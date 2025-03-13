@@ -12,8 +12,8 @@
 </head>
     <body class="bg-gray-100 flex items-center justify-center min-h-screen relative">
          <div class="absolute inset-0 overflow-hidden">
-         <img alt="Decorative background with abstract shapes" class="absolute top-0 left-0 w-1/2 h-full object-cover opacity-10" height="800" src="https://storage.googleapis.com/a1aa/image/dlhH3nFTBHeG4-BRf9D2AfQm19AcQzkwa5xyncnjJaE.jpg" width="600"/>
-         <img alt="Decorative background with abstract shapes" class="absolute bottom-0 right-0 w-1/2 h-full object-cover opacity-10" height="800" src="https://storage.googleapis.com/a1aa/image/dlhH3nFTBHeG4-BRf9D2AfQm19AcQzkwa5xyncnjJaE.jpg" width="600"/>
+         <img alt="Decorative background with abstract shapes" class="absolute top-0 left-0 w-1/2 h-full object-cover opacity-10" height="800" src="https://storage.googleapis.com/a1aa/image/3TpRiQE7VHilqSBgt-qqBmBbJ6gmsQ3Y7jolQ_BuA_4.jpg" width="600"/>
+         <img alt="Decorative background with abstract shapes" class="absolute bottom-0 right-0 w-1/2 h-full object-cover opacity-10" height="800" src="https://storage.googleapis.com/a1aa/image/3TpRiQE7VHilqSBgt-qqBmBbJ6gmsQ3Y7jolQ_BuA_4.jpg" width="600"/>
         </div>
          <div class="bg-white shadow-lg rounded-lg flex max-w-4xl w-full relative z-10">
          <div class="w-1/2 p-8 flex items-center justify-center">
@@ -41,6 +41,10 @@
               Sign in
               </button>
               </div>
+            </div>
+            <div class="text-center mt-10">
+                <p class="text-white text-lg font-semibold font-serif">
+                 CV Indoko Packaging
             </div>
 </body>
 </html>
