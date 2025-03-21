@@ -10,4 +10,8 @@ class IndexController extends Controller
     {
         return view('login.index');
     }
+    public function dashboard()
+    {
+        return view('login.dashboard'); 
+    }
 }
