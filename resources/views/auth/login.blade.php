@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Finance Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
 </head>
 
 <body class="bg-gray-100">
@@ -34,39 +35,52 @@
     </nav>
 
     <script>
-        document.getElementById('mobile-menu-btn').addEventListener('click', function () {
+        document.getElementById('mobile-menu-btn').addEventListener('click', function() {
             document.getElementById('mobile-menu').classList.toggle('hidden');
         });
     </script>
 
     <!-- Wrapper agar login form tidak tertutup navbar -->
     <div class="flex items-center justify-center min-h-screen mt-20 relative">
-        
+
         <!-- Background Decorative -->
         <div class="absolute inset-0 overflow-hidden">
-            <img alt="Decorative background" class="absolute top-0 left-0 w-1/2 h-full object-cover opacity-10" src="https://storage.googleapis.com/a1aa/image/3TpRiQE7VHilqSBgt-qqBmBbJ6gmsQ3Y7jolQ_BuA_4.jpg"/>
-            <img alt="Decorative background" class="absolute bottom-0 right-0 w-1/2 h-full object-cover opacity-10" src="https://storage.googleapis.com/a1aa/image/3TpRiQE7VHilqSBgt-qqBmBbJ6gmsQ3Y7jolQ_BuA_4.jpg"/>
+            <img alt="Decorative background" class="absolute top-0 left-0 w-1/2 h-full object-cover opacity-10" src="https://storage.googleapis.com/a1aa/image/3TpRiQE7VHilqSBgt-qqBmBbJ6gmsQ3Y7jolQ_BuA_4.jpg" />
+            <img alt="Decorative background" class="absolute bottom-0 right-0 w-1/2 h-full object-cover opacity-10" src="https://storage.googleapis.com/a1aa/image/3TpRiQE7VHilqSBgt-qqBmBbJ6gmsQ3Y7jolQ_BuA_4.jpg" />
         </div>
 
         <!-- Form Login -->
+
         <div class="bg-white shadow-lg rounded-lg flex max-w-4xl w-full relative z-10">
             <div class="w-1/2 p-8 flex items-center justify-center">
-                <img alt="Illustration of financial animation" class="w-full h-auto" src="https://storage.googleapis.com/a1aa/image/iWORPy8MaoAQ-fu2WrsQZsMcnoiO093s4FkDUE1NocY.jpg"/>
+                <img alt="Illustration of financial animation" class="w-full h-auto" src="https://storage.googleapis.com/a1aa/image/iWORPy8MaoAQ-fu2WrsQZsMcnoiO093s4FkDUE1NocY.jpg" />
             </div>
             <div class="w-1/2 bg-blue-600 p-8 flex flex-col justify-center">
                 <h1 class="text-white text-center font-serif text-6xl font-bold mb-6">Login</h1>
-                <form class="space-y-6">
+
+                <form class="space-y-6" method="POST" action="{{ route('login') }}">
+                    @csrf
                     <div class="relative">
-                        <input class="w-full p-3 pl-10 bg-white shadow-lg rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="Masukkan Nama" type="text"/>
+                        <input name="email" autocomplete="off" class="w-full p-3 pl-10 bg-white shadow-lg rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="Masukkan Email" type="email" />
                         <i class="fas fa-user absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        @error('email')
+                        <span class="invalid-feedback" role="alert">
+                            <strong>{{ $message }}</strong>
+                        </span>
+                        @enderror
                     </div>
                     <div class="relative">
-                        <input class="w-full p-3 pl-10 bg-white shadow-lg rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="Password" type="password"/>
+                        <input name="password" class="w-full p-3 pl-10 bg-white shadow-lg rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="Password" type="password" />
                         <i class="fas fa-lock absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        @error('password')
+                        <span class="invalid-feedback" role="alert">
+                            <strong>{{ $message }}</strong>
+                        </span>
+                        @enderror
                     </div>
                     <div class="flex space-x-4 mt-6">
-                        <button class="bg-yellow-400 text-white py-2 px-10 rounded-full font-bold" type="button">Submit</button>
-                        <button class="bg-transparent border border-white text-white py-2 px-10 rounded-full font-bold" type="button">Sign in</button>
+                        <!-- <button class="bg-yellow-400 text-white py-2 px-10 rounded-full font-bold" type="button">Submit</button> -->
+                        <button type="submit" class="bg-transparent border border-white text-white py-2 px-10 rounded-full font-bold" type="button">Sign in</button>
                     </div>
                 </form>
                 <div class="text-center mt-10">
@@ -77,4 +91,5 @@
     </div>
 
 </body>
+
 </html>

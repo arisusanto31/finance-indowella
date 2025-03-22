@@ -1,24 +1,26 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>Dashboard Finance</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
-     <style>
+    <style>
         .rotate {
             transform: rotate(180deg);
             transition: transform 0.3s ease;
         }
+
         body {
             font-family: 'Roboto', sans-serif;
         }
     </style>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.dropdown-toggle').forEach(button => {
-                button.addEventListener('click', function () {
+                button.addEventListener('click', function() {
                     const menu = this.nextElementSibling;
                     menu.classList.toggle('hidden');
                     this.classList.toggle('bg-blue-700');
@@ -28,6 +30,7 @@
         });
     </script>
 </head>
+
 <body class="bg-gray-100">
 
     <nav class="bg-white shadow-md fixed top-0 left-0 w-full z-50">
@@ -37,7 +40,16 @@
                 <div class="hidden md:flex space-x-6">
                     <a href="#" class="text-gray-700 hover:text-blue-600">Home</a>
                     <a href="#" class="text-gray-700 hover:text-blue-600">About</a>
-                    <a href="#" class="text-gray-700 hover:text-blue-600">Services</a>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+
+                        <a href="#" class="text-gray-700 hover:text-blue-600"
+                            onclick="event.preventDefault();
+                                        this.closest('form').submit();">
+                            {{ __('Log Out') }}
+                        </a>
+                    </form>
+
                 </div>
                 <button id="mobile-menu-btn" class="md:hidden text-gray-700 focus:outline-none">
                     ☰
@@ -46,12 +58,12 @@
         </div>
     </nav>
 
-    <div class="flex h-screen pt-16"> 
-        
+    <div class="flex h-screen pt-16">
+
         <!-- Sidebar -->
         <div class="bg-sky-500 p-6 w-64 space-y-6 py-7 shadow-lg min-h-screen">
             <div class="relative">
-                <input class="border border-gray-800 text-gray-800 rounded-lg py-2 px-4 pl-10 w-full focus:outline-none focus:ring-2 focus:ring-blue-900" placeholder="Search..." type="text"/>
+                <input class="border border-gray-800 text-gray-800 rounded-lg py-2 px-4 pl-10 w-full focus:outline-none focus:ring-2 focus:ring-blue-900" placeholder="Search..." type="text" />
                 <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
             </div>
 
@@ -77,7 +89,7 @@
                     <i class="fas fa-cog"></i>
                     <span>Settings</span>
                 </button>
-                
+
                 <button class="flex items-center gap-x-3 bg-blue-900 font-bold text-white px-4 py-3 w-full shadow-md border border-white rounded-lg cursor-pointer mt-2">
                     <i class="fas fa-cog"></i>
                     <span>apa le</span>
@@ -107,4 +119,5 @@
     </div>
 
 </body>
+
 </html>
