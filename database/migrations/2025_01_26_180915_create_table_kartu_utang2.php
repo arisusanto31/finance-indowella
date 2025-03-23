@@ -13,8 +13,7 @@ class CreateTableKartuUtang2 extends Migration
      */
     public function up()
     {
-        Schema::dropIfExists('kartu_utangs');
-        Schema::create('kartu_utangs', function (Blueprint $table) {
+            Schema::create('kartu_utangs', function (Blueprint $table) {
             $table->id();
             $table->string('type');
             $table->integer('purchasing_id')->nullable();
@@ -30,7 +29,8 @@ class CreateTableKartuUtang2 extends Migration
             $table->integer('person_id')->nullable();
             $table->string('person_type')->nullable();
             $table->string('journal_number')->nullable();
-            
+            $table->string('code_group', 10)->nullable();
+            $table->string('lawan_code_group', 10)->nullable();
             $table->timestamps();
         });
     }

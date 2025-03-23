@@ -20,6 +20,9 @@ class CreateChartAccounts extends Migration
             $table->string('account_type');
             $table->integer('parent_id')->nullable();
             $table->integer('is_deleted')->nullable();
+            $table->boolean('is_child')->nullable();
+            $table->integer('level')->nullable();
+            $table->datetime('deleted_at')->nullable();
             $table->timestamps();
         });
     }
