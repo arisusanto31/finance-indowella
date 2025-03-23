@@ -16,7 +16,7 @@
     <nav class="bg-white shadow-md fixed top-0 left-0 w-full z-50">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
-                <a href="#" class="text-xl font-bold text-blue-600">Finance Indowella</a>
+                <a href="#" class="text-xl font-bold text-blue-600">Finance</a>
                 <div class="hidden md:flex space-x-6">
                     <a href="#" class="text-gray-700 hover:text-blue-600">Home</a>
                     <a href="#" class="text-gray-700 hover:text-blue-600">About</a>
@@ -84,7 +84,7 @@
                     </div>
                 </form>
                 <div class="text-center mt-10">
-                    <p class="text-white text-lg font-semibold font-serif">CV Indoko Packaging</p>
+                    <p class="text-white text-lg font-semibold font-serif">---</p>
                 </div>
             </div>
         </div>
