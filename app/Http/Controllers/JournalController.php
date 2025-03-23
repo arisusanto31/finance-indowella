@@ -7,4 +7,9 @@ use Illuminate\Http\Request;
 class JournalController extends Controller
 {
     //
+
+
+    public function neraca(){
+        return view('main.neraca');
+    }
 }

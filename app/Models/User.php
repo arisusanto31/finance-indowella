@@ -48,6 +48,10 @@ class User extends Authenticatable
         ];
     }
 
+    public function mainRole(){
+        return $this->getRoleNames()[0];
+    }
+
 
     public static function createPermission($name){
         Permission::create(['name'=>$name]);
