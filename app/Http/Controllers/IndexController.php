@@ -12,6 +12,9 @@ class IndexController extends Controller
     }
     public function dashboard()
     {
-        return view('login.dashboard'); 
+        return view('dashboard'); 
+    }
+    public function loginDashboard(){
+        return view('login.dashboard');
     }
 }
