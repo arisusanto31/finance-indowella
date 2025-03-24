@@ -16,5 +16,7 @@ class IndexController extends Controller
     }
     public function loginDashboard(){
         return view('login.dashboard');
+
     }
+   
 }
