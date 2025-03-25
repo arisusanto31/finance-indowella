@@ -423,7 +423,7 @@
                             <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
                                 <div class="me-2">
                                     <small class="text-muted d-block mb-1">Paypal</small>
-                                    <h6 class="mb-0">Send money</h6>
+                                    <h6 class="mb-0">Send money </h6>
                                 </div>
                                 <div class="user-progress d-flex align-items-center gap-1">
                                     <h6 class="mb-0">+82.6</h6>
@@ -512,4 +512,15 @@
         </div>
         <!--/ Transactions -->
     </div>
+
+    @push('styles')
+        <style>
+            .custom-dashboard-style { color: red; }
+        </style>
+    @endpush
+    @push('scripts')
+        <style>
+            .custom-dashboard-style { color: red; }
+        </style>
+    @endpush
 </x-app-layout>

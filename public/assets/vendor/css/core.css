@@ -21,7 +21,7 @@
   --bs-info: #03c3ec;
   --bs-warning: #ffab00;
   --bs-danger: #ff3e1d;
-  --bs-light: #fcfdfd;
+  --bs-light: #fcfdfd;[]
   --bs-dark: #233446;
   --bs-gray: rgba(67, 89, 113, 0.1);
   --bs-primary-rgb: 105, 108, 255;
@@ -72,7 +72,7 @@ body {
   line-height: var(--bs-body-line-height);
   color: var(--bs-body-color);
   text-align: var(--bs-body-text-align);
-  background-color: var(--bs-body-bg);
+  background-color: var(--bs-body-bg, #f5f5f9);
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: rgba(67, 89, 113, 0);
 }

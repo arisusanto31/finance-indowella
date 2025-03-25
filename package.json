@@ -1,0 +1,32 @@
+{
+  "name": "finance-indowella",
+  "version": "1.0.0",
+  "description": "",
+  "main": "postcss.config.js",
+  "directories": {
+    "test": "tests"
+  },
+  "devDependencies": {
+    "bootstrap": "^5.3.3",
+    "laravel-mix": "^6.0.49",
+    "resolve-url-loader": "^5.0.0",
+    "sass": "^1.86.0",
+    "sass-loader": "^16.0.5"
+  },
+  "scripts": {
+    "dev": "mix",
+    "watch": "mix watch",
+    "prod": "mix --production"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arisusanto31/finance-indowella.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/arisusanto31/finance-indowella/issues"
+  },
+  "homepage": "https://github.com/arisusanto31/finance-indowella#readme"
+}
