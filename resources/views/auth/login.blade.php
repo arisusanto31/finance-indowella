@@ -84,7 +84,7 @@
                     </div>
                 </form>
                 <div class="text-center mt-10">
-                    <p class="text-white text-lg font-semibold font-serif">---</p>
+                    <p class="text-white text-lg font-semibold font-serif">CV INDOKO PACKAGING</p>
                 </div>
             </div>
         </div>
