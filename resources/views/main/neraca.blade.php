@@ -1,71 +1,57 @@
 <x-app-layout>
-        <div class="container-fluid">
-          <div class="row g-3">
-      
-
-            <div class="col-6 col-md-3">
-              <div class="card text-white bg-primary h-100">
-                <div class="card-body d-flex justify-content-between align-items-start">
-                  <div>
-                    <h5 class="card-title">000000</h5>
-                    <p class="card-text">Saldo Cash</p>
-                  </div>
-                  <i class="bx bx-wallet fs-3"></i>
-                </div>
-                <div class="card-footer bg-transparent border-0 d-flex align-items-center">
-                  <i class="bx bx-calendar me-2"></i> Per 25 Maret 2025
-                </div>
-              </div>
-            </div>
-      
-        
-            <div class="col-6 col-md-3">
-              <div class="card text-white bg-success h-100">
-                <div class="card-body d-flex justify-content-between align-items-start">
-                  <div>
-                    <h5 class="card-title">00000</h5>
-                    <p class="card-text">Laba/Rugi</p>
-                  </div>
-                  <i class="bx bx-lock-open fs-3"></i>
-                </div>
-                <div class="card-footer bg-transparent border-0 d-flex align-items-center">
-                  <i class="bx bx-calendar me-2"></i> Per 25 Maret 2025
-                </div>
-              </div>
-            </div>
-      
-            <div class="col-6 col-md-3">
-              <div class="card text-white bg-primary h-100">
-                <div class="card-body d-flex justify-content-between align-items-start">
-                  <div>
-                    <h5 class="card-title text-white">200TRILIUN</h5>
-                    <p class="card-text">Aset</p>
-                  </div>
-                  <i class="bx bx-file fs-3"></i>
-                </div>
-                <div class="card-footer bg-transparent border-0 d-flex align-items-center">
-                  <i class="bx bx-user me-2"></i> Per 25 Maret 2025
-                </div>
-                </div>
-              </div>
-
-
-            <div class="col-6 col-md-3">
-                <div class="card text-white bg-warning h-100">
-                  <div class="card-body d-flex justify-content-between align-items-start">
-                    <div>
-                      <h5 class="card-title text-white">200TRILIUN</h5>
-                      <p class="card-text">Aset</p>
+       
+    <div class="container-fluid px-4 mt-4">
+        <div class="row g-3">
+            <!-- Revenue -->
+            <div class="col-md-3">
+                <div class="p-3 rounded shadow-sm d-flex flex-column justify-content-between h-100" style="background: linear-gradient(135deg, #d1c4e9, #b39ddb); border-left: 5px solid #7e57c2;">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-cash-coin fs-3 me-2"></i>
+                        <h6 class="mb-0">Revenue</h6>
                     </div>
-                    <i class="bx bx-file fs-3"></i>
-                  </div>
-                  <div class="card-footer bg-transparent border-0 d-flex align-items-center">
-                    <i class="bx bx-user me-2"></i> Per 25 Maret 2025
-                  </div>
-                  </div>
+                    <h5 class="fw-bold text-end mb-1">4.778.145,20</h5>
+                    <small class="text-muted">Revenue YTD: 20.689.548,20</small>
                 </div>
             </div>
+    
+            <!-- Cost -->
+            <div class="col-md-3">
+                <div class="p-3 rounded shadow-sm d-flex flex-column justify-content-between h-100" style="background: linear-gradient(135deg, #ffe0b2, #ffcc80); border-left: 5px solid #fb8c00;">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-credit-card fs-3 me-2"></i>
+                        <h6 class="mb-0">Cost</h6>
+                    </div>
+                    <h5 class="fw-bold text-end mb-1">3.027.423,61</h5>
+                    <small class="text-muted">Cost YTD: 11.345.600</small>
+                </div>
             </div>
+    
+            <!-- Profit -->
+            <div class="col-md-3">
+                <div class="p-3 rounded shadow-sm d-flex flex-column justify-content-between h-100" style="background: linear-gradient(135deg, #c8e6c9, #a5d6a7); border-left: 5px solid #43a047;">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-graph-up-arrow fs-3 me-2"></i>
+                        <h6 class="mb-0">Profit</h6>
+                    </div>
+                    <h5 class="fw-bold text-end mb-1">1.750.721,59</h5>
+                    <small class="text-muted">Profit YTD: 10.247.841</small>
+                </div>
+            </div>
+    
+            <!-- Quantity -->
+            <div class="col-md-3">
+                <div class="p-3 rounded shadow-sm d-flex flex-column justify-content-between h-100" style="background: linear-gradient(135deg, #eeeeee, #e0e0e0); border-left: 5px solid #9e9e9e;">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-box-seam fs-3 me-2"></i>
+                        <h6 class="mb-0">Quantity</h6>
+                    </div>
+                    <h5 class="fw-bold text-end mb-1">2.064</h5>
+                    <small class="text-muted">Quantity YTD: 11.287</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
 
 
             <hr class="my-5" />

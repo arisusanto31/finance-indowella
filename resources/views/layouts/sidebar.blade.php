@@ -165,17 +165,17 @@
                 <div data-i18n="Basic">Daftar</div>
             </a>
             <ul class="menu-sub">
-                    <a href="ui-accordion.html" class="menu-link">
+                    <a href="{{url('admin/daftar/daftar-at') }}" class="menu-link">
                         <i class="menu-icon tf-icons bx bx-building mr-2 fs-6 me-2" style="margin-right: 10px;"></i>
                         <div data-i18n="Accordion">Daftar AT</div>
                     </a>
                 </li>
-                    <a href="ui-accordion.html" class="menu-link">
+                    <a href="{{url('admin/daftar/daftar-bdd') }}"class="menu-link">
                         <i class="menu-icon tf-icons bx bx-file me-2 fs-6 me-2" style="margin-right: 10px;"></i>
                         <div data-i18n="Accordion">Daftar BDD</div>
                     </a>
                 </li>
-                    <a href="ui-accordion.html" class="menu-link">
+                    <a href="{{url('admin/daftar/daftar-karyawan') }}"class="menu-link">
                         <i class="menu-icon tf-icons bx bx-user fs-6 me-2" style="margin-right: 10px;"></i>
                         <div data-i18n="Accordion">Daftar Karyawan</div>
                     </a>
