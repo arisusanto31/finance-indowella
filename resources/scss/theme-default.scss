@@ -1,5 +1,5 @@
 @warn "🔥file sudah terload";
-$body-bg: #f5f5f9; 
+$body-bg: #f5f5f9;
 
 
 
@@ -8,40 +8,71 @@ $body-bg: #f5f5f9;
 @import './_theme/common';
 @import './_theme/_theme';
 @warn "🔥$body-bg: #{$body-bg}";
-$primary-color:$primary;
+$primary-color: $primary;
 @warn "🔥$primary-color: #{$primary-color}";
 @include template-common-theme($primary-color);
 
 // Navbar
 // ---------------------------------------------------------------------------
 @include template-navbar-style('.bg-navbar-theme', $card-bg, $color: $body-color, $active-color: $headings-color);
+
 .layout-navbar {
   background-color: rgba($card-bg, 0.95) !important;
   backdrop-filter: saturate(200%) blur(6px);
 }
+
 .navbar-detached {
   box-shadow: 0 0 0.375rem 0.25rem rgba(rgba-to-hex($gray-500, $rgba-to-hex-bg), 0.15);
 }
+
 .layout-navbar-fixed .layout-page:before {
   backdrop-filter: saturate(200%) blur(10px);
   background: rgba($body-bg, 0.6);
 }
 
+//---------------manual--------------
+
+$theme-colors: (
+  "primary-light": tint-color($primary, 20%),
+  "primary-lighter": tint-color($primary, 40%),
+  "primary-dark": shade-color($primary, 20%),
+  "primary-darker": tint-color($primary, 40%),
+);
+
+@each $name, $color in $theme-colors {
+  .text-#{$name} {
+    color: $color !important;
+  }
+
+  .bg-#{$name} {
+    background-color: $color !important;
+  }
+
+  .btn-#{$name} {
+    background-color: $color !important;
+    border-color: $color !important;
+    color: white;
+  }
+}
+
+
+
+
 // Menu
 // ---------------------------------------------------------------------------
-@include template-menu-style(
-  '.bg-menu-theme',
+@include template-menu-style('.bg-menu-theme',
   $white,
   $color: $body-color,
   $active-color: $headings-color,
   $border: transparent,
-  $active-bg: $white
-);
+  $active-bg: $white);
 
 .bg-menu-theme {
+
   // Menu header
   .menu-header {
     color: $text-muted;
+
     &:before {
       background-color: $text-muted !important;
     }
@@ -53,38 +84,43 @@ $primary-color:$primary;
   }
 
   // menu item open(vertical) & hover (vertical & horizontal)
-  .menu-inner .menu-item.open > .menu-link,
+  .menu-inner .menu-item.open>.menu-link,
   .menu-inner .menu-item .menu-link:not(.active):hover {
+
     html:not(.layout-menu-collapsed) &,
     .layout-menu-hover.layout-menu-collapsed & {
       background-color: rgba($black, 0.04);
     }
   }
+
   // menu item open(horizontal)
-  .menu-inner .menu-sub > .menu-item.active {
-    > .menu-link.menu-toggle {
+  .menu-inner .menu-sub>.menu-item.active {
+    >.menu-link.menu-toggle {
       background-color: rgba($black, 0.04);
     }
+
     .menu-icon {
       color: $primary-color;
     }
   }
+
   // menu item active
-  .menu-inner > .menu-item.active > .menu-link {
+  .menu-inner>.menu-item.active>.menu-link {
     color: $primary-color;
     background-color: rgba($primary-color, 0.16) !important;
   }
 
-  .menu-inner > .menu-item.active:before {
+  .menu-inner>.menu-item.active:before {
     background: $primary-color;
   }
 
   // Sub menu item link bullet
-  .menu-sub > .menu-item > .menu-link:before {
+  .menu-sub>.menu-item>.menu-link:before {
     background-color: rgba-to-hex($gray-400, $rgba-to-hex-bg) !important;
   }
+
   // Sub menu item link active bullet
-  .menu-sub > .menu-item.active > .menu-link:not(.menu-toggle):before {
+  .menu-sub>.menu-item.active>.menu-link:not(.menu-toggle):before {
     background-color: $primary-color !important;
     border: 3px solid rgba-to-hex(rgba($primary-color, 0.16), $rgba-to-hex-bg) !important;
   }
@@ -93,10 +129,12 @@ $primary-color:$primary;
 .app-brand .layout-menu-toggle {
   background-color: $primary-color;
   border: 7px solid $body-bg;
+
   i {
     color: color-contrast($primary-color);
   }
-  .menu-inner > .menu-header::before {
+
+  .menu-inner>.menu-header::before {
     background-color: rgba-to-hex($gray-400, $rgba-to-hex-bg);
   }
 }

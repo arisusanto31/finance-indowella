@@ -32,7 +32,7 @@
       
             <h5>
               Kredit
-              <button type="button" class="btn btn-sm btn-success ms-2" id="addKredit">+tambah</button>
+              <button type="button" class="btn btn-sm btn-primary-light ms-2" id="addKredit">+tambah</button>
             </h5>
             <div id="kreditWrapper">
               <!-- Baris kredit pertama -->
