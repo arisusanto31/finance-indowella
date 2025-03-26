@@ -676,6 +676,20 @@ a:hover {
   color: white;
 }
 
+.text-primary-lightest {
+  color: rgb(191.25, 222, 255) !important;
+}
+
+.bg-primary-lightest {
+  background-color: rgb(191.25, 222, 255) !important;
+}
+
+.btn-primary-lightest {
+  background-color: rgb(191.25, 222, 255) !important;
+  border-color: rgb(191.25, 222, 255) !important;
+  color: white;
+}
+
 .text-primary-dark {
   color: rgb(0, 98.4, 204) !important;
 }

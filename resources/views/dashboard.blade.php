@@ -519,8 +519,6 @@
         </style>
     @endpush
     @push('scripts')
-        <style>
-            .custom-dashboard-style { color: red; }
-        </style>
+     
     @endpush
 </x-app-layout>

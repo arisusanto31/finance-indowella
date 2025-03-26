@@ -31,21 +31,21 @@
     <meta name="description" content="" />
 
     @if(request()->is('kartu-kas'))
-        <!-- Include DataTables CSS and JS -->
-        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <!-- Include DataTables CSS and JS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 
-        <script>
-            $(document).ready(function() {
-                $('#kartuKasTable').DataTable();
-            });
-        </script>
-        
+    <script>
+        $(document).ready(function() {
+            $('#kartuKasTable').DataTable();
+        });
+    </script>
+
     @endif
-</head>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="../assets/img/favicon/favicon.ico" />
@@ -79,6 +79,8 @@
     <script src="{{ asset('assets/js/config.js') }}"></script>
     <!-- @vite(['resources/css/app.css', 'resources/js/app.js']) -->
     @stack('styles')
+
+
 </head>
 
 <body>
@@ -91,7 +93,7 @@
             <!-- / Menu -->
 
             <!-- Layout container -->
-            <div class="layout-page">
+            <div class="layout-page bg-primary-lightest" >
                 <!-- Navbar -->
                 @include('layouts.navigation')
 
@@ -108,7 +110,7 @@
                     </div>
                     <!-- / Content -->
 
-                {{-- <!-- Footer -->
+                    {{-- <!-- Footer -->
 <footer class="content-footer footer bg-footer-theme mt-20">
     <div class="container-xxl d-flex flex-wrap justify-content-between py-2 flex-md-row flex-column">
         <div class="mb-2 mb-md-0">
@@ -161,6 +163,8 @@
 
     <!-- Vendors JS -->
     <script src="{{ asset('assets/vendor/libs/apex-charts/apexcharts.js') }}"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
 
     <!-- Main JS -->
     <script src="{{ asset('assets/js/main.js') }}"></script>
@@ -172,12 +176,23 @@
     <!-- Place this tag in your head or just before your close body tag. -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
     <script>
+        $('.url-active').each(function(i, elem) {
 
-        $('.url-active').each(function (i,elem){
-           
-            if($(elem).val()=='{{segmentRequest(2)}}'){
-               
+            if ($(elem).val() == '{{segmentRequest(2)}}') {
+
                 $(elem).closest('.menu-item').addClass('active');
+                segment3 = '{{segmentRequest(3)}}';
+                if (segment3) {
+                    $(elem).closest('.menu-item').addClass('open');
+                    $(elem).closest('.menu-item').find('.menu-sub').find('div').each(function(i, elem) {
+                        string = $(elem).html();
+
+                        let hasil = string.toLowerCase().replace(/\s+/g, '-');
+                        if (hasil == segment3) {
+                            $(elem).closest('li').addClass('active');
+                        }
+                    });
+                }
             }
         });
     </script>
