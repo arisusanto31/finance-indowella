@@ -15,6 +15,7 @@ class CreateJournals extends Migration
     {
         Schema::create('journals', function (Blueprint $table) {
             $table->id();
+            $table->integer('book_journal_id');
             $table->integer('chart_account_id');
             $table->decimal('index_date', 14, 0);
             $table->string('journal_number');

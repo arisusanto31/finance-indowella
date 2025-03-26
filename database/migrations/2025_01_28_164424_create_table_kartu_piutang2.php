@@ -15,6 +15,7 @@ class CreateTableKartuPiutang2 extends Migration
     {
          Schema::create('kartu_piutangs', function (Blueprint $table) {
             $table->id();
+            $table->integer('book_journal_id');
             $table->string('type');
             $table->integer('transaction_id')->nullable();
             $table->integer('code_group_piutang')->nullable();

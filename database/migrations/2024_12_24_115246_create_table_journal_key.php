@@ -15,6 +15,7 @@ class CreateTableJournalKey extends Migration
     {
         Schema::create('journal_keys', function (Blueprint $table) {
             $table->id();
+            $table->integer('book_journal_id');
             $table->string('name')->nullable();
             $table->integer('user_id')->nullable();
             $table->datetime('key_at')->nullable();

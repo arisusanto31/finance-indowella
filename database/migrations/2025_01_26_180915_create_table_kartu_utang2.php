@@ -15,6 +15,7 @@ class CreateTableKartuUtang2 extends Migration
     {
             Schema::create('kartu_utangs', function (Blueprint $table) {
             $table->id();
+            $table->integer('book_journal_id');
             $table->string('type');
             $table->integer('purchasing_id')->nullable();
             $table->string('factur_supplier_number')->nullable();

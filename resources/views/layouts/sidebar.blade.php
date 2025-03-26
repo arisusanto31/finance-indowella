@@ -196,13 +196,14 @@
         </li>
         <li class="menu-item">
             <a
+                href=""
                 onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
                 target="_blank"
                 class="menu-link">
                 <i class="menu-icon tf-icons bx bx-log-out"></i>
-                <div data-i18n="Documentation">Logout</div>
+                <div data-i18n="Documentation">Logout Buku</div>
             </a>
-            <form id="logout-form" action="{{ url('/logout') }}" method="POST" style="display: none;">{{ csrf_field() }}
+            <form id="logout-form" action="{{ url('book/logout-jurnal') }}" method="POST" style="display: none;">{{ csrf_field() }}
             </form>
         </li>
     </ul>
