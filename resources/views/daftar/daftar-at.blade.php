@@ -1,4 +1,24 @@
 <x-app-layout>
+  <div class="p-4 mt-4">
+    <div class="flex flex-wrap justify-between items-center mb-4 w-full">
+      
+      <h2 class="text-xl font-bold"></h2>
+
+        {{-- Form Import --}}
+        <form action="" method="POST" enctype="multipart/form-data" class="flex items-center gap-2">
+          @csrf
+          <input type="file" name="file" required class="border text-sm px-2 py-1">
+          <button type="submit" class="bg-green-500 text-black px-3 py-1 rounded hover:bg-green-600 text-sm">
+            Import Excel
+          </button>
+          <button type="submit" class="bg-green-500 text-black px-3 py-1 rounded hover:bg-green-600 text-sm">
+            Exsport Excel
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+  
   <style>
     table.table {
       border-collapse: separate;

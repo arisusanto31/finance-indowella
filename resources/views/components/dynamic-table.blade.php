@@ -1,6 +1,6 @@
 <div class="p-4">
-    <h5 class="text-lg font-semibold mb-2">{{ $title }}</h5>
   
+    {{-- Tabel --}}
     <div style="max-height: 400px; overflow-x: auto; overflow-y: auto;">
       <table class="table table-bordered">
         <thead class="table-light">
