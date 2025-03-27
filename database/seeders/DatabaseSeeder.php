@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UserTableSeeder::class,
             BookJournalSeeder::class,
+            chartAccountSeeder::class,
         ]);
     }
 }

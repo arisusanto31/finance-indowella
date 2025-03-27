@@ -199,11 +199,11 @@
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Profile</span></li>
         <li class="menu-item">
             <a
-                href="https://github.com/themeselection/sneat-html-admin-template-free/issues"
-                target="_blank"
+                href="{{url('admin/chart-account')}}"
                 class="menu-link">
                 <i class="menu-icon tf-icons bx bx-support"></i>
-                <div data-i18n="Support">Profile</div>
+                <div data-i18n="Support">Chart account</div>
+                <input type="hidden" class="url-active" value="chart-account" />
             </a>
         </li>
         <li class="menu-item">
