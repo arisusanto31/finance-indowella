@@ -20,7 +20,6 @@ Route::get('/', function () {
 
 
 Route::middleware('auth')->group(function () {
-
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -40,6 +39,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web','ensure.journal'])-
     Route::get('/login-dashboard', [IndexController::class, 'loginDashboard']);
     Route::get('/neraca', [JournalController::class, 'neraca']);
     Route::get('/neraca-lajur', [JournalController::class, 'neracalajur']);
+    Route::get('/get-mutasi-neraca-lajur', [JournalController::class, 'getMutasiNeracaLajur']);
     Route::get('/laba-rugi', [JournalController::class, 'labarugi']);
   
     Route::prefix('jurnal')->group(function () {

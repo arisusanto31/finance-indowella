@@ -14,6 +14,11 @@ class IndexController extends Controller
     {
         return view('dashboard'); 
     }
+    public function random()
+    {
+        $view = view('main.random');
+        return $view;
+    }
   
    
 }
