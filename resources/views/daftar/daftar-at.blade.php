@@ -1,57 +1,87 @@
 <x-app-layout>
-    <style>
-        .table-responsive {
-          overflow-x: auto;
-          -webkit-overflow-scrolling: touch;
-        }
-      </style>
-      
-      <div class="container mt-3">
-        <div class="card shadow-lg border-0 rounded-4">
-          <div class="card-header bg-white text-white rounded-top-4">
-            <h4 class="mb-0 text-black">📋 Table Biaya Dibayar di Muka (BDD)</h4>
-          </div>
+  <style>
+    th, td {
+      white-space: nowrap;
+      background-color: white !important;
+    }
 
-        <div class="table-responsive">
-          <table class="table table-bordered table-hover">
-            <thead class="table-primary text-center">
-              <tr>
-                <th>Tanggal Perolehan</th>
-                <th>Nama Aset</th>
-                <th>Kode Aset</th>
-                <th>Lokasi</th>
-                <th>Harga Perolehan</th>
-                <th>Umur Ekonomis</th>
-                <th>Akumulasi Penyusutan</th>
-                <th>Nilai Buku</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>2022-01-01</td>
-                <td>Laptop ASUS ROG</td>
-                <td>AT-001</td>
-                <td>Kantor Indowella</td>
-                <td class="text-end">Rp15.000.000</td>
-                <td class="text-center">4 Tahun</td>
-                <td class="text-end">Rp7.500.000</td>
-                <td class="text-end">Rp7.500.000</td>
-              </tr>
-              <tr>
-                <td>2021-06-01</td>
-                <td>Mesin Cetak</td>
-                <td>AT-002</td>
-                <td>Gedung A1</td>
-                <td class="text-end">Rp50.000.000</td>
-                <td class="text-center">5 Tahun</td>
-                <td class="text-end">Rp30.000.000</td>
-                <td class="text-end">Rp20.000.000</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-      
-      
+   
+    .sticky-col-1 {
+      position: sticky;
+      left: 0;
+      width: 50px;
+      min-width: 50px;
+      max-width: 50px;
+      z-index: 5;
+      text-align: center;
+    }
 
+    .sticky-col-2 {
+      position: sticky;
+      left: 50px;
+      width: 180px;
+      min-width: 180px;
+      max-width: 180px;
+      z-index: 6;
+    }
+
+    .sticky-col-3 {
+      position: sticky;
+      left: 230px; 
+      width: 80px;
+      min-width: 80px;
+      max-width: 80px;
+      z-index: 7;
+      text-align: center;
+    }
+
+    .sticky-col-4 {
+      position: sticky;
+      left: 310px; 
+      width: 100px;
+      min-width: 100px;
+      max-width: 100px;
+      z-index: 8;
+      text-align: center;
+    }
+  </style>
+
+  <div class="p-4">
+    <div class="table-responsive">
+      <table class="table table-bordered">
+        <thead class="table-light">
+          <tr>
+            <th class="sticky-col-1">No</th>
+            <th class="sticky-col-2">Nama Barang</th>
+            <th class="sticky-col-3">Qty</th>
+            <th class="sticky-col-4">Tahun</th>
+            <th>Bulan</th>
+            <th>Nilai Perolehan</th>
+            <th>Akumulasi Penyusutan</th>
+            <th>Nilai Buku</th>
+            <th>Penyusutan Jan</th>
+            <th>Penyusutan Feb</th>
+            <th>Penyusutan Mar</th>
+            <th>Penyusutan Apr</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="sticky-col-1">1</td>
+            <td class="sticky-col-2">Printer Sharkpos</td>
+            <td class="sticky-col-3">2</td>
+            <td class="sticky-col-4">2025</td>
+            <td class="sticky-col-5">Feb</td>
+            <td>474.000</td>
+            <td>0</td>
+            <td>474.000</td>
+            <td>9.875</td>
+            <td>9.875</td>
+            <td>9.875</td>
+            <td>9.875</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </x-app-layout>
