@@ -35,6 +35,7 @@ $primary-color: $primary;
 $theme-colors: (
   "primary-light": tint-color($primary, 20%),
   "primary-lighter": tint-color($primary, 40%),
+  "primary-lightest": tint-color($primary, 75%),
   "primary-dark": shade-color($primary, 20%),
   "primary-darker": tint-color($primary, 40%),
 );

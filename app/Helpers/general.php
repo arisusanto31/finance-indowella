@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\BookJournal;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Request as FacadeRequest;
 
@@ -21,12 +22,21 @@ if (! function_exists('dayInMonthQuantity')) {
 }
 
 
-if(!function_exists('user')){
-    function user(){
+if (!function_exists('user')) {
+    function user()
+    {
         return auth()->user();
     }
 }
 
-function segmentRequest($i){
+if (!function_exists('sessionJournal')) {
+    function sessionJournal()
+    {
+        return BookJournal::find(session('book_journal_id'));
+    }
+}
+
+function segmentRequest($i)
+{
     return FacadeRequest::segment($i);
 }

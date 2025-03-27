@@ -2,7 +2,11 @@
     <div class="app-brand demo">
         <a href="index.html" class="app-brand-link">
             <span class="app-brand-logo demo">
-                <svg width="25" viewBox="0 0 25 42" version="1.1" xmlns="http://www.w3.org/2000/svg"
+                <svg
+                    width="25"
+                    viewBox="0 0 25 42"
+                    version="1.1"
+                    xmlns="http://www.w3.org/2000/svg"
                     xmlns:xlink="http://www.w3.org/1999/xlink">
                     <defs>
                         <path
@@ -35,7 +39,8 @@
                                         <use fill-opacity="0.2" fill="#FFFFFF" xlink:href="#path-4"></use>
                                     </g>
                                 </g>
-                                <g id="Triangle"
+                                <g
+                                    id="Triangle"
                                     transform="translate(19.000000, 11.000000) rotate(-300.000000) translate(-19.000000, -11.000000) ">
                                     <use fill="#696cff" xlink:href="#path-5"></use>
                                     <use fill-opacity="0.2" fill="#FFFFFF" xlink:href="#path-5"></use>
@@ -58,7 +63,7 @@
     <ul class="menu-inner py-1">
         <!-- Dashboard -->
         <li class="menu-item">
-            <a href="{{ url('admin/dashboard') }}" class="menu-link">
+            <a href="{{url('admin/dashboard')}}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-home-circle"></i>
                 <div data-i18n="Analytics">Dashboard</div>
                 <input type="hidden" class="url-active" value="dashboard" />
@@ -70,132 +75,148 @@
             <span class="menu-header-text">PANEL UTAMA</span>
         </li>
         <li class="menu-item">
-            <a href="{{ url('admin/neraca') }}" class="menu-link">
+            <a href="{{url('admin/neraca')}}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-notepad"> </i>
                 <div data-i18n="Account Settings"> Neraca</div>
                 <input type="hidden" class="url-active" value="neraca" />
             </a>
         </li>
         <li class="menu-item">
-            <a href="{{ url('admin/neraca-lajur') }}" class="menu-link">
+            <a href="{{url('admin/neraca-lajur')}}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-table"> </i>
                 <div data-i18n="Account Settings"> Neraca Lajur</div>
                 <input type="hidden" class="url-active" value="neraca-lajur" />
             </a>
         </li>
         <li class="menu-item">
-            <a href="{{ url('admin/laba-rugi') }}" class="menu-link">
+            <a href="{{url('admin/laba-rugi')}}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-bar-chart-alt-2"> </i>
                 <div data-i18n="Account Settings"> Laba Rugi</div>
                 <input type="hidden" class="url-active" value="laba-rugi" />
             </a>
         </li>
         <li class="menu-item">
-            <a href="{{ url('admin/jurnal') }}" class="menu-link menu-toggle">
+            <a href="{{url('admin/jurnal')}}" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-book-bookmark"> </i>
                 <div data-i18n="Account Settings"> Jurnal</div>
             </a>
             <input type="hidden" class="url-active" value="jurnal" />
             <ul class="menu-sub">
 
-                <li>
-                    <a href="{{ url('admin/jurnal/buku-besar') }}" class="menu-link">
-                        <i class="menu-icon tf-icons bx bx-book-open fs-6 me-2" style="margin-right: 10px;"></i>
-                        <div data-i18n="Accordion">Jurnal Buku Besar</div>
+                <li class="menu-item">
+                    <a href="{{url('admin/jurnal/buku-besar') }}" class="menu-link">
+                        <div data-i18n="Accordion">Buku Besar</div>
                     </a>
                 </li>
+                <li class="menu-item">
+                    <a href="{{url('admin/jurnal/mutasi') }}" class="menu-link">
+                        <div data-i18n="Accordion">Mutasi</div>
+                    </a>
+                </li>
+
+            </ul>
+
         </li>
-        <a href="{{ url('admin/jurnal/mutasi') }}" class="menu-link">
-            <i class="menu-icon tf-icons bx bx-export fs-6 me-2" style="margin-right: 10px;"></i>
-            <div data-i18n="Accordion">Mutasi Jurnal</div>
-        </a>
+
+
+
+        <!-- Components -->
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text ">DATA</span>
         </li>
 
-    </ul>
-
-    </li>
-
-
-
-    <!-- Components -->
-    <li class="menu-header small text-uppercase">
-        <span class="menu-header-text">DATA</span>
-    </li>
-
-    <!-- Cards -->
-    <li class="menu-item">
-        <a href="#" class="menu-link menu-toggle">
-            <i class="menu-icon tf-icons bx bx-id-card fs-6 me-2" style="margin-right: 10px;"></i>
-            <div data-i18n="Basic">Kartu</div>
-        </a>
-        <ul class="menu-sub">
-    </li>
-    <a href="{{ url('admin/kartu/kartu-kas') }}" class="menu-link">
-        <i class="menu-icon tf-icons bx bx-money mr-2 fs-6 me-2" style="margin-right: 10px;"></i>
-        <div data-i18n="Accordion">Kartu Kas</div>
-    </a>
-    </li>
-
-    <a href="{{ url('admin/kartu/kartu-hutang') }}" class="menu-link">
-        <i class="menu-icon tf-icons bx bx-receipt mr-2 fs-6 me-2" style="margin-right: 10px;"></i>
-        <div data-i18n="Accordion">Kartu Hutang</div>
-    </a>
-    </li>
-    <a href="{{ url('admin/kartu/kartu-piutang') }}" class="menu-link">
-        <i class="menu-icon tf-icons bx bx-credit-card mr-2 fs-6 me-2" style="margin-right: 10px;"></i>
-        <div data-i18n="Accordion">Kartu Piutang</div>
-    </a>
-    </li>
-    <a href="{{ url('admin/kartu/kartu-stock') }}" class="menu-link">
-        <i class="menu-icon tf-icons bx bx-package mr-2 fs-6 me-2" style="margin-right: 10px;"></i>
-        <div data-i18n="Accordion">Kartu Stock</div>
-    </a>
-    </li>
-    </ul>
-    </li>
-
-    <li class="menu-item">
-        <a href="cards-basic.html" class="menu-link menu-toggle">
-            <i class="menu-icon tf-icons  bx bx-list-ul"></i>
-            <div data-i18n="Basic">Daftar</div>
-        </a>
-        <ul class="menu-sub">
-            <a href="{{ url('admin/daftar/daftar-at') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-building mr-2 fs-6 me-2" style="margin-right: 10px;"></i>
-                <div data-i18n="Accordion">Daftar AT</div>
+        <!-- Cards -->
+        <li class="menu-item">
+            <a href="#" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-id-card fs-6 me-2" style="margin-right: 10px;"></i>
+                <div data-i18n="Basic">Kartu</div>
+                <input type="hidden" class="url-active" value="kartu" />
             </a>
-    </li>
-    <a href="{{ url('admin/daftar/daftar-bdd') }}"class="menu-link">
-        <i class="menu-icon tf-icons bx bx-file me-2 fs-6 me-2" style="margin-right: 10px;"></i>
-        <div data-i18n="Accordion">Daftar BDD</div>
-    </a>
-    </li>
-    <a href="{{ url('admin/daftar/daftar-karyawan') }}"class="menu-link">
-        <i class="menu-icon tf-icons bx bx-user fs-6 me-2" style="margin-right: 10px;"></i>
-        <div data-i18n="Accordion">Daftar Karyawan</div>
-    </a>
-    </li>
-    </ul>
-    </li>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="{{url('admin/kartu/kartu-kas') }}" class="menu-link">
+                        <!-- <i class="menu-icon tf-icons bx bx-money mr-2 fs-6 me-2" style="margin-right: 10px;"></i> -->
+                        <div data-i18n="Accordion">Kartu Kas</div>
+                    </a>
+                </li>
+                <li class="menu-item">
 
-    <!-- Misc -->
-    <li class="menu-header small text-uppercase"><span class="menu-header-text">Profile</span></li>
-    <li class="menu-item">
-        <a href="https://github.com/themeselection/sneat-html-admin-template-free/issues" target="_blank"
-            class="menu-link">
-            <i class="menu-icon tf-icons bx bx-support"></i>
-            <div data-i18n="Support">Profile</div>
-        </a>
-    </li>
-    <li class="menu-item">
-        <a onclick="event.preventDefault(); document.getElementById('logout-form').submit();" target="_blank"
-            class="menu-link">
-            <i class="menu-icon tf-icons bx bx-log-out"></i>
-            <div data-i18n="Documentation">Logout</div>
-        </a>
-        <form id="logout-form" action="{{ url('/logout') }}" method="POST" style="display: none;">
-            {{ csrf_field() }}
-        </form>
-    </li>
+                    <a href="{{url('admin/kartu/kartu-hutang') }}" class="menu-link">
+                        <!-- <i class="menu-icon tf-icons bx bx-receipt mr-2 fs-6 me-2" style="margin-right: 10px;"></i> -->
+                        <div data-i18n="Accordion">Kartu Hutang</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{url('admin/kartu/kartu-piutang') }}" class="menu-link">
+                        <!-- <i class="menu-icon tf-icons bx bx-credit-card mr-2 fs-6 me-2" style="margin-right: 10px;"></i> -->
+                        <div data-i18n="Accordion">Kartu Piutang</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{url('admin/kartu/kartu-stock') }}" class="menu-link">
+                        <!-- <i class="menu-icon tf-icons bx bx-package mr-2 fs-6 me-2" style="margin-right: 10px;"></i> -->
+                        <div data-i18n="Accordion">Kartu Stock</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+
+
+
+
+        <li class="menu-item">
+            <a href="cards-basic.html" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons  bx bx-list-ul"></i>
+                <div data-i18n="Basic">Daftar</div>
+                <input type="hidden" class="url-active" value="daftar" />
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="{{url('admin/daftar/daftar-at') }}" class="menu-link">
+                        <!-- <i class="menu-icon tf-icons bx bx-building mr-2 fs-6 me-2" style="margin-right: 10px;"></i> -->
+                        <div data-i18n="Accordion">Daftar AT</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{url('admin/daftar/daftar-bdd') }}" class="menu-link">
+                        <!-- <i class="menu-icon tf-icons bx bx-file me-2 fs-6 me-2" style="margin-right: 10px;"></i> -->
+                        <div data-i18n="Accordion">Daftar BDD</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{url('admin/daftar/daftar-karyawan') }}" class="menu-link">
+                        <!-- <i class="menu-icon tf-icons bx bx-user fs-6 me-2" style="margin-right: 10px;"></i> -->
+                        <div data-i18n="Accordion">Daftar Karyawan</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+
+
+        <!-- Misc -->
+        <li class="menu-header small text-uppercase"><span class="menu-header-text">Profile</span></li>
+        <li class="menu-item">
+            <a
+                href="https://github.com/themeselection/sneat-html-admin-template-free/issues"
+                target="_blank"
+                class="menu-link">
+                <i class="menu-icon tf-icons bx bx-support"></i>
+                <div data-i18n="Support">Profile</div>
+            </a>
+        </li>
+        <li class="menu-item">
+            <a
+                href=""
+                onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
+                target="_blank"
+                class="menu-link">
+                <i class="menu-icon tf-icons bx bx-log-out"></i>
+                <div data-i18n="Documentation">Logout Buku</div>
+            </a>
+            <form id="logout-form" action="{{ url('book/logout-jurnal') }}" method="POST" style="display: none;">{{ csrf_field() }}
+            </form>
+        </li>
     </ul>
 </aside>

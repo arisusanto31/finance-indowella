@@ -15,6 +15,7 @@ class CreateKartuStocks extends Migration
     {
         Schema::create('kartu_stocks', function (Blueprint $table) {
             $table->id();
+            $table->integer('book_journal_id');
             $table->integer('stock_id');
             $table->integer('mutation_detail_id');
             $table->decimal('mutasi_qty_backend', 10, 2);
