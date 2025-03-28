@@ -4,55 +4,154 @@
           <div class="card-header bg-white text-white rounded-top-4">
             <h4 class="mb-0 text-black">📋 Table Biaya Dibayar di Muka (BDD)</h4>
           </div>
-          <div class="card-body">
-            <div class="table-responsive">
-              <table class="table table-hover align-middle">
-                <thead class="table-light text-center">
-                  <tr>
-                    <th>Tanggal</th>
-                    <th>Keterangan</th>
-                    <th>No. Bukti</th>
-                    <th>Periode Manfaat</th>
-                    <th>Jumlah</th>
-                    <th>Sisa (bln)</th>
-                    <th>Saldo BDD</th>
-                    <th>Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>2025-01-01</td>
-                    <td>Sewa Kantor Tahunan</td>
-                    <td>INV/001</td>
-                    <td>Jan - Des 2025</td>
-                    <td class="text-end">Rp12.000.000</td>
-                    <td class="text-center">12</td>
-                    <td class="text-end">Rp12.000.000</td>
-                    <td class="text-center">
-                      <button class="btn btn-sm btn-warning"><i class="bi bi-pencil"></i></button>
-                      <button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>2025-02-15</td>
-                    <td>Asuransi Gedung</td>
-                    <td>INV/002</td>
-                    <td>Feb - Jul 2025</td>
-                    <td class="text-end">Rp6.000.000</td>
-                    <td class="text-center">6</td>
-                    <td class="text-end">Rp6.000.000</td>
-                    <td class="text-center">
-                      <button class="btn btn-sm btn-warning"><i class="bi bi-pencil"></i></button>
-                      <button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
-                    </td>
-                  </tr>
-                  <!-- Tambah data lain di sini -->
-                </tbody>
-              </table>
+      
+            <style>
+              th, td {
+                white-space: nowrap;
+                background-color: white !important;
+                color: inherit;
+              }
+          
+              .sticky-col-1 {
+                position: sticky;
+                left: 0;
+                width: 50px;
+                min-width: 50px;
+                max-width: 50px;
+                z-index: 5;
+                text-align: center;
+              }
+          
+              .sticky-col-2 {
+                position: sticky;
+                left: 50px;
+                width: 180px;
+                min-width: 180px;
+                max-width: 180px;
+                z-index: 6;
+              }
+          
+              .sticky-col-3 {
+                position: sticky;
+                left: 230px;
+                width: 80px;
+                min-width: 80px;
+                max-width: 80px;
+                z-index: 7;
+                text-align: center;
+              }
+          
+              .sticky-col-4 {
+                position: sticky;
+                left: 310px;
+                width: 100px;
+                min-width: 100px;
+                max-width: 100px;
+                z-index: 8;
+                text-align: center;
+              }
+          
+              .sticky-col-5 {
+                position: sticky;
+                left: 410px;
+                width: 100px;
+                min-width: 100px;
+                max-width: 100px;
+                z-index: 9;
+                text-align: center;
+              }
+              .sticky-col-6 {
+                position: sticky;
+                left: 510px;
+                width: 100px;
+                min-width: 100px;
+                max-width: 100px;
+                z-index: 9;
+                text-align: center;
+              }
+            </style>
+          
+            {{-- Table Pertama --}}
+            <div class="p-4">
+              <div class="table-responsive">
+                <table class="table table-bordered">
+                  <thead class="table-light">
+                    <tr>
+                      <th class="bg-primary text-white sticky-col-1">No</th>
+                      <th class="bg-primary text-white sticky-col-2" style="width: 300px;">Keterangan</th>
+                      <th class="bg-primary text-white sticky-col-3" style="width: 100px;">Periode</th>
+                      <th class="bg-primary text-white sticky-col-4">bulan</th>
+                      <th class="bg-primary text-white sticky-col-5">Amortisasi</th>
+                      <th class="bg-primary text-white sticky-col-6">Saldo Awal</th>
+                      <th>Jan</th>
+                      <th>Feb</th>
+                      <th>Mar</th>
+                      <th>Apr</th>
+                      <th>Mei</th>
+                      <th>Jun</th>
+                      <th>Jul</th>
+                      <th>Agust</th>
+                      <th>Sep</th>
+                      <th>Okt</th>
+                      <th>Nov</th>
+                      <th>Des</th>
+                      <th>Total Amortisasi</th>
+                      <th>saldo akhir</th>
+                      <th>A/N</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="sticky-col-1">1</td>
+                      <td class="sticky-col-2">Printer Sharkpos</td>
+                      <td class="sticky-col-3">2</td>
+                      <td class="sticky-col-4">2025</td>
+                      <td class="sticky-col-5">Feb</td>
+                      <td class="sticky-col-6">2025</td>
+                      <td>474.000</td>
+                      <td>0</td>
+                      <td>474.000</td>
+                      <td>9.875</td>
+                      <td>9.875</td>
+                      <td>9.875</td>
+                      <td>9.875</td>
+                      <td>19.750</td>
+                      <td>19.750</td>
+                      <td>454.250</td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td>-</td>
+                      <td>-</td>
+                    </tr>
+          
+                    <!-- Subtotal Baris di Kolom ke-5 -->
+                    <tr style="background-color: #f8f9fa; font-weight: bold;">
+                      <td class="sticky-col-1">-</td>
+                      <td class="sticky-col-2">-</td>
+                      <td class="sticky-col-3">-</td>
+                      <td class="sticky-col-4">-</td>
+                      <td class="sticky-col-5">Subtotal</td>
+                      <td class="sticky-col-6">-</td>
+                      <td>474.000</td>
+                      <td>0</td>
+                      <td>474.000</td>
+                      <td>9.875</td>
+                      <td>9.875</td>
+                      <td>9.875</td>
+                      <td>9.875</td>
+                      <td>19.750</td>
+                      <td>19.750</td>
+                      <td>454.250</td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td>-</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
+          </x-app-layout>
       
       
-</x-app-layout>
