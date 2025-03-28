@@ -216,13 +216,13 @@
               success: function(res) {
                 console.log(res);
                 if (res.status == 1) {
-                  Swal.fire('success', 'journal sudah tercreate on ' + res.journal_number);
+                  Swal.fire('success', 'journal sudah tercreate on ' + res.journal_number,'success');
                 } else {
-                  Swal.fire('opps', res.msg);
+                  Swal.fire('opps', res.msg,'error');
                 }
               },
               error: function(res) {
-                Swal.fire("opps", "something error");
+                Swal.fire("opps", "something error",'error');
               }
             });
           });
@@ -264,8 +264,8 @@
                 <td rowspan="${rowspan}">${journal.journal_number}</td>
                 <td>${journal.code_group}</td>
                 <td>${journal.description}</td>
-                <td class="text-end">${journal.amount_debet}</td>
-                <td class="text-end">${journal.amount_kredit}</td>
+                <td class="text-end">${formatRupiah(journal.amount_debet)}</td>
+                <td class="text-end">${formatRupiah(journal.amount_kredit)}</td>
               </tr>
             `;
           } else {
@@ -273,8 +273,8 @@
               <tr>
                 <td>${journal.code_group}</td>
                 <td>${journal.description}</td>
-                <td class="text-end">${journal.amount_debet}</td>
-                <td class="text-end">${journal.amount_kredit}</td>
+                <td class="text-end">${formatRupiah(journal.amount_debet)}</td>
+                <td class="text-end">${formatRupiah(journal.amount_kredit)}</td>
               </tr>
             `;
           }

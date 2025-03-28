@@ -16,32 +16,31 @@
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
           <!-- <a href="#" class="btn btn-primary btn-big-custom rounded-0">Tambah Jurnal Umum</a> -->
         </div>
-
-        <form method="GET" action="#" class="row g-2">
+        <div class="row">
           <div class="col-md-2">
-            <select class="form-select select-coa"></select>
+            <select id="coa" class="form-select select-coa"></select>
 
           </div>
           <div class="col-md-2">
-            <select name="bulan" class="form-select ">
+            <select name="bulan" id="month" class="form-select ">
               <option value="">-- Bulan --</option>
-              <option>November</option>
-              <option>Desember</option>
-              <option>Januari</option>
+              @foreach(getListMonth() as $key => $month)
+              <option value="{{$key}}">{{$month}}</option>
+              @endforeach
             </select>
           </div>
           <div class="col-md-2">
-            <select name="tahun" class="form-select ">
+            <select name="tahun" id="year" class="form-select ">
               <option value="">-- Tahun --</option>
-              <option>2023</option>
-              <option>2024</option>
-              <option>2025</option>
+              @for($year=0; $year < 3; $year++)
+                <option value="{{intval(Date('Y')-$year)}}">{{intval(Date('Y')-$year)}}</option>
+                @endfor
             </select>
           </div>
           <div class="col-md-2">
             <button onclick="searchData()" class="btn btn-primary btn-sm w-100">Cari</button>
           </div>
-        </form>
+        </div>
 
 
 
@@ -72,18 +71,48 @@
     <script>
       initItemSelectManual('.select-coa', '{{route("chart-account.get-item")}}', 'chart account');
 
-      function searchData(){
+      function searchData() {
+        month = $('#month').val();
+        year = $('#year').val();
+        coa= $('#coa option:selected').val();
         $.ajax({
-          url:'{{url("admin/jurnal/get-buku-besar")}}',
-          method:'get',
-          success:function(res){
+          url: '{{url("admin/jurnal/get-buku-besar")}}?coa='+coa+'&month=' + month + '&year=' + year,
+          method: 'get',
+          success: function(res) {
             console.log(res);
-            if(res.status==1){
-              html='';
+            if (res.status == 1) {
+              html = '';
 
+              if(res.msg.length == 0){
+                html += `
+                  <tr>
+                    <td colspan="7" class="text-center">🤷‍♂️ Tidak ada data</td>
+                  </tr>
+                `;
+              }
+              res.msg.forEach((item, index) => {
+                tanggal = formatNormalDateTime(new Date(item.created_at));
+
+                html += `
+                  <tr>
+                    <td>${index+1}</td>
+                    <td>${tanggal}</td>
+                    <td>${item.journal_number} </td>
+                    <td>${item.lawan_code_group}</td>
+                    <td>${item.description}</td>
+                    <td>${formatRupiah(item.amount_debet- item.amount_kredit)}</td>
+                    <td>${formatRupiah(item.amount_saldo)}</td>
+                  </tr>
+                `;
+              });
+              $('#body-mutasi-bukubesar').html(html);
+
+            } else {
+              Swal.fire('opps', res.msg, 'error');
             }
-          },error:function(res){
-
+          },
+          error: function(res) {
+            Swal.fire('opps', 'Gagal mendapatkan data', 'error');
           }
         });
       }

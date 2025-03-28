@@ -46,6 +46,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web','ensure.journal'])-
         Route::get('/buku-besar', [JournalController::class, 'bukuBesar'])->name('main.buku-besar');
         Route::get('/mutasi', [JournalController::class, 'mutasi'])->name('main.mutasi');
         Route::get('/get-list-mutasi', [JournalController::class, 'getListMutasiJurnal']);
+        Route::get('/get-buku-besar', [JournalController::class, 'getListBukuBesar']);
         Route::post('/submit-manual', [JournalController::class, 'createBaseJournal']);
     });
 

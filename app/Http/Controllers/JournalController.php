@@ -153,9 +153,9 @@ class JournalController extends Controller
         return view('main.mutasi');
     }
 
-    public function searctBukuBesar()
+    public function getListBukuBesar()
     {
-        $code = getInput('code_group');
+        $code = getInput('coa');
         $month = getInput('month');
         $year = getInput('year');
         $journals = Journal::searchCOA($code)->whereMonth('created_at', $month)->whereYear('created_at', $year)->orderBy('index_date', 'asc')->get();
