@@ -153,6 +153,24 @@ class JournalController extends Controller
         return view('main.mutasi');
     }
 
+    public function searctBukuBesar()
+    {
+        $code = getInput('code_group');
+        $month = getInput('month');
+        $year = getInput('year');
+        $journals = Journal::searchCOA($code)->whereMonth('created_at', $month)->whereYear('created_at', $year)->orderBy('index_date', 'asc')->get();
+        $chartAccount = ChartAccount::where('code_group', $code)->first();
+        return [
+            'status' => 1,
+            'msg' => $journals,
+            'chart_account' => $chartAccount,
+            'month'=> $month,
+            'year'=> $year,
+            'code_group'=> $code
+        ];
+    }
+
+
     public static function createBaseJournal(Request $request)
     {
         $urlTryAgain = $request->input('url_try_again');
@@ -207,7 +225,7 @@ class JournalController extends Controller
             $count = $lastJournalNumber ? intval(explode('-', $lastJournalNumber->journal_number)[2]) + 1 : 1;
             $theJournalNumber = sprintf("%s-%06d", $kodeType, $count);
             // CustomLogger::log('journal', 'info', 'create journal indexnumber ' . $theJournalNumber . ' with coa(' . json_encode(collect($debets)->pluck('code_group')) . ',' .
-                // json_encode(collect($kredits)->pluck('code_group')) . ')');
+            // json_encode(collect($kredits)->pluck('code_group')) . ')');
 
             foreach ($debets as $debet) {
                 self::addExpireTimeLocks($allLocks);

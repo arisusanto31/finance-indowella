@@ -66,7 +66,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web','ensure.journal'])-
 
     Route::prefix('chart-account')->group(function () {
         Route::resource('/', ChartAccountController::class);
-        Route::get('get-item', [ChartAccountController::class, 'getItemChartAccount']);
+        Route::get('get-item', [ChartAccountController::class, 'getItemChartAccount'])->name('chart-account.get-item');
         
         Route::get('get-chart-accounts', [ChartAccountController::class, 'getChartAccounts']);
         Route::get('get-chart-account/{id}', [ChartAccountController::class, 'getChartAccount']);

@@ -8,7 +8,7 @@
         <i id="icon-create" class="bx bx-caret-down toggle-icon"></i> </a>
     </h5>
 
-    <div id="card-create"  class="tree-toggle open">
+    <div id="card-create"  class="tree-toggle">
 
       <input type="hidden" value="{{Date('Y-m-d H:i:s')}}" id="date-mutasi"/>
       <div class="card-body"  style="padding-top: 0px;">
