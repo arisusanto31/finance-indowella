@@ -79,13 +79,13 @@
           success:function(res){
             console.log(res);
             if(res.status==1){
-              html=
-              
+              html='';
+
             }
           },error:function(res){
 
-          };
-        })
+          }
+        });
       }
     </script>
     @endpush
