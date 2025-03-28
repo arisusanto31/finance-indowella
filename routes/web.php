@@ -45,6 +45,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web','ensure.journal'])-
     Route::prefix('jurnal')->group(function () {
         Route::get('/buku-besar', [JournalController::class, 'bukuBesar'])->name('main.buku-besar');
         Route::get('/mutasi', [JournalController::class, 'mutasi'])->name('main.mutasi');
+        Route::get('/get-list-mutasi', [JournalController::class, 'getListMutasiJurnal']);
+        Route::post('/submit-manual', [JournalController::class, 'createBaseJournal']);
     });
 
 
@@ -64,6 +66,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web','ensure.journal'])-
 
     Route::prefix('chart-account')->group(function () {
         Route::resource('/', ChartAccountController::class);
+        Route::get('get-item', [ChartAccountController::class, 'getItemChartAccount']);
+        
         Route::get('get-chart-accounts', [ChartAccountController::class, 'getChartAccounts']);
         Route::get('get-chart-account/{id}', [ChartAccountController::class, 'getChartAccount']);
         // Route::get('get-item-chart-account', [App\Http\Controllers\Backend\ChartAccountController::class, 'getItemChartAccount']);

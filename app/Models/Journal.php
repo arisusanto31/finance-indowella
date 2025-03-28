@@ -112,12 +112,12 @@ class Journal extends Model
         $name = 'generate-journal' . $codeGroup;
         $lock = Cache::lock($name, 50);
 
-        CustomLogger::log('journal', 'info', $journal_number . ' make lock ' . $name);
+        // CustomLogger::log('journal', 'info', $journal_number . ' make lock ' . $name);
         try {
             $lock->block(20);
             Redis::expire($name, 50);
             try {
-                CustomLogger::log('journal', 'info', $journal_number . ' get lock ' . $name);
+                // CustomLogger::log('journal', 'info', $journal_number . ' get lock ' . $name);
                 $now = createCarbon($request->input('date'));
                 $indexDate = $now->format('ymdHis');
                 $lastIndexDate = Journal::where('chart_account_id', $coaID)->whereRaw('floor(index_date/100) = ?', [$indexDate])->select(DB::raw('max(index_date) as maxindex'))->first();
@@ -152,6 +152,7 @@ class Journal extends Model
                 $journal->created_at = $now->format('Y-m-d H:i:s');
                 $journal->index_date = $finalIndexDate;
                 $journal->is_auto_generated = $request->input('is_auto_generated');
+                $journal->book_journal_id = session('book_journal_id');
                 $journal->save();
                 $reference = null;
                 if ($journal->reference_type != null)
@@ -167,27 +168,7 @@ class Journal extends Model
                                 $detail->journal_number = $reference->journal_number;
                                 $detail->save();
                             }
-                        } else if (get_class($reference) == 'App\Models\StockError') {
-
-                            if ($journal->code_group == 140001) {
-                                $mds = MutationDetail::where('reference_id', $journal->reference_id)->where('reference_type', $journal->reference_type)->get();
-                                foreach ($mds as $md) {
-                                    $md->journal_number = $journal->journal_number;
-                                    $md->journal_id = $journal->id;
-                                    $md->save();
-                                }
-                            }
-                        } else if (get_class($reference) == 'App\\Models\\MutationDetail') {
-                            $md = MutationDetail::find($journal->reference_id);
-                            $md->journal_id = $journal->id;
-                            $md->save();
-                            $kartuStock = KartuStock::where('mutation_detail_id', $md->id)->first();
-                            if ($kartuStock) {
-                                $kartuStock->journal_number = $md->journal_number;
-                                $kartuStock->journal_id = $md->journal_id;
-                                $kartuStock->save();
-                            }
-                        }
+                        } 
                     }
                 }
             } catch (Throwable $e) {
@@ -223,7 +204,7 @@ class Journal extends Model
         $codeGroup = $this->code_group;
         $name = 'generate-journal' . $codeGroup;
         $lock = Cache::lock($name, 120);
-        CustomLogger::log('journal', 'info', 'recalculate make lock ' . $name);
+        // CustomLogger::log('journal', 'info', 'recalculate make lock ' . $name);
         try {
             $lock->block(20);
             $mustEditJournal = Journal::where('index_date', '>', $thejournal->index_date)->where('code_group', $thejournal->code_group)->sortindex()->get();
@@ -248,7 +229,7 @@ class Journal extends Model
             ];
         } finally {
             $lock->release();
-            CustomLogger::log('journal', 'info', 'recalculate release lock ' . $name);
+            // CustomLogger::log('journal', 'info', 'recalculate release lock ' . $name);
         }
         return ['status' => 1, 'msg' => $newdata, 'journal' => $thejournal];
     }
