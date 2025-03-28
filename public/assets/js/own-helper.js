@@ -36,6 +36,7 @@ function formatRupiah(angkaString, prefix = "", language = "eng") {
 
             }
         }
+        console.log("format rupiah dijalankan");
         if (language == "eng")
             rupiah = split[1] != undefined ? rupiah + '.' + split[1] : rupiah;
         else
@@ -46,8 +47,22 @@ function formatRupiah(angkaString, prefix = "", language = "eng") {
         }
         return prefix == undefined ? rupiah : (rupiah ? rupiah : '');
     } catch (err) {
+        console.log(err);
         return angkaString;
     }
+
+
+}
+
+
+function check_char(str, char) {
+    ctr = 0;
+    for (let i = 0; i < str.length; i++) {
+        if (str.charAt(i) == char) {
+            ctr++;
+        }
+    }
+    return (ctr > 0) ? 1 : 0;
 }
 
 

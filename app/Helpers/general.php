@@ -56,3 +56,42 @@ function segmentRequest($i)
 {
     return FacadeRequest::segment($i);
 }
+
+function getListMonth(){
+    return [
+        '01' => 'Januari',
+        '02' => 'Februari',
+        '03' => 'Maret',
+        '04' => 'April',
+        '05' => 'Mei',
+        '06' => 'Juni',
+        '07' => 'Juli',
+        '08' => 'Agustus',
+        '09' => 'September',
+        '10' => 'Oktober',
+        '11' => 'November',
+        '12' => 'Desember'
+    ];
+}
+
+
+if (!function_exists('format_price')) {
+    /**
+     * @param $value
+     * @param $length
+     * @return string
+     */
+    function format_price($number, $decimal = 2,$language="eng")
+    {
+        try {
+            if($language=="eng"){
+                return number_format($number, $decimal, ',', ',');
+            }else{    
+                return number_format($number, $decimal, ',', '.');;
+            }   
+        } catch (\Exception $e) {
+            return "";
+        }
+    }
+}
+
