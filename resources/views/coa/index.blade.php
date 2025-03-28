@@ -24,7 +24,7 @@
         <div class="textcenter " id="form-title">
             <p style="font-size:25px;"> FORM </p>
         </div>
-        <div id="form-body">
+        <div id="form-body" class="text-primary-dark">
 
         </div>
 
@@ -243,15 +243,15 @@
             isParent = master[data.id] != undefined ? true : false;
             stringParent = isParent ? '<i id="arrow'+data.id+'" class="bx bx-chevron-down toggle-icon "></i>' : '';
             if (data.parent_id == null)   
-                html += `<li class="menu-item colorblack" style="margin-left: ${margin}px" >
+                html += `<li class="menu-item " style="margin-left: ${margin}px" >
                          <a class="" href="javascript:void(openToggle('${data.id}'))"> 
-                          <div class="colorblack"><strong> ${data.code_group} -  ${data.name} </strong>  ${stringParent}</div>
+                          <div class=""><strong> ${data.code_group} -  ${data.name} </strong>  ${stringParent}</div>
                         </a>
                         </li>`;
             else
-                html += `<li class="menu-item colorblack" style="margin-left:  ${margin}px" >
+                html += `<li class="menu-item " style="margin-left:  ${margin}px" >
                          <a class="" href="javascript:void(openToggle('${data.id}'))"> 
-                          <div class="colorblack"><strong> ${data.code_group} </strong> -  ${data.name} ${stringParent} </div>
+                          <div class=""><strong> ${data.code_group} </strong> -  ${data.name} ${stringParent} </div>
                         </a>
                         </li>`;
 

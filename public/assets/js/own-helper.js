@@ -49,3 +49,53 @@ function formatRupiah(angkaString, prefix = "", language = "eng") {
         return angkaString;
     }
 }
+
+
+function getNumID(data) {
+    var numid = data.replace(/^\D+/g, '');
+    return numid;
+}
+
+function initItemSelectManual(el, url, placeholder = "") {
+
+    if (placeholder == "")
+        placeholder = "Cari berdasarkan nama ..."
+    $(el).select2({
+        placeholder: placeholder,
+        width: '100%', // agar responsive di Sneat
+        theme: 'bootstrap-5', // tambahkan ini agar tampilannya menyatu
+        // dropdownParent: $('#your-modal-or-card'), // jika di modal/tab/card
+        allowClear: true,
+        ajax: {
+            url: url,
+            dataType: 'json',
+            cache: true,
+            data: function (params) {
+                return {
+                    search: params.term,
+                    page: params.page || 1
+                };
+            },
+            success: function (result) {
+                console.log(result.responseText);
+            },
+            error: function (result) {
+                console.log(result.responseText);
+            }
+        }
+    });
+
+}
+
+function formatNormalDateTime(date) {
+    const pad = (n) => n.toString().padStart(2, '0');
+
+    const year = date.getFullYear();
+    const month = pad(date.getMonth() + 1); // bulan dimulai dari 0
+    const day = pad(date.getDate());
+    const hours = pad(date.getHours());
+    const minutes = pad(date.getMinutes());
+    const seconds = pad(date.getSeconds());
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
