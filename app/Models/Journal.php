@@ -2,9 +2,306 @@
 
 namespace App\Models;
 
+use App\Jobs\CreateKartuUtangJob;
+use CustomLogger;
+use Illuminate\Contracts\Cache\LockTimeoutException;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
+use Throwable;
+use Illuminate\Support\Str;
 
 class Journal extends Model
 {
-    //
+    use HasFactory;
+    protected $table = "journals";
+
+    public function reference()
+    {
+        return $this->morphTo();
+    }
+
+
+    protected static function booted()
+    {
+     
+        static::addGlobalScope('journal', function ($query) {
+            $from = $query->getQuery()->from ?? 'journals'; // untuk dukung alias `j` kalau pakai from('journals as j')
+            if (Str::contains($from, ' as ')) {
+                [$table, $alias] = explode(' as ', $from);
+                $alias = trim($alias);
+            } else {
+                $alias = $from;
+            }
+        
+            $query->where(function ($q) use ($alias){
+                $q->whereNull("{$alias}.book_journal_id")
+                ->orWhere("{$alias}.book_journal_id", session('book_journal_id'));
+            });
+        });
+    }
+
+    public function chartAccount()
+    {
+        return $this->belongsTo('App\Models\ChartAccount', 'chart_account_id');
+    }
+    public static function createOrUpdate(Request $request)
+    {
+        $id = $request->input('id');
+
+        try {
+            $journal = $id ? Journal::find($id) : new Journal;
+            $journal->chart_account_id = $request->input('chart_account_id');
+            $journal->journal_number = $request->input('journal_number');
+            $journal->description = $request->input('description');
+            $journal->amount_debet = $request->input('amount_debet');
+            $journal->amount_kredit = $request->input('amount_kredit');
+            $journal->code_group = $request->input('code_group');
+
+            $journal->reference_id = $request->input('reference_id');
+            $journal->reference_type = $request->input('reference_type');
+            $journal->verified_by = $request->input('verified_by');
+            $journal->is_auto_generated = $request->input('is_auto_generated');
+            $journal->save();
+            return [
+                'status' => 1,
+                'msg' => $journal
+            ];
+        } catch (\Exception $e) {
+            return [
+                'status' => 0,
+                'msg' => $e->getMessage()
+            ];
+        }
+    }
+
+    public function updateLawanCode()
+    {
+        if (!$this->lawan_code_group) {
+            $lawanJournal = Journal::where('journal_number', $this->journal_number)->whereRaw('abs(amount_debet+ amount_kredit)=?', [abs($this->amount_debet + $this->amount_kredit)])->where('id', '<>', $this->id)->first();
+            if ($lawanJournal) {
+                $this->lawan_code_group = $lawanJournal->code_group;
+                $this->save();
+                $lawanJournal->lawan_code_group = $this->code_group;
+                $lawanJournal->save();
+            }
+        }
+    }
+    // 'reference_id' => $transaction->id,
+    // 'reference_type' => get_class($transaction),
+    public static function generateJournal(Request $request)
+    {
+        $debet = $request->input('amount_debet');
+        $kredit = $request->input('amount_kredit');
+        $codeGroup = $request->input('code_group');
+        $isBackDate = $request->input('is_backdate');
+        $chartAccount = ChartAccount::where('code_group', $codeGroup)->first();
+        if (!$chartAccount) {
+            return [
+                'status' => 0,
+                'msg' => 'tidak ditemukan chart account ' . $codeGroup,
+                'lock' => null,
+                'lock_name' => null
+            ];
+        }
+        $coaID = $chartAccount->id;
+        $journal_number = $request->input('journal_number');
+        $name = 'generate-journal' . $codeGroup;
+        $lock = Cache::lock($name, 50);
+
+        CustomLogger::log('journal', 'info', $journal_number . ' make lock ' . $name);
+        try {
+            $lock->block(20);
+            Redis::expire($name, 50);
+            try {
+                CustomLogger::log('journal', 'info', $journal_number . ' get lock ' . $name);
+                $now = createCarbon($request->input('date'));
+                $indexDate = $now->format('ymdHis');
+                $lastIndexDate = Journal::where('chart_account_id', $coaID)->whereRaw('floor(index_date/100) = ?', [$indexDate])->select(DB::raw('max(index_date) as maxindex'))->first();
+                $counter = $lastIndexDate ? $lastIndexDate->maxindex % 100 : 0;
+                // info('counter:' . $counter);
+                $finalIndexDate = $indexDate . sprintf("%02d", ($counter + 1));
+                $lastJournal = Journal::where('chart_account_id', $coaID)->where('index_date', '<', $finalIndexDate)->orderBy('index_date', 'desc')->first();
+
+                $journal = new Journal;
+                $journal->chart_account_id = $coaID;
+                $journal->journal_number = $journal_number;
+                $journal->code_group = $request->input('code_group');
+                $journal->description = $request->input('description');
+                $journal->amount_debet = $debet > 0 ? $debet : 0;
+                $journal->amount_kredit = $kredit > 0 ? $kredit : 0;
+                if ($chartAccount->account_type == 'Aset') {
+                    $theAmount = $journal->amount_debet - $journal->amount_kredit;
+                    // info($codeGroup . '-aktiva');
+                    // info($theAmount);
+                } else {
+                    $theAmount = $journal->amount_kredit - $journal->amount_debet;
+                    // info($codeGroup . '-passiva');
+                    // info($theAmount);
+                }
+                $journal->reference_id = $request->input('reference_id');
+                $journal->reference_type = $request->input('reference_type');
+                $lastSaldo = $lastJournal ? $lastJournal->amount_saldo : 0;
+                $journal->amount_saldo = round($lastSaldo + $theAmount, 2);
+                $journal->is_backdate = $isBackDate;
+                $journal->user_backdate_id = $request->input('user_backdate_id');
+                $journal->toko_id = $request->input('toko_id');
+                $journal->created_at = $now->format('Y-m-d H:i:s');
+                $journal->index_date = $finalIndexDate;
+                $journal->is_auto_generated = $request->input('is_auto_generated');
+                $journal->save();
+                $reference = null;
+                if ($journal->reference_type != null)
+                    $reference = $journal->reference;
+
+
+                if ($reference) {
+                    if (get_class($reference) != 'App\Models\\Journal') {
+                        $reference->journal_number = $journal->journal_number;
+                        $reference->save();
+                        if (get_class($reference) == 'App\Models\PembayaranPiutang') {
+                            foreach ($reference->details as $detail) {
+                                $detail->journal_number = $reference->journal_number;
+                                $detail->save();
+                            }
+                        } else if (get_class($reference) == 'App\Models\StockError') {
+
+                            if ($journal->code_group == 140001) {
+                                $mds = MutationDetail::where('reference_id', $journal->reference_id)->where('reference_type', $journal->reference_type)->get();
+                                foreach ($mds as $md) {
+                                    $md->journal_number = $journal->journal_number;
+                                    $md->journal_id = $journal->id;
+                                    $md->save();
+                                }
+                            }
+                        } else if (get_class($reference) == 'App\\Models\\MutationDetail') {
+                            $md = MutationDetail::find($journal->reference_id);
+                            $md->journal_id = $journal->id;
+                            $md->save();
+                            $kartuStock = KartuStock::where('mutation_detail_id', $md->id)->first();
+                            if ($kartuStock) {
+                                $kartuStock->journal_number = $md->journal_number;
+                                $kartuStock->journal_id = $md->journal_id;
+                                $kartuStock->save();
+                            }
+                        }
+                    }
+                }
+            } catch (Throwable $e) {
+                return [
+                    'status' => 0,
+                    'msg' => $e->getMessage(),
+                    'lock' => $lock,
+                    'lock_name' => $name
+                ];
+            }
+        } catch (LockTimeoutException $e) {
+            return [
+                'status' => 0,
+                'msg' => 'jurnal tidak berhasil masuk, antrian timeout',
+                'lock' => $lock,
+                'lock_name' => $name
+            ];
+        } finally {
+            // $lock->release();
+        }
+        return [
+            'status' => 1,
+            'msg' => $journal,
+            'lock' => $lock,
+            'lock_name' => $name,
+
+        ];
+    }
+
+    public function recalculateJournal()
+    {
+        $thejournal = $this;
+        $codeGroup = $this->code_group;
+        $name = 'generate-journal' . $codeGroup;
+        $lock = Cache::lock($name, 120);
+        CustomLogger::log('journal', 'info', 'recalculate make lock ' . $name);
+        try {
+            $lock->block(20);
+            $mustEditJournal = Journal::where('index_date', '>', $thejournal->index_date)->where('code_group', $thejournal->code_group)->sortindex()->get();
+            $lastSaldo = $thejournal->amount_saldo;
+            $newdata = [];
+            foreach ($mustEditJournal as $journal) {
+
+                if ($journal->code_group < 200000) { //aktiva
+                    $journal->amount_saldo = round(($lastSaldo + $journal->amount_debet - $journal->amount_kredit), 2);
+                } else { //passiva
+                    $journal->amount_saldo = round(($lastSaldo - $journal->amount_debet + $journal->amount_kredit), 2);
+                }
+                $journal->save();
+                $lastSaldo = $journal->amount_saldo;
+                $newdata[] = collect($journal)->only(['id', 'description', 'index_date', 'amount_saldo', 'amount_debet', 'amount_kredit']);
+            }
+        } catch (LockTimeoutException $e) {
+            return [
+                'status' => 0,
+                'msg' => 'jurnal tidak berhasil masuk, antrian timeout',
+                'lock' => $lock
+            ];
+        } finally {
+            $lock->release();
+            CustomLogger::log('journal', 'info', 'recalculate release lock ' . $name);
+        }
+        return ['status' => 1, 'msg' => $newdata, 'journal' => $thejournal];
+    }
+
+    public function scopeSearchNote($q, $search)
+    {
+        $searchs = explode(' ', $search);
+        foreach ($searchs as $se) {
+            $q->where('journals.description', 'like', '%' . $se . '%');
+        }
+        return $q;
+    }
+
+    public function scopeSearchCOA($q, $search)
+    {
+        if ($search) {
+
+            $primaryCode = self::getPrimaryCode($search);
+            $q->where('journals.code_group', 'like', '%' . $primaryCode . '%');
+        }
+    }
+
+    public function scopeSearchNumber($q, $search)
+    {
+        if ($search) {
+
+            $q->where('journals.journal_number', 'like', '%' . $search . '%');
+        }
+    }
+    public function scopeSearchNameCOA($q, $search)
+    {
+        $searchs = explode(' ', $search);
+        $q->join('chart_accounts', 'chart_accounts.code_group', '=', 'journals.code_group');
+        foreach ($searchs as $se) {
+            $q->where('chart_accounts.name', 'like', '%' . $se . '%');
+        }
+        $q->select('journals.*');
+        return $q;
+    }
+
+    public function scopeSortindex($q)
+    {
+        $q->orderBy('journals.index_date', 'asc');
+    }
+
+    public static function getPrimaryCode($code)
+    {
+        for ($i = 1; $i < 10000000; $i *= 10) {
+            if ($code % $i != 0) {
+                $theFixCode = $code * 10 / $i;
+                break;
+            }
+        }
+        return $theFixCode;
+    }
 }

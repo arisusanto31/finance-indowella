@@ -16,13 +16,13 @@
           <thead class="bg-white text-dark text-center">
             <tr>
               <th>No</th>
-              <th>Tanggal</th>
-              <th>Keterangan</th>
-              <th>No Bukti</th>
-              <th>Description</th>
-              <th>Masuk</th>
-              <th>Keluar</th>
-              <th>Saldo</th>
+              <th>📅  Tanggal</th>
+              <th>📓  Keterangan</th>
+              <th>#️⃣  No Bukti</th>
+              <th>📎  Description</th>
+              <th>📥 Masuk</th>
+              <th>📤 Keluar</th>
+              <th>💰  Saldo</th>
             </tr>
             
           </thead>

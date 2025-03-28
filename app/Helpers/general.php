@@ -36,6 +36,22 @@ if (!function_exists('sessionJournal')) {
     }
 }
 
+if (!function_exists('getInput')) {
+    function getInput($key)
+    {
+        if (array_key_exists($key, $_GET)) {
+            return $_GET[$key];
+        }
+    }
+}
+
+if (!function_exists('carbonDate')) {
+    function carbonDate()
+    {
+        return new Carbon();
+    }
+}
+
 function segmentRequest($i)
 {
     return FacadeRequest::segment($i);

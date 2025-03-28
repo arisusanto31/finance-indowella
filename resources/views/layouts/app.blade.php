@@ -61,10 +61,13 @@
     <!-- Core CSS -->
     <link rel="stylesheet" href="{{ asset('assets/vendor/css/core.css') }}" class="template-customizer-core-css" />
     <link rel="stylesheet" href="{{ asset('assets/vendor/css') }}/{{sessionJournal()->theme}}" class="template-customizer-theme-css" />
+    <link rel="stylesheet" href="{{ asset('assets/css/helper.css') }}" />
+
     <link rel="stylesheet" href="{{ asset('assets/css/demo.css') }}" />
 
     <!-- Vendors CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
 
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/apex-charts/apex-charts.css') }}" />
@@ -93,7 +96,7 @@
             <!-- / Menu -->
 
             <!-- Layout container -->
-            <div class="layout-page bg-primary-lightest" >
+            <div class="layout-page bg-primary-lightest">
                 <!-- Navbar -->
                 @include('layouts.navigation')
 
@@ -164,13 +167,15 @@
     <!-- Vendors JS -->
     <script src="{{ asset('assets/vendor/libs/apex-charts/apexcharts.js') }}"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Main JS -->
     <script src="{{ asset('assets/js/main.js') }}"></script>
+    <script src="{{ asset('assets/js/own-helper.js') }}"></script>
 
     <!-- Page JS -->
     <script src="{{ asset('assets/js/dashboards-analytics.js') }}"></script>
+	<script src="{{ asset('assets/js/collect.min.js') }}"></script>
 
 
     <!-- Place this tag in your head or just before your close body tag. -->

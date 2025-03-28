@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\BookJournal;
+use App\Models\ChartAccount;
 use Illuminate\Http\Request;
 
 class JournalController extends Controller
@@ -10,18 +11,67 @@ class JournalController extends Controller
     //
 
 
+
+
     public function neraca()
     {
-        return view('main.neraca');
+        $view = view('main.neraca');
+
+        $starttime = microtime(true);
+        $date = getInput('date') ? getInput('date') : carbonDate();
+        $query = ChartAccount::getRincianNeracaAt($date);
+        if ($query['status'] == 0)
+            return $query;
+        $chartAccounts = $query['msg'];
+        $laba = ChartAccount::getLabaBulanAt($date);
+        $aset = collect($chartAccounts['Aset'])->sum('saldo');
+        $kewajiban = collect($chartAccounts['Kewajiban'])->sum('saldo');
+        $ekuitas = collect($chartAccounts['Ekuitas'])->sum('saldo');
+        $jsdata = [
+            'status' => 1,
+            'time' => microtime(true) - $starttime,
+            'date' => $date,
+            'msg' => $chartAccounts,
+            'Aset' => $aset,
+            'Kewajiban' => $kewajiban,
+            'Ekuitas' => $ekuitas,
+            'laba_bulan' => $laba,
+            'balance' => $aset - ($kewajiban + $ekuitas + $laba)
+        ];
+        $view->jsdata = $jsdata;
+
+        return $view;
     }
 
     public function neracalajur()
     {
-        return view('main.neraca-lajur');
+        $view = view('main.neraca-lajur');
+        $month = getInput('month') ? getInput('month') : Date('m');
+        $year = getInput('year') ? createCarbon(getInput('year') . '-01-01')->format('y') : Date('y');
+        $view->data =  ChartAccount::getRincianSaldoNeracaLajur($month, $year);
+        return $view;
     }
+    public function getMutasiNeracaLajur()
+    {
+        $month = getInput('month') ? getInput('month') : Date('m');
+        $year = getInput('year') ? createCarbon(getInput('year') . '-01-01')->format('y') : Date('y');
+        return ChartAccount::getRincianMutationNeracaLajur($month, $year);
+    }
+   
+       
+
     public function labarugi()
     {
-        return view('main.laba-rugi');
+        $view= view('main.laba-rugi');
+        $date =  getInput('date') ? getInput('date') : carbonDate();
+        $labarugi = ChartAccount::getRincianLabaBulanAt($date);
+        $data= [
+            'status' => 1,
+            'msg' => $labarugi,
+            'laba_bulan' => round(collect($labarugi)->where('is_child', 1)->sum('saldo_akhir'), 2)
+        ];
+        $view->data= $data;
+        return $view;
     }
     public function jurnal()
     {
@@ -51,7 +101,8 @@ class JournalController extends Controller
         }
     }
 
-    public function logoutJurnal(){
+    public function logoutJurnal()
+    {
         session()->forget('book_journal_id');
         return redirect()->route('pilih.jurnal');
     }
