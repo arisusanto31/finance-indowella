@@ -159,11 +159,11 @@ class JournalController extends Controller
         $month = getInput('month');
         $year = getInput('year');
         $journals = Journal::searchCOA($code)->whereMonth('created_at', $month)->whereYear('created_at', $year)->orderBy('index_date', 'asc')->get();
-        $chartAccount = ChartAccount::where('code_group', $code)->first();
+        $chartAccount = ChartAccount::aktif()->pluck('name', 'code_group');
         return [
             'status' => 1,
             'msg' => $journals,
-            'chart_account' => $chartAccount,
+            'chart_accounts' => $chartAccount,
             'month'=> $month,
             'year'=> $year,
             'code_group'=> $code
@@ -305,7 +305,7 @@ class JournalController extends Controller
                         RecalculateJournalJob::dispatch($journal->id);
                         // $journal->recalculateJournal();
                     }
-                    UpdateLawanCodeJournalJob::dispatch($journal->id);
+                    $journal->updateLawanCode();
                 }
             });
             return [

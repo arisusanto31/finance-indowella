@@ -13,12 +13,13 @@ class CreateTableKartuUtang2 extends Migration
      */
     public function up()
     {
-            Schema::create('kartu_utangs', function (Blueprint $table) {
+            Schema::create('kartu_hutangs', function (Blueprint $table) {
             $table->id();
             $table->integer('book_journal_id');
             $table->string('type');
             $table->integer('purchasing_id')->nullable();
-            $table->string('factur_supplier_number')->nullable();
+            $table->string('factur_supplier_number')->index();
+            $table->date('date_invoice');
             $table->string('description')->nullable();
             $table->decimal('amount_kredit',12,2);
             $table->decimal('amount_debet',12,2);
@@ -30,6 +31,7 @@ class CreateTableKartuUtang2 extends Migration
             $table->integer('person_id')->nullable();
             $table->string('person_type')->nullable();
             $table->string('journal_number')->nullable();
+            $table->integer('journal_id')->nullable();
             $table->string('code_group', 10)->nullable();
             $table->string('lawan_code_group', 10)->nullable();
             $table->timestamps();
@@ -43,6 +45,6 @@ class CreateTableKartuUtang2 extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('kartu_utangs');
+        Schema::dropIfExists('kartu_hutangs');
     }
 }

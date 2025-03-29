@@ -19,6 +19,8 @@ class DatabaseSeeder extends Seeder
             UserTableSeeder::class,
             BookJournalSeeder::class,
             ChartAccountSeeder::class,
+            SupplierSeeder::class,
+            OtherPersonSeeder::class,
         ]);
     }
 }

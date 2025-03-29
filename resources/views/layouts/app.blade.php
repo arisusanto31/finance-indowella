@@ -113,30 +113,28 @@
                     <div class="container-xxl flex-grow-1 container-p-y">
                         {{$slot}}
                     </div>
-                    <!-- / Content -->
 
-                    {{-- <!-- Footer -->
-<footer class="content-footer footer bg-footer-theme mt-20">
-    <div class="container-xxl d-flex flex-wrap justify-content-between py-2 flex-md-row flex-column">
-        <div class="mb-2 mb-md-0">
-            ©
-            <script>
-                document.write(new Date().getFullYear());
-            </script>
-            , made with <span class="text-danger" style="position: relative; top: 1px;">❤️</span>
+                    <footer class="content-footer footer bg-footer-theme mt-20">
+                        <div class="container-xxl d-flex flex-wrap justify-content-between py-2 flex-md-row flex-column">
+                            <div class="mb-2 mb-md-0">
+                                ©
+                                <script>
+                                    document.write(new Date().getFullYear());
+                                </script>
+                                , made with <span class="text-danger" style="position: relative; top: 1px;">❤️</span>
 
-            Indowella team
-        </div>
-        <div>
-            <a href="https://themeselection.com/license/" class="footer-link me-4" target="_blank">License</a>
-            <a href="https://themeselection.com/" target="_blank" class="footer-link me-4">More Themes</a>
-            <a href="https://themeselection.com/demo/sneat-bootstrap-html-admin-template/documentation/"
-                target="_blank" class="footer-link me-4">Documentation</a>
-            <a href="https://github.com/themeselection/sneat-html-admin-template-free/issues" target="_blank"
-                class="footer-link me-4">Support</a>
-        </div>
-    </div>
-</footer> --}}
+                               by Indowella team
+                            </div>
+                            <div>
+                                <a href="https://themeselection.com/license/" class="footer-link me-4" target="_blank">License</a>
+                                <a href="https://themeselection.com/" target="_blank" class="footer-link me-4">More Themes</a>
+                                <a href="https://themeselection.com/demo/sneat-bootstrap-html-admin-template/documentation/"
+                                    target="_blank" class="footer-link me-4">Documentation</a>
+                                <a href="https://github.com/themeselection/sneat-html-admin-template-free/issues" target="_blank"
+                                    class="footer-link me-4">Support</a>
+                            </div>
+                        </div>
+                    </footer>
 
                     <!-- / Footer -->
 
@@ -150,14 +148,9 @@
         <!-- Overlay -->
         <div class="layout-overlay layout-menu-toggle"></div>
     </div>
-    <!-- / Layout wrapper -->
+    <!-- Modal -->
+  
 
-    <!-- <div class="buy-now">
-        <a
-            href="https://themeselection.com/products/sneat-bootstrap-html-admin-template/"
-            target="_blank"
-            class="btn btn-danger btn-buy-now">Upgrade to Pro</a>
-    </div> -->
 
     <!-- Core JS -->
     <script src="{{ asset('assets/vendor/libs/jquery/jquery.js') }}"></script>
@@ -204,6 +197,8 @@
                 }
             }
         });
+
+        initCurrencyInput('.currency-input');
     </script>
     @stack('scripts')
 </body>

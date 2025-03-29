@@ -584,7 +584,7 @@
     },
     {
         "id": 57,
-        "name": "Utang Usaha",
+        "name": "Hutang Usaha",
         "code_group": "211000",
         "account_type": "Kewajiban",
         "parent_id": 11,
@@ -595,7 +595,7 @@
     },
     {
         "id": 60,
-        "name": "Utang Sewa Guna Usaha",
+        "name": "Hutang Sewa Guna Usaha",
         "code_group": "220100",
         "account_type": "Kewajiban",
         "parent_id": 12,
@@ -606,7 +606,7 @@
     },
     {
         "id": 61,
-        "name": "Utang Lain Pihak ke-3",
+        "name": "Hutang Lain Pihak ke-3",
         "code_group": "220200",
         "account_type": "Kewajiban",
         "parent_id": 12,
@@ -617,7 +617,7 @@
     },
     {
         "id": 62,
-        "name": "Utang Pemegang Saham",
+        "name": "Hutang Pemegang Saham",
         "code_group": "220300",
         "account_type": "Kewajiban",
         "parent_id": 12,

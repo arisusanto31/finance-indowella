@@ -74,7 +74,20 @@ function getListMonth(){
     ];
 }
 
-
+function getProsen($data,$total){
+    if($total==0){
+        return 0;
+    }else{
+        return round(($data/$total)*100,2);
+    }
+}
+function getProsenDecimal($data,$total){
+    if($total==0){
+        return 0;
+    }else{
+        return ($data/$total)*100;
+    }
+}
 if (!function_exists('format_price')) {
     /**
      * @param $value

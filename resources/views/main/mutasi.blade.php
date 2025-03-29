@@ -8,10 +8,10 @@
         <i id="icon-create" class="bx bx-caret-down toggle-icon"></i> </a>
     </h5>
 
-    <div id="card-create"  class="tree-toggle">
+    <div id="card-create" class="tree-toggle">
 
-      <input type="hidden" value="{{Date('Y-m-d H:i:s')}}" id="date-mutasi"/>
-      <div class="card-body"  style="padding-top: 0px;">
+      <input type="hidden" value="{{Date('Y-m-d H:i:s')}}" id="date-mutasi" />
+      <div class="card-body" style="padding-top: 0px;">
         <div>
           Debit
           <button type="button" class="btn btn-sm btn-success ms-2" id="addDebit">+tambah</button>
@@ -26,7 +26,7 @@
               <input id="dnote1" type="text" class="form-control" placeholder="Note">
             </div>
             <div class="col-md-4">
-              <input id="damount1" type="number" class="form-control" placeholder="Amount">
+              <input id="damount1" type="text" class="form-control currency-input" placeholder="Amount">
             </div>
           </div>
         </div>
@@ -49,7 +49,7 @@
               <input id="knote1" type="text" class="form-control" placeholder="Note">
             </div>
             <div class="col-md-4">
-              <input id="kamount1" type="number" class="form-control" placeholder="Amount">
+              <input id="kamount1" type="text" class="form-control currency-input" placeholder="Amount">
             </div>
           </div>
         </div>
@@ -95,14 +95,14 @@
     var iRowDebet = 1;
     var iRowKredit = 1;
     setTimeout(() => {
-      initItemSelectManual('.select-coa', '{{url("admin/chart-account/get-item")}}', 'chart account');
+      initItemSelectManual('.select-coa', '{{url("admin/master/chart-account/get-item")}}', 'chart account');
 
     }, 100);
     document.getElementById('addDebit').addEventListener('click', function() {
       const debitWrapper = document.getElementById('div-debet');
       const newRow = document.createElement('div');
       iRowDebet++;
-      newRow.id= 'debet' + (iRowDebet);
+      newRow.id = 'debet' + (iRowDebet);
       newRow.classList.add('row', 'g-2', 'mb-2', 'rowdebet');
       newRow.innerHTML = `
             <div class="col-md-4">
@@ -114,11 +114,11 @@
               <input id="dnote${iRowDebet}" type="text" class="form-control" placeholder="Note">
             </div>
             <div class="col-md-4">
-              <input id="damount${iRowDebet}" type="number" class="form-control" placeholder="Amount">
+              <input id="damount${iRowDebet}" type="text" class="form-control currency-input" placeholder="Amount">
             </div>
           `;
       debitWrapper.appendChild(newRow);
-      initItemSelectManual('.select-coa', '{{url("admin/chart-account/get-item")}}', 'chart account');
+      initItemSelectManual('.select-coa', '{{url("admin/master/chart-account/get-item")}}', 'chart account');
 
     });
 
@@ -126,7 +126,7 @@
       const kreditWrapper = document.getElementById('div-kredit');
       const newRow = document.createElement('div');
       iRowKredit++;
-      newRow.id= 'kredit' + (iRowKredit);
+      newRow.id = 'kredit' + (iRowKredit);
       newRow.classList.add('row', 'g-2', 'mb-2', 'rowkredit');
       newRow.innerHTML = `
             <div class="col-md-4">
@@ -138,11 +138,11 @@
               <input id="knote${iRowKredit}" type="text" class="form-control" placeholder="Note">
             </div>
             <div class="col-md-4">
-              <input id="kamount${iRowKredit}" type="number" class="form-control" placeholder="Amount">
+              <input id="kamount${iRowKredit}" type="text" class="form-control currency-input" placeholder="Amount">
             </div>
           `;
       kreditWrapper.appendChild(newRow);
-      initItemSelectManual('.select-coa', '{{url("admin/chart-account/get-item")}}', 'chart account');
+      initItemSelectManual('.select-coa', '{{url("admin/master/chart-account/get-item")}}', 'chart account');
 
     });
 
@@ -163,7 +163,7 @@
         id = getNumID($(elem).attr('id'));
         codeGroup = $('#dcodegroup' + id + ' option:selected').val();
         note = $('#dnote' + id).val();
-        amount = $('#damount' + id).val();
+        amount = formatDB($('#damount' + id).val());
         debets.push({
           code_group: codeGroup,
           description: note,
@@ -176,7 +176,7 @@
         id = getNumID($(elem).attr('id'));
         codeGroup = $('#kcodegroup' + id + ' option:selected').val();
         note = $('#knote' + id).val();
-        amount = $('#kamount' + id).val();
+        amount = formatDB($('#kamount' + id).val());
         kredits.push({
           code_group: codeGroup,
           description: note,
@@ -216,13 +216,13 @@
               success: function(res) {
                 console.log(res);
                 if (res.status == 1) {
-                  Swal.fire('success', 'journal sudah tercreate on ' + res.journal_number,'success');
+                  Swal.fire('success', 'journal sudah tercreate on ' + res.journal_number, 'success');
                 } else {
-                  Swal.fire('opps', res.msg,'error');
+                  Swal.fire('opps', res.msg, 'error');
                 }
               },
               error: function(res) {
-                Swal.fire("opps", "something error",'error');
+                Swal.fire("opps", "something error", 'error');
               }
             });
           });
@@ -250,19 +250,19 @@
     }
 
     function renderListMutasiJurnal(res) {
-      html="";
+      html = "";
       console.log(res);
       Object.keys(res.msg).forEach(function eachJournalNumber(journalNumber, i) {
         rowspan = res.msg[journalNumber].length;
         res.msg[journalNumber].forEach(function eachJournal(journal, j) {
-          tanggal= formatNormalDateTime(new Date(journal.created_at));
+          tanggal = formatNormalDateTime(new Date(journal.created_at));
           if (j == 0) {
             html += `
               <tr>
                 <td class="text-center" rowspan="${rowspan}">${i+1}</td>
                 <td rowspan="${rowspan}">${tanggal}</td>
                 <td rowspan="${rowspan}">${journal.journal_number}</td>
-                <td>${journal.code_group}</td>
+                <td>${journal.code_group} - ${res.chart_accounts[journal.code_group]}</td>
                 <td>${journal.description}</td>
                 <td class="text-end">${formatRupiah(journal.amount_debet)}</td>
                 <td class="text-end">${formatRupiah(journal.amount_kredit)}</td>
@@ -271,7 +271,7 @@
           } else {
             html += `
               <tr>
-                <td>${journal.code_group}</td>
+                <td>${journal.code_group} - ${res.chart_accounts[journal.code_group]}</td>
                 <td>${journal.description}</td>
                 <td class="text-end">${formatRupiah(journal.amount_debet)}</td>
                 <td class="text-end">${formatRupiah(journal.amount_kredit)}</td>

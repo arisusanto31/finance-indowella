@@ -12,7 +12,44 @@ function formatRupiahSimple(angkaString) {
     }
 }
 
-function formatRupiah(angkaString, prefix = "", language = "eng") {
+
+function formatDB(angka, language = "id") {
+    negatif = 0;
+    if (angka == null)
+        angka = "0";
+    else {
+        angka = angka.toString();
+        negatif = check_char(angka, '-');
+        if (angka == "") {
+            angka = "0";
+        }
+    }
+    if (language == "eng")
+        split = angka.split('.');
+    else {
+        split = angka.split(',');
+    }
+    split[0] = (split[0].replace(/[^0-9]/g, ''));
+    angka = split[0];
+    if (split[1] != undefined) {
+        split[1] = (split[1].replace(/[^0-9]/g, ''));
+        strkoma = "0." + split[1];
+        koma = parseFloat(strkoma);
+   
+        koma *= 100;
+        koma = Math.round(koma);
+        angka += '.' + koma;
+    }
+    if (angka == null || angka == "") angka = 0;
+    angka = parseFloat(angka);
+   
+    if (negatif)
+        angka *= -1;
+    return angka;
+}
+
+
+function formatRupiah(angkaString, prefix = "", language = "id") {
     try {
         var number_string = "";
         angkaString = angkaString.toString();
@@ -71,15 +108,18 @@ function getNumID(data) {
     return numid;
 }
 
-function initItemSelectManual(el, url, placeholder = "") {
+function initItemSelectManual(el, url, placeholder = "",parent=null) {
 
     if (placeholder == "")
         placeholder = "Cari berdasarkan nama ..."
+    if(parent==null){
+        parent='body';
+    }
     $(el).select2({
         placeholder: placeholder,
         width: '100%', // agar responsive di Sneat
         theme: 'bootstrap-5', // tambahkan ini agar tampilannya menyatu
-        // dropdownParent: $('#your-modal-or-card'), // jika di modal/tab/card
+        dropdownParent: $(parent), // jika di modal/tab/card
         allowClear: true,
         ajax: {
             url: url,
@@ -113,4 +153,23 @@ function formatNormalDateTime(date) {
     const seconds = pad(date.getSeconds());
 
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
+
+
+function getProsen($data,$total){
+    if($total==0){
+        return 0;
+    }else{
+        return Math.round(($data*100/$total)*100)/100;
+    }
+}
+
+function initCurrencyInput(elem){
+    $(elem).on('input', function () {
+        let value = $(this).val().replace(/[^\d]/g, '');
+        // Format angka dengan locale 'id-ID' → hasilnya: 50.000
+        let formatted = new Intl.NumberFormat('id-ID').format(value);
+        $(this).val(formatted);
+    });
 }
