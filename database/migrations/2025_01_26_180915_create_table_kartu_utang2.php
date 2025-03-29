@@ -17,9 +17,8 @@ class CreateTableKartuUtang2 extends Migration
             $table->id();
             $table->integer('book_journal_id');
             $table->string('type');
-            $table->integer('purchasing_id')->nullable();
             $table->string('factur_supplier_number')->index();
-            $table->date('date_invoice');
+            $table->date('invoice_date');
             $table->string('description')->nullable();
             $table->decimal('amount_kredit',12,2);
             $table->decimal('amount_debet',12,2);

@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Supplier;
+use App\Models\OtherPerson;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class SupplierController extends Controller
+class OtherPersonController extends Controller
 {
     //
     public function index() {}
@@ -14,7 +14,7 @@ class SupplierController extends Controller
     public function getItem()
     {
         $searchs = explode(' ', getInput('search'));
-        $supps = Supplier::from('suppliers');
+        $supps = OtherPerson::from('other_persons');
         foreach ($searchs as $s) {
             $supps->where('name', 'like', '%' . $s . '%');
         }
@@ -25,7 +25,7 @@ class SupplierController extends Controller
     }
 
     public function destroy($id){
-        $supplier= Supplier::find($id);
+        $supplier= OtherPerson::find($id);
         $supplier->is_deleted=1;
         $supplier->deleted_at= Date('Y-m-d H:i:s');
         $supplier->save();

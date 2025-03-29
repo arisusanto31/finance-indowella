@@ -10,7 +10,9 @@ use App\Http\Controllers\KartuPiutangController;
 use App\Http\Controllers\KartuStockController;
 use App\Http\Controllers\BDDController;
 use App\Http\Controllers\ChartAccountController;
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\KaryawanController;
+use App\Http\Controllers\OtherPersonController;
 use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
 
@@ -60,13 +62,23 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
 
     Route::prefix('kartu')->group(function () {
         Route::resource('/kartu-kas', KartuKasController::class);
-        Route::resource('/kartu-hutang', KartuHutangController::class);
-        Route::resource('/kartu-piutang', KartuPiutangController::class);
-        Route::resource('/kartu-stock', KartuStockController::class);
-        
 
-        Route::post('create-mutasi-hutang',[KartuHutangController::class,'createMutationHutang']);
-   
+        Route::resource('/kartu-stock', KartuStockController::class);
+
+
+        Route::prefix('kartu-hutang')->name('kartu-hutang.')->group(function () {
+            Route::resource('/', KartuHutangController::class);
+            Route::post('create-mutation', [KartuHutangController::class, 'createMutation'])->name('create-mutation');
+            Route::post('create-pelunasan', [KartuHutangController::class, 'createPelunasan'])->name('create-pelunasan');
+            Route::get('get-summary', [KartuHutangController::class, 'getSummary'])->name('get-summary');
+        });
+
+        Route::prefix('kartu-piutang')->name('kartu-piutang.')->group(function () {
+            Route::resource('/', KartuPiutangController::class);
+            Route::post('create-mutation', [KartuPiutangController::class, 'createMutation'])->name('create-mutation');
+            Route::post('create-pelunasan', [KartuPiutangController::class, 'createPelunasan'])->name('create-pelunasan');
+            Route::get('get-summary', [KartuPiutangController::class, 'getSummary'])->name('get-summary');
+        });
     });
     Route::prefix('master')->group(function () {
         Route::prefix('chart-account')->group(function () {
@@ -84,11 +96,20 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
 
         });
 
-        Route::prefix('supplier')->name('supplier.')->group(function(){
-            Route::resource('/',SupplierController::class);
-            Route::get('/get-item',[SupplierController::class,'getItem'])->name('get-item');
+        Route::prefix('supplier')->name('supplier.')->group(function () {
+            Route::resource('/', SupplierController::class);
+            Route::get('/get-item', [SupplierController::class, 'getItem'])->name('get-item');
+        });
+
+        Route::prefix('other-person')->name('other-person.')->group(function () {
+            Route::resource('/', OtherPersonController::class);
+            Route::get('/get-item', [OtherPersonController::class, 'getItem'])->name('get-item');
+        });
+
+        Route::prefix('customer')->name('customer.')->group(function () {
+            Route::resource('/', CustomerController::class);
+            Route::get('/get-item', [CustomerController::class, 'getItem'])->name('get-item');
         });
     });
 });
 require __DIR__ . '/auth.php';
-
