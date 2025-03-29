@@ -196,10 +196,12 @@
                 url: '{{url("admin/kartu/kartu-piutang/create-mutation")}}',
                 method: 'post',
                 data: {
-                    factur_supplier_number: $('#factur').val(),
+                    package_number: $('#factur').val(),
                     amount_mutasi: formatDB($('#amount_mutasi').val(), 'id'),
                     person_id: $('#person_id option:selected').val(),
                     person_type: $('#person_type option:selected').val(),
+                    account_penjualan:$('#akun-piutang option:selected').val(),
+                    account_piutang:$('#akun-penjualan option:selected').val(),
                     _token: '{{csrf_token()}}'
                 },
                 success: function(res) {
@@ -233,11 +235,14 @@
                 url: '{{url("admin/kartu/kartu-piutang/create-pelunasan")}}',
                 method: 'post',
                 data: {
-                    factur_supplier_number: $('#pelunasan-factur').val(),
+                    package_number: $('#pelunasan-factur').val(),
                     amount_bayar: formatDB($('#pelunasan-amount').val(), 'id'),
                     person_id: $('#pelunasan-person_id option:selected').val(),
                     account_bayar: $('#pelunasan-akun-bayar option:selected').val(),
                     person_type: $('#pelunasan-person_type option:selected').val(),
+                    account_bayar:$('#pelunasan-akun-pembayaran option:selected').val(),
+                    account_piutang:$('#pelunasan-akun-piutang option:selected').val(),
+               
                     _token: '{{csrf_token()}}'
                 },
                 success: function(res) {

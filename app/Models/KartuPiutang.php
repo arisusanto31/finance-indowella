@@ -60,13 +60,13 @@ class KartuPiutang extends Model
                 $lastSaldoFactur = $lastSaldo;
 
 
-                $lastSaldoPerson = KartuHutang::whereIn('id', function ($q) use ($personID, $personType) {
+                $lastSaldoPerson = KartuPiutang::whereIn('id', function ($q) use ($personID, $personType) {
                     $q->from('kartu_piutangs')->where('person_id', $personID)->where('person_type', $personType)
                         ->select(
                             DB::raw('max(id) as maxid'),
                         )->groupBy('package_number');
                 })->sum('amount_saldo_factur');
-                $kartu = new KartuHutang();
+                $kartu = new KartuPiutang();
                 $kartu->type = $request->input('type');
                 $kartu->package_number = $facturNumber;
                 $kartu->description = $request->input('description');
@@ -122,7 +122,7 @@ class KartuPiutang extends Model
             $amountMutasi = $request->input('amount_mutasi');
             $personID = $request->input('person_id');
             $personType = $request->input('person_type');
-            $accountPenjualan = $request->input('accountPenjualan');
+            $accountPenjualan = $request->input('account_penjualan');
             $accountPiutang= $request->input('account_piutang');
 
             if($amountMutasi>0){
@@ -163,7 +163,7 @@ class KartuPiutang extends Model
                 'date' => Date('Y-m-d H:i:s'),
                 'is_auto_generated' => 1,
                 'title' => 'create mutation transaction',
-                'url_try_again' => null
+                'url_try_again' => 'try_again'
 
             ]), false);
             if ($st['status'] == 0) return $st;
