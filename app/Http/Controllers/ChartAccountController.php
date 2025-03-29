@@ -74,8 +74,17 @@ class ChartAccountController extends Controller
                 }
             }
             $chart= $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
-
-        } else if ($kind == 'beban') {
+        } 
+        else if($kind=='kas'){
+            $chart = ChartAccount::aktif()->child()->where('code_group', '>',110000)->where('code_group', '<',119999);
+            if(getInput('search')){
+                foreach(explode(' ',getInput('search')) as $search){
+                    $chart = $chart->where('name','like', '%'. $search . '%');
+                }
+            }
+            $chart= $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
+        }
+        else if ($kind == 'beban') {
             $chart = ChartAccount::aktif()->child()->where('account_type', 'Beban');
             if(getInput('search')){
                 foreach(explode(' ',getInput('search')) as $search){

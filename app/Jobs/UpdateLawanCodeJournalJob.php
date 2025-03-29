@@ -9,6 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\DB;
 
 class UpdateLawanCodeJournalJob implements ShouldQueue
 {
@@ -20,6 +21,8 @@ class UpdateLawanCodeJournalJob implements ShouldQueue
      * @return void
      */
     protected $id;
+    public $tries = 3; // Maksimal 3 kali
+    public $backoff = [120, 300, 600]; // In
     public function __construct($id)
     {
         //
@@ -34,7 +37,7 @@ class UpdateLawanCodeJournalJob implements ShouldQueue
     public function handle()
     {
         //
-        $journal = Journal::find($this->id);
+        $journal = DB::table('journals')->where('id',$this->id)->first();
         $journal->updateLawanCode();
     }
 }

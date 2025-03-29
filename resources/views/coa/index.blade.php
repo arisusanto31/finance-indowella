@@ -217,7 +217,7 @@
 
         function submitNewAccount() {
             $.ajax({
-                url: '{{url("admin/chart-account")}}',
+                url: '{{url("admin/master/chart-account")}}',
                 method: 'post',
                 data: $('#form-new-account').serialize(),
                 success: function(res) {
@@ -270,7 +270,7 @@
 
         function getChartAccount() {
             $.ajax({
-                url: '{{url("admin/chart-account/get-chart-accounts")}}',
+                url: '{{url("admin/master/chart-account/get-chart-accounts")}}',
                 method: 'get',
                 success: function(res) {
                     console.log(res);

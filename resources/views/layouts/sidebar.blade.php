@@ -193,19 +193,38 @@
             </ul>
         </li>
 
+        <li class="menu-item">
+            <a href="cards-basic.html" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-buildings"></i>
+                <div data-i18n="Basic">Master</div>
+                <input type="hidden" class="url-active" value="master" />
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="{{url('admin/master/chart-account')}}" class="menu-link">
+                        <div data-i18n="chart-account">Chart account</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{url('admin/master/supplier')}}" class="menu-link">
+                        <div data-i18n="supplier">Supplier</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{url('admin/master/other-person')}}" class="menu-link">
+                        <div data-i18n="other-person">Other Person</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+
+
 
 
         <!-- Misc -->
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Profile</span></li>
-        <li class="menu-item">
-            <a
-                href="{{url('admin/chart-account')}}"
-                class="menu-link">
-                <i class="menu-icon tf-icons bx bx-support"></i>
-                <div data-i18n="Support">Chart account</div>
-                <input type="hidden" class="url-active" value="chart-account" />
-            </a>
-        </li>
+
         <li class="menu-item">
             <a
                 href=""
