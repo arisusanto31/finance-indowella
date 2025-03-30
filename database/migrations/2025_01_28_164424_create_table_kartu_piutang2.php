@@ -17,9 +17,9 @@ class CreateTableKartuPiutang2 extends Migration
             $table->id();
             $table->integer('book_journal_id');
             $table->string('type');
-            $table->integer('transaction_id')->nullable();
             $table->integer('code_group_piutang')->nullable();
             $table->string('package_number')->nullable();
+            $table->date('invoice_date')->nullable();
             $table->string('description')->nullable();
             $table->decimal('amount_kredit', 12, 2);
             $table->decimal('amount_debet', 12, 2);
@@ -31,6 +31,7 @@ class CreateTableKartuPiutang2 extends Migration
             $table->integer('person_id')->nullable();
             $table->string('person_type')->nullable();
             $table->string('journal_number')->nullable();
+            $table->integer('journal_id')->nullable();
             $table->string('code_group', 10)->nullable();
             $table->string('lawan_code_group', 10)->nullable();
             $table->timestamps();

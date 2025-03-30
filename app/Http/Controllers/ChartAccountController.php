@@ -75,8 +75,30 @@ class ChartAccountController extends Controller
             }
             $chart= $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
         } 
+        else if ($kind == 'penjualan') {
+            $chart = ChartAccount::aktif()->child()->whereBetween('code_group',[400000,500000]);
+            if(getInput('search')){
+                foreach(explode(' ',getInput('search')) as $search){
+                    $chart = $chart->where('name','like', '%'. $search . '%');
+                }
+            }
+            $chart= $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
+        } 
+        else if($kind=='piutang'){
+            $chart = ChartAccount::aktif()->child()->whereBetween('code_group',[120000,140000]);
+            if(getInput('search')){
+                foreach(explode(' ',getInput('search')) as $search){
+                    $chart = $chart->where('name','like', '%'. $search . '%');
+                }
+            }
+            $chart= $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
+            
+        }
+        
         else if($kind=='kas'){
-            $chart = ChartAccount::aktif()->child()->where('code_group', '>',110000)->where('code_group', '<',119999);
+            $chart = ChartAccount::aktif()->child()->where(function($q){
+                $q->whereBetween('code_group',[110000,120000])->orWhere('code_group',301000);
+            });
             if(getInput('search')){
                 foreach(explode(' ',getInput('search')) as $search){
                     $chart = $chart->where('name','like', '%'. $search . '%');

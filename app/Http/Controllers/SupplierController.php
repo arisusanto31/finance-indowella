@@ -23,4 +23,14 @@ class SupplierController extends Controller
             'results' => $supps
         ];
     }
+
+    public function destroy($id){
+        $supplier= Supplier::find($id);
+        $supplier->is_deleted=1;
+        $supplier->deleted_at= Date('Y-m-d H:i:s');
+        $supplier->save();
+        return [
+            'status'=>1,'msg'=>'success delete'
+        ];
+    }
 }
