@@ -114,10 +114,13 @@
                                                 <i class="bi bi-eye"></i>
                                             </a>
                                     
-                                            {{-- ✏️ Tombol Edit --}}
-                                            <a href="#" class="btn btn-success btn-sm" title="Edit">
-                                                <i class="bi bi-pencil"></i>
-                                            </a>
+                                            <button type="button" class="btn btn-success btn-sm" title="Edit"
+                                             data-bs-toggle="modal" data-bs-target="#editModal{{ $customer->id }}">
+                                            <i class="bi bi-pencil"></i>
+                                            </button>
+
+                                            
+                                            
                                     
                                             {{-- 🗑 Tombol Hapus --}}
                                             <form action="{{ route('customers.destroy', $customer->id) }}" method="POST" style="display:inline;">
@@ -136,6 +139,19 @@
                             <tr>
                                 <td colspan="8" class="text-center">Belum ada data customer</td>
                             </tr>
+                            @foreach ($customers as $customer)
+                        <tr>
+    <!-- Kolom lainnya -->
+                        <td>
+                        <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#editModal{{ $customer->id }}">
+                                 <i class="bi bi-pencil"></i>
+                         </button>
+                                    </td>
+</tr>
+
+@include('master.customer-edit', ['customer' => $customer])
+@endforeach
+
                             @endforelse
                         </tbody>
                     </table>

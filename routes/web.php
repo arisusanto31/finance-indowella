@@ -99,15 +99,20 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::prefix('chart-account')->group(function () {
             Route::resource('/', ChartAccountController::class);
     
-            // ✅ Tambahkan ini:
+            
             Route::get('/customer/trashed', [CustomerController::class, 'trashed'])->name('customers.trashed');
     
-            // Sudah ada sebelumnya
+           
             Route::get('/customer', [CustomerController::class, 'index'])->name('master.customer');
             Route::post('/admin/master/customer/store', [CustomerController::class, 'store'])->name('admin.master.customer.store');
     
             Route::post('/customer/{id}/restore', [CustomerController::class, 'restore'])->name('customers.restore');
             Route::post('/customer/restore-all', [CustomerController::class, 'restoreAll'])->name('customers.restoreAll');
+            
+            Route::get('/customers/{id}/edit', [CustomerController::class, 'edit'])->name('customers.edit');
+            Route::put('/customers/{id}', [CustomerController::class, 'update'])->name('customers.update');
+
+  
         });
 
     

@@ -32,9 +32,10 @@ class CustomerController extends Controller
 
     public function index()
     {
-        $customers = Customer::all(); // karena ada global scope 'customer'
+        $customers = Customer::all(); // Ini otomatis pakai global scope jika ada
         return view('master.customer', compact('customers'));
     }
+    
 
     public function store(Request $request)
     {
@@ -77,6 +78,36 @@ class CustomerController extends Controller
 
         return view('master.customer-trashed', compact('customers'));
     }
+    public function edit($id)
+{
+    $customer = Customer::withoutGlobalScope('customer')->findOrFail($id);
+    return view('master.customer-edit', compact('customer'));
+}
+
+public function update(Request $request, $id)
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'address' => 'nullable|string',
+        'phone' => 'nullable|string|max:20',
+        'ktp' => 'nullable|string|max:100',
+        'npwp' => 'nullable|string|max:100',
+        'purchase_info' => 'nullable|string',
+    ]);
+
+    $customer = Customer::withoutGlobalScope('customer')->findOrFail($id);
+    $customer->update($request->only([
+        'name',
+        'address',
+        'phone',
+        'ktp',
+        'npwp',
+        'purchase_info',
+    ]));
+
+    return redirect()->route('customers.index')->with('success', 'Customer berhasil diperbarui!');
+}
+
 
 } 
 
