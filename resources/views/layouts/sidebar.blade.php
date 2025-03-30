@@ -215,6 +215,16 @@
                         <div data-i18n="other-person">Other Person</div>
                     </a>
                 </li>
+                <li class="menu-item">
+                    <a href="{{url('admin/master/chart-account/customer')}}" class="menu-link">
+                        <div data-i18n="other-person">Customer</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="#" class="menu-link">
+                        <div data-i18n="other-person">Stock</div>
+                    </a>
+                </li>
             </ul>
         </li>
 

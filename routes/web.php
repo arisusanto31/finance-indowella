@@ -10,14 +10,31 @@ use App\Http\Controllers\KartuPiutangController;
 use App\Http\Controllers\KartuStockController;
 use App\Http\Controllers\BDDController;
 use App\Http\Controllers\ChartAccountController;
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\OtherPersonController;
 Route::get('/', function () {
     return redirect('/login');
 });
 
+Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
+Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
+Route::delete('/customers/{id}', [CustomerController::class, 'destroy'])->name('customers.destroy');
+Route::get('/customers/trashed', [CustomerController::class, 'trashed'])->name('customers.trashed');
+Route::post('/customers/{id}/restore', [CustomerController::class, 'restore'])->name('customers.restore');
+
+Route::resource('other-persons', OtherPersonController::class);
+
+// Soft delete related
+Route::get('other-persons-trashed',[OtherPersonController::class, 'trashed'])->name('other-persons.trashed');
+Route::post('other-persons/{id}/restore',[OtherPersonController::class,'restore'])->name('other-persons.restore');
+
+Route::prefix('supplier')->name('supplier.')->group(function () {
+    Route::resource('/', SupplierController::class);
+    Route::get('/get-item', [SupplierController::class, 'getItem'])->name('get-item');
+});
 
 
 Route::middleware('auth')->group(function () {
@@ -71,18 +88,19 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
     Route::prefix('master')->group(function () {
         Route::prefix('chart-account')->group(function () {
             Route::resource('/', ChartAccountController::class);
-            Route::get('get-item', [ChartAccountController::class, 'getItemChartAccount'])->name('chart-account.get-item');
-            Route::get('get-chart-accounts', [ChartAccountController::class, 'getChartAccounts']);
-            Route::get('get-chart-account/{id}', [ChartAccountController::class, 'getChartAccount']);
-            // Route::get('get-item-chart-account', [App\Http\Controllers\Backend\ChartAccountController::class, 'getItemChartAccount']);
-            // Route::get('get-item-chart-account-all', [App\Http\Controllers\Backend\ChartAccountController::class, 'getItemChartAccountAll']);
-            Route::get('get-code-group-account/{id}', [ChartAccountController::class, 'getCodeGroupAccount']);
-            Route::get('get-item-keuangan', [ChartAccountController::class, 'getItemChartAccountKeuanganManual'])->name('chart-account.get-item-keuangan');
-            // Route::get('get-item-chart-account-aset-tetap', [App\Http\Controllers\Backend\ChartAccountController::class, 'getItemChartAccountAsetTetap']);
-            // Route::get('get-item-chart-account-bdd', [App\Http\Controllers\Backend\ChartAccountController::class, 'getItemChartAccountBDD']);
-            // Route::get('chart-account-update-level', [App\Http\Controllers\Backend\ChartAccountController::class, 'updateAllLevel']);
-
+    
+            // ✅ Tambahkan ini:
+            Route::get('/customer/trashed', [CustomerController::class, 'trashed'])->name('customers.trashed');
+    
+            // Sudah ada sebelumnya
+            Route::get('/customer', [CustomerController::class, 'index'])->name('master.customer');
+            Route::post('/admin/master/customer/store', [CustomerController::class, 'store'])->name('admin.master.customer.store');
+    
+            Route::post('/customer/{id}/restore', [CustomerController::class, 'restore'])->name('customers.restore');
+            Route::post('/customer/restore-all', [CustomerController::class, 'restoreAll'])->name('customers.restoreAll');
         });
+
+    
 
         Route::prefix('supplier')->name('supplier.')->group(function(){
             Route::resource('/',SupplierController::class);
