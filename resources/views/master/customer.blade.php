@@ -106,7 +106,6 @@
                             </td>
                         </tr>
     
-                        <!-- Modal Edit untuk masing-masing customer -->
                         <div class="modal fade" id="editModal{{ $customer->id }}" tabindex="-1"
                             aria-labelledby="editModalLabel{{ $customer->id }}" aria-hidden="true">
                             <div class="modal-dialog">

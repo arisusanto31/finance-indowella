@@ -192,7 +192,29 @@
                 </li>
             </ul>
         </li>
-
+        <li class="menu-item">
+            <a href="cards-basic.html" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons  bx bx-list-ul"></i>
+                <div data-i18n="Basic">Invoice</div>
+                <input type="hidden" class="url-active" value="daftar" />
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="#" class="menu-link">
+                        <!-- <i class="menu-icon tf-icons bx bx-building mr-2 fs-6 me-2" style="margin-right: 10px;"></i> -->
+                        <div data-i18n="Accordion">Invoice Sales</div>
+                    </a>
+                </li>
+            </ul>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="#" class="menu-link">
+                        <!-- <i class="menu-icon tf-icons bx bx-building mr-2 fs-6 me-2" style="margin-right: 10px;"></i> -->
+                        <div data-i18n="Accordion">Invoice Purchase</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
         <li class="menu-item">
             <a href="cards-basic.html" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-buildings"></i>
@@ -221,9 +243,11 @@
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="#" class="menu-link">
+                    <a href="{{url('admin/master/chart-account/stock')}}"  class="menu-link">
                         <div data-i18n="other-person">Stock</div>
                     </a>
+                </li>
+
                 </li>
             </ul>
         </li>

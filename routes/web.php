@@ -13,7 +13,9 @@ use App\Http\Controllers\ChartAccountController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\OtherPersonController;
+use App\Http\Controllers\StockController;
 use App\Http\Controllers\SupplierController;
+use App\Models\KartuStock;
 use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return redirect('/login');
@@ -101,8 +103,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
     
             
             Route::get('/customer/trashed', [CustomerController::class, 'trashed'])->name('customers.trashed');
-    
-           
+            Route::get('/stock', [StockController::class, 'Stock'])->name('master.stock');
+            
             Route::get('/customer', [CustomerController::class, 'index'])->name('master.customer');
             Route::post('/admin/master/customer/store', [CustomerController::class, 'store'])->name('admin.master.customer.store');
     
@@ -111,6 +113,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             
             Route::get('/customers/{id}/edit', [CustomerController::class, 'edit'])->name('customers.edit');
             Route::put('/customers/{id}', [CustomerController::class, 'update'])->name('customers.update');
+
+           
 
   
         });
