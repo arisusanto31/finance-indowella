@@ -19,6 +19,7 @@ class Journal extends Model
     use HasFactory;
     protected $table = "journals";
 
+    
     public function reference()
     {
         return $this->morphTo();

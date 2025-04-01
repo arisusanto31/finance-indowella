@@ -4,27 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\OtherPerson;
 use Illuminate\Http\Request;
-<<<<<<< HEAD
-
-class OtherPersonController extends Controller
-{
-    // Menampilkan data yang di-soft delete
-    public function trashed()
-    {
-        $trashed = OtherPerson::onlyTrashed()->get();
-        return view('other_persons.trashed', compact('trashed'));
-    }
-
-    // Memulihkan data yang di-soft delete
-    public function restore($id)
-    {
-        $person = OtherPerson::withTrashed()->findOrFail($id);
-        $person->update(['is_deleted' => 0]); // Optional, jika kamu pakai kolom is_deleted
-        $person->restore();
-
-        return redirect()->route('other-persons.index')->with('success', 'Data berhasil dipulihkan.');
-=======
 use Illuminate\Support\Facades\DB;
+
+
+
 
 class OtherPersonController extends Controller
 {
@@ -44,14 +27,31 @@ class OtherPersonController extends Controller
         ];
     }
 
-    public function destroy($id){
-        $supplier= OtherPerson::find($id);
-        $supplier->is_deleted=1;
-        $supplier->deleted_at= Date('Y-m-d H:i:s');
+    public function destroy($id)
+    {
+        $supplier = OtherPerson::find($id);
+        $supplier->is_deleted = 1;
+        $supplier->deleted_at = Date('Y-m-d H:i:s');
         $supplier->save();
         return [
-            'status'=>1,'msg'=>'success delete'
+            'status' => 1,
+            'msg' => 'success delete'
         ];
->>>>>>> e0de16632f18dbc7a08ad16100464f2dcd1abf21
+    }
+
+    public function trashed()
+    {
+        $trashed = OtherPerson::onlyTrashed()->get();
+        return view('other_persons.trashed', compact('trashed'));
+    }
+
+    // Memulihkan data yang di-soft delete
+    public function restore($id)
+    {
+        $person = OtherPerson::withTrashed()->findOrFail($id);
+        $person->update(['is_deleted' => 0]); // Optional, jika kamu pakai kolom is_deleted
+        $person->restore();
+
+        return redirect()->route('other-persons.index')->with('success', 'Data berhasil dipulihkan.');
     }
 }

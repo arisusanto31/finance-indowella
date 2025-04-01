@@ -238,13 +238,13 @@
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="{{url('admin/master/chart-account/customer')}}" class="menu-link">
-                        <div data-i18n="other-person">Customer</div>
+                    <a href="{{url('admin/master/customer')}}" class="menu-link">
+                        <div data-i18n="customer">Customer</div>
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="{{url('admin/master/chart-account/stock')}}"  class="menu-link">
-                        <div data-i18n="other-person">Stock</div>
+                    <a href="{{url('admin/master/stock')}}"  class="menu-link">
+                        <div data-i18n="stock">Stock</div>
                     </a>
                 </li>
 

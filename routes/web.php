@@ -15,28 +15,14 @@ use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\OtherPersonController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\SupplierController;
+use App\Models\ChartAccount;
 use App\Models\KartuStock;
 use Illuminate\Support\Facades\Route;
+
 Route::get('/', function () {
     return redirect('/login');
 });
 
-Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
-Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
-Route::delete('/customers/{id}', [CustomerController::class, 'destroy'])->name('customers.destroy');
-Route::get('/customers/trashed', [CustomerController::class, 'trashed'])->name('customers.trashed');
-Route::post('/customers/{id}/restore', [CustomerController::class, 'restore'])->name('customers.restore');
-
-Route::resource('other-persons', OtherPersonController::class);
-
-// Soft delete related
-Route::get('other-persons-trashed',[OtherPersonController::class, 'trashed'])->name('other-persons.trashed');
-Route::post('other-persons/{id}/restore',[OtherPersonController::class,'restore'])->name('other-persons.restore');
-
-Route::prefix('supplier')->name('supplier.')->group(function () {
-    Route::resource('/', SupplierController::class);
-    Route::get('/get-item', [SupplierController::class, 'getItem'])->name('get-item');
-});
 
 
 Route::middleware('auth')->group(function () {
@@ -98,32 +84,17 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         });
     });
     Route::prefix('master')->group(function () {
-        Route::prefix('chart-account')->group(function () {
+        Route::prefix('chart-account')->name('chart-account.')->group(function () {
             Route::resource('/', ChartAccountController::class);
-    
-            
-            Route::get('/customer/trashed', [CustomerController::class, 'trashed'])->name('customers.trashed');
-            Route::get('/stock', [StockController::class, 'Stock'])->name('master.stock');
-            
-            Route::get('/customer', [CustomerController::class, 'index'])->name('master.customer');
-            Route::post('/admin/master/customer/store', [CustomerController::class, 'store'])->name('admin.master.customer.store');
-    
-            Route::post('/customer/{id}/restore', [CustomerController::class, 'restore'])->name('customers.restore');
-            Route::post('/customer/restore-all', [CustomerController::class, 'restoreAll'])->name('customers.restoreAll');
-            
-            Route::get('/customers/{id}/edit', [CustomerController::class, 'edit'])->name('customers.edit');
-            Route::put('/customers/{id}', [CustomerController::class, 'update'])->name('customers.update');
-
-           
-
-  
+            Route::get('/get-item', [ChartAccountController::class, 'getItemChartAccount'])->name('get-item');
+            Route::get('/get-item-keuangan', [ChartAccountController::class, 'getItemChartAccountKeuanganManual'])->name('get-item-keuangan');
         });
 
-    
 
-        Route::prefix('supplier')->name('supplier.')->group(function(){
-            Route::resource('/',SupplierController::class);
-            Route::get('/get-item',[SupplierController::class,'getItem'])->name('get-item');
+
+        Route::prefix('supplier')->name('supplier.')->group(function () {
+            Route::resource('/', SupplierController::class);
+            Route::get('/get-item', [SupplierController::class, 'getItem'])->name('get-item');
         });
         Route::prefix('supplier')->name('supplier.')->group(function () {
             Route::resource('/', SupplierController::class);
@@ -133,12 +104,20 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::prefix('other-person')->name('other-person.')->group(function () {
             Route::resource('/', OtherPersonController::class);
             Route::get('/get-item', [OtherPersonController::class, 'getItem'])->name('get-item');
+            // Soft delete related
+            Route::get('/trashed', [OtherPersonController::class, 'trashed'])->name('other-persons.trashed');
+            Route::post('{id}/restore', [OtherPersonController::class, 'restore'])->name('other-persons.restore');
         });
 
         Route::prefix('customer')->name('customer.')->group(function () {
             Route::resource('/', CustomerController::class);
             Route::get('/get-item', [CustomerController::class, 'getItem'])->name('get-item');
+            Route::get('/customers/trashed', [CustomerController::class, 'trashed'])->name('customers.trashed');
+            Route::post('/customers/{id}/restore', [CustomerController::class, 'restore'])->name('customers.restore');
         });
+
+
+     
     });
 });
 require __DIR__ . '/auth.php';

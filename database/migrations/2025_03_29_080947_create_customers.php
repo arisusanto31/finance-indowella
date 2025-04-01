@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('npwp')->nullable();
             $table->string('purchase_info')->nullable();
             $table->boolean('is_deleted')->nullable();
-            $table->softDeletes();
+            $table->datetime('deleted_at')->nullable();
             $table->timestamps();
 
             
