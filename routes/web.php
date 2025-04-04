@@ -88,6 +88,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::resource('/', ChartAccountController::class);
             Route::get('/get-item', [ChartAccountController::class, 'getItemChartAccount'])->name('get-item');
             Route::get('/get-item-keuangan', [ChartAccountController::class, 'getItemChartAccountKeuanganManual'])->name('get-item-keuangan');
+            Route::get('/get-chart-accounts', [ChartAccountController::class, 'getChartAccounts']);
         });
 
 
@@ -112,10 +113,16 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::prefix('customer')->name('customer.')->group(function () {
             Route::resource('/', CustomerController::class);
             Route::get('/get-item', [CustomerController::class, 'getItem'])->name('get-item');
-            Route::get('/customers/trashed', [CustomerController::class, 'trashed'])->name('customers.trashed');
-            Route::post('/customers/{id}/restore', [CustomerController::class, 'restore'])->name('customers.restore');
+            Route::get('/trashed', [CustomerController::class, 'trashed'])->name('trashed');
+            Route::post('/{id}/restore', [CustomerController::class, 'restore'])->name('restore');
         });
 
+        Route::prefix('stock')->name('stock.')->group(function () {
+            Route::resource('/', StockController::class);
+            Route::get('trashed', [StockController::class, 'trashed'])->name('trashed');
+            Route::post('category-store', [StockController::class, 'categoryStore'])->name('category-store');
+            Route::get('category-get-item', [StockController::class, 'categoryGetItem'])->name('category-get-item');
+        });
 
      
     });

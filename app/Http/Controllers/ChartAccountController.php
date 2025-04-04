@@ -13,7 +13,7 @@ class ChartAccountController extends Controller
 
     public function index()
     {
-        $view = view('coa.index');
+        $view = view('master.chart-account');
 
         return $view;
     }

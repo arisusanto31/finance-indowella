@@ -14,13 +14,9 @@ return new class extends Migration
             $table->text('address')->nullable();
             $table->string('phone')->nullable();
             $table->string('ktp')->nullable();
-            $table->string('npwp')->nullable();
-            $table->string('purchase_info')->nullable();
-            $table->boolean('is_deleted')->nullable();
+            $table->string('npwp')->nullable();            $table->boolean('is_deleted')->nullable();
             $table->datetime('deleted_at')->nullable();
-            $table->timestamps();
-
-            
+            $table->timestamps();            
         });
     }
 
