@@ -108,3 +108,46 @@ if (!function_exists('format_price')) {
     }
 }
 
+
+if (!function_exists('money')) {
+    function money($value): string
+    {
+        return number_format((float)$value, 2, '.', '');
+    }
+}
+
+if (!function_exists('moneyAdd')) {
+    function moneyAdd(string $a, string $b): string
+    {
+        return bcadd(money($a), money($b), 2);
+    }
+}
+
+if (!function_exists('moneySub')) {
+    function moneySub(string $a, string $b): string
+    {
+        return bcsub(money($a), money($b), 2);
+    }
+}
+
+if (!function_exists('moneyMul')) {
+    function moneyMul(string $a, string $b): string
+    {
+        return bcmul(money($a), money($b), 2);
+    }
+}
+
+if (!function_exists('moneyAbs')) {
+    function moneyAbs(string $value): string
+    {
+        return bccomp($value, '0', 2) < 0 ? moneyMul($value, '-1') : money($value);
+    }
+}
+
+if (!function_exists('moneyCmp')) {
+    function moneyCmp(string $a, string $b = '0'): int
+    {
+        return bccomp(money($a), money($b), 2);
+    }
+}
+
