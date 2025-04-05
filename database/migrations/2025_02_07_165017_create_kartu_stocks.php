@@ -17,7 +17,6 @@ class CreateKartuStocks extends Migration
             $table->id();
             $table->integer('book_journal_id');
             $table->integer('stock_id');
-            $table->integer('mutation_detail_id');
             $table->decimal('mutasi_qty_backend', 10, 2);
             $table->string('unit_backend');
             $table->decimal('mutasi_quantity', 10, 2);
@@ -26,8 +25,7 @@ class CreateKartuStocks extends Migration
             $table->decimal('mutasi_rupiah_total', 14, 2);
             $table->decimal('saldo_qty_backend', 10, 2);
             $table->decimal('saldo_rupiah_total', 14, 2);
-            $table->string('journal_number')->nullable();
-            $table->integer('journal_id')->nullable();
+            $table->integer('is_uploaded')->nullable();
             $table->timestamps();
         });
     }

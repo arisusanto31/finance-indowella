@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 class KartuStockController extends Controller
 {
     
-    public function KartuStock(){
+    public function index(){
         return view('kartu.kartu-stock');
     }
 }

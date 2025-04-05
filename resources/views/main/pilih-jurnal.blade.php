@@ -17,9 +17,14 @@
             <div class="flex justify-between items-center h-16">
                 <a href="#" class="text-xl font-bold text-blue-600">Finance</a>
                 <div class="hidden md:flex space-x-6">
-                    <a href="#" class="text-gray-700 hover:text-blue-600">Home</a>
-                    <a href="#" class="text-gray-700 hover:text-blue-600">About</a>
-                    <a href="#" class="text-gray-700 hover:text-blue-600">Logout</a>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="dropdown-item">
+                            <i class="bx bx-power-off me-2"></i>
+                            <span class="align-middle">Log Out</span>
+                        </button>
+                    </form>
+                </li>
                 </div>
                 <button id="mobile-menu-btn" class="md:hidden text-gray-700 focus:outline-none">☰</button>
             </div>
@@ -28,6 +33,7 @@
             <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-blue-100">Home</a>
             <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-blue-100">About</a>
             <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-blue-100">Services</a>
+
         </div>
     </nav>
 
@@ -36,13 +42,12 @@
             document.getElementById('mobile-menu').classList.toggle('hidden');
         });
     </script>
-
-    <!-- Main Content -->
-    <div class="flex items-center justify-center min-h-screen pt-32 px-4 bg-purple-300">
-        <div class="bg-white shadow-2xl rounded-2xl px-10 py-10 inline-block">
-            <h1 class="text-2xl font-bold font-serif text-center text-gray-800 mb-8">
-          Pilih Buku Jurnal
-            </h1>
+    
+<div class="flex items-center justify-center min-h-screen m-0 p-0 px-4 bg-purple-300">
+    <div class="bg-white shadow-2xl rounded-2xl px-10 py-10 inline-block">
+        <h1 class="text-2xl font-bold font-serif text-center text-gray-800 mb-8">
+            Pilih Buku Jurnal
+        </h1>
 
             <div class="grid grid-cols-2 divide-x divide-gray-400 border border-gray-300 rounded-lg">
                 @foreach($books as $row => $book)
@@ -66,7 +71,19 @@
                             </div>
                         </button>
                     </div>
+                    
                 @endforeach
+                <div class="flex items-center justify-center  p-10">
+                    <button
+                        onclick="pilihBook('{{ $book->id }}')"
+                        class="group w-44 h-44 {{ $color }} text-white border border-gray-300 hover:shadow-xl transition-all duration-300 rounded-lg p-4 text-center hover:scale-105"
+                    >
+                    <img src="{{ asset('assets/img/openboox-removebg.png') }}" alt="Book Icon"
+                    class="w-24 h-24 mb-3 mx-auto group-hover:opacity-90" />
+                    <div class="font-serif text-base font-semibold text-white">
+                        {{-- {{ $book->name }} --}}
+                    </div>
+                </button>
             </div>
         </div>
     </div>
