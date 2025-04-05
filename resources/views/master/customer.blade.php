@@ -119,11 +119,30 @@
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
                                         </div>
                                         <div class="modal-body">
-                                            <div class="mb-3"><label class="form-label">Name</label><input type="text" name="name" class="form-control" value="{{ $customer->name }}"></div>
-                                            <div class="mb-3"><label class="form-label">Phone</label><input type="text" name="phone" class="form-control" value="{{ $customer->phone }}"></div>
-                                            <div class="mb-3"><label class="form-label">Address</label><textarea name="address" class="form-control">{{ $customer->address }}</textarea></div>
-                                            <div class="mb-3"><label class="form-label">KTP</label><input type="text" name="ktp" class="form-control" value="{{ $customer->ktp }}"></div>
-                                            <div class="mb-3"><label class="form-label">NPWP</label><input type="text" name="npwp" class="form-control" value="{{ $customer->npwp }}"></div>
+                                            <div class="mb-3"><label class="form-label">Name</label>
+                                                <input type="text" name="name" class="form-control" value="{{ $customer->name }}">
+                                            </div>
+                                            
+                                            <div class="mb-3"><label class="form-label">Address</label>
+                                                <textarea name="address" class="form-control">{{ $customer->address }}</textarea>
+                                            </div>
+                                            
+                                            <div class="mb-3"><label class="form-label">Phone</label>
+                                                <input type="text" name="phone" class="form-control" value="{{ $customer->phone }}">
+                                            </div>
+                                            
+                                            <div class="mb-3"><label class="form-label">KTP</label>
+                                                <input type="text" name="ktp" class="form-control" value="{{ $customer->ktp }}">
+                                            </div>
+                                            
+                                            <div class="mb-3"><label class="form-label">NPWP</label>
+                                                <input type="text" name="npwp" class="form-control" value="{{ $customer->npwp }}">
+                                            </div>
+                                            
+                                            <div class="mb-3"><label class="form-label">Keterangan Pembelian</label>
+                                                <input type="text" name="purchase_info" class="form-control" value="{{ $customer->purchase_info }}">
+                                            </div>
+                                            
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
