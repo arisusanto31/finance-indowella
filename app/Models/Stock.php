@@ -11,6 +11,10 @@ class Stock extends Model
     protected $table = 'stocks';
     public $timestamps = true;
 
+    public function units()
+    {
+        return $this->hasMany('App\Models\StockUnit', 'stock_id')->whereNull('is_deleted');
+    }
 
     protected static function booted()
     {

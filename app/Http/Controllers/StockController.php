@@ -53,7 +53,7 @@ class StockController extends Controller
             Stock::create($validated);
             return redirect()->back()->with('success', 'Stock berhasil disimpan!');
         } catch (ValidationException $e) {
-           $errorString = $e->validator->errors()->first();
+            $errorString = $e->validator->errors()->first();
 
             return redirect()->back()
                 ->with('error', $errorString); // <- ini isi session 'errors'
@@ -99,5 +99,24 @@ class StockController extends Controller
         $categories = $categories->select('id', DB::raw('name as text'))->get();
 
         return ['results' => $categories];
+    }
+
+    public function unitStore(Request $request)
+    {
+        $request->validate([
+            'stock_id' => 'required|integer',
+            'unit' => 'required|stirng|max:15',
+            'konversi' => 'required|decimal:8,2',
+        ]);
+
+        StockUnit::create($request->only([
+            'name',
+            'stock_id',
+        ]));
+
+        return [
+            'status' => 1,
+            'msg' => 'Satuan berhasil disimpan!'
+        ];
     }
 }

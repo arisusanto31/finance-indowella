@@ -120,6 +120,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::prefix('stock')->name('stock.')->group(function () {
             Route::resource('/', StockController::class);
             Route::get('trashed', [StockController::class, 'trashed'])->name('trashed');
+            Route::post('unit-store', [StockController::class, 'unitStore'])->name('unit-store');
             Route::post('category-store', [StockController::class, 'categoryStore'])->name('category-store');
             Route::get('category-get-item', [StockController::class, 'categoryGetItem'])->name('category-get-item');
         });

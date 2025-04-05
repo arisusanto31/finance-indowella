@@ -116,11 +116,39 @@
                                                 </select>
                                             </div>
 
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                            <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
-                                        </div>
+                                            <div class="mb-3 p-3 rounded" style="background-color:#eee;">
+                                                @foreach($stock->units as $unit)
+                                                <div class="row mb-2">
+                                                    <div class="col-md-4">
+                                                        <input class="form-control" placeholder="nama satuan" value="{{ $unit->unit }}" />
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <input class="form-control" placeholder="konversi" value="{{ $unit->konversi }}" />
+                                                    </div>
+                                                </div>
+                                                @endforeach
+
+                                                <p class="fw-bold">+ tambah satuan baru</p>
+                                                <form id="create-unit{{$stock->id}}">
+                                                    {{csrf_field()}}
+                                                    <div class="row align-items-center">
+                                                        <div class="col-md-4">
+                                                            <input type="hidden" name="stock_id" value="{{ $stock->id }}" />
+                                                            <input name="unit" class="form-control" placeholder="nama satuan" />
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <input name="konversi" class="form-control" placeholder="konversi" />
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <button onclick="tambahSatuan()" type="button" class="btn btn-success">Tambahkan</button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                                <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                                            </div>
                                     </form>
                                 </div>
                             </div>
@@ -195,10 +223,31 @@
         initItemSelectManual('#parent-id', '{{route("stock.category-get-item")}}', 'parent category', '#createCategory');
         initItemSelectManual('#category-id', '{{route("stock.category-get-item")}}', 'category', '#createModal');
         initItemSelectManual('#parent-category-id', '{{route("stock.category-get-item")}}', 'parent category', '#createModal');
-        $('.edit-modal').each(function each(i,elem){
-            id= getNumID($(elem).attr('id'));
-            initItemSelectManual($(elem), '{{route("stock.category-get-item")}}', 'category', '#editModal'+id);
+        $('.edit-modal').each(function each(i, elem) {
+            id = getNumID($(elem).attr('id'));
+            initItemSelectManual($(elem), '{{route("stock.category-get-item")}}', 'category', '#editModal' + id);
         });
+
+
+        function tambahSatuan(id) {
+            $.ajax({
+                url: '{{route("stock.unit-store")}}',
+                method: 'POST',
+                data: $('#create-unit' + id).serialize(),
+                success: function(res) {
+                    console.log(res);
+                    if (res.status == 1) {
+                        Swal.fire('Berhasil', 'satuan berhasil ditambah', 'success');
+                    } else {
+                        Swal.fire('Gagal', 'satuan gagal ditambah:' + res.msg, 'error');
+                    }
+                },
+                error: function(err) {
+                    console.log(err);
+                    Swal.fire('opps', "Gagal menambah satuan", 'error');
+                }
+            });
+        }
     </script>
     @if(session('success'))
     <script>
