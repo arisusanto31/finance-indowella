@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Stock;
 use App\Models\StockCategory;
+use App\Models\StockUnit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -20,6 +21,8 @@ class StockController extends Controller
 
     public function update(Request $request, $id)
     {
+
+
         $request->validate([
             'name' => 'required|string|max:255',
             'category_id' => 'integer',
@@ -30,14 +33,14 @@ class StockController extends Controller
         $stock = Stock::findOrFail($id);
         $stock->update($request->only([
             'name',
-            'address',
-            'phone',
-            'ktp',
-            'npwp',
-            'purchase_info',
+            'category_id',
+            'parent_category_id',
         ]));
 
-        return redirect()->back()->with('success', 'Stock berhasil diperbarui!');
+        return [
+            'status' => 1,
+            'msg' => $stock
+        ];
     }
 
 
@@ -78,6 +81,9 @@ class StockController extends Controller
         return redirect()->back()->with('success', 'Kategori berhasil disimpan!');
     }
 
+    public function show(){
+        return "halo halo bandung";
+    }
     public function trashed()
     {
         $view = view('master.stock-trashed');
@@ -105,18 +111,18 @@ class StockController extends Controller
     {
         $request->validate([
             'stock_id' => 'required|integer',
-            'unit' => 'required|stirng|max:15',
-            'konversi' => 'required|decimal:8,2',
+            'unit' => 'required|string|max:15', // typo: 'stirng' → 'string'
+            'konversi' => 'required|numeric',   // tidak ada rule 'decimal' di Laravel
         ]);
 
         StockUnit::create($request->only([
-            'name',
-            'stock_id',
+            'stock_id','unit', 'konversi'
         ]));
 
         return [
             'status' => 1,
-            'msg' => 'Satuan berhasil disimpan!'
+            'msg'=> StockUnit::where('stock_id',$request->input('stock_id'))->get(),
+            'hal' => 'Satuan berhasil disimpan!'
         ];
     }
 }

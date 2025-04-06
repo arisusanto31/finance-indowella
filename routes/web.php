@@ -71,14 +71,14 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
 
 
         Route::prefix('kartu-hutang')->name('kartu-hutang.')->group(function () {
-            Route::resource('/', KartuHutangController::class);
+            Route::resource('main', KartuHutangController::class);
             Route::post('create-mutation', [KartuHutangController::class, 'createMutation'])->name('create-mutation');
             Route::post('create-pelunasan', [KartuHutangController::class, 'createPelunasan'])->name('create-pelunasan');
             Route::get('get-summary', [KartuHutangController::class, 'getSummary'])->name('get-summary');
         });
 
         Route::prefix('kartu-piutang')->name('kartu-piutang.')->group(function () {
-            Route::resource('/', KartuPiutangController::class);
+            Route::resource('main', KartuPiutangController::class);
             Route::post('create-mutation', [KartuPiutangController::class, 'createMutation'])->name('create-mutation');
             Route::post('create-pelunasan', [KartuPiutangController::class, 'createPelunasan'])->name('create-pelunasan');
             Route::get('get-summary', [KartuPiutangController::class, 'getSummary'])->name('get-summary');
@@ -86,7 +86,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
     });
     Route::prefix('master')->group(function () {
         Route::prefix('chart-account')->name('chart-account.')->group(function () {
-            Route::resource('/', ChartAccountController::class);
+            Route::resource('main', ChartAccountController::class);
             Route::get('/get-item', [ChartAccountController::class, 'getItemChartAccount'])->name('get-item');
             Route::get('/get-item-keuangan', [ChartAccountController::class, 'getItemChartAccountKeuanganManual'])->name('get-item-keuangan');
             Route::get('/get-chart-accounts', [ChartAccountController::class, 'getChartAccounts']);
@@ -95,16 +95,16 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
 
 
         Route::prefix('supplier')->name('supplier.')->group(function () {
-            Route::resource('/', SupplierController::class);
+            Route::resource('main', SupplierController::class);
             Route::get('/get-item', [SupplierController::class, 'getItem'])->name('get-item');
         });
         Route::prefix('supplier')->name('supplier.')->group(function () {
-            Route::resource('/', SupplierController::class);
+            Route::resource('main', SupplierController::class);
             Route::get('/get-item', [SupplierController::class, 'getItem'])->name('get-item');
         });
 
         Route::prefix('other-person')->name('other-person.')->group(function () {
-            Route::resource('/', OtherPersonController::class);
+            Route::resource('main', OtherPersonController::class);
             Route::get('/get-item', [OtherPersonController::class, 'getItem'])->name('get-item');
             // Soft delete related
             Route::get('/trashed', [OtherPersonController::class, 'trashed'])->name('other-persons.trashed');
@@ -112,14 +112,14 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         });
 
         Route::prefix('customer')->name('customer.')->group(function () {
-            Route::resource('/', CustomerController::class);
+            Route::resource('main', CustomerController::class);
             Route::get('/get-item', [CustomerController::class, 'getItem'])->name('get-item');
             Route::get('/trashed', [CustomerController::class, 'trashed'])->name('trashed');
             Route::post('/{id}/restore', [CustomerController::class, 'restore'])->name('restore');
         });
 
         Route::prefix('stock')->name('stock.')->group(function () {
-            Route::resource('/', StockController::class);
+            Route::resource('main', StockController::class);
             Route::get('trashed', [StockController::class, 'trashed'])->name('trashed');
             Route::post('unit-store', [StockController::class, 'unitStore'])->name('unit-store');
             Route::post('category-store', [StockController::class, 'categoryStore'])->name('category-store');

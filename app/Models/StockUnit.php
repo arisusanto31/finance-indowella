@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class StockUnit extends Model
@@ -11,9 +12,15 @@ class StockUnit extends Model
     public $timestamps = true;
 
     protected $fillable = [
-        'name',
         'stock_id',
         'unit',
         'konversi'
     ];
+
+    protected function unit(): Attribute
+    {
+        return Attribute::make(
+            set: fn ($value) => ucwords(strtolower($value)),
+        );
+    }
 }

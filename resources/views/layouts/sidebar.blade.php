@@ -141,13 +141,13 @@
                 </li>
                 <li class="menu-item">
 
-                    <a href="{{url('admin/kartu/kartu-hutang') }}" class="menu-link">
+                    <a href="{{url('admin/kartu/kartu-hutang/main') }}" class="menu-link">
                         <!-- <i class="menu-icon tf-icons bx bx-receipt mr-2 fs-6 me-2" style="margin-right: 10px;"></i> -->
                         <div data-i18n="Accordion">Kartu Hutang</div>
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="{{url('admin/kartu/kartu-piutang') }}" class="menu-link">
+                    <a href="{{url('admin/kartu/kartu-piutang/main') }}" class="menu-link">
                         <!-- <i class="menu-icon tf-icons bx bx-credit-card mr-2 fs-6 me-2" style="margin-right: 10px;"></i> -->
                         <div data-i18n="Accordion">Kartu Piutang</div>
                     </a>
@@ -223,27 +223,27 @@
             </a>
             <ul class="menu-sub">
                 <li class="menu-item">
-                    <a href="{{url('admin/master/chart-account')}}" class="menu-link">
+                    <a href="{{url('admin/master/chart-account/main')}}" class="menu-link">
                         <div data-i18n="chart-account">Chart account</div>
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="{{url('admin/master/supplier')}}" class="menu-link">
+                    <a href="{{url('admin/master/supplier/main')}}" class="menu-link">
                         <div data-i18n="supplier">Supplier</div>
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="{{url('admin/master/other-person')}}" class="menu-link">
+                    <a href="{{url('admin/master/other-person/main')}}" class="menu-link">
                         <div data-i18n="other-person">Other Person</div>
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="{{url('admin/master/customer')}}" class="menu-link">
+                    <a href="{{url('admin/master/customer/main')}}" class="menu-link">
                         <div data-i18n="customer">Customer</div>
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="{{url('admin/master/stock')}}"  class="menu-link">
+                    <a href="{{url('admin/master/stock/main')}}"  class="menu-link">
                         <div data-i18n="stock">Stock</div>
                     </a>
                 </li>

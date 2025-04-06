@@ -79,7 +79,7 @@
                                         data-bs-toggle="modal" data-bs-target="#editModal{{ $stock->id }}">
                                         <i class="bi bi-pencil"></i>
                                     </button>
-                                    <form action="{{ route('stock.destroy', $stock->id) }}" method="POST" style="display:inline;">
+                                    <form action="{{ route('stock.main.destroy', $stock->id) }}" method="POST" style="display:inline;">
                                         @csrf @method('DELETE')
                                         <button type="submit" class="btn btn-danger btn-sm" title="Hapus">
                                             <i class="bi bi-trash"></i>
@@ -93,8 +93,9 @@
                             aria-labelledby="editModalLabel{{ $stock->id }}" aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
-                                    <form action="{{ route('stock.update', $stock->id) }}" method="POST">
-                                        @csrf @method('PUT')
+                                    <form autocomplete="off" id="form-edit-stock{{$stock->id}}">
+                                        @csrf
+                                        @method('PUT')
                                         <div class="modal-header">
                                             <h5 class="modal-title" id="editModalLabel{{ $stock->id }}">
                                                 Edit Stock {{ $stock->name }}
@@ -116,8 +117,22 @@
                                                 </select>
                                             </div>
 
-                                            <div class="mb-3 p-3 rounded" style="background-color:#eee;">
-                                                @foreach($stock->units as $unit)
+
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                                <button type="button" onclick="updateStock('{{$stock->id}}')" class="btn btn-primary">Simpan Perubahan</button>
+                                            </div>
+                                        </div>
+                                    </form>
+
+                                    <div class="modal-header" style="padding-top:0px">
+                                        <h5>Data Satuan </h5>
+                                    </div>
+                                    <div class="modal-body" style="padding-top:0px; padding-bottom:0px">
+                                        <div class="mb-1 p-3 rounded" style="background-color:#eee;">
+                                            <div id="container-unit{{$stock->id}}">
+
+                                                @forelse($stock->units as $unit)
                                                 <div class="row mb-2">
                                                     <div class="col-md-4">
                                                         <input class="form-control" placeholder="nama satuan" value="{{ $unit->unit }}" />
@@ -126,39 +141,41 @@
                                                         <input class="form-control" placeholder="konversi" value="{{ $unit->konversi }}" />
                                                     </div>
                                                 </div>
-                                                @endforeach
+                                                @empty
+                                                <div>belum ada satuan apapun</div>
+                                                @endforelse
+                                            </div>
 
-                                                <p class="fw-bold">+ tambah satuan baru</p>
-                                                <form id="create-unit{{$stock->id}}">
-                                                    {{csrf_field()}}
-                                                    <div class="row align-items-center">
-                                                        <div class="col-md-4">
-                                                            <input type="hidden" name="stock_id" value="{{ $stock->id }}" />
-                                                            <input name="unit" class="form-control" placeholder="nama satuan" />
-                                                        </div>
-                                                        <div class="col-md-4">
-                                                            <input name="konversi" class="form-control" placeholder="konversi" />
-                                                        </div>
-                                                        <div class="col-md-4">
-                                                            <button onclick="tambahSatuan()" type="button" class="btn btn-success">Tambahkan</button>
-                                                        </div>
+                                            <!-- <p class="mt-3 fw-bold" sytle="margin-bottom:0px; padding-bottom:0px">+ tambah satuan baru</p> -->
+                                            <div class="mb-1">+ tambah satuan baru</div>
+                                            <form id="create-unit{{$stock->id}}">
+                                                {{csrf_field()}}
+                                                <input type="hidden" name="stock_id" value="{{ $stock->id }}" />
+                                                <div class="row align-items-center">
+                                                    <div class="col-md-4">
+                                                        <input type="hidden" name="stock_id" value="{{ $stock->id }}" />
+                                                        <input name="unit" class="form-control" placeholder="nama satuan" />
                                                     </div>
-                                                </form>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                                <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
-                                            </div>
-                                    </form>
+                                                    <div class="col-md-4">
+                                                        <input name="konversi" class="form-control" placeholder="konversi" />
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <button onclick="tambahSatuan('{{$stock->id}}')" type="button" class="btn btn-success">Tambahkan</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
-                        </div>
 
-                        @empty
-                        <tr>
-                            <td colspan="9" class="text-center">Belum ada data stock</td>
-                        </tr>
-                        @endforelse
+                            @empty
+                            <tr>
+                                <td colspan="9" class="text-center">Belum ada data stock</td>
+                            </tr>
+                            @endforelse
                     </tbody>
                 </table>
             </div>
@@ -169,7 +186,7 @@
     <div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="backDropModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form action="{{ route('stock.store') }}" method="POST">
+                <form action="{{url('admin/master/stock').'/'.$stock->id}}" method="POST">
                     @csrf
                     <div class="modal-header">
                         <h5 class="modal-title" id="backDropModalLabel">Tambah Stock</h5>
@@ -238,6 +255,7 @@
                     console.log(res);
                     if (res.status == 1) {
                         Swal.fire('Berhasil', 'satuan berhasil ditambah', 'success');
+                        updateContainerUnit(id, res.msg);
                     } else {
                         Swal.fire('Gagal', 'satuan gagal ditambah:' + res.msg, 'error');
                     }
@@ -247,6 +265,44 @@
                     Swal.fire('opps', "Gagal menambah satuan", 'error');
                 }
             });
+        }
+
+        function updateStock(id) {
+            $.ajax({
+                url: '{{url("admin/master/stock/main")}}/' + id,
+                method: 'POST',
+                data: $('#form-edit-stock' + id).serialize(),
+                success: function(res) {
+                    console.log(res);
+                    if (res.status == 1) {
+                        $('#editModal' + id).modal('hide');
+                        Swal.fire('Berhasil', 'Stock berhasil diupdate', 'success');
+                    } else {
+                        Swal.fire('Gagal', 'Stock gagal diupdate:' + res.msg, 'error');
+                    }
+                },
+                error: function(err) {
+                    console.log(err);
+                    Swal.fire('opps', "Gagal mengupdate stock", 'error');
+                }
+            });
+        }
+
+        function updateContainerUnit(id, data) {
+            html = '';
+            data.forEach((item, index) => {
+                html += `
+                <div class="row mb-2">
+                    <div class="col-md-4">
+                        <input class="form-control" placeholder="nama satuan" value="${item.unit}" />
+                    </div>
+                    <div class="col-md-4">
+                        <input class="form-control" placeholder="konversi" value="${item.konversi}" />
+                    </div>
+                </div>
+                `;
+            });
+            $('#container-unit' + id).html(html);
         }
     </script>
     @if(session('success'))
