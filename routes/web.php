@@ -23,7 +23,9 @@ Route::get('/', function () {
     return redirect('/login');
 });
 
-
+Route::get('/phpinfo', function () {
+    phpinfo();
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -36,7 +38,6 @@ Route::prefix('book')->middleware(['auth', 'role:admin,web'])->group(function ()
     Route::get('/pilih-jurnal', [JournalController::class, 'pilihJurnal'])->name('pilih.jurnal');
     Route::get('/login-jurnal/{id}', [JournalController::class, 'loginJurnal'])->name('login.jurnal');
     Route::post('/logout-jurnal', [JournalController::class, 'logoutJurnal'])->name('logout.jurnal');
-    
 });
 Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])->group(function () {
     Route::get('/', [IndexController::class, 'index'])->name('admin.index');
@@ -70,9 +71,13 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
 
         Route::prefix('kartu-stock')->name('kartu-stock.')->group(function () {
             Route::resource('main', KartuStockController::class);
+            Route::post('mutasi-store', [KartuStockController::class, 'mutasiStore'])->name('mutasi-store');
             Route::get('create-mutasi-masuk', [KartuStockController::class, 'createMutasiMasuk'])->name('create-mutasi-masuk');
             Route::get('create-mutasi-keluar', [KartuStockController::class, 'createMutasiKeluar'])->name('create-mutasi-keluar');
-          });
+            Route::get('get-summary', [KartuStockController::class, 'getSummary'])->name('get-summary');
+            Route::get('get-mutasi-masuk', [KartuStockController::class, 'getMutasiMasuk'])->name('get-mutasi-masuk');
+            Route::get('get-mutasi-keluar', [KartuStockController::class, 'getMutasiKeluar'])->name('get-mutasi-keluar');
+        });
 
 
         Route::prefix('kartu-hutang')->name('kartu-hutang.')->group(function () {
@@ -129,9 +134,10 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::post('unit-store', [StockController::class, 'unitStore'])->name('unit-store');
             Route::post('category-store', [StockController::class, 'categoryStore'])->name('category-store');
             Route::get('category-get-item', [StockController::class, 'categoryGetItem'])->name('category-get-item');
+            Route::get('get-item', [StockController::class, 'getItem'])->name('get-item');
+            Route::get('get-info/{id}', [StockController::class, 'getInfo'])->name('get-info');
+       
         });
-
-     
     });
 });
 require __DIR__ . '/auth.php';

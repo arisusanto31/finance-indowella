@@ -10,11 +10,13 @@ class Stock extends Model
     //
     protected $table = 'stocks';
     public $timestamps = true;
+    protected $fillable = [
+        'name',
+        'category_id',
+        'parent_category_id',
+        'unit_backend'
+    ];
 
-    public function units()
-    {
-        return $this->hasMany('App\Models\StockUnit', 'stock_id')->whereNull('is_deleted');
-    }
 
     protected static function booted()
     {
@@ -34,11 +36,11 @@ class Stock extends Model
         });
     }
 
-    protected $fillable = [
-        'name',
-        'category_id',
-        'parent_category_id',
-    ];
+    public function units()
+    {
+        return $this->hasMany('App\Models\StockUnit', 'stock_id')->whereNull('is_deleted');
+    }
+
 
     public function category()
     {

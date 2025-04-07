@@ -27,7 +27,8 @@
                                     data-bs-toggle="tab"
                                     data-bs-target="#navs-pills-top-home"
                                     aria-controls="navs-pills-top-home"
-                                    aria-selected="true">
+                                    aria-selected="true"
+                                    onclick="getSummary()">
                                     🗃 KARTU
                                 </button>
                             </li>
@@ -39,7 +40,8 @@
                                     data-bs-toggle="tab"
                                     data-bs-target="#navs-pills-top-profile"
                                     aria-controls="navs-pills-top-profile"
-                                    aria-selected="false">
+                                    aria-selected="false"
+                                    onclick="getMutasiMasuk()">
                                     📥 Masuk
                                 </button>
                             </li>
@@ -51,7 +53,8 @@
                                     data-bs-toggle="tab"
                                     data-bs-target="#navs-pills-top-messages"
                                     aria-controls="navs-pills-top-messages"
-                                    aria-selected="false">
+                                    aria-selected="false"
+                                    onclick="getMutasiKeluar()">
                                     📤 Keluar
                                 </button>
                             </li>
@@ -63,12 +66,12 @@
                                         <thead class="bg-white text-dark text-center">
                                             <tr>
                                                 <th rowspan=2>No</th>
-                                                <th rowspan=2>🔢 Kode barang</th>
                                                 <th rowspan=2> Nama Barang</th>
                                                 <th rowspan=2> Kategori</th>
                                                 <th colspan=3>Saldo Awal</th>
                                                 <th colspan=3>Masuk</th>
                                                 <th colspan=3>Keluar</th>
+                                                <th colspan=3>Saldo Akhir</th>
                                             </tr>
                                             <tr>
                                                 <th>Qty</th>
@@ -80,9 +83,12 @@
                                                 <th>Qty</th>
                                                 <th>Rp/unit</th>
                                                 <th>Total</th>
+                                                <th>Qty</th>
+                                                <th>Rp/unit</th>
+                                                <th>Total</th>
                                             </tr>
                                         </thead>
-                                        <tbody id="body-mutasi-bukubesar">
+                                        <tbody id="body-summary">
                                         </tbody>
                                     </table>
                                 </div>
@@ -116,7 +122,7 @@
                             </div>
                             <div class="tab-pane fade" id="navs-pills-top-messages" role="tabpanel">
                                 <div class="col-md-2">
-                                    <button type="button" class=" btn-primary" onclick="showModalkeluar()"> 🔃 buat mutasi</button>
+                                    <button type="button" class=" btn-primary" onclick="showModalOut()"> 🔃 buat mutasi</button>
                                 </div>
                                 <div class="table-responsive mt-2">
                                     <table id="kartuKeluar" class="table table-bordered table-striped table-hover align-middle">
@@ -271,12 +277,145 @@
 
     @push('scripts')
     <script>
-        function showModalMasuk(){
+        setTimeout(function() {
+            getSummary();
+        }, 200);
+
+        function getSummary() {
+            $.ajax({
+                url: "{{ route('kartu-stock.get-summary') }}",
+                method: "GET",
+                success: function(res) {
+                    console.log(res);
+                    if (res.status == 1) {
+                        html = "";
+                        res.msg.forEach(function(item, i) {
+                            rupiahUnitAwal = item.awal_qty > 0 ? item.awal_rupiah / item.awal_qty : 0;
+                            rupiahUnitAkhir = item.akhir_qty > 0 ? item.akhir_rupiah / item.akhir_qty : 0;
+                            masuk = [0, 0, 0];
+                            keluar = [0, 0, 0];
+                            if (array_key_exists(item.id, res.mutasi_masuk)) {
+                                masuk[0] = res.mutasi_masuk[item.id].qty;
+                                masuk[1] = res.mutasi_masuk[item.id].rupiah_unit;
+                                masuk[2] = res.mutasi_masuk[item.id].total;
+                            }
+                            if (array_key_exists(item.id, res.mutasi_keluar)) {
+                                keluar[0] = res.mutasi_keluar[item.id].qty;
+                                keluar[1] = res.mutasi_keluar[item.id].rupiah_unit;
+                                keluar[2] = res.mutasi_keluar[item.id].total;
+                            }
+                            html += `
+                                <tr>
+                                <td>${i+1}</td>
+                                <td>${item.name} [${item.id}]</td>
+                                <td>${item.category_name}</td>
+                                <td>${formatRupiah(item.awal_qty)}</td>
+                                <td>${formatRupiah(rupiahUnitAwal)}</td>
+                                <td>${formatRupiah(item.awal_rupiah)}</td>
+                                <td>${formatRupiah(masuk[0])}</td>
+                                <td>${formatRupiah(masuk[1])}</td>
+                                <td>${formatRupiah(masuk[2])}</td>
+                                <td>${formatRupiah(keluar[0])}</td>
+                                <td>${formatRupiah(keluar[1])}</td>
+                                <td>${formatRupiah(keluar[2])}</td>
+                                <td>${formatRupiah(item.akhir_qty)}</td>
+                                <td>${formatRupiah(rupiahUnitAkhir)}</td>
+                                <td>${formatRupiah(item.akhir_rupiah)}</td>
+                                </tr>`;
+
+                        });
+                        $('#body-summary').html(html);
+                        // $('#kartuKasTable').DataTable({
+                        //     "destroy": true,
+                        //     "order": [
+                        //         [0, "asc"]
+                        //     ],
+                        //     "pageLength": 10,
+                        //     "lengthMenu": [
+                        //         [10, 25, 50, -1],
+                        //         [10, 25, 50, "All"]
+                        //     ],
+                        // });
+                    } else {
+
+                    }
+                },
+                error: function(err) {
+                    console.log(err);
+                }
+            });
+        }
+
+        function showModalMasuk() {
             showDetailOnModal("{{ route('kartu-stock.create-mutasi-masuk') }}");
         }
 
-        function showModalKeluar(){
+        function showModalOut() {
             showDetailOnModal("{{ route('kartu-stock.create-mutasi-keluar') }}");
+        }
+
+        function getMutasiMasuk() {
+            $.ajax({
+                url: "{{ route('kartu-stock.get-mutasi-masuk') }}",
+                method: "GET",
+                success: function(res) {
+                    console.log(res);
+                    if (res.status == 1) {
+                        html = "";
+                        res.msg.forEach(function(item, i) {
+                            html += `
+                                <tr>
+                                <td>${i+1}</td>
+                                <td>${item.created_at}</td>
+                                <td>${item.stock_id}</td>
+                                <td>${item.stock_name}</td>
+                                <td>${formatRupiah(item.mutasi_quantity)}</td>
+                                <td>${item.unit}</td>
+                                <td>${formatRupiah(item.mutasi_rupiah_on_unit*(item.mutasi_qty_backend/item.mutasi_quantity))}</td>
+                                <td>${formatRupiah(item.mutasi_rupiah_total)}</td>
+                                </tr>`;
+                        });
+                        $('#body-mutasi-masuk').html(html);
+                    } else {
+
+                    }
+                },
+                error: function(err) {
+                    console.log(err);
+                }
+            });
+        }
+
+        function getMutasiKeluar() {
+            $.ajax({
+                url: "{{ route('kartu-stock.get-mutasi-keluar') }}",
+                method: "GET",
+                success: function(res) {
+                    console.log(res);
+                    if (res.status == 1) {
+                        html = "";
+                        res.msg.forEach(function(item, i) {
+                            html += `
+                                <tr>
+                                <td>${i+1}</td>
+                                <td>${item.created_at}</td>
+                                <td>${item.stock_id}</td>
+                                <td>${item.stock_name}</td>
+                                <td>${formatRupiah(item.mutasi_quantity)}</td>
+                                <td>${item.unit}</td>
+                                <td>${formatRupiah(item.mutasi_rupiah_on_unit*(item.mutasi_qty_backend/item.mutasi_quantity))}</td>
+                                <td>${formatRupiah(item.mutasi_rupiah_total)}</td>
+                                </tr>`;
+                        });
+                        $('#body-mutasi-keluar').html(html);
+                    } else {
+
+                    }
+                },
+                error: function(err) {
+                    console.log(err);
+                }
+            });
         }
     </script>
     @endpush
