@@ -101,11 +101,7 @@
             <div class="layout-page bg-primary-lightest">
                 <!-- Navbar -->
                 @include('layouts.navigation')
-
-
-
                 <!-- / Navbar -->
-
                 <!-- Content wrapper -->
                 <div class="content-wrapper">
                     <!-- Content -->
@@ -149,7 +145,7 @@
         <div class="layout-overlay layout-menu-toggle"></div>
     </div>
     <!-- Modal -->
-  
+    @include('layouts.modal')
 
 
     <!-- Core JS -->
@@ -199,6 +195,14 @@
         });
 
         initCurrencyInput('.currency-input');
+
+        function showDetailOnModal( url) {
+            $('#global-modal').modal('show');
+            $('#global-modal-content').html('');
+            $('#global-modal-content').load(url);
+        }
+
+        
     </script>
     @stack('scripts')
 </body>

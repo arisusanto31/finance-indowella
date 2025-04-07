@@ -67,7 +67,12 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
     Route::prefix('kartu')->group(function () {
         Route::resource('/kartu-kas', KartuKasController::class);
 
-        Route::resource('/kartu-stock', KartuStockController::class);
+
+        Route::prefix('kartu-stock')->name('kartu-stock.')->group(function () {
+            Route::resource('main', KartuStockController::class);
+            Route::get('create-mutasi-masuk', [KartuStockController::class, 'createMutasiMasuk'])->name('create-mutasi-masuk');
+            Route::get('create-mutasi-keluar', [KartuStockController::class, 'createMutasiKeluar'])->name('create-mutasi-keluar');
+          });
 
 
         Route::prefix('kartu-hutang')->name('kartu-hutang.')->group(function () {

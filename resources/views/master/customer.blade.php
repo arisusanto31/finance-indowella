@@ -81,7 +81,7 @@
                                     data-bs-toggle="modal" data-bs-target="#editModal{{ $customer->id }}">
                                     <i class="bi bi-pencil"></i>
                                 </button>
-                                <form action="{{ route('customer.destroy', $customer->id) }}" method="POST" style="display:inline;">
+                                <form action="{{ route('customer.main.destroy', $customer->id) }}" method="POST" style="display:inline;">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="btn btn-danger btn-sm" title="Hapus">
                                         <i class="bi bi-trash"></i>
@@ -95,7 +95,7 @@
                         aria-labelledby="editModalLabel{{ $customer->id }}" aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">
-                                <form action="{{ route('customer.update', $customer->id) }}" method="POST">
+                                <form action="{{ route('customer.main.update', $customer->id) }}" method="POST">
                                     @csrf @method('PUT')
                                     <div class="modal-header">
                                         <h5 class="modal-title" id="editModalLabel{{ $customer->id }}">
@@ -134,7 +134,7 @@
     <div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="backDropModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form action="{{ route('customer.store') }}" method="POST">
+                <form action="{{ route('customer.main.store') }}" method="POST">
                     @csrf
                     <div class="modal-header">
                         <h5 class="modal-title" id="backDropModalLabel">Tambah Customer</h5>

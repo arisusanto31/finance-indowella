@@ -14,6 +14,13 @@ class KartuStockController extends Controller
 
     public function getSummary() {}
 
+    public function createMutasiMasuk(){
+        $view = view('kartu.modal._kartu-stock-masuk');
+        return $view;
+    }
+    public function createMutasiKeluar() {
+
+    }
     public function getMutasiMasuk() {}
     public function getMutasiKeluar() {}
 }

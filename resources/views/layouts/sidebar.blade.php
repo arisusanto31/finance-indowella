@@ -153,7 +153,7 @@
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="{{url('admin/kartu/kartu-stock') }}" class="menu-link">
+                    <a href="{{url('admin/kartu/kartu-stock/main') }}" class="menu-link">
                         <!-- <i class="menu-icon tf-icons bx bx-package mr-2 fs-6 me-2" style="margin-right: 10px;"></i> -->
                         <div data-i18n="Accordion">Kartu Stock</div>
                     </a>

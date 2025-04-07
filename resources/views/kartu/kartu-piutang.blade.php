@@ -200,8 +200,8 @@
                     amount_mutasi: formatDB($('#amount_mutasi').val(), 'id'),
                     person_id: $('#person_id option:selected').val(),
                     person_type: $('#person_type option:selected').val(),
-                    account_penjualan:$('#akun-piutang option:selected').val(),
-                    account_piutang:$('#akun-penjualan option:selected').val(),
+                    account_penjualan: $('#akun-piutang option:selected').val(),
+                    account_piutang: $('#akun-penjualan option:selected').val(),
                     _token: '{{csrf_token()}}'
                 },
                 success: function(res) {
@@ -240,9 +240,9 @@
                     person_id: $('#pelunasan-person_id option:selected').val(),
                     account_bayar: $('#pelunasan-akun-bayar option:selected').val(),
                     person_type: $('#pelunasan-person_type option:selected').val(),
-                    account_bayar:$('#pelunasan-akun-pembayaran option:selected').val(),
-                    account_piutang:$('#pelunasan-akun-piutang option:selected').val(),
-               
+                    account_bayar: $('#pelunasan-akun-pembayaran option:selected').val(),
+                    account_piutang: $('#pelunasan-akun-piutang option:selected').val(),
+
                     _token: '{{csrf_token()}}'
                 },
                 success: function(res) {
@@ -272,10 +272,9 @@
             if (type === 'App\\Models\\Customer') {
                 console.log('init oy ' + type);
                 initItemSelectManual('#person_id', '{{route("customer.get-item")}}', 'Person Name ..', '#basicModal');
-            }
-            else{
+            } else {
                 initItemSelectManual('#person_id', '{{route("other-person.get-item")}}', 'Person Name ..', '#basicModal');
-       
+
             }
         }
 
@@ -284,9 +283,9 @@
             if (type === 'App\\Models\\Customer') {
                 console.log('init oy ' + type);
                 initItemSelectManual('#pelunasan-person_id', '{{route("customer.get-item")}}', 'Person Name ..', '#pelunasanModal');
-            }else{
+            } else {
                 initItemSelectManual('#pelunasan-person_id', '{{route("other-person.get-item")}}', 'Person Name ..', '#pelunasanModal');
-       
+
             }
         }
         initSelectPerson();
