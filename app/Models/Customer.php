@@ -6,7 +6,7 @@ use Illuminate\Support\Str;
 
 class Customer extends Model
 {
-    // ✅ Kolom-kolom yang boleh diisi secara massal
+   
     protected $fillable = [
         'name',
         'address',
@@ -14,8 +14,8 @@ class Customer extends Model
         'ktp',
         'npwp',
         'purchase_info',
-        'is_deleted',     // optional, kalau kamu set manual
-        'deleted_at',     // optional, kalau kamu set manual
+        'is_deleted',     
+        'deleted_at',     
     ];
 
     protected static function booted()

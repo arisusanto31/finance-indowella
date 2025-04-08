@@ -95,6 +95,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('/get-item', [ChartAccountController::class, 'getItemChartAccount'])->name('get-item');
             Route::get('/get-item-keuangan', [ChartAccountController::class, 'getItemChartAccountKeuanganManual'])->name('get-item-keuangan');
             Route::get('/get-chart-accounts', [ChartAccountController::class, 'getChartAccounts']);
+            Route::get('/master-suplier', [SupplierController::class, 'master.supplier']);
+           
         });
 
 
@@ -102,6 +104,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::prefix('supplier')->name('supplier.')->group(function () {
             Route::resource('main', SupplierController::class);
             Route::get('/get-item', [SupplierController::class, 'getItem'])->name('get-item');
+         
         });
         Route::prefix('supplier')->name('supplier.')->group(function () {
             Route::resource('main', SupplierController::class);

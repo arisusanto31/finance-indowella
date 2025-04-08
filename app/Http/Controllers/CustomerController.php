@@ -32,7 +32,7 @@ class CustomerController extends Controller
 
     public function index()
     {
-        $customers = Customer::all(); // Ini otomatis pakai global scope jika ada
+        $customers = Customer::all(); 
         return view('master.customer', compact('customers'));
     }
 

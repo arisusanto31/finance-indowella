@@ -23,9 +23,19 @@ class Supplier extends Model
             } else {
                 $alias = $from;
             }
-        
-            $query->whereNull("{$alias}.is_deleted");
+            $query->where("{$alias}.is_deleted", '=', 0);
+
         });
     }
+
+    protected $fillable = [
+        'name',
+        'npwp',
+        'ktp',
+        'cp_name',
+        'phone',
+        'address',
+        'is_deleted',
+    ];
 
 }
