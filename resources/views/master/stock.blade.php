@@ -116,6 +116,13 @@
                                                     <option class="" value="{{ $stock->parentCategory->id }}">{{ $stock->parentCategory->name }}</option>
                                                 </select>
                                             </div>
+                                            <div class="mb-3"><label class="form-label">Unit backend <span style="font-size:12px">(satuan paling kecil)</span></label>
+                                                <select id="unit-backend" type="text" name="unit_backend" class="form-control">
+                                                    <option @if($stock->unit_backend=="Pcs") selected @endif value="Pcs">Pcs</option>
+                                                    <option @if($stock->unit_backend=="Gram") selected @endif value="Gram">Gram</option>
+                                                    <option @if($stock->unit_backend=="Meter") selected @endif value="Meter">Meter</option>
+                                                </select>
+                                            </div>
 
 
                                             <div class="modal-footer">
@@ -182,11 +189,11 @@
 
         </div>
     </div>
-    <!-- Modal Tambah Customer -->
+    <!-- Modal Tambah stock -->
     <div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="backDropModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form action="{{url('admin/master/stock').'/'.$stock->id}}" method="POST">
+                <form action="{{url('admin/master/stock/main')}}" method="POST">
                     @csrf
                     <div class="modal-header">
                         <h5 class="modal-title" id="backDropModalLabel">Tambah Stock</h5>
@@ -199,6 +206,13 @@
                         </div>
                         <div class="mb-3"><label class="form-label">Parent Category</label>
                             <select id="parent-category-id" type="text" name="parent_category_id" class="form-control category-select"></select>
+                        </div>
+                        <div class="mb-3"><label class="form-label">Unit backend <span style="font-size:12px">(satuan paling kecil)</span></label>
+                            <select id="unit-backend" type="text" name="unit_backend" class="form-control">
+                                <option value="Pcs">Pcs</option>
+                                <option value="Gram">Gram</option>
+                                <option value="Meter">Meter</option>
+                            </select>
                         </div>
                     </div>
                     <div class="modal-footer">

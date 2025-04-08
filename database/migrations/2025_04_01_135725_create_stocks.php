@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->unsignedBigInteger('category_id');
+            $table->string('unit_default')->nullable();
+            $table->string('unit_backend');
             $table->unsignedBigInteger('parent_category_id')->nullable();
             $table->boolean('is_deleted')->nullable()->default(false);
             $table->timestamp('deleted_at')->nullable();

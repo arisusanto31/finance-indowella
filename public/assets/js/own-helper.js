@@ -73,7 +73,6 @@ function formatRupiah(angkaString, prefix = "", language = "id") {
 
             }
         }
-        console.log("format rupiah dijalankan");
         if (language == "eng")
             rupiah = split[1] != undefined ? rupiah + '.' + split[1] : rupiah;
         else
@@ -173,3 +172,7 @@ function initCurrencyInput(elem){
         $(this).val(formatted);
     });
 }
+
+function array_key_exists(key, obj) {
+    return Object.prototype.hasOwnProperty.call(obj, key);
+  }

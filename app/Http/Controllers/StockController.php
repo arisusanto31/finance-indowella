@@ -51,6 +51,7 @@ class StockController extends Controller
                 'name' => 'required|string|max:255',
                 'category_id' => 'required|integer',
                 'parent_category_id' => 'required|integer',
+                'unit_backend'=>'required|string|max:10',
             ]);
 
             Stock::create($validated);
@@ -107,6 +108,35 @@ class StockController extends Controller
         return ['results' => $categories];
     }
 
+    public function getItem()
+    {
+        $search = getInput('search');
+        $searchs = [];
+        if ($search)
+            $searchs = explode(' ', $search);
+
+        $stocks = Stock::where('is_deleted', 0);
+        foreach ($searchs as $s) {
+            $stocks = $stocks->where('name', 'like', '%' . $s . '%');
+        }
+        $stocks = $stocks->select('id', DB::raw('name as text'))->get();
+
+        return ['results' => $stocks];
+    }
+
+    public function getInfo($id){
+        $stock = Stock::with(['units'])->find($id);
+        if (!$stock) {
+            return [
+                'status' => 0,
+                'msg' => 'Stock tidak ditemukan'
+            ];
+        }
+        return [
+            'status' => 1,
+            'msg' => $stock
+        ];
+    }
     public function unitStore(Request $request)
     {
         $request->validate([

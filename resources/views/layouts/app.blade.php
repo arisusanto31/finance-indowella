@@ -201,6 +201,9 @@
             $('#global-modal-content').html('');
             $('#global-modal-content').load(url);
         }
+        function hideModal(){
+            $('#global-modal-content').modal('hide');
+        }
 
         
     </script>

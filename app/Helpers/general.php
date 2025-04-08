@@ -108,6 +108,35 @@ if (!function_exists('format_price')) {
     }
 }
 
+if (!function_exists('format_db')) {
+    /**
+     * Mengubah string harga terformat ke format angka standar (float string)
+     * Contoh: "1.234.567,89" → "1234567.89"
+     * @param string $formatted
+     * @param string $language
+     * @return string
+     */
+    function format_db($formatted, $language = 'id')
+    {
+        try {
+            // Hilangkan spasi dan non-digit selain pemisah
+            $formatted = trim($formatted);
+
+            if ($language == 'eng') {
+                // Format Inggris: 1,234,567.89 → 1234567.89
+                $clean = str_replace(',', '', $formatted);
+                return (string) $clean;
+            } else {
+                // Format Indonesia: 1.234.567,89 → 1234567.89
+                $clean = str_replace('.', '', $formatted);      // Hilangkan pemisah ribuan
+                $clean = str_replace(',', '.', $clean);         // Ganti koma (desimal) jadi titik
+                return (string) $clean;
+            }
+        } catch (\Exception $e) {
+            return '0';
+        }
+    }
+}
 
 if (!function_exists('money')) {
     function money($value): string
