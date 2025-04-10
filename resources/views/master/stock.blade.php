@@ -116,14 +116,20 @@
                                                     <option class="" value="{{ $stock->parentCategory->id }}">{{ $stock->parentCategory->name }}</option>
                                                 </select>
                                             </div>
-                                            <div class="mb-3"><label class="form-label">Unit backend <span style="font-size:12px">(satuan paling kecil)</span></label>
+                                            <div class="mb-3"><label class="form-label">Unit backend <span style="font-size:11px">(satuan paling kecil untuk acuan)</span></label>
                                                 <select id="unit-backend" type="text" name="unit_backend" class="form-control">
                                                     <option @if($stock->unit_backend=="Pcs") selected @endif value="Pcs">Pcs</option>
                                                     <option @if($stock->unit_backend=="Gram") selected @endif value="Gram">Gram</option>
                                                     <option @if($stock->unit_backend=="Meter") selected @endif value="Meter">Meter</option>
                                                 </select>
                                             </div>
-
+                                            <div class="mb-3"><label class="form-label">Unit Default <span style="font-size:11px">(satuan paling kecil untuk acuan)</span></label>
+                                                <select id="unit-default{{$stock->id}}" type="text" name="unit_default" class="form-control">
+                                                    @foreach($stock->units as $dataunit)
+                                                    <option @if($stock->unit_default==$dataunit->unit) selected @endif value="{{$dataunit->unit}}">{{$dataunit->unit}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
 
                                             <div class="modal-footer">
                                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -145,14 +151,20 @@
                                                         <input class="form-control" placeholder="nama satuan" value="{{ $unit->unit }}" />
                                                     </div>
                                                     <div class="col-md-4">
-                                                        <input class="form-control" placeholder="konversi" value="{{ $unit->konversi }}" />
+                                                        <div class="row">
+                                                            <div class="col-xs-12" style="position:relative; width:100%">
+                                                                <span class="unit-form{{$stock->id}}" style="position:absolute; right:20px; top:7px; color:#bbb"> {{$stock->unit_backend}}</span>
+                                                                <input class="form-control" placeholder="konversi" value="{{ $unit->konversi }}" />
+
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
+
                                                 @empty
                                                 <div>belum ada satuan apapun</div>
                                                 @endforelse
                                             </div>
-
                                             <!-- <p class="mt-3 fw-bold" sytle="margin-bottom:0px; padding-bottom:0px">+ tambah satuan baru</p> -->
                                             <div class="mb-1">+ tambah satuan baru</div>
                                             <form id="create-unit{{$stock->id}}">
@@ -164,7 +176,12 @@
                                                         <input name="unit" class="form-control" placeholder="nama satuan" />
                                                     </div>
                                                     <div class="col-md-4">
-                                                        <input name="konversi" class="form-control" placeholder="konversi" />
+                                                        <div class="row">
+                                                            <div class="col-xs-12" style="position:relative; width:100%">
+                                                                <span class="unit-form{{$stock->id}}" style="position:absolute; right:20px; top:7px; color:#bbb"> {{$stock->unit_backend}}</span>
+                                                                <input name="konversi" class="form-control" placeholder="konversi" value="" />
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                     <div class="col-md-4">
                                                         <button onclick="tambahSatuan('{{$stock->id}}')" type="button" class="btn btn-success">Tambahkan</button>
@@ -172,17 +189,18 @@
                                                 </div>
                                             </form>
 
+
                                         </div>
+
                                     </div>
 
-                                </div>
-                            </div>
 
-                            @empty
-                            <tr>
-                                <td colspan="9" class="text-center">Belum ada data stock</td>
-                            </tr>
-                            @endforelse
+                                    @empty
+                                    <tr>
+                                        <td colspan="9" class="text-center">Belum ada data stock</td>
+                                    </tr>
+                                    @endforelse
+                                </div>
                     </tbody>
                 </table>
             </div>
@@ -291,6 +309,7 @@
                     if (res.status == 1) {
                         $('#editModal' + id).modal('hide');
                         Swal.fire('Berhasil', 'Stock berhasil diupdate', 'success');
+                        $('.unit-form' + id).html(res.msg.unit_backend);
                     } else {
                         Swal.fire('Gagal', 'Stock gagal diupdate:' + res.msg, 'error');
                     }
@@ -317,6 +336,11 @@
                 `;
             });
             $('#container-unit' + id).html(html);
+            html = '';
+            data.forEach((item, index) => {
+                html += `<option value="${item.unit}">${item.unit}</option>`;
+            });
+            $('#unit-default' + id).html(html);
         }
     </script>
     @if(session('success'))

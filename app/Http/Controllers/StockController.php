@@ -27,7 +27,8 @@ class StockController extends Controller
             'name' => 'required|string|max:255',
             'category_id' => 'integer',
             'parent_category_id' => 'integer',
-
+            'unit_backend'=>'required|string|max:10',
+            'unit_default'=>'string|max:20'
         ]);
 
         $stock = Stock::findOrFail($id);
@@ -35,6 +36,7 @@ class StockController extends Controller
             'name',
             'category_id',
             'parent_category_id',
+            'unit_backend'
         ]));
 
         return [
