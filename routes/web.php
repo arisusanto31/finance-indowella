@@ -106,15 +106,27 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
 
 
 
-        Route::prefix('supplier')->name('supplier.')->group(function () {
-            Route::resource('main', SupplierController::class);
-            Route::get('/get-item', [SupplierController::class, 'getItem'])->name('get-item');
+        // Route::prefix('supplier')->name('supplier.')->group(function () {
+        //     Route::resource('main', SupplierController::class);
+        //     Route::get('/get-item', [SupplierController::class, 'getItem'])->name('get-item');
          
-        });
+        // });
         Route::prefix('supplier')->name('supplier.')->group(function () {
-            Route::resource('main', SupplierController::class);
+    
+            Route::get('main/deleted', [SupplierController::class, 'showDeleted'])->name('main.deleted');
+    
+            Route::resource('main', SupplierController::class)->except(['show']);
+        
+            
             Route::get('/get-item', [SupplierController::class, 'getItem'])->name('get-item');
+        
+            Route::post('main/{id}/soft-delete', [SupplierController::class, 'softDeleteSupplier'])->name('main.soft-delete');
+        
+            Route::post('main/{id}/restore', [SupplierController::class, 'restore'])->name('main.restore');
+
+
         });
+        
 
         Route::prefix('other-person')->name('other-person.')->group(function () {
             Route::resource('main', OtherPersonController::class);
