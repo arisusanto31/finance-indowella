@@ -11,6 +11,7 @@ use App\Http\Controllers\KartuStockController;
 use App\Http\Controllers\BDDController;
 use App\Http\Controllers\ChartAccountController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\OtherPersonController;
 use App\Http\Controllers\StockController;
@@ -60,7 +61,10 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
 
 
     Route::prefix('daftar')->group(function () {
-        Route::get('/daftar-at', [DaftarAtController::class, 'DaftarAt'])->name('daftar.daftar-at');
+        Route::prefix('aset-tetap')->name('aset-tetap.')->group(function () {
+            Route::get('/', [InventoryController::class, 'index']);
+        });
+
         Route::get('/daftar-bdd', [BDDController::class, 'DaftarBDD'])->name('daftar.daftar-bdd');
         Route::get('/daftar-karyawan', [KaryawanController::class, 'DaftarKaryawan'])->name('daftar.daftar-karyawan');
     });
@@ -136,7 +140,6 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('category-get-item', [StockController::class, 'categoryGetItem'])->name('category-get-item');
             Route::get('get-item', [StockController::class, 'getItem'])->name('get-item');
             Route::get('get-info/{id}', [StockController::class, 'getInfo'])->name('get-info');
-       
         });
     });
 });

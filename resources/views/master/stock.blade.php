@@ -123,7 +123,7 @@
                                                     <option @if($stock->unit_backend=="Meter") selected @endif value="Meter">Meter</option>
                                                 </select>
                                             </div>
-                                            <div class="mb-3"><label class="form-label">Unit Default <span style="font-size:11px">(satuan paling kecil untuk acuan)</span></label>
+                                            <div class="mb-3"><label class="form-label">Unit Default</label>
                                                 <select id="unit-default{{$stock->id}}" type="text" name="unit_default" class="form-control">
                                                     @foreach($stock->units as $dataunit)
                                                     <option @if($stock->unit_default==$dataunit->unit) selected @endif value="{{$dataunit->unit}}">{{$dataunit->unit}}</option>
@@ -158,6 +158,11 @@
 
                                                             </div>
                                                         </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        @if($stock->unit_default==$unit->unit)
+                                                        <div class="bg-primary  colorwhite px-2 rounded-1"> default</div>
+                                                        @endif
                                                     </div>
                                                 </div>
 
@@ -287,7 +292,7 @@
                     console.log(res);
                     if (res.status == 1) {
                         Swal.fire('Berhasil', 'satuan berhasil ditambah', 'success');
-                        updateContainerUnit(id, res.msg);
+                        updateContainerUnit(id, res.msg, res.stock);
                     } else {
                         Swal.fire('Gagal', 'satuan gagal ditambah:' + res.msg, 'error');
                     }
@@ -321,7 +326,7 @@
             });
         }
 
-        function updateContainerUnit(id, data) {
+        function updateContainerUnit(id, data, stock = "") {
             html = '';
             data.forEach((item, index) => {
                 html += `
@@ -330,7 +335,15 @@
                         <input class="form-control" placeholder="nama satuan" value="${item.unit}" />
                     </div>
                     <div class="col-md-4">
-                        <input class="form-control" placeholder="konversi" value="${item.konversi}" />
+                       <div class="row">
+                          <div class="col-xs-12" style="position:relative; width:100%">
+                            <span class="unit-form${id}" style="position:absolute; right:20px; top:7px; color:#bbb"> ${stock.unit_backend}</span>
+                            <input class="form-control" placeholder="konversi" value="${item.konversi}" />
+                          </div>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                        ${stock.unit_default==item.unit?'<div class="bg-primary  colorwhite px-2 rounded-1"> default</div>':""}
                     </div>
                 </div>
                 `;

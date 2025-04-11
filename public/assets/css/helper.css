@@ -1,40 +1,46 @@
-.mb-10{
-    margin-bottom:10px;
-}
-.mt-10{
-    margin-top:10px;
-}
-.hidden{
-    display: none;
+.mb-10 {
+  margin-bottom: 10px;
 }
 
-.colorblack{
-    color: black    ;
+.mt-10 {
+  margin-top: 10px;
+}
+
+.hidden {
+  display: none;
+}
+
+.colorblack {
+  color: black;
+}
+
+.colorwhite {
+  color: white;
 }
 
 .tree-toggle {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.8s;
-    
- 
-  }
-  
-  .tree-toggle.open {
-    max-height: 500px; /* cukup besar utk semua submenu */
-    opacity: 1;
-  }
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.8s;
 
-  .toggle-icon {
-    transition: transform 0.3s ease;
-  }
-  
-  /* Saat parent menu-item memiliki class "open", icon akan rotate */
- .toggle-icon.open {
-    transform: rotate(180deg);
-  }
 
-  .textright{
-    text-align: right;
-  }
-  
+}
+
+.tree-toggle.open {
+  max-height: 500px;
+  /* cukup besar utk semua submenu */
+  opacity: 1;
+}
+
+.toggle-icon {
+  transition: transform 0.3s ease;
+}
+
+/* Saat parent menu-item memiliki class "open", icon akan rotate */
+.toggle-icon.open {
+  transform: rotate(180deg);
+}
+
+.textright {
+  text-align: right;
+}

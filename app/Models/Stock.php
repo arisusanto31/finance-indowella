@@ -14,7 +14,8 @@ class Stock extends Model
         'name',
         'category_id',
         'parent_category_id',
-        'unit_backend'
+        'unit_backend',
+        'unit_default'
     ];
 
 

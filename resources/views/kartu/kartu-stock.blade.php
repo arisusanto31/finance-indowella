@@ -151,130 +151,7 @@
         </div>
     </div>
 
-    <div class="modal fade" id="pelunasanModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel1">Buat Pelunasan Kartu Hutang</h5>
-                    <button
-                        type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col mb-3">
-                            <label for="nameBasic" class="form-label">Nomer Invoice</label>
-                            <input type="text" id="pelunasan-factur" class="form-control" placeholder="Nomer Invoice" />
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col mb-3">
-                            <label for="amount_mutasi" class="form-label">Nilai Pelunasan</label>
-                            <input type="text" id="pelunasan-amount" autocomplete="off" class="form-control currency-input" placeholder="Nilai Pelunasan" />
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col mb-3">
-                            <label for="amount_mutasi" class="form-label">Akun Piutang</label>
-                            <select type="text" id="pelunasan-akun-piutang" class="form-control select-coa">
-
-                            </select>
-                        </div>
-                        <div class="col mb-3">
-                            <label for="amount_mutasi" class="form-label">Akun Pembayaran</label>
-                            <select type="text" id="pelunasan-akun-pembayaran" class="form-control select-coa">
-
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row g-2">
-                        <div class="col mb-0">
-                            <label for="person_type" class="form-label">Type Person</label>
-                            <select onchange="initSelectPersonPelunasan()" type="text" id="pelunasan-person_type" class="form-control" placeholder="type person">
-                                <option value="App\Models\Supplier" selected> Supplier</option>
-                                <option value="App\Models\OtherPerson"> Orang Lain</option>
-                            </select>
-                        </div>
-                        <div class="col mb-0">
-                            <label for="dobBasic" class="form-label">Person</label>
-                            <select class="form-control" id="pelunasan-person_id" placeholder="person"></select>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                        Close
-                    </button>
-                    <button id="btn-store-pelunasan" onclick="storePelunasan()" type="button" class="btn btn-primary">Save changes</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="pelunasanModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel1">Buat Pelunasan Kartu Hutang</h5>
-                    <button
-                        type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col mb-3">
-                            <label for="nameBasic" class="form-label">Nomer Invoice</label>
-                            <input type="text" id="pelunasan-factur" class="form-control" placeholder="Nomer Invoice" />
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col mb-3">
-                            <label for="amount_mutasi" class="form-label">Nilai Pelunasan</label>
-                            <input type="text" id="pelunasan-amount" autocomplete="off" class="form-control currency-input" placeholder="Nilai Pelunasan" />
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col mb-3">
-                            <label for="amount_mutasi" class="form-label">Akun Piutang</label>
-                            <select type="text" id="pelunasan-akun-piutang" class="form-control select-coa">
-
-                            </select>
-                        </div>
-                        <div class="col mb-3">
-                            <label for="amount_mutasi" class="form-label">Akun Pembayaran</label>
-                            <select type="text" id="pelunasan-akun-pembayaran" class="form-control select-coa">
-
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row g-2">
-                        <div class="col mb-0">
-                            <label for="person_type" class="form-label">Type Person</label>
-                            <select onchange="initSelectPersonPelunasan()" type="text" id="pelunasan-person_type" class="form-control" placeholder="type person">
-                                <option value="App\Models\Supplier" selected> Supplier</option>
-                                <option value="App\Models\OtherPerson"> Orang Lain</option>
-                            </select>
-                        </div>
-                        <div class="col mb-0">
-                            <label for="dobBasic" class="form-label">Person</label>
-                            <select class="form-control" id="pelunasan-person_id" placeholder="person"></select>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                        Close
-                    </button>
-                    <button id="btn-store-pelunasan" onclick="storePelunasan()" type="button" class="btn btn-primary">Save changes</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
+   
     @push('scripts')
     <script>
         setTimeout(function() {
@@ -309,17 +186,17 @@
                                 <td>${i+1}</td>
                                 <td>${item.name} [${item.id}]</td>
                                 <td>${item.category_name}</td>
-                                <td>${formatRupiah(item.awal_qty)}</td>
-                                <td>${formatRupiah(rupiahUnitAwal)}</td>
+                                <td>${formatRupiah(item.awal_qty/item.konversi)} ${item.unit_default}</td>
+                                <td>${formatRupiah(rupiahUnitAwal*item.konversi)}</td>
                                 <td>${formatRupiah(item.awal_rupiah)}</td>
-                                <td>${formatRupiah(masuk[0])}</td>
-                                <td>${formatRupiah(masuk[1])}</td>
+                                <td>${formatRupiah(masuk[0]/item.konversi)} ${item.unit_default}</td>
+                                <td>${formatRupiah(masuk[1]*item.konversi)}</td>
                                 <td>${formatRupiah(masuk[2])}</td>
-                                <td>${formatRupiah(keluar[0])}</td>
-                                <td>${formatRupiah(keluar[1])}</td>
+                                <td>${formatRupiah(keluar[0]/item.konversi)} ${item.unit_default}</td>
+                                <td>${formatRupiah(keluar[1]*item.konversi)}</td>
                                 <td>${formatRupiah(keluar[2])}</td>
-                                <td>${formatRupiah(item.akhir_qty)}</td>
-                                <td>${formatRupiah(rupiahUnitAkhir)}</td>
+                                <td>${formatRupiah(item.akhir_qty/item.konversi)} ${item.unit_default}</td>
+                                <td>${formatRupiah(rupiahUnitAkhir*item.konversi)}</td>
                                 <td>${formatRupiah(item.akhir_rupiah)}</td>
                                 </tr>`;
 
@@ -366,7 +243,7 @@
                             html += `
                                 <tr>
                                 <td>${i+1}</td>
-                                <td>${item.created_at}</td>
+                                <td>${formatNormalDateTime(new Date(item.created_at))}</td>
                                 <td>${item.stock_id}</td>
                                 <td>${item.stock_name}</td>
                                 <td>${formatRupiah(item.mutasi_quantity)}</td>
@@ -398,7 +275,7 @@
                             html += `
                                 <tr>
                                 <td>${i+1}</td>
-                                <td>${item.created_at}</td>
+                                <td>${formatNormalDateTime(new Date(item.created_at))}</td>
                                 <td>${item.stock_id}</td>
                                 <td>${item.stock_name}</td>
                                 <td>${formatRupiah(item.mutasi_quantity)}</td>

@@ -27,8 +27,8 @@ class StockController extends Controller
             'name' => 'required|string|max:255',
             'category_id' => 'integer',
             'parent_category_id' => 'integer',
-            'unit_backend'=>'required|string|max:10',
-            'unit_default'=>'string|max:20'
+            'unit_backend' => 'required|string|max:10',
+            'unit_default' => 'string|max:20'
         ]);
 
         $stock = Stock::findOrFail($id);
@@ -36,7 +36,8 @@ class StockController extends Controller
             'name',
             'category_id',
             'parent_category_id',
-            'unit_backend'
+            'unit_backend',
+            'unit_default'
         ]));
 
         return [
@@ -53,7 +54,7 @@ class StockController extends Controller
                 'name' => 'required|string|max:255',
                 'category_id' => 'required|integer',
                 'parent_category_id' => 'required|integer',
-                'unit_backend'=>'required|string|max:10',
+                'unit_backend' => 'required|string|max:10',
             ]);
 
             Stock::create($validated);
@@ -84,7 +85,8 @@ class StockController extends Controller
         return redirect()->back()->with('success', 'Kategori berhasil disimpan!');
     }
 
-    public function show(){
+    public function show()
+    {
         return "halo halo bandung";
     }
     public function trashed()
@@ -126,7 +128,8 @@ class StockController extends Controller
         return ['results' => $stocks];
     }
 
-    public function getInfo($id){
+    public function getInfo($id)
+    {
         $stock = Stock::with(['units'])->find($id);
         if (!$stock) {
             return [
@@ -148,12 +151,15 @@ class StockController extends Controller
         ]);
 
         StockUnit::create($request->only([
-            'stock_id','unit', 'konversi'
+            'stock_id',
+            'unit',
+            'konversi'
         ]));
 
         return [
             'status' => 1,
-            'msg'=> StockUnit::where('stock_id',$request->input('stock_id'))->get(),
+            'msg' => StockUnit::where('stock_id', $request->input('stock_id'))->get(),
+            'stock' => Stock::find($request->input('stock_id')),
             'hal' => 'Satuan berhasil disimpan!'
         ];
     }

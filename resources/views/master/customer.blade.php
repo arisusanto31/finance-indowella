@@ -66,7 +66,7 @@
                     @forelse($customers as $index => $customer)
                     <tr>
                         <td>{{ $index + 1 }}</td>
-                        <td>{{ $customer->created_at->format('d M Y H:i:s') }}</td>
+                        <td>{{ $customer->created_at?$customer->created_at->format('d M Y H:i:s'):'' }}</td>
                         <td>{{ $customer->name }}</td>
                         <td>{{ $customer->address }}</td>
                         <td>{{ $customer->phone }}</td>

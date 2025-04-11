@@ -173,7 +173,7 @@
             </a>
             <ul class="menu-sub">
                 <li class="menu-item">
-                    <a href="{{url('admin/daftar/daftar-at') }}" class="menu-link">
+                    <a href="{{url('admin/daftar/aset-tetap') }}" class="menu-link">
                         <!-- <i class="menu-icon tf-icons bx bx-building mr-2 fs-6 me-2" style="margin-right: 10px;"></i> -->
                         <div data-i18n="Accordion">Daftar AT</div>
                     </a>

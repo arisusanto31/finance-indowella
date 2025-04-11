@@ -1,4 +1,4 @@
-<div class="p-4">
+<div class="p-1">
   
     {{-- Tabel --}}
     <div style="max-height: 400px; overflow-x: auto; overflow-y: auto;">

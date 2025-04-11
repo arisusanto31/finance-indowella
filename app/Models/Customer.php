@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -7,13 +8,14 @@ use Illuminate\Support\Str;
 class Customer extends Model
 {
     // ✅ Kolom-kolom yang boleh diisi secara massal
+    public $timestamps = true;
+    protected $table='customers';
     protected $fillable = [
         'name',
         'address',
         'phone',
         'ktp',
         'npwp',
-        'purchase_info',
         'is_deleted',     // optional, kalau kamu set manual
         'deleted_at',     // optional, kalau kamu set manual
     ];

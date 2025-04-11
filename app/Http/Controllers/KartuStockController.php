@@ -40,8 +40,12 @@ class KartuStockController extends Controller
         })->leftJoinSub($saldoAkhir, 'saldoAkhir', function ($join) {
             $join->on('stocks.id', '=', 'saldoAkhir.stock_id');
         })->join('stock_categories', 'stocks.category_id', '=', 'stock_categories.id')
-            ->select(
+            ->join('stock_units', function ($join) {
+                $join->on('stocks.id', '=', 'stock_units.stock_id')
+                    ->on('stocks.unit_default', '=', 'stock_units.unit');
+            })->select(
                 'stocks.*',
+                'stock_units.konversi as konversi',
                 'stock_categories.name as category_name',
                 DB::raw('coalesce(saldoAwal.saldo_qty_backend,0) as awal_qty'),
                 DB::raw('coalesce(saldoAwal.saldo_rupiah_total,0) as awal_rupiah'),

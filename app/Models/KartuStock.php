@@ -41,8 +41,8 @@ class KartuStock extends Model
 
     {
 
-      
-   
+
+
         $lock = Cache::lock('kartu-stock-' . $request->input('stock_id'), 40);
         try {
             $flow = $request->input('flow');
@@ -66,8 +66,15 @@ class KartuStock extends Model
                 $kartu->mutasi_rupiah_on_unit = $rupiahUnit; //ini kayak hpp gitu. pake defaultnya
                 $kartu->mutasi_rupiah_total = moneyMul($rupiahUnit, $kartu->mutasi_qty_backend);
             } else {
+
                 $kartu->mutasi_rupiah_on_unit = $request->input('mutasi_rupiah_on_unit') ?? 0;
                 $kartu->mutasi_rupiah_total = $request->input('mutasi_rupiah_total') ?? 0;
+                if($kartu->mutasi_rupiah_total ==0){
+                    return [
+                        'status'=>0,
+                        'msg'=>'input rupiah tidak valid!,'
+                    ];
+                }
             }
             if ($flow == 1) {
                 $kartu->mutasi_qty_backend = moneyMul($kartu->mutasi_qty_backend, -1);
@@ -78,6 +85,12 @@ class KartuStock extends Model
             $kartu->book_journal_id = session('book_journal_id');
             $kartu->saldo_qty_backend = moneyAdd($lastCard->saldo_qty_backend, $kartu->mutasi_qty_backend);
             $kartu->saldo_rupiah_total = moneyAdd($lastCard->saldo_rupiah_total, $kartu->mutasi_rupiah_total);
+            if ($kartu->saldo_rupiah_total < 0 || $kartu->saldo_qty_backend < 0) {
+                return [
+                    'status' => 0,
+                    'msg' => 'invalid input, saldo minus jika diinput!'
+                ];
+            }
             $kartu->save();
         } catch (LockTimeoutException $e) {
             info('kartu stock timeout on md' . $request->input('mutation_detail_id'));
@@ -111,8 +124,8 @@ class KartuStock extends Model
             $qty = $request->input('mutasi_quantity');
             $unit = $request->input('unit');
             $flow = $request->input('flow');
-            if($request->input('mutais_rupiah_total'))
-                $mutasiRupiahTotal =format_db($request->input('mutasi_rupiah_total'));
+            if ($request->input('mutasi_rupiah_total'))
+                $mutasiRupiahTotal = format_db($request->input('mutasi_rupiah_total'));
             else
                 $mutasiRupiahTotal = 0;
             $isCustom = $request->input('is_custom_rupiah');
@@ -128,9 +141,9 @@ class KartuStock extends Model
             }
             $qtybackend = $qty * $dataunit->konversi;
             $unitbackend = $stock->unit_backend;
-            
-            $mutasiRupiahUnit= money($mutasiRupiahTotal/$qtybackend);
-            $st = self::create(new Request( [
+
+            $mutasiRupiahUnit = money($mutasiRupiahTotal / $qtybackend);
+            $st = self::create(new Request([
                 'stock_id' => $stockid,
                 'mutasi_qty_backend' => $qtybackend,
                 'unit_backend' => $unitbackend,
