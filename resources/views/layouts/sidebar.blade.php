@@ -200,7 +200,7 @@
             </a>
             <ul class="menu-sub">
                 <li class="menu-item">
-                    <a href="#" class="menu-link">
+                    <a href="{{url('admin/invoice/invoice-sales') }}"class="menu-link">
                         <!-- <i class="menu-icon tf-icons bx bx-building mr-2 fs-6 me-2" style="margin-right: 10px;"></i> -->
                         <div data-i18n="Accordion">Invoice Sales</div>
                     </a>
@@ -208,7 +208,7 @@
             </ul>
             <ul class="menu-sub">
                 <li class="menu-item">
-                    <a href="#" class="menu-link">
+                    <a href="{{url('admin/invoice/invoice-purchase') }}" class="menu-link">
                         <!-- <i class="menu-icon tf-icons bx bx-building mr-2 fs-6 me-2" style="margin-right: 10px;"></i> -->
                         <div data-i18n="Accordion">Invoice Purchase</div>
                     </a>
