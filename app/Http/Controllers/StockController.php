@@ -110,19 +110,19 @@ class StockController extends Controller
         return ['results' => $categories];
     }
 
-    public function getItem()
+    public function getStockItems()
     {
         $search = getInput('search');
         $searchs = [];
         if ($search)
             $searchs = explode(' ', $search);
-
+    
         $stocks = Stock::where('is_deleted', 0);
         foreach ($searchs as $s) {
             $stocks = $stocks->where('name', 'like', '%' . $s . '%');
         }
         $stocks = $stocks->select('id', DB::raw('name as text'))->get();
-
+    
         return ['results' => $stocks];
     }
 
@@ -157,4 +157,26 @@ class StockController extends Controller
             'hal' => 'Satuan berhasil disimpan!'
         ];
     }
+ 
+
+public function getItem(Request $request)
+
+{
+    $search = $request->get('q');
+
+    $stocks = Stock::with('category')
+        ->where('name', 'like', "%$search%")
+        ->select('id', 'name',)
+        ->limit(20)
+        ->get()
+        ->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'text' => $item->name . optional($item->category)->name,
+            ];
+        });
+
+    return response()->json($stocks);
+}
+
 }

@@ -96,6 +96,10 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('/get-item-keuangan', [ChartAccountController::class, 'getItemChartAccountKeuanganManual'])->name('get-item-keuangan');
             Route::get('/get-chart-accounts', [ChartAccountController::class, 'getChartAccounts']);
             Route::get('/master-suplier', [SupplierController::class, 'master.supplier']);
+            Route::get('/category-json', function () {
+                return \App\Models\StockCategory::select('id', 'name as text')->get();
+            });
+            
         });
 
         Route::prefix('supplier')->name('supplier.')->group(function () {
@@ -104,6 +108,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('/get-item', [SupplierController::class, 'getItem'])->name('get-item');
             Route::post('main/{id}/soft-delete', [SupplierController::class, 'softDeleteSupplier'])->name('main.soft-delete');
             Route::post('main/{id}/restore', [SupplierController::class, 'restore'])->name('main.restore');
+            Route::post('/invoice-sales', [InvoiceSaleController::class, 'store'])->name('invoice-sale.store');
         });
 
         Route::prefix('other-person')->name('other-person.')->group(function () {
@@ -128,8 +133,16 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('category-get-item', [StockController::class, 'categoryGetItem'])->name('category-get-item');
             Route::get('get-item', [StockController::class, 'getItem'])->name('get-item');
             Route::get('get-info/{id}', [StockController::class, 'getInfo'])->name('get-info');
+           
+            // Route::get('/produk/get-item', [StockController::class, 'getItem'])->name('stock.produk-get-item');
+ 
         });
     });
+
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('/produk/get-item', [StockController::class, 'getItem'])->name('stock.produk-get-item');
+    });
+    
 
     Route::prefix('invoice')->name('invoice.')->group(function () {
         Route::get('invoice-sales', [InvoiceSaleController::class, 'ShowSales'])->name('sales.index');

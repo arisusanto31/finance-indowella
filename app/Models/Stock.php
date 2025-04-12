@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Illuminate\Http\Request;
 
 class Stock extends Model
 {
@@ -54,4 +55,29 @@ class Stock extends Model
     {
         $q->where('stocks.is_deleted', true);
     }
+
+
+    
+    public function getItem(Request $request)
+    {
+        $search = $request->get('search');
+    
+        $stocks = Stock::with('category')
+            ->when($search, function ($query) use ($search) {
+                $query->where('name', 'like', '%' . $search . '%');
+            })
+            ->select('id', 'name', 'category_id')
+            ->limit(20)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'text' => $item->name . ' - ' . optional($item->category)->name,
+                ];
+            });
+    
+        return ['results' => $stocks];
+    }
+    
+
 }
