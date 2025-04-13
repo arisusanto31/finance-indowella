@@ -138,6 +138,14 @@ if (!function_exists('format_db')) {
     }
 }
 
+function getErrorValidation($e){
+    return 'kolom: '.implode(',',collect($e->errors())->keys()->all()).' tidak valid';
+}
+
+function format_date_db($date){
+    $dateDb = Carbon::createFromFormat('d/m/Y', $date)->format('Y-m-d');
+    return $dateDb;
+}
 if (!function_exists('money')) {
     function money($value): string
     {
@@ -179,4 +187,5 @@ if (!function_exists('moneyCmp')) {
         return bccomp(money($a), money($b), 2);
     }
 }
+
 

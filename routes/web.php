@@ -63,6 +63,14 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
     Route::prefix('daftar')->group(function () {
         Route::prefix('aset-tetap')->name('aset-tetap.')->group(function () {
             Route::get('/', [InventoryController::class, 'index']);
+            Route::get('/create_', [InventoryController::class, 'createInventory'])->name('create');
+            Route::get('/create-kartu', [InventoryController::class, 'createKartuInventory'])->name('create-kartu');
+            Route::post('/store-inventory', [InventoryController::class, 'storeInventory'])->name('store-inventory');
+            Route::post('/store-kartu-inventory', [InventoryController::class, 'storeKartuInventory'])->name('store-kartu-inventory');
+            Route::get('/get-item', [InventoryController::class, 'getItem'])->name('get-item');
+            Route::get('/get-summary',[InventoryController::class, 'getSummary'])->name('get-summary');
+            Route::get('/get-mutasi-masuk', [InventoryController::class, 'getMutasiMasuk'])->name('get-mutasi-masuk');
+            Route::get('/get-mutasi-keluar', [InventoryController::class, 'getMutasiKeluar'])->name('get-mutasi-keluar');
         });
 
         Route::get('/daftar-bdd', [BDDController::class, 'DaftarBDD'])->name('daftar.daftar-bdd');
@@ -71,7 +79,6 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
 
     Route::prefix('kartu')->group(function () {
         Route::resource('/kartu-kas', KartuKasController::class);
-
 
         Route::prefix('kartu-stock')->name('kartu-stock.')->group(function () {
             Route::resource('main', KartuStockController::class);
@@ -82,7 +89,6 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('get-mutasi-masuk', [KartuStockController::class, 'getMutasiMasuk'])->name('get-mutasi-masuk');
             Route::get('get-mutasi-keluar', [KartuStockController::class, 'getMutasiKeluar'])->name('get-mutasi-keluar');
         });
-
 
         Route::prefix('kartu-hutang')->name('kartu-hutang.')->group(function () {
             Route::resource('main', KartuHutangController::class);
@@ -106,12 +112,6 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('/get-chart-accounts', [ChartAccountController::class, 'getChartAccounts']);
         });
 
-
-
-        Route::prefix('supplier')->name('supplier.')->group(function () {
-            Route::resource('main', SupplierController::class);
-            Route::get('/get-item', [SupplierController::class, 'getItem'])->name('get-item');
-        });
         Route::prefix('supplier')->name('supplier.')->group(function () {
             Route::resource('main', SupplierController::class);
             Route::get('/get-item', [SupplierController::class, 'getItem'])->name('get-item');

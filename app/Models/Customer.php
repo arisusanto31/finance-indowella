@@ -24,14 +24,12 @@ class Customer extends Model
     {
         static::addGlobalScope('customer', function ($query) {
             $from = $query->getQuery()->from ?? 'customers';
-
             if (Str::contains($from, ' as ')) {
                 [$table, $alias] = explode(' as ', $from);
                 $alias = trim($alias);
             } else {
                 $alias = $from;
             }
-
             $query->whereNull("{$alias}.is_deleted");
         });
     }

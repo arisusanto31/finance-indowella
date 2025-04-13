@@ -14,7 +14,7 @@ class CustomerSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+
         $data = [
             [
                 'name' => 'OYI',
@@ -33,7 +33,6 @@ class CustomerSeeder extends Seeder
                 'address' => 'malang',
                 'phone' => '08251234234',
             ],
-
             [
                 'name' => 'Red Chicken',
                 'address' => 'malang',

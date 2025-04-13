@@ -13,11 +13,13 @@ return new class extends Migration
     {
         Schema::create('inventories', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->integer('book_journal_id');
+            $table->string('name')->unique();
+
             $table->string('type_aset');
             $table->string('keterangan_qty_unit')->nullable();
             $table->date('date');
-            $table->decimal('nilai_perolehan',15,2);
+            $table->decimal('nilai_perolehan', 15, 2);
             $table->integer('periode');
             $table->timestamps();
         });
