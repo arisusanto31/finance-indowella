@@ -69,8 +69,17 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('/get-mutasi-masuk', [InventoryController::class, 'getMutasiMasuk'])->name('get-mutasi-masuk');
             Route::get('/get-mutasi-keluar', [InventoryController::class, 'getMutasiKeluar'])->name('get-mutasi-keluar');
         });
-
-        Route::get('/daftar-bdd', [BDDController::class, 'DaftarBDD'])->name('daftar.daftar-bdd');
+        Route::prefix('bdd')->name('bdd.')->group(function () {
+            Route::get('/', [BDDController::class, 'index']);
+            Route::get('/create_', [BDDController::class, 'createPrepaid'])->name('create');
+            Route::get('/create-kartu', [BDDController::class, 'createKartuPrepaid'])->name('create-kartu');
+            Route::post('/store-prepaid', [BDDController::class, 'storePrepaid'])->name('store-prepaid');
+            Route::post('/store-kartu-prepaid', [BDDController::class, 'storeKartuPrepaid'])->name('store-kartu-prepaid');
+            Route::get('/get-item', [BDDController::class, 'getItem'])->name('get-item');
+            Route::get('/get-summary', [BDDController::class, 'getSummary'])->name('get-summary');
+            Route::get('/get-mutasi-masuk', [BDDController::class, 'getMutasiMasuk'])->name('get-mutasi-masuk');
+            Route::get('/get-mutasi-keluar', [BDDController::class, 'getMutasiKeluar'])->name('get-mutasi-keluar');
+        });
         Route::get('/daftar-karyawan', [KaryawanController::class, 'DaftarKaryawan'])->name('daftar.daftar-karyawan');
     });
 

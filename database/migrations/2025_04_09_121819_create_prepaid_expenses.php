@@ -13,6 +13,12 @@ return new class extends Migration
     {
         Schema::create('prepaid_expenses', function (Blueprint $table) {
             $table->id();
+            $table->integer('book_journal_id');
+            $table->string('name')->unique();
+            $table->string('type_bdd');
+            $table->date('date');
+            $table->decimal('nilai_perolehan', 15, 2);
+            $table->integer('periode');
             $table->timestamps();
         });
     }

@@ -179,9 +179,9 @@
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="{{url('admin/daftar/daftar-bdd') }}" class="menu-link">
+                    <a href="{{url('admin/daftar/bdd') }}" class="menu-link">
                         <!-- <i class="menu-icon tf-icons bx bx-file me-2 fs-6 me-2" style="margin-right: 10px;"></i> -->
-                        <div data-i18n="Accordion">Daftar BDD</div>
+                        <div data-i18n="Accordion">BDD</div>
                     </a>
                 </li>
                 <li class="menu-item">
@@ -196,7 +196,7 @@
             <a href="cards-basic.html" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons  bx bx-list-ul"></i>
                 <div data-i18n="Basic">Invoice</div>
-                <input type="hidden" class="url-active" value="daftar" />
+                <input type="hidden" class="url-active" value="Invoice" />
             </a>
             <ul class="menu-sub">
                 <li class="menu-item">
