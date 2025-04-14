@@ -26,6 +26,10 @@ class CreateKartuStocks extends Migration
             $table->decimal('saldo_qty_backend', 10, 2);
             $table->decimal('saldo_rupiah_total', 14, 2);
             $table->integer('is_uploaded')->nullable();
+            $table->integer('reference_id')->nullable(); //ini nanti bisa kita link ke invoice
+            $table->string('reference_type')->nullable();
+            $table->string('journal_number')->nullable();
+            $table->integer('journal_id')->nullable();
             $table->timestamps();
         });
     }

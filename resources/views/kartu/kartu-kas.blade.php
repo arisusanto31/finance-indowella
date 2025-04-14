@@ -15,7 +15,7 @@
                     <select name="bulan" id="month" class="form-select ">
                         <option value="">-- Bulan --</option>
                         @foreach(getListMonth() as $key => $month)
-                        <option value="{{$key}}">{{$month}}</option>
+                        <option value="{{$key}}" >{{$month}}</option>
                         @endforeach
                     </select>
                 </div>
@@ -23,7 +23,7 @@
                     <select name="tahun" id="year" class="form-select ">
                         <option value="">-- Tahun --</option>
                         @for($year=0; $year < 3; $year++)
-                            <option value="{{intval(Date('Y')-$year)}}">{{intval(Date('Y')-$year)}}</option>
+                            <option value="{{intval(Date('Y')-$year)}}" @if($year==0) selected @endif >{{intval(Date('Y')-$year)}}</option>
                             @endfor
                     </select>
                 </div>
@@ -57,7 +57,6 @@
 
     @push('scripts')
     <script>
-   
         initItemSelectManual('.select-coa', '{{route("chart-account.get-item-keuangan")}}?kind=kas', 'chart account');
 
         function searchData() {

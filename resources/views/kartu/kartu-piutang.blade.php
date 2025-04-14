@@ -4,7 +4,7 @@
 
         <div class="card-body">
             <div class="row mt-1">
-                <div class="col-md-2">
+                <div class="col-md-4">
                     <button type="button" class=" btn-primary" data-bs-toggle="modal" data-bs-target="#basicModal"> 🔃 Mutasi</button>
                     <button type="button" class=" btn-primary" data-bs-toggle="modal" data-bs-target="#pelunasanModal"> 💵 Pelunasan</button>
                 </div>

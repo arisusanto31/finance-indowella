@@ -19,6 +19,8 @@ return new class extends Migration
             $table->decimal('amount', 15, 2);
             $table->string('type_mutasi');
             $table->decimal('nilai_buku', 15, 2);
+            $table->string('journal_number')->nullable();
+            $table->integer('journal_id')->nullable();
             $table->timestamps();
         });
     }

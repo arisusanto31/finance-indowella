@@ -3,8 +3,7 @@
 
   <div class="card shadow-sm rounded-3 ">
 
-    <h5 class="text-primary-dark card-header"> <a href="javascript:void(openCardCreate())">⚒️ <strong>BUAT MUTASI JURNAL
-        </strong>
+    <h5 class="text-primary-dark card-header"> <a href="javascript:void(openCardCreate())">⚒️ <strong>BUAT MUTASI JURNAL</strong>
         <i id="icon-create" class="bx bx-caret-down toggle-icon"></i> </a>
     </h5>
 
@@ -53,8 +52,6 @@
             </div>
           </div>
         </div>
-
-
         <div class="mt-4">
           <button onclick="submitJournalManual()" class="btn btn-primary w-100">Submit Journal</button>
         </div>
@@ -80,7 +77,6 @@
               <th>📥 Masuk</th>
               <th>📤 Keluar</th>
             </tr>
-
           </thead>
           <tbody id="body-mutasi-jurnal">
 

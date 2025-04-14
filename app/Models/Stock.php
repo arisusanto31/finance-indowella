@@ -22,7 +22,6 @@ class Stock extends Model
 
     protected static function booted()
     {
-
         static::addGlobalScope('aktif', function ($query) {
             $from = $query->getQuery()->from ?? 'stocks'; // untuk dukung alias `j` kalau pakai from('journals as j')
             if (Str::contains($from, ' as ')) {
@@ -33,7 +32,7 @@ class Stock extends Model
             }
 
             $query->where(function ($q) use ($alias) {
-                $q->whereNull("{$alias}.is_deleted")->orWhere("{$alias}.is_deleted", false);
+                $q->whereNull("{$alias}.is_deleted")->orWhere("{$alias}.is_deleted", 0);
             });
         });
     }
