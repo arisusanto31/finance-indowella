@@ -9,6 +9,18 @@ use App\Models\StockCategory;
 
 class InvoiceSaleController extends Controller
 {
+
+    protected $fillable = [
+        'invoice_number',
+        'stock_id',
+        'quantity',
+        'unit',
+        'price',
+        'total_price',
+        'discount',
+        'customer_id',
+    ];
+    
     public function showSales()
     {
         $invoices = InvoiceSaleDetail::latest()->get();
@@ -59,7 +71,8 @@ class InvoiceSaleController extends Controller
             ]);
         }
 
-        return redirect()->route('invoice-sale.index')->with('success', 'Invoice berhasil disimpan!');
+        return redirect()->route('invoice.sales.index')->with('success', 'Invoice berhasil disimpan!');
+
     }
    
 

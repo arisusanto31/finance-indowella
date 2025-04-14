@@ -1,5 +1,5 @@
 <x-app-layout>
-    <form method="POST" action="{{ route('supplier.invoice-sale.store') }}">
+    <form method="POST" action="{{ route('invoice.sales.store') }}">
         @csrf
 
         <div class="container py-4 p-3 mb-4 card shadow-sm">

@@ -168,6 +168,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
     Route::prefix('invoice')->name('invoice.')->group(function () {
         Route::get('invoice-sales', [InvoiceSaleController::class, 'ShowSales'])->name('sales.index');
         Route::get('invoice-purchase', [InvoicePurchaseController::class, 'ShowPurchase'])->name('purchase.index');
+        Route::post('invoice-sales', [InvoiceSaleController::class, 'store'])->name('sales.store');
+
     });
 });
 
