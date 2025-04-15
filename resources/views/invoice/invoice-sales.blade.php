@@ -4,23 +4,29 @@
 
         <div class="container py-4 p-3 mb-4 card shadow-sm">
             <h2>Create Invoice Sales ya</h2>
+
+            {{-- Tombol tambah di atas --}}
             <div class="mb-3 mt-2">
                 <button type="button" class="btn btn-success" id="addDebit">+Tambah</button>
             </div>
 
+            {{-- Nomor dan Tanggal Invoice --}}
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Nomor Invoice</label>
+                    <input name="invoice_number" type="text" class="form-control" required placeholder="Nomor Invoice">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Tanggal Invoice</label>
+                    <input type="text" class="form-control" value="{{ now()->format('Y-m-d H:i:s') }}" readonly>
+                </div>
+            </div>
+
+            {{-- Wrapper Detail Invoice --}}
             <div id="div-debet" class="debet-wrapper">
                 <div class="card border shadow-sm rounded p-3 mb-3 position-relative rowdebet">
                     <button type="button" class="btn-close-card" onclick="removeDebetRow(this)">×</button>
                     <div class="row g-2">
-                        <div class="mb-3">
-                            <label class="form-label">Tanggal Invoice</label>
-                            <input type="text" class="form-control" value="{{ now()->format('Y-m-d H:i:s') }}" readonly>
-                        </div>
-                        
-                        <div class="col-md-2">
-                            <label class="form-label">Nomor Invoice</label>
-                            <input name="price_unit[]" type="text" step="0.01" class="form-control" placeholder="Nomor Invoice">
-                        </div>
                         <div class="col-md-3">
                             <label class="form-label">Nama Produk</label>
                             <select name="stock_id[]" class="form-control select2-stock" required></select>
@@ -45,7 +51,7 @@
                             <label class="form-label">Total Harga</label>
                             <input name="total_price[]" type="number" step="0.01" class="form-control" placeholder="Total">
                         </div>
-                        <div class="col-md-1">
+                        <div class="col-md-2">
                             <label class="form-label">Diskon</label>
                             <input name="discount[]" type="number" class="form-control" placeholder="0">
                         </div>
@@ -114,16 +120,6 @@
                     newRow.innerHTML = `
                         <button type="button" class="btn-close-card" onclick="removeDebetRow(this)">×</button>
                         <div class="row g-2">
-                            <div class="mb-3">
-                                 <label class="form-label">Tanggal Invoice</label>
-                                <input type="text" class="form-control" value="{{ now()->format('Y-m-d H:i:s') }}" readonly>
-
-                                </div>
-
-                              <div class="col-md-2">
-                            <label class="form-label">Nomor Invoice</label>
-                            <input name="price_unit[]" type="text" step="0.01" class="form-control" placeholder="Nomor Invoice">
-                        </div>
                             <div class="col-md-3">
                                 <label class="form-label">Nama Produk</label>
                                 <select name="stock_id[]" class="form-control select2-stock" required></select>
@@ -148,7 +144,7 @@
                                 <label class="form-label">Total Harga</label>
                                 <input name="total_price[]" type="number" step="0.01" class="form-control" placeholder="Total">
                             </div>
-                            <div class="col-md-1">
+                            <div class="col-md-2">
                                 <label class="form-label">Diskon</label>
                                 <input name="discount[]" type="number" class="form-control" placeholder="0">
                             </div>
