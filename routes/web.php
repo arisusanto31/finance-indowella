@@ -80,9 +80,13 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('/get-mutasi-masuk', [BDDController::class, 'getMutasiMasuk'])->name('get-mutasi-masuk');
             Route::get('/get-mutasi-keluar', [BDDController::class, 'getMutasiKeluar'])->name('get-mutasi-keluar');
         });
-        Route::get('/daftar-karyawan', [KaryawanController::class, 'DaftarKaryawan'])->name('daftar.daftar-karyawan');
-    });
 
+            Route::get('/daftar-karyawan', [KaryawanController::class, 'DaftarKaryawan'])->name('daftar.daftar-karyawan');
+            Route::get('/karyawan/create', [KaryawanController::class, 'create'])->name('karyawan.create');
+            Route::post('/karyawan/store', [KaryawanController::class, 'store'])->name('karyawan.store');
+
+
+});
     Route::prefix('kartu')->group(function () {
         Route::resource('/kartu-kas', KartuKasController::class);
 
