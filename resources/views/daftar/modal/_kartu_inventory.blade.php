@@ -12,21 +12,30 @@
                 </select>
             </div>
         </div>
+        <div class="row">
+            <div class="col mb-3">
+                <label for="quantity" class="form-label">Tipe Mutasi</label>
+                <select class="form-control" onchange="changeType()" id="type-mutasi" name="type_mutasi">
+                    <option value="pembelian">Pembelian</option>
+                    <option value="penyusutan" selected>Penyusutan</option>
+                </select>
+            </div>
+        </div>
+
 
         <div class="row">
             <div class="col mb-3">
-                <label for="akun" class="form-label">Akun Aset</label>
-                <select type="text" name="code_group" id="code-group" class="form-control select-coa">
+                <label for="akun" id="label-akun" class="form-label">Akun (Debet)</label>
+                <select type="text" name="code_group" id="code-group" class="form-control ">
 
                 </select>
             </div>
         </div>
         <div class="row">
             <div class="col mb-3">
-                <label for="quantity" class="form-label">Tipe Mutasi</label>
-                <select class="form-control" name="type_mutasi">
-                    <option value="pembelian">Pembelian</option>
-                    <option value="penyusutan">Penyusutan</option>
+                <label for="akun" id="label-lawan-akun" class="form-label">Lawan Akun (Kredit)</label>
+                <select type="text" name="lawan_code_group" id="lawan-code-group" class="form-control">
+
                 </select>
             </div>
         </div>
@@ -56,8 +65,23 @@
     console.log('masuk kok');
     initItemSelectManual('.select-inventory', '{{route("aset-tetap.get-item")}}', 'Pilih aset', '#global-modal');
     initCurrencyInput('.currency-input');
-    initItemSelectManual('.select-coa', '{{route("chart-account.get-item-keuangan")}}?kind=inventory', 'Pilih Akun Aset', '#global-modal');
-  
+
+    function changeType() {
+        type = $('#type-mutasi option:selected').val();
+        if (type == 'pembelian') {
+            $('#label-lawan-akun').html('Lawan Akun (Kredit)');
+            $('#label-akun').html('Akun Aset');
+            initItemSelectManual('#code-group', '{{route("chart-account.get-item-keuangan")}}?kind=inventory', 'Pilih Akun Aset', '#global-modal');
+            initItemSelectManual('#lawan-code-group', '{{route("chart-account.get-item")}}', 'Pilih Lawan Akun', '#global-modal');
+
+        } else {
+            $('#label-lawan-akun').html('Akun Beban Penyusutan');
+            $('#label-akun').html('Akun Akumulasi Penyusutan');
+            initItemSelectManual('#code-group', '{{route("chart-account.get-item-keuangan")}}?kind=akumulasi_inventory', 'Pilih Akun akumulasi', '#global-modal');
+            initItemSelectManual('#lawan-code-group', '{{route("chart-account.get-item-keuangan")}}?kind=beban_inventory', 'Pilih akun penyusutan', '#global-modal');
+        }
+    }
+
     function submitKartu() {
         $.ajax({
             url: '{{route("aset-tetap.store-kartu-inventory")}}',

@@ -18,6 +18,7 @@ class CreateTableKartuPiutang2 extends Migration
             $table->integer('book_journal_id');
             $table->string('type');
             $table->decimal('code_group',6,0);
+            $table->decimal('lawan_code_group',6,0);    
             $table->string('code_group_name',6,0);
             $table->string('package_number')->nullable();
             $table->date('invoice_date')->nullable();

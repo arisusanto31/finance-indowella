@@ -53,9 +53,9 @@
 
 <script>
     console.log('masuk kok');
-    initItemSelectManual('.select-stock', '{{route("stock.get-item")}}', 'Pilih Stock', '#global-modal');
     initCurrencyInput('.currency-input');
     initItemSelectManual('.select-coa', '{{route("chart-account.get-item-keuangan")}}?kind=persediaan', 'Pilih Akun Persediaan', '#global-modal');
+    initItemSelectManual('.select-stock', '{{route("stock.get-item")}}', 'Pilih Stock', '#global-modal');
 
     function updateTotalRupiah() {
         let quantity = $('#mutasi_quantity').val();

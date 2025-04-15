@@ -86,8 +86,8 @@
                             </select>
                         </div>
                         <div class="col mb-3">
-                            <label for="amount_mutasi" class="form-label">Akun Penjualan</label>
-                            <select type="text" id="akun-penjualan" class="form-control select-coa">
+                            <label for="amount_mutasi" class="form-label">Lawan Akun</label>
+                            <select type="text" id="akun-lawan" class="form-control select-coa">
 
                             </select>
                         </div>
@@ -155,8 +155,8 @@
                             </select>
                         </div>
                         <div class="col mb-3">
-                            <label for="amount_mutasi" class="form-label">Akun Pembayaran</label>
-                            <select type="text" id="pelunasan-akun-pembayaran" class="form-control select-coa">
+                            <label for="amount_mutasi" class="form-label">Lawan Akun</label>
+                            <select type="text" id="pelunasan-akun-lawan" class="form-control select-coa">
 
                             </select>
                         </div>
@@ -165,7 +165,7 @@
                         <div class="col mb-0">
                             <label for="person_type" class="form-label">Type Person</label>
                             <select onchange="initSelectPersonPelunasan()" type="text" id="pelunasan-person_type" class="form-control" placeholder="type person">
-                                <option value="App\Models\Supplier" selected> Supplier</option>
+                                <option value="App\Models\Customer" selected> Customer</option>
                                 <option value="App\Models\OtherPerson"> Orang Lain</option>
                             </select>
                         </div>
@@ -200,8 +200,8 @@
                     amount_mutasi: formatDB($('#amount_mutasi').val(), 'id'),
                     person_id: $('#person_id option:selected').val(),
                     person_type: $('#person_type option:selected').val(),
-                    account_penjualan: $('#akun-piutang option:selected').val(),
-                    account_piutang: $('#akun-penjualan option:selected').val(),
+                    code_group: $('#akun-piutang option:selected').val(),
+                    lawan_code_group: $('#akun-lawan option:selected').val(),
                     _token: '{{csrf_token()}}'
                 },
                 success: function(res) {
@@ -240,8 +240,8 @@
                     person_id: $('#pelunasan-person_id option:selected').val(),
                     account_bayar: $('#pelunasan-akun-bayar option:selected').val(),
                     person_type: $('#pelunasan-person_type option:selected').val(),
-                    account_bayar: $('#pelunasan-akun-pembayaran option:selected').val(),
-                    account_piutang: $('#pelunasan-akun-piutang option:selected').val(),
+                    lawan_code_group: $('#pelunasan-akun-lawan option:selected').val(),
+                    code_group: $('#pelunasan-akun-piutang option:selected').val(),
 
                     _token: '{{csrf_token()}}'
                 },
@@ -290,10 +290,10 @@
         }
         initSelectPerson();
         initSelectPersonPelunasan();
-        initItemSelectManual('#pelunasan-akun-pembayaran', '{{route("chart-account.get-item-keuangan")}}?kind=kas', 'akun pembayaran ..', '#pelunasanModal');
+        initItemSelectManual('#pelunasan-akun-lawan', '{{route("chart-account.get-item")}}', 'akun lawan ..', '#pelunasanModal');
         initItemSelectManual('#pelunasan-akun-piutang', '{{route("chart-account.get-item-keuangan")}}?kind=piutang', 'akun piutang ..', '#pelunasanModal');
         initItemSelectManual('#akun-piutang', '{{route("chart-account.get-item-keuangan")}}?kind=piutang', 'akun piutang ..', '#basicModal');
-        initItemSelectManual('#akun-penjualan', '{{route("chart-account.get-item-keuangan")}}?kind=penjualan', 'akun penjualan ..', '#basicModal');
+        initItemSelectManual('#akun-lawan', '{{route("chart-account.get-item")}}', 'akun lawan ..', '#basicModal');
 
 
         function getSummary() {

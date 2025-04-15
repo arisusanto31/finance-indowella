@@ -14,7 +14,7 @@ class KartuPiutang extends Model
 {
     //
 
-    protected $table='kartu_piutangs';
+    protected $table = 'kartu_piutangs';
     public $timestamps = true;
     public function person()
     {
@@ -30,6 +30,7 @@ class KartuPiutang extends Model
     {
 
 
+       
         $personID = $request->input('person_id');
         $personType = $request->input('person_type');
         $lock = Cache::lock('create-kartu-piutang' . $personType . '-' . $personID, 90);
@@ -80,9 +81,10 @@ class KartuPiutang extends Model
                 $kartu->person_id = $request->input('person_id');
                 $kartu->person_type = $request->input('person_type');
                 $kartu->journal_number = $request->input('journal_number');
-                $kartu->journal_id= $request->input('journal_id');
+                $kartu->journal_id = $request->input('journal_id');
                 $kartu->code_group = $request->input('code_group');
                 $kartu->lawan_code_group = $request->input('lawan_code_group');
+                $kartu->code_group_name = $request->input('code_group_name');
                 $kartu->invoice_date = Date('Y-m-d');
                 $kartu->save();
 
@@ -115,6 +117,7 @@ class KartuPiutang extends Model
 
     public static function createMutation(Request $request)
     {
+
         
         DB::beginTransaction();
         try {
@@ -122,21 +125,27 @@ class KartuPiutang extends Model
             $amountMutasi = $request->input('amount_mutasi');
             $personID = $request->input('person_id');
             $personType = $request->input('person_type');
-            $accountPenjualan = $request->input('account_penjualan');
-            $accountPiutang= $request->input('account_piutang');
-
-            if($amountMutasi>0){
-                //piutang bertambah
-                $codeDebet= $accountPiutang;
-                $codeKredit= $accountPenjualan;
-                $amountDebet= $amountMutasi; $amountKredit=0;
-                $desc= 'claim piutang dari penjualan '.$factur;
+            $lawanCodeGroup = $request->input('lawan_code_group');
+            $codeGroup = $request->input('code_group');
+            $chart = ChartAccount::where('code_group', $codeGroup)->first();
+            if (!$chart) {
+                throw new \Exception('chart not found');
             }
-            else{
-                $codeDebet= $accountPenjualan;
-                $codeKredit= $accountPiutang;
-                $amountKredit=abs($amountMutasi); $amountDebet=0;
-                $desc= 'pembatalan penjualan '.$factur;
+            $codeName = $chart->name;
+
+            if ($amountMutasi > 0) {
+                //piutang bertambah
+                $codeDebet = $codeGroup;
+                $codeKredit = $lawanCodeGroup;
+                $amountDebet = $amountMutasi;
+                $amountKredit = 0;
+                $desc = 'claim piutang dari  ' . $factur;
+            } else {
+                $codeDebet = $lawanCodeGroup;
+                $codeKredit = $codeGroup;
+                $amountKredit = abs($amountMutasi);
+                $amountDebet = 0;
+                $desc = 'pembatalan claim piutang dari ' . $factur;
             }
             $kredits = [
                 [
@@ -168,7 +177,7 @@ class KartuPiutang extends Model
             ]), false);
             if ($st['status'] == 0) return $st;
             $number = $st['journal_number'];
-            $journal = Journal::where('journal_number', $number)->whereBetween('code_group',[120000,130000])->first();
+            $journal = Journal::where('journal_number', $number)->whereBetween('code_group', [120000, 130000])->first();
 
             $st = self::createKartu(new Request([
                 'type' => 'mutasi',
@@ -182,8 +191,9 @@ class KartuPiutang extends Model
                 'person_type' => $personType,
                 'journal_number' => $number,
                 'journal_id' => $journal->id,
-                'code_group' => $journal->code_group,
-                'lawan_code_group' => $journal->lawan_code_group
+                'code_group' => $codeGroup,
+                'lawan_code_group' => $lawanCodeGroup,
+                'code_group_name' => $codeName
             ]));
 
             if ($st['status'] == 1) {
@@ -204,28 +214,31 @@ class KartuPiutang extends Model
 
 
 
-   
+
 
     public static function createPelunasan(Request $request)
     {
+        
 
-     
         DB::beginTransaction();
         try {
             $factur = $request->input('package_number');
             $amountBayar = $request->input('amount_bayar');
-            $accountBayar = $request->input('account_bayar');
-            $accountPiutang= $request->input('account_piutang');
-
-            if($amountBayar>0){
-                $codeDebet= $accountBayar;
-                $codeKredit=$accountPiutang;
-                $desc='penerimaan penjualan '.$factur;
+            $lawanCodeGroup = $request->input('lawan_code_group');
+            $codeGroup = $request->input('code_group');
+            $chart = ChartAccount::where('code_group', $codeGroup)->first();
+            if (!$chart) {
+                throw new \Exception('chart not found');
             }
-            else{
-                $codeDebet=$accountPiutang;
-                $codeKredit= $accountBayar;
-                $desc='pembatalan penerimaan penjualan '.$factur;
+            $codeName = $chart->name;
+            if ($amountBayar > 0) {
+                $codeDebet = $lawanCodeGroup;
+                $codeKredit = $codeGroup;
+                $desc = 'penerimaan penjualan ' . $factur;
+            } else {
+                $codeDebet = $codeGroup;
+                $codeKredit = $lawanCodeGroup;
+                $desc = 'pembatalan penerimaan penjualan ' . $factur;
             }
             $personID = $request->input('person_id');
             $personType = $request->input('person_type');
@@ -259,9 +272,9 @@ class KartuPiutang extends Model
             ]), false);
             if ($st['status'] == 0) return $st;
             $number = $st['journal_number'];
-            $journal = Journal::where('journal_number', $number)->whereBetween('code_group',[120000,130000] )->first();
-            $amountKredit= $amountBayar>0?$amountBayar:0;
-            $amountDebet= $amountBayar<0?abs($amountBayar):0;
+            $journal = Journal::where('journal_number', $number)->whereBetween('code_group', [120000, 130000])->first();
+            $amountKredit = $amountBayar > 0 ? $amountBayar : 0;
+            $amountDebet = $amountBayar < 0 ? abs($amountBayar) : 0;
             $st = self::createKartu(new Request([
                 'type' => 'pelunasan',
                 'package_number' => $factur,
@@ -274,8 +287,9 @@ class KartuPiutang extends Model
                 'person_type' => $personType,
                 'journal_number' => $number,
                 'journal_id' => $journal->id,
-                'code_group' => $journal->code_group,
-                'lawan_code_group' => $journal->lawan_code_group
+                'code_group' => $codeGroup,
+                'lawan_code_group' => $lawanCodeGroup,
+                'code_group_name' => $codeName
             ]));
 
             if ($st['status'] == 1) {

@@ -147,13 +147,11 @@
                         <div class="col mb-3">
                             <label for="amount_mutasi" class="form-label">Akun Hutang</label>
                             <select type="text" id="pelunasan-akun-hutang" class="form-control select-coa">
-
                             </select>
                         </div>
                         <div class="col mb-3">
                             <label for="amount_mutasi" class="form-label">Akun Pembayaran</label>
                             <select type="text" id="pelunasan-akun-bayar" class="form-control select-coa">
-
                             </select>
                         </div>
                     </div>
@@ -233,8 +231,8 @@
                     factur_supplier_number: $('#pelunasan-factur').val(),
                     amount_bayar: formatDB($('#pelunasan-amount').val(), 'id'),
                     person_id: $('#pelunasan-person_id option:selected').val(),
-                    code_group: $('#pelunasan-akun-bayar option:selected').val(),
-                    lawan_code_group: $('#pelunasan-akun-hutang option:selected').val(),
+                    code_group: $('#pelunasan-akun-hutang option:selected').val(),
+                    lawan_code_group: $('#pelunasan-akun-bayar option:selected').val(),
                     person_type: $('#pelunasan-person_type option:selected').val(),
                     _token: '{{csrf_token()}}'
                 },

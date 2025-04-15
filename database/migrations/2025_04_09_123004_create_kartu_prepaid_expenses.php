@@ -17,6 +17,7 @@ return new class extends Migration
             $table->date('date');
             $table->decimal('code_group', 6, 0);
             $table->string('code_group_name', 6, 0);
+            $table->decimal('lawan_code_group', 6, 0);
             $table->integer('prepaid_expense_id');
             $table->decimal('amount', 15, 2);
             $table->string('type_mutasi');

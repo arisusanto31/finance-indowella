@@ -21,7 +21,9 @@ class KartuInventory extends Model
         'amount',
         'date',
         'type_mutasi',
-        'nilai_buku'
+        'nilai_buku',
+        'code_group',
+        'lawan_code_group',
     ];
 
 
@@ -47,6 +49,7 @@ class KartuInventory extends Model
 
     public static function createKartu(Request $request)
     {
+
         $invID = $request->input('inventory_id');
         $lock = Cache::lock('inventory-' . $invID, 30);
         //diini kita ambil dulu kartu yang lama
@@ -70,7 +73,14 @@ class KartuInventory extends Model
                 'type_mutasi'     => 'required|string', // validasi sesuai kebutuhan
                 'nilai_buku'      => 'required|numeric',
                 'date'           => 'required|date',
+                'code_group'      => 'required|integer',
+                'lawan_code_group' => 'required|integer',
             ]);
+
+            // return [
+            //     'status' => 0,
+            //     'msg' => json_encode($validated)
+            // ];
             $ki = KartuInventory::create($validated);
             //masukkan data baru dengan nilai buku yang baru yaa..
             return ['status' => 1, 'msg' => $ki];

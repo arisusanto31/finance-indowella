@@ -117,6 +117,7 @@ class KartuHutang extends Model
 
     public static function createMutation(Request $request)
     {
+        
 
         DB::beginTransaction();
         try {
@@ -175,8 +176,8 @@ class KartuHutang extends Model
                 'person_type' => $personType,
                 'journal_number' => $number,
                 'journal_id' => $journal->id,
-                'code_group' => $journal->code_group,
-                'lawan_code_group' => $journal->lawan_code_group,
+                'code_group' => $codeGroup,
+                'lawan_code_group' => $lawanCodeGroup,
                 'code_group_name' => $chart->name
             ]));
 
@@ -206,15 +207,18 @@ class KartuHutang extends Model
         try {
             $factur = $request->input('factur_supplier_number');
             $amountBayar = $request->input('amount_bayar');
-            $accountBayar = $request->input('account_bayar');
+            $codeGroup= $request->input('code_group');
+            $lawanCodeGroup=$request->input('lawan_code_group');
+            $codeName= ChartAccount::where('code_group', $codeGroup)->first()?->name;
+
             if ($amountBayar > 0) {
-                $codeKredit = $accountBayar;
-                $codeDebet = 211000;
-                $desc = 'pembayaran pembelian ' . $factur;
+                $codeKredit = $lawanCodeGroup;
+                $codeDebet = $codeGroup;
+                $desc = 'pembayaran hutang ' . $factur;
             } else {
-                $codeKredit = 211000;
-                $codeDebet = $accountBayar;
-                $desc = 'pembatalan pembayaran pembelian ' . $factur;
+                $codeKredit = $codeGroup;
+                $codeDebet = $lawanCodeGroup;
+                $desc = 'pembatalan pembayaran hutang ' . $factur;
             }
             $personID = $request->input('person_id');
             $personType = $request->input('person_type');
@@ -264,8 +268,9 @@ class KartuHutang extends Model
                 'person_type' => $personType,
                 'journal_number' => $number,
                 'journal_id' => $journal->id,
-                'code_group' => $journal->code_group,
-                'lawan_code_group' => $journal->lawan_code_group
+                'code_group' => $codeGroup,
+                'lawan_code_group' => $lawanCodeGroup,
+                'code_group_name' => $codeName
             ]));
 
             if ($st['status'] == 1) {

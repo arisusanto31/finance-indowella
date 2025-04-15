@@ -74,8 +74,8 @@
               <th>#️⃣ No Jurnal</th>
               <th>🔢 COA</th>
               <th>📎 Description</th>
-              <th>📥 Masuk</th>
-              <th>📤 Keluar</th>
+              <th>📥 Debet</th>
+              <th>📤 Kredit</th>
             </tr>
           </thead>
           <tbody id="body-mutasi-jurnal">

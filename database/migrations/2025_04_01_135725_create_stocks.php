@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('unit_default')->nullable();
             $table->string('unit_backend');
             $table->unsignedBigInteger('parent_category_id')->nullable();
-            $table->boolean('is_deleted')->nullable()->default(false);
+            $table->boolean('is_deleted')->nullable();
             $table->timestamp('deleted_at')->nullable();
             $table->timestamps(); // created_at dan updated_at
         });

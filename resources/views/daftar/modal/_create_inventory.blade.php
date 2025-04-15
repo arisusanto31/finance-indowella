@@ -21,6 +21,14 @@
         </div>
         <div class="row">
             <div class="col mb-3">
+                <label for="akun" class="form-label">Akun Lawan (Kredit)</label>
+                <select type="text" name="lawan_code_group" id="lawan-code-group" class="form-control">
+
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col mb-3">
                 <label for="quantity" class="form-label">Tipe Aset</label>
                 <select class="form-control" name="type_aset">
                     <option value="Tanah">Tanah</option>
@@ -74,10 +82,11 @@
 
 <script>
     console.log('masuk kok');
-    initItemSelectManual('.select-stock', '{{route("stock.get-item")}}', 'Pilih Stock', '#global-modal');
     initCurrencyInput('.currency-input');
-    initItemSelectManual('.select-coa', '{{route("chart-account.get-item-keuangan")}}?kind=inventory', 'Pilih Akun Aset', '#global-modal');
-  
+    initItemSelectManual('#code-group', '{{route("chart-account.get-item-keuangan")}}?kind=inventory', 'Pilih Akun Aset', '#global-modal');
+    initItemSelectManual('#lawan-code-group', '{{route("chart-account.get-item")}}', 'Pilih Akun Lawan', '#global-modal');
+    initItemSelectManual('.select-stock', '{{route("stock.get-item")}}', 'Pilih Stock', '#global-modal');
+
 
     function submitInventory() {
         $.ajax({

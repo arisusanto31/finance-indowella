@@ -21,7 +21,9 @@ class KartuPrepaidExpense extends Model
         'amount',
         'date',
         'type_mutasi',
-        'nilai_buku'
+        'nilai_buku',
+        'code_group',
+        'lawan_code_group',
     ];
 
 
@@ -70,6 +72,8 @@ class KartuPrepaidExpense extends Model
                 'type_mutasi'     => 'required|string', // validasi sesuai kebutuhan
                 'nilai_buku'      => 'required|numeric',
                 'date'           => 'required|date',
+                'code_group'     => 'required|numeric',
+                'lawan_code_group' => 'required|numeric',
             ]);
             $ki = KartuPrepaidExpense::create($validated);
             //masukkan data baru dengan nilai buku yang baru yaa..

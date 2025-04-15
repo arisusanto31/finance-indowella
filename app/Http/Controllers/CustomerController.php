@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Customer;
+use Illuminate\Support\Facades\DB;
 
 class CustomerController extends Controller
 {
@@ -102,6 +103,20 @@ class CustomerController extends Controller
         ]));
 
         return redirect()->route('customer.index')->with('success', 'Customer berhasil diperbarui!');
+    }
+
+    public function getItem()
+    {
+        $searchs = explode(' ', request('search'));
+        $cust = Customer::query();
+
+        foreach ($searchs as $s) {
+            $cust->where('name', 'like', "%$s%");
+        }
+
+        $cust = $cust->select('id', DB::raw('name as text'))->get();
+
+        return ['results' => $cust];
     }
 } 
 

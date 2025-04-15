@@ -64,8 +64,10 @@ class InventoryController extends Controller
                 'periode' => 'required|integer',
                 'book_journal_id' => 'required|integer',
                 'type_aset' => 'required|string',
+                'code_group' => 'required|integer',
+                'lawan_code_group'=> 'required|integer',
             ]);
-
+           
 
             $inv = Inventory::create($request);
             $inv->refresh();
@@ -77,7 +79,10 @@ class InventoryController extends Controller
                 'date' => $inv->date,
                 'amount' => $request['nilai_perolehan'], // ini pake format indonesia
                 'type_mutasi' => 'pembelian',
+                'code_group'=>$request['code_group'],
+                'lawan_code_group'=>$request['lawan_code_group'],
             ]));
+
             if ($st['status'] == 0) {
                 throw new \Exception($st['msg']);
             }
@@ -104,6 +109,7 @@ class InventoryController extends Controller
 
     public function storeKartuInventory(Request $request)
     {
+       
         try {
             $st = KartuInventory::createKartu($request);
             if ($st['status'] == 0) {

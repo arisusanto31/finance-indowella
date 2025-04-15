@@ -47,6 +47,8 @@ class BDDController extends Controller
                 'periode' => 'required|integer',
                 'book_journal_id' => 'required|integer',
                 'type_bdd' => 'required|string',
+                'code_group'=> 'required|numeric',
+                'lawan_code_group'=> 'required|numeric',
             ]);
 
 
@@ -60,6 +62,9 @@ class BDDController extends Controller
                 'date' => $inv->date,
                 'amount' => $request['nilai_perolehan'], // ini pake format indonesia
                 'type_mutasi' => 'pembayaran',
+                'code_group'=>$request['code_group'],
+                'lawan_code_group'=>$request['lawan_code_group'],
+
             ]));
             if ($st['status'] == 0) {
                 throw new \Exception($st['msg']);
