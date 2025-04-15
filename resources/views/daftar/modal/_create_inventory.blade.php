@@ -10,6 +10,15 @@
                 <input name="name" class="form-control" placeholder="nama aset tetap" />
             </div>
         </div>
+
+        <div class="row">
+            <div class="col mb-3">
+                <label for="akun" class="form-label">Akun Aset</label>
+                <select type="text" name="code_group" id="code-group" class="form-control select-coa">
+
+                </select>
+            </div>
+        </div>
         <div class="row">
             <div class="col mb-3">
                 <label for="quantity" class="form-label">Tipe Aset</label>
@@ -19,6 +28,8 @@
                     <option value="Mobil">Mobil / Motor</option>
                     <option value="Peralatan">Peralatan</option>
                     <option value="Inventaris Kantor">Inventaris Kantor</option>
+                    <option value="Inventaris Lain">Inventaris Lain</option>
+
                 </select>
             </div>
 
@@ -65,7 +76,8 @@
     console.log('masuk kok');
     initItemSelectManual('.select-stock', '{{route("stock.get-item")}}', 'Pilih Stock', '#global-modal');
     initCurrencyInput('.currency-input');
-
+    initItemSelectManual('.select-coa', '{{route("chart-account.get-item-keuangan")}}?kind=inventory', 'Pilih Akun Aset', '#global-modal');
+  
 
     function submitInventory() {
         $.ajax({

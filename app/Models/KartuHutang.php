@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
+use function PHPUnit\Framework\throwException;
+
 class KartuHutang extends Model
 {
     //
@@ -80,8 +82,9 @@ class KartuHutang extends Model
                 $kartu->person_id = $request->input('person_id');
                 $kartu->person_type = $request->input('person_type');
                 $kartu->journal_number = $request->input('journal_number');
-                $kartu->journal_id= $request->input('journal_id');
+                $kartu->journal_id = $request->input('journal_id');
                 $kartu->code_group = $request->input('code_group');
+                $kartu->code_group_name = $request->input('code_group_name');
                 $kartu->lawan_code_group = $request->input('lawan_code_group');
                 $kartu->invoice_date = Date('Y-m-d');
                 $kartu->save();
@@ -112,20 +115,25 @@ class KartuHutang extends Model
         ];
     }
 
-
     public static function createMutation(Request $request)
     {
-        
+
         DB::beginTransaction();
         try {
             $factur = $request->input('factur_supplier_number');
             $amountMutasi = $request->input('amount_mutasi');
             $personID = $request->input('person_id');
             $personType = $request->input('person_type');
+            $codeGroup = $request->input('code_group');
+            $lawanCodeGroup = $request->input('lawan_code_group');
+            $person = $personType::find($personID);
+            if (!$person) {
+                throw new \Exception('person not found');
+            }
             $kredits = [
                 [
-                    'code_group' => 211000,
-                    'description' => 'hutang pembelian ' . $factur,
+                    'code_group' => $codeGroup,
+                    'description' => 'hutang nomer' . $factur . ' dari ' . $person->name,
                     'amount' => $amountMutasi,
                     'reference_id' => null,
                     'reference_type' => null,
@@ -133,8 +141,8 @@ class KartuHutang extends Model
             ];
             $debets = [
                 [
-                    'code_group' => 140001,
-                    'description' => 'penambahan persediaan barang dari ' . $factur,
+                    'code_group' => $lawanCodeGroup,
+                    'description' => 'hutang nomer' . $factur . ' dari ' . $person->name,
                     'amount' => $amountMutasi,
                     'reference_id' => null,
                     'reference_type' => null,
@@ -153,7 +161,7 @@ class KartuHutang extends Model
             if ($st['status'] == 0) return $st;
             $number = $st['journal_number'];
             $journal = Journal::where('journal_number', $number)->where('code_group', 211000)->first();
-
+            $chart = $journal->chartAccount;
             $st = self::createKartu(new Request([
                 'type' => 'mutasi',
                 'purchasing_id' => null,
@@ -168,7 +176,8 @@ class KartuHutang extends Model
                 'journal_number' => $number,
                 'journal_id' => $journal->id,
                 'code_group' => $journal->code_group,
-                'lawan_code_group' => $journal->lawan_code_group
+                'lawan_code_group' => $journal->lawan_code_group,
+                'code_group_name' => $chart->name
             ]));
 
             if ($st['status'] == 1) {
@@ -189,26 +198,23 @@ class KartuHutang extends Model
 
 
 
-   
+
 
     public static function createPelunasan(Request $request)
     {
-
-     
         DB::beginTransaction();
         try {
             $factur = $request->input('factur_supplier_number');
             $amountBayar = $request->input('amount_bayar');
             $accountBayar = $request->input('account_bayar');
-            if($amountBayar>0){
-                $codeKredit= $accountBayar;
-                $codeDebet= 211000;
-                $desc='pembayaran pembelian '.$factur;
-            }
-            else{
-                $codeKredit=211000;
-                $codeDebet= $accountBayar;
-                $desc='pembatalan pembayaran pembelian '.$factur;
+            if ($amountBayar > 0) {
+                $codeKredit = $accountBayar;
+                $codeDebet = 211000;
+                $desc = 'pembayaran pembelian ' . $factur;
+            } else {
+                $codeKredit = 211000;
+                $codeDebet = $accountBayar;
+                $desc = 'pembatalan pembayaran pembelian ' . $factur;
             }
             $personID = $request->input('person_id');
             $personType = $request->input('person_type');
@@ -243,8 +249,8 @@ class KartuHutang extends Model
             if ($st['status'] == 0) return $st;
             $number = $st['journal_number'];
             $journal = Journal::where('journal_number', $number)->where('code_group', 211000)->first();
-            $amountKredit= $amountBayar>0?$amountBayar:0;
-            $amountDebet= $amountBayar<0?abs($amountBayar):0;
+            $amountKredit = $amountBayar > 0 ? $amountBayar : 0;
+            $amountDebet = $amountBayar < 0 ? abs($amountBayar) : 0;
             $st = self::createKartu(new Request([
                 'type' => 'pelunasan',
                 'purchasing_id' => null,

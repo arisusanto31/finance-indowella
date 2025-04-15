@@ -14,6 +14,14 @@
         </div>
         <div class="row">
             <div class="col mb-3">
+                <label for="akun" class="form-label">Akun BDD</label>
+                <select type="text" name="code_group" id="code-group" class="form-control select-coa">
+
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col mb-3">
                 <label for="quantity" class="form-label">Tipe Mutasi</label>
                 <select class="form-control" name="type_mutasi">
                     <option value="pembayaran">Pembayaran</option>
@@ -47,7 +55,8 @@
     console.log('masuk kok');
     initItemSelectManual('.select-prepaid', '{{route("bdd.get-item")}}', 'Pilih bdd', '#global-modal');
     initCurrencyInput('.currency-input');
-
+    initItemSelectManual('.select-coa', '{{route("chart-account.get-item-keuangan")}}?kind=prepaid', 'Pilih Akun Bdd', '#global-modal');
+ 
     function submitKartu() {
         $.ajax({
             url: '{{route("bdd.store-kartu-prepaid")}}',

@@ -19,7 +19,7 @@ class Journal extends Model
     use HasFactory;
     protected $table = "journals";
 
-    
+
     public function reference()
     {
         return $this->morphTo();
@@ -28,7 +28,7 @@ class Journal extends Model
 
     protected static function booted()
     {
-     
+
         static::addGlobalScope('journal', function ($query) {
             $from = $query->getQuery()->from ?? 'journals'; // untuk dukung alias `j` kalau pakai from('journals as j')
             if (Str::contains($from, ' as ')) {
@@ -37,10 +37,10 @@ class Journal extends Model
             } else {
                 $alias = $from;
             }
-        
-            $query->where(function ($q) use ($alias){
+
+            $query->where(function ($q) use ($alias) {
                 $q->whereNull("{$alias}.book_journal_id")
-                ->orWhere("{$alias}.book_journal_id", session('book_journal_id'));
+                    ->orWhere("{$alias}.book_journal_id", session('book_journal_id'));
             });
         });
     }
@@ -61,6 +61,7 @@ class Journal extends Model
             $journal->amount_debet = $request->input('amount_debet');
             $journal->amount_kredit = $request->input('amount_kredit');
             $journal->code_group = $request->input('code_group');
+
 
             $journal->reference_id = $request->input('reference_id');
             $journal->reference_type = $request->input('reference_type');
@@ -128,7 +129,9 @@ class Journal extends Model
                 $lastJournal = Journal::where('chart_account_id', $coaID)->where('index_date', '<', $finalIndexDate)->orderBy('index_date', 'desc')->first();
 
                 $journal = new Journal;
+                $chartAccount = ChartAccount::find($coaID);
                 $journal->chart_account_id = $coaID;
+                $journal->reference_model = $chartAccount->reference_model;
                 $journal->journal_number = $journal_number;
                 $journal->code_group = $request->input('code_group');
                 $journal->description = $request->input('description');
@@ -169,7 +172,7 @@ class Journal extends Model
                                 $detail->journal_number = $reference->journal_number;
                                 $detail->save();
                             }
-                        } 
+                        }
                     }
                 }
             } catch (Throwable $e) {

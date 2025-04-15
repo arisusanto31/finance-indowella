@@ -15,7 +15,7 @@ class CreateJournalJobFailed extends Migration
     {
         Schema::create('journal_job_faileds', function (Blueprint $table) {
             $table->id();
-            $table->string('url_try_again');
+            $table->string('url_try_again')->nullable();
             $table->string('type')->nullable();
             $table->longText('request')->nullable();
             $table->longText('response')->nullable();

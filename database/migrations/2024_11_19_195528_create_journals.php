@@ -26,6 +26,7 @@ class CreateJournals extends Migration
             $table->decimal('amount_saldo', 15, 2);
             $table->integer('reference_id')->nullable();
             $table->string('reference_type')->nullable();
+            $table->string('reference_model')->nullable();
             $table->integer('verified_by')->nullable();
             $table->integer('is_auto_generated')->nullable();
             $table->string('lawan_code_group', 10)->nullable();

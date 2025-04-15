@@ -241,23 +241,28 @@
         function tampilkan(data, master, margin) {
             html = "";
             isParent = master[data.id] != undefined ? true : false;
-            stringParent = isParent ? '<i id="arrow'+data.id+'" class="bx bx-chevron-down toggle-icon "></i>' : '';
-            if (data.parent_id == null)   
+            stringParent = isParent ? '<i id="arrow' + data.id + '" class="bx bx-chevron-down toggle-icon "></i>' : '';
+            if (data.parent_id == null)
                 html += `<li class="menu-item " style="margin-left: ${margin}px" >
                          <a class="" href="javascript:void(openToggle('${data.id}'))"> 
-                          <div class=""><strong> ${data.code_group} -  ${data.name} </strong>  ${stringParent}</div>
+                          <div class=""><strong> ${data.code_group} -  ${data.name} </strong>  ${stringParent} 
+                                    ${data.reference_model?'<span class="bg-primary px-2 text-white">'+data.reference_model+'</span>':''}
+                          </div>
                         </a>
                         </li>`;
             else
                 html += `<li class="menu-item " style="margin-left:  ${margin}px" >
                          <a class="" href="javascript:void(openToggle('${data.id}'))"> 
-                          <div class=""><strong> ${data.code_group} </strong> -  ${data.name} ${stringParent} </div>
+                          <div class=""><strong> ${data.code_group} </strong> -  ${data.name} ${stringParent} 
+                               ${data.reference_model?'<span class="bg-primary px-2 text-white">'+data.reference_model+'</span>':''}
+
+                          </div>
                         </a>
                         </li>`;
 
             if (master[data.id] != undefined) {
                 //punya anak coy
-                html += '<ul class=" tree-toggle" id="menu-sub'+data.id+'">';
+                html += '<ul class=" tree-toggle" id="menu-sub' + data.id + '">';
                 master[data.id].forEach(function eachDt(child) {
                     html += tampilkan(child, master, margin + 5);
                 });
@@ -266,7 +271,7 @@
 
             return html;
         }
-        
+
 
         function getChartAccount() {
             $.ajax({
@@ -292,9 +297,9 @@
             });
         }
 
-        function openToggle(id){
-            $('#menu-sub'+id).toggleClass('open');
-            $('#arrow'+id).toggleClass('open');
+        function openToggle(id) {
+            $('#menu-sub' + id).toggleClass('open');
+            $('#arrow' + id).toggleClass('open');
         }
     </script>
     @endpush

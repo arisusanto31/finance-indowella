@@ -17,6 +17,9 @@ class CreateTableKartuUtang2 extends Migration
             $table->id();
             $table->integer('book_journal_id');
             $table->string('type');
+            $table->decimal('code_group',6,0);
+            $table->string('code_group_name',6,0);
+            $table->decimal('lawan_code_group',6,0);
             $table->string('factur_supplier_number')->index();
             $table->date('invoice_date');
             $table->string('description')->nullable();
@@ -31,8 +34,6 @@ class CreateTableKartuUtang2 extends Migration
             $table->string('person_type')->nullable();
             $table->string('journal_number')->nullable();
             $table->integer('journal_id')->nullable();
-            $table->string('code_group', 10)->nullable();
-            $table->string('lawan_code_group', 10)->nullable();
             $table->timestamps();
         });
     }

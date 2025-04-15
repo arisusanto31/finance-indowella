@@ -15,8 +15,16 @@
         </div>
         <div class="row">
             <div class="col mb-3">
+                <label for="akun" class="form-label">Akun Persediaan</label>
+                <select type="text" name="code_group" id="code-group" class="form-control select-coa">
+
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col mb-3">
                 <label for="quantity" class="form-label">Jumlah Mutasi</label>
-                <input type="text"  name="mutasi_quantity" id="mutasi_quantity" autocomplete="off" class="form-control currency-input" placeholder="jumlah" />
+                <input type="text" name="mutasi_quantity" id="mutasi_quantity" autocomplete="off" class="form-control currency-input" placeholder="jumlah" />
             </div>
             <div class="col mb-3">
                 <label for="unit" class="form-label">Satuan</label>
@@ -47,6 +55,7 @@
     console.log('masuk kok');
     initItemSelectManual('.select-stock', '{{route("stock.get-item")}}', 'Pilih Stock', '#global-modal');
     initCurrencyInput('.currency-input');
+    initItemSelectManual('.select-coa', '{{route("chart-account.get-item-keuangan")}}?kind=persediaan', 'Pilih Akun Persediaan', '#global-modal');
 
     function updateTotalRupiah() {
         let quantity = $('#mutasi_quantity').val();
@@ -54,12 +63,12 @@
         let unit = $('#unit').val();
         let keterangan = 'Total Nilai Per unit : ' + formatRupiah(totalRupiah) + ' / ' + unit;
         $('#keterangan').html(keterangan);
-        $('#mutasi-rupiah-on-unit').val(totalRupiah );
+        $('#mutasi-rupiah-on-unit').val(totalRupiah);
     }
 
     function selectStock() {
         let stockid = $('#select-stock option:selected').val();
-        if(stockid == '') {
+        if (stockid == '') {
             return;
         }
         $.ajax({

@@ -18,7 +18,6 @@ class KartuStock extends Model
 
     protected static function booted()
     {
-
         static::addGlobalScope('journal', function ($query) {
             $from = $query->getQuery()->from ?? 'journals'; // untuk dukung alias `j` kalau pakai from('journals as j')
             if (Str::contains($from, ' as ')) {
@@ -38,11 +37,7 @@ class KartuStock extends Model
 
 
     public static function create(Request $request)
-
     {
-
-
-
         $lock = Cache::lock('kartu-stock-' . $request->input('stock_id'), 40);
         try {
             $flow = $request->input('flow');
@@ -82,6 +77,8 @@ class KartuStock extends Model
                 $kartu->mutasi_rupiah_on_unit = moneyMul($kartu->mutasi_rupiah_on_unit, -1);
                 $kartu->mutasi_rupiah_total = moneyMul($kartu->mutasi_rupiah_total, -1);
             }
+            $kartu->code_group= $request->input('code_group');
+            $kartu->code_group_name = $request->input('code_group_name');
             $kartu->book_journal_id = session('book_journal_id');
             $kartu->saldo_qty_backend = moneyAdd($lastCard->saldo_qty_backend, $kartu->mutasi_qty_backend);
             $kartu->saldo_rupiah_total = moneyAdd($lastCard->saldo_rupiah_total, $kartu->mutasi_rupiah_total);
@@ -124,6 +121,16 @@ class KartuStock extends Model
             $qty = $request->input('mutasi_quantity');
             $unit = $request->input('unit');
             $flow = $request->input('flow');
+            $codeGroup= $request->input('code_group');
+            $chart= ChartAccount::where('code_group', $codeGroup)->first();
+            if (!$chart) {
+                DB::rollBack();
+                return [
+                    'status' => 0,
+                    'msg' => 'code group tidak ditemukan'
+                ];
+            }
+            $codeGroupName = $chart->name;
             if ($request->input('mutasi_rupiah_total'))
                 $mutasiRupiahTotal = format_db($request->input('mutasi_rupiah_total'));
             else
@@ -153,6 +160,8 @@ class KartuStock extends Model
                 'is_custom_rupiah' => $isCustom,
                 'mutasi_rupiah_on_unit' => $mutasiRupiahUnit,
                 'mutasi_rupiah_total' => $mutasiRupiahTotal,
+                'code_group' => $codeGroup,
+                'code_group_name' => $codeGroupName,
             ]));
             return $st;
             if ($st['status'] == 0) {

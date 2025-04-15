@@ -23,7 +23,7 @@ class Supplier extends Model
             } else {
                 $alias = $from;
             }
-            $query->where("{$alias}.is_deleted", '=', 0);
+            $query->whereNull("{$alias}.is_deleted");
 
         });
     }

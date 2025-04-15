@@ -338,7 +338,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 2,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuPiutang"
     },
     {
         "id": 34,
@@ -349,7 +350,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 2,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuPiutang"
     },
     {
         "id": 35,
@@ -360,7 +362,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 2,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuPiutang"
     },
     {
         "id": 36,
@@ -371,7 +374,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 2,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuPiutang"
     },
     {
         "id": 37,
@@ -382,7 +386,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 2,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuPiutang"
     },
     {
         "id": 38,
@@ -393,7 +398,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 2,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuPiutang"
     },
     {
         "id": 39,
@@ -404,7 +410,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 2,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuStock"
     },
     {
         "id": 40,
@@ -415,7 +422,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 2,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuStock"
     },
     {
         "id": 41,
@@ -426,7 +434,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 2,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuPrepaidExpense"
     },
     {
         "id": 42,
@@ -437,7 +446,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 2,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuPrepaidExpense"
     },
     {
         "id": 43,
@@ -448,7 +458,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 2,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuPrepaidExpense"
     },
     {
         "id": 44,
@@ -459,7 +470,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 2,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuPrepaidExpense"
     },
     {
         "id": 45,
@@ -470,7 +482,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 2,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuPiutang"
     },
     {
         "id": 46,
@@ -481,7 +494,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 2,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuInventory"
     },
     {
         "id": 48,
@@ -492,7 +506,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 2,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuInventory"
     },
     {
         "id": 49,
@@ -503,7 +518,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 2,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuInventory"
     },
     {
         "id": 50,
@@ -514,7 +530,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 2,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuInventory"
     },
     {
         "id": 51,
@@ -525,7 +542,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 2,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuInventory"
     },
     {
         "id": 52,
@@ -536,7 +554,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 2,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuInventory"
     },
     {
         "id": 53,
@@ -547,7 +566,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 2,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuInventory"
     },
     {
         "id": 54,
@@ -558,7 +578,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 2,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuInventory"
     },
     {
         "id": 55,
@@ -569,7 +590,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 2,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuInventory"
     },
     {
         "id": 56,
@@ -580,7 +602,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 2,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuInventory"
     },
     {
         "id": 57,
@@ -591,7 +614,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 2,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuHutang"
     },
     {
         "id": 60,
@@ -602,7 +626,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 2,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuHutang"
     },
     {
         "id": 61,
@@ -613,7 +638,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 2,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuHutang"
     },
     {
         "id": 62,
@@ -624,7 +650,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 2,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuHutang"
     },
     {
         "id": 63,
@@ -976,7 +1003,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 2,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuPrepaidExpense"
     },
     {
         "id": 96,
@@ -1009,7 +1037,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 2,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuHutang"
     },
     {
         "id": 99,
@@ -1020,7 +1049,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 2,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuHutang"
     },
     {
         "id": 100,
@@ -1031,7 +1061,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 3,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuHutang"
     },
     {
         "id": 101,
@@ -1042,7 +1073,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 3,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuHutang"
     },
     {
         "id": 102,
@@ -1053,7 +1085,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 3,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuHutang"
     },
     {
         "id": 103,
@@ -1064,7 +1097,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 3,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuHutang"
     },
     {
         "id": 104,
@@ -1075,7 +1109,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 3,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuHutang"
     },
     {
         "id": 105,
@@ -1086,7 +1121,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 3,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuHutang"
     },
     {
         "id": 106,
@@ -1097,7 +1133,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 3,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuHutang"
     },
     {
         "id": 107,
@@ -1108,7 +1145,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 3,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuHutang"
     },
     {
         "id": 108,
@@ -1119,7 +1157,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 3,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuHutang"
     },
     {
         "id": 109,
@@ -1416,7 +1455,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 2,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuPrepaidExpense"
     },
     {
         "id": 136,
@@ -1493,7 +1533,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 2,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuInventory"
     },
     {
         "id": 144,
@@ -1636,7 +1677,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 2,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuStock"
     },
     {
         "id": 157,
@@ -1670,6 +1712,5 @@
         "is_child": 1,
         "level": 2,
         "deleted_at": null
-        
     }
 ]

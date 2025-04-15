@@ -22,6 +22,7 @@ class CreateChartAccounts extends Migration
             $table->integer('is_deleted')->nullable();
             $table->boolean('is_child')->nullable();
             $table->integer('level')->nullable();
+            $table->string('reference_model')->nullable();
             $table->datetime('deleted_at')->nullable();
             $table->timestamps();
         });

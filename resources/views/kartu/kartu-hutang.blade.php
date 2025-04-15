@@ -14,7 +14,7 @@
             </div>
 
             <div class="row">
-               
+
                 <div class="col-md-2">
                     <select name="bulan" id="month" class="form-select ">
                         <option value="">-- Bulan --</option>
@@ -35,8 +35,6 @@
                     <button onclick="getSummary()" class="btn btn-primary btn-sm w-100">Cari</button>
                 </div>
             </div>
-
-
 
             <div class="table-responsive mt-2">
                 <table id="kartuKasTable" class="table table-bordered table-striped table-hover align-middle">
@@ -82,6 +80,19 @@
                         <div class="col mb-3">
                             <label for="amount_mutasi" class="form-label">Nilai mutasi</label>
                             <input type="text" id="amount_mutasi" autocomplete="off" class="form-control currency-input" placeholder="Nilai Mutasi" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col mb-3">
+                            <label for="amount_mutasi" class="form-label">Akun hutang</label>
+                            <select type="text" id="akun-hutang" class="form-control select-coa">
+
+                            </select>
+                        </div>
+                        <div class="col mb-3">
+                            <label for="amount_mutasi" class="form-label">Lawan Akun</label>
+                            <select type="text" id="akun-lawan-hutang" class="form-control select-coa">
+                            </select>
                         </div>
                     </div>
                     <div class="row g-2">
@@ -134,8 +145,14 @@
                     </div>
                     <div class="row">
                         <div class="col mb-3">
+                            <label for="amount_mutasi" class="form-label">Akun Hutang</label>
+                            <select type="text" id="pelunasan-akun-hutang" class="form-control select-coa">
+
+                            </select>
+                        </div>
+                        <div class="col mb-3">
                             <label for="amount_mutasi" class="form-label">Akun Pembayaran</label>
-                            <select type="text" id="pelunasan-akun-bayar" class="form-control select-coa" >
+                            <select type="text" id="pelunasan-akun-bayar" class="form-control select-coa">
 
                             </select>
                         </div>
@@ -178,6 +195,8 @@
                     factur_supplier_number: $('#factur').val(),
                     amount_mutasi: formatDB($('#amount_mutasi').val(), 'id'),
                     person_id: $('#person_id option:selected').val(),
+                    code_group:$('#akun-hutang option:selected').val(),
+                    lawan_code_group: $('#akun-lawan-hutang option:selected').val(),
                     person_type: $('#person_type option:selected').val(),
                     _token: '{{csrf_token()}}'
                 },
@@ -200,7 +219,6 @@
                     $('#btn-store').attr('disabled', false);
                 }
             })
-
         }
 
         function storePelunasan() {
@@ -215,7 +233,8 @@
                     factur_supplier_number: $('#pelunasan-factur').val(),
                     amount_bayar: formatDB($('#pelunasan-amount').val(), 'id'),
                     person_id: $('#pelunasan-person_id option:selected').val(),
-                    account_bayar: $('#pelunasan-akun-bayar option:selected').val(),
+                    code_group: $('#pelunasan-akun-bayar option:selected').val(),
+                    lawan_code_group: $('#pelunasan-akun-hutang option:selected').val(),
                     person_type: $('#pelunasan-person_type option:selected').val(),
                     _token: '{{csrf_token()}}'
                 },
@@ -238,7 +257,6 @@
                     $('#btn-store-pelunasan').attr('disabled', false);
                 }
             })
-
         }
 
         function initSelectPerson() {
@@ -246,45 +264,42 @@
             if (type === 'App\\Models\\Supplier') {
                 console.log('init oy ' + type);
                 initItemSelectManual('#person_id', '{{route("supplier.get-item")}}', 'Person Name ..', '#basicModal');
-            }
-
-            else{
+            } else {
                 initItemSelectManual('#person_id', '{{route("other-person.get-item")}}', 'Person Name ..', '#basicModal');
-       
             }
         }
+
         function initSelectPersonPelunasan() {
             type = $('#person_type option:selected').val();
             if (type === 'App\\Models\\Supplier') {
                 console.log('init oy ' + type);
                 initItemSelectManual('#pelunasan-person_id', '{{route("supplier.get-item")}}', 'Person Name ..', '#pelunasanModal');
-            }
-            else{
+            } else {
                 initItemSelectManual('#pelunasan-person_id', '{{route("other-person.get-item")}}', 'Person Name ..', '#pelunasanModal');
-       
             }
-            
         }
         initSelectPerson();
         initSelectPersonPelunasan();
-        initItemSelectManual('#pelunasan-akun-bayar','{{route("chart-account.get-item")}}','akun pembayaran ..','#pelunasanModal');
-        
+        initItemSelectManual('#pelunasan-akun-bayar', '{{route("chart-account.get-item")}}', 'akun pembayaran ..', '#pelunasanModal');
+        initItemSelectManual('#pelunasan-akun-hutang', '{{route("chart-account.get-item-keuangan")}}?kind=hutang', 'akun hutang ..', '#pelunasanModal');
+        initItemSelectManual('#akun-hutang', '{{route("chart-account.get-item-keuangan")}}?kind=hutang', 'akun hutang ..', '#basicModal');
+        initItemSelectManual('#akun-lawan-hutang', '{{route("chart-account.get-item")}}', 'akun lawan hutang ..', '#basicModal');
 
         function getSummary() {
-            month= $('#month option:selected').val()??"";
-            year= $('#year option:selected').val()??"";
-            console.log(month+','+year);
+            month = $('#month option:selected').val() ?? "";
+            year = $('#year option:selected').val() ?? "";
+            console.log(month + ',' + year);
             $.ajax({
-                url: '{{route("kartu-hutang.get-summary")}}?month='+month+'&year='+year,
+                url: '{{route("kartu-hutang.get-summary")}}?month=' + month + '&year=' + year,
                 method: 'get',
                 success: function(res) {
                     console.log(res);
                     if (res.status == 1) {
                         html = "";
-                        saldoAkhir=0;
-                        res.msg.forEach(function(data,i) {
-                            saldoAkhir+=parseInt(data.saldo);
-                            html+= `
+                        saldoAkhir = 0;
+                        res.msg.forEach(function(data, i) {
+                            saldoAkhir += parseInt(data.saldo);
+                            html += `
                                 <tr>
                                     <td>${i+1}</td>
                                     <td>${data.person_name}</td>
@@ -309,7 +324,7 @@
             });
         }
 
-        setTimeout(getSummary,100);
+        setTimeout(getSummary, 100);
     </script>
     @endpush
 </x-app-layout>

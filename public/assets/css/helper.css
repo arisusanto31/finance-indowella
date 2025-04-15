@@ -27,7 +27,7 @@
 }
 
 .tree-toggle.open {
-  max-height: 500px;
+  max-height: 1500px;
   /* cukup besar utk semua submenu */
   opacity: 1;
 }
