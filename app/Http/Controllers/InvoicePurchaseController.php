@@ -10,4 +10,5 @@ class InvoicePurchaseController extends Controller
     {
         return view('invoice.invoice-purchase');
     }
+    
 }

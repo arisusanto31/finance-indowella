@@ -13,15 +13,22 @@ return new class extends Migration
     {
         Schema::create('invoice_packs', function (Blueprint $table) {
             $table->id();
-            $table->string('invoice_number')->unique(); 
+            $table->string('invoice_number')->unique();
             $table->unsignedBigInteger('customer_id');
             $table->date('invoice_date')->nullable();
             $table->decimal('total_price', 20, 2)->nullable();
-            $table->text('notes')->nullable();
-            $table->timestamps();
-
-            // Tambahkan foreign key
+            $table->string('status')->default('pending');
+            $table->string('bukti_file')->nullable();
+         
             $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
+        
+            $table->timestamps(); 
         });
     }
-}
+
+
+    public function down(): void
+    {
+        Schema::dropIfExists('invoice_packs');
+    }
+};

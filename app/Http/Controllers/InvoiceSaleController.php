@@ -34,40 +34,48 @@ class InvoiceSaleController extends Controller
     }
    
     public function store(Request $request)
-{
-    $request->validate([
-        'invoice_number' => 'required|string|max:255',
-        'customer_id' => 'required|integer',
-        'stock_id' => 'required|array',
-        'stock_id.*' => 'required|integer',
-        'quantity' => 'required|array',
-        'quantity.*' => 'required|numeric',
-        'price_unit' => 'required|array',
-        'price_unit.*' => 'required|numeric',
-        'unit' => 'required|array',
-        'unit.*' => 'required|string',
-    ]);
-
-    $invoice_number = $request->invoice_number;
-
-    foreach ($request->stock_id as $i => $stockId) {
-        $qty = $request->quantity[$i];
-        $price = $request->price_unit[$i];
-        $discount = $request->discount[$i] ?? 0;
-        $total = ($qty * $price) - $discount;
-
-        InvoiceSaleDetail::create([
-            'invoice_number' => $invoice_number,
-            'stock_id' => $stockId,
-            'quantity' => $qty,
-            'unit' => $request->unit[$i],
-            'price' => $price,
-            'total_price' => $total,
-            'discount' => $discount,
-            'customer_id' => $request->customer_id,
+    {
+        $request->validate([
+            'invoice_number' => 'required|string|max:255',
+            'customer_id' => 'required|integer',
+            'stock_id' => 'required|array',
+            'stock_id.*' => 'required|integer',
+            'quantity' => 'required|array',
+            'quantity.*' => 'required|numeric',
+            'price_unit' => 'required|array',
+            'price_unit.*' => 'required|numeric',
+            'unit' => 'required|array',
+            'unit.*' => 'required|string',
         ]);
+    
+        $invoice_number = $request->invoice_number;
+        $grouped = [];
+    
+        foreach ($request->stock_id as $i => $stockId) {
+            $key = $invoice_number . '-' . $stockId;
+    
+            if (!isset($grouped[$key])) {
+                $grouped[$key] = [
+                    'invoice_number' => $invoice_number,
+                    'stock_id' => $stockId,
+                    'quantity' => $request->quantity[$i],
+                    'unit' => $request->unit[$i],
+                    'price' => $request->price_unit[$i],
+                    'discount' => $request->discount[$i] ?? 0,
+                    'customer_id' => $request->customer_id,
+                ];
+            } else {
+                $grouped[$key]['quantity'] += $request->quantity[$i];
+                $grouped[$key]['discount'] += $request->discount[$i] ?? 0;
+            }
+        }
+    
+        foreach ($grouped as &$data) {
+            $data['total_price'] = ($data['quantity'] * $data['price']) - $data['discount'];
+            InvoiceSaleDetail::create($data);
+        }
+    
+        
+        return redirect()->route('invoice.sales.index')->with('success', 'Invoice berhasil disimpan!');
     }
-
-    return redirect()->route('invoice.sales.index')->with('success', 'Invoice berhasil disimpan!');
-}
 }

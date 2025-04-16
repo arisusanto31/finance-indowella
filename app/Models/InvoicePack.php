@@ -1,11 +1,10 @@
 <?php
 
-
-
 namespace App\Models;
 
-// use app/Models/InvoicePack.php
 use Illuminate\Database\Eloquent\Model;
+use App\Models\InvoiceSaleDetail;
+use App\Models\Customer;
 
 class InvoicePack extends Model
 {
@@ -18,20 +17,15 @@ class InvoicePack extends Model
         'bukti_file',
     ];
 
+    
     public function invoiceDetails()
     {
         return $this->hasMany(InvoiceSaleDetail::class, 'invoice_number', 'invoice_number');
     }
 
-    public function show($id)
-{
-    $invoice = InvoicePack::with('invoiceDetails')->findOrFail($id);
-    return view('invoice.show', compact('invoice'));
-}
-
-public function invoiceDetails()
-{
-    return $this->hasMany(InvoiceSaleDetail::class, 'invoice_number', 'invoice_number');
-}
-
+   
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class);
+    }
 }
