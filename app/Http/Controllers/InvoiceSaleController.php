@@ -34,46 +34,40 @@ class InvoiceSaleController extends Controller
     }
    
     public function store(Request $request)
-    {
-      
-        $request->validate([
-            'stock_id' => 'required|array',
-            'stock_id.*' => 'required|integer',
-            'quantity' => 'required|array',
-            'quantity.*' => 'required|numeric',
-            'price_unit' => 'required|array',
-            'price_unit.*' => 'required|numeric',
-            'unit' => 'required|array',
-            'unit.*' => 'required|string',
+{
+    $request->validate([
+        'invoice_number' => 'required|string|max:255',
+        'customer_id' => 'required|integer',
+        'stock_id' => 'required|array',
+        'stock_id.*' => 'required|integer',
+        'quantity' => 'required|array',
+        'quantity.*' => 'required|numeric',
+        'price_unit' => 'required|array',
+        'price_unit.*' => 'required|numeric',
+        'unit' => 'required|array',
+        'unit.*' => 'required|string',
+    ]);
+
+    $invoice_number = $request->invoice_number;
+
+    foreach ($request->stock_id as $i => $stockId) {
+        $qty = $request->quantity[$i];
+        $price = $request->price_unit[$i];
+        $discount = $request->discount[$i] ?? 0;
+        $total = ($qty * $price) - $discount;
+
+        InvoiceSaleDetail::create([
+            'invoice_number' => $invoice_number,
+            'stock_id' => $stockId,
+            'quantity' => $qty,
+            'unit' => $request->unit[$i],
+            'price' => $price,
+            'total_price' => $total,
+            'discount' => $discount,
+            'customer_id' => $request->customer_id,
         ]);
-
-       
-        $prefix = 'INV-' . now()->format('Ym');
-        $last = InvoiceSaleDetail::where('invoice_number', 'like', "$prefix%")->count();
-        $invoice_number = $prefix . '-' . str_pad($last + 1, 4, '0', STR_PAD_LEFT);
-
-        
-        foreach ($request->stock_id as $i => $stockId) {
-            $qty = $request->quantity[$i];
-            $price = $request->price_unit[$i];
-            $discount = $request->discount[$i] ?? 0;
-            $total = ($qty * $price) - $discount;
-
-            InvoiceSaleDetail::create([
-                'invoice_number' => $invoice_number,
-                'stock_id' => $stockId,
-                'quantity' => $qty,
-                'unit' => $request->unit[$i],
-                'price' => $price,
-                'total_price' => $total,
-                'discount' => $discount,
-                'customer_id' => $request->customer_id ?? null,
-            ]);
-        }
-
-        return redirect()->route('invoice.sales.index')->with('success', 'Invoice berhasil disimpan!');
-
     }
-   
 
+    return redirect()->route('invoice.sales.index')->with('success', 'Invoice berhasil disimpan!');
+}
 }

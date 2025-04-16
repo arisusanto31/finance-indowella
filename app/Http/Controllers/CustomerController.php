@@ -120,6 +120,8 @@ class CustomerController extends Controller
     }
 } 
 
+
+
 // class CustomerController extends Controller
 // {
 //     //
