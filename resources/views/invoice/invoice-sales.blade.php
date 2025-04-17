@@ -1,4 +1,11 @@
 <x-app-layout>
+@if (session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
     <form method="POST" action="{{ route('invoice.sales.store') }}">
         @csrf
 
@@ -68,6 +75,53 @@
             </div>
         </div>
     </form>
+    @forelse ($invoices as $invoiceNumber => $items)
+    <div class="card mb-4 shadow p-3">
+        <h5>Invoice: {{ $invoiceNumber }}</h5>
+        <p>Customer: {{ $items->first()->customer->name ?? '-' }}</p>
+        <p>Tanggal: {{ $items->first()->created_at->format('Y-m-d') }}</p>
+
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Nama Produk</th>
+                    <th>Qty</th>
+                    <th>Unit</th>
+                    <th>Harga</th>
+                    <th>Diskon</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($items as $item)
+                    <tr>
+                        <td>{{ $item->stock->name ?? '-' }}</td>
+                        <td>{{ $item->quantity }}</td>
+                        <td>{{ $item->unit }}</td>
+                        <td>Rp{{ number_format($item->price) }}</td>
+                        <td>Rp{{ number_format($item->discount) }}</td>
+                        <td>Rp{{ number_format($item->total_price) }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+@empty
+    <div class="alert alert-warning">Belum ada data invoice.</div>
+@endforelse
+    </tbody>
+</table>
+
+
+    </div>
+@empty
+    <div class="alert alert-warning text-center">
+        Belum ada data invoice.
+    </div>
+@endforelse
+
+    </tbody>
+</table>
 
     @push('styles')
         <style>

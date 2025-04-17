@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\InvoiceSaleDetail;
 use App\Models\Stock;
 use App\Models\StockCategory;
+use App\Models\InvoicePack;
 
 class InvoiceSaleController extends Controller
 {
@@ -21,17 +22,31 @@ class InvoiceSaleController extends Controller
         'customer_id',
     ];
     
+
+ 
+
     public function showSales()
     {
-        $invoices = InvoiceSaleDetail::latest()->get();
-        $categories = \App\Models\StockCategory::all();
-        $stocks = Stock::all();
-        $categories = StockCategory::all();
-        $stocks = Stock::with(['category', 'parentCategory', 'units'])->get();
-
-
-        return view('invoice.invoice-sales', compact('invoices','stocks','categories'));
+       
+        $invoices = \App\Models\InvoiceSaleDetail::with(['stock', 'customer'])
+            ->get()
+            ->groupBy('invoice_number');
+    
+        return view('invoice.invoice-sales', compact('invoices'));
     }
+    
+
+    // public function showSales()
+    // {
+    //     $invoices = InvoiceSaleDetail::latest()->get();
+    //     $categories = \App\Models\StockCategory::all();
+    //     $stocks = Stock::all();
+    //     $categories = StockCategory::all();
+    //     $stocks = Stock::with(['category', 'parentCategory', 'units'])->get();
+
+
+    //     return view('invoice.invoice-sales', compact('invoices','stocks','categories'));
+    // }
    
     public function store(Request $request)
     {
@@ -76,6 +91,6 @@ class InvoiceSaleController extends Controller
         }
     
         
-        return redirect()->route('invoice.sales.index')->with('success', 'Invoice berhasil disimpan!');
+        return redirect()->route('invoice.sales.index')->with('success', 'Invoice berhasil disimpan luurr 😃!');
     }
 }
