@@ -23,6 +23,7 @@ use App\Http\Controllers\{
     InvoicePurchaseController,
     InventoryController
 };
+use App\Models\Journal;
 
 Route::get('/', fn() => redirect('/login'));
 Route::get('/phpinfo', fn() => phpinfo());
@@ -31,6 +32,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::prefix('permission')->group(function () {
+        Route::get('/give-to-role',[ProfileController::class,'getGivePermissionRole'])->name('give-to-role');
+    });
 });
 
 Route::prefix('book')->middleware(['auth', 'role:admin,web'])->group(function () {
@@ -42,19 +46,30 @@ Route::prefix('book')->middleware(['auth', 'role:admin,web'])->group(function ()
 Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])->group(function () {
     Route::get('/', [IndexController::class, 'index'])->name('admin.index');
     Route::get('/random', [IndexController::class, 'random']);
-    Route::get('/dashboard', [IndexController::class, 'dashboard'])->name('admin.dashboard');
+
+    Route::prefix('dashboard')->name('dashboard.')->group(function () {
+        Route::get('/', [IndexController::class, 'dashboard'])->name('index');
+        Route::get('/inspect-jurnal', [IndexController::class, 'inspectJurnal'])->name('inspect-jurnal');
+    });
+
+
     Route::get('/login-dashboard', [IndexController::class, 'loginDashboard']);
     Route::get('/neraca', [JournalController::class, 'neraca']);
     Route::get('/neraca-lajur', [JournalController::class, 'neracalajur']);
     Route::get('/get-mutasi-neraca-lajur', [JournalController::class, 'getMutasiNeracaLajur']);
     Route::get('/laba-rugi', [JournalController::class, 'labarugi']);
 
-    Route::prefix('jurnal')->group(function () {
+    Route::prefix('jurnal')->name('jurnal.')->group(function () {
         Route::get('/buku-besar', [JournalController::class, 'bukuBesar'])->name('main.buku-besar');
         Route::get('/mutasi', [JournalController::class, 'mutasi'])->name('main.mutasi');
         Route::get('/get-list-mutasi', [JournalController::class, 'getListMutasiJurnal']);
         Route::get('/get-buku-besar', [JournalController::class, 'getListBukuBesar']);
         Route::post('/submit-manual', [JournalController::class, 'createBaseJournal']);
+        Route::get('/search-error', [JournalController::class, 'searchError'])->name('search-error');
+        Route::post('link-journal', [JournalController::class, 'linkJournal'])->name('link-journal');
+        Route::get('verify/{id}', [JournalController::class, 'verify'])->name('verify');
+        Route::get('/recalculate/{id}', [JournalController::class, 'recalculate'])->name('recalculate');
+        Route::delete('delete/{id}', [JournalController::class, 'destroy'])->name('delete');
     });
 
     Route::prefix('daftar')->group(function () {
@@ -81,12 +96,10 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('/get-mutasi-keluar', [BDDController::class, 'getMutasiKeluar'])->name('get-mutasi-keluar');
         });
 
-            Route::get('/daftar-karyawan', [KaryawanController::class, 'DaftarKaryawan'])->name('daftar.daftar-karyawan');
-            Route::get('/karyawan/create', [KaryawanController::class, 'create'])->name('karyawan.create');
-            Route::post('/karyawan/store', [KaryawanController::class, 'store'])->name('karyawan.store');
-
-
-});
+        Route::get('/daftar-karyawan', [KaryawanController::class, 'DaftarKaryawan'])->name('daftar.daftar-karyawan');
+        Route::get('/karyawan/create', [KaryawanController::class, 'create'])->name('karyawan.create');
+        Route::post('/karyawan/store', [KaryawanController::class, 'store'])->name('karyawan.store');
+    });
     Route::prefix('kartu')->group(function () {
         Route::resource('/kartu-kas', KartuKasController::class);
 
@@ -173,7 +186,6 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::get('invoice-sales', [InvoiceSaleController::class, 'ShowSales'])->name('sales.index');
         Route::get('invoice-purchase', [InvoicePurchaseController::class, 'ShowPurchase'])->name('purchase.index');
         Route::post('invoice-sales', [InvoiceSaleController::class, 'store'])->name('sales.store');
-
     });
 });
 

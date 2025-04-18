@@ -175,6 +175,7 @@ class Journal extends Model
                         }
                     }
                 }
+                $journal->verifyJournal();
             } catch (Throwable $e) {
                 return [
                     'status' => 0,
@@ -200,6 +201,52 @@ class Journal extends Model
             'lock_name' => $name,
 
         ];
+    }
+
+    public function verifyJournal()
+    {
+        $this->refresh();
+        if ($this->reference_model) {
+            $this->verified_by = null;
+
+            if ($this->reference_model == 'App\Models\KartuStock') {
+                $ks = KartuStock::where('journal_id', $this->id)->get();
+                info(abs(collect($ks)->sum('mutasi_rupiah_total')) . '==' . abs($this->amount_debet - $this->amount_kredit));
+                if (abs(collect($ks)->sum('mutasi_rupiah_total')) == abs($this->amount_debet - $this->amount_kredit)) {
+                    $this->verified_by = 1;
+                }
+            } else if ($this->reference_model == 'App\Models\KartuHutang') {
+                $ks = KartuHutang::where('journal_id', $this->id)->get();
+                $totalAmount = abs($ks->sum('amount_debet') - $ks->sum('amount_kredit'));
+                info(abs($totalAmount) . '==' . abs($this->amount_debet - $this->amount_kredit));
+                if (($totalAmount) == abs($this->amount_debet - $this->amount_kredit)) {
+                    $this->verified_by = 1;
+                }
+            } else if ($this->reference_model == 'App\Models\KartuPiutang') {
+                $ks = KartuPiutang::where('journal_id', $this->id)->get();
+                $totalAmount = abs($ks->sum('amount_debet') - $ks->sum('amount_kredit'));
+                info(abs($totalAmount) . '==' . abs($this->amount_debet - $this->amount_kredit));
+                if ($totalAmount == abs($this->amount_debet - $this->amount_kredit)) {
+                    $this->verified_by = 1;
+                }
+            } else if ($this->reference_model == 'App\Models\KartuInventory') {
+                $ks = KartuInventory::where('journal_id', $this->id)->get();
+                info(abs(collect($ks)->sum('amount')) . '==' . abs($this->amount_debet - $this->amount_kredit));
+                if (abs(collect($ks)->sum('amount')) == abs($this->amount_debet - $this->amount_kredit)) {
+                    $this->verified_by = 1;
+                }
+            } else if ($this->reference_model == 'App\Models\KartuPrepaidExpense') {
+                $ks = KartuPrepaidExpense::where('journal_id', $this->id)->get();
+                info(abs(collect($ks)->sum('amount')) . '==' . abs($this->amount_debet - $this->amount_kredit));
+                if (abs(collect($ks)->sum('amount')) == abs($this->amount_debet - $this->amount_kredit)) {
+                    $this->verified_by = 1;
+                }
+            }
+        } else {
+            $this->verified_by = 1;
+        }
+        $this->save();
+        return $this;
     }
 
     public function recalculateJournal()

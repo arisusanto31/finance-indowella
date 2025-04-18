@@ -93,7 +93,7 @@
                   <tr>
                     <td>${index+1}</td>
                     <td>${tanggal}</td>
-                    <td>${item.journal_number} </td>
+                    <td>${item.journal_number} [${item.id}] </td>
                     <td>${item.lawan_code_group} - ${res.chart_accounts[item.lawan_code_group]}</td>
                     <td>${item.description}</td>
                     <td>${formatRupiah(item.amount_debet- item.amount_kredit)}</td>

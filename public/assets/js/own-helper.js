@@ -35,14 +35,14 @@ function formatDB(angka, language = "id") {
         split[1] = (split[1].replace(/[^0-9]/g, ''));
         strkoma = "0." + split[1];
         koma = parseFloat(strkoma);
-   
+
         koma *= 100;
         koma = Math.round(koma);
         angka += '.' + koma;
     }
     if (angka == null || angka == "") angka = 0;
     angka = parseFloat(angka);
-   
+
     if (negatif)
         angka *= -1;
     return angka;
@@ -107,12 +107,12 @@ function getNumID(data) {
     return numid;
 }
 
-function initItemSelectManual(el, url, placeholder = "",parent=null) {
+function initItemSelectManual(el, url, placeholder = "", parent = null) {
 
     if (placeholder == "")
         placeholder = "Cari berdasarkan nama ..."
-    if(parent==null){
-        parent='body';
+    if (parent == null) {
+        parent = 'body';
     }
     $(el).select2({
         placeholder: placeholder,
@@ -156,15 +156,15 @@ function formatNormalDateTime(date) {
 
 
 
-function getProsen($data,$total){
-    if($total==0){
+function getProsen($data, $total) {
+    if ($total == 0) {
         return 0;
-    }else{
-        return Math.round(($data*100/$total)*100)/100;
+    } else {
+        return Math.round(($data * 100 / $total) * 100) / 100;
     }
 }
 
-function initCurrencyInput(elem){
+function initCurrencyInput(elem) {
     $(elem).on('input', function () {
         let value = $(this).val().replace(/[^\d]/g, '');
         // Format angka dengan locale 'id-ID' → hasilnya: 50.000
@@ -175,4 +175,94 @@ function initCurrencyInput(elem){
 
 function array_key_exists(key, obj) {
     return Object.prototype.hasOwnProperty.call(obj, key);
-  }
+}
+
+
+function swalInfo(title,text,icon="info"){
+    Swal.fire({
+        title: title,
+        text: text,
+        icon: icon,
+        allowOutsideClick: false,
+        showLoaderOnConfirm: true,
+        didOpen: () => {
+            $('.swal2-container').css('z-index', 2000);
+        }
+    });
+}
+function swalConfirmAndSubmit({ url, data, onSuccess = null, successText = "Berhasil!", confirmText = "Yes", cancelText = "No" }) {
+    Swal.fire({
+        title: "Apakah kamu yakin?",
+        text: "Data akan diproses!",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: confirmText,
+        cancelButtonText: cancelText,
+        allowOutsideClick: false,
+        showLoaderOnConfirm: true,
+        didOpen: () => {
+            $('.swal2-container').css('z-index', 2000);
+        },
+        preConfirm: () => {
+            return $.ajax({
+                url: url,
+                method: 'post',
+                data: data
+            }).then(res => {
+                if (res.status == 1) {
+                    return Swal.fire({
+                        title: "Sukses!",
+                        text: successText,
+                        icon: 'success',
+                        allowOutsideClick: false
+                    }).then(() => {
+                        if (typeof onSuccess === "function") onSuccess(res);
+                    });
+                } else {
+                    return Promise.reject(res.msg || "Gagal menyimpan data");
+                }
+            }).catch(err => {
+                Swal.showValidationMessage(err || "Terjadi kesalahan!");
+            });
+        }
+    });
+}
+
+function swalDelete({ url, onSuccess = null, successText = "Berhasil!", confirmText = "Dihapus", cancelText = "Cancel" }) {
+    Swal.fire({
+        title: "Apakah kamu yakin?",
+        text: "Data akan dihapus!",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: confirmText,
+        cancelButtonText: cancelText,
+        allowOutsideClick: false,
+        showLoaderOnConfirm: true,
+        didOpen: () => {
+            $('.swal2-container').css('z-index', 2000);
+        },
+        preConfirm: () => {
+            return $.ajax({
+                url: url,
+                type: "DELETE",
+                headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
+            }).then(res => {
+                console.log(res);
+                if (res.status == 1) {
+                    return Swal.fire({
+                        title: "Sukses!",
+                        text: successText,
+                        icon: 'success',
+                        allowOutsideClick: false
+                    }).then(() => {
+                        if (typeof onSuccess === "function") onSuccess(res);
+                    });
+                } else {
+                    return Promise.reject(res.msg || "Gagal menyimpan data");
+                }
+            }).catch(err => {
+                Swal.showValidationMessage(err || "Terjadi kesalahan!");
+            });
+        }
+    });
+}

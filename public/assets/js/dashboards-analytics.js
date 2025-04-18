@@ -420,7 +420,7 @@
 
   // Order Statistics Chart
   // --------------------------------------------------------------------
-  const chartOrderStatistics = document.querySelector('#orderStatisticsChart'),
+  const chartOrderStatistics = document.querySelector('#lala'),
     orderChartConfig = {
       chart: {
         height: 165,
@@ -483,6 +483,7 @@
         }
       }
     };
+   
   if (typeof chartOrderStatistics !== undefined && chartOrderStatistics !== null) {
     const statisticsChart = new ApexCharts(chartOrderStatistics, orderChartConfig);
     statisticsChart.render();

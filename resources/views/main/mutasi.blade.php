@@ -76,6 +76,7 @@
               <th>📎 Description</th>
               <th>📥 Debet</th>
               <th>📤 Kredit</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody id="body-mutasi-jurnal">
@@ -257,12 +258,18 @@
               <tr>
                 <td class="text-center" rowspan="${rowspan}">${i+1}</td>
                 <td rowspan="${rowspan}">${tanggal}</td>
-                <td rowspan="${rowspan}">${journal.journal_number}</td>
+                <td rowspan="${rowspan}">${journal.journal_number} [${journal.id}]</td>
                 <td>${journal.code_group} - ${res.chart_accounts[journal.code_group]}</td>
                 <td>${journal.description}</td>
                 <td class="text-end">${formatRupiah(journal.amount_debet)}</td>
                 <td class="text-end">${formatRupiah(journal.amount_kredit)}</td>
-              </tr>
+                <td> 
+                     ${journal.verified_by == 1 ? '<span class="bg-primary p-1 fs-7 rounded-1 colorwhite" ><i class="fas fa-check"></i> valid </span>' : '<span class="bg-warning fs-7 p-1 rounded-1 colorwhite"><i class="fas fa-times"></i> invalid</span>'}
+                     <button class="btn btn-secondary btn-sm" onclick="verifyJournal(${journal.id})" > <i class="fas fa-refresh"></i></button>
+                     <button class="btn btn-danger btn-sm" onclick="deleteJournal(${journal.id})" > <i class="fas fa-trash"></i></button>
+                </td>
+               
+               </tr>
             `;
           } else {
             html += `
@@ -271,12 +278,48 @@
                 <td>${journal.description}</td>
                 <td class="text-end">${formatRupiah(journal.amount_debet)}</td>
                 <td class="text-end">${formatRupiah(journal.amount_kredit)}</td>
+                <td>
+                   ${journal.verified_by == 1 ? '<span class="bg-primary p-1 fs-7 rounded-1 colorwhite " ><i class="fas fa-check"></i> valid </span>' : '<span class="bg-warning fs-7 p-1 rounded-1 colorwhite"><i class="fas fa-times"></i> invalid</span>'}
+                   <button class="btn btn-secondary btn-sm" onclick="verifyJournal(${journal.id})" > <i class="fas fa-refresh"></i></button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteJournal(${journal.id})" > <i class="fas fa-trash"></i></button>
+                </td>
               </tr>
             `;
           }
         });
       });
       $('#body-mutasi-jurnal').html(html);
+    }
+
+    function deleteJournal(id) {
+      url = '{{route("jurnal.delete",["id"=>"__id__"])}}';
+      url = url.replace('__id__', id);
+      console.log(url);
+      swalDelete({
+        url: url,
+        successText: "Transaksi berhasil!",
+        onSuccess: (res) => {
+
+        }
+      });
+    }
+
+    function verifyJournal(id) {
+      $.ajax({
+        url: '{{url("admin/jurnal/verify")}}/' + id,
+        type: 'get',
+        success: function(res) {
+          if (res.status == 1) {
+            Swal.fire('success', 'journal sudah terverifikasi', 'success');
+            getListMutasiJurnal();
+          } else {
+            Swal.fire('opps', res.msg, 'error');
+          }
+        },
+        error: function(err) {
+          console.log(err);
+        }
+      });
     }
   </script>
   @endpush

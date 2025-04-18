@@ -18,6 +18,24 @@
   color: white;
 }
 
+.fs-7{
+  font-size: 0.875rem;
+}
+.fs-8{
+  font-size: 0.75rem;
+}
+.fs-9{
+  font-size: 0.625rem;
+}
+.fs-10{
+  font-size: 0.5rem;
+}
+.fs-11{
+  font-size: 0.375rem;
+}
+.fs-12{
+  font-size: 0.25rem;
+}
 .tree-toggle {
   max-height: 0;
   overflow: hidden;
@@ -43,4 +61,8 @@
 
 .textright {
   text-align: right;
+}
+
+.swal2-container {
+  z-index: 2000 !important;
 }

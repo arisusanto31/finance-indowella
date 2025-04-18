@@ -114,7 +114,17 @@ class ChartAccountController extends Controller
                 }
             }
             $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
-        } else if ($kind == 'inventory') {
+        } 
+        else if($kind=='kartu-inventory'){
+            $chart = ChartAccount::aktif()->child()->where('reference_model', 'App\\Models\\KartuInventory');
+            if (getInput('search')) {
+                foreach (explode(' ', getInput('search')) as $search) {
+                    $chart = $chart->where('name', 'like', '%' . $search . '%');
+                }
+            }
+            $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
+        }
+        else if ($kind == 'inventory') {
             $chart = ChartAccount::aktif()->child()->where(function ($q) {
                 $q->whereBetween('code_group', [181000, 181999])->orWhere('code_group', 301000);
             });

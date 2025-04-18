@@ -34,7 +34,6 @@ class CreateJournals extends Migration
             $table->integer('user_backdate_id')->nullable();
             $table->integer('toko_id')->nullable();
             $table->unique(['index_date', 'chart_account_id']);
-
             $table->timestamps();
         });
     }
