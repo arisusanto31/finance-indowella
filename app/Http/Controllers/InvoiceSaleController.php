@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\InvoiceSaleDetail;
 use App\Models\Stock;
 use App\Models\StockCategory;
+use App\Models\InvoicePack;
 
 class InvoiceSaleController extends Controller
 {
@@ -21,22 +22,48 @@ class InvoiceSaleController extends Controller
         'customer_id',
     ];
     
+
+    public function stock()
+    {
+        return $this->belongsTo(\App\Models\Stock::class, 'stock_id');
+    }
+
+    public function customer()
+    {
+        return $this->belongsTo(\App\Models\Customer::class, 'customer_id');
+    }
+        
+
     public function showSales()
     {
-        $invoices = InvoiceSaleDetail::latest()->get();
-        $categories = \App\Models\StockCategory::all();
-        $stocks = Stock::all();
-        $categories = StockCategory::all();
-        $stocks = Stock::with(['category', 'parentCategory', 'units'])->get();
+        $invoices = \App\Models\InvoiceSaleDetail::with('stock')
+    ->get()
+    ->groupBy('invoice_number');
 
+       // dd($invoices);
 
-        return view('invoice.invoice-sales', compact('invoices','stocks','categories'));
+    return view('invoice.invoice-sales', compact('invoices'));
     }
+    
+    
+
+    // public function showSales()
+    // {
+    //     $invoices = InvoiceSaleDetail::latest()->get();
+    //     $categories = \App\Models\StockCategory::all();
+    //     $stocks = Stock::all();
+    //     $categories = StockCategory::all();
+    //     $stocks = Stock::with(['category', 'parentCategory', 'units'])->get();
+
+
+    //     return view('invoice.invoice-sales', compact('invoices','stocks','categories'));
+    // }
    
     public function store(Request $request)
     {
-      
         $request->validate([
+            'invoice_number' => 'required|string|max:255',
+            'customer_id' => 'required|integer',
             'stock_id' => 'required|array',
             'stock_id.*' => 'required|integer',
             'quantity' => 'required|array',
@@ -46,34 +73,50 @@ class InvoiceSaleController extends Controller
             'unit' => 'required|array',
             'unit.*' => 'required|string',
         ]);
-
-       
-        $prefix = 'INV-' . now()->format('Ym');
-        $last = InvoiceSaleDetail::where('invoice_number', 'like', "$prefix%")->count();
-        $invoice_number = $prefix . '-' . str_pad($last + 1, 4, '0', STR_PAD_LEFT);
-
-        
+    
+        $invoice_number = $request->invoice_number;
+        $grouped = [];
+    
         foreach ($request->stock_id as $i => $stockId) {
-            $qty = $request->quantity[$i];
-            $price = $request->price_unit[$i];
-            $discount = $request->discount[$i] ?? 0;
-            $total = ($qty * $price) - $discount;
+            $key = $invoice_number . '-' . $stockId;
+    
+            if (!isset($grouped[$key])) {
+                $grouped[$key] = [
+                    'invoice_number' => $invoice_number,
+                    'stock_id' => $stockId,
+                    'quantity' => $request->quantity[$i],
+                    'unit' => $request->unit[$i],
+                    'price' => $request->price_unit[$i],
+                    'discount' => $request->discount[$i] ?? 0,
+                    'customer_id' => $request->customer_id,
+                ];
+            } else {
+                $grouped[$key]['quantity'] += $request->quantity[$i];
+                $grouped[$key]['discount'] += $request->discount[$i] ?? 0;
+            }
+        }
+    
+        foreach ($grouped as &$data) {
+            $data['total_price'] = ($data['quantity'] * $data['price']) - $data['discount'];
+            InvoiceSaleDetail::create($data);
+        }
+    
+        
+        return redirect()->route('invoice.sales.index')->with('success', 'Invoice berhasil disimpan luurr 😃!');
+    }
 
-            InvoiceSaleDetail::create([
-                'invoice_number' => $invoice_number,
-                'stock_id' => $stockId,
-                'quantity' => $qty,
-                'unit' => $request->unit[$i],
-                'price' => $price,
-                'total_price' => $total,
-                'discount' => $discount,
-                'customer_id' => $request->customer_id ?? null,
-            ]);
+    public function getItem()
+    {
+        $searchs = explode(' ', request('search'));
+        $cust = Customer::query();
+
+        foreach ($searchs as $s) {
+            $cust->where('name', 'like', "%$s%");
         }
 
-        return redirect()->route('invoice.sales.index')->with('success', 'Invoice berhasil disimpan!');
+        $cust = $cust->select('id', DB::raw('name as text'))->get();
 
+        return ['results' => $cust];
     }
-   
+} 
 
-}

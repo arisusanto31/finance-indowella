@@ -16,5 +16,18 @@ class InvoiceSaleDetail extends Model
         'discount',
         'customer_id',
     ];
-    
+
+public function stock()
+
+{
+    return $this->belongsTo(\App\Models\Stock::class, 'stock_id', 'id');
+}
+
+// public function customer()
+// {
+//     return $this->belongsTo(\App\Models\Customer::class, 'customer_id');
+// }
+
+
+
 }

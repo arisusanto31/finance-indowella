@@ -33,9 +33,10 @@ class CustomerController extends Controller
 
     public function index()
     {
-        $customers = Customer::all(); 
+        $customers = \App\Models\Customer::all(); 
         return view('master.customer', compact('customers'));
     }
+    
 
 
     public function store(Request $request)
@@ -119,6 +120,8 @@ class CustomerController extends Controller
         return ['results' => $cust];
     }
 } 
+
+
 
 // class CustomerController extends Controller
 // {

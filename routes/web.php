@@ -1,6 +1,6 @@
 <?php
 
-
+use App\Http\Controllers\InvoicePackController;
 use App\Models\ChartAccount;
 use App\Models\KartuStock;
 use Illuminate\Support\Facades\Route;
@@ -33,7 +33,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::prefix('permission')->group(function () {
-        Route::get('/give-to-role',[ProfileController::class,'getGivePermissionRole'])->name('give-to-role');
+        Route::get('/give-to-role', [ProfileController::class, 'getGivePermissionRole'])->name('give-to-role');
     });
 });
 
@@ -147,6 +147,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::post('main/{id}/soft-delete', [SupplierController::class, 'softDeleteSupplier'])->name('main.soft-delete');
             Route::post('main/{id}/restore', [SupplierController::class, 'restore'])->name('main.restore');
             Route::post('/invoice-sales', [InvoiceSaleController::class, 'store'])->name('invoice-sale.store');
+            Route::get('/invoice/{id}', [InvoicePackController::class, 'show'])->name('invoice.show');
         });
 
         Route::prefix('other-person')->name('other-person.')->group(function () {
@@ -177,16 +178,15 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         });
     });
 
-    Route::prefix('admin')->name('admin.')->group(function () {
-        Route::get('/produk/get-item', [StockController::class, 'getItem'])->name('stock.produk-get-item');
-    });
-
-
     Route::prefix('invoice')->name('invoice.')->group(function () {
         Route::get('invoice-sales', [InvoiceSaleController::class, 'ShowSales'])->name('sales.index');
         Route::get('invoice-purchase', [InvoicePurchaseController::class, 'ShowPurchase'])->name('purchase.index');
         Route::post('invoice-sales', [InvoiceSaleController::class, 'store'])->name('sales.store');
     });
+
+    Route::post('sales/store', [InvoiceSaleController::class, 'store'])->name('sales.store');
+    Route::get('{id}', [InvoicePackController::class, 'show'])->name('show');
 });
+
 
 require __DIR__ . '/auth.php';

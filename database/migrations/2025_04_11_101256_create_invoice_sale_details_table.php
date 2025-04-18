@@ -10,8 +10,8 @@ return new class extends Migration
     {
         Schema::create('invoice_sale_details', function (Blueprint $table) {
             $table->id();
+            $table->string('invoice_number'); 
             $table->unsignedBigInteger('invoice_id');
-            $table->string('invoice_number')->unique();
             $table->unsignedBigInteger('stock_id');
             $table->text('description')->nullable();
             $table->decimal('price', 15, 2);
@@ -22,10 +22,11 @@ return new class extends Migration
             $table->decimal('total_price', 20, 2);
             $table->decimal('discount', 10, 2)->default(0);
             $table->string('journal_number')->nullable();
-            $table->integer(('journal_id'));
+            $table->integer('journal_id'); // ✅ Benerin bagian ini
             $table->unsignedBigInteger('customer_id');
             $table->integer('reference_id')->nullable();
             $table->string('reference_type')->nullable();
+            $table->unique(['invoice_number', 'stock_id']); 
             $table->timestamps();
         });
     }

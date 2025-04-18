@@ -28,11 +28,13 @@ class KaryawanController extends Controller
             'date_keluar' => 'nullable|date',
         ]);
     
-        Karyawan::create($validated);
+        $karyawan = Karyawan::create($validated); 
     
+        $status = is_null($karyawan->date_keluar) ? 'Aktif' : 'Keluar';
+    
+     
         return redirect()->back()->with('success', 'Karyawan berhasil disimpan!');
     }
     
-    
-}
 
+}
