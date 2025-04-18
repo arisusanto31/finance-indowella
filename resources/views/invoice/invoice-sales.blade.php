@@ -75,51 +75,46 @@
             </div>
         </div>
     </form>
-    @forelse ($invoices as $invoiceNumber => $items)
-    <div class="card mb-4 shadow p-3">
-        <h5>Invoice: {{ $invoiceNumber }}</h5>
-        <p>Customer: {{ $items->first()->customer->name ?? '-' }}</p>
-        <p>Tanggal: {{ $items->first()->created_at->format('Y-m-d') }}</p>
+    @if ($invoices->isNotEmpty())
+    @foreach ($invoices as $invoiceNumber => $items)
+        <div class="card mb-4 shadow p-3">
+            <h5>Invoice: {{ $invoiceNumber }}</h5>
+            <p>Customer: {{ $items->first()->customer->name ?? '-' }}</p>
+            <p>Tanggal: {{ $items->first()->created_at->format('Y-m-d') }}</p>
 
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Nama Produk</th>
-                    <th>Qty</th>
-                    <th>Unit</th>
-                    <th>Harga</th>
-                    <th>Diskon</th>
-                    <th>Total</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($items as $item)
+            <table class="table table-bordered">
+                <thead>
                     <tr>
-                        <td>{{ $item->stock->name ?? '-' }}</td>
-                        <td>{{ $item->quantity }}</td>
-                        <td>{{ $item->unit }}</td>
-                        <td>Rp{{ number_format($item->price) }}</td>
-                        <td>Rp{{ number_format($item->discount) }}</td>
-                        <td>Rp{{ number_format($item->total_price) }}</td>
+                        <th>Nama Produk</th>
+                        <th>Qty</th>
+                        <th>Unit</th>
+                        <th>Harga</th>
+                        <th>Diskon</th>
+                        <th>Total</th>
                     </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-@empty
-    <div class="alert alert-warning">Belum ada data invoice.</div>
-@endforelse
-    </tbody>
-</table>
-
-
-    </div>
-@empty
+                </thead>
+                <tbody>
+                    @foreach ($items as $item)
+                        <tr>
+                            <td>{{ $item->stock->name ?? '-' }}</td>
+                            <td>{{ $item->quantity }}</td>
+                            <td>{{ $item->unit }}</td>
+                            <td>Rp{{ number_format($item->price) }}</td>
+                            <td>Rp{{ number_format($item->discount) }}</td>
+                            <td>Rp{{ number_format($item->total_price) }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    @endforeach
+@else
     <div class="alert alert-warning text-center">
         Belum ada data invoice.
+   
     </div>
-@endforelse
-
+@endif
+</div>
     </tbody>
 </table>
 
@@ -168,7 +163,7 @@
                 placeholder: '-- Pilih Customer --',
                 allowClear: true,
                 ajax: {
-                    url: '{{ route("customer.get-item") }}',
+                     url: '{{ url("admin/master/customer/get-item") }}',
                     dataType: 'json',
                     delay: 250,
                     processResults: function (data) {

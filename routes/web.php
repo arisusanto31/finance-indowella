@@ -151,7 +151,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('/trashed', [CustomerController::class, 'trashed'])->name('trashed');
             Route::post('/{id}/restore', [CustomerController::class, 'restore'])->name('restore');
             Route::get('admin/customer/get-item', [CustomerController::class, 'getItem'])->name('admin.customer.get-item');
-
+            Route::get('/customer/get-item', [CustomerController::class, 'getItem'])->name('customer.get-item');
         });
 
         Route::prefix('stock')->name('stock.')->group(function () {
@@ -176,7 +176,10 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
     Route::prefix('invoice')->name('invoice.')->group(function () {
     Route::get('invoice-sales', [InvoiceSaleController::class, 'ShowSales'])->name('sales.index');
     Route::get('invoice-purchase', [InvoicePurchaseController::class, 'ShowPurchase'])->name('purchase.index');
-    Route::post('invoice-sales', [InvoiceSaleController::class, 'store'])->name('sales.store');
+    Route::get('admin/customer/get-item', [CustomerController::class, 'getItem'])->name('customer.get-item');
+    Route::post('sales/store', [InvoiceSaleController::class, 'store'])->name('sales.store');
+
+  
 
     Route::get('{id}', [InvoicePackController::class, 'show'])->name('show');
 });

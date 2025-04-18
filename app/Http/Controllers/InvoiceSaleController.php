@@ -23,17 +23,28 @@ class InvoiceSaleController extends Controller
     ];
     
 
- 
+    public function stock()
+    {
+        return $this->belongsTo(\App\Models\Stock::class, 'stock_id');
+    }
+
+    public function customer()
+    {
+        return $this->belongsTo(\App\Models\Customer::class, 'customer_id');
+    }
+        
 
     public function showSales()
     {
-       
-        $invoices = \App\Models\InvoiceSaleDetail::with(['stock', 'customer'])
-            ->get()
-            ->groupBy('invoice_number');
-    
-        return view('invoice.invoice-sales', compact('invoices'));
+        $invoices = \App\Models\InvoiceSaleDetail::with('stock')
+    ->get()
+    ->groupBy('invoice_number');
+
+       // dd($invoices);
+
+    return view('invoice.invoice-sales', compact('invoices'));
     }
+    
     
 
     // public function showSales()
@@ -93,4 +104,19 @@ class InvoiceSaleController extends Controller
         
         return redirect()->route('invoice.sales.index')->with('success', 'Invoice berhasil disimpan luurr 😃!');
     }
-}
+
+    public function getItem()
+    {
+        $searchs = explode(' ', request('search'));
+        $cust = Customer::query();
+
+        foreach ($searchs as $s) {
+            $cust->where('name', 'like', "%$s%");
+        }
+
+        $cust = $cust->select('id', DB::raw('name as text'))->get();
+
+        return ['results' => $cust];
+    }
+} 
+
