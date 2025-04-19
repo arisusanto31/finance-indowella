@@ -117,6 +117,17 @@
 
                                 @if ($index === 0)
                                     <td rowspan="{{ $rowspan }}"><strong>Rp{{ number_format($invoiceSubtotal) }}</strong></td>
+                                    @if ($index === 0)
+                                    <td rowspan="{{ $rowspan }}">
+                                        <a href="" class="btn btn-sm btn-outline-info" title="Lihat Invoice">
+                                            👁️
+                                        </a>
+                                        <a href="" class="btn btn-sm btn-outline-primary" title="Edit Invoice">
+                                            ✏️
+                                        </a>
+                                    </td>
+                                @endif
+                                
                                 @endif
                             </tr>
                         @endforeach

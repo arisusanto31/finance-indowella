@@ -36,13 +36,13 @@ class InvoiceSaleController extends Controller
 
     public function showSales()
     {
-        $invoices = \App\Models\InvoiceSaleDetail::with('stock')
-    ->get()
-    ->groupBy('invoice_number');
+        $invoices = \App\Models\InvoiceSaleDetail::with('customer','stock')
+       ->get()
+       ->groupBy('invoice_number');
 
        // dd($invoices);
 
-    return view('invoice.invoice-sales', compact('invoices'));
+      return view('invoice.invoice-sales', compact('invoices'));
     }
     
     
