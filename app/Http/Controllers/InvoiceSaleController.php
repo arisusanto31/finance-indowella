@@ -61,6 +61,7 @@ class InvoiceSaleController extends Controller
    
     public function store(Request $request)
     {
+       
         $request->validate([
             'invoice_number' => 'required|string|max:255',
             'customer_id' => 'required|integer',
@@ -73,7 +74,7 @@ class InvoiceSaleController extends Controller
             'unit' => 'required|array',
             'unit.*' => 'required|string',
         ]);
-    
+       
         $invoice_number = $request->invoice_number;
         $grouped = [];
     
@@ -89,6 +90,7 @@ class InvoiceSaleController extends Controller
                     'price' => $request->price_unit[$i],
                     'discount' => $request->discount[$i] ?? 0,
                     'customer_id' => $request->customer_id,
+                    'book_journal_id' => session('book_journal_id'),
                 ];
             } else {
                 $grouped[$key]['quantity'] += $request->quantity[$i];

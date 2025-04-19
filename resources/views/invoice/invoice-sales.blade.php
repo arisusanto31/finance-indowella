@@ -13,7 +13,7 @@
             <h2>Create Invoice Sales ya</h2>
 
             <div class="mb-3 mt-2">
-                <button type="button" class="btn btn-success" id="addDebit">+Tambah</button>
+                <button type="button" class="btn btn-success" onclick="addrow()"   id="addDebit">+Tambah</button>
             </div>
 
             <div class="row g-2 mb-3">
@@ -163,41 +163,10 @@
 
     @push('scripts')
         <script>
-            function initSelectProdukAjax(context = document) {
-                $(context).find('.select2-stock').select2({
-                    placeholder: '-- Pilih Produk --',
-                    allowClear: true,
-                    ajax: {
-                        url: '{{ route("admin.stock.produk-get-item") }}',
-                        dataType: 'json',
-                        delay: 250,
-                        processResults: function (data) {
-                            return {
-                                results: data.results
-                            };
-                        },
-                        cache: true
-                    }
-                });
-            }
 
-            function initSelectCustomerAjax(context = document) {
-                $(context).find('.select2-customer').select2({
-                    placeholder: '-- Pilih Customer --',
-                    allowClear: true,
-                    ajax: {
-                        url: '{{ url("admin/master/customer/get-item") }}',
-                        dataType: 'json',
-                        delay: 250,
-                        processResults: function (data) {
-                            return {
-                                results: data.results
-                            };
-                        },
-                        cache: true
-                    }
-                });
-            }
+            initItemSelectManual('.select2-stock','{{ url("admin/master/stock/get-item") }}', '-- Pilih Produk --');
+            initItemSelectManual('.select2-customer','{{ url("admin/master/customer/get-item") }}', '-- Pilih Customer --');
+
 
             function removeDebetRow(btn) {
                 const card = btn.closest('.rowdebet');
@@ -209,12 +178,8 @@
                 }
             }
 
-            $(document).ready(function () {
-                initSelectProdukAjax();
-                initSelectCustomerAjax();
-
-                document.getElementById('addDebit').addEventListener('click', function () {
-                    const debitWrapper = document.getElementById('div-debet');
+            function addrow() {
+                const debitWrapper = document.getElementById('div-debet');
                     const newRow = document.createElement('div');
                     newRow.classList.add('card', 'border', 'shadow-sm', 'rounded', 'p-3', 'mb-3', 'position-relative', 'rowdebet');
 
@@ -248,9 +213,50 @@
                         </div>
                     `;
                     debitWrapper.appendChild(newRow);
-                    initSelectProdukAjax(newRow);
-                });
-            });
+                    initItemSelectManual(newRow.querySelector('.select2-stock'), '{{ url("admin/master/stock/get-item") }}', '-- Pilih Produk --');
+               
+
+            }
+            // $(document).ready(function () {
+               
+            //     document.getElementById('addDebit').addEventListener('click', function () {
+            //         const debitWrapper = document.getElementById('div-debet');
+            //         const newRow = document.createElement('div');
+            //         newRow.classList.add('card', 'border', 'shadow-sm', 'rounded', 'p-3', 'mb-3', 'position-relative', 'rowdebet');
+
+            //         newRow.innerHTML = `
+            //             <button type="button" class="btn-close-card" onclick="removeDebetRow(this)">×</button>
+            //             <div class="row g-2">
+            //                 <div class="col-md-3">
+            //                     <label class="form-label">Nama Produk</label>
+            //                     <select name="stock_id[]" class="form-control select2-stock" required></select>
+            //                 </div>
+            //                 <div class="col-md-1">
+            //                     <label class="form-label">Qty</label>
+            //                     <input name="quantity[]" type="number" step="0.01" class="form-control" placeholder="Qty">
+            //                 </div>
+            //                 <div class="col-md-2">
+            //                     <label class="form-label">Satuan</label>
+            //                     <select name="unit[]" class="form-control">
+            //                         <option value="pcs">PCS</option>
+            //                         <option value="slop">Slop</option>
+            //                         <option value="pack">Pack</option>
+            //                     </select>
+            //                 </div>
+            //                 <div class="col-md-2">
+            //                     <label class="form-label">Harga Satuan</label>
+            //                     <input name="price_unit[]" type="number" step="0.01" class="form-control" placeholder="Harga">
+            //                 </div>
+            //                 <div class="col-md-2">
+            //                     <label class="form-label">Diskon</label>
+            //                     <input name="discount[]" type="number" class="form-control" placeholder="0">
+            //                 </div>
+            //             </div>
+            //         `;
+            //         debitWrapper.appendChild(newRow);
+            //         initItemSelectManual(newRow.querySelector('.select2-stock'), '{{ url("admin/master/stock/get-item") }}', '-- Pilih Produk --');
+            //     });
+            // });
         </script>
     @endpush
 </x-app-layout>

@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('invoice_packs', function (Blueprint $table) {
             $table->id();
+            $table->integer('book_journal_id');
             $table->string('invoice_number')->unique();
             $table->unsignedBigInteger('customer_id');
             $table->date('invoice_date')->nullable();

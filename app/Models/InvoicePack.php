@@ -10,6 +10,7 @@ class InvoicePack extends Model
 {
     protected $fillable = [
         'invoice_number',
+        'book_journal_id',
         'customer_id',
         'invoice_date',
         'total_price',
