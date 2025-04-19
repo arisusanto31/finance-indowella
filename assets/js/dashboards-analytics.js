@@ -420,7 +420,7 @@
 
   // Order Statistics Chart
   // --------------------------------------------------------------------
-  const chartOrderStatistics = document.querySelector('#orderStatisticsChart'),
+  const chartOrderStatistics = document.querySelector('errorDataChart'),
     orderChartConfig = {
       chart: {
         height: 165,

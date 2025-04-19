@@ -7,11 +7,9 @@
                         <div class="card-body">
                             <h5 class="card-title text-primary">Selamat datang {{user()->name}}! 🎉</h5>
                             <p class="mb-4">
-                                You have done <span class="fw-bold">72%</span> more sales today. Check your new badge in
-                                your profile.
+                                Semangaat! semoga harimu menyenangkan dan produktif.
                             </p>
-
-                            <a href="javascript:;" class="btn btn-sm btn-outline-primary">View Badges</a>
+                            <a href="javascript:;" class="btn btn-sm btn-outline-primary">NERACA : BALANCE</a>
                         </div>
                     </div>
                     <div class="col-sm-5 text-center text-sm-left">
@@ -55,7 +53,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <span class="fw-semibold d-block mb-1">Profit</span>
+                            <span class="fw-semibold d-block mb-1">Laba</span>
                             <h3 class="card-title mb-2">$12,628</h3>
                             <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> +72.80%</small>
                         </div>
@@ -87,7 +85,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <span>Sales</span>
+                            <span>Penjualan</span>
                             <h3 class="card-title text-nowrap mb-1">$4,679</h3>
                             <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> +28.42%</small>
                         </div>
@@ -177,7 +175,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <span class="d-block mb-1">Payments</span>
+                            <span class="d-block mb-1">Hutang</span>
                             <h3 class="card-title text-nowrap mb-2">$2,456</h3>
                             <small class="text-danger fw-semibold"><i class="bx bx-down-arrow-alt"></i> -14.82%</small>
                         </div>
@@ -206,7 +204,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <span class="fw-semibold d-block mb-1">Transactions</span>
+                            <span class="fw-semibold d-block mb-1">Piutang</span>
                             <h3 class="card-title mb-2">$14,857</h3>
                             <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> +28.14%</small>
                         </div>
@@ -219,7 +217,7 @@
                             <div class="d-flex justify-content-between flex-sm-row flex-column gap-3">
                                 <div class="d-flex flex-sm-column flex-row align-items-start justify-content-between">
                                     <div class="card-title">
-                                        <h5 class="text-nowrap mb-2">Profile Report</h5>
+                                        <h5 class="text-nowrap mb-2">Saldo Akun Jurnal</h5>
                                         <span class="badge bg-label-warning rounded-pill">Year 2021</span>
                                     </div>
                                     <div class="mt-sm-auto">
@@ -241,8 +239,8 @@
             <div class="card h-100">
                 <div class="card-header d-flex align-items-center justify-content-between pb-0">
                     <div class="card-title mb-0">
-                        <h5 class="m-0 me-2">Order Statistics</h5>
-                        <small class="text-muted">42.82k Total Sales</small>
+                        <h5 class="m-0 me-2">List Data Bermasalah</h5>
+                        <small class="text-muted">data yang belum ada jurnal / belum ada kartu </small>
                     </div>
                     <div class="dropdown">
                         <button
@@ -256,76 +254,21 @@
                         </button>
                         <div class="dropdown-menu dropdown-menu-end" aria-labelledby="orederStatistics">
                             <a class="dropdown-item" href="javascript:void(0);">Select All</a>
-                            <a class="dropdown-item" href="javascript:void(0);">Refresh</a>
+                            <a class="dropdown-item" href="javascript:void(loadDataError());">Refresh</a>
                             <a class="dropdown-item" href="javascript:void(0);">Share</a>
                         </div>
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
                         <div class="d-flex flex-column align-items-center gap-1">
-                            <h2 class="mb-2">8,258</h2>
-                            <span>Total Orders</span>
+                            <h2 class="mb-2" id="total-data-valid"> <i class="fas fa-spin fa-refresh"> </i> </h2>
+                            <span>Total data</span>
                         </div>
-                        <div id="orderStatisticsChart"></div>
+                        <div id="errorDataChart"></div>
                     </div>
-                    <ul class="p-0 m-0">
-                        <li class="d-flex mb-4 pb-1">
-                            <div class="avatar flex-shrink-0 me-3">
-                                <span class="avatar-initial rounded bg-label-primary"><i class="bx bx-mobile-alt"></i></span>
-                            </div>
-                            <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                                <div class="me-2">
-                                    <h6 class="mb-0">Electronic</h6>
-                                    <small class="text-muted">Mobile, Earbuds, TV</small>
-                                </div>
-                                <div class="user-progress">
-                                    <small class="fw-semibold">82.5k</small>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="d-flex mb-4 pb-1">
-                            <div class="avatar flex-shrink-0 me-3">
-                                <span class="avatar-initial rounded bg-label-success"><i class="bx bx-closet"></i></span>
-                            </div>
-                            <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                                <div class="me-2">
-                                    <h6 class="mb-0">Fashion</h6>
-                                    <small class="text-muted">T-shirt, Jeans, Shoes</small>
-                                </div>
-                                <div class="user-progress">
-                                    <small class="fw-semibold">23.8k</small>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="d-flex mb-4 pb-1">
-                            <div class="avatar flex-shrink-0 me-3">
-                                <span class="avatar-initial rounded bg-label-info"><i class="bx bx-home-alt"></i></span>
-                            </div>
-                            <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                                <div class="me-2">
-                                    <h6 class="mb-0">Decor</h6>
-                                    <small class="text-muted">Fine Art, Dining</small>
-                                </div>
-                                <div class="user-progress">
-                                    <small class="fw-semibold">849k</small>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="d-flex">
-                            <div class="avatar flex-shrink-0 me-3">
-                                <span class="avatar-initial rounded bg-label-secondary"><i class="bx bx-football"></i></span>
-                            </div>
-                            <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                                <div class="me-2">
-                                    <h6 class="mb-0">Sports</h6>
-                                    <small class="text-muted">Football, Cricket Kit</small>
-                                </div>
-                                <div class="user-progress">
-                                    <small class="fw-semibold">99</small>
-                                </div>
-                            </div>
-                        </li>
+                    <ul class="p-0 m-0" id="list-data-valid">
+
                     </ul>
                 </div>
             </div>
@@ -514,11 +457,213 @@
     </div>
 
     @push('styles')
-        <style>
-            .custom-dashboard-style { color: red; }
-        </style>
+    <style>
+        .custom-dashboard-style {
+            color: red;
+        }
+    </style>
     @endpush
     @push('scripts')
-     
+    <script>
+        // Custom JavaScript code can be added here
+        console.log('Dashboard script loaded');
+
+        setTimeout(() => {
+            loadDataError();
+        }, 1000);
+
+        const donutChartConfig = {
+            chart: {
+                height: 165,
+                width: 130,
+                type: 'donut'
+            },
+            labels: ['Jurnal', 'kartuStock', 'KartuHutang', 'KartuPiutang', 'kartu Inventory', 'kartu Prepaid'],
+            series: [0, 0, 0, 0, 0, 0],
+            colors: ['#696cff', '#8592a3', '#03c3ec', '#71dd37', '#ffab00', '#ff3e1d'],
+            stroke: {
+                width: 5,
+                colors: ['#fff']
+            },
+            dataLabels: {
+                enabled: false
+            },
+            legend: {
+                show: false
+            },
+            grid: {
+                padding: {
+                    top: 0,
+                    bottom: 0,
+                    right: 15
+                }
+            },
+            plotOptions: {
+                pie: {
+                    donut: {
+                        size: '75%',
+                        labels: {
+                            show: true,
+                            value: {
+                                fontSize: '1.5rem',
+                                fontFamily: 'Public Sans',
+                                color: '#566a7f',
+                                offsetY: -15
+                            },
+                            name: {
+                                offsetY: 20,
+                                fontFamily: 'Public Sans'
+                            },
+                            total: {
+                                show: true,
+                                fontSize: '0.8125rem',
+                                color: '#a1acb8',
+                                label: 'Error'
+                            }
+                        }
+                    }
+                }
+            },
+            yaxis: [ /* ❌ ini akan dibuang otomatis */ ],
+            annotations: {
+                yaxis: [],
+                xaxis: [],
+                points: []
+            },
+            xaxis: {
+                convertedCatToNumeric: false
+            }
+        };
+        console.log(donutChartConfig)
+        // ✅ Function untuk bikin donut chart aman tanpa properti yang tidak perlu
+        function createSafeDonutChart(elId, config) {
+            const chartEl = document.querySelector(elId);
+            if (!chartEl) return console.error('Element chart tidak ditemukan:', elId);
+
+            const safeConfig = JSON.parse(JSON.stringify(config));
+
+            // Hapus properti yang bisa memicu error
+            delete safeConfig.yaxis;
+            delete safeConfig.xaxis;
+            delete safeConfig.annotations;
+
+            const chart = new ApexCharts(chartEl, safeConfig);
+            chart.render();
+        }
+
+        // 🔥 Panggil dengan ID chart kamu
+        function loadDataError() {
+            $.ajax({
+                url: '{{route("dashboard.inspect-jurnal")}}',
+                method: 'get',
+                success: function(res) {
+                    console.log(res);
+
+                    if (res.status == 1) {
+                        $('#total-data-valid').html(res.total);
+                        // Handle success
+                        html = `
+                        <li class="d-flex mb-3 pb-1">
+                            <div class="avatar flex-shrink-0 me-3">
+                                <span class="avatar-initial rounded bg-label-primary"><i class="bx bx-mobile-alt"></i></span>
+                            </div>
+                            <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                                <div class="me-2">
+                                    <h6 class="mb-0">Jurnal</h6>
+                                    <small class="text-muted">data yang belum ada kartunya</small>
+                                </div>
+                                <div class="user-progress">
+                                    <small class="fw-semibold">${res.problem_journal}</small>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="d-flex mb-3 pb-1">
+                            <div class="avatar flex-shrink-0 me-3">
+                                <span class="avatar-initial rounded bg-label-success"><i class="bx bx-closet"></i></span>
+                            </div>
+                            <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                                <div class="me-2">
+                                    <h6 class="mb-0">Kartu Stock</h6>
+                                    <small class="text-muted">data yang belum ada jurnalnya</small>
+                                </div>
+                                <div class="user-progress">
+                                    <small class="fw-semibold">${res.problem_kartu_stock}</small>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="d-flex mb-3 pb-1">
+                            <div class="avatar flex-shrink-0 me-3">
+                                <span class="avatar-initial rounded bg-label-info"><i class="bx bx-home-alt"></i></span>
+                            </div>
+                            <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                                <div class="me-2">
+                                    <h6 class="mb-0">Kartu Hutang</h6>
+                                    <small class="text-muted">data yang belum ada jurnalnya</small>
+                                </div>
+                                <div class="user-progress">
+                                    <small class="fw-semibold">${res.problem_kartu_hutang}</small>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="d-flex mb-3 pb-1">
+                            <div class="avatar flex-shrink-0 me-3">
+                                <span class="avatar-initial rounded bg-label-secondary"><i class="bx bx-football"></i></span>
+                            </div>
+                            <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                                <div class="me-2">
+                                    <h6 class="mb-0">Kartu Piutang</h6>
+                                    <small class="text-muted">data yang belum ada jurnalnya</small>
+                                </div>
+                                <div class="user-progress">
+                                    <small class="fw-semibold">${res.problem_kartu_piutang}</small>
+                                </div>
+                            </div>
+                        </li> 
+                         <li class="d-flex mb-3 pb-1">
+                            <div class="avatar flex-shrink-0 me-3">
+                                <span class="avatar-initial rounded bg-label-secondary"><i class="bx bx-football"></i></span>
+                            </div>
+                            <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                                <div class="me-2">
+                                    <h6 class="mb-0">Kartu Inventory</h6>
+                                    <small class="text-muted">data yang belum ada jurnalnya</small>
+                                </div>
+                                <div class="user-progress">
+                                    <small class="fw-semibold">${res.problem_kartu_inventory}</small>
+                                </div>
+                            </div>
+                        </li> 
+                         <li class="d-flex mb-3 pb-1">
+                            <div class="avatar flex-shrink-0 me-3">
+                                <span class="avatar-initial rounded bg-label-secondary"><i class="bx bx-football"></i></span>
+                            </div>
+                            <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                                <div class="me-2">
+                                    <h6 class="mb-0">Kartu Prepaid</h6>
+                                    <small class="text-muted">data yang belum ada jurnalnya</small>
+                                </div>
+                                <div class="user-progress">
+                                    <small class="fw-semibold">${res.problem_kartu_prepaid}</small>
+                                </div>
+                            </div>
+                        </li> 
+                        `;
+                        $('#list-data-valid').html(html);
+
+                        donutChartConfig.series = [res.problem_journal, res.problem_kartu_stock, res.problem_kartu_hutang, res.problem_kartu_piutang, res.problem_kartu_inventory, res.problem_kartu_prepaid];
+                        createSafeDonutChart('#errorDataChart', donutChartConfig);
+
+                    } else {
+                        // Handle error
+                        Swal.fire('Error', 'Failed to load data: ' + res.msg, 'error');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', status, error);
+                    Swal.fire('Error', 'AJAX request failed: ' + error, 'error');
+                }
+            });
+        }
+    </script>
     @endpush
 </x-app-layout>

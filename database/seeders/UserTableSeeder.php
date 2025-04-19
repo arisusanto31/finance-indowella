@@ -36,7 +36,6 @@ class UserTableSeeder extends Seeder
         foreach($users as $user){
             $user->giveRole('admin');
             info($user->can('read_hpp'));
-
         }
     }
 }

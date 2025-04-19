@@ -23,14 +23,30 @@ use App\Http\Controllers\{
     InvoicePurchaseController,
     InventoryController
 };
+use App\Models\Journal;
 
 Route::get('/', fn() => redirect('/login'));
 Route::get('/phpinfo', fn() => phpinfo());
 
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::prefix('profile')->name('profile.')->group(function () {
+        Route::post('/create-permission', [ProfileController::class, 'createPermission'])->name('create-permission');
+        Route::post('/create-role', [ProfileController::class, 'createRole'])->name('create-role');
+        Route::post('/create-user', [ProfileController::class, 'createUser'])->name('create-user');
+        Route::post('/add-permission-role', [ProfileController::class, 'addPermissionRole'])->name('add-permission-role');
+        Route::post('/add-role-user', [ProfileController::class, 'addRoleUser'])->name('add-role-user');
+        Route::get('/get-role', [ProfileController::class, 'getRole'])->name('get-role');
+        Route::get('/get-permission', [ProfileController::class, 'getPermission'])->name('get-permission');
+        Route::get('/get-user', [ProfileController::class, 'getUser'])->name('get-user');
+        Route::get('/get-item-permission', [ProfileController::class, 'getItemPermission'])->name('get-item-permission');
+        Route::get('/get-item-role', [ProfileController::class, 'getItemRole'])->name('get-item-role');
+        Route::get('/get-item-user', [ProfileController::class, 'getItemUser'])->name('get-item-user');
+    });
+
+    Route::prefix('permission')->group(function () {
+        Route::get('/give-to-role', [ProfileController::class, 'getGivePermissionRole'])->name('give-to-role');
+    });
 });
 
 Route::prefix('book')->middleware(['auth', 'role:admin,web'])->group(function () {
@@ -42,19 +58,30 @@ Route::prefix('book')->middleware(['auth', 'role:admin,web'])->group(function ()
 Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])->group(function () {
     Route::get('/', [IndexController::class, 'index'])->name('admin.index');
     Route::get('/random', [IndexController::class, 'random']);
-    Route::get('/dashboard', [IndexController::class, 'dashboard'])->name('admin.dashboard');
+
+    Route::prefix('dashboard')->name('dashboard.')->group(function () {
+        Route::get('/', [IndexController::class, 'dashboard'])->name('index');
+        Route::get('/inspect-jurnal', [IndexController::class, 'inspectJurnal'])->name('inspect-jurnal');
+    });
+
+
     Route::get('/login-dashboard', [IndexController::class, 'loginDashboard']);
     Route::get('/neraca', [JournalController::class, 'neraca']);
     Route::get('/neraca-lajur', [JournalController::class, 'neracalajur']);
     Route::get('/get-mutasi-neraca-lajur', [JournalController::class, 'getMutasiNeracaLajur']);
     Route::get('/laba-rugi', [JournalController::class, 'labarugi']);
 
-    Route::prefix('jurnal')->group(function () {
+    Route::prefix('jurnal')->name('jurnal.')->group(function () {
         Route::get('/buku-besar', [JournalController::class, 'bukuBesar'])->name('main.buku-besar');
         Route::get('/mutasi', [JournalController::class, 'mutasi'])->name('main.mutasi');
         Route::get('/get-list-mutasi', [JournalController::class, 'getListMutasiJurnal']);
         Route::get('/get-buku-besar', [JournalController::class, 'getListBukuBesar']);
         Route::post('/submit-manual', [JournalController::class, 'createBaseJournal']);
+        Route::get('/search-error', [JournalController::class, 'searchError'])->name('search-error');
+        Route::post('link-journal', [JournalController::class, 'linkJournal'])->name('link-journal');
+        Route::get('verify/{id}', [JournalController::class, 'verify'])->name('verify');
+        Route::get('/recalculate/{id}', [JournalController::class, 'recalculate'])->name('recalculate');
+        Route::delete('delete/{id}', [JournalController::class, 'destroy'])->name('delete');
     });
 
     Route::prefix('daftar')->group(function () {
@@ -81,12 +108,10 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('/get-mutasi-keluar', [BDDController::class, 'getMutasiKeluar'])->name('get-mutasi-keluar');
         });
 
-            Route::get('/daftar-karyawan', [KaryawanController::class, 'DaftarKaryawan'])->name('daftar.daftar-karyawan');
-            Route::get('/karyawan/create', [KaryawanController::class, 'create'])->name('karyawan.create');
-            Route::post('/karyawan/store', [KaryawanController::class, 'store'])->name('karyawan.store');
-
-
-});
+        Route::get('/daftar-karyawan', [KaryawanController::class, 'DaftarKaryawan'])->name('daftar.daftar-karyawan');
+        Route::get('/karyawan/create', [KaryawanController::class, 'create'])->name('karyawan.create');
+        Route::post('/karyawan/store', [KaryawanController::class, 'store'])->name('karyawan.store');
+    });
     Route::prefix('kartu')->group(function () {
         Route::resource('/kartu-kas', KartuKasController::class);
 
@@ -135,7 +160,6 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::post('main/{id}/restore', [SupplierController::class, 'restore'])->name('main.restore');
             Route::post('/invoice-sales', [InvoiceSaleController::class, 'store'])->name('invoice-sale.store');
             Route::get('/invoice/{id}', [InvoicePackController::class, 'show'])->name('invoice.show');
-
         });
 
         Route::prefix('other-person')->name('other-person.')->group(function () {
@@ -150,8 +174,6 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('/get-item', [CustomerController::class, 'getItem'])->name('get-item');
             Route::get('/trashed', [CustomerController::class, 'trashed'])->name('trashed');
             Route::post('/{id}/restore', [CustomerController::class, 'restore'])->name('restore');
-            Route::get('admin/customer/get-item', [CustomerController::class, 'getItem'])->name('admin.customer.get-item');
-            Route::get('/customer/get-item', [CustomerController::class, 'getItem'])->name('customer.get-item');
         });
 
         Route::prefix('stock')->name('stock.')->group(function () {
@@ -168,22 +190,15 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         });
     });
 
-    Route::prefix('admin')->name('admin.')->group(function () {
-        Route::get('/produk/get-item', [StockController::class, 'getItem'])->name('stock.produk-get-item');
+    Route::prefix('invoice')->name('invoice.')->group(function () {
+        Route::get('invoice-sales', [InvoiceSaleController::class, 'ShowSales'])->name('sales.index');
+        Route::get('invoice-purchase', [InvoicePurchaseController::class, 'ShowPurchase'])->name('purchase.index');
+        Route::post('invoice-sales', [InvoiceSaleController::class, 'store'])->name('sales.store');
     });
 
-
-    Route::prefix('invoice')->name('invoice.')->group(function () {
-    Route::get('invoice-sales', [InvoiceSaleController::class, 'ShowSales'])->name('sales.index');
-    Route::get('invoice-purchase', [InvoicePurchaseController::class, 'ShowPurchase'])->name('purchase.index');
-    Route::get('admin/customer/get-item', [CustomerController::class, 'getItem'])->name('customer.get-item');
     Route::post('sales/store', [InvoiceSaleController::class, 'store'])->name('sales.store');
-
-  
-
     Route::get('{id}', [InvoicePackController::class, 'show'])->name('show');
 });
 
-});
 
 require __DIR__ . '/auth.php';

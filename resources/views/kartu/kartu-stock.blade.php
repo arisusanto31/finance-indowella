@@ -112,6 +112,7 @@
                                                 <th>🔢 Satuan</th>
                                                 <th>Rp/Unit</th>
                                                 <th>Total</th>
+                                                <th>Nomer Jurnal</th>
                                             </tr>
 
                                         </thead>
@@ -136,6 +137,7 @@
                                                 <th>🔢 Satuan</th>
                                                 <th>Rp/Unit</th>
                                                 <th>Total</th>
+                                                <th>Nomer Jurnal</th>
                                             </tr>
 
                                         </thead>
@@ -151,14 +153,117 @@
         </div>
     </div>
 
-   
+    <div class="modal fade" id="modal-journal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel1">Buat Link ke Jurnal</h5>
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div id="keterangan-kartu" class="col mb-3">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 col-xs-12">
+                            <label>Cari Jurnal</label>
+                        </div>
+                        <div class="col">
+                            <select class="form-control" id="select-code_group">
+
+                            </select>
+                        </div>
+                        <div class="col">
+                            <input type="text" id="daterange" class="form-control" placeholder="Pilih Tanggal" />
+                        </div>
+
+
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <input type="text" id="description" placeholder="cari deskripsi" class="form-control" />
+                        </div>
+                        <div class="col">
+                            <button type="button" class="btn btn-primary" onclick="searchJournal()">Cari</button>
+                        </div>
+                    </div>
+                    <div class="row p-2 m-1" style="background-color:#eee" id="container-journal">
+
+                    </div>
+                    <input type="hidden" id="journal_id" />
+                    <input type="hidden" id="model_id" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        Close
+                    </button>
+                    <button id="btn-store-pelunasan" onclick="linkJournal()" type="button" class="btn btn-primary">LINK !!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     @push('scripts')
     <script>
+         var page = "kartu";
         setTimeout(function() {
             getSummary();
         }, 200);
+        $('#daterange').daterangepicker({
+            opens: 'right',
+            locale: {
+                format: 'YYYY-MM-DD'
+            }
+        });
+        console.log('init berhasil lur ');
+        initItemSelectManual('#select-code_group', '{{route("chart-account.get-item-keuangan")}}?kind=persediaan', 'pilih kode akun', '#modal-journal');
+
+        function searchJournal() {
+
+            $.ajax({
+                url: '{{route("jurnal.search-error")}}?code_group=' + $('#select-code_group').val() + '&daterange=' + $('#daterange').val() + '&description=' + $('#description').val(),
+                method: 'get',
+                success: function(res) {
+                    console.log(res);
+                    if (res.status == 1) {
+                        html = "";
+                        res.msg.forEach(function eachData(data) {
+                            html += `
+                                <a href="javascript:void(pilihJurnal(${data.id}))" >
+                                    <div id="item-jurnal${data.id}" class="col-md-12 col-xs-12 item-jurnal colorblack " style="position:relative; border-bottom:1px solid black;">
+                                        <span style="position:absolute; top:0px; left:-17px"> <i class="fas fa-circle"></i></span>
+
+                                        <label  for="journal_id_${data.id}">${data.journal_number} - ${data.description} - ${formatNormalDateTime(new Date(data.created_at))} : ${formatRupiah(data.amount_debet - data.amount_kredit)}</label>
+                                    </div>
+                                </a>
+                            `;
+                        });
+                        $('#container-journal').html(html);
+                    } else {
+
+                    }
+                },
+                error: function(res) {
+                    console.log(res);
+                }
+            });
+        }
+
+
+        function pilihJurnal(id) {
+            $('.item-jurnal').removeClass('bg-primary colorwhite');
+            $('#item-jurnal' + id).addClass('bg-primary colorwhite');
+            $('#journal_id').val(id);
+        }
 
         function getSummary() {
+            page= "kartu";
             $.ajax({
                 url: "{{ route('kartu-stock.get-summary') }}",
                 method: "GET",
@@ -232,6 +337,7 @@
         }
 
         function getMutasiMasuk() {
+            page="masuk";
             $.ajax({
                 url: "{{ route('kartu-stock.get-mutasi-masuk') }}",
                 method: "GET",
@@ -250,11 +356,54 @@
                                 <td>${item.unit}</td>
                                 <td>${formatRupiah(item.mutasi_rupiah_on_unit*(item.mutasi_qty_backend/item.mutasi_quantity))}</td>
                                 <td>${formatRupiah(item.mutasi_rupiah_total)}</td>
+                                <td>${(!item.journal_number?'<span> belum ada jurnal</span> <button onclick="openLinkJournal('+item.id+')"> <i class="fas fa-link"></i> jurnal</button>':item.journal_number)}</td>
                                 </tr>`;
                         });
                         $('#body-mutasi-masuk').html(html);
                     } else {
 
+                    }
+                },
+                error: function(err) {
+                    console.log(err);
+                }
+            });
+        }
+
+        function openLinkJournal(id) {
+            $('#modal-journal').modal('show');
+            $('#keterangan-kartu').html("Link Kartu Stock ID : " + id);
+            $('#model_id').val(id);
+
+        }
+
+        function linkJournal() {
+            id = $('#journal_id').val();
+            if (id == "") {
+                Swal.fire("opss", "Pilih jurnal terlebih dahulu", "error");
+                return;
+            }
+            model_id = $('#model_id').val();
+            if (model_id == "") {
+                Swal.fire("opss", "Pilih kartu stock terlebih dahulu", "error");
+                return;
+            }
+
+            $.ajax({
+                url: '{{route("jurnal.link-journal")}}',
+                method: 'POST',
+                data: {
+                    "_token": "{{ csrf_token() }}",
+                    "model_id": model_id,
+                    "journal_id": id,
+                    "model": "App\\Models\\KartuStock",
+                },
+                success: function(res) {
+                    console.log(res);
+                    if (res.status == 1) {
+                        $('#modal-journal').modal('hide');
+                    } else {
+                        Swal.fire("opss", res.msg, "error");
                     }
                 },
                 error: function(err) {
@@ -282,6 +431,7 @@
                                 <td>${item.unit}</td>
                                 <td>${formatRupiah(item.mutasi_rupiah_on_unit*(item.mutasi_qty_backend/item.mutasi_quantity))}</td>
                                 <td>${formatRupiah(item.mutasi_rupiah_total)}</td>
+                                <td>${(!item.journal_number?'<span> belum ada jurnal</span> <button onclick="openLinkJournal('+item.id+')"> <i class="fas fa-link"></i> jurnal</button>':item.journal_number)}</td>
                                 </tr>`;
                         });
                         $('#body-mutasi-keluar').html(html);

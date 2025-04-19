@@ -272,7 +272,7 @@ class KartuHutang extends Model
                 'lawan_code_group' => $lawanCodeGroup,
                 'code_group_name' => $codeName
             ]));
-
+            
             if ($st['status'] == 1) {
                 DB::commit();
                 return $st;

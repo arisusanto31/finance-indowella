@@ -65,9 +65,9 @@ class InventoryController extends Controller
                 'book_journal_id' => 'required|integer',
                 'type_aset' => 'required|string',
                 'code_group' => 'required|integer',
-                'lawan_code_group'=> 'required|integer',
+                'lawan_code_group' => 'required|integer',
             ]);
-           
+
 
             $inv = Inventory::create($request);
             $inv->refresh();
@@ -79,8 +79,8 @@ class InventoryController extends Controller
                 'date' => $inv->date,
                 'amount' => $request['nilai_perolehan'], // ini pake format indonesia
                 'type_mutasi' => 'pembelian',
-                'code_group'=>$request['code_group'],
-                'lawan_code_group'=>$request['lawan_code_group'],
+                'code_group' => $request['code_group'],
+                'lawan_code_group' => $request['lawan_code_group'],
             ]));
 
             if ($st['status'] == 0) {
@@ -109,7 +109,7 @@ class InventoryController extends Controller
 
     public function storeKartuInventory(Request $request)
     {
-       
+
         try {
             $st = KartuInventory::createKartu($request);
             if ($st['status'] == 0) {
@@ -186,7 +186,7 @@ class InventoryController extends Controller
         $year = getInput('year') ? getInput('year') : date('Y');
         $kartu = KartuInventory::from('kartu_inventories as ki')->join('inventories as inv', 'inv.id', '=', 'ki.inventory_id')
             ->whereYear('ki.date', $year)->where('ki.amount', '>', 0)
-            ->select('ki.*', 'inv.name')->get();
+            ->select('ki.*', 'inv.name', 'inv.type_aset')->get();
         return [
             'status' => 1,
             'msg' => $kartu
@@ -197,7 +197,7 @@ class InventoryController extends Controller
         $year = getInput('year') ? getInput('year') : date('Y');
         $kartu = KartuInventory::from('kartu_inventories as ki')->join('inventories as inv', 'inv.id', '=', 'ki.inventory_id')
             ->whereYear('ki.date', $year)->where('ki.amount', '<', 0)
-            ->select('ki.*', 'inv.name')->get();
+            ->select('ki.*', 'inv.name', 'inv.type_aset')->get();
         return [
             'status' => 1,
             'msg' => $kartu
