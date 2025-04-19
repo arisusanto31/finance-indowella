@@ -209,6 +209,7 @@ function swalConfirmAndSubmit({ url, data, onSuccess = null, successText = "Berh
                 method: 'post',
                 data: data
             }).then(res => {
+                console.log(res);
                 if (res.status == 1) {
                     return Swal.fire({
                         title: "Sukses!",

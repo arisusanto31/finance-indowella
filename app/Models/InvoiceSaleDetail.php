@@ -29,7 +29,7 @@ class InvoiceSaleDetail extends Model
             } else {
                 $alias = $from;
             }
-        
+
             $query->where(function ($q) use ($alias) {
                 $q->whereNull("{$alias}.book_journal_id")
                     ->orWhere("{$alias}.book_journal_id", session('book_journal_id'));
@@ -37,17 +37,14 @@ class InvoiceSaleDetail extends Model
         });
     }
 
-public function stock()
+    public function stock()
 
-{
-    return $this->belongsTo(\App\Models\Stock::class, 'stock_id', 'id');
-}
+    {
+        return $this->belongsTo(\App\Models\Stock::class, 'stock_id', 'id');
+    }
 
-public function customer()
-{
-return $this->belongsTo(\App\Models\Customer::class, 'customer_id');
-}
-
-
-
+    public function customer()
+    {
+        return $this->belongsTo(\App\Models\Customer::class, 'customer_id');
+    }
 }

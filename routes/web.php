@@ -184,7 +184,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('category-get-item', [StockController::class, 'categoryGetItem'])->name('category-get-item');
             Route::get('get-item', [StockController::class, 'getItem'])->name('get-item');
             Route::get('get-info/{id}', [StockController::class, 'getInfo'])->name('get-info');
-
+            Route::get('get-unit/{id}', [StockController::class, 'getUnit'])->name('get-unit');
             // Route::get('/produk/get-item', [StockController::class, 'getItem'])->name('stock.produk-get-item');
 
         });
@@ -194,6 +194,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::get('invoice-sales', [InvoiceSaleController::class, 'ShowSales'])->name('sales.index');
         Route::get('invoice-purchase', [InvoicePurchaseController::class, 'ShowPurchase'])->name('purchase.index');
         Route::post('invoice-sales', [InvoiceSaleController::class, 'store'])->name('sales.store');
+        Route::post('invoice-purchase', [InvoicePurchaseController::class, 'store'])->name('purchase.store');
     });
 
     Route::post('sales/store', [InvoiceSaleController::class, 'store'])->name('sales.store');

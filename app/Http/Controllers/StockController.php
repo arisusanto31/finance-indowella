@@ -179,4 +179,20 @@ class StockController extends Controller
 
         return response()->json(['results' => $stocks]);
     }
+
+    function getUnit($id){
+        $unit = StockUnit::where('stock_id', $id)->get();
+        if (!$unit) {
+            return [
+                'status' => 0,
+                'msg' => 'unit tidak ditemukan'
+            ];
+        }
+        return [
+            'status' => 1,
+            'msg' => $unit
+        ];
+
+        
+    }
 }

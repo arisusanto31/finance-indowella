@@ -43,6 +43,8 @@ class Journal extends Model
                     ->orWhere("{$alias}.book_journal_id", session('book_journal_id'));
             });
         });
+
+       
     }
 
     public function chartAccount()
