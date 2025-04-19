@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('invoice_sale_details', function (Blueprint $table) {
             $table->id();
+            $table->integer('book_journal_id');
             $table->string('invoice_number'); 
             $table->unsignedBigInteger('invoice_id');
             $table->unsignedBigInteger('stock_id');
