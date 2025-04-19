@@ -131,7 +131,18 @@ class JournalController extends Controller
     {
 
         $view = view('main.pilih-jurnal-bootstrap');
-        $view->books = BookJournal::get();
+        $thebook = BookJournal::where('name', 'buku ' . user()->name)->first();
+        if (!$thebook) {
+            $thebook = BookJournal::create([
+                'name' => 'buku ' . user()->name,
+                'description' => 'buku jurnal ' . user()->name . ' bisa untuk coba coba ya ',
+                'type' => 'own',
+                'theme' => 'theme-default-brown.css'
+            ]);
+        }
+
+        $view->books = BookJournal::where('type', '<>', 'own')->get();
+        $view->thebook = $thebook;;
         return $view;
     }
 

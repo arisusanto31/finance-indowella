@@ -56,14 +56,15 @@
                             @php
                             $isToko = str_contains(strtolower($book->name), 'toko');
                             $isManufaktur = str_contains(strtolower($book->name), 'manufaktur');
-                            $bgColor = $isToko ? 'bg-danger' : ($isManufaktur ? 'bg-primary' : 'bg-secondary');
+                            $bgColor = $isToko ? '#71dd37' : ($isManufaktur ? '#007bff' : '993932');
                             @endphp
                             <div class="col text-center">
                                 <button onclick="pilihBook('{{ $book->id }}')"
-                                    class="btn {{ $bgColor }} text-white rounded-3 px-4 py-4 w-100 h-100 shadow-sm">
+                                    style="background-color:{{$bgColor}}" class="btn  text-white rounded-3 px-4 py-4 w-100 h-100 shadow-sm">
                                     <img src="{{ asset('assets/img/openboox-removebg.png') }}" alt="Book Icon"
                                         class="img-fluid mb-2" style="max-height: 80px;">
                                     <div class="fw-semibold">{{ $book->name }}</div>
+                                    <p style="font-size:10px">{{$book->description}}</p>
                                 </button>
                             </div>
                             @endforeach
@@ -71,12 +72,12 @@
                         <div class="row">
                             <div class="col-xs-12 col-md-12 mt-4">
                                 <div class="col text-center">
-                                    <button onclick="pilihBook(5)"
+                                    <button onclick="pilihBook('{{$thebook->id}}')"
                                         class="btn text-white rounded-3 px-4 py-4 w-100 h-100 shadow-sm bg-secondary">
                                         <img src="{{ asset('assets/img/openboox-removebg.png') }}" alt="Book Icon"
                                             class="img-fluid mb-2" style="max-height: 80px;">
                                         <div class="fw-semibold">Buku {{user()->name}} </div>
-                                        <p style="font-size:10px">bisa untuk coba coba yaa</p>
+                                        <p style="font-size:10px">buku {{user()->name}}, bisa untuk coba coba yaa</p>
                                     </button>
                                 </div>
                             </div>
@@ -333,8 +334,8 @@
             });
         }
 
-        function addRole(id){
-            roleID= $('#select-role'+id+' option:selected').val();
+        function addRole(id) {
+            roleID = $('#select-role' + id + ' option:selected').val();
             swalConfirmAndSubmit({
                 url: '{{route("profile.add-role-user")}}',
                 data: {
@@ -348,8 +349,9 @@
                 }
             });
         }
-        function addPermission(id){
-            permissionID= $('#select-permission'+id+' option:selected').val();
+
+        function addPermission(id) {
+            permissionID = $('#select-permission' + id + ' option:selected').val();
             swalConfirmAndSubmit({
                 url: '{{route("profile.add-permission-role")}}',
                 data: {
@@ -362,7 +364,7 @@
                     getRole();
                 }
             });
-        }   
+        }
 
         getPermission();
         getUser();
