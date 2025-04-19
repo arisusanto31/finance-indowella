@@ -7,7 +7,10 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Spatie\Permission\Models\Permission;
 
@@ -47,13 +50,9 @@ class ProfileController extends Controller
         $request->validateWithBag('userDeletion', [
             'password' => ['required', 'current_password'],
         ]);
-
         $user = $request->user();
-
         Auth::logout();
-
         $user->delete();
-
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
@@ -84,6 +83,32 @@ class ProfileController extends Controller
         ];
     }
 
+    function createUser(Request $request)
+    {
+        try {
+            $request = $request->validate([
+                'name' => 'required|string',
+                'email' => 'required|string'
+            ]);
+            $request['password'] = Hash::make('123456');
+            $user = User::create($request);
+            return [
+                'status' => 1,
+                'msg' => $user
+            ];
+        } catch (ValidationException $v) {
+            return [
+                'status' => 0,
+                'msg' => getErrorValidation($v)
+            ];
+        } catch (\Throwable $th) {
+            return [
+                'status' => 0,
+                'msg' => $th->getMessage()
+            ];
+        }
+    }
+
     function getGivePermissionRole()
     {
         $role = getInput('role');
@@ -103,15 +128,22 @@ class ProfileController extends Controller
         }
     }
 
-    function givePermissionToRole(Request $request)
+    function addPermissionRole(Request $request)
     {
         $request->validate([
-            'permission' => 'required|string',
-            'role' => 'required|string'
+            'permission_id' => 'required|integer',
+            'role_id' => 'required|integer'
         ]);
-        $role = \Spatie\Permission\Models\Role::findByName($request->input('role'));
+        $role = \Spatie\Permission\Models\Role::find($request->input('role_id'));
         if ($role) {
-            $role->givePermissionTo($request->input('permission'));
+            $permission = Permission::find($request->input('permission_id'));
+            if (!$permission) {
+                return [
+                    'status' => 0,
+                    'msg' => 'permission not found'
+                ];
+            }
+            $role->givePermissionTo($permission->name);
             return [
                 'status' => 1,
                 'msg' => 'permission added'
@@ -127,14 +159,20 @@ class ProfileController extends Controller
     function addRoleUser(Request $request)
     {
         $request->validate([
-            'role' => 'required|string',
+            'role_id' => 'required|integer',
             'user_id' => 'required|integer'
         ]);
         $user_id = $request->input('user_id');
-        $role = $request->input('role');
+        $role = \Spatie\Permission\Models\Role::find($request->input('role_id'));
+        if (!$role) {
+            return [
+                'status' => 0,
+                'msg' => 'role not found'
+            ];
+        }
         $user = User::find($user_id);
         if ($user) {
-            $user->assignRole($role);
+            $user->assignRole($role->name);
             return [
                 'status' => 1,
                 'msg' => 'role added'
@@ -145,5 +183,61 @@ class ProfileController extends Controller
                 'msg' => 'user not found'
             ];
         }
+    }
+
+    function getRole()
+    {
+        $role = \Spatie\Permission\Models\Role::with('permissions')->get();
+        return [
+            'status' => 1,
+            'msg' => $role
+        ];
+    }
+
+    function getPermission()
+    {
+        $permission = Permission::all();
+        return [
+            'status' => 1,
+            'msg' => $permission
+        ];
+    }
+
+    function getUser()
+    {
+        $user = User::all()->map(function ($val) {
+            $val['role'] = $val->getAllRoles();
+            return $val;
+        });
+        return [
+            'status' => 1,
+            'msg' => $user
+        ];
+    }
+
+    function getItemPermission()
+    {
+        $searchs = explode(' ', getInput('search'));
+        $permission = Permission::query();
+        foreach ($searchs as $search) {
+            $permission = $permission->where('name', 'like', '%' . $search . '%');
+        }
+        $permission = $permission->select('id', DB::raw('name as text'))->get();
+        return [
+            'results' => $permission
+        ];
+    }
+
+    function getItemRole()
+    {
+        $searchs = explode(' ', getInput('search'));
+        $role = \Spatie\Permission\Models\Role::query();
+        foreach ($searchs as $search) {
+            $role = $role->where('name', 'like', '%' . $search . '%');
+        }
+        $role = $role->select('id', DB::raw('name as text'))->get();
+        return [
+            'results' => $role
+        ];
     }
 }

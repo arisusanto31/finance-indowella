@@ -29,9 +29,21 @@ Route::get('/', fn() => redirect('/login'));
 Route::get('/phpinfo', fn() => phpinfo());
 
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::prefix('profile')->name('profile.')->group(function () {
+        Route::post('/create-permission', [ProfileController::class, 'createPermission'])->name('create-permission');
+        Route::post('/create-role', [ProfileController::class, 'createRole'])->name('create-role');
+        Route::post('/create-user', [ProfileController::class, 'createUser'])->name('create-user');
+        Route::post('/add-permission-role', [ProfileController::class, 'addPermissionRole'])->name('add-permission-role');
+        Route::post('/add-role-user', [ProfileController::class, 'addRoleUser'])->name('add-role-user');
+        Route::get('/get-role', [ProfileController::class, 'getRole'])->name('get-role');
+        Route::get('/get-permission', [ProfileController::class, 'getPermission'])->name('get-permission');
+        Route::get('/get-user', [ProfileController::class, 'getUser'])->name('get-user');
+        Route::get('/get-item-permission', [ProfileController::class, 'getItemPermission'])->name('get-item-permission');
+        Route::get('/get-item-role', [ProfileController::class, 'getItemRole'])->name('get-item-role');
+        Route::get('/get-item-user', [ProfileController::class, 'getItemUser'])->name('get-item-user');
+    });
+
     Route::prefix('permission')->group(function () {
         Route::get('/give-to-role', [ProfileController::class, 'getGivePermissionRole'])->name('give-to-role');
     });
