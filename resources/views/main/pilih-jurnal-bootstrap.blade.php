@@ -19,6 +19,8 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <style>
     .btn-primary {
@@ -28,7 +30,7 @@
     }
 </style>
 
-<body class="bg-light">
+<body class="bg-light mt-4">
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top shadow-sm">
         <div class="container-fluid">
@@ -44,8 +46,60 @@
         </div>
     </nav>
 
+
+    <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-md-8 pt-5">
+            <div class="card p-4 shadow-sm">      
+        <h5 class="mb-4">Profile Details</h5>
+    
+        <form action="/profile/update" method="POST" enctype="multipart/form-data">
+          <div class="row align-items-center mb-4">
+            <!-- Foto Profil -->
+            <div class="col-md-2 text-center">
+              <img src="https://via.placeholder.com/100" id="preview-image" class="rounded-circle border" width="100" height="100" alt="Profile Photo">
+            </div>
+    
+            <!-- Upload & Reset Button -->
+            <div class="col-md-10">
+              <div class="d-flex gap-2">
+                <label class="btn btn-primary">
+                  Upload new photo <input type="file" name="foto" accept="image/*" onchange="previewFoto(this)" hidden>
+                </label>
+                <button type="button" class="btn btn-outline-secondary" onclick="resetFoto()">Reset</button>
+              </div>
+              <small class="text-muted d-block mt-2">Allowed JPG, PNG or GIF. Max size 800K.</small>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <label class="form-label">Nama nya siapa</label>
+            <input type="text" class="form-control" name="first_name" value="{{ user()->name }}">
+          </div>
+          
+            <div class="col-md-8">
+              <label class="form-label">E-mail</label>
+              <input type="email" class="form-control" name="email" value="{{ user()->email }}">
+            </div>
+            <div class="col-md-8">
+              <label class="form-label">username</label>
+              <input type="text" class="form-control" name="organization" value="{{ user()->email }}">
+            </div>
+          </div>
+    
+          <div class="text-end mt-4">
+            <button type="submit" class="btn btn-success">Save Changes</button>
+            <button type="submit" class="btn btn-success">Edit lur</button>
+
+          </div>
+          
+        </form>
+      </div>
+    </div>
+    
+   
+
     <!-- Content -->
-    <div class="container py-5 mt-5">
+    <div class="container py-5 mt-10">
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="card shadow-lg rounded-4">
@@ -191,6 +245,22 @@
 
     <!-- Script pilih book -->
     <script>
+
+const defaultImg = "https://via.placeholder.com/100";
+
+function previewFoto(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => document.getElementById('preview-image').src = e.target.result;
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+function resetFoto() {
+  document.getElementById('preview-image').src = defaultImg;
+  document.querySelector('input[type="file"]').value = '';
+}
+
         function pilihBook(bookid) {
             $.ajax({
                 url: '{{ url("book/login-jurnal") }}/' + bookid,
