@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->integer('book_journal_id');
             $table->unsignedBigInteger('invoice_id');
-            $table->string('invoice_number')->unique();
+            $table->string('invoice_number');
             $table->unsignedBigInteger('stock_id');
             $table->text('description')->nullable();
             $table->decimal('price', 15, 2)->default(0);
@@ -27,6 +27,8 @@ return new class extends Migration
             $table->unsignedBigInteger('supplier_id');
             $table->integer('reference_id')->nullable();
             $table->string('reference_type')->nullable();
+            $table->unique(['invoice_number', 'stock_id']);
+
             $table->timestamps();
         });
     }
@@ -36,4 +38,3 @@ return new class extends Migration
         Schema::dropIfExists('invoice_purchase_details');
     }
 };
-

@@ -40,4 +40,6 @@ class Supplier extends Model
         'is_deleted',
     ];
 
+   
+
 }

@@ -279,7 +279,7 @@
         }
 
         function initSelectPersonPelunasan() {
-            type = $('#person_type option:selected').val();
+            type = $('#pelunasan-person_type option:selected').val();
             if (type === 'App\\Models\\Customer') {
                 console.log('init oy ' + type);
                 initItemSelectManual('#pelunasan-person_id', '{{route("customer.get-item")}}', 'Person Name ..', '#pelunasanModal');
