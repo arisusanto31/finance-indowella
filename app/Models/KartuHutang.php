@@ -115,11 +115,11 @@ class KartuHutang extends Model
         ];
     }
 
-    public static function createMutation(Request $request)
+    public static function createMutation(Request $request, $useTransaction = true)
     {
-        
 
-        DB::beginTransaction();
+        if ($useTransaction)
+            DB::beginTransaction();
         try {
             $factur = $request->input('factur_supplier_number');
             $amountMutasi = $request->input('amount_mutasi');
@@ -159,7 +159,11 @@ class KartuHutang extends Model
                 'url_try_again' => null
 
             ]), false);
-            if ($st['status'] == 0) return $st;
+            if ($st['status'] == 0) {
+                if ($useTransaction)
+                    DB::rollBack();
+                return $st;
+            }
             $number = $st['journal_number'];
             $journal = Journal::where('journal_number', $number)->where('code_group', 211000)->first();
             $chart = $journal->chartAccount;
@@ -182,14 +186,17 @@ class KartuHutang extends Model
             ]));
 
             if ($st['status'] == 1) {
-                DB::commit();
+                if ($useTransaction)
+                    DB::commit();
                 return $st;
             } else {
-                DB::rollBack();
+                if ($useTransaction)
+                    DB::rollBack();
                 return $st;
             }
         } catch (Throwable $th) {
-            DB::rollBack();
+            if ($useTransaction)
+                DB::rollBack();
             return [
                 'status' => 0,
                 'msg' => $th->getMessage()
@@ -201,15 +208,16 @@ class KartuHutang extends Model
 
 
 
-    public static function createPelunasan(Request $request)
+    public static function createPelunasan(Request $request, $useTransaction = true)
     {
-        DB::beginTransaction();
+        if ($useTransaction)
+            DB::beginTransaction();
         try {
             $factur = $request->input('factur_supplier_number');
             $amountBayar = $request->input('amount_bayar');
-            $codeGroup= $request->input('code_group');
-            $lawanCodeGroup=$request->input('lawan_code_group');
-            $codeName= ChartAccount::where('code_group', $codeGroup)->first()?->name;
+            $codeGroup = $request->input('code_group');
+            $lawanCodeGroup = $request->input('lawan_code_group');
+            $codeName = ChartAccount::where('code_group', $codeGroup)->first()?->name;
 
             if ($amountBayar > 0) {
                 $codeKredit = $lawanCodeGroup;
@@ -250,7 +258,11 @@ class KartuHutang extends Model
                 'url_try_again' => null
 
             ]), false);
-            if ($st['status'] == 0) return $st;
+            if ($st['status'] == 0) {
+                if ($useTransaction)
+                    DB::rollBack();
+                return $st;
+            }
             $number = $st['journal_number'];
             $journal = Journal::where('journal_number', $number)->where('code_group', 211000)->first();
             $amountKredit = $amountBayar > 0 ? $amountBayar : 0;
@@ -272,16 +284,19 @@ class KartuHutang extends Model
                 'lawan_code_group' => $lawanCodeGroup,
                 'code_group_name' => $codeName
             ]));
-            
+
             if ($st['status'] == 1) {
-                DB::commit();
+                if ($useTransaction)
+                    DB::commit();
                 return $st;
             } else {
-                DB::rollBack();
+                if ($useTransaction)
+                    DB::rollBack();
                 return $st;
             }
         } catch (Throwable $th) {
-            DB::rollBack();
+            if ($useTransaction)
+                DB::rollBack();
             return [
                 'status' => 0,
                 'msg' => $th->getMessage()

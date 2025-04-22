@@ -110,12 +110,12 @@ class KartuStock extends Model
         ];
     }
 
-    public static function mutationStore(Request $request)
+    public static function mutationStore(Request $request,$useTransaction = true)
     {
 
 
-
-        DB::beginTransaction();
+        if($useTransaction)
+            DB::beginTransaction();
         try {
             $stockid = $request->input('stock_id');
             $qty = $request->input('mutasi_quantity');
@@ -124,6 +124,7 @@ class KartuStock extends Model
             $codeGroup= $request->input('code_group');
             $chart= ChartAccount::where('code_group', $codeGroup)->first();
             if (!$chart) {
+                if($useTransaction)
                 DB::rollBack();
                 return [
                     'status' => 0,
@@ -140,6 +141,7 @@ class KartuStock extends Model
 
             $stock = Stock::find($stockid);
             if (!$unit) {
+                if($useTransaction)
                 DB::rollBack();
                 return [
                     'status' => 0,
@@ -168,17 +170,19 @@ class KartuStock extends Model
                 new Throwable($st['msg']);
             }
         } catch (Throwable $th) {
+            if($useTransaction)
             DB::rollBack();
             return [
                 'status' => 0,
                 'msg' => $th->getMessage()
             ];
         } finally {
+            if($useTransaction)
             DB::commit();
         }
         return [
             'status' => 1,
-            'msg' => 'kartu stock berhasil disimpan'
+            'msg' => $st['msg']
         ];
     }
 }

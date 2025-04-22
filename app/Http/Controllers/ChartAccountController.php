@@ -66,139 +66,170 @@ class ChartAccountController extends Controller
     public function getItemChartAccountKeuanganManual()
     {
         $kind = getInput('kind');
-        if ($kind == 'pendapatan') {
-            $chart = ChartAccount::aktif()->child()->where('account_type', 'Pendapatan');
-            if (getInput('search')) {
-                foreach (explode(' ', getInput('search')) as $search) {
-                    $chart = $chart->where('name', 'like', '%' . $search . '%');
+        $kinds = explode('|', $kind);
+        $finalChart = collect([]);
+        foreach ($kinds as $kind) {
+            if ($kind == 'pendapatan') {
+                $chart = ChartAccount::aktif()->child()->where('account_type', 'Pendapatan');
+                if (getInput('search')) {
+                    foreach (explode(' ', getInput('search')) as $search) {
+                        $chart = $chart->where('name', 'like', '%' . $search . '%');
+                    }
                 }
+                $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
+                $finalChart = $finalChart->merge($chart);
             }
-            $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
-        } else if ($kind == 'penjualan') {
-            $chart = ChartAccount::aktif()->child()->whereBetween('code_group', [400000, 500000]);
-            if (getInput('search')) {
-                foreach (explode(' ', getInput('search')) as $search) {
-                    $chart = $chart->where('name', 'like', '%' . $search . '%');
+            if ($kind == 'penjualan') {
+                $chart = ChartAccount::aktif()->child()->whereBetween('code_group', [400000, 500000]);
+                if (getInput('search')) {
+                    foreach (explode(' ', getInput('search')) as $search) {
+                        $chart = $chart->where('name', 'like', '%' . $search . '%');
+                    }
                 }
+                $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
+                $finalChart = $finalChart->merge($chart);
             }
-            $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
-        } else if ($kind == 'piutang') {
-            $chart = ChartAccount::aktif()->child()->where('reference_model', 'App\\Models\\KartuPiutang');
-            if (getInput('search')) {
-                foreach (explode(' ', getInput('search')) as $search) {
-                    $chart = $chart->where('name', 'like', '%' . $search . '%');
+            if ($kind == 'piutang') {
+                $chart = ChartAccount::aktif()->child()->where('reference_model', 'App\\Models\\KartuPiutang');
+                if (getInput('search')) {
+                    foreach (explode(' ', getInput('search')) as $search) {
+                        $chart = $chart->where('name', 'like', '%' . $search . '%');
+                    }
                 }
+                $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
+                $finalChart = $finalChart->merge($chart);
             }
-            $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
-        } else if ($kind == 'hutang') {
-            $chart = ChartAccount::aktif()->child()->where('reference_model', 'App\\Models\\KartuHutang');
-            if (getInput('search')) {
-                foreach (explode(' ', getInput('search')) as $search) {
-                    $chart = $chart->where('name', 'like', '%' . $search . '%');
+            if ($kind == 'hutang') {
+                $chart = ChartAccount::aktif()->child()->where('reference_model', 'App\\Models\\KartuHutang');
+                if (getInput('search')) {
+                    foreach (explode(' ', getInput('search')) as $search) {
+                        $chart = $chart->where('name', 'like', '%' . $search . '%');
+                    }
                 }
+                $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
+                $finalChart = $finalChart->merge($chart);
             }
-            $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
-        } else if ($kind == 'prepaid') {
-            $chart = ChartAccount::aktif()->child()->where('reference_model', 'App\\Models\\KartuPrepaidExpense');
-            if (getInput('search')) {
-                foreach (explode(' ', getInput('search')) as $search) {
-                    $chart = $chart->where('name', 'like', '%' . $search . '%');
+            if ($kind == 'prepaid') {
+                $chart = ChartAccount::aktif()->child()->where('reference_model', 'App\\Models\\KartuPrepaidExpense');
+                if (getInput('search')) {
+                    foreach (explode(' ', getInput('search')) as $search) {
+                        $chart = $chart->where('name', 'like', '%' . $search . '%');
+                    }
                 }
+                $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
+                $finalChart = $finalChart->merge($chart);
             }
-            $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
-        } else if ($kind == 'persediaan') {
-            $chart = ChartAccount::aktif()->child()->where('reference_model', 'App\\Models\\KartuStock');
-            if (getInput('search')) {
-                foreach (explode(' ', getInput('search')) as $search) {
-                    $chart = $chart->where('name', 'like', '%' . $search . '%');
+            if ($kind == 'persediaan') {
+                $chart = ChartAccount::aktif()->child()->where('reference_model', 'App\\Models\\KartuStock');
+                if (getInput('search')) {
+                    foreach (explode(' ', getInput('search')) as $search) {
+                        $chart = $chart->where('name', 'like', '%' . $search . '%');
+                    }
                 }
+                $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
+                $finalChart = $finalChart->merge($chart);
             }
-            $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
-        } 
-        else if($kind=='kartu-inventory'){
-            $chart = ChartAccount::aktif()->child()->where('reference_model', 'App\\Models\\KartuInventory');
-            if (getInput('search')) {
-                foreach (explode(' ', getInput('search')) as $search) {
-                    $chart = $chart->where('name', 'like', '%' . $search . '%');
+            if ($kind == 'kartu-inventory') {
+                $chart = ChartAccount::aktif()->child()->where('reference_model', 'App\\Models\\KartuInventory');
+                if (getInput('search')) {
+                    foreach (explode(' ', getInput('search')) as $search) {
+                        $chart = $chart->where('name', 'like', '%' . $search . '%');
+                    }
                 }
+                $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
+                $finalChart = $finalChart->merge($chart);
             }
-            $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
-        }
-        else if ($kind == 'inventory') {
-            $chart = ChartAccount::aktif()->child()->where(function ($q) {
-                $q->whereBetween('code_group', [181000, 181999])->orWhere('code_group', 301000);
-            });
-            if (getInput('search')) {
-                foreach (explode(' ', getInput('search')) as $search) {
-                    $chart = $chart->where('name', 'like', '%' . $search . '%');
+            if ($kind == 'inventory') {
+                $chart = ChartAccount::aktif()->child()->where(function ($q) {
+                    $q->whereBetween('code_group', [181000, 181999])->orWhere('code_group', 301000);
+                });
+                if (getInput('search')) {
+                    foreach (explode(' ', getInput('search')) as $search) {
+                        $chart = $chart->where('name', 'like', '%' . $search . '%');
+                    }
                 }
+                $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
+                $finalChart = $finalChart->merge($chart);
             }
-            $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
-        } else if ($kind == 'akumulasi_inventory') {
-            $chart = ChartAccount::aktif()->child()->where(function ($q) {
-                $q->whereBetween('code_group', [182000, 182999])->orWhere('code_group', 301000);
-            });
-            if (getInput('search')) {
-                foreach (explode(' ', getInput('search')) as $search) {
-                    $chart = $chart->where('name', 'like', '%' . $search . '%');
+            if ($kind == 'akumulasi_inventory') {
+                $chart = ChartAccount::aktif()->child()->where(function ($q) {
+                    $q->whereBetween('code_group', [182000, 182999])->orWhere('code_group', 301000);
+                });
+                if (getInput('search')) {
+                    foreach (explode(' ', getInput('search')) as $search) {
+                        $chart = $chart->where('name', 'like', '%' . $search . '%');
+                    }
                 }
+                $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
+                $finalChart = $finalChart->merge($chart);
             }
-            $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
-        } else if ($kind == 'beban_inventory') {
-            $chart = ChartAccount::aktif()->child()->where(function ($q) {
-                $q->whereBetween('code_group', [800010, 800015])->orWhere('code_group', 301000);
-            });
-            if (getInput('search')) {
-                foreach (explode(' ', getInput('search')) as $search) {
-                    $chart = $chart->where('name', 'like', '%' . $search . '%');
+            if ($kind == 'beban_inventory') {
+                $chart = ChartAccount::aktif()->child()->where(function ($q) {
+                    $q->whereBetween('code_group', [800010, 800015])->orWhere('code_group', 301000);
+                });
+                if (getInput('search')) {
+                    foreach (explode(' ', getInput('search')) as $search) {
+                        $chart = $chart->where('name', 'like', '%' . $search . '%');
+                    }
                 }
+                $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
+                $finalChart = $finalChart->merge($chart);
             }
-            $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
-        } else if ($kind == 'kas') {
-            $chart = ChartAccount::aktif()->child()->where(function ($q) {
-                $q->whereBetween('code_group', [110000, 120000])->orWhere('code_group', 301000);
-            });
-            if (getInput('search')) {
-                foreach (explode(' ', getInput('search')) as $search) {
-                    $chart = $chart->where('name', 'like', '%' . $search . '%');
+            if ($kind == 'kas') {
+                $chart = ChartAccount::aktif()->child()->where(function ($q) {
+                    $q->whereBetween('code_group', [110000, 120000])->orWhere('code_group', 301000);
+                });
+                if (getInput('search')) {
+                    foreach (explode(' ', getInput('search')) as $search) {
+                        $chart = $chart->where('name', 'like', '%' . $search . '%');
+                    }
                 }
+                $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
+                $finalChart = $finalChart->merge($chart);
             }
-            $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
-        } else if ($kind == 'beban') {
-            $chart = ChartAccount::aktif()->child()->where('account_type', 'Beban');
-            if (getInput('search')) {
-                foreach (explode(' ', getInput('search')) as $search) {
-                    $chart = $chart->where('name', 'like', '%' . $search . '%');
+            if ($kind == 'beban') {
+                $chart = ChartAccount::aktif()->child()->where('account_type', 'Beban');
+                if (getInput('search')) {
+                    foreach (explode(' ', getInput('search')) as $search) {
+                        $chart = $chart->where('name', 'like', '%' . $search . '%');
+                    }
                 }
+                $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
+                $finalChart = $finalChart->merge($chart);
             }
-            $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
-        } else if ($kind == 'pemindahan') {
-            $chart = ChartAccount::aktif()->child()->where('name', 'Ayat Silang');
-            if (getInput('search')) {
-                foreach (explode(' ', getInput('search')) as $search) {
-                    $chart = $chart->where('name', 'like', '%' . $search . '%');
+            if ($kind == 'pemindahan') {
+                $chart = ChartAccount::aktif()->child()->where('name', 'Ayat Silang');
+                if (getInput('search')) {
+                    foreach (explode(' ', getInput('search')) as $search) {
+                        $chart = $chart->where('name', 'like', '%' . $search . '%');
+                    }
                 }
+                $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
+                $finalChart = $finalChart->merge($chart);
             }
-            $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
-        } else if ($kind == 'modal') {
-            $chart = ChartAccount::aktif()->child()->where('account_type', 'Ekuitas');
-            if (getInput('search')) {
-                foreach (explode(' ', getInput('search')) as $search) {
-                    $chart = $chart->where('name', 'like', '%' . $search . '%');
+            if ($kind == 'modal') {
+                $chart = ChartAccount::aktif()->child()->where('account_type', 'Ekuitas');
+                if (getInput('search')) {
+                    foreach (explode(' ', getInput('search')) as $search) {
+                        $chart = $chart->where('name', 'like', '%' . $search . '%');
+                    }
                 }
+                $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
+                $finalChart = $finalChart->merge($chart);
             }
-            $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
-        } else if ($kind == 'lainlain') {
-            $chart = ChartAccount::aktif()->child();
-            if (getInput('search')) {
-                foreach (explode(' ', getInput('search')) as $search) {
-                    $chart = $chart->where('name', 'like', '%' . $search . '%');
+            if ($kind == 'lainlain') {
+                $chart = ChartAccount::aktif()->child();
+                if (getInput('search')) {
+                    foreach (explode(' ', getInput('search')) as $search) {
+                        $chart = $chart->where('name', 'like', '%' . $search . '%');
+                    }
                 }
+                $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
+                $finalChart = $finalChart->merge($chart);
             }
-            $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
         }
         return [
-            'results' => $chart
+            'results' => $finalChart
         ];
     }
 

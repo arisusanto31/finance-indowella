@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('invoice_purchase_details', function (Blueprint $table) {
             $table->id();
             $table->integer('book_journal_id');
-            $table->unsignedBigInteger('invoice_id');
+            $table->unsignedBigInteger('invoice_pack_id');
             $table->string('invoice_number');
             $table->unsignedBigInteger('stock_id');
             $table->text('description')->nullable();
@@ -28,7 +28,6 @@ return new class extends Migration
             $table->integer('reference_id')->nullable();
             $table->string('reference_type')->nullable();
             $table->unique(['invoice_number', 'stock_id']);
-
             $table->timestamps();
         });
     }

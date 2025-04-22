@@ -185,7 +185,18 @@
 
         initCurrencyInput('.currency-input');
 
-        function showDetailOnModal(url) {
+        function showDetailOnModal(url, size = "") {
+            if (size == "") {
+                $('#global-modal').find('.modal-dialog').remove('modal-xl modal-lg');
+
+            } else if (size == "l") {
+                $('#global-modal').find('.modal-dialog').remove('modal-xl modal-lg');
+                $('#global-modal').find('.modal-dialog').addClass('modal-lg');
+
+            } else if (size == "xl") {
+                $('#global-modal').find('.modal-dialog').remove('modal-xl modal-lg');
+                $('#global-modal').find('.modal-dialog').addClass('modal-xl');
+            }
             $('#global-modal').modal('show');
             $('#global-modal-content').html('');
             $('#global-modal-content').load(url);

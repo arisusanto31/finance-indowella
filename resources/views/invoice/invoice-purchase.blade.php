@@ -96,11 +96,11 @@
                     <td rowspan="{{ $rowspan }}"><strong>Rp{{ number_format($invoiceSubtotal) }}</strong></td>
                     @if ($index === 0)
                     <td rowspan="{{ $rowspan }}">
-                        <a href="" class="btn btn-sm btn-outline-info" title="Lihat Invoice">
-                            👁️
+                        <a href="javascript:void(lihatDetailInvoice('{{$item->invoice_number}}'))" class="btn btn-sm btn-outline-primary" title="Lihat Invoice">
+                            <i class="fas fa-eye"></i>
                         </a>
                         <a href="" class="btn btn-sm btn-outline-primary" title="Edit Invoice">
-                            ✏️
+                            <i class="fas fa-edit"></i>
                         </a>
                     </td>
                     @endif
@@ -109,7 +109,9 @@
                 </tr>
                 @endforeach
                 @endforeach
+
             </tbody>
+
         </table>
     </div>
     @else
@@ -156,6 +158,9 @@
         initItemSelectManual('.select2-stock', '{{ url("admin/master/stock/get-item") }}', '-- Pilih Produk --');
         initItemSelectManual('.select2-supplier', '{{ url("admin/master/supplier/get-item") }}', '-- Pilih Supplier --');
 
+        function lihatDetailInvoice(invoiceNumber) {
+            showDetailOnModal('{{url("admin/invoice/show-detail")}}/' + invoiceNumber, 'xl');
+        }
 
         function removeDebetRow(btn) {
             const card = btn.closest('.rowdebet');

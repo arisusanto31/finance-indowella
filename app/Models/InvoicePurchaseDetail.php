@@ -10,6 +10,7 @@ class InvoicePurchaseDetail extends Model
 
     protected $fillable = [
         'invoice_number',
+        'invoice_pack_id',
         'book_journal_id',
         'stock_id',
         'quantity',
