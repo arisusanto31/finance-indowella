@@ -34,7 +34,7 @@ class KartuPiutang extends Model
         $personID = $request->input('person_id');
         $personType = $request->input('person_type');
         $lock = Cache::lock('create-kartu-piutang' . $personType . '-' . $personID, 90);
-        info('kartu utang - trying to create kartu piutang');
+        info('kartu piutang - trying to create kartu piutang');
         try {
 
             try {
@@ -96,6 +96,7 @@ class KartuPiutang extends Model
             } finally {
                 $lock->release();
             }
+            info('kartu piutang - success create kartu piutang');
             return [
                 'status' => 1,
                 'msg' => $kartu

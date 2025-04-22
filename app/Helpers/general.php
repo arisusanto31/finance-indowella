@@ -57,7 +57,8 @@ function segmentRequest($i)
     return FacadeRequest::segment($i);
 }
 
-function getListMonth(){
+function getListMonth()
+{
     return [
         '01' => 'Januari',
         '02' => 'Februari',
@@ -74,19 +75,28 @@ function getListMonth(){
     ];
 }
 
-function getProsen($data,$total){
-    if($total==0){
+function getProsen($data, $total)
+{
+    if ($total == 0) {
         return 0;
-    }else{
-        return round(($data/$total)*100,2);
+    } else {
+        return round(($data / $total) * 100, 2);
     }
 }
-function getProsenDecimal($data,$total){
-    if($total==0){
+function getProsenDecimal($data, $total)
+{
+    if ($total == 0) {
         return 0;
-    }else{
-        return ($data/$total)*100;
+    } else {
+        return ($data / $total) * 100;
     }
+}
+
+function getModel($model)
+{
+    $model = str_replace('App\\Models\\', '', $model);
+    $model = str_replace('\\', '_', $model);
+    return $model;
 }
 if (!function_exists('format_price')) {
     /**
@@ -94,14 +104,14 @@ if (!function_exists('format_price')) {
      * @param $length
      * @return string
      */
-    function format_price($number, $decimal = 2,$language="eng")
+    function format_price($number, $decimal = 2, $language = "eng")
     {
         try {
-            if($language=="eng"){
+            if ($language == "eng") {
                 return number_format($number, $decimal, ',', ',');
-            }else{    
+            } else {
                 return number_format($number, $decimal, ',', '.');;
-            }   
+            }
         } catch (\Exception $e) {
             return "";
         }
@@ -128,6 +138,11 @@ if (!function_exists('format_db')) {
                 return (string) $clean;
             } else {
                 // Format Indonesia: 1.234.567,89 → 1234567.89
+                //harus dicek dulu , kalau sudah integer g usah, kalau string baru di proses nih
+                if (is_numeric($formatted)) {
+                    return (string) $formatted;
+                }
+                $formatted = str_replace(' ', '', $formatted); // Hilangkan spasi
                 $clean = str_replace('.', '', $formatted);      // Hilangkan pemisah ribuan
                 $clean = str_replace(',', '.', $clean);         // Ganti koma (desimal) jadi titik
                 return (string) $clean;
@@ -138,11 +153,13 @@ if (!function_exists('format_db')) {
     }
 }
 
-function getErrorValidation($e){
-    return 'kolom: '.implode(',',collect($e->errors())->keys()->all()).' tidak valid';
+function getErrorValidation($e)
+{
+    return 'kolom: ' . implode(',', collect($e->errors())->keys()->all()) . ' tidak valid';
 }
 
-function format_date_db($date){
+function format_date_db($date)
+{
     $dateDb = Carbon::createFromFormat('d/m/Y', $date)->format('Y-m-d');
     return $dateDb;
 }
@@ -187,5 +204,3 @@ if (!function_exists('moneyCmp')) {
         return bccomp(money($a), money($b), 2);
     }
 }
-
-

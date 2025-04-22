@@ -15,15 +15,13 @@ return new class extends Migration
             $table->id();
             $table->integer('book_journal_id');
             $table->string('invoice_number')->unique();
-            $table->unsignedBigInteger('customer_id');
+            $table->string('person_type');
+            $table->integer('person_id');
+            $table->string('reference_model');
             $table->date('invoice_date')->nullable();
             $table->decimal('total_price', 20, 2)->nullable();
-            $table->string('status')->default('pending');
-            $table->string('bukti_file')->nullable();
-         
-            $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
-        
-            $table->timestamps(); 
+            $table->string('status')->default('draft');
+            $table->timestamps();
         });
     }
 

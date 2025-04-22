@@ -8,6 +8,8 @@ use App\Models\InvoiceSaleDetail;
 use App\Models\Stock;
 use App\Models\StockCategory;
 use App\Models\InvoicePack;
+use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class InvoiceSaleController extends Controller
 {
@@ -41,6 +43,7 @@ class InvoiceSaleController extends Controller
     public function store(Request $request)
     {
 
+
         $request->validate([
             'invoice_number' => 'required|string|max:255',
             'customer_id' => 'required|integer',
@@ -52,38 +55,55 @@ class InvoiceSaleController extends Controller
             'price_unit.*' => 'required|numeric',
             'unit' => 'required|array',
             'unit.*' => 'required|string',
+            'total_price' => 'required|array',
+            'total_price.*' => 'required|string',
         ]);
 
         $invoice_number = $request->invoice_number;
         $grouped = [];
 
         foreach ($request->stock_id as $i => $stockId) {
-            $key = $invoice_number . '-' . $stockId;
+        
 
-            if (!isset($grouped[$key])) {
-                $grouped[$key] = [
-                    'invoice_number' => $invoice_number,
-                    'stock_id' => $stockId,
-                    'quantity' => $request->quantity[$i],
-                    'unit' => $request->unit[$i],
-                    'price' => $request->price_unit[$i],
-                    'discount' => $request->discount[$i] ?? 0,
-                    'customer_id' => $request->customer_id,
-                    'book_journal_id' => session('book_journal_id'),
-                ];
-            } else {
-                $grouped[$key]['quantity'] += $request->quantity[$i];
-                $grouped[$key]['discount'] += $request->discount[$i] ?? 0;
-            }
+            $grouped[] = [
+                'invoice_number' => $invoice_number,
+                'stock_id' => $stockId,
+                'quantity' => $request->quantity[$i],
+                'unit' => $request->unit[$i],
+                'price' => $request->price_unit[$i],
+                'discount' => $request->discount[$i] ?? 0,
+                'customer_id' => $request->customer_id,
+                'book_journal_id' => session('book_journal_id'),
+                'total_price' => format_db($request->total_price[$i]) ?? 0,
+            ];
         }
 
-        foreach ($grouped as &$data) {
-            $data['total_price'] = ($data['quantity'] * $data['price']) - $data['discount'];
-            InvoiceSaleDetail::create($data);
+        DB::beginTransaction();
+        try {
+            //create pack ya
+            $invoicePack = InvoicePack::create([
+                'invoice_number' => $invoice_number,
+                'book_journal_id' => session('book_journal_id'),
+                'person_id' => $request->customer_id,
+                'person_type' => Customer::class,
+                'reference_model' => InvoiceSaleDetail::class,
+                'invoice_date' => now(),
+                'total_price' => collect($grouped)->sum('total_price'),
+                'status' => 'draft',
+            ]);
+
+            foreach ($grouped as $data) {
+                $data['invoice_pack_id'] = $invoicePack->id;
+                InvoiceSaleDetail::create($data);
+            }
+
+            DB::commit();
+        } catch (Throwable $e) {
+
+            DB::rollBack();
+            return ['status' => 0, 'msg' => $e->getMessage()];
         }
 
         return ['status' => 1, 'msg' => 'Data berhasil disimpan'];
     }
-
- 
 }
