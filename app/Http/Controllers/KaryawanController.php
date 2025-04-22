@@ -14,7 +14,7 @@ class KaryawanController extends Controller
 
     public function create()
     {
-        return view('kartu.modal._create_karyawan');
+        return view('daftar.modal._create_karyawan');
     }
 
     public function store(Request $request)
@@ -35,6 +35,11 @@ class KaryawanController extends Controller
      
         return redirect()->back()->with('success', 'Karyawan berhasil disimpan!');
     }
-    
-
+    public function index()
+    {
+        $karyawans = Karyawan::all();
+        return view('daftar.daftar-karyawan', compact('karyawans'));
+    }
 }
+
+
