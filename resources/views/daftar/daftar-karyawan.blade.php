@@ -14,16 +14,16 @@
                 <!-- <a href="#" class="btn btn-primary btn-big-custom rounded-0">Tambah Jurnal Umum</a> -->
             </div>
 
-            
             <table id="supplier-table" class="table table-bordered table-striped">
-                  <thead class="table-light">
+                <thead class="table-light">
                   <tr>
                     <th class="border px-4 py-2">No</th>
                     <th class="border px-4 py-2">Nama</th>
                     <th class="border px-4 py-2">Nik</th>
-                    <th class="border px-4 py-2">npwp</th>
+                    <th class="border px-4 py-2">NPWP</th>
                     <th class="border px-4 py-2">Jabatan</th>
                     <th class="border px-4 py-2">Tanggal Masuk</th>
+                    <th class="border px-4 py-2">Status</th>
                     <th class="border px-4 py-2">Aksi</th>
                   </tr>
                 </thead>
@@ -37,23 +37,45 @@
                     <td class="border px-4 py-2">{{ $karyawan->jabatan }}</td>
                     <td class="border px-4 py-2">{{ $karyawan->date_masuk }}</td>
                     <td class="border px-4 py-2">
-                      @if(!$karyawan->date_keluar)
-{{--             
-                      <form action="{{ route('karyawans.resign', $karyawan->id) }}" method="POST" class="inline"> --}}
+                    @if (!$karyawan->date_keluar || $karyawan->date_keluar === '0000-00-00')
+                        <div class="text-green-600 font-semibold text-sm">Aktif</div>
+                        @else
+                        <span class="text-sm text-gray-500">Keluar ({{ $karyawan->date_keluar }})</span>
+                        @endif
+                        </td>
+  
+                     <td class="border px-4 py-2 space-x-1">
+    
+                      <!-- Tombol Edit Karyawan -->
+                    <button onclick="showDetailOnModal(), 'lg')" class="btn btn-success btn-sm">
+                    <i class="bi bi-pencil"></i>
+                    </button>
+  
+                        <form action="#" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin hapus data ini?')">
+                        @csrf
+                            @method('DELETE')
+                        <button type="submit" class="btn btn-danger btn-sm" title="Hapus">
+                        <i class="bi bi-trash"></i>
+                        </button>
+                    </form>
+  
+                   @if (!$karyawan->date_keluar || $karyawan->date_keluar === '0000-00-00')
+                        <form action="{{ route('karyawans.resign', $karyawan->id) }}" method="POST" class="d-inline">
                         @csrf
                         @method('PUT')
-                        <button type="submit" class="bg-red-500 text-white px-3 py-1 text-sm rounded hover:bg-red-600">
-                          Resign
-                        </button>
-                      </form>
-                      @else
-                      <span class="text-gray-500 text-sm">aktif</span>
-                      @endif
-                    </td>
+                        <button type="submit" class="btn btn-warning btn-sm text-white" title="Resign">
+                        Resign
+                    </button>
+                </form>
+                @endif
+                </td>
+  
+                      
                   </tr>
                   @endforeach
                 </tbody>
               </table>
+              
 
             @push('scripts')
     @if(session('success'))

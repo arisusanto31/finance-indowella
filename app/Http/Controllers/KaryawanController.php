@@ -4,9 +4,21 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Karyawan;
+use Carbon\Carbon;
 
 class KaryawanController extends Controller
 {
+
+    public function resign($id)
+{
+    $karyawan = Karyawan::findOrFail($id);
+    $karyawan->update([
+        'date_keluar' => Carbon::now()->toDateString()
+    ]);
+
+    return redirect()->back()->with('success', 'Karyawan berhasil diresign.');
+}
+   
     public function DaftarKaryawan()
     {
         return view('daftar.daftar-karyawan');
@@ -35,11 +47,15 @@ class KaryawanController extends Controller
      
         return redirect()->back()->with('success', 'Karyawan berhasil disimpan!');
     }
+
+
+
     public function index()
-    {
-        $karyawans = Karyawan::all();
-        return view('daftar.daftar-karyawan', compact('karyawans'));
-    }
+{
+    $karyawans = Karyawan::all();
+    return view('daftar.daftar-karyawan', compact('karyawans'));
+}
+
 }
 
 
