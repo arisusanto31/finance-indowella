@@ -54,8 +54,8 @@
                                 </div>
                             </div>
                             <span class="fw-semibold d-block mb-1">Laba</span>
-                            <h3 class="card-title mb-2">$12,628</h3>
-                            <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> +72.80%</small>
+                            <h3 id="saldo-laba" class="card-title mb-2"><i class="fas fa-spin fa-spinner"></i></h3>
+                            <small id="prosen-laba" class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> --%</small>
                         </div>
                     </div>
                 </div>
@@ -86,8 +86,8 @@
                                 </div>
                             </div>
                             <span>Penjualan</span>
-                            <h3 class="card-title text-nowrap mb-1">$4,679</h3>
-                            <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> +28.42%</small>
+                            <h3 id="saldo-penjualan" class="card-title text-nowrap mb-1"><i class="fas fa-spin fa-spinner"></i></h3>
+                            <small id="prosen-penjualan" class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> --%</small>
                         </div>
                     </div>
                 </div>
@@ -176,8 +176,8 @@
                                 </div>
                             </div>
                             <span class="d-block mb-1">Hutang</span>
-                            <h3 class="card-title text-nowrap mb-2">$2,456</h3>
-                            <small class="text-danger fw-semibold"><i class="bx bx-down-arrow-alt"></i> -14.82%</small>
+                            <h3 id="saldo-hutang" class="card-title text-nowrap mb-2"><i class="fas fa-spin fa-spinner"></i></h3>
+                            <small id="prosen-hutang" class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> --%</small>
                         </div>
                     </div>
                 </div>
@@ -205,8 +205,8 @@
                                 </div>
                             </div>
                             <span class="fw-semibold d-block mb-1">Piutang</span>
-                            <h3 class="card-title mb-2">$14,857</h3>
-                            <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> +28.14%</small>
+                            <h3 id="saldo-piutang" class="card-title mb-2"> <i class="fas fa-spin fa-spinner"></i></h3>
+                            <small id="prosen-piutang" class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> --%</small>
                         </div>
                     </div>
                 </div>
@@ -218,11 +218,12 @@
                                 <div class="d-flex flex-sm-column flex-row align-items-start justify-content-between">
                                     <div class="card-title">
                                         <h5 class="text-nowrap mb-2">Saldo Akun Jurnal</h5>
-                                        <span class="badge bg-label-warning rounded-pill">Year 2021</span>
+                                        <!-- <span class="badge bg-label-warning rounded-pill">Year 2021</span> -->
+                                        <select id="select-codegroup-custom" class="select-coa" onchange="getSaldoCustom()"></select>
                                     </div>
                                     <div class="mt-sm-auto">
-                                        <small class="text-success text-nowrap fw-semibold"><i class="bx bx-chevron-up"></i> 68.2%</small>
-                                        <h3 class="mb-0">$84,686k</h3>
+                                        <!-- <small class="text-success text-nowrap fw-semibold"><i class="bx bx-chevron-up"></i> 68.2%</small> -->
+                                        <h3 id="saldo-custom" class="mb-0"><i class="fas fa-spin fa-spinner"></i></h3>
                                     </div>
                                 </div>
                                 <div id="profileReportChart"></div>
@@ -467,10 +468,14 @@
     <script>
         // Custom JavaScript code can be added here
         console.log('Dashboard script loaded');
-
-        setTimeout(() => {
+        $(document).ready(function() {
+            // Initialize the donut chart
+            initItemSelectManual('#select-codegroup-custom', '{{route("chart-account.get-item-all")}}?', '--Pilih Akun--');
             loadDataError();
-        }, 1000);
+            getDataSaldoHighlight();
+            $('#select-codegroup-custom').html('<option value="140000" selected >Persediaan </option>');
+            getSaldoCustom();
+        });
 
         const donutChartConfig = {
             chart: {
@@ -565,7 +570,7 @@
                         html = `
                         <li class="d-flex mb-3 pb-1">
                             <div class="avatar flex-shrink-0 me-3">
-                                <span class="avatar-initial rounded bg-label-primary"><i class="bx bx-mobile-alt"></i></span>
+                                <span class="avatar-initial rounded " style="background-color:#696cff"><i class="bx bx-book"></i></span>
                             </div>
                             <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
                                 <div class="me-2">
@@ -579,7 +584,7 @@
                         </li>
                         <li class="d-flex mb-3 pb-1">
                             <div class="avatar flex-shrink-0 me-3">
-                                <span class="avatar-initial rounded bg-label-success"><i class="bx bx-closet"></i></span>
+                                <span class="avatar-initial rounded" style="background-color:#8592a3"><i class="bx bx-book"></i></span>
                             </div>
                             <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
                                 <div class="me-2">
@@ -593,7 +598,7 @@
                         </li>
                         <li class="d-flex mb-3 pb-1">
                             <div class="avatar flex-shrink-0 me-3">
-                                <span class="avatar-initial rounded bg-label-info"><i class="bx bx-home-alt"></i></span>
+                                <span class="avatar-initial rounded" style="background-color:#03c3ec"><i class="bx bx-book"></i></span>
                             </div>
                             <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
                                 <div class="me-2">
@@ -607,7 +612,7 @@
                         </li>
                         <li class="d-flex mb-3 pb-1">
                             <div class="avatar flex-shrink-0 me-3">
-                                <span class="avatar-initial rounded bg-label-secondary"><i class="bx bx-football"></i></span>
+                                <span class="avatar-initial rounded" style="background-color:#71dd37"><i class="bx bx-book"></i></span>
                             </div>
                             <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
                                 <div class="me-2">
@@ -621,7 +626,7 @@
                         </li> 
                          <li class="d-flex mb-3 pb-1">
                             <div class="avatar flex-shrink-0 me-3">
-                                <span class="avatar-initial rounded bg-label-secondary"><i class="bx bx-football"></i></span>
+                                <span class="avatar-initial rounded" style="background-color:#ffab00"><i class="bx bx-book"></i></span>
                             </div>
                             <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
                                 <div class="me-2">
@@ -635,7 +640,7 @@
                         </li> 
                          <li class="d-flex mb-3 pb-1">
                             <div class="avatar flex-shrink-0 me-3">
-                                <span class="avatar-initial rounded bg-label-secondary"><i class="bx bx-football"></i></span>
+                                <span class="avatar-initial rounded" style="background-color:#ff3e1d"><i class="bx bx-book"></i></span>
                             </div>
                             <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
                                 <div class="me-2">
@@ -653,6 +658,57 @@
                         donutChartConfig.series = [res.problem_journal, res.problem_kartu_stock, res.problem_kartu_hutang, res.problem_kartu_piutang, res.problem_kartu_inventory, res.problem_kartu_prepaid];
                         createSafeDonutChart('#errorDataChart', donutChartConfig);
 
+                    } else {
+                        // Handle error
+                        Swal.fire('Error', 'Failed to load data: ' + res.msg, 'error');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', status, error);
+                    Swal.fire('Error', 'AJAX request failed: ' + error, 'error');
+                }
+            });
+        }
+
+        function getDataSaldoHighlight() {
+            $.ajax({
+                url: '{{route("jurnal.get-saldo-highlight")}}?date={{Date("Y-m-d H:i:s")}}',
+                method: 'get',
+                success: function(res) {
+                    console.log(res);
+                    if (res.status == 1) {
+                        $('#saldo-hutang').html("Rp " + formatRupiahSimple(res.msg.saldo_hutang.msg));
+                        $('#saldo-piutang').html("Rp " + formatRupiahSimple(res.msg.saldo_piutang.msg));
+                        $('#saldo-laba').html("Rp " + formatRupiahSimple(res.msg.saldo_laba));
+                        $('#saldo-penjualan').html("Rp " + formatRupiahSimple(res.msg.saldo_penjualan.msg));
+                        // $('#prosen-hutang').html(res.prosen_hutang);
+                        // $('#prosen-piutang').html(res.prosen_piutang);
+                        // $('#prosen-penjualan').html(res.prosen_penjualan);
+                    } else {
+                        // Handle error
+                        Swal.fire('Error', 'Failed to load data: ' + res.msg, 'error');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', status, error);
+                    Swal.fire('Error', 'AJAX request failed: ' + error, 'error');
+                }
+            });
+        }
+
+        function getSaldoCustom() {
+            var code = $('#select-codegroup-custom option:selected').val();
+            $.ajax({
+                url: '{{url("admin/jurnal/get-saldo-custom")}}/' + code + '?date={{Date("Y-m-d H:i:s")}}',
+                method: 'get',
+                success: function(res) {
+                    console.log(res);
+                    if (res.status == 1) {
+
+                        $('#saldo-custom').html("Rp " + formatRupiahSimple(res.msg.msg));
+                        // $('#prosen-hutang').html(res.prosen_hutang);
+                        // $('#prosen-piutang').html(res.prosen_piutang);
+                        // $('#prosen-penjualan').html(res.prosen_penjualan);
                     } else {
                         // Handle error
                         Swal.fire('Error', 'Failed to load data: ' + res.msg, 'error');

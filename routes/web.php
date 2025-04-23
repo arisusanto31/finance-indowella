@@ -82,6 +82,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::get('verify/{id}', [JournalController::class, 'verify'])->name('verify');
         Route::get('/recalculate/{id}', [JournalController::class, 'recalculate'])->name('recalculate');
         Route::delete('delete/{id}', [JournalController::class, 'destroy'])->name('delete');
+        Route::get('/get-saldo-highlight', [JournalController::class, 'getSaldoHighlight'])->name('get-saldo-highlight');
+        Route::get('/get-saldo-custom/{id}', [JournalController::class, 'getSaldoCustom'])->name('get-saldo-custom');
     });
 
     Route::prefix('daftar')->group(function () {
@@ -130,6 +132,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::post('create-mutation', [KartuHutangController::class, 'createMutation'])->name('create-mutation');
             Route::post('create-pelunasan', [KartuHutangController::class, 'createPelunasan'])->name('create-pelunasan');
             Route::get('get-summary', [KartuHutangController::class, 'getSummary'])->name('get-summary');
+            Route::get('show-detail/{id}', [KartuHutangController::class, 'showDetail'])->name('show-detail');
+            Route::get('search-link-journal', [KartuHutangController::class, 'searchLinkJournal'])->name('search-link-journal');
         });
 
         Route::prefix('kartu-piutang')->name('kartu-piutang.')->group(function () {
@@ -144,6 +148,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::prefix('chart-account')->name('chart-account.')->group(function () {
             Route::resource('main', ChartAccountController::class);
             Route::get('/get-item', [ChartAccountController::class, 'getItemChartAccount'])->name('get-item');
+            Route::get('/get-item-all', [ChartAccountController::class, 'getItemChartAccountAll'])->name('get-item-all');
             Route::get('/get-item-keuangan', [ChartAccountController::class, 'getItemChartAccountKeuanganManual'])->name('get-item-keuangan');
             Route::get('/get-chart-accounts', [ChartAccountController::class, 'getChartAccounts']);
             Route::get('/master-suplier', [SupplierController::class, 'master.supplier']);

@@ -12,6 +12,7 @@ use App\Models\JournalKey;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
+use SebastianBergmann\CodeUnit\FunctionUnit;
 
 class JournalController extends Controller
 {
@@ -161,6 +162,8 @@ class JournalController extends Controller
             ];
         }
     }
+
+
 
     public function logoutJurnal()
     {
@@ -528,5 +531,58 @@ class JournalController extends Controller
                 'msg' => 'jurnal tidak ditemukan'
             ];
         }
+    }
+
+    public static function getSaldoJournal($codeGroup)
+    {
+        $chart = ChartAccount::where('code_group', $codeGroup)->first();
+        if (!$chart) {
+            return [
+                'status' => 0,
+                'msg' => 'chart account tidak tersedia'
+            ];
+        }
+        if (!getInput('date')) {
+            return [
+                'status' => 0,
+                'msg' => 'tanggal tidak valid (' . getInput('date') . ')'
+            ];
+        }
+        $saldo = $chart->getSaldoAt(getInput('date'));
+        // $theindexdate = floatval(createCarbon(getInput('date'))->format('ymdHis') . '00');
+        // $primaryCode = Journal::getPrimaryCode($chart->code_group);
+        // $lastJournal = Journal::where('code_group', 'like', $primaryCode . '%')->where('index_date', '<=', $theindexdate)->orderBy('index_date', 'desc')->first();
+        return [
+            'status' => 1,
+            'msg' => $saldo,
+            // 'chart_account' => $chart,
+            // 'journal' => $lastJournal
+        ];
+    }
+
+    public function getSaldoHighlight()
+    {
+        $saldoPenjualan = self::getSaldoJournal(400000);
+        $saldoHutang = self::getSaldoJournal(200000);
+        $saldoPiutang = self::getSaldoJournal(120000);
+        $saldoLaba = ChartAccount::getLabaBulanAt(getInput('date'));
+        return [
+            'status' => 1,
+            'msg' => [
+                'saldo_penjualan' => $saldoPenjualan,
+                'saldo_hutang' => $saldoHutang,
+                'saldo_piutang' => $saldoPiutang,
+                'saldo_laba' => $saldoLaba
+            ]
+        ];
+    }
+
+    public function getSaldoCustom($codeGroup)
+    {
+        $saldo = self::getSaldoJournal($codeGroup);
+        return [
+            'status' => 1,
+            'msg' => $saldo
+        ];
     }
 }

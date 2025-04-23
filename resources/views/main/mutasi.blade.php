@@ -13,7 +13,7 @@
       <div class="card-body" style="padding-top: 0px;">
         <div>
           Debit
-          <button type="button" class="btn btn-sm btn-success ms-2" id="addDebit">+tambah</button>
+          <button type="button" class="btn btn-sm btn-primary-light ms-2" id="addDebit">+tambah</button>
         </div>
         <div id="div-debet" class="debet-wrapper">
           <div id="debet1" class="row rowdebet g-2 mb-2 ">

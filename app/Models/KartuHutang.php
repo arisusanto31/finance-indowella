@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Throwable;
 
 use function PHPUnit\Framework\throwException;
@@ -28,6 +29,33 @@ class KartuHutang extends Model
         return $this->mrophTo();
     }
 
+    public function codeGroup()
+    {
+        return $this->belongsTo(ChartAccount::class, 'code_group', 'code_group');
+    }
+    public function codeGroupLawan()
+    {
+        return $this->belongsTo(ChartAccount::class, 'lawan_code_group', 'code_group');
+    }
+
+    protected static function booted()
+    {
+
+        static::addGlobalScope('journal', function ($query) {
+            $from = $query->getQuery()->from ?? 'kartu_hutangs'; // untuk dukung alias `j` kalau pakai from('journals as j')
+            if (Str::contains($from, ' as ')) {
+                [$table, $alias] = explode(' as ', $from);
+                $alias = trim($alias);
+            } else {
+                $alias = $from;
+            }
+
+            $query->where(function ($q) use ($alias) {
+                $q->whereNull("{$alias}.book_journal_id")
+                    ->orWhere("{$alias}.book_journal_id", session('book_journal_id'));
+            });
+        });
+    }
     public static function createKartu(Request $request)
     {
 
@@ -117,7 +145,6 @@ class KartuHutang extends Model
 
     public static function createMutation(Request $request, $useTransaction = true)
     {
-
         if ($useTransaction)
             DB::beginTransaction();
         try {
@@ -127,46 +154,57 @@ class KartuHutang extends Model
             $personType = $request->input('person_type');
             $codeGroup = $request->input('code_group');
             $lawanCodeGroup = $request->input('lawan_code_group');
+            $isOtomatisJurnal = $request->input('is_otomatis_jurnal') ?? 0;
+            $chartAccount = ChartAccount::where('code_group', $codeGroup)->first();
+            if (!$chartAccount) {
+                throw new \Exception('chart account not found');
+            }
+            $codeGroupName = $chartAccount->name;
             $person = $personType::find($personID);
             if (!$person) {
                 throw new \Exception('person not found');
             }
-            $kredits = [
-                [
-                    'code_group' => $codeGroup,
-                    'description' => 'hutang nomer' . $factur . ' dari ' . $person->name,
-                    'amount' => $amountMutasi,
-                    'reference_id' => null,
-                    'reference_type' => null,
-                ],
-            ];
-            $debets = [
-                [
-                    'code_group' => $lawanCodeGroup,
-                    'description' => 'hutang nomer' . $factur . ' dari ' . $person->name,
-                    'amount' => $amountMutasi,
-                    'reference_id' => null,
-                    'reference_type' => null,
-                ],
-            ];
-            $st = JournalController::createBaseJournal(new Request([
-                'kredits' => $kredits,
-                'debets' => $debets,
-                'type' => 'purchasing',
-                'date' => Date('Y-m-d H:i:s'),
-                'is_auto_generated' => 1,
-                'title' => 'create mutation purchase',
-                'url_try_again' => null
+            if ($isOtomatisJurnal) {
+                $kredits = [
+                    [
+                        'code_group' => $codeGroup,
+                        'description' => 'hutang nomer' . $factur . ' dari ' . $person->name,
+                        'amount' => $amountMutasi,
+                        'reference_id' => null,
+                        'reference_type' => null,
+                    ],
+                ];
+                $debets = [
+                    [
+                        'code_group' => $lawanCodeGroup,
+                        'description' => 'hutang nomer' . $factur . ' dari ' . $person->name,
+                        'amount' => $amountMutasi,
+                        'reference_id' => null,
+                        'reference_type' => null,
+                    ],
+                ];
+                $st = JournalController::createBaseJournal(new Request([
+                    'kredits' => $kredits,
+                    'debets' => $debets,
+                    'type' => 'purchasing',
+                    'date' => Date('Y-m-d H:i:s'),
+                    'is_auto_generated' => 1,
+                    'title' => 'create mutation purchase',
+                    'url_try_again' => null
 
-            ]), false);
-            if ($st['status'] == 0) {
-                if ($useTransaction)
-                    DB::rollBack();
-                return $st;
+                ]), false);
+                if ($st['status'] == 0) {
+                    if ($useTransaction)
+                        DB::rollBack();
+                    return $st;
+                }
+                $number = $st['journal_number'];
+                $journal = Journal::where('journal_number', $number)->where('code_group', $codeGroup)->first();
+                $journalID = $journal->id;
+            } else {
+                $journalID = null;
+                $number = null;
             }
-            $number = $st['journal_number'];
-            $journal = Journal::where('journal_number', $number)->where('code_group', 211000)->first();
-            $chart = $journal->chartAccount;
             $st = self::createKartu(new Request([
                 'type' => 'mutasi',
                 'purchasing_id' => null,
@@ -179,10 +217,10 @@ class KartuHutang extends Model
                 'person_id' => $personID,
                 'person_type' => $personType,
                 'journal_number' => $number,
-                'journal_id' => $journal->id,
+                'journal_id' => $journalID,
                 'code_group' => $codeGroup,
                 'lawan_code_group' => $lawanCodeGroup,
-                'code_group_name' => $chart->name
+                'code_group_name' => $codeGroupName
             ]));
 
             if ($st['status'] == 1) {
@@ -218,7 +256,7 @@ class KartuHutang extends Model
             $codeGroup = $request->input('code_group');
             $lawanCodeGroup = $request->input('lawan_code_group');
             $codeName = ChartAccount::where('code_group', $codeGroup)->first()?->name;
-
+            $isOtomatisJurnal = $request->input('is_otomatis_jurnal') ?? 0;
             if ($amountBayar > 0) {
                 $codeKredit = $lawanCodeGroup;
                 $codeDebet = $codeGroup;
@@ -230,41 +268,49 @@ class KartuHutang extends Model
             }
             $personID = $request->input('person_id');
             $personType = $request->input('person_type');
-            $kredits = [
-                [
-                    'code_group' => $codeKredit,
-                    'description' => $desc,
-                    'amount' => abs($amountBayar),
-                    'reference_id' => null,
-                    'reference_type' => null,
-                ],
-            ];
-            $debets = [
-                [
-                    'code_group' => $codeDebet,
-                    'description' => $desc,
-                    'amount' => abs($amountBayar),
-                    'reference_id' => null,
-                    'reference_type' => null,
-                ],
-            ];
-            $st = JournalController::createBaseJournal(new Request([
-                'kredits' => $kredits,
-                'debets' => $debets,
-                'type' => 'purchasing',
-                'date' => Date('Y-m-d H:i:s'),
-                'is_auto_generated' => 1,
-                'title' => 'create mutation purchase',
-                'url_try_again' => null
+            if ($isOtomatisJurnal) {
 
-            ]), false);
-            if ($st['status'] == 0) {
-                if ($useTransaction)
-                    DB::rollBack();
-                return $st;
+
+                $kredits = [
+                    [
+                        'code_group' => $codeKredit,
+                        'description' => $desc,
+                        'amount' => abs($amountBayar),
+                        'reference_id' => null,
+                        'reference_type' => null,
+                    ],
+                ];
+                $debets = [
+                    [
+                        'code_group' => $codeDebet,
+                        'description' => $desc,
+                        'amount' => abs($amountBayar),
+                        'reference_id' => null,
+                        'reference_type' => null,
+                    ],
+                ];
+                $st = JournalController::createBaseJournal(new Request([
+                    'kredits' => $kredits,
+                    'debets' => $debets,
+                    'type' => 'purchasing',
+                    'date' => Date('Y-m-d H:i:s'),
+                    'is_auto_generated' => 1,
+                    'title' => 'create mutation purchase',
+                    'url_try_again' => null
+
+                ]), false);
+                if ($st['status'] == 0) {
+                    if ($useTransaction)
+                        DB::rollBack();
+                    return $st;
+                }
+                $number = $st['journal_number'];
+                $journal = Journal::where('journal_number', $number)->where('code_group', $codeGroup)->first();
+                $journalID = $journal->id;
+            } else {
+                $number = null;
+                $journalID = null;
             }
-            $number = $st['journal_number'];
-            $journal = Journal::where('journal_number', $number)->where('code_group', 211000)->first();
             $amountKredit = $amountBayar > 0 ? $amountBayar : 0;
             $amountDebet = $amountBayar < 0 ? abs($amountBayar) : 0;
             $st = self::createKartu(new Request([
@@ -279,7 +325,7 @@ class KartuHutang extends Model
                 'person_id' => $personID,
                 'person_type' => $personType,
                 'journal_number' => $number,
-                'journal_id' => $journal->id,
+                'journal_id' => $journalID,
                 'code_group' => $codeGroup,
                 'lawan_code_group' => $lawanCodeGroup,
                 'code_group_name' => $codeName

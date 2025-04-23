@@ -126,7 +126,7 @@ class ChartAccount extends Model
             ->groupBy('code_group');
 
 
-        $saldo = DB::table('journals as j')
+        $saldo = Journal::from('journals as j')
             ->joinSub($subquery, 'subquery', function ($join) {
                 $join->on('j.code_group', '=', 'subquery.code_group')
                     ->on('j.index_date', '=', 'subquery.max_index_date');
@@ -296,12 +296,12 @@ class ChartAccount extends Model
                 return $val;
             })->keyBy('id');
       
-        $subquery = DB::table('journals')
+        $subquery = Journal::from('journals as j')
             ->where('index_date', '<', (float)$lastdate)
             ->select('code_group', DB::raw('MAX(index_date) as max_index_date'))
             ->groupBy('code_group');
 
-        $saldo_akhir = DB::table('journals as j')
+        $saldo_akhir = Journal::from('journals as j')
             ->joinSub($subquery, 'subquery', function ($join) {
                 $join->on('j.code_group', '=', 'subquery.code_group')
                     ->on('j.index_date', '=', 'subquery.max_index_date');
@@ -329,8 +329,8 @@ class ChartAccount extends Model
         $fixdatas = ChartAccount::select('name', 'account_type', 'id', 'code_group', 'level')->orderBy('code_group')->get()
             ->map(function ($val) use ($saldoAkhir, $saldoAwal) {
                 
-                $val['saldo_awal'] = array_key_exists($val->id,$saldoAwal->all())?$saldoAwal[$val->id]->saldo_akhir:0;
-                $val['saldo_akhir'] = array_key_exists($val->id,$saldoAkhir->all())?$saldoAkhir[$val->id]->saldo_akhir:0;
+                $val['saldo_awal'] = array_key_exists($val->id,$saldoAwal->all())?money($saldoAwal[$val->id]->saldo_akhir):0;
+                $val['saldo_akhir'] = array_key_exists($val->id,$saldoAkhir->all())?money($saldoAkhir[$val->id]->saldo_akhir):0;
                 return $val;
             });
         return [
@@ -371,8 +371,8 @@ class ChartAccount extends Model
                 $idchilds = [$data->id];
             }
             $newdata['id'] = $data->id;
-            $newdata['total_debet'] = round($mutasi_->whereIn('id', $idchilds)->sum('total_debet'), 2);
-            $newdata['total_kredit'] = round($mutasi_->whereIn('id', $idchilds)->sum('total_kredit'), 2);
+            $newdata['total_debet'] = money(round($mutasi_->whereIn('id', $idchilds)->sum('total_debet'), 2));
+            $newdata['total_kredit'] = money(round($mutasi_->whereIn('id', $idchilds)->sum('total_kredit'), 2));
             $fixMutasi[$data->id] = $newdata;
         }
 

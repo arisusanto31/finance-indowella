@@ -49,7 +49,7 @@ class ChartAccountController extends Controller
         foreach ($searchs as $search) {
             $charts = $charts->where('name', 'like', '%' . $search . '%');
         }
-        $charts = $charts->select('id', DB::raw('concat(code_group,"-",name) as text'))->get();
+        $charts = $charts->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
         return [
             'results' => $charts
         ];
