@@ -113,7 +113,11 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::get('/daftar-karyawan', [KaryawanController::class, 'DaftarKaryawan'])->name('daftar.daftar-karyawan');
         Route::get('/karyawan/create', [KaryawanController::class, 'create'])->name('karyawan.create');
         Route::post('/karyawan/store', [KaryawanController::class, 'store'])->name('karyawan.store');
-    });
+        Route::get('/daftar-karyawan', [KaryawanController::class, 'index']);
+        Route::get('/daftar-karyawan', [KaryawanController::class, 'index'])->name('daftar.daftar-karyawan');
+        Route::put('/karyawans/{id}/resign', [KaryawanController::class, 'resign'])->name('karyawans.resign');
+
+});
     Route::prefix('kartu')->group(function () {
         Route::resource('/kartu-kas', KartuKasController::class);
 

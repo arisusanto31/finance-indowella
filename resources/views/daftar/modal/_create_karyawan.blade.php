@@ -39,10 +39,6 @@
                 <label class="form-label">Tanggal Masuk</label>
                 <input type="date" name="date_masuk" class="form-control" required />
             </div>
-            <div class="col mb-3">
-                <label class="form-label">Tanggal Keluar</label>
-                <input type="date" name="date_keluar" class="form-control" />
-            </div>
         </div>
 
     </div>
