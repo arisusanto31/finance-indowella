@@ -38,24 +38,24 @@ class KartuHutang extends Model
         return $this->belongsTo(ChartAccount::class, 'lawan_code_group', 'code_group');
     }
 
-    protected static function booted()
-    {
+    // protected static function booted()
+    // {
 
-        static::addGlobalScope('journal', function ($query) {
-            $from = $query->getQuery()->from ?? 'kartu_hutangs'; // untuk dukung alias `j` kalau pakai from('journals as j')
-            if (Str::contains($from, ' as ')) {
-                [$table, $alias] = explode(' as ', $from);
-                $alias = trim($alias);
-            } else {
-                $alias = $from;
-            }
+    //     static::addGlobalScope('journal', function ($query) {
+    //         $from = $query->getQuery()->from ?? 'kartu_hutangs'; // untuk dukung alias `j` kalau pakai from('journals as j')
+    //         if (Str::contains($from, ' as ')) {
+    //             [$table, $alias] = explode(' as ', $from);
+    //             $alias = trim($alias);
+    //         } else {
+    //             $alias = $from;
+    //         }
 
-            $query->where(function ($q) use ($alias) {
-                $q->whereNull("{$alias}.book_journal_id")
-                    ->orWhere("{$alias}.book_journal_id", session('book_journal_id'));
-            });
-        });
-    }
+    //         $query->where(function ($q) use ($alias) {
+    //             $q->whereNull("{$alias}.book_journal_id")
+    //                 ->orWhere("{$alias}.book_journal_id", session('book_journal_id'));
+    //         });
+    //     });
+    // }
     public static function createKartu(Request $request)
     {
 
@@ -82,8 +82,6 @@ class KartuHutang extends Model
                 }
                 $facturNumber = $request->input('factur_supplier_number');
                 $realAmount = $amount_debet - $amount_kredit;
-
-
                 $lastKartu = KartuHutang::where('person_id', $personID)->where('person_type', $personType)
                     ->where('factur_supplier_number', $facturNumber)->orderBy('id', 'desc')->first();
                 $lastSaldoPurchase =  $lastKartu ? $lastKartu->amount_saldo_factur : 0;

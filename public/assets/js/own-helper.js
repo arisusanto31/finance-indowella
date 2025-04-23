@@ -98,42 +98,47 @@ function formatRupiah(number, language = "id") {
     //yang bingung disini adalah inputnya ,inputnya itu formatDB atau stringIndo atau stringEng
     //harusnya kalau kita pake language id , barti asumsinya cuma angka dengan format DB dan string Indo
     //buat mastikan angkanya itu beneran angka dulu
-    let isTyping = false;
-    awal = number;
+    try {
+        let isTyping = false;
+        awal = number;
 
 
-    if (detectFormat(number) == 'rupiah') {
-        //kalo inputnya ternyata format rupiah
-        if (language == "eng") {
-            //asumsi format rupiah eng ya
-            if (number.match(/\.$/)) isTyping = true;
+        if (detectFormat(number) != 'database') {
+            //kalo inputnya ternyata format rupiah
+            if (language == "eng") {
+                //asumsi format rupiah eng ya
+                if (number.match(/\.$/)) isTyping = true;
 
-            number = (number.replace(/[^0-9.]/g, ''));
-        } else {
-            //asumsi rupiah format indo ya
-            if (number.match(/\,$/)) isTyping = true;
-            number = (number.replace(/[^0-9,]/g, '').replace(',', '.'));
+                number = (number.replace(/[^0-9.]/g, ''));
+            } else {
+                //asumsi rupiah format indo ya
+                if (number.match(/\,$/)) isTyping = true;
+                number = (number.replace(/[^0-9,]/g, '').replace(',', '.'));
 
+            }
         }
-    }
-    if (isTyping) return awal;
+        if (isTyping) return awal;
 
-    decPoint = language == "eng" ? '.' : ',';
-    thousandsSep = language == "eng" ? ',' : '.';
-    if (language == 'id')
-        parts = number.toString().split('.');
-    else
-        parts = number.toString().split(',');
-    console.log(parts);
-    if (parts.length > 1) {
-        if (parts[1].length > 2) {
-            numberKoma = parseFloat("0." + parts[1]);
-            parts[1] = numberKoma.toFixed(2).split('.')[1];
+        decPoint = language == "eng" ? '.' : ',';
+        thousandsSep = language == "eng" ? ',' : '.';
+        if (language == 'id')
+            parts = number.toString().split('.');
+        else
+            parts = number.toString().split(',');
+        console.log(parts);
+        if (parts.length > 1) {
+            if (parts[1].length > 2) {
+                numberKoma = parseFloat("0." + parts[1]);
+                parts[1] = numberKoma.toFixed(2).split('.')[1];
+            }
         }
-    }
-    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandsSep);
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandsSep);
 
-    return parts.join(",");
+        return parts.join(",");
+    } catch (err) {
+        console.log("error format rupiah " + number);
+        
+    }
 }
 
 function formatRupiahSimple(number, language = "id") {
@@ -144,7 +149,7 @@ function formatRupiahSimple(number, language = "id") {
     awal = number;
 
 
-    if (detectFormat(number) == 'rupiah') {
+    if (detectFormat(number) != 'database') {
         //kalo inputnya ternyata format rupiah
         if (language == "eng") {
             //asumsi format rupiah eng ya
@@ -163,15 +168,16 @@ function formatRupiahSimple(number, language = "id") {
     //dari sini mestinya semuanya sudah formatdb
     number = parseFloat(number);
     tail = "";
+
     if (number > 999999999) {
         tail = "M";
         number = number / 1000000000;
     }
     else if (number > 999999) {
-        tail = "Jt";
+        tail = "jt";
         number = number / 1000000;
     } else if (number > 999) {
-        tail = "Rb";
+        tail = "rb";
         number = number / 1000;
     }
     decPoint = language == "eng" ? '.' : ',';

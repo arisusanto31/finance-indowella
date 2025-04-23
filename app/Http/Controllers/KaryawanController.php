@@ -10,15 +10,15 @@ class KaryawanController extends Controller
 {
 
     public function resign($id)
-{
-    $karyawan = Karyawan::findOrFail($id);
-    $karyawan->update([
-        'date_keluar' => Carbon::now()->toDateString()
-    ]);
+    {
+        $karyawan = Karyawan::findOrFail($id);
+        $karyawan->update([
+            'date_keluar' => Carbon::now()->toDateString()
+        ]);
 
-    return redirect()->back()->with('success', 'Karyawan berhasil diresign.');
-}
-   
+        return redirect()->back()->with('success', 'Karyawan berhasil diresign.');
+    }
+
     public function DaftarKaryawan()
     {
         return view('daftar.daftar-karyawan');
@@ -39,23 +39,20 @@ class KaryawanController extends Controller
             'date_masuk' => 'required|date',
             'date_keluar' => 'nullable|date',
         ]);
-    
-        $karyawan = Karyawan::create($validated); 
-    
+
+        $karyawan = Karyawan::create($validated);
+
         $status = is_null($karyawan->date_keluar) ? 'Aktif' : 'Keluar';
-    
-     
+
+
         return redirect()->back()->with('success', 'Karyawan berhasil disimpan!');
     }
 
 
 
     public function index()
-{
-    $karyawans = Karyawan::all();
-    return view('daftar.daftar-karyawan', compact('karyawans'));
+    {
+        $karyawans = Karyawan::all();
+        return view('daftar.daftar-karyawan', compact('karyawans'));
+    }
 }
-
-}
-
-

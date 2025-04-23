@@ -54,7 +54,7 @@
                                 </div>
                             </div>
                             <span class="fw-semibold d-block mb-1">Laba</span>
-                            <h3 id="saldo-laba" class="card-title mb-2"><i class="fas fa-spin fa-spinner"></i></h3>
+                            <h3 id="saldo-laba" class="card-title fs-4 mb-2"><i class="fas fa-spin fa-spinner"></i></h3>
                             <small id="prosen-laba" class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> --%</small>
                         </div>
                     </div>
@@ -86,7 +86,7 @@
                                 </div>
                             </div>
                             <span>Penjualan</span>
-                            <h3 id="saldo-penjualan" class="card-title text-nowrap mb-1"><i class="fas fa-spin fa-spinner"></i></h3>
+                            <h3 id="saldo-penjualan" class="card-title fs-4 text-nowrap mb-1"><i class="fas fa-spin fa-spinner"></i></h3>
                             <small id="prosen-penjualan" class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> --%</small>
                         </div>
                     </div>
@@ -176,7 +176,7 @@
                                 </div>
                             </div>
                             <span class="d-block mb-1">Hutang</span>
-                            <h3 id="saldo-hutang" class="card-title text-nowrap mb-2"><i class="fas fa-spin fa-spinner"></i></h3>
+                            <h3 id="saldo-hutang" class="card-title text-nowrap fs-4 mb-2"><i class="fas fa-spin fa-spinner"></i></h3>
                             <small id="prosen-hutang" class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> --%</small>
                         </div>
                     </div>
@@ -205,7 +205,7 @@
                                 </div>
                             </div>
                             <span class="fw-semibold d-block mb-1">Piutang</span>
-                            <h3 id="saldo-piutang" class="card-title mb-2"> <i class="fas fa-spin fa-spinner"></i></h3>
+                            <h3 id="saldo-piutang" class="card-title mb-2 fs-4"> <i class="fas fa-spin fa-spinner"></i></h3>
                             <small id="prosen-piutang" class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> --%</small>
                         </div>
                     </div>
@@ -677,10 +677,10 @@
                 success: function(res) {
                     console.log(res);
                     if (res.status == 1) {
-                        $('#saldo-hutang').html("Rp " + formatRupiahSimple(res.msg.saldo_hutang.msg));
-                        $('#saldo-piutang').html("Rp " + formatRupiahSimple(res.msg.saldo_piutang.msg));
-                        $('#saldo-laba').html("Rp " + formatRupiahSimple(res.msg.saldo_laba));
-                        $('#saldo-penjualan').html("Rp " + formatRupiahSimple(res.msg.saldo_penjualan.msg));
+                        $('#saldo-hutang').html("Rp." + formatRupiahSimple(res.msg.saldo_hutang.msg));
+                        $('#saldo-piutang').html("Rp." + formatRupiahSimple(res.msg.saldo_piutang.msg));
+                        $('#saldo-laba').html("Rp." + formatRupiahSimple(res.msg.saldo_laba));
+                        $('#saldo-penjualan').html("Rp." + formatRupiahSimple(res.msg.saldo_penjualan.msg));
                         // $('#prosen-hutang').html(res.prosen_hutang);
                         // $('#prosen-piutang').html(res.prosen_piutang);
                         // $('#prosen-penjualan').html(res.prosen_penjualan);
