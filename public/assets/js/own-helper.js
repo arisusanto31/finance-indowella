@@ -1,16 +1,5 @@
 console.log("own-helper.js loaded");
-function formatRupiahSimple(angkaString) {
-    angka = parseInt(angkaString);
-    if (Math.abs(angka) >= 1000000) {
-        angka = Math.floor(angka / 100000) / 10;
-        return angka + "M";
-    } else if (Math.abs(angka) >= 1000) {
-        angka = Math.floor(angka / 100) / 10;
-        return angka + "K";
-    } else {
-        return angka;
-    }
-}
+
 
 
 function formatDB(angka, language = "id") {
@@ -49,47 +38,159 @@ function formatDB(angka, language = "id") {
 }
 
 
-function formatRupiah(angkaString, prefix = "", language = "id") {
-    try {
-        var number_string = "";
-        angkaString = angkaString.toString();
-        negatif = check_char(angkaString, '-');
-        split = angkaString.split('.'),
-            split[0] = split[0].replace(/[^0-9]/g, '').toString();
-        if (split[1] != undefined)
-            split[1] = split[1].replace(/[^0-9]/g, '').toString();
-        sisa = split[0].length % 3,
-            rupiah = split[0].substr(0, sisa),
-            ribuan = split[0].substr(sisa).match(/\d{3}/gi);
-        // tambahkan titik jika yang di input sudah menjadi angka ribuan
+// function formatRupiah(angkaString, prefix = "", language = "id") {
+//     try {
+//         var number_string = "";
+//         angkaString = angkaString.toString();
+//         negatif = check_char(angkaString, '-');
+//         split = angkaString.split('.'),
+//             split[0] = split[0].replace(/[^0-9]/g, '').toString();
+//         if (split[1] != undefined)
+//             split[1] = split[1].replace(/[^0-9]/g, '').toString();
+//         sisa = split[0].length % 3,
+//             rupiah = split[0].substr(0, sisa),
+//             ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+//         // tambahkan titik jika yang di input sudah menjadi angka ribuan
 
-        if (ribuan) {
-            if (language == "eng") {
-                separator = sisa ? ',' : '';
-                rupiah += separator + ribuan.join(',');
-            } else {
-                separator = sisa ? '.' : '';
-                rupiah += separator + ribuan.join('.');
+//         if (ribuan) {
+//             if (language == "eng") {
+//                 separator = sisa ? ',' : '';
+//                 rupiah += separator + ribuan.join(',');
+//             } else {
+//                 separator = sisa ? '.' : '';
+//                 rupiah += separator + ribuan.join('.');
 
-            }
-        }
-        if (language == "eng")
-            rupiah = split[1] != undefined ? rupiah + '.' + split[1] : rupiah;
-        else
-            rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
+//             }
+//         }
+//         if (language == "eng")
+//             rupiah = split[1] != undefined ? rupiah + '.' + split[1] : rupiah;
+//         else
+//             rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
 
-        if (negatif) {
-            return prefix == undefined ? '-' + rupiah : (rupiah ? '-' + rupiah : '');
-        }
-        return prefix == undefined ? rupiah : (rupiah ? rupiah : '');
-    } catch (err) {
-        console.log(err);
-        return angkaString;
+//         if (negatif) {
+//             return prefix == undefined ? '-' + rupiah : (rupiah ? '-' + rupiah : '');
+//         }
+//         return prefix == undefined ? rupiah : (rupiah ? rupiah : '');
+//     } catch (err) {
+//         console.log(err);
+//         return angkaString;
+//     }
+
+
+// }
+
+function detectFormat(input) {
+    // 1. Format database: angka murni dengan titik desimal
+    const dbPattern = /^\d+(\.\d+)?$/;
+
+    // 2. Format rupiah: bisa mengandung Rp, titik ribuan, koma desimal
+    const rupiahPattern = /^\s?[\d\.]+(,\d{1,2})?$/;
+
+    if (dbPattern.test(input)) {
+        return 'database';
+    } else if (rupiahPattern.test(input)) {
+        return 'rupiah';
+    } else {
+        return 'unknown';
     }
+}
+function formatRupiah(number, language = "id") {
+    //yang bingung disini adalah inputnya ,inputnya itu formatDB atau stringIndo atau stringEng
+    //harusnya kalau kita pake language id , barti asumsinya cuma angka dengan format DB dan string Indo
+    //buat mastikan angkanya itu beneran angka dulu
+    let isTyping = false;
+    awal = number;
 
 
+    if (detectFormat(number) == 'rupiah') {
+        //kalo inputnya ternyata format rupiah
+        if (language == "eng") {
+            //asumsi format rupiah eng ya
+            if (number.match(/\.$/)) isTyping = true;
+
+            number = (number.replace(/[^0-9.]/g, ''));
+        } else {
+            //asumsi rupiah format indo ya
+            if (number.match(/\,$/)) isTyping = true;
+            number = (number.replace(/[^0-9,]/g, '').replace(',', '.'));
+
+        }
+    }
+    if (isTyping) return awal;
+
+    decPoint = language == "eng" ? '.' : ',';
+    thousandsSep = language == "eng" ? ',' : '.';
+    if (language == 'id')
+        parts = number.toString().split('.');
+    else
+        parts = number.toString().split(',');
+    console.log(parts);
+    if (parts.length > 1) {
+        if (parts[1].length > 2) {
+            numberKoma = parseFloat("0." + parts[1]);
+            parts[1] = numberKoma.toFixed(2).split('.')[1];
+        }
+    }
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandsSep);
+
+    return parts.join(",");
 }
 
+function formatRupiahSimple(number, language = "id") {
+    //yang bingung disini adalah inputnya ,inputnya itu formatDB atau stringIndo atau stringEng
+    //harusnya kalau kita pake language id , barti asumsinya cuma angka dengan format DB dan string Indo
+    //buat mastikan angkanya itu beneran angka dulu
+    let isTyping = false;
+    awal = number;
+
+
+    if (detectFormat(number) == 'rupiah') {
+        //kalo inputnya ternyata format rupiah
+        if (language == "eng") {
+            //asumsi format rupiah eng ya
+            if (number.match(/\.$/)) isTyping = true;
+
+            number = (number.replace(/[^0-9.]/g, ''));
+        } else {
+            //asumsi rupiah format indo ya
+            if (number.match(/\,$/)) isTyping = true;
+            number = (number.replace(/[^0-9,]/g, '').replace(',', '.'));
+
+        }
+    }
+    if (isTyping) return awal;
+
+    //dari sini mestinya semuanya sudah formatdb
+    number = parseFloat(number);
+    tail = "";
+    if (number > 999999999) {
+        tail = "M";
+        number = number / 1000000000;
+    }
+    else if (number > 999999) {
+        tail = "Jt";
+        number = number / 1000000;
+    } else if (number > 999) {
+        tail = "Rb";
+        number = number / 1000;
+    }
+    decPoint = language == "eng" ? '.' : ',';
+    thousandsSep = language == "eng" ? ',' : '.';
+    if (language == 'id')
+        parts = number.toString().split('.');
+    else
+        parts = number.toString().split(',');
+    console.log(parts);
+    if (parts.length > 1) {
+        if (parts[1].length > 2) {
+            numberKoma = parseFloat("0." + parts[1]);
+            parts[1] = numberKoma.toFixed(2).split('.')[1];
+        }
+    }
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandsSep);
+
+    return parts.join(",") + ' ' + tail;
+}
 
 function check_char(str, char) {
     ctr = 0;
@@ -178,7 +279,7 @@ function array_key_exists(key, obj) {
 }
 
 
-function swalInfo(title,text,icon="info"){
+function swalInfo(title, text, icon = "info") {
     Swal.fire({
         title: title,
         text: text,

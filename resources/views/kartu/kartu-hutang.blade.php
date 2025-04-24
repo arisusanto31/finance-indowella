@@ -49,6 +49,7 @@
                             <th>💵 Pelunasan</th>
                             <th>💲 saldo</th>
                             <th>💸 saldo Akumulasi</th>
+                            <th>📝 Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="body-kartu-hutang">
@@ -62,14 +63,26 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel1">Buat Mutasi Kartu Hutang</h5>
+
+                    <div class="flex-column align-items-start">
+                        <h5 class="modal-title" id="exampleModalLabel1">Buat Mutasi Kartu Hutang</h5>
+
+
+                        <div class="form-check form-switch ">
+                            <input class="form-check-input" type="checkbox" id="is_otomatis_jurnal" checked />
+                            <label class="form-check-label" for="is_otomatis_jurnal">Buat Jurnal</label>
+                        </div>
+
+                    </div>
                     <button
                         type="button"
-                        class="btn-close"
+                        class="btn-close position-absolute end-0 top-0 m-3"
                         data-bs-dismiss="modal"
                         aria-label="Close"></button>
+
                 </div>
                 <div class="modal-body">
+
                     <div class="row">
                         <div class="col mb-3">
                             <label for="nameBasic" class="form-label">Nomer Invoice</label>
@@ -123,10 +136,19 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel1">Buat Pelunasan Kartu Hutang</h5>
+                    <div class="flex-column align-items-start">
+                        <h5 class="modal-title" id="exampleModalLabel1">Buat Pelunasan Kartu Hutang</h5>
+
+
+                        <div class="form-check form-switch ">
+                            <input class="form-check-input" type="checkbox" id="is_pelunasan_otomatis_jurnal" checked />
+                            <label class="form-check-label" for="is_pelunasan_otomatis_jurnal">Buat Jurnal</label>
+                        </div>
+
+                    </div>
                     <button
                         type="button"
-                        class="btn-close"
+                        class="btn-close position-absolute end-0 top-0 m-3"
                         data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
@@ -193,9 +215,10 @@
                     factur_supplier_number: $('#factur').val(),
                     amount_mutasi: formatDB($('#amount_mutasi').val(), 'id'),
                     person_id: $('#person_id option:selected').val(),
-                    code_group:$('#akun-hutang option:selected').val(),
+                    code_group: $('#akun-hutang option:selected').val(),
                     lawan_code_group: $('#akun-lawan-hutang option:selected').val(),
                     person_type: $('#person_type option:selected').val(),
+                    is_otomatis_jurnal: $('#is_otomatis_jurnal').is(':checked') ? 1 : 0,
                     _token: '{{csrf_token()}}'
                 },
                 success: function(res) {
@@ -234,6 +257,7 @@
                     code_group: $('#pelunasan-akun-hutang option:selected').val(),
                     lawan_code_group: $('#pelunasan-akun-bayar option:selected').val(),
                     person_type: $('#pelunasan-person_type option:selected').val(),
+                    is_otomatis_jurnal: $('#is_pelunasan_otomatis_jurnal').is(':checked') ? 1 : 0,
                     _token: '{{csrf_token()}}'
                 },
                 success: function(res) {
@@ -268,7 +292,7 @@
         }
 
         function initSelectPersonPelunasan() {
-            type = $('#person_type option:selected').val();
+            type = $('#pelunasan-person_type option:selected').val();
             if (type === 'App\\Models\\Supplier') {
                 console.log('init oy ' + type);
                 initItemSelectManual('#pelunasan-person_id', '{{route("supplier.get-item")}}', 'Person Name ..', '#pelunasanModal');
@@ -307,7 +331,10 @@
                                     <td class="textright">${formatRupiah(data.mutasi)}</td>
                                     <td class="textright">${formatRupiah(data.pelunasan)}</td>
                                     <td class="textright">${formatRupiah(data.saldo)}</td>
-                                    <td class="textright">${formatRupiah(saldoAkhir)}</td>                              
+                                    <td class="textright">${formatRupiah(saldoAkhir)}</td>    
+                                    <td>
+                                        <button type="button" class="btn btn-primary btn-sm" onclick="showDetailKartuHutang('${data.factur_supplier_number}')"><i class="fas fa-eye"></i> Detail</button>
+                                    </td>                          
                                 </tr>
                             `;
                         });
@@ -323,6 +350,10 @@
         }
 
         setTimeout(getSummary, 100);
+
+        function showDetailKartuHutang(factur) {
+            showDetailOnModal('{{url("admin/kartu/kartu-hutang/show-detail")}}/' + factur, 'xl');
+        }
     </script>
     @endpush
 </x-app-layout>

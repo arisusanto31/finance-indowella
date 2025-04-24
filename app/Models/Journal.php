@@ -25,6 +25,16 @@ class Journal extends Model
         return $this->morphTo();
     }
 
+    public function codeGroupData()
+    {
+        return $this->belongsTo(ChartAccount::class, 'code_group', 'code_group');
+    }
+    public function codeGroupLawanData()
+    {
+        return $this->belongsTo(ChartAccount::class, 'lawan_code_group', 'code_group');
+    }
+
+
 
     protected static function booted()
     {
@@ -43,8 +53,6 @@ class Journal extends Model
                     ->orWhere("{$alias}.book_journal_id", session('book_journal_id'));
             });
         });
-
-       
     }
 
     public function chartAccount()
