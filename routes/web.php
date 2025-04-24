@@ -114,6 +114,11 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::get('/daftar-karyawan', [KaryawanController::class, 'index']);
         Route::get('/daftar-karyawan', [KaryawanController::class, 'index'])->name('daftar.daftar-karyawan');
         Route::put('/karyawans/{id}/resign', [KaryawanController::class, 'resign'])->name('karyawans.resign');
+        Route::delete('/karyawans/{id}', [KaryawanController::class, 'destroy'])->name('karyawans.destroy');
+
+
+
+
 
 });
     Route::prefix('kartu')->group(function () {
