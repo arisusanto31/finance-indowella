@@ -170,7 +170,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         });
 
         Route::prefix('toko')->name('toko.')->group(function () {
-         Route::get('deleted', [SupplierController::class, 'showDeleted'])->name('deleted');
+            Route::get('deleted', [SupplierController::class, 'showDeleted'])->name('deleted');
             Route::resource('main', SupplierController::class)->except(['show']);
             Route::get('/get-item', [SupplierController::class, 'getItem'])->name('get-item');
             Route::post('{id}/restore', [SupplierController::class, 'restore'])->name('restore');

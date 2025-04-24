@@ -8,6 +8,22 @@ use Carbon\Carbon;
 
 class KaryawanController extends Controller
 {
+    public function destroy($id)
+    {
+        $karyawan = Karyawan::findOrFail($id);
+        $karyawan->delete();
+
+        return redirect()->back()->with('success', 'Data karyawan berhasil dihapus!');
+    }
+
+
+    public function edit($id)
+    {
+        $karyawan = Karyawan::findOrFail($id);
+        return view('modal._edit_karyawan', compact('karyawan'));
+    }
+
+
 
     public function resign($id)
     {
@@ -40,6 +56,7 @@ class KaryawanController extends Controller
             'date_keluar' => 'nullable|date',
         ]);
 
+        $validated['book_journal_id'] = session('book_journal_id');
         $karyawan = Karyawan::create($validated);
 
         $status = is_null($karyawan->date_keluar) ? 'Aktif' : 'Keluar';

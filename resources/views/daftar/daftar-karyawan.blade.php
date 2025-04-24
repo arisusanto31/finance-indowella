@@ -4,6 +4,9 @@
     <div class="card shadow-sm mb-4">
         <h5 class="text-primary-dark card-header" style="padding-bottom:0px;">  <strong></strong> </h5>
 
+        <div class="container py-4 p-3 mb-4 card shadow-sm">
+            <h2>Daftar Karyawan</h2>
+
         <div class="card-body">
             <div class="row mt-1">
                 <div class="col-md-2">
@@ -46,18 +49,24 @@
   
                      <td class="border px-4 py-2 space-x-1">
     
-                      <!-- Tombol Edit Karyawan -->
-                    <button onclick="showDetailOnModal(), 'lg')" class="btn btn-success btn-sm">
-                    <i class="bi bi-pencil"></i>
-                    </button>
-  
-                        <form action="#" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin hapus data ini?')">
-                        @csrf
-                            @method('DELETE')
-                        <button type="submit" class="btn btn-danger btn-sm" title="Hapus">
-                        <i class="bi bi-trash"></i>
-                        </button>
-                    </form>
+
+                        <a href="javascript:void(0);"
+                           onclick="showDetailOnModal('{{ url('admin/daftar/karyawan/edit') }}/{{ $karyawan->id }}', 'xl')"
+                             class="btn btn-success btn-sm" title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                            </a>
+                            
+                            <form action="{{ route('karyawans.destroy', $karyawan->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin hapus data ini?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-sm" title="Hapus">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                            
+                          
+                        
+                            
   
                    @if (!$karyawan->date_keluar || $karyawan->date_keluar === '0000-00-00')
                         <form action="{{ route('karyawans.resign', $karyawan->id) }}" method="POST" class="d-inline">
@@ -82,6 +91,7 @@
     @endif
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script>
+        
         function ShowModalKaryawan(){
             showDetailOnModal(`{{ route('karyawan.create') }}`);
         }
