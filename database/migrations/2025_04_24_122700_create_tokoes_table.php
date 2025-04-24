@@ -11,15 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('prepaid_expenses', function (Blueprint $table) {
+        Schema::create('tokoes', function (Blueprint $table) {
             $table->id();
             $table->integer('book_journal_id');
             $table->string('name')->unique();
-            $table->integer('toko_id');
-            $table->string('type_bdd');
-            $table->date('date');
-            $table->decimal('nilai_perolehan', 15, 2);
-            $table->integer('periode');
+            $table->string('phone')->nullable();
+            $table->string('address')->nullable();
+            $table->boolean('is_deleted')->nullable();
+            $table->datetime('deleted_at')->nullable();
             $table->timestamps();
         });
     }
@@ -29,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('prepaid_expenses');
+        Schema::dropIfExists('tokoes');
     }
 };

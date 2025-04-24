@@ -1,7 +1,22 @@
 <form id="form-create">
     @csrf
     <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Buat Kartu Inventaris</h5>
+
+        <div class="flex-column align-items-start">
+            <h5 class="modal-title" id="exampleModalLabel1">Buat Inventaris</h5>
+
+
+            <div class="form-check form-switch ">
+                <input class="form-check-input" type="checkbox" id="is_otomatis_jurnal" checked />
+                <label class="form-check-label" for="is_otomatis_jurnal">Buat Jurnal</label>
+            </div>
+
+        </div>
+        <button
+            type="button"
+            class="btn-close position-absolute end-0 top-0 m-3"
+            data-bs-dismiss="modal"
+            aria-label="Close"></button>
     </div>
     <div class="modal-body">
         <div class="row">
@@ -11,6 +26,12 @@
             </div>
         </div>
 
+        <div class="row">
+            <div class="col mb-3">
+                <label class="form-label">Deskripsi jurnal</label>
+                <input class="form-control" placeholder="description" name="description" />
+            </div>
+        </div>
         <div class="row">
             <div class="col mb-3">
                 <label for="akun" class="form-label">Akun Aset</label>

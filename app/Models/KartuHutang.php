@@ -38,24 +38,24 @@ class KartuHutang extends Model
         return $this->belongsTo(ChartAccount::class, 'lawan_code_group', 'code_group');
     }
 
-    // protected static function booted()
-    // {
+    protected static function booted()
+    {
 
-    //     static::addGlobalScope('journal', function ($query) {
-    //         $from = $query->getQuery()->from ?? 'kartu_hutangs'; // untuk dukung alias `j` kalau pakai from('journals as j')
-    //         if (Str::contains($from, ' as ')) {
-    //             [$table, $alias] = explode(' as ', $from);
-    //             $alias = trim($alias);
-    //         } else {
-    //             $alias = $from;
-    //         }
+        static::addGlobalScope('journal', function ($query) {
+            $from = $query->getQuery()->from ?? 'kartu_hutangs'; // untuk dukung alias `j` kalau pakai from('journals as j')
+            if (Str::contains($from, ' as ')) {
+                [$table, $alias] = explode(' as ', $from);
+                $alias = trim($alias);
+            } else {
+                $alias = $from;
+            }
 
-    //         $query->where(function ($q) use ($alias) {
-    //             $q->whereNull("{$alias}.book_journal_id")
-    //                 ->orWhere("{$alias}.book_journal_id", session('book_journal_id'));
-    //         });
-    //     });
-    // }
+            $query->where(function ($q) use ($alias) {
+                $q->whereNull("{$alias}.book_journal_id")
+                    ->orWhere("{$alias}.book_journal_id", session('book_journal_id'));
+            });
+        });
+    }
     public static function createKartu(Request $request)
     {
 
@@ -113,6 +113,7 @@ class KartuHutang extends Model
                 $kartu->code_group_name = $request->input('code_group_name');
                 $kartu->lawan_code_group = $request->input('lawan_code_group');
                 $kartu->invoice_date = Date('Y-m-d');
+                $kartu->book_journal_id = session('book_journal_id');
                 $kartu->save();
 
 

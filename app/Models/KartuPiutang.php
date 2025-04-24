@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 use Illuminate\Support\Str;
+
 class KartuPiutang extends Model
 {
     //
@@ -48,7 +49,7 @@ class KartuPiutang extends Model
     {
 
 
-       
+
         $personID = $request->input('person_id');
         $personType = $request->input('person_type');
         $lock = Cache::lock('create-kartu-piutang' . $personType . '-' . $personID, 90);
@@ -104,6 +105,7 @@ class KartuPiutang extends Model
                 $kartu->lawan_code_group = $request->input('lawan_code_group');
                 $kartu->code_group_name = $request->input('code_group_name');
                 $kartu->invoice_date = Date('Y-m-d');
+                $kartu->book_journal_id = session('book_journal_id');
                 $kartu->save();
 
 
@@ -137,7 +139,7 @@ class KartuPiutang extends Model
     public static function createMutation(Request $request)
     {
 
-        
+
         DB::beginTransaction();
         try {
             $factur = $request->input('package_number');
@@ -146,6 +148,7 @@ class KartuPiutang extends Model
             $personType = $request->input('person_type');
             $lawanCodeGroup = $request->input('lawan_code_group');
             $codeGroup = $request->input('code_group');
+            $isOtomatisJurnal = $request->input('is_otomatis_jurnal') ?? 0;
             $chart = ChartAccount::where('code_group', $codeGroup)->first();
             if (!$chart) {
                 throw new \Exception('chart not found');
@@ -166,38 +169,43 @@ class KartuPiutang extends Model
                 $amountDebet = 0;
                 $desc = 'pembatalan claim piutang dari ' . $factur;
             }
-            $kredits = [
-                [
-                    'code_group' => $codeKredit,
-                    'description' => $desc,
-                    'amount' => abs($amountMutasi),
-                    'reference_id' => null,
-                    'reference_type' => null,
-                ],
-            ];
-            $debets = [
-                [
-                    'code_group' => $codeDebet,
-                    'description' => $desc,
-                    'amount' => abs($amountMutasi),
-                    'reference_id' => null,
-                    'reference_type' => null,
-                ],
-            ];
-            $st = JournalController::createBaseJournal(new Request([
-                'kredits' => $kredits,
-                'debets' => $debets,
-                'type' => 'transaction',
-                'date' => Date('Y-m-d H:i:s'),
-                'is_auto_generated' => 1,
-                'title' => 'create mutation transaction',
-                'url_try_again' => 'try_again'
+            if ($isOtomatisJurnal) {
+                $kredits = [
+                    [
+                        'code_group' => $codeKredit,
+                        'description' => $desc,
+                        'amount' => abs($amountMutasi),
+                        'reference_id' => null,
+                        'reference_type' => null,
+                    ],
+                ];
+                $debets = [
+                    [
+                        'code_group' => $codeDebet,
+                        'description' => $desc,
+                        'amount' => abs($amountMutasi),
+                        'reference_id' => null,
+                        'reference_type' => null,
+                    ],
+                ];
+                $st = JournalController::createBaseJournal(new Request([
+                    'kredits' => $kredits,
+                    'debets' => $debets,
+                    'type' => 'transaction',
+                    'date' => Date('Y-m-d H:i:s'),
+                    'is_auto_generated' => 1,
+                    'title' => 'create mutation transaction',
+                    'url_try_again' => 'try_again'
 
-            ]), false);
-            if ($st['status'] == 0) return $st;
-            $number = $st['journal_number'];
-            $journal = Journal::where('journal_number', $number)->whereBetween('code_group', [120000, 130000])->first();
-
+                ]), false);
+                if ($st['status'] == 0) return $st;
+                $number = $st['journal_number'];
+                $journal = Journal::where('journal_number', $number)->whereBetween('code_group', [120000, 130000])->first();
+                $journalID = $journal->id;
+            } else {
+                $number = null;
+                $journalID = null;
+            }
             $st = self::createKartu(new Request([
                 'type' => 'mutasi',
                 'package_number' => $factur,
@@ -209,7 +217,7 @@ class KartuPiutang extends Model
                 'person_id' => $personID,
                 'person_type' => $personType,
                 'journal_number' => $number,
-                'journal_id' => $journal->id,
+                'journal_id' => $journalID,
                 'code_group' => $codeGroup,
                 'lawan_code_group' => $lawanCodeGroup,
                 'code_group_name' => $codeName
@@ -237,7 +245,7 @@ class KartuPiutang extends Model
 
     public static function createPelunasan(Request $request)
     {
-        
+
 
         DB::beginTransaction();
         try {
@@ -245,6 +253,7 @@ class KartuPiutang extends Model
             $amountBayar = $request->input('amount_bayar');
             $lawanCodeGroup = $request->input('lawan_code_group');
             $codeGroup = $request->input('code_group');
+            $isOtomatisJurnal = $request->input('is_otomatis_jurnal') ?? 0;
             $chart = ChartAccount::where('code_group', $codeGroup)->first();
             if (!$chart) {
                 throw new \Exception('chart not found');
@@ -261,37 +270,44 @@ class KartuPiutang extends Model
             }
             $personID = $request->input('person_id');
             $personType = $request->input('person_type');
-            $kredits = [
-                [
-                    'code_group' => $codeKredit,
-                    'description' => $desc,
-                    'amount' => abs($amountBayar),
-                    'reference_id' => null,
-                    'reference_type' => null,
-                ],
-            ];
-            $debets = [
-                [
-                    'code_group' => $codeDebet,
-                    'description' => $desc,
-                    'amount' => abs($amountBayar),
-                    'reference_id' => null,
-                    'reference_type' => null,
-                ],
-            ];
-            $st = JournalController::createBaseJournal(new Request([
-                'kredits' => $kredits,
-                'debets' => $debets,
-                'type' => 'transaction',
-                'date' => Date('Y-m-d H:i:s'),
-                'is_auto_generated' => 1,
-                'title' => 'create penerimaan penjualan',
-                'url_try_again' => null
 
-            ]), false);
-            if ($st['status'] == 0) return $st;
-            $number = $st['journal_number'];
-            $journal = Journal::where('journal_number', $number)->whereBetween('code_group', [120000, 130000])->first();
+            if ($isOtomatisJurnal) {
+                $kredits = [
+                    [
+                        'code_group' => $codeKredit,
+                        'description' => $desc,
+                        'amount' => abs($amountBayar),
+                        'reference_id' => null,
+                        'reference_type' => null,
+                    ],
+                ];
+                $debets = [
+                    [
+                        'code_group' => $codeDebet,
+                        'description' => $desc,
+                        'amount' => abs($amountBayar),
+                        'reference_id' => null,
+                        'reference_type' => null,
+                    ],
+                ];
+                $st = JournalController::createBaseJournal(new Request([
+                    'kredits' => $kredits,
+                    'debets' => $debets,
+                    'type' => 'transaction',
+                    'date' => Date('Y-m-d H:i:s'),
+                    'is_auto_generated' => 1,
+                    'title' => 'create penerimaan penjualan',
+                    'url_try_again' => null
+
+                ]), false);
+                if ($st['status'] == 0) return $st;
+                $number = $st['journal_number'];
+                $journal = Journal::where('journal_number', $number)->whereBetween('code_group', [120000, 130000])->first();
+                $journalID = $journal->id;
+            } else {
+                $journalID = null;
+                $number = null;
+            }
             $amountKredit = $amountBayar > 0 ? $amountBayar : 0;
             $amountDebet = $amountBayar < 0 ? abs($amountBayar) : 0;
             $st = self::createKartu(new Request([
@@ -305,7 +321,7 @@ class KartuPiutang extends Model
                 'person_id' => $personID,
                 'person_type' => $personType,
                 'journal_number' => $number,
-                'journal_id' => $journal->id,
+                'journal_id' => $journalID,
                 'code_group' => $codeGroup,
                 'lawan_code_group' => $lawanCodeGroup,
                 'code_group_name' => $codeName

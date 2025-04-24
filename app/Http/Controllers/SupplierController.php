@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
+use Throwable;
 
 class SupplierController extends Controller
 {
@@ -12,18 +14,15 @@ class SupplierController extends Controller
     public function showDeleted()
     {
         $deletedSuppliers = Supplier::withoutGlobalScope('supplier')
-                            ->where('is_deleted', 1)
-                            ->get();
-    
-
-    //  dd($deletedSuppliers);
-
-    return view('master.deleted_supplier', compact('deletedSuppliers'));
+            ->where('is_deleted', 1)
+            ->get();
 
 
-      
+        //  dd($deletedSuppliers);
+
+        return view('master.deleted_supplier', compact('deletedSuppliers'));
     }
-    
+
 
     public function restore($id)
     {
@@ -31,47 +30,37 @@ class SupplierController extends Controller
         $supplier->is_deleted = 0;
         // $supplier->deleted_at = null;
         $supplier->save();
-    
+
         return redirect()->route('supplier.main.deleted')->with('success', 'Supplier berhasil dipulihkan!');
     }
 
 
-    public function softDeleteSupplier($id)
-    {
-        $supplier = Supplier::findOrFail($id);
-        $supplier->update([
-            'is_deleted' => 1,
-            'deleted_at' => now()
-        ]);
-    
-        return redirect()->route('supplier.main.index')
-            ->with('success', 'Supplier berhasil disembunyikan!');
-    }
-    
-    
+
+
+
 
     public function edit($id)
-{
-    $supplier = Supplier::findOrFail($id);
-    return view('kartu.modal.edit_supplier', compact('supplier'));
-}
+    {
+        $supplier = Supplier::findOrFail($id);
+        return view('kartu.modal.edit_supplier', compact('supplier'));
+    }
 
-public function update(Request $request, $id)
-{
-    $data = $request->validate([
-        'name' => 'required',
-        'npwp' => 'required',
-        'ktp' => 'required',
-        'cp_name' => 'required',
-        'phone' => 'required',
-        'address' => 'nullable',
-    ]);
+    public function update(Request $request, $id)
+    {
+        $data = $request->validate([
+            'name' => 'required',
+            'npwp' => 'required',
+            'ktp' => 'required',
+            'cp_name' => 'required',
+            'phone' => 'required',
+            'address' => 'nullable',
+        ]);
 
-    $supplier = Supplier::findOrFail($id);
-    $supplier->update($data);
+        $supplier = Supplier::findOrFail($id);
+        $supplier->update($data);
 
-    return redirect()->route('supplier.main.index')->with('success', 'Supplier berhasil diperbarui!');
-}
+        return redirect()->route('supplier.main.index')->with('success', 'Supplier berhasil diperbarui!');
+    }
 
     public function index()
     {
@@ -86,22 +75,28 @@ public function update(Request $request, $id)
 
     public function store(Request $request)
     {
+        try {
         $data = $request->validate([
             'name'     => 'required|unique:suppliers,name',
             'npwp'     => 'required',
-            'ktp'      => 'required',
+            'ktp'      => 'required|digits:16',
             'cp_name'  => 'required',
             'phone'    => 'required',
             'address'  => 'nullable',
         ]);
-
-        $data['is_deleted'] = false;
-
         Supplier::create($data);
-
         return redirect()
             ->route('supplier.main.index')
             ->with('success', 'Supplier berhasil ditambahkan!');
+        } catch (ValidationException $e) {
+            return redirect()
+                ->route('supplier.main.index')
+                ->with('error', 'Supplier gagal ditambahkan! ' . getErrorValidation($e));
+        } catch (Throwable $e) {
+            return redirect()
+                ->route('supplier.main.index')
+                ->with('error', 'Supplier gagal ditambahkan! ' . $e->getMessage());
+        }
     }
 
     public function destroy($id)
@@ -111,11 +106,10 @@ public function update(Request $request, $id)
             'is_deleted' => 1,
             'deleted_at' => now(),
         ]);
-
-        return redirect()->back()->with('success', 'Supplier berhasil disembunyikan!');
+        return ['status' => 1, 'msg' => 'supplier berhasil '];
     }
 
-  
+
 
     public function getItem()
     {

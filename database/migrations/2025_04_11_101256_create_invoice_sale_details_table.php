@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id();
             $table->integer('book_journal_id');
             $table->string('invoice_number'); 
+            $table->integer('toko_id');
             $table->unsignedBigInteger('invoice_pack_id');
             $table->unsignedBigInteger('stock_id');
             $table->text('description')->nullable();

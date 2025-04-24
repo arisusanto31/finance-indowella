@@ -104,6 +104,7 @@ function formatRupiah(number, language = "id") {
 
 
         if (detectFormat(number) != 'database') {
+            number = number.toString();
             //kalo inputnya ternyata format rupiah
             if (language == "eng") {
                 //asumsi format rupiah eng ya
@@ -137,7 +138,7 @@ function formatRupiah(number, language = "id") {
         return parts.join(",");
     } catch (err) {
         console.log("error format rupiah " + number);
-        
+
     }
 }
 

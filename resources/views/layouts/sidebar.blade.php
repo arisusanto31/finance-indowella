@@ -187,7 +187,7 @@
                 <li class="menu-item">
                     <a href="{{url('admin/daftar/daftar-karyawan') }}" class="menu-link">
                         <!-- <i class="menu-icon tf-icons bx bx-user fs-6 me-2" style="margin-right: 10px;"></i> -->
-                        <div data-i18n="Accordion">Daftar Karyawan</div>
+                        <div data-i18n="Accordion">Karyawan</div>
                     </a>
                 </li>
             </ul>
@@ -232,6 +232,7 @@
                         <div data-i18n="supplier">Supplier</div>
                     </a>
                 </li>
+
                 <li class="menu-item">
                     <a href="{{url('admin/master/other-person/main')}}" class="menu-link">
                         <div data-i18n="other-person">Other Person</div>
@@ -240,6 +241,11 @@
                 <li class="menu-item">
                     <a href="{{url('admin/master/customer/main')}}" class="menu-link">
                         <div data-i18n="customer">Customer</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{url('admin/master/toko/main')}}" class="menu-link">
+                        <div data-i18n="toko">Toko</div>
                     </a>
                 </li>
                 <li class="menu-item">

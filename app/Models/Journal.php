@@ -110,6 +110,12 @@ class Journal extends Model
         $kredit = $request->input('amount_kredit');
         $codeGroup = $request->input('code_group');
         $isBackDate = $request->input('is_backdate');
+        $tokoID = $request->input('toko_id');
+        if ($codeGroup > 400000) {
+            if (!$tokoID) {
+                throw new \Exception('toko_id tidak boleh kosong untuk membuat jurnal ini');
+            }
+        }
         $chartAccount = ChartAccount::where('code_group', $codeGroup)->first();
         if (!$chartAccount) {
             return [

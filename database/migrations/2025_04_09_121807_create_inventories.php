@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->integer('book_journal_id');
             $table->string('name')->unique();
-
+            $table->integer('toko_id');
             $table->string('type_aset');
             $table->string('keterangan_qty_unit')->nullable();
             $table->date('date');

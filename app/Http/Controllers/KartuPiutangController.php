@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Journal;
 use App\Models\KartuPiutang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -61,7 +62,7 @@ class KartuPiutangController extends Controller
                 'person_name' => $dataFix->person->name,
                 'person_type' => $dataFix->person_type,
                 'invoice_date' => $dataFix->invoice_date,
-                'factur_supplier_number' => $factur,
+                'package_number' => $factur,
                 'saldo_awal' => $saldoAwal,
                 'mutasi' => $dataMutasi,
                 'pelunasan' => abs($dataPelunasan),
@@ -74,6 +75,27 @@ class KartuPiutangController extends Controller
             'status' => 1,
             'msg' => $customTable,
             'month' => $month . '-' . $year
+        ];
+    }
+
+    public function showDetail($nomer)
+    {
+        $view = view('kartu.modal._kartu-mutasi-piutang');
+        $view->factur = $nomer;
+        $kh = KartuPiutang::where('package_number', $nomer)->orderBy('created_at', 'desc')->first();
+        $view->person = $kh->person;
+        $data = KartuPiutang::where('package_number', $nomer)->get();
+        $view->data = $data;
+        return $view;
+    }
+
+    public function searchLinkJournal()
+    {
+        $journals = Journal::where('reference_model', KartuPiutang::class)
+            ->whereNull('verified_by')->with(['codeGroupData:code_group,name', 'codeGroupLawanData:code_group,name'])->get();
+        return [
+            'status' => 1,
+            'msg' => $journals
         ];
     }
 }

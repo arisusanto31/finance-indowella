@@ -51,6 +51,7 @@
                             <th>💵 Pelunasan</th>
                             <th>💲 saldo</th>
                             <th>💸 saldo Akumulasi</th>
+                            <th>📝 Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="body-kartu-hutang">
@@ -64,10 +65,18 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel1">Buat Mutasi Kartu Piutang</h5>
+                    <div class="flex-column align-items-start">
+                        <h5 class="modal-title" id="exampleModalLabel1">Buat Kartu Piutang</h5>
+
+                        <div class="form-check form-switch ">
+                            <input class="form-check-input" type="checkbox" id="is_otomatis_jurnal" checked />
+                            <label class="form-check-label" for="is_otomatis_jurnal">Buat Jurnal</label>
+                        </div>
+
+                    </div>
                     <button
                         type="button"
-                        class="btn-close"
+                        class="btn-close position-absolute end-0 top-0 m-3"
                         data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
@@ -127,10 +136,18 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel1">Buat Pelunasan Kartu Hutang</h5>
+                    <div class="flex-column align-items-start">
+                        <h5 class="modal-title" id="exampleModalLabel1">Buat Pelunasan Kartu Piutang</h5>
+
+                        <div class="form-check form-switch ">
+                            <input class="form-check-input" type="checkbox" id="is_pelunasan_otomatis_jurnal" checked />
+                            <label class="form-check-label" for="is_pelunasan_otomatis_jurnal">Buat Jurnal</label>
+                        </div>
+
+                    </div>
                     <button
                         type="button"
-                        class="btn-close"
+                        class="btn-close position-absolute end-0 top-0 m-3"
                         data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
@@ -202,6 +219,7 @@
                     person_type: $('#person_type option:selected').val(),
                     code_group: $('#akun-piutang option:selected').val(),
                     lawan_code_group: $('#akun-lawan option:selected').val(),
+                    is_otomatis_jurnal:$('#is_otomatis_jurnal').is(':checked') ? 1 : 0,
                     _token: '{{csrf_token()}}'
                 },
                 success: function(res) {
@@ -242,7 +260,7 @@
                     person_type: $('#pelunasan-person_type option:selected').val(),
                     lawan_code_group: $('#pelunasan-akun-lawan option:selected').val(),
                     code_group: $('#pelunasan-akun-piutang option:selected').val(),
-
+                    is_otomatis_jurnal:$('#is_pelunasan_otomatis_jurnal').is(':checked') ? 1 : 0,
                     _token: '{{csrf_token()}}'
                 },
                 success: function(res) {
@@ -315,12 +333,15 @@
                                     <td>${i+1}</td>
                                     <td>${data.person_name}</td>
                                     <td>${data.invoice_date}</td>
-                                    <td>${data.factur_supplier_number}</td>
+                                    <td>${data.package_number}</td>
                                     <td class="textright">${formatRupiah(data.saldo_awal)}</td>
                                     <td class="textright">${formatRupiah(data.mutasi)}</td>
                                     <td class="textright">${formatRupiah(data.pelunasan)}</td>
                                     <td class="textright">${formatRupiah(data.saldo)}</td>
-                                    <td class="textright">${formatRupiah(saldoAkhir)}</td>                              
+                                    <td class="textright">${formatRupiah(saldoAkhir)}</td>      
+                                      <td>
+                                        <button type="button" class="btn btn-primary btn-sm" onclick="showDetailKartuPiutang('${data.package_number}')"><i class="fas fa-eye"></i> Detail</button>
+                                    </td>                          
                                 </tr>
                             `;
                         });
@@ -335,6 +356,9 @@
             });
         }
 
+        function showDetailKartuPiutang(factur) {
+            showDetailOnModal('{{url("admin/kartu/kartu-piutang/show-detail")}}/' + factur, 'xl');
+        }
         setTimeout(getSummary, 100);
     </script>
     @endpush

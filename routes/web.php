@@ -116,8 +116,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::get('/daftar-karyawan', [KaryawanController::class, 'index']);
         Route::get('/daftar-karyawan', [KaryawanController::class, 'index'])->name('daftar.daftar-karyawan');
         Route::put('/karyawans/{id}/resign', [KaryawanController::class, 'resign'])->name('karyawans.resign');
-
-});
+    });
     Route::prefix('kartu')->group(function () {
         Route::resource('/kartu-kas', KartuKasController::class);
 
@@ -145,6 +144,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::post('create-mutation', [KartuPiutangController::class, 'createMutation'])->name('create-mutation');
             Route::post('create-pelunasan', [KartuPiutangController::class, 'createPelunasan'])->name('create-pelunasan');
             Route::get('get-summary', [KartuPiutangController::class, 'getSummary'])->name('get-summary');
+            Route::get('show-detail/{id}', [KartuPiutangController::class, 'showDetail'])->name('show-detail');
+            Route::get('search-link-journal', [KartuPiutangController::class, 'searchLinkJournal'])->name('search-link-journal');
         });
     });
 
@@ -162,14 +163,19 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         });
 
         Route::prefix('supplier')->name('supplier.')->group(function () {
-            Route::get('main/deleted', [SupplierController::class, 'showDeleted'])->name('main.deleted');
+            Route::get('deleted', [SupplierController::class, 'showDeleted'])->name('deleted');
             Route::resource('main', SupplierController::class)->except(['show']);
             Route::get('/get-item', [SupplierController::class, 'getItem'])->name('get-item');
-            Route::post('main/{id}/soft-delete', [SupplierController::class, 'softDeleteSupplier'])->name('main.soft-delete');
-            Route::post('main/{id}/restore', [SupplierController::class, 'restore'])->name('main.restore');
-            Route::post('/invoice-sales', [InvoiceSaleController::class, 'store'])->name('invoice-sale.store');
-            Route::get('/invoice/{id}', [InvoicePackController::class, 'show'])->name('invoice.show');
+            Route::post('{id}/restore', [SupplierController::class, 'restore'])->name('restore');
         });
+
+        Route::prefix('toko')->name('toko.')->group(function () {
+         Route::get('deleted', [SupplierController::class, 'showDeleted'])->name('deleted');
+            Route::resource('main', SupplierController::class)->except(['show']);
+            Route::get('/get-item', [SupplierController::class, 'getItem'])->name('get-item');
+            Route::post('{id}/restore', [SupplierController::class, 'restore'])->name('restore');
+        });
+
 
         Route::prefix('other-person')->name('other-person.')->group(function () {
             Route::resource('main', OtherPersonController::class);
