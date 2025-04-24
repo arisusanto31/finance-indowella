@@ -12,33 +12,33 @@ class KaryawanController extends Controller
     {
         $karyawan = Karyawan::findOrFail($id);
         $karyawan->delete();
-    
+
         return redirect()->back()->with('success', 'Data karyawan berhasil dihapus!');
     }
-    
+
 
     public function edit($id)
     {
         $karyawan = Karyawan::findOrFail($id);
-        return view('modal._edit_karyawan', compact('karyawan'));
+        return view('daftar.modal._edit_karyawan', compact('karyawan'));
     }
-    
+
 
 
     public function resign($id)
-{
-    $karyawan = Karyawan::findOrFail($id);
-    $karyawan->update([
-        'date_keluar' => Carbon::now()->toDateString()
-    ]);
-
-    return redirect()->back()->with('success', 'Karyawan berhasil diresign.');
-}
-   
-    public function DaftarKaryawan()
     {
-        return view('daftar.daftar-karyawan');
+        $karyawan = Karyawan::findOrFail($id);
+        $karyawan->update([
+            'date_keluar' => Carbon::now()->toDateString()
+        ]);
+
+        return redirect()->back()->with('success', 'Karyawan berhasil diresign.');
     }
+
+    // public function DaftarKaryawan()
+    // {
+    //     return view('daftar.daftar-karyawan');
+    // }
 
     public function create()
     {
@@ -55,24 +55,39 @@ class KaryawanController extends Controller
             'date_masuk' => 'required|date',
             'date_keluar' => 'nullable|date',
         ]);
-    
+
         $validated['book_journal_id'] = session('book_journal_id');
-        $karyawan = Karyawan::create($validated); 
-    
+        $karyawan = Karyawan::create($validated);
+
         $status = is_null($karyawan->date_keluar) ? 'Aktif' : 'Keluar';
-    
-     
+
+
         return redirect()->back()->with('success', 'Karyawan berhasil disimpan!');
     }
+
+    public function update(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'nama' => 'required',
+            'nik' => 'required',
+            'npwp' => 'nullable',
+            'jabatan' => 'required',
+           
+        ]);
+    
+        $karyawan = Karyawan::findOrFail($id);
+        $karyawan->update($validated);
+    
+        return redirect()->back()->with('success', 'Data berhasil diupdate!');
+        // dd('Masuk ke update!', $request->all());
+    }
+    
 
 
 
     public function index()
-{
-    $karyawans = Karyawan::all();
-    return view('daftar.daftar-karyawan', compact('karyawans'));
+    {
+        $karyawans = Karyawan::all();
+        return view('daftar.daftar-karyawan', compact('karyawans'));
+    }
 }
-
-}
-
-
