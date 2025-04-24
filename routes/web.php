@@ -64,7 +64,6 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::get('/inspect-jurnal', [IndexController::class, 'inspectJurnal'])->name('inspect-jurnal');
     });
 
-
     Route::get('/login-dashboard', [IndexController::class, 'loginDashboard']);
     Route::get('/neraca', [JournalController::class, 'neraca']);
     Route::get('/neraca-lajur', [JournalController::class, 'neracalajur']);
@@ -110,13 +109,19 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('/get-mutasi-keluar', [BDDController::class, 'getMutasiKeluar'])->name('get-mutasi-keluar');
         });
 
-        Route::get('/daftar-karyawan', [KaryawanController::class, 'DaftarKaryawan'])->name('daftar.daftar-karyawan');
-        Route::get('/karyawan/create', [KaryawanController::class, 'create'])->name('karyawan.create');
-        Route::post('/karyawan/store', [KaryawanController::class, 'store'])->name('karyawan.store');
-        Route::get('/daftar-karyawan', [KaryawanController::class, 'index']);
-        Route::get('/daftar-karyawan', [KaryawanController::class, 'index'])->name('daftar.daftar-karyawan');
-        Route::put('/karyawans/{id}/resign', [KaryawanController::class, 'resign'])->name('karyawans.resign');
+        Route::prefix('karyawan')->name('karyawan.')->group(function () {
+            Route::get('/', [KaryawanController::class, 'index'])->name('index');
+            Route::get('/create', [KaryawanController::class, 'create'])->name('create');
+            Route::post('/store', [KaryawanController::class, 'store'])->name('store');
+            Route::get('/{id}', [KaryawanController::class, 'show'])->name('show');
+            Route::get('edit/{id}', [KaryawanController::class, 'edit'])->name('edit');
+            Route::put('/{id}/resign', [KaryawanController::class, 'resign'])->name('resign');
+            Route::put('/update/{id}', [KaryawanController::class, 'update'])->name('update');
+            Route::delete('/{id}', [KaryawanController::class, 'destroy'])->name('destroy');
+            Route::put('karyawans/{id}', [KaryawanController::class, 'update'])->name('karyawans.update');
+        });
     });
+
     Route::prefix('kartu')->group(function () {
         Route::resource('/kartu-kas', KartuKasController::class);
 
@@ -214,8 +219,6 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::post('create-claim-pembelian', [InvoicePackController::class, 'createClaimPembelian'])->name('create-claim-pembelian');
         Route::post('create-claim-penjualan', [InvoicePackController::class, 'createClaimPenjualan'])->name('create-claim-penjualan');
     });
-    Route::post('sales/store', [InvoiceSaleController::class, 'store'])->name('sales.store');
-    Route::get('{id}', [InvoicePackController::class, 'show'])->name('show');
 });
 
 

@@ -51,12 +51,12 @@
     
 
                         <a href="javascript:void(0);"
-                           onclick="showDetailOnModal('{{ url('admin/daftar/karyawan/edit') }}/{{ $karyawan->id }}', 'xl')"
+                           onclick="showDetailOnModal('{{ url('admin/daftar/karyawan/edit') }}/{{ $karyawan->id }}', 'l')"
                              class="btn btn-success btn-sm" title="Edit">
                                                 <i class="bi bi-pencil"></i>
                             </a>
                             
-                            <form action="{{ route('karyawans.destroy', $karyawan->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin hapus data ini?')">
+                            <form action="{{ route('karyawan.destroy', $karyawan->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin hapus data ini?')">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-danger btn-sm" title="Hapus">
@@ -69,7 +69,7 @@
                             
   
                    @if (!$karyawan->date_keluar || $karyawan->date_keluar === '0000-00-00')
-                        <form action="{{ route('karyawans.resign', $karyawan->id) }}" method="POST" class="d-inline">
+                        <form action="{{ route('karyawan.resign', $karyawan->id) }}" method="POST" class="d-inline">
                         @csrf
                         @method('PUT')
                         <button type="submit" class="btn btn-warning btn-sm text-white" title="Resign">

@@ -185,7 +185,7 @@
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="{{url('admin/daftar/daftar-karyawan') }}" class="menu-link">
+                    <a href="{{url('admin/daftar/karyawan') }}" class="menu-link">
                         <!-- <i class="menu-icon tf-icons bx bx-user fs-6 me-2" style="margin-right: 10px;"></i> -->
                         <div data-i18n="Accordion">Karyawan</div>
                     </a>

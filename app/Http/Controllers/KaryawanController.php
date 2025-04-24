@@ -20,12 +20,13 @@ class KaryawanController extends Controller
     public function edit($id)
     {
         $karyawan = Karyawan::findOrFail($id);
-        return view('modal._edit_karyawan', compact('karyawan'));
+        return view('daftar.modal._edit_karyawan', compact('karyawan'));
     }
 
 
 
     public function resign($id)
+<<<<<<< HEAD
     {
         $karyawan = Karyawan::findOrFail($id);
         $karyawan->update([
@@ -36,9 +37,21 @@ class KaryawanController extends Controller
     }
 
     public function DaftarKaryawan()
+=======
+>>>>>>> 3f9824813da5dff64de0f307342d14c21d5c062a
     {
-        return view('daftar.daftar-karyawan');
+        $karyawan = Karyawan::findOrFail($id);
+        $karyawan->update([
+            'date_keluar' => Carbon::now()->toDateString()
+        ]);
+
+        return redirect()->back()->with('success', 'Karyawan berhasil diresign.');
     }
+
+    // public function DaftarKaryawan()
+    // {
+    //     return view('daftar.daftar-karyawan');
+    // }
 
     public function create()
     {
@@ -64,6 +77,24 @@ class KaryawanController extends Controller
 
         return redirect()->back()->with('success', 'Karyawan berhasil disimpan!');
     }
+
+    public function update(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'nama' => 'required',
+            'nik' => 'required',
+            'npwp' => 'nullable',
+            'jabatan' => 'required',
+           
+        ]);
+    
+        $karyawan = Karyawan::findOrFail($id);
+        $karyawan->update($validated);
+    
+        return redirect()->back()->with('success', 'Data berhasil diupdate!');
+        // dd('Masuk ke update!', $request->all());
+    }
+    
 
 
 
