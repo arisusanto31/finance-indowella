@@ -11,8 +11,12 @@ use Illuminate\Support\Facades\DB;
 
 class OtherPersonController extends Controller
 {
-    //
-    public function index() {}
+    
+    public function index()
+    {
+        $other_persons = OtherPerson::all();
+        return view('master.other-person', compact('other_persons'));
+    }
 
     public function getItem()
     {
@@ -45,7 +49,7 @@ class OtherPersonController extends Controller
         return view('other_persons.trashed', compact('trashed'));
     }
 
-    // Memulihkan data yang di-soft delete
+ 
     public function restore($id)
     {
         $person = OtherPerson::withTrashed()->findOrFail($id);
