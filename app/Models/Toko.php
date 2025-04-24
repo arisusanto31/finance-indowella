@@ -26,7 +26,7 @@ class Toko extends Model
         });
         static::addGlobalScope('aktif', function ($query) {
             $from = $query->getQuery()->from ?? 'tokoes'; // untuk dukung alias `j` kalau pakai from('journals as j')
-            $query->whereNul("{$from}.is_deleted");
+            $query->whereNull("{$from}.is_deleted");
         });
     }
 }

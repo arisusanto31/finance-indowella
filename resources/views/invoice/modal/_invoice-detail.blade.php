@@ -101,7 +101,9 @@
         initItemSelectManual('#select-pcoa-persediaan', '{{route("chart-account.get-item-keuangan")}}?kind=persediaan', 'chart account', '#global-modal');
         initItemSelectManual('#select-pcoa-piutang-kas', '{{route("chart-account.get-item-keuangan")}}?kind=piutang|kas', 'chart account', '#global-modal');
         initItemSelectManual('#select-pcoa-penjualan', '{{route("chart-account.get-item-keuangan")}}?kind=penjualan', 'chart account', '#global-modal');
-    });
+        initItemSelectManual('#select-coa-persediaan', '{{route("chart-account.get-item-keuangan")}}?kind=persediaan', 'chart account', '#global-modal');
+        initItemSelectManual('#select-coa-hutang-kas', '{{route("chart-account.get-item-keuangan")}}?kind=hutang|kas', 'chart account', '#global-modal');
+       });
 
     function createClaimPenjualan() {
         $.ajax({

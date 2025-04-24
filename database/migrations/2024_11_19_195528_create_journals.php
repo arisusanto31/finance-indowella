@@ -17,7 +17,6 @@ class CreateJournals extends Migration
             $table->id();
             $table->integer('book_journal_id');
             $table->integer('chart_account_id');
-            $table->integer('toko_id')->nullable();
             $table->decimal('index_date', 14, 0);
             $table->string('journal_number');
             $table->string('code_group');

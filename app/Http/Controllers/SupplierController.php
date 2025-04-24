@@ -42,7 +42,7 @@ class SupplierController extends Controller
     public function edit($id)
     {
         $supplier = Supplier::findOrFail($id);
-        return view('kartu.modal.edit_supplier', compact('supplier'));
+        return view('master.modal._edit_supplier', compact('supplier'));
     }
 
     public function update(Request $request, $id)
@@ -70,7 +70,7 @@ class SupplierController extends Controller
 
     public function create()
     {
-        return view('kartu.modal._supplier');
+        return view('master.modal._supplier');
     }
 
     public function store(Request $request)

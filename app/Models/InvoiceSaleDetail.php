@@ -18,6 +18,7 @@ class InvoiceSaleDetail extends Model
         'total_price',
         'discount',
         'customer_id',
+        'toko_id'
     ];
 
     protected static function booted()
