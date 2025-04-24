@@ -20,6 +20,7 @@ class InvoicePack extends Model
         'invoice_date',
         'total_price',
         'status',
+        'toko_id'
     ];
 
 

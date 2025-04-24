@@ -45,8 +45,8 @@ class TokoController extends Controller
 
     public function edit($id)
     {
-        $supplier = Toko::findOrFail($id);
-        return view('kartu.modal.edit_supplier', compact('supplier'));
+        $toko = Toko::findOrFail($id);
+        return view('master.modal._edit_toko', compact('toko'));
     }
 
     public function update(Request $request, $id)
@@ -73,7 +73,7 @@ class TokoController extends Controller
 
     public function create()
     {
-        return view('kartu.modal._create_toko');
+        return view('master.modal._create_toko');
     }
 
     public function store(Request $request)

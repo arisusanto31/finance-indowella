@@ -17,15 +17,19 @@
             </div>
 
             <div class="row g-2 mb-3">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label class="form-label">Pilih Customer</label>
                     <select name="customer_id" class="form-control select2-customer" required></select>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
+                    <label class="form-label">Pilih Toko</label>
+                    <select name="toko_id" class="form-control select2-toko" required></select>
+                </div>
+                <div class="col-md-3">
                     <label class="form-label">Nomor Invoice</label>
                     <input name="invoice_number" type="text" class="form-control" required placeholder="Nomor Invoice">
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label class="form-label">Tanggal Invoice</label>
                     <input type="text" class="form-control" value="{{ now()->format('Y-m-d H:i:s') }}" readonly>
                 </div>
@@ -155,9 +159,10 @@
     <script>
         initItemSelectManual('.select2-stock', '{{ url("admin/master/stock/get-item") }}', '-- Pilih Produk --');
         initItemSelectManual('.select2-customer', '{{ url("admin/master/customer/get-item") }}', '-- Pilih Customer --');
+        initItemSelectManual('.select2-toko', '{{ url("admin/master/toko/get-item") }}', '-- Pilih Toko --');
 
         function lihatDetailInvoice(invoiceNumber) {
-            showDetailOnModal('{{url("admin/invoice/show-detail")}}/' + invoiceNumber,'xl');
+            showDetailOnModal('{{url("admin/invoice/show-detail")}}/' + invoiceNumber, 'xl');
         }
 
         function removeDebetRow(btn) {

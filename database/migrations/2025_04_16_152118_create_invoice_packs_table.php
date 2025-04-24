@@ -21,6 +21,7 @@ return new class extends Migration
             $table->date('invoice_date')->nullable();
             $table->decimal('total_price', 20, 2)->nullable();
             $table->string('status')->default('draft');
+            $table->integer('toko_id');
             $table->timestamps();
         });
     }

@@ -173,6 +173,7 @@ class Journal extends Model
                 $journal->index_date = $finalIndexDate;
                 $journal->is_auto_generated = $request->input('is_auto_generated');
                 $journal->book_journal_id = session('book_journal_id');
+                $journal->toko_id = $request->input('toko_id');
                 $journal->save();
                 $reference = null;
                 if ($journal->reference_type != null)

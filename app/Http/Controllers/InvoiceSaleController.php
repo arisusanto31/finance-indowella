@@ -57,6 +57,7 @@ class InvoiceSaleController extends Controller
             'unit.*' => 'required|string',
             'total_price' => 'required|array',
             'total_price.*' => 'required|string',
+            'toko_id'=>'required|integer',
         ]);
 
         $invoice_number = $request->invoice_number;
@@ -75,6 +76,7 @@ class InvoiceSaleController extends Controller
                 'customer_id' => $request->customer_id,
                 'book_journal_id' => session('book_journal_id'),
                 'total_price' => format_db($request->total_price[$i]) ?? 0,
+                'toko_id'=>$request->toko_id,
             ];
         }
 
@@ -90,6 +92,7 @@ class InvoiceSaleController extends Controller
                 'invoice_date' => now(),
                 'total_price' => collect($grouped)->sum('total_price'),
                 'status' => 'draft',
+                'toko_id'=>$request->toko_id,
             ]);
 
             foreach ($grouped as $data) {
