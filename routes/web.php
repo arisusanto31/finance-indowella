@@ -84,6 +84,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::delete('delete/{id}', [JournalController::class, 'destroy'])->name('delete');
         Route::get('/get-saldo-highlight', [JournalController::class, 'getSaldoHighlight'])->name('get-saldo-highlight');
         Route::get('/get-saldo-custom/{id}', [JournalController::class, 'getSaldoCustom'])->name('get-saldo-custom');
+        Route::get('/get-laba-rugi/{id}', [JournalController::class, 'getLabaRugi'])->name('get-laba-rugi');
     });
 
     Route::prefix('daftar')->group(function () {

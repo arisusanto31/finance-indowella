@@ -51,7 +51,8 @@
               <th>#️⃣ No Jurnal</th>
               <th>🔢 LAWAN COA</th>
               <th>📎 Description</th>
-              <th>🔃 Mutasi</th>
+              <th>📥 Debet</th>
+              <th>📤 Kredit</th>
               <th>💲saldo</th>
             </tr>
           </thead>
@@ -96,7 +97,8 @@
                     <td>${item.journal_number} [${item.id}] </td>
                     <td>${item.lawan_code_group} - ${res.chart_accounts[item.lawan_code_group]}</td>
                     <td>${item.description}</td>
-                    <td>${formatRupiah(item.amount_debet- item.amount_kredit)}</td>
+                    <td>${formatRupiah(item.amount_debet)}</td>
+                    <td>${formatRupiah(item.amount_kredit)}</td>
                     <td>${formatRupiah(item.amount_saldo)}</td>
                   </tr>
                 `;

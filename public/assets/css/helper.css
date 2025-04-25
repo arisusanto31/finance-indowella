@@ -66,3 +66,10 @@
 .swal2-container {
   z-index: 2000 !important;
 }
+
+.fixed-center {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}

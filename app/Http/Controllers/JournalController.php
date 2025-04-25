@@ -9,6 +9,7 @@ use App\Models\ChartAccount;
 use App\Models\Journal;
 use App\Models\JournalJobFailed;
 use App\Models\JournalKey;
+use App\Models\Toko;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
@@ -121,9 +122,24 @@ class JournalController extends Controller
             'msg' => $labarugi,
             'laba_bulan' => round(collect($labarugi)->where('is_child', 1)->sum('saldo_akhir'), 2)
         ];
+        $view->tokoes = Toko::all();
         $view->data = $data;
         return $view;
     }
+
+    public function getLabaRugi($tokoid)
+    {
+        if ($tokoid == "" || $tokoid == "null" || $tokoid == 0) $tokoid = null;
+        $date = getInput('date') ? getInput('date') : carbonDate();
+        $labarugi = ChartAccount::getRincianLabaBulanAt($date, $tokoid);
+        return [
+            'status' => 1,
+            'msg' => $labarugi,
+            'laba_bulan' => round(collect($labarugi)->where('is_child', 1)->sum('saldo_akhir'), 2)
+        ];
+    }
+
+
     public function jurnal()
     {
         return view('main.jurnal');
@@ -268,7 +284,7 @@ class JournalController extends Controller
                     'reference_type' => $debet['reference_type'],
                     'is_auto_generated' => $isAuto,
                     'is_backdate' => $isBackDate,
-                    'toko_id' => $tokoid,
+                    'toko_id' =>  array_key_exists('toko_id', $debet) ? $debet['toko_id'] : null,
                     'user_backdate_id' => $userBackdate,
                     'date' => $date
                 ]));
@@ -298,7 +314,7 @@ class JournalController extends Controller
                     'reference_type' => $kredit['reference_type'],
                     'is_auto_generated' => $isAuto,
                     'is_backdate' => $isBackDate,
-                    'toko_id' => $tokoid,
+                    'toko_id' => array_key_exists('toko_id', $kredit) ? $kredit['toko_id'] : null,
                     'user_backdate_id' => $userBackdate,
                     'date' => $date
                 ]));

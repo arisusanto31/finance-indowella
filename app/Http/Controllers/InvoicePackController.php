@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\DB;
 use Throwable;
 
 class InvoicePackController extends Controller
-
 {
 
     public function show($id)
@@ -90,6 +89,8 @@ class InvoicePackController extends Controller
                     'person_type' => $invoicePack->person_type,
                     'code_group' => $coaPiutangKas,
                     'lawan_code_group' => $coaPenjualan,
+                
+                    'is_otomatis_jurnal' => 1,
                 ]), false);
                 if ($kartu['status'] == 0) {
                     throw new \Exception($kartu['msg']);
@@ -102,9 +103,9 @@ class InvoicePackController extends Controller
                 $debets = [
                     [
                         'code_group' => $coaPenjualan,
-                        'description' => 'pembelian nomer ' . $invoicePack->invoice_number,
+                        'description' => 'penjualan nomer ' . $invoicePack->invoice_number,
                         'amount' => $invoicePack->total_price,
-                        'toko_id'=> $invoicePack->toko_id,
+                        'toko_id' => $invoicePack->toko_id,
                         'reference_id' => null,
                         'reference_type' => null,
                     ],
@@ -112,9 +113,9 @@ class InvoicePackController extends Controller
                 $kredits = [
                     [
                         'code_group' => $coaPiutangKas,
-                        'description' => 'pembelian nomer ' . $invoicePack->invoice_number,
+                        'description' => 'penjualan nomer ' . $invoicePack->invoice_number,
                         'amount' => $invoicePack->total_price,
-                        'toko_id'=> $invoicePack->toko_id,
+                        'toko_id' => $invoicePack->toko_id,
                         'reference_id' => null,
                         'reference_type' => null,
                     ],
@@ -143,6 +144,7 @@ class InvoicePackController extends Controller
                     'code_group' => $coaBeban,
                     'description' => 'penjualan nomer ' . $invoicePack->invoice_number,
                     'amount' => $amountPersediaan,
+                    'toko_id'=> $invoicePack->toko_id,
                     'reference_id' => null,
                     'reference_type' => null,
                 ],
@@ -153,6 +155,7 @@ class InvoicePackController extends Controller
                     'description' => 'penjualan nomer ' . $invoicePack->invoice_number,
                     'amount' => $amountPersediaan,
                     'reference_id' => null,
+                    'toko_id'=> $invoicePack->toko_id,
                     'reference_type' => null,
                 ],
             ];
@@ -163,6 +166,7 @@ class InvoicePackController extends Controller
                 'type' => 'sales',
                 'date' => Date('Y-m-d H:i:s'),
                 'is_auto_generated' => 1,
+
                 'title' => 'create mutation sales',
                 'url_try_again' => null
 
@@ -277,6 +281,8 @@ class InvoicePackController extends Controller
                     'person_type' => $invoicePack->person_type,
                     'code_group' => $coaHutangKas,
                     'lawan_code_group' => $coaPersediaan,
+                    'is_otomatis_jurnal' => 1,
+                    'description' => 'pembelian nomer ' . $invoicePack->invoice_number,
                 ]), false);
                 if ($kartu['status'] == 0) {
                     throw new \Exception($kartu['msg']);
@@ -293,6 +299,7 @@ class InvoicePackController extends Controller
                         'amount' => $invoicePack->total_price,
                         'reference_id' => null,
                         'reference_type' => null,
+                   
                     ],
                 ];
                 $kredits = [
