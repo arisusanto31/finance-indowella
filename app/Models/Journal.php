@@ -113,7 +113,8 @@ class Journal extends Model
         $tokoID = $request->input('toko_id');
         if ($codeGroup > 400000) {
             if (!$tokoID) {
-                throw new \Exception('toko_id tidak boleh kosong untuk membuat jurnal ini');
+                $msg = 'toko_id tidak boleh kosong untuk membuat jurnal ' . $codeGroup . ' ini' . json_encode($request->all());
+                throw new \Exception($msg);
             }
         }
         $chartAccount = ChartAccount::where('code_group', $codeGroup)->first();
@@ -345,11 +346,15 @@ class Journal extends Model
 
     public static function getPrimaryCode($code)
     {
+        $theFixCode = null;
         for ($i = 1; $i < 10000000; $i *= 10) {
             if ($code % $i != 0) {
                 $theFixCode = $code * 10 / $i;
                 break;
             }
+        }
+        if (!$theFixCode) {
+            dd($code);
         }
         return $theFixCode;
     }

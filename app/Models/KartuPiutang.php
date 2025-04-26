@@ -154,7 +154,12 @@ class KartuPiutang extends Model
                 throw new \Exception('chart not found');
             }
             $codeName = $chart->name;
-
+            $invoicePack = InvoicePack::where('invoice_number', $factur)->first();
+            if (!$invoicePack) {
+                $tokoid = null;
+            } else {
+                $tokoid = $invoicePack->toko_id;
+            }
             if ($amountMutasi > 0) {
                 //piutang bertambah
                 $codeDebet = $codeGroup;
@@ -176,6 +181,7 @@ class KartuPiutang extends Model
                         'description' => $desc,
                         'amount' => abs($amountMutasi),
                         'reference_id' => null,
+                        'toko_id' => $tokoid,
                         'reference_type' => null,
                     ],
                 ];
@@ -185,6 +191,7 @@ class KartuPiutang extends Model
                         'description' => $desc,
                         'amount' => abs($amountMutasi),
                         'reference_id' => null,
+                        'toko_id' => $tokoid,
                         'reference_type' => null,
                     ],
                 ];

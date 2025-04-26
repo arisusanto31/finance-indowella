@@ -18,7 +18,7 @@
         <div id="div-debet" class="debet-wrapper">
           <div id="debet1" class="row rowdebet g-2 mb-2 ">
             <div class="col-md-4">
-              <select id="dcodegroup1" class="form-control select-coa">
+              <select id="dcodegroup1" onchange="changeCode('debet','1')" class="form-control select-coa">
               </select>
             </div>
             <div class="col-md-4">
@@ -40,7 +40,7 @@
           <!-- Baris kredit pertama -->
           <div id="kredit1" class="row  rowkredit g-2 mb-2 ">
             <div class="col-md-4">
-              <select id="kcodegroup1" class="form-control select-coa">
+              <select id="kcodegroup1" onchange="changeCode('kredit','1')" class="form-control select-coa">
 
               </select>
             </div>
@@ -102,8 +102,8 @@
       newRow.id = 'debet' + (iRowDebet);
       newRow.classList.add('row', 'g-2', 'mb-2', 'rowdebet');
       newRow.innerHTML = `
-            <div class="col-md-4">
-              <select id="dcodegroup${iRowDebet}" class="form-select select-coa"> ">
+            <div class="col-md-4 ">
+              <select id="dcodegroup${iRowDebet}" onchange="changeCode('debet','${iRowDebet}')" class="form-select select-coa"> ">
                
               </select>
             </div>
@@ -127,7 +127,7 @@
       newRow.classList.add('row', 'g-2', 'mb-2', 'rowkredit');
       newRow.innerHTML = `
             <div class="col-md-4">
-              <select id="kcodegroup${iRowKredit}" class="form-select select-coa">
+              <select id="kcodegroup${iRowKredit}" onchange="changeCode('kredit','${iRowKredit}')" class="form-select select-coa">
                
               </select>
             </div>
@@ -148,6 +148,29 @@
       $('#icon-create').toggleClass('open');
     }
 
+    function changeCode(type, id) {
+      nametype = type == 'debet' ? 'd' : 'k';
+      codeGroup = $('#' + nametype + 'codegroup' + id + ' option:selected').val();
+      console.log(codeGroup);
+      if (codeGroup > 400000) {
+        //kita tambahkan toko_id kalau codegroup >400000
+        html = `<div class="col-md-3 col-toko form-contorl"> <select id="${nametype}toko_id${id}" ></select></div>`;
+        if (type == 'debet') {
+          $('#debet' + id).find('.col-md-4').addClass('col-md-3').removeClass('col-md-4');
+          if ($('#debet' + id).find('.col-toko').length == 0) {
+            $('#debet' + id).append(html);
+          }
+        } else {
+          $('#kredit' + id).find('.col-md-4').addClass('col-md-3').removeClass('col-md-4');
+          if ($('#kredit' + id).find('.col-toko').length == 0) {
+            $('#kredit' + id).append(html);
+          }
+        }
+        initItemSelectManual('#' + nametype + 'toko_id' + id, '{{url("admin/master/toko/get-item")}}', 'Pilih Toko');
+      }
+
+    }
+
     setTimeout(getListMutasiJurnal, 100);
 
 
@@ -161,12 +184,17 @@
         codeGroup = $('#dcodegroup' + id + ' option:selected').val();
         note = $('#dnote' + id).val();
         amount = formatDB($('#damount' + id).val());
+        toko_id = $('#dtoko_id' + id).val();
+        if (toko_id == undefined) {
+          toko_id = null;
+        }
         debets.push({
           code_group: codeGroup,
           description: note,
           amount: amount,
           reference_id: null,
           reference_type: null,
+          toko_id: toko_id
         });
       });
       $('.rowkredit').each(function(i, elem) {
@@ -174,12 +202,17 @@
         codeGroup = $('#kcodegroup' + id + ' option:selected').val();
         note = $('#knote' + id).val();
         amount = formatDB($('#kamount' + id).val());
+        toko_id = $('#ktoko_id' + id).val();
+        if (toko_id == undefined) {
+          toko_id = null;
+        }
         kredits.push({
           code_group: codeGroup,
           description: note,
           amount: amount,
           reference_id: null,
           reference_type: null,
+          toko_id: toko_id
         });
       });
       data = {

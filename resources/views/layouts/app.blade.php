@@ -185,6 +185,20 @@
 
         initCurrencyInput('.currency-input');
 
+
+        function loading(vis) {
+            if (vis) {
+                rand = Math.floor(Math.random() * 2);
+                console.log("random=" + rand);
+                $('#img-load').attr('src', "{{asset('dist/img/Spin_trans_')}}" + rand + '.gif');
+                $('#load').removeClass("hidden");
+                $('#load').addClass("loading");
+            } else {
+                $('#load').addClass("hidden");
+                $('#load').removeClass("loading");
+            }
+        }
+
         function showDetailOnModal(url, size = "") {
             if (size == "") {
                 $('#global-modal').find('.modal-dialog').remove('modal-xl modal-lg');

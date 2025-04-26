@@ -2,7 +2,16 @@
 
     <div class="card">
 
-        <h5 class="text-primary-dark card-header"> 💰 <strong>LABA RUGI </strong> </h5>
+        <div class="card-header">
+            <h5 class="text-primary-dark mb-1"> 💰 <strong>LABA RUGI </strong> </h5>
+
+            <select onchange="changeToko()" id="select-toko" class="form-control ms-1" style="width:200px">
+                <option value="0">Semua Toko</option>
+                @foreach($tokoes as $toko)
+                <option value="{{$toko->id}}">{{$toko->name}}</option>
+                @endforeach
+            </select>
+        </div>
         <div class="card-body">
             <div class="table-responsive text-nowrap">
                 <div id="container-laba-rugi" class="text-primary-dark"></div>
@@ -15,6 +24,29 @@
     <script>
         var res = @json($data);
 
+        function changeToko() {
+            loading(1);
+            tokoid = $('#select-toko option:selected').val();
+            $.ajax({
+                url: "{{ url('admin/jurnal/get-laba-rugi') }}/" + tokoid,
+                method: 'get',
+                success: function(res) {
+                    loading(0);
+
+                    console.log(res);
+                    if (res.status == 1) {
+                        tampilkan(res);
+                    } else {
+                        swalInfo('ops', 'something error', 'error');
+                    }
+                },
+                error: function(res) {
+                    loading(0);
+                    console.log(res);
+                    swalInfo('ops', 'something error', 'error');
+                }
+            });
+        }
 
         function _tampilkanBaris(kodePerk, string, amount, isStrong, prosen = "") {
             if (isStrong) {
@@ -75,7 +107,7 @@
                     prosen = getProsen(lajur.saldo_akhir, totalPenjualan);
                     html += _tampilkanBaris(lajur.code_group, lajur.name, formatRupiah(lajur.saldo_akhir), isStrong, prosen);
                 });
-                html += _tampilkanBaris("", "Pendapatan Netto", formatRupiah(totalPenjualan), true,100);
+                html += _tampilkanBaris("", "Pendapatan Netto", formatRupiah(totalPenjualan), true, 100);
 
                 html += '<div style="margin-top:20px"></div>';
                 bebanPokok = collect(res.msg).where('code_group', '<', 700000).where('code_group', '>', 600000).all();

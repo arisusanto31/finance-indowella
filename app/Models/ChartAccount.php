@@ -158,7 +158,7 @@ class ChartAccount extends Model
 
         $theLastDate = createCarbon($date)->format('ymdHis') . '00';
 
-        $subquery =Journal::where('index_date', '<', (float)$theLastDate)->whereRaw('CONVERT(code_group, UNSIGNED) > ?', [400000])
+        $subquery = Journal::where('index_date', '<', (float)$theLastDate)->whereRaw('CONVERT(code_group, UNSIGNED) > ?', [400000])
             ->select('code_group', DB::raw('MAX(index_date) as max_index_date'))
             ->groupBy('code_group');
 
@@ -171,40 +171,69 @@ class ChartAccount extends Model
     }
 
 
-    public static function getRincianLabaBulanAt($date)
+    public static function getRincianLabaBulanAt($date, $tokoid = null)
     {
 
-        $theLastDate = createCarbon($date)->format('ymdHis') . '00';
+        if ($tokoid == null) {
+            //langsung ambil dari saldo terakhir yang tertulis di database
+            $theLastDate = createCarbon($date)->format('ymdHis') . '00';
 
-        $subquery = Journal::where('index_date', '<', (float)$theLastDate)->whereRaw('CONVERT(code_group, UNSIGNED) > ?', [400000])
-            ->select('code_group', DB::raw('MAX(index_date) as max_index_date'))
-            ->groupBy('code_group');
+            $subquery = Journal::where('index_date', '<', (float)$theLastDate)->whereRaw('CONVERT(code_group, UNSIGNED) > ?', [400000])
+                ->select('code_group', DB::raw('MAX(index_date) as max_index_date'))
+                ->groupBy('code_group');
 
-        $saldo = Journal::from('journals as j')
-            ->joinSub($subquery, 'subquery', function ($join) {
-                $join->on('j.code_group', '=', 'subquery.code_group')
-                    ->on('j.index_date', '=', 'subquery.max_index_date');
-            })->rightJoin('chart_accounts as ca', 'ca.id', '=', 'j.chart_account_id')
-            ->where('ca.code_group', '>=', 400000)
-            ->select(
+            $saldo = Journal::from('journals as j')
+                ->joinSub($subquery, 'subquery', function ($join) {
+                    $join->on('j.code_group', '=', 'subquery.code_group')
+                        ->on('j.index_date', '=', 'subquery.max_index_date');
+                })->rightJoin('chart_accounts as ca', 'ca.id', '=', 'j.chart_account_id')
+                ->where('ca.code_group', '>=', 400000)
+                ->select(
+                    'ca.name',
+                    'ca.id',
+                    'ca.code_group',
+                    DB::raw('coalesce(j.amount_saldo,0) as saldo_akhir'),
+                    'ca.is_child',
+                )
+                ->orderBy('ca.code_group')->get();
+
+            $revisiSaldo = collect($saldo)
+                ->map(function ($val) use ($saldo) {
+                    if ($val->is_child == 0) {
+                        $code = Journal::getPrimaryCode($val->code_group);
+                        $idchilds = ChartAccount::where('code_group', 'like', $code . '%')->pluck('id');
+                        $val->saldo_akhir = $saldo->whereIn('id', $idchilds)->sum('saldo_akhir');
+                    }
+                    return $val;
+                });
+            return $revisiSaldo;
+        } else {
+            $indexAwal = createCarbon($date)->format('ym01His') . '00';
+            $indexAkhir = createCarbon($date)->format('ymd23595999');
+            //kalo pake toko id harus ngitung manual nih ,ahahahy
+            $journals = Journal::from('journals as j')->where('j.code_group', '>', 400000)
+                ->where('j.toko_id', $tokoid)->whereBetween('j.index_date', [$indexAwal, $indexAkhir]);
+
+            $saldo = ChartAccount::from('chart_accounts as ca')->where('ca.code_group', '>', 400000)->leftJoinSub($journals, 'j', function ($join) {
+                $join->on('j.code_group', '=', 'ca.code_group');
+            })->select(
+                DB::raw('coalesce(sum(j.amount_kredit- j.amount_debet),0) as saldo_akhir'),
+                'ca.code_group',
                 'ca.name',
                 'ca.id',
-                'ca.code_group',
-                DB::raw('coalesce(j.amount_saldo,0) as saldo_akhir'),
                 'ca.is_child',
-            )
-            ->orderBy('ca.code_group')->get();
-
-        $revisiSaldo = collect($saldo)
-            ->map(function ($val) use ($saldo) {
-                if ($val->is_child == 0) {
-                    $code = Journal::getPrimaryCode($val->code_group);
-                    $idchilds = ChartAccount::where('code_group', 'like', $code . '%')->pluck('id');
-                    $val->saldo_akhir = $saldo->whereIn('id', $idchilds)->sum('saldo_akhir');
-                }
-                return $val;
-            });
-        return $revisiSaldo;
+            ) ->groupBy('code_group')->get();
+            $revisiSaldo = collect($saldo)
+                ->map(function ($val) use ($saldo) {
+                    if ($val->is_child == 0) {
+                        $code = Journal::getPrimaryCode($val->code_group);
+                        $idchilds = ChartAccount::where('code_group', 'like', $code . '%')->pluck('id');
+                        $val->saldo_akhir = $saldo->whereIn('id', $idchilds)->sum('saldo_akhir');
+                    }
+                    return $val;
+                });
+            return $revisiSaldo;
+        }
     }
 
     public static function getRincianNeracaAt($date)
@@ -213,8 +242,7 @@ class ChartAccount extends Model
             $start = microtime(true);
             $theLastDate = createCarbon($date)->format('ymdHis') . '00';
 
-            $subquery = Journal::
-                where('index_date', '<', (float)$theLastDate)->whereRaw('CONVERT(code_group, UNSIGNED) < ?', [400000])
+            $subquery = Journal::where('index_date', '<', (float)$theLastDate)->whereRaw('CONVERT(code_group, UNSIGNED) < ?', [400000])
                 ->select('code_group', DB::raw('MAX(index_date) as max_index_date'))
                 ->groupBy('code_group');
 
@@ -271,7 +299,7 @@ class ChartAccount extends Model
             ->select('code_group', DB::raw('MAX(index_date) as max_index_date'))
             ->groupBy('code_group');
 
-        $saldo =Journal::from('journals as j')
+        $saldo = Journal::from('journals as j')
             ->joinSub($subquery, 'subquery', function ($join) {
                 $join->on('j.code_group', '=', 'subquery.code_group')
                     ->on('j.index_date', '=', 'subquery.max_index_date');
@@ -284,8 +312,8 @@ class ChartAccount extends Model
                 'ca.is_child',
             )
             ->orderBy('ca.code_group')->get();
-       
-       
+
+
         $saldoAwal = collect($saldo)
             ->map(function ($val) use ($saldo) {
                 if ($val->is_child == 0) {
@@ -295,7 +323,7 @@ class ChartAccount extends Model
                 }
                 return $val;
             })->keyBy('id');
-      
+
         $subquery = Journal::from('journals as j')
             ->where('index_date', '<', (float)$lastdate)
             ->select('code_group', DB::raw('MAX(index_date) as max_index_date'))
@@ -325,12 +353,12 @@ class ChartAccount extends Model
                 return $val;
             })->keyBy('id');
 
-    
+
         $fixdatas = ChartAccount::select('name', 'account_type', 'id', 'code_group', 'level')->orderBy('code_group')->get()
             ->map(function ($val) use ($saldoAkhir, $saldoAwal) {
-                
-                $val['saldo_awal'] = array_key_exists($val->id,$saldoAwal->all())?money($saldoAwal[$val->id]->saldo_akhir):0;
-                $val['saldo_akhir'] = array_key_exists($val->id,$saldoAkhir->all())?money($saldoAkhir[$val->id]->saldo_akhir):0;
+
+                $val['saldo_awal'] = array_key_exists($val->id, $saldoAwal->all()) ? money($saldoAwal[$val->id]->saldo_akhir) : 0;
+                $val['saldo_akhir'] = array_key_exists($val->id, $saldoAkhir->all()) ? money($saldoAkhir[$val->id]->saldo_akhir) : 0;
                 return $val;
             });
         return [
@@ -359,7 +387,7 @@ class ChartAccount extends Model
                 'c.id',
                 'c.is_child',
                 'c.name'
-            )->orderBy('c.code_group')->groupBy('c.code_group','c.id','c.is_child','c.name')->get();
+            )->orderBy('c.code_group')->groupBy('c.code_group', 'c.id', 'c.is_child', 'c.name')->get();
         $fixMutasi = [];
         foreach ($chartAccount as $data) {
             $newdata = [];
