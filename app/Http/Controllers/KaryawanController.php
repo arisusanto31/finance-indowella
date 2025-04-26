@@ -26,7 +26,6 @@ class KaryawanController extends Controller
 
 
     public function resign($id)
-<<<<<<< HEAD
     {
         $karyawan = Karyawan::findOrFail($id);
         $karyawan->update([
@@ -36,17 +35,7 @@ class KaryawanController extends Controller
         return redirect()->back()->with('success', 'Karyawan berhasil diresign.');
     }
 
-    public function DaftarKaryawan()
-=======
->>>>>>> 3f9824813da5dff64de0f307342d14c21d5c062a
-    {
-        $karyawan = Karyawan::findOrFail($id);
-        $karyawan->update([
-            'date_keluar' => Carbon::now()->toDateString()
-        ]);
-
-        return redirect()->back()->with('success', 'Karyawan berhasil diresign.');
-    }
+  
 
     // public function DaftarKaryawan()
     // {

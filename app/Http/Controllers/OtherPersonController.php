@@ -5,14 +5,63 @@ namespace App\Http\Controllers;
 use App\Models\OtherPerson;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Validation\ValidationException;
+use Throwable;
+use App\Models\Karyawan;
+use Illuminate\Support\Facades\Validator;
 
 
 
 class OtherPersonController extends Controller
 {
-    //
-    public function index() {}
+
+    public function store(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string',
+                'phone' => 'required',
+                'address' => 'required',
+            ]);
+    
+            if ($validator->fails()) {
+                throw new ValidationException($validator);
+            }
+    
+            OtherPerson::create($validator->validated());
+    
+            return redirect()
+                ->route('other-person.main.index')
+                ->with('success', 'Other Person berhasil ditambahkan lurr!');
+        } catch (ValidationException $e) {
+            return redirect()
+                ->route('other-person.main.index')
+                ->with('error', 'Input tidak valid! ' . $this->getValidationMessage($e))
+                ->withInput();
+        } catch (\Throwable $e) {
+            return redirect()
+                ->route('other-person.main.index')
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    private function getValidationMessage(ValidationException $e)
+    {
+        return implode(', ', collect($e->errors())->flatten()->toArray());
+    }
+
+
+    public function create()
+    {
+        return view('master.modal._create_other-person');
+    }
+
+    public function index()
+    {
+        $otherPersons = OtherPerson::whereNull('is_deleted')->get();
+        return view('master.other-person', compact('otherPersons'));
+    }
+    
 
     public function getItem()
     {
@@ -45,7 +94,7 @@ class OtherPersonController extends Controller
         return view('other_persons.trashed', compact('trashed'));
     }
 
-    // Memulihkan data yang di-soft delete
+
     public function restore($id)
     {
         $person = OtherPerson::withTrashed()->findOrFail($id);
