@@ -1,10 +1,7 @@
 <x-app-layout>
-
     <div class="card">
-
         <div class="card-header">
             <h5 class="text-primary-dark mb-1"> 💰 <strong>LABA RUGI </strong> </h5>
-
             <select onchange="changeToko()" id="select-toko" class="form-control ms-1" style="width:200px">
                 <option value="0">Semua Toko</option>
                 @foreach($tokoes as $toko)
@@ -15,7 +12,6 @@
         <div class="card-body">
             <div class="table-responsive text-nowrap">
                 <div id="container-laba-rugi" class="text-primary-dark"></div>
-
             </div>
         </div>
     </div>
