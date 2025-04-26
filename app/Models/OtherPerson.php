@@ -9,5 +9,12 @@ class OtherPerson extends Model
     //
     protected $table= 'other_persons';
     public $timestamps = true;
+
+    protected $fillable = [
+        'name',
+        'phone',
+        'address',
+    ];
+    
     
 }

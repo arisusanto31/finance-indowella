@@ -188,6 +188,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('/get-item', [OtherPersonController::class, 'getItem'])->name('get-item');
             Route::get('/trashed', [OtherPersonController::class, 'trashed'])->name('other-persons.trashed');
             Route::post('{id}/restore', [OtherPersonController::class, 'restore'])->name('other-persons.restore');
+            Route::get('/get-item-other-person', [OtherPersonController::class, 'getItemOtherPerson'])->name('get-item-other-person');
         });
 
         Route::prefix('customer')->name('customer.')->group(function () {
