@@ -29,3 +29,28 @@
         <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
     </div>
 </form>
+<script>
+    $('#form-edit-other-person').submit(function(e) {
+        e.preventDefault();
+        
+        let form = $(this);
+        let url = form.attr('action');
+        
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: form.serialize(),
+            success: function(response) {
+                if (response.status) {
+                    $('#editModal').modal('hide');
+                    Swal.fire('Sukses', response.message, 'success');
+                    // reload table atau halaman
+                    $('#datatable').DataTable().ajax.reload();
+                }
+            },
+            error: function(xhr) {
+                Swal.fire('Error', 'Gagal menyimpan data!', 'error');
+            }
+        });
+    });
+</script>
