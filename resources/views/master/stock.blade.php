@@ -20,6 +20,16 @@
                     <button type="button" class=" btn-primary" data-bs-toggle="modal" data-bs-target="#createModal"> + Add Stock</button>
                     <button type="button" class=" btn-primary" data-bs-toggle="modal" data-bs-target="#createCategory">+ Add category </button>
                 </div>
+                <div class="clearfix"></div>
+                @if(book()->name=='Buku Toko')
+                <div class="col-md-4">
+                    <button onclick="showLink()" class="btn-primary"> Sinkronkan dengan stock TOKO</button>
+                </div>
+                @elseif(book()->name=='Buku Manufaktur')
+                <div class="col-md-4">
+                    <button onclick="showLink()" class="btn-primary"> Sinkronkan dengan stock MANUF</button>
+                </div>
+                @endif
 
             </div>
             <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
@@ -72,9 +82,9 @@
                             <td>{{ $stock->parentCategory->name }}</td>
                             <td class="text-center align-middle">
                                 <div class="d-flex justify-content-center gap-1">
-                                    <a href="{{ route('stock.trashed') }}" class="btn btn-custom-blue btn-sm" title="Lihat">
+                                    <!-- <a href="{{ route('stock.trashed') }}" class="btn btn-custom-blue btn-sm" title="Lihat">
                                         <i class="bi bi-eye"></i>
-                                    </a>
+                                    </a> -->
                                     <button type="button" class="btn btn-success btn-sm" title="Edit"
                                         data-bs-toggle="modal" data-bs-target="#editModal{{ $stock->id }}">
                                         <i class="bi bi-pencil"></i>
@@ -282,6 +292,13 @@
             initItemSelectManual($(elem), '{{route("stock.category-get-item")}}', 'category', '#editModal' + id);
         });
 
+        function showLink() {
+            id= '{{book()->id}}';
+            finalUrl = '{{route("stock.open-sinkron",["id"=>"idreplace"])}}';
+            finalUrl = finalUrl.replace('idreplace', id);
+            showDetailOnModal(finalUrl, 'xl');
+
+        }
 
         function tambahSatuan(id) {
             $.ajax({

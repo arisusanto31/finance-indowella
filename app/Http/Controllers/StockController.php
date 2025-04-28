@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BookJournal;
+use App\Models\ManufStock;
+use App\Models\ManufUnit;
+use App\Models\RetailStock;
 use App\Models\Stock;
 use App\Models\StockCategory;
 use App\Models\StockUnit;
@@ -21,8 +25,6 @@ class StockController extends Controller
 
     public function update(Request $request, $id)
     {
-
-
         $request->validate([
             'name' => 'required|string|max:255',
             'category_id' => 'integer',
@@ -30,7 +32,6 @@ class StockController extends Controller
             'unit_backend' => 'required|string|max:10',
             'unit_default' => 'string|max:20'
         ]);
-
         $stock = Stock::findOrFail($id);
         $stock->update($request->only([
             'name',
@@ -39,7 +40,6 @@ class StockController extends Controller
             'unit_backend',
             'unit_default'
         ]));
-
         return [
             'status' => 1,
             'msg' => $stock
@@ -49,6 +49,8 @@ class StockController extends Controller
 
     public function store(Request $request)
     {
+        $request->merge(['book_journal_id', session('book_journal_id')]);
+
         try {
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
@@ -166,21 +168,19 @@ class StockController extends Controller
 
 
     public function getItem(Request $request)
-
     {
         $search = $request->get('search');
-
         $searchs = explode(' ', $search);
         $stocks = Stock::from('stocks');
         foreach ($searchs as $s) {
             $stocks = $stocks->where('name', 'like', '%' . $s . '%');
         }
         $stocks = $stocks->select('id', DB::raw('name as text'))->get();
-
         return response()->json(['results' => $stocks]);
     }
 
-    function getUnit($id){
+    function getUnit($id)
+    {
         $unit = StockUnit::where('stock_id', $id)->get();
         if (!$unit) {
             return [
@@ -192,7 +192,134 @@ class StockController extends Controller
             'status' => 1,
             'msg' => $unit
         ];
+    }
+    function openSinkron($book_journal_id)
+    {
+        $book = BookJournal::find($book_journal_id);
+        if (!$book) {
+            return [
+                'status' => 0,
+                'msg' => 'Book Journal tidak ditemukan'
+            ];
+        }
+        $defaultDB = config('database.connections.mysql.database');
 
-        
+        $stockModelClass = $book->name == "Buku Toko" ? RetailStock::class : ManufStock::class;
+
+        $stocks = $stockModelClass::from('stocks as rst')
+            ->leftJoin($defaultDB . '.stocks as st', function ($join) use ($stockModelClass) {
+                $join->on('rst.id', '=', 'st.reference_stock_id')
+                    ->where('st.reference_stock_type', '=', $stockModelClass);
+            })->where(function ($q) {
+                $q->where('st.id', null)->orWhere('st.updated_at', '<', DB::raw('rst.updated_at'));
+            })->with('category:id,name')->with('parentCategory:id,name')
+            ->select(
+                'rst.name',
+                'rst.unit_info as unit_default',
+                'rst.unit_backend as unit_backend',
+                'rst.category_id',
+                'rst.parent_category_id',
+                'rst.id',
+                'st.id as master_stock_id'
+            )->get();
+        $stocks = $stockModelClass::withUnits($stocks);
+
+        $view = view('master.modal._link_stock');
+        $view->stocks = $stocks;
+        return $view;
+    }
+
+    function sync(Request $request)
+    {
+
+        DB::beginTransaction();
+        try {
+            $bookModel = book()->name == "Buku Toko" ? RetailStock::class : ManufStock::class;
+            $datastock = $request->input('data');
+            $referenceStockID = $request->input('stock_id');
+            $name = $datastock['name'];
+            $category_name = $datastock['category']['name'];
+            $parent_category_name = $datastock['parent_category']['name'];
+            $unit_default = $datastock['unit_default'];
+            $unit_backend = $datastock['unit_backend'] ?? 'Pcs';
+            $stock_id = $datastock['master_stock_id'];
+            $units = $datastock['units_manual'] ?? [];
+            $category = StockCategory::where('name', $category_name)->first();
+            if (!$category) {
+                $category = StockCategory::create([
+                    'name' => $category_name
+                ]);
+            }
+            $parentCategory = StockCategory::where('name', $parent_category_name)->first();
+            if (!$parentCategory) {
+                $parentCategory = StockCategory::create([
+                    'name' => $parent_category_name
+                ]);
+            }
+
+
+            $dataFix = [
+                'name' => $name,
+                'category_id' => $category->id,
+                'parent_category_id' => $parentCategory->id,
+                'unit_default' => $unit_default,
+                'unit_backend' => $unit_backend,
+                'book_journal_id' => session('book_journal_id'),
+                'reference_stock_id' => $referenceStockID,
+                'reference_stock_type' => $bookModel
+            ];
+
+            if ($stock_id) {
+                $stock = Stock::find($stock_id);
+                $stock->update($dataFix);
+            } else {
+                $stock = Stock::create($dataFix);
+            }
+
+            $stock->refresh();
+
+            //oke kalo sudah waktunya bikin unit ya
+            if ($units) {
+                $allUnitName = collect($units)->pluck('unit')->toArray();
+                foreach ($stock->units as $unit) {
+                    if (!in_array($unit->unit, $allUnitName)) {
+                        $unit->delete();
+                    }
+                }
+
+
+                foreach ($units as $unit) {
+                    $nameKolom = book()->name == 'Buku Toko' ? 'retail_stock_id' : 'stock_id';
+                    $stunit = StockUnit::where('stock_id', $unit[$nameKolom])->where('unit', $unit['unit'])->first();
+
+                    if ($stunit) {
+                        $stunit->update([
+
+                            'konversi' => $unit['konversi']
+                        ]);
+                    } else {
+                        $dataunit = StockUnit::create([
+                            'stock_id' => $stock->id,
+                            'unit' => $unit['unit'],
+                            'konversi' => $unit['konversi']
+                        ]);
+                    }
+                }
+            }
+            DB::commit();
+            return [
+                'status' => 1,
+                'msg' => $stock->refresh(),
+
+            ];
+        } catch (Throwable $th) {
+            DB::rollBack();
+            return [
+                'status' => 0,
+                'msg' => $th->getMessage(),
+                'trace' => $th->getTrace(),
+                'request' => $request->all()
+            ];
+        }
     }
 }

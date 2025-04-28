@@ -29,12 +29,14 @@ if (!function_exists('user')) {
     }
 }
 
-if (!function_exists('sessionJournal')) {
-    function sessionJournal()
+if (!function_exists('book')) {
+    function book()
     {
         return BookJournal::find(session('book_journal_id'));
     }
 }
+
+
 
 if (!function_exists('getInput')) {
     function getInput($key)

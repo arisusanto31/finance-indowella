@@ -62,6 +62,46 @@ return [
             ]) : [],
         ],
 
+
+        'tokoSql' => [
+            'driver' => 'mysql',
+            'url' => env('DB_URL'),
+            'host' => env('DB_HOST_TOKO', '127.0.0.1'),
+            'port' => env('DB_PORT_TOKO', '3306'),
+            'database' => env('DB_DATABASE_TOKO', 'laravel'),
+            'username' => env('DB_USERNAME_TOKO', 'root'),
+            'password' => env('DB_PASSWORD_TOKO', ''),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => env('DB_CHARSET', 'utf8mb4'),
+            'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => false,
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
+        ],
+        'manufSql' => [
+            'driver' => 'mysql',
+            'url' => env('DB_URL'),
+            'host' => env('DB_HOST_MANUF', '127.0.0.1'),
+            'port' => env('DB_PORT_MANUF', '3306'),
+            'database' => env('DB_DATABASE_MANUF', 'laravel'),
+            'username' => env('DB_USERNAME_MANUF', 'root'),
+            'password' => env('DB_PASSWORD_MANUF', ''),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => env('DB_CHARSET', 'utf8mb4'),
+            'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => false,
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
+        ],
+
         'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),
@@ -147,7 +187,7 @@ return [
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_database_'),
+            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_') . '_database_'),
             'persistent' => env('REDIS_PERSISTENT', false),
         ],
 
@@ -170,20 +210,20 @@ return [
         ],
 
 
-//     'mysql_customers' => [
-//     'driver' => 'mysql',
-//     'host' => env('DB_CUSTOMERS_HOST', '127.0.0.1'),
-//     'port' => env('DB_CUSTOMERS_PORT', '3306'),
-//     'database' => env('DB_CUSTOMERS_DATABASE', 'nama_db_customers'),
-//     'username' => env('DB_CUSTOMERS_USERNAME', 'root'),
-//     'password' => env('DB_CUSTOMERS_PASSWORD', ''),
-//     'unix_socket' => env('DB_SOCKET', ''),
-//     'charset' => 'utf8mb4',
-//     'collation' => 'utf8mb4_unicode_ci',
-//     'prefix' => '',
-//     'strict' => true,
-//     'engine' => null,
-// ],
-],
+        //     'mysql_customers' => [
+        //     'driver' => 'mysql',
+        //     'host' => env('DB_CUSTOMERS_HOST', '127.0.0.1'),
+        //     'port' => env('DB_CUSTOMERS_PORT', '3306'),
+        //     'database' => env('DB_CUSTOMERS_DATABASE', 'nama_db_customers'),
+        //     'username' => env('DB_CUSTOMERS_USERNAME', 'root'),
+        //     'password' => env('DB_CUSTOMERS_PASSWORD', ''),
+        //     'unix_socket' => env('DB_SOCKET', ''),
+        //     'charset' => 'utf8mb4',
+        //     'collation' => 'utf8mb4_unicode_ci',
+        //     'prefix' => '',
+        //     'strict' => true,
+        //     'engine' => null,
+        // ],
+    ],
 
 ];

@@ -21,6 +21,7 @@ class StockSeeder extends Seeder
 
         $items = [
             [
+                'book_journal_id'=>2,
                 'name' => 'Gelas Plastik 12oz',
                 'category_id' => 1,
                 'parent_category_id' => 1,
@@ -29,6 +30,7 @@ class StockSeeder extends Seeder
                 'unit' => ['Pcs' => 1, 'Slop' => 50, 'Dus' => 1000]
             ],
             [
+                'book_journal_id'=>2,
                 'name' => 'Kertas Nasi 22*27 p500',
                 'category_id' => 2,
                 'parent_category_id' => 2,
@@ -42,13 +44,14 @@ class StockSeeder extends Seeder
         }
 
         foreach ($items as $item) {
-            $input = collect($item)->only('name', 'category_id', 'parent_category_id', 'unit_backend', 'unit_default')->toArray();
+            $input = collect($item)->only('name', 'category_id', 'parent_category_id', 'unit_backend', 'unit_default','book_journal_id')->toArray();
             $st = Stock::create($input);
             foreach ($item['unit'] as $key => $value) {
                 StockUnit::create([
                     'stock_id' => $st->id,
                     'unit' => $key,
-                    'konversi' => $value
+                    'konversi' => $value,
+
                 ]);
             }
         }

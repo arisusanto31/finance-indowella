@@ -16,7 +16,10 @@ class Stock extends Model
         'category_id',
         'parent_category_id',
         'unit_backend',
-        'unit_default'
+        'unit_default',
+        'book_journal_id',
+        'reference_stock_id',
+        'reference_stock_type'
     ];
 
 
@@ -33,6 +36,21 @@ class Stock extends Model
 
             $query->where(function ($q) use ($alias) {
                 $q->whereNull("{$alias}.is_deleted")->orWhere("{$alias}.is_deleted", 0);
+            });
+        });
+
+        static::addGlobalScope('journal', function ($query) {
+            $from = $query->getQuery()->from ?? 'stocks'; // untuk dukung alias `j` kalau pakai from('journals as j')
+            if (Str::contains($from, ' as ')) {
+                [$table, $alias] = explode(' as ', $from);
+                $alias = trim($alias);
+            } else {
+                $alias = $from;
+            }
+
+            $query->where(function ($q) use ($alias) {
+                $q->whereNull("{$alias}.book_journal_id")
+                    ->orWhere("{$alias}.book_journal_id", session('book_journal_id'));
             });
         });
     }
@@ -57,11 +75,11 @@ class Stock extends Model
     }
 
 
-    
+
     public function getItem(Request $request)
     {
         $search = $request->get('search');
-    
+
         $stocks = Stock::with('category')
             ->when($search, function ($query) use ($search) {
                 $query->where('name', 'like', '%' . $search . '%');
@@ -75,9 +93,7 @@ class Stock extends Model
                     'text' => $item->name . ' - ' . optional($item->category)->name,
                 ];
             });
-    
+
         return ['results' => $stocks];
     }
-    
-
 }

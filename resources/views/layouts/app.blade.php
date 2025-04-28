@@ -47,7 +47,7 @@
 
     <!-- Core CSS -->
     <link rel="stylesheet" href="{{ asset('assets/vendor/css/core.css') }}" class="template-customizer-core-css" />
-    <link rel="stylesheet" href="{{ asset('assets/vendor/css') }}/{{sessionJournal()->theme}}" class="template-customizer-theme-css" />
+    <link rel="stylesheet" href="{{ asset('assets/vendor/css') }}/{{book()->theme}}" class="template-customizer-theme-css" />
     <link rel="stylesheet" href="{{ asset('assets/css/helper.css') }}" />
 
     <link rel="stylesheet" href="{{ asset('assets/css/demo.css') }}" />
@@ -164,16 +164,13 @@
     <script async defer src="https://buttons.github.io/buttons.js"></script>
     <script>
         $('.url-active').each(function(i, elem) {
-
             if ($(elem).val() == '{{segmentRequest(2)}}') {
-
                 $(elem).closest('.menu-item').addClass('active');
                 segment3 = '{{segmentRequest(3)}}';
                 if (segment3) {
                     $(elem).closest('.menu-item').addClass('open');
                     $(elem).closest('.menu-item').find('.menu-sub').find('div').each(function(i, elem) {
                         string = $(elem).html();
-
                         let hasil = string.toLowerCase().replace(/\s+/g, '-');
                         if (hasil == segment3) {
                             $(elem).closest('li').addClass('active');
@@ -182,10 +179,7 @@
                 }
             }
         });
-
         initCurrencyInput('.currency-input');
-
-
         function loading(vis) {
             if (vis) {
                 rand = Math.floor(Math.random() * 2);
@@ -198,11 +192,9 @@
                 $('#load').removeClass("loading");
             }
         }
-
         function showDetailOnModal(url, size = "") {
             if (size == "") {
                 $('#global-modal').find('.modal-dialog').remove('modal-xl modal-lg');
-
             } else if (size == "l") {
                 $('#global-modal').find('.modal-dialog').remove('modal-xl modal-lg');
                 $('#global-modal').find('.modal-dialog').addClass('modal-lg');
