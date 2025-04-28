@@ -47,24 +47,32 @@
                         <th>aksi</th>
                     </tr>
                 </thead>
-
                 <tbody>
-                    @foreach ($otherPersons as $key => $person)
+                    @foreach ($otherPersons as $key => $otherPerson)
+
                     <tr>
+                    
                         <td>{{ $key + 1 }}</td>
-                        <td>{{ $person->created_at ? $person->created_at->format('d M Y H:i') : '-' }}</td>
-                        <td>{{ $person->name }}</td>
-                        <td>{{ $person->address }}</td>
-                        <td>{{ $person->phone }}</td>
-                        
+                        <td>{{ $otherPerson->created_at ? $otherPerson->created_at->format('Y-m-d H:i') : '-' }}</td>
+                        <td>{{ $otherPerson->name }}</td>
+                        <td>{{ $otherPerson->cp_name }}</td>
+                        <td>{{ $otherPerson->phone }}</td>
+                        <td>{{ $otherPerson->address }}</td>
+
                         <td>
-                            <a href="#" onclick="editOtherPerson({{ $person->id }})" class="btn btn-success btn-sm">Edit</a>
-                            <button onclick="deleteOtherPerson({{ $person->id }})" class="btn btn-danger btn-sm">Hapus</button>
+                            <a href="javascript:void(showDetailOnModal(`{{ route('other-person.main.edit', $otherPerson->id) }}`))" class="btn btn-success btn-sm" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            
+                            {{-- <button onclick="deleteOtherPerson({{ $person->id }})" class="btn btn-danger btn-sm">
+                                Hapus
+                            </button> --}}
                         </td>
+                        
+                        
                     </tr>
-                    @endforeach
+                @endforeach
                 </tbody>
-                
             </table>
 
             @push('scripts')
