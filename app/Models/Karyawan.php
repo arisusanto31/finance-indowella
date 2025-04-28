@@ -15,6 +15,7 @@ class Karyawan extends Model
         'jabatan', 
         'date_masuk', 
         'date_keluar', 
+        'is_deleted',
          
     ];
 
@@ -22,17 +23,25 @@ class Karyawan extends Model
     {
         static::addGlobalScope('journal', function ($query) {
             $from = $query->getQuery()->from ?? 'karyawans';
+    
             if (Str::contains($from, ' as ')) {
                 [$table, $alias] = explode(' as ', $from);
                 $alias = trim($alias);
             } else {
                 $alias = $from;
             }
-
-            $query->where(function ($q) use ($alias) {
-                $q->whereNull("{$alias}.book_journal_id")
-                    ->orWhere("{$alias}.book_journal_id", session('book_journal_id'));
-            });
+    
+            $sessionId = session('book_journal_id');
+    
+            $query->where(function ($q) use ($alias, $sessionId) {
+                if ($sessionId) {
+                    $q->whereNull("{$alias}.book_journal_id")
+                      ->orWhere("{$alias}.book_journal_id", $sessionId);
+                } else {
+                    $q->whereNull("{$alias}.book_journal_id");
+                }
+            })->where("{$alias}.is_deleted", 0);
         });
     }
+    
 }

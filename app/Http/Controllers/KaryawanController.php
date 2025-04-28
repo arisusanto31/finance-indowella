@@ -23,7 +23,28 @@ class KaryawanController extends Controller
         return view('daftar.modal._edit_karyawan', compact('karyawan'));
     }
 
+    public function show($id)
+{
+    return redirect()->route('karyawan.index');
+}
 
+    public function softDelete($id)
+    {
+        try {
+            $karyawan = Karyawan::withoutGlobalScopes()->findOrFail($id);
+            $karyawan->is_deleted = 1;
+            $karyawan->save();
+    
+            return redirect()
+                ->route('karyawan.index') 
+                ->with('success', 'Karyawan berhasil di delete lur!');
+        } catch (\Throwable $e) {
+            return redirect()
+                ->route('karyawan.index')
+                ->with('error', 'Gagal soft delete: ' . $e->getMessage());
+        }
+    }
+    
 
     public function resign($id)
     {
@@ -84,12 +105,29 @@ class KaryawanController extends Controller
         // dd('Masuk ke update!', $request->all());
     }
     
+    public function deleted()
+    {
+        $karyawans = Karyawan::withoutGlobalScopes()
+            ->where('is_deleted', 1)
+            ->get();
+        // dd($karyawans);
+    
+        return view('daftar.delete-karyawan', compact('karyawans'));
+       
 
+    }
+    
+    
 
 
     public function index()
     {
+        // dd(session('book_journal_id'));
+        
+        $karyawans = Karyawan::where('is_deleted', 0)->get();
         $karyawans = Karyawan::all();
+        // dd(Karyawan::where('is_deleted', 0)->pluck('nama'));
+
         return view('daftar.daftar-karyawan', compact('karyawans'));
     }
 }

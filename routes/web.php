@@ -115,12 +115,17 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('/', [KaryawanController::class, 'index'])->name('index');
             Route::get('/create', [KaryawanController::class, 'create'])->name('create');
             Route::post('/store', [KaryawanController::class, 'store'])->name('store');
+            Route::get('/deleted', [KaryawanController::class, 'deleted'])->name('deleted');
             Route::get('/{id}', [KaryawanController::class, 'show'])->name('show');
             Route::get('edit/{id}', [KaryawanController::class, 'edit'])->name('edit');
             Route::put('/{id}/resign', [KaryawanController::class, 'resign'])->name('resign');
             Route::put('/update/{id}', [KaryawanController::class, 'update'])->name('update');
             Route::delete('/{id}', [KaryawanController::class, 'destroy'])->name('destroy');
             Route::put('karyawans/{id}', [KaryawanController::class, 'update'])->name('karyawans.update');
+            Route::post('{id}/soft-delete', [KaryawanController::class, 'softDelete'])->name('karyawans.soft-delete');
+
+         
+
         });
     });
 
