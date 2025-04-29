@@ -197,12 +197,6 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('/get-item-other-person', [OtherPersonController::class, 'getItemOtherPerson'])->name('get-item-other-person');
         });
 
-        Route::prefix('customer')->name('customer.')->group(function () {
-            Route::resource('main', CustomerController::class);
-            Route::get('/get-item', [CustomerController::class, 'getItem'])->name('get-item');
-            Route::get('/trashed', [CustomerController::class, 'trashed'])->name('trashed');
-            Route::post('/{id}/restore', [CustomerController::class, 'restore'])->name('restore');
-        });
 
         Route::prefix('stock')->name('stock.')->group(function () {
             Route::resource('main', StockController::class);

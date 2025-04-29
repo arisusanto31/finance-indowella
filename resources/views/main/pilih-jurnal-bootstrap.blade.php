@@ -129,7 +129,7 @@
   </div>
 </div>
 
-
+@if(user()->can('setting_profile'))
 
 <div class="mt-10 px-6">
   <div class="bg-white rounded-lg shadow-md p-6 space-y-8">
@@ -194,6 +194,7 @@
 </div>
 </main>
   </div>
+  @endif
 
   <script>
   const defaultImg = "https://via.placeholder.com/100";

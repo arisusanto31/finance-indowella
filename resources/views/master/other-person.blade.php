@@ -51,22 +51,16 @@
                     @foreach ($otherPersons as $key => $otherPerson)
 
                     <tr>
-                    
-                        <td>{{ $key + 1 }}</td>
-                        <td>{{ $otherPerson->created_at ? $otherPerson->created_at->format('Y-m-d H:i') : '-' }}</td>
-                        <td>{{ $otherPerson->name }}</td>
-                        <td>{{ $otherPerson->cp_name }}</td>
-                        <td>{{ $otherPerson->phone }}</td>
-                        <td>{{ $otherPerson->address }}</td>
-
+                        <td>{{ $key + 1 }}</td> 
+                        <td>{{ $otherPerson->created_at ? $otherPerson->created_at->format('Y-m-d H:i') : '-' }}</td> <!-- Tanggal -->
+                        <td>{{ $otherPerson->name }}</td> <
+                        <td>{{ $otherPerson->address }}</td> 
+                        <td>{{ $otherPerson->phone }}</td> 
                         <td>
                             <a href="javascript:void(showDetailOnModal(`{{ route('other-person.main.edit', $otherPerson->id) }}`))" class="btn btn-success btn-sm" title="Edit">
                                 <i class="bi bi-pencil"></i>
                             </a>
-                            
-                            {{-- <button onclick="deleteOtherPerson({{ $person->id }})" class="btn btn-danger btn-sm">
-                                Hapus
-                            </button> --}}
+        
                         </td>
                         
                         
@@ -108,12 +102,6 @@
                             $('other-table').modal('show'); 
                         });
 
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Ada error lur 😢',
-                            text: '{{ session('error') }}',
-                            confirmButtonText: 'OK'
-                        });
                 </script>
             @elseif(session('error'))
                 <script>
