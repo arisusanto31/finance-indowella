@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             CustomerSeeder::class,
             StockSeeder::class,
             PermissionSeeder::class,
+            
         ]);
     }
 }

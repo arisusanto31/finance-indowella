@@ -224,6 +224,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::get('show-detail/{id}', [InvoicePackController::class, 'showDetail'])->name('detail');
         Route::post('create-claim-pembelian', [InvoicePackController::class, 'createClaimPembelian'])->name('create-claim-pembelian');
         Route::post('create-claim-penjualan', [InvoicePackController::class, 'createClaimPenjualan'])->name('create-claim-penjualan');
+        Route::get('open-import/{id}', [InvoiceSaleController::class, 'openImport'])->name('open-import');
     });
 });
 

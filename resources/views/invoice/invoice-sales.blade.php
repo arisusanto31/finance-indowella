@@ -9,50 +9,60 @@
     <form id="form-invoice">
         @csrf
 
-        <div class="container py-4 p-3 mb-4 card shadow-sm">
-            <h2>Create Invoice Sales</h2>
+        <div class=" mb-4 card shadow-sm">
+            <h5 class="text-primary-dark card-header"> <a href="javascript:void(openCardCreate())">⚒️ <strong>BUAT INVOICE SALE</strong>
+                    <i id="icon-create" class="bx bx-caret-down toggle-icon"></i> </a>
+            </h5>
+            <div id="card-create" class="container tree-toggle">
 
-            <div class="mb-3 mt-2">
-                <button type="button" class="btn btn-success" onclick="addrow()" id="addDebit">+Tambah</button>
-            </div>
+                <div class="mb-3 mt-2">
+                    <button type="button" class="btn btn-success" onclick="addrow()" id="addDebit">+Tambah</button>
+                    @if(book()->name=="Buku Toko")
+                    <button type="button" class="btn btn-success" onclick="importData('{{book()->id}}')" id="btn-import">Import dari Toko</button>
+                    @else
+                    <button type="button" class="btn btn-success" onclick="importData('{{book()->id}}')" id="btn-import">Import dari Manuf</button>
+                    @endif
+                </div>
 
-            <div class="row g-2 mb-3">
-                <div class="col-md-3">
-                    <label class="form-label">Pilih Customer</label>
-                    <select name="customer_id" class="form-control select2-customer" required></select>
+                <div class="row g-2 mb-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Pilih Customer</label>
+                        <select name="customer_id" class="form-control select2-customer" required></select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Pilih Toko</label>
+                        <select name="toko_id" class="form-control select2-toko" required></select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Nomor Invoice</label>
+                        <input name="invoice_number" type="text" class="form-control" required placeholder="Nomor Invoice">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Tanggal Invoice</label>
+                        <input type="text" class="form-control" value="{{ now()->format('Y-m-d H:i:s') }}" readonly>
+                    </div>
                 </div>
-                <div class="col-md-3">
-                    <label class="form-label">Pilih Toko</label>
-                    <select name="toko_id" class="form-control select2-toko" required></select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Nomor Invoice</label>
-                    <input name="invoice_number" type="text" class="form-control" required placeholder="Nomor Invoice">
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Tanggal Invoice</label>
-                    <input type="text" class="form-control" value="{{ now()->format('Y-m-d H:i:s') }}" readonly>
-                </div>
-            </div>
 
-            <div id="invoice-wrapper" class="debet-wrapper">
-            </div>
-
-            <hr>
-            <div class="d-flex justify-content-end pe-4">
-                <div class="d-flex align-items-center gap-2">
-                    <label for="total_invoice" class="me-2 fw-bold">TOTAL INVOICE</label>
-                    <input type="text" class="form-control text-end" autocomplete="off" readonly style="width: 200px;" id="total-invoice" readonly>
+                <div id="invoice-wrapper" class="debet-wrapper">
                 </div>
-            </div>
-            <div class="mt-4">
-                <button type="button" onclick="submitInvoice()" class="btn btn-primary w-100">Submit Invoice</button>
+
+                <hr>
+                <div class="d-flex justify-content-end pe-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <label for="total_invoice" class="me-2 fw-bold">TOTAL INVOICE</label>
+                        <input type="text" class="form-control text-end" autocomplete="off" readonly style="width: 200px;" id="total-invoice" readonly>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <button type="button" onclick="submitInvoice()" class="btn btn-primary mb-3 w-100">Submit Invoice</button>
+                </div>
             </div>
         </div>
     </form>
 
     @if ($invoices->isNotEmpty())
     <div class="card mb-4 shadow p-3">
+        <h5 class="text-primary-dark card-header"> 📁 <strong>DAFTAR INVOICE </strong> </h5>
         <table class="table table-bordered">
             <thead class="table-primary text-center">
                 <tr>
@@ -117,9 +127,12 @@
         </table>
     </div>
     @else
-    <div class="card mb-2 shadow p-3">
-        <div class="alert alert-warning text-center">
-            Belum ada data invoice.
+    <div class="card mb-2 shadow ">
+        <h5 class="text-primary-dark card-header"> 📁 <strong>DAFTAR INVOICE </strong> </h5>
+        <div class="container">
+            <div class="alert alert-warning text-center">
+                Belum ada data invoice.
+            </div>
         </div>
     </div>
     @endif
@@ -163,6 +176,14 @@
 
         function lihatDetailInvoice(invoiceNumber) {
             showDetailOnModal('{{url("admin/invoice/show-detail")}}/' + invoiceNumber, 'xl');
+        }
+
+        function importData(bookID){
+            showDetailOnModal('{{url("admin/invoice/open-import")}}/'+bookID,'xl');
+        }
+        function openCardCreate() {
+            $('#card-create').toggleClass('open');
+            $('#icon-create').toggleClass('open');
         }
 
         function removeDebetRow(btn) {

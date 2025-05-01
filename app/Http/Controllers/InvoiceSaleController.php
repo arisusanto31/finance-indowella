@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BookJournal;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use App\Models\InvoiceSaleDetail;
 use App\Models\Stock;
 use App\Models\StockCategory;
 use App\Models\InvoicePack;
+use App\Models\ManufSales;
+use App\Models\RetailSales;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -57,14 +60,14 @@ class InvoiceSaleController extends Controller
             'unit.*' => 'required|string',
             'total_price' => 'required|array',
             'total_price.*' => 'required|string',
-            'toko_id'=>'required|integer',
+            'toko_id' => 'required|integer',
         ]);
 
         $invoice_number = $request->invoice_number;
         $grouped = [];
 
         foreach ($request->stock_id as $i => $stockId) {
-        
+
 
             $grouped[] = [
                 'invoice_number' => $invoice_number,
@@ -76,7 +79,7 @@ class InvoiceSaleController extends Controller
                 'customer_id' => $request->customer_id,
                 'book_journal_id' => session('book_journal_id'),
                 'total_price' => format_db($request->total_price[$i]) ?? 0,
-                'toko_id'=>$request->toko_id,
+                'toko_id' => $request->toko_id,
             ];
         }
 
@@ -92,7 +95,7 @@ class InvoiceSaleController extends Controller
                 'invoice_date' => now(),
                 'total_price' => collect($grouped)->sum('total_price'),
                 'status' => 'draft',
-                'toko_id'=>$request->toko_id,
+                'toko_id' => $request->toko_id,
             ]);
 
             foreach ($grouped as $data) {
@@ -108,5 +111,25 @@ class InvoiceSaleController extends Controller
         }
 
         return ['status' => 1, 'msg' => 'Data berhasil disimpan'];
+    }
+
+    function openImport($book_journal_id)
+    {
+        $book = BookJournal::find($book_journal_id);
+        if (!$book) {
+            return ['status' => 0, 'msg' => 'Book tidak ditemukan'];
+        }
+        $defaultDB = config('database.connections.mysql.database');
+        $saleModel = $book->name == 'Buku Toko' ? RetailSales::class : ManufSales::class;
+        $columnString = $book->name == 'Buku Toko' ? 'transactions as tr' : 'invoice_details as tr';
+        $sales = $saleModel::from($columnString)
+            ->leftJoin($defaultDB . '.invoice_sale_details as inv', function ($join) use ($saleModel) {
+                $join->on('tr.id', '=', 'inv.reference_id')
+                    ->where('inv.reference_type', $saleModel);
+            })->whereNull('inv.id')->get();
+            return $sales;
+        $view = view('invoice.modal._invoice_sale_import');
+        $view->sales = $sales;
+        return $view;
     }
 }
