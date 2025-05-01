@@ -96,17 +96,19 @@ class OtherPersonController extends Controller
         ->with('success', 'Data berhasil diperbarui!');
 }
     
-    public function destroy($id)
-    {
-        $supplier = OtherPerson::find($id);
-        $supplier->is_deleted = 1;
-        $supplier->deleted_at = Date('Y-m-d H:i:s');
-        $supplier->save();
-        return [
-            'status' => 1,
-            'msg' => 'success delete'
-        ];
-    }
+public function destroy($id)
+{
+    $otherPerson = OtherPerson::find($id);
+    $otherPerson->is_deleted = 1;
+    $otherPerson->deleted_at = date('Y-m-d H:i:s');
+    $otherPerson->save();
+
+    return [
+        'status' => 1,
+        'msg' => 'Success delete'
+    ];
+}
+
 
     public function trashed()
     {

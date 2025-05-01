@@ -60,10 +60,10 @@
                             <a href="javascript:void(showDetailOnModal(`{{ route('other-person.main.edit', $otherPerson->id) }}`))" class="btn btn-success btn-sm" title="Edit">
                                 <i class="bi bi-pencil"></i>
                             </a>
-        
+                            <button type="button"  onclick="deleteOtherPerson('{{$otherPerson->id}}')" class="btn btn-danger btn-sm" title="Hapus">
+                                <i class="bi bi-trash"></i>
+                            </button>
                         </td>
-                        
-                        
                     </tr>
                 @endforeach
                 </tbody>
@@ -80,8 +80,8 @@
 
                     }
 
-                    function deleteSupplier(id) {
-                        swalDelete('{{ url('admin/master/supplier/main/destroy') }}/' + id);
+                    function deleteOtherPerson(id) {
+                        swalDelete('{{ url("admin/master/supplier/main/destroy") }}/' + id);
                     }
 
                     $(document).ready(function() {

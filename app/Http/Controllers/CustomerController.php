@@ -61,15 +61,15 @@ class CustomerController extends Controller
         return redirect()->back()->with('success', 'Customer berhasil disimpan!');
     }
 
-    public function destroy($id)
+    public function destroy(Customer $main)
     {
-        $customer = Customer::findOrFail($id);
-        $customer->is_deleted = 1;
-        $customer->deleted_at = now();
-        $customer->save();
-
+        $main->is_deleted = 1;
+        $main->deleted_at = now();
+        $main->save();
+    
         return redirect()->back()->with('success', 'Customer berhasil dihapus.');
     }
+    
 
     public function trashed()
     {

@@ -81,12 +81,10 @@
                                     data-bs-toggle="modal" data-bs-target="#editModal{{ $customer->id }}">
                                     <i class="bi bi-pencil"></i>
                                 </button>
-                                <form action="{{ route('customer.main.destroy', $customer->id) }}" method="POST" style="display:inline;">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm" title="Hapus">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
+                              
+                                <button type="button"  onclick="deleteCustomer('{{$otherPerson->id}}')" class="btn btn-danger btn-sm" title="Hapus">
+                                    <i class="bi bi-trash"></i>
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -157,21 +155,36 @@
     </div>
 
     @push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    @if(session('success'))
     <script>
-        Swal.fire({
-            icon: 'success',
-            title: 'Berhasil!',
-            text: '{{ session("success")}}',
-            confirmButtonText: 'OK'
-        });
-    </script>
-    @endif
-
+        function deleteCustomer(id) {
+                        swalDelete('{{ url("admin/master/supplier/main/destroy") }}/' + id);
+                    }
     
 
-    @endpush
+ @if (session('success'))
+     Swal.fire({
+              icon: 'success',
+              title: 'Berhasil lurrr!',
+              text: '{{ session('success') }}',
+              confirmButtonText: 'OK'
+          });
+      @elseif (session('error'))
+         
+          $(document).ready(function() {
+              $('other-table').modal('show'); 
+          });
+
+  </script>
+@elseif(session('error'))
+  <script>
+      Swal.fire({
+          icon: 'error',
+          title: 'Ada error lur 😢',
+          text: '{{ session('error') }}',
+          confirmButtonText: 'OK'
+      });
+      @endif
+  </script>
+@endpush
 
 </x-app-layout>
