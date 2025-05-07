@@ -81,7 +81,8 @@ function formatDB(angka, language = "id") {
 
 function detectFormat(input) {
     // 1. Format database: angka murni dengan titik desimal
-    const dbPattern = /^\d+(\.\d+)?$/;
+    console.log(input);
+    const dbPattern = /^-?\d+(\.\d+)?$/;
 
     // 2. Format rupiah: bisa mengandung Rp, titik ribuan, koma desimal
     const rupiahPattern = /^\s?[\d\.]+(,\d{1,2})?$/;
@@ -95,51 +96,48 @@ function detectFormat(input) {
     }
 }
 function formatRupiah(number, language = "id") {
+
+
     //yang bingung disini adalah inputnya ,inputnya itu formatDB atau stringIndo atau stringEng
     //harusnya kalau kita pake language id , barti asumsinya cuma angka dengan format DB dan string Indo
     //buat mastikan angkanya itu beneran angka dulu
-    try {
-        let isTyping = false;
-        awal = number;
-
-
-        if (detectFormat(number) != 'database') {
+    let isTyping = false;
+    if (number == null || number == undefined || number == "") return 0;
+    awal = number;
+    console.log(detectFormat(number));
+    if (detectFormat(number) != 'database') {
+        //kalo inputnya ternyata format rupiah
+        if (language == "eng") {
+            //asumsi format rupiah eng ya
             number = number.toString();
-            //kalo inputnya ternyata format rupiah
-            if (language == "eng") {
-                //asumsi format rupiah eng ya
-                if (number.match(/\.$/)) isTyping = true;
+            if (number.match(/\.$/)) isTyping = true;
 
-                number = (number.replace(/[^0-9.]/g, ''));
-            } else {
-                //asumsi rupiah format indo ya
-                if (number.match(/\,$/)) isTyping = true;
-                number = (number.replace(/[^0-9,]/g, '').replace(',', '.'));
+            number = (number.replace(/[^0-9.]/g, ''));
+        } else {
+            number = number.toString();
+            //asumsi rupiah format indo ya
+            if (number.match(/\,$/)) isTyping = true;
+            number = (number.replace(/[^0-9,]/g, '').replace(',', '.'));
 
-            }
         }
-        if (isTyping) return awal;
-
-        decPoint = language == "eng" ? '.' : ',';
-        thousandsSep = language == "eng" ? ',' : '.';
-        if (language == 'id')
-            parts = number.toString().split('.');
-        else
-            parts = number.toString().split(',');
-        console.log(parts);
-        if (parts.length > 1) {
-            if (parts[1].length > 2) {
-                numberKoma = parseFloat("0." + parts[1]);
-                parts[1] = numberKoma.toFixed(2).split('.')[1];
-            }
-        }
-        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandsSep);
-
-        return parts.join(",");
-    } catch (err) {
-        console.log("error format rupiah " + number);
-
     }
+    number = parseFloat(number).toString();
+
+    if (isTyping) return awal;
+    console.log("number=" + number);
+    decPoint = language == "eng" ? '.' : ',';
+    thousandsSep = language == "eng" ? ',' : '.';
+    parts = number.toString().split('.');
+    console.log(parts);
+    if (parts.length > 1) {
+        if (parts[1].length > 2) {
+            numberKoma = parseFloat("0." + parts[1]);
+            parts[1] = numberKoma.toFixed(2).split('.')[1];
+        }
+    }
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandsSep);
+
+    return parts.join(decPoint);
 }
 
 function formatRupiahSimple(number, language = "id") {

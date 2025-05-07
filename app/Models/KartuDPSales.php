@@ -159,13 +159,13 @@ class KartuDPSales extends Model
                 //piutang bertambah
                 $codeDebet = $codeGroup;
                 $codeKredit = $lawanCodeGroup;
-                $amountDebet = $amountMutasi;
-                $amountKredit = 0;
+                $amountDebet = 0;
+                $amountKredit = abs($amountMutasi);
             } else {
                 $codeDebet = $lawanCodeGroup;
                 $codeKredit = $codeGroup;
-                $amountKredit = abs($amountMutasi);
-                $amountDebet = 0;
+                $amountKredit = 0;
+                $amountDebet = $amountMutasi;
             }
             if ($isOtomatisJurnal) {
                 $kredits = [
@@ -199,13 +199,13 @@ class KartuDPSales extends Model
 
                 ]), false);
                 if ($st['status'] == 0) return $st;
-              
+
                 $number = $st['journal_number'];
-                info('success harusnya dari sini journalnya aman'.$number);
+                info('success harusnya dari sini journalnya aman' . $number);
                 $journal = Journal::where('journal_number', $number)->where('code_group', 214000)->first();
-                if(!$journal){
+                if (!$journal) {
                     return ['status' => 0, 'msg' => 'kok aneh journal not found 214000'];
-                }   
+                }
                 $journalID = $journal->id;
             } else {
                 $number = null;
@@ -260,6 +260,15 @@ class KartuDPSales extends Model
             $codeGroup = $request->input('code_group');
             $isOtomatisJurnal = $request->input('is_otomatis_jurnal') ?? 0;
             $chart = ChartAccount::where('code_group', $codeGroup)->first();
+            $invoicePack = SalesOrder::where('sales_order_number', $factur)->first();
+            if (!$invoicePack) {
+                $invoicePack= InvoicePack::where('invoice_number', $factur)->first();
+
+                $tokoid = null;
+
+            } else {
+                $tokoid = $invoicePack->toko_id;
+            }
             $desc = $request->input('description');
             if (!$chart) {
                 throw new \Exception('chart not found');
@@ -283,6 +292,7 @@ class KartuDPSales extends Model
                         'amount' => abs($amountBayar),
                         'reference_id' => null,
                         'reference_type' => null,
+                        'toko_id'=>$tokoid,
                     ],
                 ];
                 $debets = [
@@ -292,6 +302,7 @@ class KartuDPSales extends Model
                         'amount' => abs($amountBayar),
                         'reference_id' => null,
                         'reference_type' => null,
+                        'toko_id'=>$tokoid,
                     ],
                 ];
                 $st = JournalController::createBaseJournal(new Request([
@@ -306,9 +317,9 @@ class KartuDPSales extends Model
                 ]), false);
                 if ($st['status'] == 0) return $st;
                 $number = $st['journal_number'];
-                info('success harusnya dari sini journalnya aman'.$number);
+                info('success harusnya dari sini journalnya aman' . $number);
                 $journal = Journal::where('journal_number', $number)->where('code_group', 214000)->first();
-                if(!$journal){
+                if (!$journal) {
                     return ['status' => 0, 'msg' => 'kok aneh journal not found 214000'];
                 }
                 $journalID = $journal->id;
