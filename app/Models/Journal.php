@@ -193,6 +193,7 @@ class Journal extends Model
                         }
                     }
                 }
+                info('success creating journal'.$codeGroup);
                 $journal->verifyJournal();
             } catch (Throwable $e) {
                 return [

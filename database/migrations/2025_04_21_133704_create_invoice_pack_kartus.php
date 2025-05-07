@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->integer('book_journal_id');
             $table->integer('invoice_pack_id');
+            $table->integer('sales_order_id')->nullable();
             $table->string('invoice_number');
             $table->string('kartu_type')->nullable();
             $table->integer('kartu_id')->nullable();

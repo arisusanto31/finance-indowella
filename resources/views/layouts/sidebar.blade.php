@@ -120,12 +120,12 @@
 
 
 
-        
+
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text ">DATA</span>
         </li>
 
-      
+
         <li class="menu-item">
             <a href="#" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-id-card fs-6 me-2" style="margin-right: 10px;"></i>
@@ -153,9 +153,28 @@
                     </a>
                 </li>
                 <li class="menu-item">
+                    <a href="{{url('admin/kartu/kartu-dp-sales/main') }}" class="menu-link">
+                        <!-- <i class="menu-icon tf-icons bx bx-credit-card mr-2 fs-6 me-2" style="margin-right: 10px;"></i> -->
+                        <div data-i18n="Accordion">Kartu DP Sales</div>
+                    </a>
+                </li>
+
+                <li class="menu-item">
                     <a href="{{url('admin/kartu/kartu-stock/main') }}" class="menu-link">
                         <!-- <i class="menu-icon tf-icons bx bx-package mr-2 fs-6 me-2" style="margin-right: 10px;"></i> -->
                         <div data-i18n="Accordion">Kartu Stock</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{url('admin/kartu/kartu-bdp/main') }}" class="menu-link">
+                        <!-- <i class="menu-icon tf-icons bx bx-package mr-2 fs-6 me-2" style="margin-right: 10px;"></i> -->
+                        <div data-i18n="Accordion">Kartu BDP</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{url('admin/kartu/kartu-bahan-jadi/main') }}" class="menu-link">
+                        <!-- <i class="menu-icon tf-icons bx bx-package mr-2 fs-6 me-2" style="margin-right: 10px;"></i> -->
+                        <div data-i18n="Accordion">Kartu Bahan Jadi</div>
                     </a>
                 </li>
             </ul>
@@ -200,7 +219,15 @@
             </a>
             <ul class="menu-sub">
                 <li class="menu-item">
-                    <a href="{{url('admin/invoice/invoice-sales') }}"class="menu-link">
+                    <a href="{{url('admin/invoice/sales-order') }}" class="menu-link">
+                        <!-- <i class="menu-icon tf-icons bx bx-building mr-2 fs-6 me-2" style="margin-right: 10px;"></i> -->
+                        <div data-i18n="Accordion">Sales Order</div>
+                    </a>
+                </li>
+            </ul>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="{{url('admin/invoice/invoice-sales') }}" class="menu-link">
                         <!-- <i class="menu-icon tf-icons bx bx-building mr-2 fs-6 me-2" style="margin-right: 10px;"></i> -->
                         <div data-i18n="Accordion">Invoice Sales</div>
                     </a>
@@ -249,33 +276,33 @@
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="{{url('admin/master/stock/main')}}"  class="menu-link">
+                    <a href="{{url('admin/master/stock/main')}}" class="menu-link">
                         <div data-i18n="stock">Stock</div>
                     </a>
                 </li>
 
-                </li>
-            </ul>
         </li>
+    </ul>
+    </li>
 
 
 
 
 
-        <!-- Misc -->
-        <li class="menu-header small text-uppercase"><span class="menu-header-text">Profile</span></li>
+    <!-- Misc -->
+    <li class="menu-header small text-uppercase"><span class="menu-header-text">Profile</span></li>
 
-        <li class="menu-item">
-            <a
-                href=""
-                onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
-                target="_blank"
-                class="menu-link">
-                <i class="menu-icon tf-icons bx bx-log-out"></i>
-                <div data-i18n="Documentation">Logout Buku</div>
-            </a>
-            <form id="logout-form" action="{{ url('book/logout-jurnal') }}" method="POST" style="display: none;">{{ csrf_field() }}
-            </form>
-        </li>
+    <li class="menu-item">
+        <a
+            href=""
+            onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
+            target="_blank"
+            class="menu-link">
+            <i class="menu-icon tf-icons bx bx-log-out"></i>
+            <div data-i18n="Documentation">Logout Buku</div>
+        </a>
+        <form id="logout-form" action="{{ url('book/logout-jurnal') }}" method="POST" style="display: none;">{{ csrf_field() }}
+        </form>
+    </li>
     </ul>
 </aside>

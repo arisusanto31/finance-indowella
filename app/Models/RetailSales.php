@@ -10,4 +10,6 @@ class RetailSales extends Model
     protected $connection = "tokoSql";
     protected $table= 'transactions';
     public $timestamps = true;
+
+    
 }

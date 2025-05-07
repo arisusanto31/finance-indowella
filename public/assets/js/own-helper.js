@@ -328,9 +328,14 @@ function swalConfirmAndSubmit({ url, data, onSuccess = null, successText = "Berh
                         if (typeof onSuccess === "function") onSuccess(res);
                     });
                 } else {
-                    return Promise.reject(res.msg || "Gagal menyimpan data");
+
+                    return Promise.reject(res.msg || "hehe error ini lur");
                 }
             }).catch(err => {
+                console.log("something error");
+                if (typeof err == "object") {
+                    err = "error di server";
+                }
                 Swal.showValidationMessage(err || "Terjadi kesalahan!");
             });
         }

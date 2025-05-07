@@ -22,9 +22,14 @@ use App\Http\Controllers\{
     InvoiceSaleController,
     InvoicePurchaseController,
     InventoryController,
+    KartuBahanJadiController,
+    KartuBDPController,
+    KartuDPSalesController,
+    SalesOrderController,
     TokoController
 };
 use App\Models\Journal;
+use App\Models\SalesOrder;
 
 Route::get('/', fn() => redirect('/login'));
 Route::get('/phpinfo', fn() => phpinfo());
@@ -137,6 +142,25 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('get-mutasi-keluar', [KartuStockController::class, 'getMutasiKeluar'])->name('get-mutasi-keluar');
         });
 
+        Route::prefix('kartu-bdp')->name('kartu-bdp.')->group(function () {
+            Route::resource('main', KartuBDPController::class);
+            Route::post('mutasi-store', [KartuBDPController::class, 'mutasiStore'])->name('mutasi-store');
+            Route::get('create-mutasi-masuk', [KartuBDPController::class, 'createMutasiMasuk'])->name('create-mutasi-masuk');
+            Route::get('create-mutasi-keluar', [KartuBDPController::class, 'createMutasiKeluar'])->name('create-mutasi-keluar');
+            Route::get('get-summary', [KartuBDPController::class, 'getSummary'])->name('get-summary');
+            Route::get('get-mutasi-masuk', [KartuBDPController::class, 'getMutasiMasuk'])->name('get-mutasi-masuk');
+            Route::get('get-mutasi-keluar', [KartuBDPController::class, 'getMutasiKeluar'])->name('get-mutasi-keluar');
+        });
+
+        Route::prefix('kartu-bahan-jadi')->name('kartu-bahan-jadi.')->group(function () {
+            Route::resource('main', KartuBahanJadiController::class);
+            Route::post('mutasi-store', [KartuBahanJadiController::class, 'mutasiStore'])->name('mutasi-store');
+            Route::get('create-mutasi-masuk', [KartuBahanJadiController::class, 'createMutasiMasuk'])->name('create-mutasi-masuk');
+            Route::get('create-mutasi-keluar', [KartuBahanJadiController::class, 'createMutasiKeluar'])->name('create-mutasi-keluar');
+            Route::get('get-summary', [KartuBahanJadiController::class, 'getSummary'])->name('get-summary');
+            Route::get('get-mutasi-masuk', [KartuBahanJadiController::class, 'getMutasiMasuk'])->name('get-mutasi-masuk');
+            Route::get('get-mutasi-keluar', [KartuBahanJadiController::class, 'getMutasiKeluar'])->name('get-mutasi-keluar');
+        });
         Route::prefix('kartu-hutang')->name('kartu-hutang.')->group(function () {
             Route::resource('main', KartuHutangController::class);
             Route::post('create-mutation', [KartuHutangController::class, 'createMutation'])->name('create-mutation');
@@ -153,6 +177,23 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('get-summary', [KartuPiutangController::class, 'getSummary'])->name('get-summary');
             Route::get('show-detail/{id}', [KartuPiutangController::class, 'showDetail'])->name('show-detail');
             Route::get('search-link-journal', [KartuPiutangController::class, 'searchLinkJournal'])->name('search-link-journal');
+        });
+
+        Route::prefix('kartu-piutang')->name('kartu-piutang.')->group(function () {
+            Route::resource('main', KartuPiutangController::class);
+            Route::post('create-mutation', [KartuPiutangController::class, 'createMutation'])->name('create-mutation');
+            Route::post('create-pelunasan', [KartuPiutangController::class, 'createPelunasan'])->name('create-pelunasan');
+            Route::get('get-summary', [KartuPiutangController::class, 'getSummary'])->name('get-summary');
+            Route::get('show-detail/{id}', [KartuPiutangController::class, 'showDetail'])->name('show-detail');
+            Route::get('search-link-journal', [KartuPiutangController::class, 'searchLinkJournal'])->name('search-link-journal');
+        });
+        Route::prefix('kartu-dp-sales')->name('kartu-dp-sales.')->group(function () {
+            Route::resource('main', KartuDPSalesController::class);
+            Route::post('create-mutation', [KartuDPSalesController::class, 'createMutation'])->name('create-mutation');
+            Route::post('create-pelunasan', [KartuDPSalesController::class, 'createPelunasan'])->name('create-pelunasan');
+            Route::get('get-summary', [KartuDPSalesController::class, 'getSummary'])->name('get-summary');
+            Route::get('show-detail/{id}', [KartuDPSalesController::class, 'showDetail'])->name('show-detail');
+            Route::get('search-link-journal', [KartuDPSalesController::class, 'searchLinkJournal'])->name('search-link-journal');
         });
     });
 
@@ -225,6 +266,10 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::post('create-claim-pembelian', [InvoicePackController::class, 'createClaimPembelian'])->name('create-claim-pembelian');
         Route::post('create-claim-penjualan', [InvoicePackController::class, 'createClaimPenjualan'])->name('create-claim-penjualan');
         Route::get('open-import/{id}', [InvoiceSaleController::class, 'openImport'])->name('open-import');
+
+        Route::get('sales-order', [SalesOrderController::class, 'index'])->name('sales-order.index');
+        Route::post('sales-order-store', [SalesOrderController::class, 'store'])->name('sales-order.store');
+        Route::get('sales-open-import/{id}', [SalesOrderController::class, 'openImport'])->name('sales-open-import');
     });
 });
 

@@ -1,5 +1,5 @@
 <div class="modal-header">
-    <h5 class="modal-title" id="exampleModalLabel">Detail Invoice <span class="fs-8 px-2 rounded-1 bg-primary text-white"> lalaa </span></h5>
+    <h5 class="modal-title" id="exampleModalLabel">Import sales order </h5>
 </div>
 <div class="modal-body">
    

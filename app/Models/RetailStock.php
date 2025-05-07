@@ -64,4 +64,9 @@ class RetailStock extends Model
 
         return $stocks;
     }
+
+    public function getUnits()
+    {
+        return ManufUnit::where('retail_stock_id', $this->id)->get();
+    }
 }

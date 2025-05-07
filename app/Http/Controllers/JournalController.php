@@ -274,6 +274,7 @@ class JournalController extends Controller
 
             foreach ($debets as $debet) {
                 self::addExpireTimeLocks($allLocks);
+
                 $st = Journal::generateJournal(new Request([
                     'journal_number' => $theJournalNumber,
                     'code_group' => $debet['code_group'],
@@ -334,6 +335,7 @@ class JournalController extends Controller
 
             DB::afterCommit(function () use ($allLocks, $allJournals, $theJournalNumber) {
                 self::releaseLocks($allLocks);
+                info('recalculate journal ' . $theJournalNumber);
                 foreach ($allJournals as $thej) {
                     $journal = Journal::find($thej->id);
                     if ($journal->is_backdate == 1) {

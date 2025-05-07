@@ -119,15 +119,51 @@ class InvoiceSaleController extends Controller
         if (!$book) {
             return ['status' => 0, 'msg' => 'Book tidak ditemukan'];
         }
+        $month = getInput("month") ? getInput("month") : date('m');
+        $year = getInput("year") ? getInput("year") : date('Y');
+
+
         $defaultDB = config('database.connections.mysql.database');
         $saleModel = $book->name == 'Buku Toko' ? RetailSales::class : ManufSales::class;
-        $columnString = $book->name == 'Buku Toko' ? 'transactions as tr' : 'invoice_details as tr';
-        $sales = $saleModel::from($columnString)
+
+        $sales = $saleModel::from('transactions as tr')
             ->leftJoin($defaultDB . '.invoice_sale_details as inv', function ($join) use ($saleModel) {
                 $join->on('tr.id', '=', 'inv.reference_id')
                     ->where('inv.reference_type', $saleModel);
-            })->whereNull('inv.id')->get();
-            return $sales;
+            })->whereNull('inv.id')->whereMonth('tr.created_at', $month)->whereYear('tr.created_at', $year);
+        if ($book->name == 'Buku Toko') {
+            // la disini ngambil data yang dari toko aja yaa
+            $sales = $sales->where('tr.is_ppn', 1)->select(
+                'tr.id as reference_id',
+                DB::raw('"App\Models\RetailSales" as reference_type'),
+                'tr.quantity',
+                'tr.unit',
+                'tr.recent_selling_price as price',
+                'tr.total',
+                'tr.toko_id',
+                'tr.stock_id as ref_stock_id',
+                DB::raw(' "App\Models\RetailStock" as ref_stock_type'),
+                'tr.stock_name',
+                'tr.is_ppn',
+                'tr.is_wajib_lapor'
+            );
+        } else {
+            $sales = $sales->where('tr.is_ppn', 1)->select(
+                'tr.id as reference_id',
+                DB::raw('"App\Models\ManufSales" as reference_type'),
+                'tr.quantity',
+                'tr.unit_info',
+                'tr.recent_selling_price as price',
+                'tr.total',
+                'tr.toko_id',
+                'tr.stock_id as ref_stock_id',
+                DB::raw(' "App\Models\Stock" as ref_stock_type'),
+                'tr.stock_name',
+                'tr.is_ppn',
+                'tr.is_wajib_lapor'
+            );
+        }
+        $sales = $sales->get();
         $view = view('invoice.modal._invoice_sale_import');
         $view->sales = $sales;
         return $view;

@@ -5,11 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
-class InvoiceSaleDetail extends Model
+class SalesOrderDetail extends Model
 {
+    //
+
+    protected $table = 'sales_order_details';
+    public $timestamps = true;
     protected $fillable = [
-        'invoice_number',
-        'invoice_pack_id',
+        'sales_order_number',
+        'sales_order_id',
         'book_journal_id',
         'stock_id',
         'quantity',
@@ -21,13 +25,21 @@ class InvoiceSaleDetail extends Model
         'toko_id',
         'reference_id',
         'reference_type'
-
     ];
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'customer_id', 'id');
+    }
+    public function stock()
+    {
+        return $this->belongsTo(Stock::class, 'stock_id', 'id');
+    }
 
     protected static function booted()
     {
         static::addGlobalScope('journal', function ($query) {
-            $from = $query->getQuery()->from ?? 'invoice_sale_details'; // untuk dukung alias `j` kalau pakai from('journals as j')
+            $from = $query->getQuery()->from ?? 'sales_order_details'; // untuk dukung alias `j` kalau pakai from('journals as j')
             if (Str::contains($from, ' as ')) {
                 [$table, $alias] = explode(' as ', $from);
                 $alias = trim($alias);
@@ -40,20 +52,5 @@ class InvoiceSaleDetail extends Model
                     ->orWhere("{$alias}.book_journal_id", session('book_journal_id'));
             });
         });
-
-        static::updating(function ($model) {
-            
-        });
-    }
-
-    public function stock()
-
-    {
-        return $this->belongsTo(\App\Models\Stock::class, 'stock_id', 'id');
-    }
-
-    public function customer()
-    {
-        return $this->belongsTo(\App\Models\Customer::class, 'customer_id');
     }
 }

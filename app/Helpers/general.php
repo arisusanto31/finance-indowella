@@ -141,9 +141,7 @@ if (!function_exists('format_db')) {
             } else {
                 // Format Indonesia: 1.234.567,89 → 1234567.89
                 //harus dicek dulu , kalau sudah integer g usah, kalau string baru di proses nih
-                if (is_numeric($formatted)) {
-                    return (string) $formatted;
-                }
+                $formatted = strval($formatted);
                 $formatted = str_replace(' ', '', $formatted); // Hilangkan spasi
                 $clean = str_replace('.', '', $formatted);      // Hilangkan pemisah ribuan
                 $clean = str_replace(',', '.', $clean);         // Ganti koma (desimal) jadi titik

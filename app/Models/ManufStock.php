@@ -70,4 +70,8 @@ class ManufStock extends Model
 
         return $stocks;
     }
+    public function getUnits()
+    {
+        return $this->units;
+    }
 }

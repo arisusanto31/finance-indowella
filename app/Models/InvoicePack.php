@@ -20,7 +20,9 @@ class InvoicePack extends Model
         'invoice_date',
         'total_price',
         'status',
-        'toko_id'
+        'toko_id',
+        'reference_id',
+        'reference_type',
     ];
 
 
@@ -47,7 +49,6 @@ class InvoicePack extends Model
             $val['type_kartu'] = $val->kartu_type ? explode('\\', $val->kartu_type)[2] : 'Kartu lain-lain';
             $val['code_group_name'] = $val->journal->chartAccount->name;
             return $val;
-            
         })->groupBy('type_kartu');
         return $kartus;
     }
