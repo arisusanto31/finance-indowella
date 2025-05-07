@@ -28,7 +28,8 @@ class CustomerController extends Controller
         $customer->deleted_at = null;
         $customer->save();
 
-        return redirect()->route('customers.trashed')->with('success', 'Customer berhasil dipulihkan.');
+        return redirect()->route('customer.trashed')->with('success', 'Customer berhasil dipulihkan!');
+
     }
 
     public function index()
@@ -103,7 +104,10 @@ class CustomerController extends Controller
             'npwp',
         ]));
 
-        return redirect()->route('customer.index')->with('success', 'Customer berhasil diperbarui!');
+        return redirect()->route('customer.main.index')->with('success', 'Customer berhasil diperbarui!');
+
+
+
     }
 
     public function getItem()
@@ -119,6 +123,16 @@ class CustomerController extends Controller
 
         return ['results' => $cust];
     }
+
+
+    public function show($id)
+{
+    $customer = Customer::findOrFail($id);
+
+    return view('master.customer-edit', compact('customer'));
+
+}
+
 } 
 
 

@@ -31,8 +31,9 @@
     }
   </style>
 </head>
-<body class="bg-blue-200 min-h-screen flex items-center justify-center p-6">
+<body class="bg-blue-200 min-h-screen flex flex-col items-center justify-start p-6">
   <div class="bg-white rounded-md w-full max-w-5xl shadow-md">
+
     <!-- Header -->
     <header class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
       <div class="flex items-center space-x-3">
@@ -41,13 +42,29 @@
             <path d="M12 3v18m9-9H3" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
         </div>
-        <span class="font-semibold text-gray-800 text-base select-none">Profile Fiinance Indowella</span>
+        <span class="font-semibold text-gray-800 text-base select-none">Profile Finance Indowella</span>
       </div>
-      <div class="flex items-center space-x-4">
+
+      <div class="flex items-center space-x-4 relative overflow-visible">
         <span class="font-semibold text-gray-800 text-base select-none">{{ user()->email }}</span>
+
         <div class="relative">
-          <img class="w-8 h-8 rounded-full object-cover" src="https://storage.googleapis.com/a1aa/image/043db412-f976-4810-e807-4bc5d5e1b256.jpg" alt="Profile" />
-          <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-400 border-2 border-white rounded-full"></span>
+          <button onclick="toggleDropdown()" class="focus:outline-none">
+            <img class="w-8 h-8 rounded-full object-cover" src="https://storage.googleapis.com/a1aa/image/043db412-f976-4810-e807-4bc5d5e1b256.jpg" alt="Profile" />
+            <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-400 border-2 border-white rounded-full"></span>
+          </button>
+
+          <!-- Dropdown menu -->
+          <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg py-2 z-50 transition-all duration-300">
+          
+            <form method="POST" action="{{ route('logout') }}">
+              @csrf
+              <button type="submit" class="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 flex items-center space-x-2">
+                  <i class="bi bi-box-arrow-right"></i>
+                  <span>Logout</span>
+              </button>
+          </form>          
+          </div>
         </div>
       </div>
     </header>
@@ -72,6 +89,7 @@
           <label class="block font-semibold text-gray-700 mb-1">E-mail</label>
           <input class="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-700" name="email" type="email" value="{{ user()->email }}" readonly />
         </div>
+      
       </form>
     </section>
   </div>
@@ -111,7 +129,7 @@
   </div>
 </div>
 
-
+@if(user()->can('setting_profile'))
 
 <div class="mt-10 px-6">
   <div class="bg-white rounded-lg shadow-md p-6 space-y-8">
@@ -176,10 +194,14 @@
 </div>
 </main>
   </div>
+  @endif
 
   <script>
   const defaultImg = "https://via.placeholder.com/100";
 
+  function toggleDropdown() {
+    document.getElementById('dropdownMenu').classList.toggle('hidden');
+}
   function previewFoto(input) {
     if (input.files && input.files[0]) {
       const reader = new FileReader();

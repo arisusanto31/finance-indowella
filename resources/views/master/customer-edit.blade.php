@@ -1,9 +1,13 @@
+<form action="{{ route('customer.main.update', $customer->id) }}" method="POST">
+  @csrf
+  @method('PUT')
 <x-app-layout>
+
   <!-- Modal Edit untuk Customer -->
 <div class="modal fade" id="editModal{{ $customer->id }}" tabindex="-1" aria-labelledby="editModalLabel{{ $customer->id }}" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
-        <form action="{{ route('customers.update', $customer->id) }}" method="POST">
+        <form action="{{ route('customer.main.update', $customer->id) }}" method="POST">
           @csrf
           @method('PUT')
           <div class="modal-header">

@@ -76,6 +76,26 @@ class OtherPersonController extends Controller
         ];
     }
 
+    public function update(Request $request, $id)
+    {
+        $otherPerson = OtherPerson::findOrFail($id);
+    
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'alamat' => 'nullable|string',
+            'no_hp' => 'nullable|string|max:20',
+        ]);
+    
+        $otherPerson->update([
+            'name' => $request->nama,
+            'address' => $request->alamat,
+            'phone' => $request->no_hp,
+        ]);
+    
+        return redirect()->route('other-person.main.index')
+        ->with('success', 'Data berhasil diperbarui!');
+}
+    
     public function destroy($id)
     {
         $supplier = OtherPerson::find($id);
@@ -98,9 +118,18 @@ class OtherPersonController extends Controller
     public function restore($id)
     {
         $person = OtherPerson::withTrashed()->findOrFail($id);
-        $person->update(['is_deleted' => 0]); // Optional, jika kamu pakai kolom is_deleted
+        $person->update(['is_deleted' => 0]); 
         $person->restore();
 
         return redirect()->route('other-persons.index')->with('success', 'Data berhasil dipulihkan.');
     }
+ 
+    public function edit($id)
+{
+    $otherPerson = OtherPerson::findOrFail($id);
+    return view('master.modal._edit_other-person', compact('otherPerson'));
 }
+
+
+}
+

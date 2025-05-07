@@ -24,10 +24,11 @@
                 <td>{{ $customer->npwp }}</td>
                 <td>{{ $customer->purchase_info }}</td>
                 <td>
-                    <form action="{{ route('customers.restore', $customer->id) }}" method="POST">
+                    <form action="{{ route('customer.restore', $customer->id) }}" method="POST">
                         @csrf
-                        <button class="btn btn-sm btn-success">Pulihkan</button>
+                        <button type="submit" class="btn btn-success btn-sm">Pulihkan</button>
                     </form>
+                    
                 </td>
             </tr>
             @empty

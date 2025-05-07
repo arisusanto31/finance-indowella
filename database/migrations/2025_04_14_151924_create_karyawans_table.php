@@ -16,6 +16,7 @@ return new class extends Migration {
             $table->string('jabatan');
             $table->date('date_masuk');
             $table->date('date_keluar');
+            $table->boolean('is_deleted')->default(false);
             $table->timestamps();
         });
     }
