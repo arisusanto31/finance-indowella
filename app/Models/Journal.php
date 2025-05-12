@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Jobs\CreateKartuUtangJob;
+use App\Services\LockManager;
 use CustomLogger;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -104,7 +105,7 @@ class Journal extends Model
     }
     // 'reference_id' => $transaction->id,
     // 'reference_type' => get_class($transaction),
-    public static function generateJournal(Request $request)
+    public static function generateJournal(Request $request, ?LockManager $lockManager = null)
     {
         $debet = $request->input('amount_debet');
         $kredit = $request->input('amount_kredit');
@@ -129,11 +130,11 @@ class Journal extends Model
         $coaID = $chartAccount->id;
         $journal_number = $request->input('journal_number');
         $name = 'generate-journal' . $codeGroup;
-        $lock = Cache::lock($name, 50);
+
 
         // CustomLogger::log('journal', 'info', $journal_number . ' make lock ' . $name);
         try {
-            $lock->block(20);
+            $lockManager->acquire($name, 50, 20);
             Redis::expire($name, 50);
             try {
                 // CustomLogger::log('journal', 'info', $journal_number . ' get lock ' . $name);
@@ -193,22 +194,22 @@ class Journal extends Model
                         }
                     }
                 }
-                info('success creating journal'.$codeGroup);
+                info('success creating journal' . $codeGroup);
                 $journal->verifyJournal();
             } catch (Throwable $e) {
                 return [
                     'status' => 0,
                     'msg' => $e->getMessage(),
-                    'lock' => $lock,
-                    'lock_name' => $name
+                    // 'lock' => $lock,
+                    // 'lock_name' => $name
                 ];
             }
         } catch (LockTimeoutException $e) {
             return [
                 'status' => 0,
                 'msg' => 'jurnal tidak berhasil masuk, antrian timeout',
-                'lock' => $lock,
-                'lock_name' => $name
+                // 'lock' => $lock,
+                // 'lock_name' => $name
             ];
         } finally {
             // $lock->release();
@@ -216,8 +217,8 @@ class Journal extends Model
         return [
             'status' => 1,
             'msg' => $journal,
-            'lock' => $lock,
-            'lock_name' => $name,
+            // 'lock' => $lock,
+            // 'lock_name' => $name,
 
         ];
     }
@@ -230,6 +231,20 @@ class Journal extends Model
 
             if ($this->reference_model == 'App\Models\KartuStock') {
                 $ks = KartuStock::where('journal_id', $this->id)->get();
+                info(abs(collect($ks)->sum('mutasi_rupiah_total')) . '==' . abs($this->amount_debet - $this->amount_kredit));
+                if (abs(collect($ks)->sum('mutasi_rupiah_total')) == abs($this->amount_debet - $this->amount_kredit)) {
+                    $this->verified_by = 1;
+                }
+            }
+            if ($this->reference_model == 'App\Models\KartuBDP') {
+                $ks = KartuBDP::where('journal_id', $this->id)->get();
+                info(abs(collect($ks)->sum('mutasi_rupiah_total')) . '==' . abs($this->amount_debet - $this->amount_kredit));
+                if (abs(collect($ks)->sum('mutasi_rupiah_total')) == abs($this->amount_debet - $this->amount_kredit)) {
+                    $this->verified_by = 1;
+                }
+            }
+            if ($this->reference_model == 'App\Models\KartuBahanJadi') {
+                $ks = KartuBahanJadi::where('journal_id', $this->id)->get();
                 info(abs(collect($ks)->sum('mutasi_rupiah_total')) . '==' . abs($this->amount_debet - $this->amount_kredit));
                 if (abs(collect($ks)->sum('mutasi_rupiah_total')) == abs($this->amount_debet - $this->amount_kredit)) {
                     $this->verified_by = 1;
@@ -258,6 +273,18 @@ class Journal extends Model
                 $ks = KartuPrepaidExpense::where('journal_id', $this->id)->get();
                 info(abs(collect($ks)->sum('amount')) . '==' . abs($this->amount_debet - $this->amount_kredit));
                 if (abs(collect($ks)->sum('amount')) == abs($this->amount_debet - $this->amount_kredit)) {
+                    $this->verified_by = 1;
+                }
+            } else if ($this->reference_model == 'App\Models\KartuDPSales') {
+                $ks = KartuDPSales::where('journal_id', $this->id)->get();
+                info(abs(collect($ks)->sum('amount_debet') - collect($ks)->sum('amount_kredit')) . '==' . abs($this->amount_debet - $this->amount_kredit));
+                if (abs(collect($ks)->sum('amount_debet') - collect($ks)->sum('amount_kredit')) == abs($this->amount_debet - $this->amount_kredit)) {
+                    $this->verified_by = 1;
+                }
+            } else if ($this->reference_model == 'App\Models\InvoiceSaleDetail') {
+                $ks = InvoiceSaleDetail::where('journal_id', $this->id)->get();
+                info(abs(collect($ks)->sum('total')) . '==' . abs($this->amount_debet - $this->amount_kredit));
+                if (abs(collect($ks)->sum('total')) == abs($this->amount_debet - $this->amount_kredit)) {
                     $this->verified_by = 1;
                 }
             }

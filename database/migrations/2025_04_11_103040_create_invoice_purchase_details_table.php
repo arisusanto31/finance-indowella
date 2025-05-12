@@ -27,7 +27,6 @@ return new class extends Migration
             $table->unsignedBigInteger('supplier_id');
             $table->integer('reference_id')->nullable();
             $table->string('reference_type')->nullable();
-            $table->unique(['invoice_number', 'stock_id']);
             $table->timestamps();
         });
     }

@@ -83,7 +83,7 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col mb-3">
-                            <label for="nameBasic" class="form-label">Nomer SO/Invoice</label>
+                            <label for="nameBasic" class="form-label">Nomer Sales Order</label>
                             <input type="text" id="factur" class="form-control" placeholder="Nomer Invoice" />
                         </div>
                     </div>
@@ -161,8 +161,14 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col mb-3">
-                            <label for="nameBasic" class="form-label">Nomer Invoice</label>
+                            <label for="nameBasic" class="form-label">Nomer Sales Order</label>
                             <input type="text" id="pelunasan-factur" class="form-control" placeholder="Nomer Invoice" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col mb-3">
+                            <label for="nameBasic" class="form-label">Nomer Invoice</label>
+                            <input type="text" id="pelunasan-invoice_number" class="form-control" placeholder="Nomer Invoice" />
                         </div>
                     </div>
                     <div class="row">
@@ -225,7 +231,7 @@
                           <span class="visually-hidden">Loading...</span>
                         </div> storing data..`);
             data = {
-                package_number: $('#factur').val(),
+                sales_order_number: $('#factur').val(),
                 amount_mutasi: formatDB($('#amount_mutasi').val(), 'id'),
                 person_id: $('#person_id option:selected').val(),
                 person_type: $('#person_type option:selected').val(),
@@ -271,7 +277,8 @@
                 url: '{{url("admin/kartu/kartu-dp-sales/create-pelunasan")}}',
                 method: 'post',
                 data: {
-                    package_number: $('#pelunasan-factur').val(),
+                    sales_order_number: $('#pelunasan-factur').val(),
+                    invoice_pack_number: $('#pelunasan-invoice_number').val(),
                     amount_bayar: formatDB($('#pelunasan-amount').val(), 'id'),
                     person_id: $('#pelunasan-person_id option:selected').val(),
                     account_bayar: $('#pelunasan-akun-bayar option:selected').val(),
@@ -359,7 +366,7 @@
                                     <td class="textright">${formatRupiah(data.saldo)}</td>
                                     <td class="textright">${formatRupiah(saldoAkhir)}</td>      
                                       <td>
-                                        <button type="button" class="btn btn-primary btn-sm" onclick="showDetailKartuPiutang('${data.package_number}')"><i class="fas fa-eye"></i> Detail</button>
+                                        <button type="button" class="btn btn-primary btn-sm" onclick="showDetailKartu('${data.package_number}')"><i class="fas fa-eye"></i> detail</button>
                                     </td>                          
                                 </tr>
                             `;
@@ -375,8 +382,26 @@
             });
         }
 
-        function showDetailKartuPiutang(factur) {
+        function showDetailKartu(factur) {
             showDetailOnModal('{{url("admin/kartu/kartu-dp-sales/show-detail")}}/' + factur, 'xl');
+
+        }
+
+        function refreshKartuDP(id) {
+            $.ajax({
+                url: '{{url("admin/kartu/kartu-dp-sales/refresh")}}/' + id,
+                method: 'get',
+                success: function(res) {
+                    if (res.status == 1) {
+                        swalInfo('success', 'berhasil refresh', 'success');
+                    } else {
+                        swalInfo('error', 'gagal refresh', 'error');
+                    }
+                },
+                error: function(res) {
+                    swalInfo('error', 'something error', 'error');
+                }
+            });
         }
         setTimeout(getSummary, 100);
     </script>

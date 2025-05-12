@@ -18,9 +18,9 @@
                 <div class="mb-3 mt-2">
                     <button type="button" class="btn btn-success" onclick="addrow()" id="addDebit">+Tambah</button>
                     @if(book()->name=="Buku Toko")
-                    <button type="button" class="btn btn-success" onclick="importData('{{book()->id}}')" id="btn-import">Import dari Toko</button>
+                    <button type="button" class="btn btn-success" onclick="openImport('{{book()->id}}')" id="btn-import">Import dari Toko</button>
                     @else
-                    <button type="button" class="btn btn-success" onclick="importData('{{book()->id}}')" id="btn-import">Import dari Manuf</button>
+                    <button type="button" class="btn btn-success" onclick="openImport('{{book()->id}}')" id="btn-import">Import dari Manuf</button>
                     @endif
                 </div>
 
@@ -62,70 +62,77 @@
 
     @if ($invoices->isNotEmpty())
     <div class="card mb-4 shadow p-3">
+
         <h5 class="text-primary-dark card-header"> 📁 <strong>DAFTAR INVOICE </strong> </h5>
-        <table class="table table-bordered">
-            <thead class="table-primary text-center">
-                <tr>
-                    <th>No</th>
-                    <th>Invoice</th>
-                    <th>Customer</th>
-                    <th>Produk</th>
-                    <th>Qty</th>
-                    <th>Unit</th>
-                    <th>Harga Satuan</th>
-                    <th>Diskon</th>
-                    <th>Sub-Total</th>
-                    <th>Total</th>
-                    <th> Aksi nya say</th>
-                </tr>
-            </thead>
-            <tbody>
-                @php $no = 1; @endphp
-                @foreach ($invoices as $invoiceNumber => $items)
-                @php
-                $rowspan = $items->count();
-                $invoiceSubtotal = $items->sum(fn($item) => ($item->quantity * $item->price) - $item->discount);
-                @endphp
-
-                @foreach ($items as $index => $item)
-                <tr>
-                    @if ($index === 0)
-                    <td rowspan="{{ $rowspan }}">{{ $no++ }}</td>
-                    <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }}</td>
-                    <td rowspan="{{ $rowspan }}">{{ $item->customer->name ?? '-' }}</td>
-                    @endif
-
-                    <td>{{ $item->stock->name ?? '-' }}</td>
-                    <td class="text-end">{{ $item->quantity }}</td>
-                    <td>{{ $item->unit }}</td>
-                    <td class="text-end">Rp{{ number_format($item->price) }}</td>
-                    <td class="text-end">Rp{{ number_format($item->discount) }}</td>
-
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead class="table-primary text-center">
+                    <tr>
+                        <th>No</th>
+                        <th>Invoice</th>
+                        <th>Customer</th>
+                        <th>Produk</th>
+                        <th>Qty</th>
+                        <th>Unit</th>
+                        <th>Harga Satuan</th>
+                        <th>Diskon</th>
+                        <th>Sub-Total</th>
+                        <th>Total</th>
+                        <th> Aksi nya say</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @php $no = 1; @endphp
+                    @foreach ($invoices as $invoiceNumber => $items)
                     @php
-                    $subtotal = ($item->quantity * $item->price) - $item->discount;
+                    $rowspan = $items->count();
+                    $invoiceSubtotal = $items->sum(fn($item) => ($item->quantity * $item->price) - $item->discount);
                     @endphp
-                    <td class="text-end">Rp{{ number_format($subtotal) }}</td>
 
-                    @if ($index === 0)
-                    <td rowspan="{{ $rowspan }}"><strong>Rp{{ number_format($invoiceSubtotal) }}</strong></td>
-                    @if ($index === 0)
-                    <td rowspan="{{ $rowspan }}">
-                        <a href="javascript:void(lihatDetailInvoice('{{$item->invoice_number}}'))" class="btn btn-sm btn-outline-primary" title="Lihat Invoice">
-                            <i class="fas fa-eye"></i>
-                        </a>
-                        <a href="" class="btn btn-sm btn-outline-primary" title="Edit Invoice">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                    </td>
-                    @endif
+                    @foreach ($items as $index => $item)
+                    <tr>
+                        @if ($index === 0)
+                        <td rowspan="{{ $rowspan }}">{{ $no++ }}</td>
+                        <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }}</td>
+                        <td rowspan="{{ $rowspan }}">{{ $item->customer->name ?? '-' }}</td>
+                        @endif
 
-                    @endif
-                </tr>
-                @endforeach
-                @endforeach
-            </tbody>
-        </table>
+                        <td>{{ $item->stock->name ?? '-' }}</td>
+                        <td class="text-end">{{ $item->quantity }}</td>
+                        <td>{{ $item->unit }}</td>
+                        <td class="text-end">Rp{{ number_format($item->price) }}</td>
+                        <td class="text-end">Rp{{ number_format($item->discount) }}</td>
+
+                        @php
+                        $subtotal = ($item->quantity * $item->price) - $item->discount;
+                        @endphp
+                        <td class="text-end">Rp{{ number_format($subtotal) }}</td>
+
+                        @if ($index === 0)
+                        <td rowspan="{{ $rowspan }}"><strong>Rp{{ number_format($invoiceSubtotal) }}</strong></td>
+                        @if ($index === 0)
+                        <td rowspan="{{ $rowspan }}">
+                            <a href="javascript:void(lihatDetailInvoice('{{$item->invoice_pack_number}}'))" class="btn btn-sm btn-outline-primary" title="Lihat Invoice">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="" class="btn btn-sm btn-outline-primary" title="Edit Invoice">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        </td>
+                        @endif
+
+                        @endif
+                    </tr>
+                    @endforeach
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
     </div>
+
+    <!-- Jika laporan stock external dan internal tercatat jelas selisihnya. maka purchase ppn bisa disetting,
+     menambah ulur tempo menuju pkp. masih banyak yang disiapkan menuju pkp, tapi pembelian dan penjualan ppn sudah
+     akan mencapai batas. penguasaan setting pembelian ppn harus segera learned agar nafas bisa lebih panjang -->
     @else
     <div class="card mb-2 shadow ">
         <h5 class="text-primary-dark card-header"> 📁 <strong>DAFTAR INVOICE </strong> </h5>
@@ -178,9 +185,10 @@
             showDetailOnModal('{{url("admin/invoice/show-detail")}}/' + invoiceNumber, 'xl');
         }
 
-        function importData(bookID){
-            showDetailOnModal('{{url("admin/invoice/open-import")}}/'+bookID,'xl');
+        function openImport(bookID) {
+            showDetailOnModal('{{url("admin/invoice/open-import")}}/' + bookID, 'xl');
         }
+
         function openCardCreate() {
             $('#card-create').toggleClass('open');
             $('#icon-create').toggleClass('open');

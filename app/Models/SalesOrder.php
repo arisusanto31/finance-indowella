@@ -18,13 +18,55 @@ class SalesOrder extends Model
         'status',
         'reference_id',
         'reference_type',
-        
+
     ];
 
-    public function customer(){
-        return $this->belongsTo(Customer::class, 'customer_id', 'id');  
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'customer_id', 'id');
     }
-    public function stock(){
+    public function stock()
+    {
         return $this->belongsTo(Stock::class, 'stock_id', 'id');
+    }
+
+    public function detailKartuInvoices()
+    {
+
+        return $this->hasMany(DetailKartuInvoice::class, 'sales_order_id', 'id');
+    }
+
+    public function getTotalKartu()
+    {
+        $kartus = collect($this->detailKartuInvoices)->map(function ($val) {
+            $val['code_group_name'] = $val->journal->chartAccount->name;
+            $kartu = $val->kartu_type::find($val->kartu_id);
+            if (isset($kartu->amount)) {
+                $val['total'] = $kartu->amount;
+            } else if (isset($kartu->amount_debet)) {
+                $val['total'] = $kartu->amount_debet - $kartu->amount_kredit;
+            } else if (isset($kartu->total_price)) {
+                $val['total'] = $kartu->total_price;
+            } else if (isset($kartu->mutasi_rupiah_total)) {
+                $val['total'] = $kartu->mutasi_rupiah_total;
+            }
+
+            return $val;
+        })->groupBy('code_group_name')->map(function ($val) {
+            return $val->sum('total');
+        });
+
+        return $kartus ?? [];
+    }
+    public function getAllKartu()
+    {
+        $kartus = collect($this->detailKartuInvoices)->map(function ($val) {
+            $val['type_kartu'] = $val->kartu_type ? explode('\\', $val->kartu_type)[2] : 'Kartu lain-lain';
+            $val['code_group_name'] = $val->journal->chartAccount->name;
+
+            return $val;
+        })->groupBy('type_kartu');
+
+        return $kartus ?? [];
     }
 }

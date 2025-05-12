@@ -50,6 +50,6 @@ class InvoicePack extends Model
             $val['code_group_name'] = $val->journal->chartAccount->name;
             return $val;
         })->groupBy('type_kartu');
-        return $kartus;
+        return $kartus??[];
     }
 }

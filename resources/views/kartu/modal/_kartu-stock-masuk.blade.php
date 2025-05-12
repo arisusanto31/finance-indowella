@@ -20,6 +20,20 @@
         </div>
         <div class="row">
             <div class="col mb-3">
+                <label for="nameBasic" class="form-label">Nomer PO</label>
+                <input type="text" name="purchase_order_number" id="po_number" class="form-control" placeholder="nomer PO" />
+            </div>
+            <div class="col mb-3">
+                <label for="nameBasic" class="form-label">Nomer SO</label>
+                <input type="text" name="sales_order_number" id="so_number" class="form-control" placeholder="nomer SO" />
+            </div>
+            <div class="col mb-3">
+                <label for="nameBasic" class="form-label">Nomer INV</label>
+                <input type="text" name="invoice_pack_number" id="inv_number" class="form-control" placeholder="nomer INV" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col mb-3">
                 <label for="akun" class="form-label">Akun Persediaan</label>
                 <select type="text" name="code_group" id="code-group" class="form-control select-coa">
 

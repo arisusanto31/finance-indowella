@@ -8,10 +8,11 @@ use Illuminate\Support\Str;
 class InvoiceSaleDetail extends Model
 {
     protected $fillable = [
-        'invoice_number',
+        'invoice_pack_number',
         'invoice_pack_id',
         'book_journal_id',
         'stock_id',
+        'custom_stock_name',
         'quantity',
         'unit',
         'price',
@@ -41,9 +42,7 @@ class InvoiceSaleDetail extends Model
             });
         });
 
-        static::updating(function ($model) {
-            
-        });
+        static::updating(function ($model) {});
     }
 
     public function stock()

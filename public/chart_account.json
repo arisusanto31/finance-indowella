@@ -414,8 +414,8 @@
         "reference_model": "App\\Models\\KartuStock"
     },
     {
-        "id": 40,
-        "name": "Persediaan Dalam Proses",
+        "id": 160,
+        "name": "Persediaan Bahan Baku",
         "code_group": "140002",
         "account_type": "Aset",
         "parent_id": 5,
@@ -424,6 +424,31 @@
         "level": 2,
         "deleted_at": null,
         "reference_model": "App\\Models\\KartuStock"
+    },
+
+    {
+        "id": 40,
+        "name": "Persediaan Dalam Proses",
+        "code_group": "140003",
+        "account_type": "Aset",
+        "parent_id": 5,
+        "is_deleted": null,
+        "is_child": 1,
+        "level": 2,
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuBDP"
+    },
+    {
+        "id": 161,
+        "name": "Persediaan Barang Jadi",
+        "code_group": "140004",
+        "account_type": "Aset",
+        "parent_id": 5,
+        "is_deleted": null,
+        "is_child": 1,
+        "level": 2,
+        "deleted_at": null,
+        "reference_model": "App\\Models\\KartuBahanJadi"
     },
     {
         "id": 41,
@@ -717,7 +742,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 1,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\InvoiceSaleDetail"
     },
     {
         "id": 69,
@@ -728,7 +754,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 1,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\InvoiceSaleDetail"
     },
     {
         "id": 70,
@@ -1038,7 +1065,7 @@
         "is_child": 1,
         "level": 2,
         "deleted_at": null,
-        "reference_model": "App\\Models\\KartuHutang"
+        "reference_model": "App\\Models\\KartuDPSales"
     },
     {
         "id": 99,
@@ -1545,7 +1572,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 1,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\InvoiceSaleDetail"
     },
     {
         "id": 145,
@@ -1556,7 +1584,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 1,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\InvoiceSaleDetail"
     },
     {
         "id": 146,
@@ -1567,7 +1596,8 @@
         "is_deleted": null,
         "is_child": 1,
         "level": 1,
-        "deleted_at": null
+        "deleted_at": null,
+        "reference_model": "App\\Models\\InvoiceSaleDetail"
     },
     {
         "id": 147,
@@ -1667,18 +1697,6 @@
         "is_child": 1,
         "level": 3,
         "deleted_at": null
-    },
-    {
-        "id": 156,
-        "name": "Persediaan Dalam Perjalanan",
-        "code_group": "140003",
-        "account_type": "Aset",
-        "parent_id": 5,
-        "is_deleted": null,
-        "is_child": 1,
-        "level": 2,
-        "deleted_at": null,
-        "reference_model": "App\\Models\\KartuStock"
     },
     {
         "id": 157,

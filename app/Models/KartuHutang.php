@@ -68,7 +68,6 @@ class KartuHutang extends Model
 
             try {
                 $lock->block(30);
-
                 $amount_debet = $request->input('amount_debet');
                 $amount_kredit = $request->input('amount_kredit');
                 if ($amount_debet < 0) {
@@ -80,23 +79,27 @@ class KartuHutang extends Model
                     $amount_debet = abs($amount_kredit);
                     $amount_kredit = 0;
                 }
-                $facturNumber = $request->input('factur_supplier_number');
+                $invoiceNumber = $request->input('ivoice_pack_number');
+                $PONumber = $request->input('purchase_order_number');
+                $POID = $request->input('purchase_order_id');
+                $invoiceID = $request->input('invoice_pack_id');
                 $realAmount = $amount_debet - $amount_kredit;
                 $lastKartu = KartuHutang::where('person_id', $personID)->where('person_type', $personType)
-                    ->where('factur_supplier_number', $facturNumber)->orderBy('id', 'desc')->first();
+                    ->where('invoice_pack_number', $invoiceNumber)->orderBy('id', 'desc')->first();
                 $lastSaldoPurchase =  $lastKartu ? $lastKartu->amount_saldo_factur : 0;
                 $lastSaldoFactur = $lastSaldoPurchase;
-
-
                 $lastSaldoPerson = KartuHutang::whereIn('id', function ($q) use ($personID, $personType) {
                     $q->from('kartu_hutangs')->where('person_id', $personID)->where('person_type', $personType)
                         ->select(
                             DB::raw('max(id) as maxid'),
-                        )->groupBy('factur_supplier_number');
+                        )->groupBy('invoice_pack_number');
                 })->sum('amount_saldo_factur');
                 $kartu = new KartuHutang();
                 $kartu->type = $request->input('type');
-                $kartu->factur_supplier_number = $facturNumber;
+                $kartu->invoice_pack_number = $invoiceNumber;
+                $kartu->invoice_pack_id = $invoiceID;
+                $kartu->purchase_order_number = $PONumber;
+                $kartu->purchase_order_id = $POID;
                 $kartu->description = $request->input('description');
                 $kartu->amount_saldo_purchase = $lastSaldoPurchase + $realAmount;
                 $kartu->amount_saldo_factur = $lastSaldoFactur + $realAmount;
@@ -147,7 +150,14 @@ class KartuHutang extends Model
         if ($useTransaction)
             DB::beginTransaction();
         try {
-            $factur = $request->input('factur_supplier_number');
+            $invoiceNumber = $request->input('invoice_pack_number');
+            $PONumber = $request->input('purchase_order_number');
+            $invoice = InvoicePack::where('invoice_number', $invoiceNumber)->first();
+            $invoiceID = $invoice ? $invoice->id : null;
+            $PO = PurchaseOrder::where('purchase_order_number', $PONumber)->first();
+            $POID = $PO ? $PO->id : null;
+            
+
             $amountMutasi = $request->input('amount_mutasi');
             $personID = $request->input('person_id');
             $personType = $request->input('person_type');
@@ -158,6 +168,7 @@ class KartuHutang extends Model
             if (!$chartAccount) {
                 throw new \Exception('chart account not found');
             }
+            $desc = $request->input('description');
             $codeGroupName = $chartAccount->name;
             $person = $personType::find($personID);
             if (!$person) {
@@ -167,7 +178,7 @@ class KartuHutang extends Model
                 $kredits = [
                     [
                         'code_group' => $codeGroup,
-                        'description' => 'hutang nomer' . $factur . ' dari ' . $person->name,
+                        'description' => $desc,
                         'amount' => $amountMutasi,
                         'reference_id' => null,
                         'reference_type' => null,
@@ -176,7 +187,7 @@ class KartuHutang extends Model
                 $debets = [
                     [
                         'code_group' => $lawanCodeGroup,
-                        'description' => 'hutang nomer' . $factur . ' dari ' . $person->name,
+                        'description' => $desc,
                         'amount' => $amountMutasi,
                         'reference_id' => null,
                         'reference_type' => null,
@@ -207,8 +218,11 @@ class KartuHutang extends Model
             $st = self::createKartu(new Request([
                 'type' => 'mutasi',
                 'purchasing_id' => null,
-                'factur_supplier_number' => $factur,
-                'description' => 'claim utang dari mutasi pembelian ' . $factur,
+                'invoice_pack_id' => $invoiceID,
+                'invoice_pack_number' => $invoiceNumber,
+                'purchase_order_id' => $POID,
+                'purchase_order_number' => $PONumber,
+                'description' => $desc,
                 'amount_debet' => $amountMutasi, //debet untuk nilai utang yang bertambah
                 'amount_kredit' => 0,
                 'reference_id' => null,
@@ -241,35 +255,35 @@ class KartuHutang extends Model
         }
     }
 
-
-
-
-
     public static function createPelunasan(Request $request, $useTransaction = true)
     {
         if ($useTransaction)
             DB::beginTransaction();
         try {
-            $factur = $request->input('factur_supplier_number');
+            $invoiceNumber = $request->input('invoice_pack_number');
+            $PONumber = $request->input('purchase_order_number');
+            $invoice = InvoicePack::where('invoice_number', $invoiceNumber)->first();
+            $invoiceID =  $invoice ? $invoice->id : null;
+            $PO = PurchaseOrder::where('purchase_order_number', $PONumber)->first();
+            $POID = $PO ? $PO->id : null;
             $amountBayar = $request->input('amount_bayar');
             $codeGroup = $request->input('code_group');
             $lawanCodeGroup = $request->input('lawan_code_group');
             $codeName = ChartAccount::where('code_group', $codeGroup)->first()?->name;
             $isOtomatisJurnal = $request->input('is_otomatis_jurnal') ?? 0;
+            $description = $request->input('description');
             if ($amountBayar > 0) {
                 $codeKredit = $lawanCodeGroup;
                 $codeDebet = $codeGroup;
-                $desc = 'pembayaran hutang ' . $factur;
+                $desc = $description;
             } else {
                 $codeKredit = $codeGroup;
                 $codeDebet = $lawanCodeGroup;
-                $desc = 'pembatalan pembayaran hutang ' . $factur;
+                $desc = $description;
             }
             $personID = $request->input('person_id');
             $personType = $request->input('person_type');
             if ($isOtomatisJurnal) {
-
-
                 $kredits = [
                     [
                         'code_group' => $codeKredit,
@@ -315,7 +329,10 @@ class KartuHutang extends Model
             $st = self::createKartu(new Request([
                 'type' => 'pelunasan',
                 'purchasing_id' => null,
-                'factur_supplier_number' => $factur,
+                'invoice_pack_number' => $invoiceNumber,
+                'invoice_pack_id' => $invoiceID,
+                'purchase_order_id' => $POID,
+                'purchase_order_number' => $PONumber,
                 'description' => $desc,
                 'amount_debet' => $amountDebet, //debet untuk nilai utang yang bertambah
                 'amount_kredit' => $amountKredit,

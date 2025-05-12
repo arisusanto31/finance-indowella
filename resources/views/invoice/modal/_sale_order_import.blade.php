@@ -76,6 +76,7 @@
         let dataPost = {
             customer_name: data.customer_name,
             sales_order_number: data.package_number,
+            custom_stock_name: data.details.map(item => item.stock_name),
             reference_stock_id: data.details.map(item => item.stock_id),
             reference_stock_type: data.stock_type,
             quantity: data.details.map(item => item.quantity),

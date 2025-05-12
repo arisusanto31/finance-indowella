@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Http\Controllers\JournalController;
+use App\Services\LockManager;
+use App\Traits\HasModelDetailKartuInvoice;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -13,6 +16,8 @@ use Throwable;
 class KartuBDP extends Model
 {
     //
+
+    use HasModelDetailKartuInvoice;
     protected $table = 'kartu_bdps';
     public $timestamps = true;
 
@@ -34,10 +39,9 @@ class KartuBDP extends Model
         });
     }
 
-
     public static function create(Request $request)
     {
-        $lock = Cache::lock('kartu-stock-' . $request->input('stock_id'), 40);
+        $lock = Cache::lock('kartu-bdp-' . $request->input('stock_id'), 40);
         try {
             $flow = $request->input('flow');
             $isCustom = $request->input('is_custom_rupiah');
@@ -47,24 +51,43 @@ class KartuBDP extends Model
             $kartu->unit_backend = $request->input('unit_backend');
             $kartu->mutasi_quantity = $request->input('mutasi_quantity');
             $kartu->unit = $request->input('unit');
-            $kartu->spk_number = $request->input('spk_number');
-            $kartu->sale_order_id = $request->input('sale_order_id');
-            //mutasi terakhir sebelum mutasi id yg diinput oleh user
-            $lastCard = KartuBDP::where('stock_id', $kartu->stock_id)->where('spk_number', $kartu->spk_number)->orderBy('id', 'desc')->first();
+            $kartu->sales_order_number = $request->input('sales_order_number');
+            $kartu->sales_order_id = $request->input('sales_order_id');
+            $kartu->invoice_pack_number = $request->input('invoice_pack_number');
+            $kartu->invoice_pack_id = $request->input('invoice_pack_id');
 
+
+            $kartu->production_number = $request->input('production_number');
+            if (!$kartu->production_number) {
+                $kartu->production_number = $request->input('sales_order_number');
+            }
+            //mutasi terakhir sebelum mutasi id yg diinput oleh user
+            $lastCard = KartuBDP::where('stock_id', $kartu->stock_id)->where('production_number', $kartu->production_number)->orderBy('id', 'desc')->first();
             if (!$lastCard) {
                 $lastCard = new KartuBDP;
                 $lastCard->saldo_qty_backend = 0;
                 $lastCard->saldo_rupiah_total = 0;
             }
-
+            if ($lastCard->saldo_qty_backend == 0 && $flow == 1) {
+                //kalo keluar
+                throw new \Exception('tidak ada saldo qty barang pada BDP nomer ' . $kartu->production_number);
+            }
             if ($isCustom == 0) {
                 //ini ngambil hpp yang lama.
-                $rupiahUnit = $lastCard->saldo_rupiah_total / $lastCard->saldo_qty_backend;
+                if ($lastCard->saldo_qty_backend == 0) {
+                    $rupiahUnit = 0;
+                } else {
+                    $rupiahUnit = $lastCard->saldo_rupiah_total / $lastCard->saldo_qty_backend;
+                }
+                if ($rupiahUnit == 0) {
+                    return [
+                        'status' => 0,
+                        'msg' => 'perhitungan input rupiah tidak valid!,'
+                    ];
+                }
                 $kartu->mutasi_rupiah_on_unit = $rupiahUnit; //ini kayak hpp gitu. pake defaultnya
                 $kartu->mutasi_rupiah_total = moneyMul($rupiahUnit, $kartu->mutasi_qty_backend);
             } else {
-
                 $kartu->mutasi_rupiah_on_unit = $request->input('mutasi_rupiah_on_unit') ?? 0;
                 $kartu->mutasi_rupiah_total = $request->input('mutasi_rupiah_total') ?? 0;
                 if ($kartu->mutasi_rupiah_total == 0) {
@@ -113,7 +136,7 @@ class KartuBDP extends Model
         ];
     }
 
-    public static function mutationStore(Request $request, $useTransaction = true)
+    public static function mutationStore(Request $request, $useTransaction = true,?LockManager $lockManager=null )
     {
 
         if ($useTransaction)
@@ -125,6 +148,16 @@ class KartuBDP extends Model
             $flow = $request->input('flow');
             $codeGroup = $request->input('code_group');
             $chart = ChartAccount::where('code_group', $codeGroup)->first();
+
+            $SONumber = $request->input('sales_order_number');
+            $invoiceNumber = $request->input('invoice_pack_number');
+            $sales = SalesOrder::where('sales_order_number', $SONumber)->first();
+            $SOID = $sales ? $sales->id : null;
+            $invoice = InvoicePack::where('invoice_number', $invoiceNumber)->first();
+            $invID = $invoice ? $invoice->id : null;
+
+            $lawanCodeGroup = $request->input('lawan_code_group');
+            $isOtomatisJurnal = $request->input('is_otomatis_jurnal');
 
             if (!$chart) {
                 if ($useTransaction)
@@ -146,10 +179,8 @@ class KartuBDP extends Model
                 }
             } else
                 $mutasiRupiahTotal = 0;
-
             $isCustom = $request->input('is_custom_rupiah');
             $dataunit = StockUnit::where('stock_id', $stockid)->where('unit', $unit)->first();
-
             $stock = Stock::find($stockid);
             if (!$unit) {
                 if ($useTransaction)
@@ -165,22 +196,76 @@ class KartuBDP extends Model
             $mutasiRupiahUnit = money($mutasiRupiahTotal / $qtybackend);
             $st = self::create(new Request([
                 'stock_id' => $stockid,
+                'sales_order_number' => $SONumber,
+                'sales_order_id' => $SOID,
+                'invoice_pack_number' => $invoiceNumber,
+                'invoice_pack_id' => $invID,
                 'mutasi_qty_backend' => $qtybackend,
                 'unit_backend' => $unitbackend,
                 'mutasi_quantity' => $qty,
                 'unit' => $unit,
                 'flow' => $flow,
-                'spk_number' => $request->input('spk_number'),
-                'sale_order_id' => $request->input('sale_order_id'),
                 'is_custom_rupiah' => $isCustom,
                 'mutasi_rupiah_on_unit' => $mutasiRupiahUnit,
                 'mutasi_rupiah_total' => $mutasiRupiahTotal,
                 'code_group' => $codeGroup,
                 'code_group_name' => $codeGroupName,
+                'production_number' => $request->input('production_number'),
             ]));
-            return $st;
             if ($st['status'] == 0) {
-                new Throwable($st['msg']);
+                throw new \Exception($st['msg']);
+            }
+            $spkNumber = $request->input('sales_order_number');
+            $ks = $st['msg'];
+            $number = null;
+            if ($isOtomatisJurnal) {
+                $amount = abs($ks->mutasi_rupiah_total);
+
+                if ($flow == 1) {
+                    //keluar
+                    $codeDebet = $lawanCodeGroup;
+                    $codeKredit = $codeGroup;
+                    $desc = 'bahan dalam proses keluar ' . $spkNumber;
+                } else {
+                    $codeDebet = $codeGroup;
+                    $codeKredit = $lawanCodeGroup;
+                    $desc = 'bahan dalam proses masuk ' . $spkNumber;
+                }
+                $kredits = [
+                    [
+                        'code_group' => $codeKredit,
+                        'description' => $desc,
+                        'amount' => $amount,
+                        'reference_id' => null,
+                        'reference_type' => null,
+                    ],
+                ];
+                $debets = [
+                    [
+                        'code_group' => $codeDebet,
+                        'description' => $desc,
+                        'amount' => $amount,
+                        'reference_id' => null,
+                        'reference_type' => null,
+                    ],
+                ];
+                $st = JournalController::createBaseJournal(new Request([
+                    'kredits' => $kredits,
+                    'debets' => $debets,
+                    'type' => 'transaction',
+                    'date' => Date('Y-m-d H:i:s'),
+                    'is_auto_generated' => 1,
+                    'title' => 'create mutation transaction',
+                    'url_try_again' => 'try_again'
+
+                ]), false,$lockManager);
+                if ($st['status'] != 1) return $st;
+                $number = $st['journal_number'];
+                $journal = Journal::where('journal_number', $number)->where('code_group', 140003)->first();
+                $ks->journal_id = $journal->id;
+                $ks->journal_number = $number;
+                $ks->save();
+                $ks->createDetailKartuInvoice();
             }
         } catch (Throwable $th) {
             if ($useTransaction)
@@ -195,7 +280,8 @@ class KartuBDP extends Model
         }
         return [
             'status' => 1,
-            'msg' => $st['msg']
+            'msg' => $st['msg'],
+            'journal_number' => $number
         ];
     }
 }

@@ -377,7 +377,9 @@
                                 <td>${item.unit}</td>
                                 <td>${formatRupiah(item.mutasi_rupiah_on_unit*(item.mutasi_qty_backend/item.mutasi_quantity))}</td>
                                 <td>${formatRupiah(item.mutasi_rupiah_total)}</td>
-                                <td>${(!item.journal_number?'<span> belum ada jurnal</span> <button onclick="openLinkJournal('+item.id+')"> <i class="fas fa-link"></i> jurnal</button>':item.journal_number)}</td>
+                                <td>${(!item.journal_number?'<span> belum ada jurnal</span> <button onclick="openLinkJournal('+item.id+')"> <i class="fas fa-link"></i> jurnal</button>':item.journal_number)}
+                                       <button onclick="refreshKartu(${item.id})"> <i class="fas fa-sync"></i> </button>
+                                </td>
                                 </tr>`;
                         });
                         $('#body-mutasi-masuk').html(html);
@@ -434,6 +436,7 @@
         }
 
         function getMutasiKeluar() {
+            page = "keluar";
             $.ajax({
                 url: "{{ route('kartu-bdp.get-mutasi-keluar') }}",
                 method: "GET",
@@ -452,12 +455,42 @@
                                 <td>${item.unit}</td>
                                 <td>${formatRupiah(item.mutasi_rupiah_on_unit*(item.mutasi_qty_backend/item.mutasi_quantity))}</td>
                                 <td>${formatRupiah(item.mutasi_rupiah_total)}</td>
-                                <td>${(!item.journal_number?'<span> belum ada jurnal</span> <button onclick="openLinkJournal('+item.id+')"> <i class="fas fa-link"></i> jurnal</button>':item.journal_number)}</td>
+                                <td>${(!item.journal_number?'<span> belum ada jurnal</span> <button onclick="openLinkJournal('+item.id+')"> <i class="fas fa-link"></i> jurnal</button>':item.journal_number)}
+                                    <button onclick="refreshKartu(${item.id})"> <i class="fas fa-sync"></i> </button>
+                                </td>
                                 </tr>`;
                         });
                         $('#body-mutasi-keluar').html(html);
                     } else {
 
+                    }
+                },
+                error: function(err) {
+                    console.log(err);
+                }
+            });
+
+        }
+
+        function refreshKartu(id) {
+            $.ajax({
+                url: "{{ route('kartu-bdp.refresh-kartu') }}",
+                method: "POST",
+                data: {
+                    "_token": "{{ csrf_token() }}",
+                    "id": id,
+                },
+                success: function(res) {
+                    console.log(res);
+                    if (res.status == 1) {
+                        if (page == "masuk") {
+                            getMutasiMasuk();
+                        } else {
+                            getMutasiKeluar();
+                        }
+                        Swal.fire("Berhasil", res.msg, "success");
+                    } else {
+                        Swal.fire("opss", res.msg, "error");
                     }
                 },
                 error: function(err) {

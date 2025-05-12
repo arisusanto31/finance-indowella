@@ -9,6 +9,7 @@ use App\Models\Journal;
 use App\Models\KartuHutang;
 use App\Models\KartuPiutang;
 use App\Models\KartuStock;
+use App\Models\SalesOrder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -29,10 +30,15 @@ class InvoicePackController extends Controller
     public function showDetail($number)
     {
         $data = InvoicePack::where('invoice_number', $number)->first();
-        $invdetails = $data->reference_model::with('stock')->where('invoice_number', $number)->get();
+        $invdetails = $data->reference_model::with('stock')->where('invoice_pack_number', $number)->get();
+
         $data['details'] = $invdetails;
         $data['kartus'] = $data->getAllKartu();
-        return view('invoice.modal._invoice-detail', compact('data'));
+       
+        $view = view('invoice.modal._invoice-detail');
+        $view->data = $data;
+       
+        return $view;
     }
 
     public function createClaimPenjualan(Request $request)
@@ -47,6 +53,8 @@ class InvoicePackController extends Controller
         if (!$invoicePack) {
             return ['status' => 0, 'msg' => 'Invoice tidak ditemukan'];
         }
+        $salesOrder= SalesOrder::where('sales_order_number',$invoicePack->sales_order_number)->first();
+        
         $chartPenjualan = ChartAccount::where('code_group', $coaPenjualan)->first();
         $chartBeban = ChartAccount::where('code_group', $coaBeban)->first();
         $chartPersediaan = ChartAccount::where('code_group', $coaPersediaan)->first();
@@ -83,13 +91,14 @@ class InvoicePackController extends Controller
             if ($coaPiutangKas > 120000) {
                 //brati hutang, buat kartu hutang ya lur
                 $kartu = KartuPiutang::createMutation(new Request([
-                    'package_number' => $invoicePack->invoice_number,
+                    'invoice_pack_number' => $invoicePack->invoice_number,
                     'amount_mutasi' => $invoicePack->total_price,
                     'person_id' => $invoicePack->person_id,
                     'person_type' => $invoicePack->person_type,
                     'code_group' => $coaPiutangKas,
                     'lawan_code_group' => $coaPenjualan,
-                
+                    'sales_order_number'=>$salesOrder? $salesOrder->sales_order_number:null,
+
                     'is_otomatis_jurnal' => 1,
                 ]), false);
                 if ($kartu['status'] == 0) {
@@ -144,7 +153,7 @@ class InvoicePackController extends Controller
                     'code_group' => $coaBeban,
                     'description' => 'penjualan nomer ' . $invoicePack->invoice_number,
                     'amount' => $amountPersediaan,
-                    'toko_id'=> $invoicePack->toko_id,
+                    'toko_id' => $invoicePack->toko_id,
                     'reference_id' => null,
                     'reference_type' => null,
                 ],
@@ -155,7 +164,7 @@ class InvoicePackController extends Controller
                     'description' => 'penjualan nomer ' . $invoicePack->invoice_number,
                     'amount' => $amountPersediaan,
                     'reference_id' => null,
-                    'toko_id'=> $invoicePack->toko_id,
+                    'toko_id' => $invoicePack->toko_id,
                     'reference_type' => null,
                 ],
             ];
@@ -299,7 +308,7 @@ class InvoicePackController extends Controller
                         'amount' => $invoicePack->total_price,
                         'reference_id' => null,
                         'reference_type' => null,
-                   
+
                     ],
                 ];
                 $kredits = [

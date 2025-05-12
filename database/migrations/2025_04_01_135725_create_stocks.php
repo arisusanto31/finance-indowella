@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->integer('book_journal_id');
             $table->string('name');
+            $table->string('type');
             $table->unsignedBigInteger('category_id');
             $table->string('unit_default')->nullable();
             $table->string('unit_backend');

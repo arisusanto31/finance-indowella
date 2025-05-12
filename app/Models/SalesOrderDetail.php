@@ -16,6 +16,7 @@ class SalesOrderDetail extends Model
         'sales_order_id',
         'book_journal_id',
         'stock_id',
+        'custom_stock_name',
         'quantity',
         'unit',
         'price',

@@ -74,4 +74,13 @@ class IndexController extends Controller
 
         ];
     }
+
+    public function areaDeveloper(){
+        if(getInput('type')=="pattern"){
+            return detectFormat(getInput('nilai'));
+        }
+        if(getInput('type')=='format_db'){
+            return format_db(getInput('nilai'));
+        }
+    }
 }

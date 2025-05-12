@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasModelDetailKartuInvoice;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -13,6 +14,8 @@ use Throwable;
 class KartuStock extends Model
 {
     //
+
+    use HasModelDetailKartuInvoice;
     protected $table = 'kartu_stocks';
     public $timestamps = true;
 
@@ -48,6 +51,13 @@ class KartuStock extends Model
             $kartu->unit_backend = $request->input('unit_backend');
             $kartu->mutasi_quantity = $request->input('mutasi_quantity');
             $kartu->unit = $request->input('unit');
+            $kartu->sales_order_number = $request->input('sales_order_number');
+            $kartu->sales_order_id = $request->input('sales_order_id');
+            $kartu->purchase_order_number = $request->input('purchase_order_number');
+            $kartu->purchase_order_id = $request->input('purchase_order_id');
+            $kartu->invoice_pack_number = $request->input('invoice_pack_number');
+            $kartu->invoice_pack_id = $request->input('invoice_pack_id');
+
             //mutasi terakhir sebelum mutasi id yg diinput oleh user
             $lastCard = KartuStock::where('stock_id', $kartu->stock_id)->orderBy('id', 'desc')->first();
             if (!$lastCard) {
@@ -57,17 +67,27 @@ class KartuStock extends Model
             }
 
             if ($isCustom == 0) {
-                $rupiahUnit = $lastCard->saldo_rupiah_total / $lastCard->saldo_qty_backend;
+                if ($lastCard->saldo_qty_backend == 0) {
+                    $rupiahUnit = 0;
+                } else {
+                    $rupiahUnit = $lastCard->saldo_rupiah_total / $lastCard->saldo_qty_backend;
+                }
+                if ($rupiahUnit == 0) {
+                    return [
+                        'status' => 0,
+                        'msg' => 'perhitungan input rupiah tidak valid!,'
+                    ];
+                }
                 $kartu->mutasi_rupiah_on_unit = $rupiahUnit; //ini kayak hpp gitu. pake defaultnya
                 $kartu->mutasi_rupiah_total = moneyMul($rupiahUnit, $kartu->mutasi_qty_backend);
             } else {
 
                 $kartu->mutasi_rupiah_on_unit = $request->input('mutasi_rupiah_on_unit') ?? 0;
                 $kartu->mutasi_rupiah_total = $request->input('mutasi_rupiah_total') ?? 0;
-                if($kartu->mutasi_rupiah_total ==0){
+                if ($kartu->mutasi_rupiah_total == 0) {
                     return [
-                        'status'=>0,
-                        'msg'=>'input rupiah tidak valid!,'
+                        'status' => 0,
+                        'msg' => 'input rupiah tidak valid!,'
                     ];
                 }
             }
@@ -77,7 +97,7 @@ class KartuStock extends Model
                 $kartu->mutasi_rupiah_on_unit = moneyMul($kartu->mutasi_rupiah_on_unit, -1);
                 $kartu->mutasi_rupiah_total = moneyMul($kartu->mutasi_rupiah_total, -1);
             }
-            $kartu->code_group= $request->input('code_group');
+            $kartu->code_group = $request->input('code_group');
             $kartu->code_group_name = $request->input('code_group_name');
             $kartu->book_journal_id = session('book_journal_id');
             $kartu->saldo_qty_backend = moneyAdd($lastCard->saldo_qty_backend, $kartu->mutasi_qty_backend);
@@ -110,22 +130,38 @@ class KartuStock extends Model
         ];
     }
 
-    public static function mutationStore(Request $request,$useTransaction = true)
+    public static function mutationStore(Request $request, $useTransaction = true)
     {
 
 
-        if($useTransaction)
+        if ($useTransaction)
             DB::beginTransaction();
         try {
             $stockid = $request->input('stock_id');
             $qty = $request->input('mutasi_quantity');
             $unit = $request->input('unit');
             $flow = $request->input('flow');
-            $codeGroup= $request->input('code_group');
-            $chart= ChartAccount::where('code_group', $codeGroup)->first();
+            $codeGroup = $request->input('code_group');
+            $chart = ChartAccount::where('code_group', $codeGroup)->first();
+            $PONumber = $request->input('purchase_order_number');
+            $SONumber = $request->input('sales_order_number');
+            $invoiceNumber = $request->input('invoice_pack_number');
+            $POID = $SOID = $invID = null;
+            if ($PONumber) {
+                $PO = PurchaseOrder::where('purchase_order_number', $PONumber)->first();
+                $POID = $PO ? $PO->id : null;
+            }
+            if ($SONumber) {
+                $SO = SalesOrder::where('sales_order_number', $SONumber)->first();
+                $SOID = $SO ? $SO->id : null;
+            }
+            if ($invoiceNumber) {
+                $inv = InvoicePack::where('invoice_number', $invoiceNumber)->first();
+                $invID = $inv ? $inv->id : null;
+            }
             if (!$chart) {
-                if($useTransaction)
-                DB::rollBack();
+                if ($useTransaction)
+                    DB::rollBack();
                 return [
                     'status' => 0,
                     'msg' => 'code group tidak ditemukan'
@@ -141,8 +177,8 @@ class KartuStock extends Model
 
             $stock = Stock::find($stockid);
             if (!$unit) {
-                if($useTransaction)
-                DB::rollBack();
+                if ($useTransaction)
+                    DB::rollBack();
                 return [
                     'status' => 0,
                     'msg' => 'unit tidak ditemukan'
@@ -153,6 +189,12 @@ class KartuStock extends Model
 
             $mutasiRupiahUnit = money($mutasiRupiahTotal / $qtybackend);
             $st = self::create(new Request([
+                'purchase_order_number' => $PONumber,
+                'purchase_order_id' => $POID,
+                'sales_order_number' => $SONumber,
+                'sales_order_id' => $SOID,
+                'invoice_pack_number' => $invoiceNumber,
+                'invoice_pack_id' => $invID,
                 'stock_id' => $stockid,
                 'mutasi_qty_backend' => $qtybackend,
                 'unit_backend' => $unitbackend,
@@ -167,18 +209,18 @@ class KartuStock extends Model
             ]));
             return $st;
             if ($st['status'] == 0) {
-                new Throwable($st['msg']);
+                throw new \Exception($st['msg']);
             }
         } catch (Throwable $th) {
-            if($useTransaction)
-            DB::rollBack();
+            if ($useTransaction)
+                DB::rollBack();
             return [
                 'status' => 0,
                 'msg' => $th->getMessage()
             ];
         } finally {
-            if($useTransaction)
-            DB::commit();
+            if ($useTransaction)
+                DB::commit();
         }
         return [
             'status' => 1,

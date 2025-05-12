@@ -15,9 +15,13 @@ return new class extends Migration
             $table->id();
             $table->integer('book_journal_id');
             $table->decimal('code_group', 6, 0);
-            $table->string('spk_number');
-            $table->string('sale_order_id')->nullable();
-            
+
+            $table->string('sales_order_number')->nullable();;
+            $table->integer('sales_order_id')->nullable();
+            $table->string('invoice_pack_number')->nullable();
+            $table->integer('invoice_pack_id')->nullable();
+            $table->string('production_number')->nullable();
+
             $table->string('code_group_name');
             $table->integer('stock_id');
             $table->decimal('mutasi_qty_backend', 10, 2);

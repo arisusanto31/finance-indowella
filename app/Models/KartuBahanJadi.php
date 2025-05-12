@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Http\Controllers\JournalController;
+use App\Services\LockManager;
+use App\Traits\HasModelDetailKartuInvoice;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -13,6 +16,8 @@ use Throwable;
 class KartuBahanJadi extends Model
 {
     //
+
+    use HasModelDetailKartuInvoice;
     protected $table = 'kartu_bahan_jadis';
     public $timestamps = true;
 
@@ -36,7 +41,7 @@ class KartuBahanJadi extends Model
 
     public static function create(Request $request)
     {
-        $lock = Cache::lock('kartu-stock-' . $request->input('stock_id'), 40);
+        $lock = Cache::lock('kartu-bahanjadi-' . $request->input('stock_id'), 40);
         try {
             $flow = $request->input('flow');
             $isCustom = $request->input('is_custom_rupiah');
@@ -46,12 +51,28 @@ class KartuBahanJadi extends Model
             $kartu->unit_backend = $request->input('unit_backend');
             $kartu->mutasi_quantity = $request->input('mutasi_quantity');
             $kartu->unit = $request->input('unit');
+            $kartu->custom_stock_name = $request->input('custom_stock_name');
+            //sale_order_id menunjukkan pada reference
+            //tapi sale_order_number ini menunjukkan pada kode barang nomer spk
+            $kartu->sales_order_number = $request->input('sales_order_number');
+            $kartu->sales_order_id = $request->input('sales_order_id');
+            $kartu->invoice_pack_number = $request->input('invoice_pack_number');
+            $kartu->invoice_pack_id = $request->input('invoice_pack_id');
+            $kartu->production_number = $request->input('production_number');
+            if (!$kartu->production_number) {
+                $kartu->production_number = $request->input('sales_order_number');
+            }
             //mutasi terakhir sebelum mutasi id yg diinput oleh user
-            $lastCard = KartuBahanJadi::where('stock_id', $kartu->stock_id)->orderBy('id', 'desc')->first();
+
+            $lastCard = KartuBahanJadi::where('stock_id', $kartu->stock_id)->where('production_number', $kartu->production_number)->orderBy('id', 'desc')->first();
             if (!$lastCard) {
                 $lastCard = new KartuBahanJadi;
                 $lastCard->saldo_qty_backend = 0;
                 $lastCard->saldo_rupiah_total = 0;
+            }
+            if ($lastCard->saldo_qty_backend == 0 && $flow == 1) {
+                //kalo keluar
+                throw new \Exception('tidak ada saldo qty barang bahan jadi nomer ' . $kartu->production_number);
             }
 
             if ($isCustom == 0) {
@@ -108,7 +129,7 @@ class KartuBahanJadi extends Model
         ];
     }
 
-    public static function mutationStore(Request $request, $useTransaction = true)
+    public static function mutationStore(Request $request, $useTransaction = true, ?LockManager $lockManager=null)
     {
 
 
@@ -119,8 +140,19 @@ class KartuBahanJadi extends Model
             $qty = $request->input('mutasi_quantity');
             $unit = $request->input('unit');
             $flow = $request->input('flow');
+            $customStockName = $request->input('custom_stock_name');
             $codeGroup = $request->input('code_group');
             $chart = ChartAccount::where('code_group', $codeGroup)->first();
+
+            $SONumber = $request->input('sales_order_number');
+            $invoiceNumber = $request->input('invoice_pack_number');
+            $sales = SalesOrder::where('sales_order_number', $SONumber)->first();
+            $SOID = $sales ? $sales->id : null;
+            $invoice = InvoicePack::where('invoice_number', $invoiceNumber)->first();
+            $invID = $invoice ? $invoice->id : null;
+            $lawanCodeGroup = $request->input('lawan_code_group');
+            $isOtomatisJurnal = $request->input('is_otomatis_jurnal');
+
             if (!$chart) {
                 if ($useTransaction)
                     DB::rollBack();
@@ -152,6 +184,10 @@ class KartuBahanJadi extends Model
             $mutasiRupiahUnit = money($mutasiRupiahTotal / $qtybackend);
             $st = self::create(new Request([
                 'stock_id' => $stockid,
+                'sales_order_number' => $SONumber,
+                'sales_order_id' => $SOID,
+                'invoice_pack_number' => $invoiceNumber,
+                'invoice_pack_id' => $invID,
                 'mutasi_qty_backend' => $qtybackend,
                 'unit_backend' => $unitbackend,
                 'mutasi_quantity' => $qty,
@@ -162,10 +198,63 @@ class KartuBahanJadi extends Model
                 'mutasi_rupiah_total' => $mutasiRupiahTotal,
                 'code_group' => $codeGroup,
                 'code_group_name' => $codeGroupName,
+                'custom_stock_name' => $customStockName,
+                'production_number' => $request->input('production_number')
             ]));
-            return $st;
             if ($st['status'] == 0) {
-                new Throwable($st['msg']);
+                throw new \Exception($st['msg']);
+            }
+            $spkNumber = $request->input('sales_order_number');
+            $ks = $st['msg'];
+            $number = null;
+            if ($isOtomatisJurnal) {
+                $amount = abs($ks->mutasi_rupiah_total);
+
+                if ($flow == 1) {
+                    //keluar
+                    $codeDebet = $lawanCodeGroup;
+                    $codeKredit = $codeGroup;
+                    $desc = 'bahan dalam proses keluar ' . $spkNumber;
+                } else {
+                    $codeDebet = $codeGroup;
+                    $codeKredit = $lawanCodeGroup;
+                    $desc = 'bahan dalam proses masuk ' . $spkNumber;
+                }
+                $kredits = [
+                    [
+                        'code_group' => $codeKredit,
+                        'description' => $desc,
+                        'amount' => $amount,
+                        'reference_id' => null,
+                        'reference_type' => null,
+                    ],
+                ];
+                $debets = [
+                    [
+                        'code_group' => $codeDebet,
+                        'description' => $desc,
+                        'amount' => $amount,
+                        'reference_id' => null,
+                        'reference_type' => null,
+                    ],
+                ];
+                $st = JournalController::createBaseJournal(new Request([
+                    'kredits' => $kredits,
+                    'debets' => $debets,
+                    'type' => 'transaction',
+                    'date' => Date('Y-m-d H:i:s'),
+                    'is_auto_generated' => 1,
+                    'title' => 'create mutation transaction',
+                    'url_try_again' => 'try_again'
+
+                ]), false,$lockManager);
+                if ($st['status'] != 1) return $st;
+                $number = $st['journal_number'];
+                $journal = Journal::where('journal_number', $number)->where('code_group', 140004)->first();
+                $ks->journal_id = $journal->id;
+                $ks->journal_number = $number;
+                $ks->save();
+                $ks->createDetailKartuInvoice();
             }
         } catch (Throwable $th) {
             if ($useTransaction)
@@ -174,13 +263,14 @@ class KartuBahanJadi extends Model
                 'status' => 0,
                 'msg' => $th->getMessage()
             ];
-        } finally {
-            if ($useTransaction)
-                DB::commit();
         }
+        if ($useTransaction)
+            DB::commit();
+
         return [
             'status' => 1,
-            'msg' => $st['msg']
+            'msg' => $st['msg'],
+            'journal_number' => $number
         ];
     }
 }

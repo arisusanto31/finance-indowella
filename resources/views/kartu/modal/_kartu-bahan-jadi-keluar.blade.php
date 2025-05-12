@@ -12,16 +12,18 @@
 
         <div class="row">
             <div class="col mb-3">
-                <label for="nameBasic" class="form-label">Nomer SPK</label>
-                <input type="text" name="spk_number" id="spk_number" class="form-control " placeholder="Nomer SPK">
+                <label for="nameBasic" class="form-label">Nomer Sales Order</label>
+                <input type="text" name="sales_order_number" id="sales-order-number" class="form-control " placeholder="Nomer SO">
             </div>
         </div>
+
         <div class="row">
             <div class="col mb-3">
-                <label for="nameBasic" class="form-label">Nomer SaleOrder (jika ada)</label>
-                <select type="text" name="sale_order_id" id="sale_order_id" class="form-control " placeholder="Nomer SPK"></select>
+                <label for="nameBasic" class="form-label">Nomer Invoice</label>
+                <input type="text" name="invoice_number" id="invoice-number" class="form-control " placeholder="Nomer Invoice">
             </div>
         </div>
+
         <div class="row">
             <div class="col mb-3">
                 <label for="nameBasic" class="form-label">Stock</label>
@@ -29,6 +31,12 @@
                 </select>
                 <input type="hidden" name="flow" value="1" />
                 <input type="hidden" name="is_custom_rupiah" value="0" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col mb-3">
+                <label for="nameBasic" class="form-label">Custom stock name</label>
+                <input type="text" id="custom-stock-name" name="custom_stock_name" class="form-control" placeholder="custom_stock_name" />
             </div>
         </div>
         <div class="row">

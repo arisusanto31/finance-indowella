@@ -57,6 +57,7 @@ class StockController extends Controller
                 'category_id' => 'required|integer',
                 'parent_category_id' => 'required|integer',
                 'unit_backend' => 'required|string|max:10',
+                'type'=> 'required|string|max:10',
             ]);
 
             Stock::create($validated);

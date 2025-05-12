@@ -67,12 +67,10 @@
                 <div class="modal-header">
                     <div class="flex-column align-items-start">
                         <h5 class="modal-title" id="exampleModalLabel1">Buat Kartu Piutang</h5>
-
                         <div class="form-check form-switch ">
                             <input class="form-check-input" type="checkbox" id="is_otomatis_jurnal" checked />
                             <label class="form-check-label" for="is_otomatis_jurnal">Buat Jurnal</label>
                         </div>
-
                     </div>
                     <button
                         type="button"
@@ -83,8 +81,20 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col mb-3">
-                            <label for="nameBasic" class="form-label">Nomer Invoice</label>
-                            <input type="text" id="factur" class="form-control" placeholder="Nomer Invoice" />
+                            <label for="nameBasic" class="form-label">Nomer Sales Order</label>
+                            <input type="text" id="factur" class="form-control" placeholder="Nomer Sales Order" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col mb-3">
+                            <label for="nameBasic" class="form-label">Nomer Ivoice </label>
+                            <input type="text" id="invoice_number" class="form-control" placeholder="Nomer Invoice" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col mb-3">
+                            <label for="nameBasic" class="form-label">Deskripsi Jurnal</label>
+                            <input type="text" id="description" class="form-control" placeholder="Deskripsi Jurnal" />
                         </div>
                     </div>
                     <div class="row">
@@ -154,8 +164,21 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col mb-3">
+                            <label for="nameBasic" class="form-label">Nomer Sales Order</label>
+                            <input type="text" id="pelunasan-factur" class="form-control" placeholder="Nomer Sales order" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col mb-3">
                             <label for="nameBasic" class="form-label">Nomer Invoice</label>
-                            <input type="text" id="pelunasan-factur" class="form-control" placeholder="Nomer Invoice" />
+                            <input type="text" id="pelunasan-invoice_number" class="form-control" placeholder="Nomer Invoice" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col mb-3">
+                            <label for="nameBasic" class="form-label">Deskripsi Jurnal</label>
+                            <input type="text" id="pelunasan-description" class="form-control" placeholder="Deskripsi Jurnal" />
                         </div>
                     </div>
                     <div class="row">
@@ -209,17 +232,23 @@
             $('#btn-store').html(`<div class="spinner-border spinner-border-sm text-primary" role="status">
                           <span class="visually-hidden">Loading...</span>
                         </div> storing data..`);
+            if($('#invoice_number').val()==""){
+                swalInfo('Opss','','warnig')
+                return 0;
+            }
             $.ajax({
                 url: '{{url("admin/kartu/kartu-piutang/create-mutation")}}',
                 method: 'post',
                 data: {
-                    package_number: $('#factur').val(),
+                    sales_order_number: $('#factur').val(),
+                    invoice_pack_number: $('#invoice_number').val(),
+                    description: $('#description').val(),
                     amount_mutasi: formatDB($('#amount_mutasi').val(), 'id'),
                     person_id: $('#person_id option:selected').val(),
                     person_type: $('#person_type option:selected').val(),
                     code_group: $('#akun-piutang option:selected').val(),
                     lawan_code_group: $('#akun-lawan option:selected').val(),
-                    is_otomatis_jurnal:$('#is_otomatis_jurnal').is(':checked') ? 1 : 0,
+                    is_otomatis_jurnal: $('#is_otomatis_jurnal').is(':checked') ? 1 : 0,
                     _token: '{{csrf_token()}}'
                 },
                 success: function(res) {
@@ -253,14 +282,16 @@
                 url: '{{url("admin/kartu/kartu-piutang/create-pelunasan")}}',
                 method: 'post',
                 data: {
-                    package_number: $('#pelunasan-factur').val(),
+                    sales_order_number: $('#pelunasan-factur').val(),
+                    invoice_pack_number: $('#pelunasan-invoice_number').val(),
+                    description: $('#pelunasan-description').val(),
                     amount_bayar: formatDB($('#pelunasan-amount').val(), 'id'),
                     person_id: $('#pelunasan-person_id option:selected').val(),
                     account_bayar: $('#pelunasan-akun-bayar option:selected').val(),
                     person_type: $('#pelunasan-person_type option:selected').val(),
                     lawan_code_group: $('#pelunasan-akun-lawan option:selected').val(),
                     code_group: $('#pelunasan-akun-piutang option:selected').val(),
-                    is_otomatis_jurnal:$('#is_pelunasan_otomatis_jurnal').is(':checked') ? 1 : 0,
+                    is_otomatis_jurnal: $('#is_pelunasan_otomatis_jurnal').is(':checked') ? 1 : 0,
                     _token: '{{csrf_token()}}'
                 },
                 success: function(res) {

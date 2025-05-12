@@ -62,6 +62,7 @@
 
     @if ($salesOrders->isNotEmpty())
     <div class="card mb-4 shadow p-3">
+  
         <h5 class="text-primary-dark card-header"> 📁 <strong>DAFTAR SALE ORDER </strong> </h5>
         <div class="table-responsive mt-2">
             <table class="table table-bordered">
@@ -97,21 +98,21 @@
                         @endif
 
                         <td>{{ $item->stock->name ?? '-' }}</td>
-                        <td class="text-end">{{ $item->quantity }}</td>
+                        <td class="text-end">{{ format_price($item->quantity) }}</td>
                         <td>{{ $item->unit }}</td>
-                        <td class="text-end">Rp{{ number_format($item->price) }}</td>
-                        <td class="text-end">Rp{{ number_format($item->discount) }}</td>
+                        <td class="text-end">Rp{{ format_price($item->price) }}</td>
+                        <td class="text-end">Rp{{ format_price($item->discount) }}</td>
 
                         @php
                         $subtotal = ($item->quantity * $item->price) - $item->discount;
                         @endphp
-                        <td class="text-end">Rp{{ number_format($subtotal) }}</td>
+                        <td class="text-end">Rp{{ format_price($subtotal) }}</td>
 
                         @if ($index === 0)
-                        <td rowspan="{{ $rowspan }}"><strong>Rp{{ number_format($invoiceSubtotal) }}</strong></td>
+                        <td rowspan="{{ $rowspan }}"><strong>Rp{{ format_price($invoiceSubtotal) }}</strong></td>
                         @if ($index === 0)
                         <td rowspan="{{ $rowspan }}">
-                            <a href="javascript:void(lihatDetailInvoice('{{$item->invoice_number}}'))" class="btn btn-sm btn-outline-primary" title="Lihat Invoice">
+                            <a href="javascript:void(lihatDetailInvoice('{{$item->sales_order_number}}'))" class="btn btn-sm btn-outline-primary" title="Lihat Invoice">
                                 <i class="fas fa-eye"></i>
                             </a>
                             <a href="" class="btn btn-sm btn-outline-primary" title="Edit Invoice">
@@ -177,7 +178,7 @@
         initItemSelectManual('.select2-toko', '{{ url("admin/master/toko/get-item") }}', '-- Pilih Toko --');
 
         function lihatDetailInvoice(invoiceNumber) {
-            showDetailOnModal('{{url("admin/invoice/show-detail")}}/' + invoiceNumber, 'xl');
+            showDetailOnModal('{{url("admin/invoice/show-sales-detail")}}/' + invoiceNumber, 'xl');
         }
 
         function openImportData(bookID) {

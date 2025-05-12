@@ -18,6 +18,7 @@ return new class extends Migration
             $table->integer('toko_id');
             $table->integer('sales_order_id')->nullable();
             $table->integer('stock_id');
+            $table->string('custom_stock_name')->nullable();
             $table->text('description')->nullable();
             $table->decimal('price', 15, 2);
             $table->string('unit');

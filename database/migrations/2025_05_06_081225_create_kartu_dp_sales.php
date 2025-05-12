@@ -18,7 +18,12 @@ return new class extends Migration
             $table->decimal('code_group', 6, 0);
             $table->decimal('lawan_code_group', 6, 0);
             $table->string('code_group_name', 6, 0);
-            $table->string('package_number')->nullable();
+
+            $table->integer('sales_order_id')->nullable();
+            $table->string('sales_order_number')->nullable();
+            $table->integer('invoice_pack_id')->nullable();
+            $table->string('invoice_pack_number')->nullable();
+
             $table->date('invoice_date')->nullable();
             $table->string('description')->nullable();
             $table->decimal('amount_kredit', 12, 2);

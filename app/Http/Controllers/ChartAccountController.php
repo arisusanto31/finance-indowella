@@ -120,7 +120,7 @@ class ChartAccountController extends Controller
                 $finalChart = $finalChart->merge($chart);
             }
             if ($kind == 'persediaan') {
-                $chart = ChartAccount::aktif()->child()->where('reference_model', 'App\\Models\\KartuStock');
+                $chart = ChartAccount::aktif()->child()->whereBetween('code_group', [140000, 150000]);
                 if (getInput('search')) {
                     foreach (explode(' ', getInput('search')) as $search) {
                         $chart = $chart->where('name', 'like', '%' . $search . '%');

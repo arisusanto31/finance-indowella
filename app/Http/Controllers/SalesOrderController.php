@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\BookJournal;
 use App\Models\Customer;
+use App\Models\InvoicePack;
+use App\Models\KartuBahanJadi;
 use App\Models\ManufSales;
 use App\Models\ManufSalesPackage;
 use App\Models\RetailSales;
@@ -53,6 +55,8 @@ class SalesOrderController extends Controller
                 'toko_id' => 'required|integer',
                 'reference_id' => 'nullable|integer',
                 'reference_type' => 'nullable|string',
+                'custom_stock_name' => 'nullable|array',
+                'custom_stock_name.*' => 'nullable|string',
             ]);
             $customerID = null;
             $arrayStockID = [];
@@ -75,7 +79,7 @@ class SalesOrderController extends Controller
                                         'category' => collect($refStock->category)->only('id', 'name'),
                                         'parent_category_id' => $refStock->parent_category_id,
                                         'parent_category' => collect($refStock->parentCategory)->only('id', 'name'),
-                                        'master_stock_id'=>null,
+                                        'master_stock_id' => null,
                                     ],
                                     'stock_id' => $refStock->id,
                                 ]));
@@ -96,7 +100,7 @@ class SalesOrderController extends Controller
             } else {
                 $arrayStockID = $request->stock_id;
             }
-           
+
             if (!$request->customer_id) {
                 if ($request->customer_name) {
                     $customer = Customer::where('name', $request->customer_name)->first();
@@ -128,6 +132,7 @@ class SalesOrderController extends Controller
                     'book_journal_id' => session('book_journal_id'),
                     'total_price' => format_db($request->total_price[$i]) ?? 0,
                     'toko_id' => $request->toko_id,
+                    'custom_stock_name' => $request->custom_stock_name[$i] ?? null,
                 ];
             }
 
@@ -156,6 +161,20 @@ class SalesOrderController extends Controller
         }
     }
 
+    public function showDetail($number)
+    {
+        $data = SalesOrder::where('sales_order_number', $number)->first();
+        $invdetails = SalesOrderDetail::with('stock')->where('sales_order_number', $number)->get();
+
+        $data['details'] = $invdetails;
+        $data['kartus'] = $data->getAllKartu();
+        $data['resume_total'] = $data->getTotalKartu();
+        $view = view('invoice.modal._sale-detail');
+        $view->data = $data;
+
+        return $view;
+    }
+
     function openImport($book_journal_id)
     {
         $book = BookJournal::find($book_journal_id);
@@ -164,7 +183,6 @@ class SalesOrderController extends Controller
         }
         $month = getInput("month") ? getInput("month") : date('m');
         $year = getInput("year") ? getInput("year") : date('Y');
-
 
         $defaultDB = config('database.connections.mysql.database');
         $saleModel = $book->name == 'Buku Toko' ? RetailSalesPackage::class : ManufSalesPackage::class;
@@ -182,7 +200,7 @@ class SalesOrderController extends Controller
                 DB::raw('"App\\\Models\\\RetailStock" as stock_type'),
                 'pack.is_ppn',
                 'pack.is_wajib_lapor',
-                'pack.package_number',
+                'pack.sales_order_number',
                 DB::raw('"anonim" as customer_name'),
             );
         } else {
@@ -192,7 +210,7 @@ class SalesOrderController extends Controller
                 DB::raw('"App\\\Models\\\ManufStock" as stock_type'),
                 'pack.is_ppn',
                 'pack.is_wajib_lapor',
-                'pack.package_number',
+                'pack.sales_order_number',
                 'pack.customer_id',
                 'c.instance as customer_name',
             );
@@ -213,15 +231,27 @@ class SalesOrderController extends Controller
 
                 return $data;
             });
-            return collect($val)->only('id', 'reference_type', 'is_ppn', 'customer_name', 'is_wajib_lapor', 'details', 'package_number', 'stock_type');
+            return collect($val)->only('id', 'reference_type', 'is_ppn', 'customer_name', 'is_wajib_lapor', 'details', 'sales_order_number', 'stock_type');
         });
-
-
-
-
 
         $view = view('invoice.modal._sale_order_import');
         $view->sales = $sales;
         return $view;
+    }
+
+    public function updateInputInvoice($number)
+    {
+        $bahanJadi = KartuBahanJadi::whereIn('id', function ($q) use ($number) {
+            $q->from('kartu_bahan_jadis')->select(DB::raw('max(id)'))
+                ->where('sales_order_number', $number)
+                ->groupBy('stock_id', 'sales_order_number');
+        })->where('sales_order_number', $number)->get()->keyBy('stock_id');
+        $details = SalesOrderDetail::where('sales_order_number', $number)->get();
+
+        return [
+            'status' => 1,
+            'msg' => $details,
+            'bahan_jadi' => $bahanJadi,
+        ];
     }
 }
