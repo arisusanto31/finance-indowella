@@ -364,14 +364,14 @@
                                     <td>${i+1}</td>
                                     <td>${data.person_name}</td>
                                     <td>${data.invoice_date}</td>
-                                    <td>${data.package_number}</td>
+                                    <td>${data.invoice_pack_number}</td>
                                     <td class="textright">${formatRupiah(data.saldo_awal)}</td>
                                     <td class="textright">${formatRupiah(data.mutasi)}</td>
                                     <td class="textright">${formatRupiah(data.pelunasan)}</td>
                                     <td class="textright">${formatRupiah(data.saldo)}</td>
                                     <td class="textright">${formatRupiah(saldoAkhir)}</td>      
                                       <td>
-                                        <button type="button" class="btn btn-primary btn-sm" onclick="showDetailKartuPiutang('${data.package_number}')"><i class="fas fa-eye"></i> Detail</button>
+                                        <button type="button" class="btn btn-primary btn-sm" onclick="showDetailKartuPiutang('${data.invoice_pack_number}')"><i class="fas fa-eye"></i> Detail</button>
                                     </td>                          
                                 </tr>
                             `;

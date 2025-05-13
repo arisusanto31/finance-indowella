@@ -99,6 +99,16 @@ class ChartAccountController extends Controller
                 $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
                 $finalChart = $finalChart->merge($chart);
             }
+            if ($kind == 'uang_muka_penjualan') {
+                $chart = ChartAccount::aktif()->child()->where('reference_model', 'App\\Models\\KartuDPSales');
+                if (getInput('search')) {
+                    foreach (explode(' ', getInput('search')) as $search) {
+                        $chart = $chart->where('name', 'like', '%' . $search . '%');
+                    }
+                }
+                $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
+                $finalChart = $finalChart->merge($chart);
+            }
             if ($kind == 'hutang') {
                 $chart = ChartAccount::aktif()->child()->where('reference_model', 'App\\Models\\KartuHutang');
                 if (getInput('search')) {

@@ -98,4 +98,17 @@ class KartuPiutangController extends Controller
             'msg' => $journals
         ];
     }
+
+    public function refresh($id)
+    {
+        $kartu = KartuPiutang::find($id);
+        $detail = $kartu->createDetailKartuInvoice();
+        if ($detail['status'] == 0) {
+            return $detail;
+        }
+        return [
+            'status' => 1,
+            'msg' => $kartu
+        ];
+    }
 }

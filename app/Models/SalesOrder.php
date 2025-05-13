@@ -21,6 +21,10 @@ class SalesOrder extends Model
 
     ];
 
+    public function details()
+    {
+        return $this->hasMany(SalesOrderDetail::class, 'sales_order_number', 'sales_order_number');
+    }
     public function customer()
     {
         return $this->belongsTo(Customer::class, 'customer_id', 'id');
@@ -63,9 +67,12 @@ class SalesOrder extends Model
         $kartus = collect($this->detailKartuInvoices)->map(function ($val) {
             $val['type_kartu'] = $val->kartu_type ? explode('\\', $val->kartu_type)[2] : 'Kartu lain-lain';
             $val['code_group_name'] = $val->journal->chartAccount->name;
-
+            $val['type_flow'] = $val->journal->amount_debet > 0 ? 'debet' : 'kredit';
             return $val;
-        })->groupBy('type_kartu');
+        })->groupBy('type_kartu')->map(function ($vals) {
+            return $vals->groupBy('type_flow')->all();
+        })->all();
+
 
         return $kartus ?? [];
     }

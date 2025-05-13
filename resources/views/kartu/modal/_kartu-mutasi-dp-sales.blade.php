@@ -64,9 +64,30 @@
 
 
 <script>
+    function refreshKartuDP(id) {
+        $.ajax({
+            url: '{{url("admin/kartu/kartu-dp-sales/refresh")}}/' + id,
+            method: 'get',
+
+            success: function(res) {
+                console.log(res);
+                if (res.status == 1) {
+                    Swal.fire('success', res.msg, 'success');
+                    $('#kolom-journal' + id).html(res.journal_number);
+                } else {
+                    Swal.fire('ops', res.msg, 'error');
+                }
+            },
+            error: function(res) {
+                console.log(res);
+                Swal.fire('ops', 'something error ' + res.msg, 'error');
+            }
+        });
+    }
+
     function searchJournal(id) {
         $.ajax({
-            url: '{{route("kartu-piutang.search-link-journal")}}',
+            url: '{{route("kartu-dp-sales.search-link-journal")}}',
             method: 'get',
             success: function(res) {
                 console.log(res);
@@ -103,7 +124,7 @@
                 _token: "{{ csrf_token() }}",
                 model_id: kartuID,
                 journal_id: journalId,
-                model: "App\\Models\\KartuPiutang",
+                model: "App\\Models\\KartuDPSales",
             },
             successText: 'berhasil membuat link',
             onSuccess: (res) => {

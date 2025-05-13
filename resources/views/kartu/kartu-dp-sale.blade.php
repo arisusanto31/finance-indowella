@@ -45,7 +45,7 @@
                             <th>No</th>
                             <th>🦸 Customer</th>
                             <th>📅 Tanggal</th>
-                            <th>#️⃣ No Invoice</th>
+                            <th>#️⃣ No Sales order</th>
                             <th>🔖 Saldo Awal</th>
                             <th>🔃 Mutasi</th>
                             <th>💵 Pelunasan</th>
@@ -359,14 +359,14 @@
                                     <td>${i+1}</td>
                                     <td>${data.person_name}</td>
                                     <td>${data.invoice_date}</td>
-                                    <td>${data.package_number}</td>
+                                    <td>${data.sales_order_number}</td>
                                     <td class="textright">${formatRupiah(data.saldo_awal)}</td>
                                     <td class="textright">${formatRupiah(data.mutasi)}</td>
                                     <td class="textright">${formatRupiah(data.pelunasan)}</td>
                                     <td class="textright">${formatRupiah(data.saldo)}</td>
                                     <td class="textright">${formatRupiah(saldoAkhir)}</td>      
                                       <td>
-                                        <button type="button" class="btn btn-primary btn-sm" onclick="showDetailKartu('${data.package_number}')"><i class="fas fa-eye"></i> detail</button>
+                                        <button type="button" class="btn btn-primary btn-sm" onclick="showDetailKartu('${data.sales_order_number}')"><i class="fas fa-eye"></i> detail</button>
                                     </td>                          
                                 </tr>
                             `;

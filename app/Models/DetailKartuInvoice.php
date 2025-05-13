@@ -66,9 +66,7 @@ class DetailKartuInvoice extends Model
                     return ['status' => 0, 'msg' => 'Journal not found'];
                 }
             }
-
-            //oke dari sini sudah ada jurnal dan invoice pack, dan bisa jadi ada kartu
-            $dt = DetailKartuInvoice::create([
+            $dataUpdate = [
                 'kartu_type' => $kartuType,
                 'kartu_id' => $kartuId,
                 'book_journal_id' => session('book_journal_id'),
@@ -80,7 +78,15 @@ class DetailKartuInvoice extends Model
                 'purchase_order_number' => $purchaseOrderNumber,
                 'journal_id' => $journal->id,
                 'amount_journal' => $journal->amount_debet - $journal->amount_kredit,
-            ]);
+            ];
+            //oke dari sini sudah ada jurnal dan invoice pack, dan bisa jadi ada kartu
+            $dt = DetailKartuInvoice::where('kartu_type', $kartuType)
+                ->where('kartu_id', $kartuId)
+                ->first();
+            if ($dt) {
+                $dt->update($dataUpdate);
+            } else
+                $dt = DetailKartuInvoice::create($dataUpdate);
 
             return [
                 'status' => 1,

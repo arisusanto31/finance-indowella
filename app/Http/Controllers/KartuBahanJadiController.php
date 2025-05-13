@@ -6,6 +6,7 @@ use App\Models\Journal;
 use App\Models\KartuBahanJadi;
 use App\Models\KartuBDP;
 use App\Models\KartuStock;
+use App\Models\SalesOrder;
 use App\Models\Stock;
 use App\Services\LockManager;
 use Illuminate\Http\Request;
@@ -131,6 +132,7 @@ class KartuBahanJadiController extends Controller
         $flows = $request->input('flow'); //harusnya ini 1 atau 0
         $spkNumbers = $request->input('spk_number');
         $codeGroup = 140004;
+        $salesDetailIDs = $request->input('sales_detail_id');
         $saleOrderId = $request->input('sales_order_id');
         $salesOrderNumber = $request->input('sales_order_number');
         $lawanCodeGroups = $request->input('lawan_code_group');
@@ -139,7 +141,7 @@ class KartuBahanJadiController extends Controller
         try {
             DB::beginTransaction();
             $lockManager = new LockManager();
-            foreach ($stockIDs as $row => $stock_id) {
+            foreach ($salesDetailIDs as $row => $saleDetailID) {
                 $qty = $quantitys[$row];
                 $unit = $units[$row];
                 $flow = $flows[$row];
@@ -147,6 +149,7 @@ class KartuBahanJadiController extends Controller
                 if ($lawanCodeGroup == $codeGroup) {
                     throw new \Exception('Lawan code group tidak boleh sama dengan code group');
                 }
+                $stock_id = $stockIDs[$row];
                 $isCustomRupiah = 0;
                 $mutasiRupiahTotal = 0;
                 if ($flow == 0) {
@@ -154,13 +157,12 @@ class KartuBahanJadiController extends Controller
                     $mutasiRupiahTotal = $hpp * $qty;
                     $isCustomRupiah = 1;
                 }
+
                 $stStock = null;
                 if ($lawanCodeGroup == 140001 || $lawanCodeGroup == 140002) {
                     //kalo bahan baku atau barang dagang
                     $stStock = KartuStock::mutationStore(new Request([
                         'stock_id' => $stock_id,
-                        'mutasi_qty_backend' => $qty,
-                        'unit_backend' => $unit,
                         'mutasi_quantity' => $qty,
                         'unit' => $unit,
                         'flow' => $flow == 1 ? 0 : 1,
@@ -172,7 +174,7 @@ class KartuBahanJadiController extends Controller
                         'is_otomatis_jurnal' => 0,
                         'is_custom_rupiah' => $isCustomRupiah,
                         'mutasi_rupiah_total' => $mutasiRupiahTotal,
-                    ]), false,$lockManager);
+                    ]), false, $lockManager);
                     if ($stStock['status'] == 0) {
                         throw new \Exception($stStock['msg']);
                     }
@@ -180,8 +182,6 @@ class KartuBahanJadiController extends Controller
                     //kalo dari barang dalam proses
                     $stStock = KartuBDP::mutationStore(new Request([
                         'stock_id' => $stock_id,
-                        'mutasi_qty_backend' => $qty,
-                        'unit_backend' => $unit,
                         'mutasi_quantity' => $qty,
                         'unit' => $unit,
                         'flow' => $flow == 1 ? 0 : 1,
@@ -193,15 +193,13 @@ class KartuBahanJadiController extends Controller
                         'is_otomatis_jurnal' => 0,
                         'is_custom_rupiah' => $isCustomRupiah,
                         'mutasi_rupiah_total' => $mutasiRupiahTotal,
-                    ]), false,$lockManager);
+                    ]), false, $lockManager);
                     if ($stStock['status'] == 0) {
                         throw new \Exception($stStock['msg']);
                     }
                 }
                 $st = KartuBahanJadi::mutationStore(new Request([
                     'stock_id' => $stock_id,
-                    'mutasi_qty_backend' => $qty,
-                    'unit_backend' => $unit,
                     'mutasi_quantity' => $qty,
                     'unit' => $unit,
                     'flow' => $flow,
@@ -214,7 +212,7 @@ class KartuBahanJadiController extends Controller
                     'is_otomatis_jurnal' => 1,
                     'is_custom_rupiah' => $isCustomRupiah,
                     'mutasi_rupiah_total' => $mutasiRupiahTotal,
-                ]), false,$lockManager);
+                ]), false, $lockManager);
                 $allSt[] = $st;
                 if ($st['status'] == 0) {
                     throw new \Exception($st['msg']);

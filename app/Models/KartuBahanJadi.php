@@ -129,7 +129,7 @@ class KartuBahanJadi extends Model
         ];
     }
 
-    public static function mutationStore(Request $request, $useTransaction = true, ?LockManager $lockManager=null)
+    public static function mutationStore(Request $request, $useTransaction = true, ?LockManager $lockManager = null)
     {
 
 
@@ -162,6 +162,8 @@ class KartuBahanJadi extends Model
                 ];
             }
             $codeGroupName = $chart->name;
+            $lawanChart = ChartAccount::where('code_group', $lawanCodeGroup)->first();
+            $lawanCodeGroupName = $lawanChart ? $lawanChart->name : null;
             if ($request->input('mutasi_rupiah_total'))
                 $mutasiRupiahTotal = format_db($request->input('mutasi_rupiah_total'));
             else
@@ -214,11 +216,11 @@ class KartuBahanJadi extends Model
                     //keluar
                     $codeDebet = $lawanCodeGroup;
                     $codeKredit = $codeGroup;
-                    $desc = 'bahan dalam proses keluar ' . $spkNumber;
+                    $desc = 'barang jadi keluar dari' . $spkNumber . 'ke ' . $lawanCodeGroupName;
                 } else {
                     $codeDebet = $codeGroup;
                     $codeKredit = $lawanCodeGroup;
-                    $desc = 'bahan dalam proses masuk ' . $spkNumber;
+                    $desc = 'barang jadi masuk ke ' . $spkNumber . ' dari ' . $lawanCodeGroupName;
                 }
                 $kredits = [
                     [
@@ -227,6 +229,7 @@ class KartuBahanJadi extends Model
                         'amount' => $amount,
                         'reference_id' => null,
                         'reference_type' => null,
+                        'toko_id'=>$sales->toko_id,
                     ],
                 ];
                 $debets = [
@@ -236,6 +239,7 @@ class KartuBahanJadi extends Model
                         'amount' => $amount,
                         'reference_id' => null,
                         'reference_type' => null,
+                        'toko_id'=>$sales->toko_id,
                     ],
                 ];
                 $st = JournalController::createBaseJournal(new Request([
@@ -247,7 +251,7 @@ class KartuBahanJadi extends Model
                     'title' => 'create mutation transaction',
                     'url_try_again' => 'try_again'
 
-                ]), false,$lockManager);
+                ]), false, $lockManager);
                 if ($st['status'] != 1) return $st;
                 $number = $st['journal_number'];
                 $journal = Journal::where('journal_number', $number)->where('code_group', 140004)->first();

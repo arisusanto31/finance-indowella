@@ -79,13 +79,11 @@ class KartuDPSalesController extends Controller
     public function refresh($id)
     {
         $kartu = KartuDPSales::find($id);
-        $detail = DetailKartuInvoice::where('kartu_id', $kartu->id)->where('kartu_type', get_class($kartu))->first();;
-        if (!$detail) {
-            $st = $kartu->createDetailKartuInvoice();
-            if ($st['status'] == 0) {
-                return $st;
-            }
+        $st = $kartu->createDetailKartuInvoice();
+        if ($st['status'] == 0) {
+            return $st;
         }
+
         return [
             'status' => 1,
             'msg' => $kartu
@@ -100,7 +98,7 @@ class KartuDPSalesController extends Controller
         $view->person = $kh->person;
         $data = KartuDPSales::where('sales_order_number', $nomer)->get();
         $view->data = $data;
-        
+
         return $view;
     }
 

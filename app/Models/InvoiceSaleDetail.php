@@ -2,14 +2,19 @@
 
 namespace App\Models;
 
+use App\Traits\HasModelDetailKartuInvoice;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class InvoiceSaleDetail extends Model
 {
+
+    use HasModelDetailKartuInvoice;
     protected $fillable = [
         'invoice_pack_number',
         'invoice_pack_id',
+        'sales_order_number',
+        'sales_order_id',
         'book_journal_id',
         'stock_id',
         'custom_stock_name',

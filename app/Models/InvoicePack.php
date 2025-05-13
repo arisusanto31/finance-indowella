@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\InvoiceSaleDetail;
 use App\Models\Customer;
 use App\Traits\HasModelChilds;
+use Illuminate\Support\Str;
 
 class InvoicePack extends Model
 {
@@ -17,6 +18,7 @@ class InvoicePack extends Model
         'person_id',
         'person_type',
         'reference_model',
+        'sales_order_id',
         'invoice_date',
         'total_price',
         'status',
@@ -25,7 +27,32 @@ class InvoicePack extends Model
         'reference_type',
     ];
 
+    protected static function booted()
+    {
+        static::addGlobalScope('journal', function ($query) {
+            $from = $query->getQuery()->from ?? 'invoice_packs'; // untuk dukung alias `j` kalau pakai from('journals as j')
+            if (Str::contains($from, ' as ')) {
+                [$table, $alias] = explode(' as ', $from);
+                $alias = trim($alias);
+            } else {
+                $alias = $from;
+            }
 
+            $query->where(function ($q) use ($alias) {
+                $q->whereNull("{$alias}.book_journal_id")
+                    ->orWhere("{$alias}.book_journal_id", session('book_journal_id'));
+            });
+        });
+    }
+
+    public static function cekAvail($code, $count)
+    {
+        $invoice = InvoicePack::where('invoice_number', $code . $count)->first();
+        if ($invoice) {
+            return ['status' => 0, 'msg' => 'Invoice number already exists'];
+        }
+        return ['status' => 1, 'msg' => 'Invoice number available'];
+    }
     public function invoiceDetails()
     {
         return $this->getChilds('invoice_pack_id');
@@ -50,6 +77,6 @@ class InvoicePack extends Model
             $val['code_group_name'] = $val->journal->chartAccount->name;
             return $val;
         })->groupBy('type_kartu');
-        return $kartus??[];
+        return $kartus ?? [];
     }
 }

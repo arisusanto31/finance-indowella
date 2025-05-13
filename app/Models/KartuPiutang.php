@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Http\Controllers\JournalController;
+use App\Services\LockManager;
+use App\Traits\HasModelDetailKartuInvoice;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -14,7 +16,7 @@ use Illuminate\Support\Str;
 class KartuPiutang extends Model
 {
     //
-
+    use HasModelDetailKartuInvoice;
     protected $table = 'kartu_piutangs';
     public $timestamps = true;
     public function person()
@@ -114,8 +116,8 @@ class KartuPiutang extends Model
 
 
 
-                //wes sudah terhitung sema tinggal pudate
 
+                $kartu->createDetailKartuInvoice();
             } catch (LockTimeoutException $e) {
             } finally {
                 $lock->release();
@@ -123,7 +125,8 @@ class KartuPiutang extends Model
             info('kartu piutang - success create kartu piutang');
             return [
                 'status' => 1,
-                'msg' => $kartu
+                'msg' => $kartu,
+                'journal_number' => $kartu->journal_number,
             ];
         } catch (Throwable $th) {
             $lock->release();
@@ -135,16 +138,17 @@ class KartuPiutang extends Model
         }
         return [
             'status' => 1,
-            'msg' => $kartu
+            'msg' => $kartu,
+            'journal_number' => $kartu->journal_number,
         ];
     }
 
 
-    public static function createMutation(Request $request)
+    public static function createMutation(Request $request, $useTransaction = true, ?LockManager $lockManager = null)
     {
 
-
-        DB::beginTransaction();
+        if ($useTransaction)
+            DB::beginTransaction();
         try {
             $SONumber = $request->input('sales_order_number');
             $amountMutasi = $request->input('amount_mutasi');
@@ -211,7 +215,7 @@ class KartuPiutang extends Model
                     'title' => 'create mutation transaction',
                     'url_try_again' => 'try_again'
 
-                ]), false);
+                ]), false, $lockManager);
                 if ($st['status'] == 0) return $st;
                 $number = $st['journal_number'];
                 $journal = Journal::where('journal_number', $number)->whereBetween('code_group', [120000, 130000])->first();
@@ -241,14 +245,17 @@ class KartuPiutang extends Model
             ]));
 
             if ($st['status'] == 1) {
-                DB::commit();
+                if ($useTransaction)
+                    DB::commit();
                 return $st;
             } else {
-                DB::rollBack();
+                if ($useTransaction)
+                    DB::rollBack();
                 return $st;
             }
         } catch (Throwable $th) {
-            DB::rollBack();
+            if ($useTransaction)
+                DB::rollBack();
             return [
                 'status' => 0,
                 'msg' => $th->getMessage()
@@ -260,11 +267,11 @@ class KartuPiutang extends Model
 
 
 
-    public static function createPelunasan(Request $request)
+    public static function createPelunasan(Request $request, $useTransaction = true, ?LockManager $lockManager = null)
     {
 
-
-        DB::beginTransaction();
+        if ($useTransaction)
+            DB::beginTransaction();
         try {
             $SONumber = $request->input('sales_order_number');
             $sales = SalesOrder::where('sales_order_number', $SONumber)->first();
@@ -321,7 +328,7 @@ class KartuPiutang extends Model
                     'title' => 'create penerimaan penjualan',
                     'url_try_again' => null
 
-                ]), false);
+                ]), false, $lockManager);
                 if ($st['status'] == 0) return $st;
                 $number = $st['journal_number'];
                 $journal = Journal::where('journal_number', $number)->whereBetween('code_group', [120000, 130000])->first();
@@ -353,14 +360,17 @@ class KartuPiutang extends Model
             ]));
 
             if ($st['status'] == 1) {
-                DB::commit();
+                if ($useTransaction)
+                    DB::commit();
                 return $st;
             } else {
-                DB::rollBack();
+                if ($useTransaction)
+                    DB::rollBack();
                 return $st;
             }
         } catch (Throwable $th) {
-            DB::rollBack();
+            if ($useTransaction)
+                DB::rollBack();
             return [
                 'status' => 0,
                 'msg' => $th->getMessage()

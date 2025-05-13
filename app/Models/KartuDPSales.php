@@ -110,6 +110,8 @@ class KartuDPSales extends Model
                 $kartu->book_journal_id = session('book_journal_id');
                 $kartu->save();
                 $salesOrder = SalesOrder::where('sales_order_number', $SONumber)->first();
+
+
                 $kartu->createDetailKartuInvoice();
                 //wes sudah terhitung sema tinggal pudate
             } catch (LockTimeoutException $e) {

@@ -9,10 +9,16 @@ use App\Models\InvoiceSaleDetail;
 use App\Models\Stock;
 use App\Models\StockCategory;
 use App\Models\InvoicePack;
+use App\Models\Journal;
+use App\Models\KartuBahanJadi;
+use App\Models\KartuDPSales;
+use App\Models\KartuPiutang;
 use App\Models\ManufSales;
 use App\Models\ManufSalesPackage;
 use App\Models\RetailSales;
 use App\Models\RetailSalesPackage;
+use App\Models\SalesOrder;
+use App\Services\LockManager;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -173,11 +179,192 @@ class InvoiceSaleController extends Controller
 
 
     //fungsi ini untuk create invoice dari Sales Order
-    public function createInvoices(Request $request) {
-        
+    public function createInvoices(Request $request)
+    {
+        $lockManager = new LockManager();
+        // return ['status' => 0, 'msg' => $request->all()];
+        $codeGroupPenjualans = $request->input('code_group_penjualan');
+        $customStockNames = $request->input('custom_stock_name');
+        $salesOrderID = $request->input('sales_order_id');
+        $salesOrderNumber = $request->input('sales_order_number');
+        $hpps = $request->input('hpp');
+        $codeGroupPiutangs = $request->input('code_group_piutang');
+        $quantities = $request->input('quantity');
+        $units = $request->input('unit');
+        $stockIDs = $request->input('stock_id');
+        $productionNumbers = $request->input('production_number');
+        $sales = SalesOrder::find($salesOrderID);
+        $salesDetailIDs = $request->input('sales_detail_id');
+        DB::beginTransaction();
+        try {
+            $lastInv = InvoicePack::where('person_id', $sales->customer_id)
+                ->where('person_type', Customer::class)->orderBy('id', 'desc')->first();
+            $count = $lastInv ? intval(explode('-', $lastInv->invoice_number)[2]) : 0;
+            $invoiceNumber = sprintf("INV-%04d-%03d", $sales->customer_id, $count + 1);
+            $realDataSales = $sales->details->keyBy('id')->all();
+            foreach ($salesDetailIDs as $i => $saleDetailID) {
+                $dataDetailSale = $realDataSales[$saleDetailID];
+                $discount = $quantities[$i] * $dataDetailSale->discount / $dataDetailSale->quantity;
+                $grouped[] = [
+                    'invoice_pack_number' => $invoiceNumber,
+                    'stock_id' => $stockIDs[$i],
+                    'quantity' => $quantities[$i],
+                    'unit' => $units[$i],
+                    'price' => $dataDetailSale->price,
+                    'discount' =>  $discount,
+                    'customer_id' => $sales->customer_id,
+                    'sales_order_id' => $saleDetailID,
+                    'sales_order_number' => $salesOrderNumber,
+                    'book_journal_id' => session('book_journal_id'),
+                    'total_price' => $dataDetailSale->price * $quantities[$i] - $discount,
+                    'toko_id' => $dataDetailSale->toko_id,
+                    'custom_stock_name' => $customStockNames[$i] ?? null,
+                ];
+            }
+            $invoicePack = InvoicePack::create([
+                'invoice_number' => $invoiceNumber,
+                'book_journal_id' => session('book_journal_id'),
+                'person_id' => $sales->customer_id,
+                'person_type' => Customer::class,
+                'total_price' => collect($grouped)->sum('total_price'),
+                'status' => 'draft',
+                'toko_id' => $sales->toko_id,
+                'sales_order_id' => $salesOrderID,
+                'reference_id' => null,
+                'reference_type' => null,
+                'reference_model' => InvoiceSaleDetail::class,
+            ]);
+            //create pack ya
+            $details = [];
+            foreach ($grouped as $data) {
+                $data['invoice_pack_id'] = $invoicePack->id;
+                $details[] = InvoiceSaleDetail::create($data);
+            }
+
+
+            foreach ($salesDetailIDs as $i => $saleDetailID) {
+                $kartu = KartuPiutang::createMutation(new Request([
+                    'invoice_pack_number' => $invoicePack->invoice_number,
+                    'amount_mutasi' => $invoicePack->total_price,
+                    'person_id' => $invoicePack->person_id,
+                    'person_type' => $invoicePack->person_type,
+                    'code_group' => $codeGroupPiutangs[$i],
+                    'lawan_code_group' => $codeGroupPenjualans[$i],
+                    'sales_order_number' => $salesOrderNumber,
+                    'is_otomatis_jurnal' => 1,
+                    'description' => 'penjualan ' . $customStockNames[$i] . ' nomer ' . $invoicePack->invoice_number,
+                ]), $lockManager);
+                if ($kartu['status'] == 0) {
+                    throw new \Exception($kartu['msg']);
+                }
+                $journalNumber = $kartu['msg']->journal_number;
+                $journal = Journal::where('journal_number', $journalNumber)->where('code_group', $codeGroupPenjualans[$i])->first();
+                $journalID = $journal ? $journal->id : null;
+                $dataSaleDetail = InvoiceSaleDetail::where('custom_stock_name', $customStockNames[$i])->where('invoice_pack_number', $invoicePack->invoice_number)->first();
+
+                $dataSaleDetail->journal_id = $journalID;
+                $dataSaleDetail->journal_number = $journalNumber;
+                $dataSaleDetail->save();
+                $dataSaleDetail->createDetailkartuInvoice();
+
+                //disini harusnya udah jadi jurnal piutang dan penjualannya
+                //tinggal hubungkan jurnal penjualannya ke kartu penjualannya
+
+                $st = KartuBahanJadi::mutationStore(new Request([
+                    'stock_id' => $stockIDs[$i],
+                    'mutasi_quantity' => $quantities[$i],
+                    'unit' => $units[$i],
+                    'flow' => 1, //keluar
+                    'sales_order_number' => $salesOrderNumber,
+                    'production_number' => $productionNumbers[$i],
+                    'sales_order_id' => $salesOrderID,
+                    'code_group' => 140004,
+                    'custom_stock_name' => $customStockNames[$i],
+                    'lawan_code_group' => 601000, //hpp
+                    'is_otomatis_jurnal' => 1,
+                ]), false, $lockManager);
+                if ($st['status'] == 0) {
+                    throw new \Exception($st['msg']);
+                }
+            }
+
+            DB::commit();
+            $lockManager->releaseAll();
+            //buat jurnal penjualan
+            return ['status' => 1, 'pack' => $invoicePack, 'details' => $details];
+        } catch (Throwable $th) {
+            DB::rollBack();
+            $lockManager->releaseAll();
+            return ['status' => 0, 'msg' => $th->getMessage()];
+        }
     }
 
+    function submitBayarSalesInvoice(Request $request)
+    {
+        $lockManager = new LockManager();
+        $codeGroupPiutang = $request->input('codegroup_piutang');
+        $codeGroupBayar = $request->input('codegroup_bayar');
+        $invoiceNumber = $request->input('invoice_number');
+        $amount = $request->input('amount');
 
+        DB::beginTransaction();
+        try {
+            $invoicePack = InvoicePack::where('invoice_number', $invoiceNumber)->first();
+            if (!$invoicePack) {
+                throw new \Exception('Invoice tidak ditemukan');
+            }
+            $sales = SalesOrder::find($invoicePack->sales_order_id);
+            $kartu = KartuPiutang::createPelunasan(new Request([
+                'invoice_pack_number' => $invoiceNumber,
+                'amount_bayar' => $amount,
+                'person_id' => $invoicePack->person_id,
+                'person_type' => $invoicePack->person_type,
+                'code_group' => $codeGroupPiutang,
+                'lawan_code_group' => $codeGroupBayar,
+                'sales_order_number' => $sales->sales_order_number,
+                'is_otomatis_jurnal' => 1,
+                'description' => 'pelunasan piutang dari invoice ' . $invoicePack->invoice_number,
+            ]), $lockManager);
+            if ($kartu['status'] == 0) {
+                throw new \Exception($kartu['msg']);
+            }
+            $journalNumber = $kartu['journal_number'];
+            $journal = Journal::where('journal_number', $journalNumber)->where('code_group', $codeGroupBayar)->first();
+            $journalID = $journal ? $journal->id : null;
+            if ($codeGroupBayar == 214000) {
+                //uang muka penjualan
+                $dpsales = KartuDPSales::createPelunasan(new Request([
+                    'invoice_pack_number' => $invoiceNumber,
+                    'amount_bayar' => $amount,
+                    'person_id' => $invoicePack->person_id,
+                    'person_type' => $invoicePack->person_type,
+                    'code_group' => 214000,
+                    'lawan_code_group' => $codeGroupPiutang,
+                    'sales_order_number' => $sales->sales_order_number,
+                    'is_otomatis_jurnal' => 0,
+                    'description' => 'pelunasan piutang dari invoice ' . $invoicePack->invoice_number,
+                ]), $lockManager);
+                if ($dpsales['status'] == 0) {
+                    throw new \Exception($dpsales['msg']);
+                }
+                $kartuDPSales = $dpsales['msg'];
+                $kartuDPSales->journal_id = $journalID;
+                $kartuDPSales->journal_number = $journalNumber;
+                $kartuDPSales->save();
+                $kartuDPSales->createDetailKartuInvoice();
+            }
+            DB::commit();
+            $lockManager->releaseAll();
+            return [
+                'status' => 1,
+                'msg' => $kartu['msg'],
+            ];
+        } catch (Throwable $th) {
+            DB::rollBack();
+            $lockManager->releaseAll();
+            return ['status' => 0, 'msg' => $th->getMessage()];
+        }
+    }
 
 
     function openImport($book_journal_id)

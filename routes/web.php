@@ -174,14 +174,6 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('search-link-journal', [KartuHutangController::class, 'searchLinkJournal'])->name('search-link-journal');
         });
 
-        Route::prefix('kartu-piutang')->name('kartu-piutang.')->group(function () {
-            Route::resource('main', KartuPiutangController::class);
-            Route::post('create-mutation', [KartuPiutangController::class, 'createMutation'])->name('create-mutation');
-            Route::post('create-pelunasan', [KartuPiutangController::class, 'createPelunasan'])->name('create-pelunasan');
-            Route::get('get-summary', [KartuPiutangController::class, 'getSummary'])->name('get-summary');
-            Route::get('show-detail/{id}', [KartuPiutangController::class, 'showDetail'])->name('show-detail');
-            Route::get('search-link-journal', [KartuPiutangController::class, 'searchLinkJournal'])->name('search-link-journal');
-        });
 
         Route::prefix('kartu-piutang')->name('kartu-piutang.')->group(function () {
             Route::resource('main', KartuPiutangController::class);
@@ -190,6 +182,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('get-summary', [KartuPiutangController::class, 'getSummary'])->name('get-summary');
             Route::get('show-detail/{id}', [KartuPiutangController::class, 'showDetail'])->name('show-detail');
             Route::get('search-link-journal', [KartuPiutangController::class, 'searchLinkJournal'])->name('search-link-journal');
+            Route::get('refresh/{id}', [KartuPiutangController::class, 'refresh'])->name('refresh');
         });
         Route::prefix('kartu-dp-sales')->name('kartu-dp-sales.')->group(function () {
             Route::resource('main', KartuDPSalesController::class);
@@ -269,6 +262,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::get('show-detail/{id}', [InvoicePackController::class, 'showDetail'])->name('detail');
         Route::post('create-claim-pembelian', [InvoicePackController::class, 'createClaimPembelian'])->name('create-claim-pembelian');
         Route::post('create-claim-penjualan', [InvoicePackController::class, 'createClaimPenjualan'])->name('create-claim-penjualan');
+        Route::get('get-item-invoice-aktif/{id}', [InvoicePackController::class, 'getItemInvoiceAktif'])->name('get-item-invoice-aktif');
         Route::get('open-import/{id}', [InvoiceSaleController::class, 'openImport'])->name('open-import');
         Route::post('create-invoices', [InvoiceSaleController::class, 'createInvoices'])->name('create-invoices');
 
@@ -277,6 +271,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::get('sales-open-import/{id}', [SalesOrderController::class, 'openImport'])->name('sales-open-import');
         Route::get('show-sales-detail/{id}', [SalesOrderController::class, 'showDetail'])->name('sale-order-detail');
         Route::get('update-input-invoice/{id}', [SalesOrderController::class, 'updateInputInvoice'])->name('update-input-invoice');
+
+        Route::post('submit-bayar-sales-invoice', [InvoiceSaleController::class, 'submitBayarSalesInvoice']);
     });
 });
 
