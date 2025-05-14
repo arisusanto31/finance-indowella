@@ -10,6 +10,7 @@ use App\Models\Journal;
 use App\Models\JournalJobFailed;
 use App\Models\JournalKey;
 use App\Models\Toko;
+use App\Services\LockManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
@@ -217,12 +218,15 @@ class JournalController extends Controller
 
 
 
-    public static function createBaseJournal(Request $request, $useTransaction = true)
+    public static function createBaseJournal(Request $request, $useTransaction = true, ?LockManager $lockManager = null)
     {
         $urlTryAgain = $request->input('url_try_again');
         $isBackDate = $request->input('is_backdate');
         $date = $isBackDate == 1 ? $request->input('date') : Date('Y-m-d H:i:s');
         $key = JournalKey::orderBy('id', 'desc')->first();
+        if ($lockManager == null) {
+            $lockManager = new LockManager();
+        }
         if ($key && createCarbon($date) < $key->key_at) {
             JournalJobFailed::create(new Request([
                 'type' => $request->input('title'),
@@ -236,7 +240,7 @@ class JournalController extends Controller
             ];
         }
 
-        $callback = function () use ($request, $urlTryAgain, $date, $isBackDate) {
+        $callback = function () use ($request, $urlTryAgain, $date, $lockManager, $isBackDate, $useTransaction) {
             $kredits = $request->input('kredits');
             $debets = $request->input('debets');
             $type = $request->input('type');
@@ -274,6 +278,7 @@ class JournalController extends Controller
 
             foreach ($debets as $debet) {
                 self::addExpireTimeLocks($allLocks);
+
                 $st = Journal::generateJournal(new Request([
                     'journal_number' => $theJournalNumber,
                     'code_group' => $debet['code_group'],
@@ -287,17 +292,17 @@ class JournalController extends Controller
                     'toko_id' =>  array_key_exists('toko_id', $debet) ? $debet['toko_id'] : null,
                     'user_backdate_id' => $userBackdate,
                     'date' => $date
-                ]));
-                $allLocks[] = ['lock' => $st['lock'], 'name' => $st['lock_name']];
+                ]), $lockManager);
+                // $allLocks[] = ['lock' => $st['lock'], 'name' => $st['lock_name']];
                 if ($st['status'] == 0) {
-                    self::releaseLocks($allLocks);
+                    // self::releaseLocks($allLocks);
                     JournalJobFailed::create(new Request([
                         'type' => $request->input('title'),
                         'request' => json_encode($request),
                         'response' => json_encode($st['msg']),
                         'url_try_again' => $urlTryAgain
                     ]));
-                    return $st;
+                    throw new \Exception($st['msg']);
                 }
                 $allJournals[] = $st['msg'];
             }
@@ -317,43 +322,52 @@ class JournalController extends Controller
                     'toko_id' => array_key_exists('toko_id', $kredit) ? $kredit['toko_id'] : null,
                     'user_backdate_id' => $userBackdate,
                     'date' => $date
-                ]));
-                $allLocks[] = ['lock' => $st['lock'], 'name' => $st['lock_name']];
+                ]), $lockManager);
+                // $allLocks[] = ['lock' => $st['lock'], 'name' => $st['lock_name']];
                 if ($st['status'] == 0) {
-                    self::releaseLocks($allLocks);
+                    // self::releaseLocks($allLocks);
                     JournalJobFailed::create(new Request([
                         'type' => $request->input('title'),
                         'request' => json_encode($request),
                         'response' => json_encode($st['msg']),
                         'url_try_again' => $urlTryAgain
                     ]));
-                    return $st;
+                    throw new \Exception($st['msg']);
                 }
                 $allJournals[] = $st['msg'];
             }
 
-            DB::afterCommit(function () use ($allLocks, $allJournals, $theJournalNumber) {
-                self::releaseLocks($allLocks);
-                foreach ($allJournals as $thej) {
-                    $journal = Journal::find($thej->id);
-                    if ($journal->is_backdate == 1) {
-                        RecalculateJournalJob::dispatch($journal->id);
-                    }
-                    $journal->updateLawanCode();
-                }
-            });
 
+
+            // DB::afterCommit(function () use ($allLocks, $allJournals, $theJournalNumber) {
+            //     self::releaseLocks($allLocks);
+            //     info('recalculate journal ' . $theJournalNumber);
+            //     foreach ($allJournals as $thej) {
+            //         $journal = Journal::find($thej->id);
+            //         if ($journal->is_backdate == 1) {
+            //             RecalculateJournalJob::dispatch($journal->id);
+            //         }
+            //         $journal->updateLawanCode();
+            //     }
+            // });
+            if ($useTransaction == true) {
+                //lock manual dilepas setelah semua proses transaksi selesai
+                $lockManager->releaseAll();
+            }
             return [
                 'status' => 1,
                 'msg' => 'success',
-                'journal_number' => $theJournalNumber
+                'journal_number' => $theJournalNumber,
+                'allLocks' => $allLocks
             ];
         };
 
         try {
             return $useTransaction ? DB::transaction($callback) : $callback();
         } catch (\Throwable $e) {
-            self::releaseLocks($allLocks ?? []);
+            if ($useTransaction == true) {
+                $lockManager->releaseAll();
+            }
             JournalJobFailed::create(new Request([
                 'type' => $request->input('title'),
                 'request' => json_encode($request),

@@ -57,6 +57,7 @@ class StockController extends Controller
                 'category_id' => 'required|integer',
                 'parent_category_id' => 'required|integer',
                 'unit_backend' => 'required|string|max:10',
+                'type'=> 'required|string|max:10',
             ]);
 
             Stock::create($validated);
@@ -229,7 +230,7 @@ class StockController extends Controller
         return $view;
     }
 
-    function sync(Request $request)
+    public static function sync(Request $request)
     {
 
         DB::beginTransaction();
@@ -244,24 +245,14 @@ class StockController extends Controller
             $unit_backend = $datastock['unit_backend'] ?? 'Pcs';
             $stock_id = $datastock['master_stock_id'];
             $units = $datastock['units_manual'] ?? [];
-            $category = StockCategory::where('name', $category_name)->first();
-            if (!$category) {
-                $category = StockCategory::create([
-                    'name' => $category_name
-                ]);
-            }
-            $parentCategory = StockCategory::where('name', $parent_category_name)->first();
-            if (!$parentCategory) {
-                $parentCategory = StockCategory::create([
-                    'name' => $parent_category_name
-                ]);
-            }
+            $parentcat = StockCategory::addCategoryIfNotExists($parent_category_name);
+            $cat = StockCategory::addCategoryIfNotExists($category_name, $parent_category_name);
 
 
             $dataFix = [
                 'name' => $name,
-                'category_id' => $category->id,
-                'parent_category_id' => $parentCategory->id,
+                'category_id' => $cat->id,
+                'parent_category_id' => $parentcat->id,
                 'unit_default' => $unit_default,
                 'unit_backend' => $unit_backend,
                 'book_journal_id' => session('book_journal_id'),
@@ -310,6 +301,7 @@ class StockController extends Controller
             return [
                 'status' => 1,
                 'msg' => $stock->refresh(),
+                'request'=> $request->all()
 
             ];
         } catch (Throwable $th) {

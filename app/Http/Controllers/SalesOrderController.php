@@ -1,0 +1,257 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\BookJournal;
+use App\Models\Customer;
+use App\Models\InvoicePack;
+use App\Models\KartuBahanJadi;
+use App\Models\ManufSales;
+use App\Models\ManufSalesPackage;
+use App\Models\RetailSales;
+use App\Models\RetailSalesPackage;
+use App\Models\SaleOrderDetail;
+use App\Models\SalesOrder;
+use App\Models\SalesOrderDetail;
+use App\Models\Stock;
+use App\Models\StockCategory;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Throwable;
+
+
+class SalesOrderController extends Controller
+{
+    //
+    public function index()
+    {
+        $salesOrders = \App\Models\SalesOrderDetail::with('customer:name,id', 'stock:name,id')
+            ->get()
+            ->groupBy('sales_order_number');
+        return view('invoice.sales-order', compact('salesOrders'));
+    }
+
+    public function store(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $request->validate([
+                'sales_order_number' => 'required|string|max:255',
+                'customer_id' => 'nullable|integer',
+                'customer_name' => 'nullable|string|max:255',
+                'reference_stock_id' => 'nullable|array',
+                'reference_stock_id.*' => 'nullable|integer',
+                'reference_stock_type' => 'nullable|string',
+                'stock_id' => 'nullable|array',
+                'stock_id.*' => 'nullable|integer',
+                'quantity' => 'required|array',
+                'quantity.*' => 'required|numeric',
+                'price_unit' => 'required|array',
+                'price_unit.*' => 'required|numeric',
+                'unit' => 'required|array',
+                'unit.*' => 'required|string',
+                'total_price' => 'required|array',
+                'total_price.*' => 'required|string',
+                'toko_id' => 'required|integer',
+                'reference_id' => 'nullable|integer',
+                'reference_type' => 'nullable|string',
+                'custom_stock_name' => 'nullable|array',
+                'custom_stock_name.*' => 'nullable|string',
+            ]);
+            $customerID = null;
+            $arrayStockID = [];
+            if (!$request->stock_id) {
+                if ($request->reference_stock_id) {
+                    foreach ($request->reference_stock_id as $row => $refStockID) {
+                        $refType = $request->reference_stock_type;
+                        $stock = Stock::where('reference_stock_type', $refType)->where('reference_stock_id', $refStockID)->first();
+                        if (!$stock) {
+                            $refStock = $refType::find($refStockID);
+                            if ($refStock) {
+                                $stat = StockController::sync(new Request([
+                                    'data' => [
+                                        'id' => $refStock->id,
+                                        'name' => $refStock->name,
+                                        'unit_backend' => $refStock->unit_backend,
+                                        'unit_default' => $refStock->unit_info,
+                                        'units_manual' => $refStock->getUnits(),
+                                        'category_id' => $refStock->category_id,
+                                        'category' => collect($refStock->category)->only('id', 'name'),
+                                        'parent_category_id' => $refStock->parent_category_id,
+                                        'parent_category' => collect($refStock->parentCategory)->only('id', 'name'),
+                                        'master_stock_id' => null,
+                                    ],
+                                    'stock_id' => $refStock->id,
+                                ]));
+                                if ($stat['status'] == 1) {
+                                    $stock = $stat['msg'];
+                                } else {
+                                    return ['status' => 0, 'msg' => 'pembuatan stock ' . $refStock->name . ' gagal,' . $stat['msg']];
+                                }
+                            } else {
+                                return ['status' => 0, 'msg' => 'Stock tidak ditemukan'];
+                            }
+                        }
+                        $arrayStockID[] = $stock->id;
+                    }
+                } else {
+                    return ['status' => 0, 'msg' => 'Stock harus diisi'];
+                }
+            } else {
+                $arrayStockID = $request->stock_id;
+            }
+
+            if (!$request->customer_id) {
+                if ($request->customer_name) {
+                    $customer = Customer::where('name', $request->customer_name)->first();
+                    if (!$customer) {
+                        $customer = Customer::create([
+                            'name' => $request->customer_name,
+                        ]);
+                    }
+                    $customerID = $customer->id;
+                } else {
+                    return ['status' => 0, 'msg' => 'Customer harus diisi'];
+                }
+            } else {
+                $customerID = $request->customer_id;
+            }
+
+            $sales_order_number = $request->sales_order_number;
+            $grouped = [];
+
+            foreach ($arrayStockID as $i => $stockId) {
+                $grouped[] = [
+                    'sales_order_number' => $sales_order_number,
+                    'stock_id' => $stockId,
+                    'quantity' => $request->quantity[$i],
+                    'unit' => $request->unit[$i],
+                    'price' => $request->price_unit[$i],
+                    'discount' => $request->discount[$i] ?? 0,
+                    'customer_id' => $customerID,
+                    'book_journal_id' => session('book_journal_id'),
+                    'total_price' => format_db($request->total_price[$i]) ?? 0,
+                    'toko_id' => $request->toko_id,
+                    'custom_stock_name' => $request->custom_stock_name[$i] ?? null,
+                ];
+            }
+
+
+            //create pack ya
+            $invoicePack = SalesOrder::create([
+                'sales_order_number' => $sales_order_number,
+                'book_journal_id' => session('book_journal_id'),
+                'customer_id' => $customerID,
+                'total_price' => collect($grouped)->sum('total_price'),
+                'status' => 'draft',
+                'toko_id' => $request->toko_id,
+                'reference_id' => $request->input('reference_id'),
+                'reference_type' => $request->input('reference_type'),
+            ]);
+
+            foreach ($grouped as $data) {
+                $data['invoice_pack_id'] = $invoicePack->id;
+                SalesOrderDetail::create($data);
+            }
+            DB::commit();
+            return ['status' => 1, 'msg' => 'Data berhasil disimpan'];
+        } catch (Throwable $e) {
+            DB::rollBack();
+            return ['status' => 0, 'msg' => $e->getMessage()];
+        }
+    }
+
+    public function showDetail($number)
+    {
+        $data = SalesOrder::where('sales_order_number', $number)->first();
+        $invdetails = SalesOrderDetail::with('stock')->where('sales_order_number', $number)->get();
+
+        $data['details'] = $invdetails;
+        $data['kartus'] = $data->getAllKartu();
+        $data['resume_total'] = $data->getTotalKartu();
+        $view = view('invoice.modal._sale-detail');
+        $view->data = $data;
+
+        return $view;
+    }
+
+    function openImport($book_journal_id)
+    {
+        $book = BookJournal::find($book_journal_id);
+        if (!$book) {
+            return ['status' => 0, 'msg' => 'Book tidak ditemukan'];
+        }
+        $month = getInput("month") ? getInput("month") : date('m');
+        $year = getInput("year") ? getInput("year") : date('Y');
+
+        $defaultDB = config('database.connections.mysql.database');
+        $saleModel = $book->name == 'Buku Toko' ? RetailSalesPackage::class : ManufSalesPackage::class;
+        $modeBook = $book->name == 'Buku Toko' ? 'toko' : 'manuf';
+        $sales = $saleModel::from('packages as pack')
+            ->leftJoin($defaultDB . '.sales_orders as inv', function ($join) use ($saleModel) {
+                $join->on('pack.id', '=', 'inv.reference_id')
+                    ->where('inv.reference_type', $saleModel);
+            })->whereNull('inv.id')->whereMonth('pack.created_at', $month)->whereYear('pack.created_at', $year);
+        if ($book->name == 'Buku Toko') {
+            // la disini ngambil data yang dari toko aja yaa
+            $sales = $sales->where('pack.is_ppn', 1)->select(
+                'pack.id',
+                DB::raw('"App\\\Models\\\RetailSalesPackage" as reference_type'),
+                DB::raw('"App\\\Models\\\RetailStock" as stock_type'),
+                'pack.is_ppn',
+                'pack.is_wajib_lapor',
+                'pack.sales_order_number',
+                DB::raw('"anonim" as customer_name'),
+            );
+        } else {
+            $sales = $sales->where('pack.is_ppn', 1)->join('customers as c', 'c.id', '=', 'pack.customer_id')->select(
+                'pack.id',
+                DB::raw('"App\\\Models\\\ManufSalesPackage" as reference_type'),
+                DB::raw('"App\\\Models\\\ManufStock" as stock_type'),
+                'pack.is_ppn',
+                'pack.is_wajib_lapor',
+                'pack.sales_order_number',
+                'pack.customer_id',
+                'c.instance as customer_name',
+            );
+        }
+
+        $sales = $sales->with('detailSales')->get()->map(function ($val) use ($modeBook) {
+            $val['details'] = collect($val['detailSales'])->map(function ($detailVal) use ($modeBook) {
+
+                $data = [];
+                $data['stock_id'] = $detailVal['stock_id'];
+                $data['quantity'] = $detailVal['quantity'];
+                $data['unit'] = $modeBook == 'toko' ? $detailVal['unit'] : $detailVal['unit_info'];
+                $data['price'] = $detailVal['recent_selling_price'];
+                $data['total_price'] = $detailVal['total'];
+                $data['discount'] = $detailVal['discount'];
+                $data['customer_id'] = $detailVal['customer_id'];
+                $data['stock_name'] = $detailVal['stock_name'];
+
+                return $data;
+            });
+            return collect($val)->only('id', 'reference_type', 'is_ppn', 'customer_name', 'is_wajib_lapor', 'details', 'sales_order_number', 'stock_type');
+        });
+
+        $view = view('invoice.modal._sale_order_import');
+        $view->sales = $sales;
+        return $view;
+    }
+
+    public function updateInputInvoice($number)
+    {
+        $bahanJadi = KartuBahanJadi::whereIn('id', function ($q) use ($number) {
+            $q->from('kartu_bahan_jadis')->select(DB::raw('max(id)'))
+                ->where('sales_order_number', $number)
+                ->groupBy('stock_id', 'sales_order_number');
+        })->where('sales_order_number', $number)->get()->keyBy('stock_id');
+        $details = SalesOrderDetail::where('sales_order_number', $number)->get();
+
+        return [
+            'status' => 1,
+            'msg' => $details,
+            'bahan_jadi' => $bahanJadi,
+        ];
+    }
+}

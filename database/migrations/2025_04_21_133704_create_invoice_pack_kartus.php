@@ -14,12 +14,16 @@ return new class extends Migration
         Schema::create('detail_kartu_invoices', function (Blueprint $table) {
             $table->id();
             $table->integer('book_journal_id');
-            $table->integer('invoice_pack_id');
-            $table->string('invoice_number');
+            $table->integer('invoice_pack_id')->nullable();
+            $table->integer('sales_order_id')->nullable();
+            $table->integer('purchase_order_id')->nullable();
+            $table->string('invoice_pack_number')->nullable();
+            $table->string('sales_order_number')->nullable();
+            $table->string('purchase_order_number')->nullable();
             $table->string('kartu_type')->nullable();
             $table->integer('kartu_id')->nullable();
             $table->integer('journal_id')->nullable();
-            $table->decimal('amount_journal',15,2)->nullable();
+            $table->decimal('amount_journal', 15, 2)->nullable();
             $table->timestamps();
         });
     }

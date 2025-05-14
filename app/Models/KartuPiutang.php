@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Http\Controllers\JournalController;
+use App\Services\LockManager;
+use App\Traits\HasModelDetailKartuInvoice;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -14,7 +16,7 @@ use Illuminate\Support\Str;
 class KartuPiutang extends Model
 {
     //
-
+    use HasModelDetailKartuInvoice;
     protected $table = 'kartu_piutangs';
     public $timestamps = true;
     public function person()
@@ -48,8 +50,6 @@ class KartuPiutang extends Model
     public static function createKartu(Request $request)
     {
 
-
-
         $personID = $request->input('person_id');
         $personType = $request->input('person_type');
         $lock = Cache::lock('create-kartu-piutang' . $personType . '-' . $personID, 90);
@@ -70,12 +70,15 @@ class KartuPiutang extends Model
                     $amount_debet = abs($amount_kredit);
                     $amount_kredit = 0;
                 }
-                $facturNumber = $request->input('package_number');
+                $SONumber = $request->input('sales_order_number');
+                $invoiceNumber = $request->input('invoice_pack_number');
+                $SOID = $request->input('sales_order_id');
+                $invoiceID = $request->input('invoice_pack_id');
                 $realAmount = $amount_debet - $amount_kredit;
 
 
                 $lastKartu = KartuPiutang::where('person_id', $personID)->where('person_type', $personType)
-                    ->where('package_number', $facturNumber)->orderBy('id', 'desc')->first();
+                    ->where('invoice_pack_number', $invoiceNumber)->orderBy('id', 'desc')->first();
                 $lastSaldo =  $lastKartu ? $lastKartu->amount_saldo_factur : 0;
                 $lastSaldoFactur = $lastSaldo;
 
@@ -84,11 +87,14 @@ class KartuPiutang extends Model
                     $q->from('kartu_piutangs')->where('person_id', $personID)->where('person_type', $personType)
                         ->select(
                             DB::raw('max(id) as maxid'),
-                        )->groupBy('package_number');
+                        )->groupBy('sales_order_number');
                 })->sum('amount_saldo_factur');
                 $kartu = new KartuPiutang();
                 $kartu->type = $request->input('type');
-                $kartu->package_number = $facturNumber;
+                $kartu->sales_order_number = $SONumber;
+                $kartu->invoice_pack_number = $invoiceNumber;
+                $kartu->sales_order_id = $SOID;
+                $kartu->invoice_pack_id = $invoiceID;
                 $kartu->description = $request->input('description');
                 $kartu->amount_saldo_transaction = $lastSaldo + $realAmount;
                 $kartu->amount_saldo_factur = $lastSaldoFactur + $realAmount;
@@ -110,8 +116,8 @@ class KartuPiutang extends Model
 
 
 
-                //wes sudah terhitung sema tinggal pudate
 
+                $kartu->createDetailKartuInvoice();
             } catch (LockTimeoutException $e) {
             } finally {
                 $lock->release();
@@ -119,7 +125,8 @@ class KartuPiutang extends Model
             info('kartu piutang - success create kartu piutang');
             return [
                 'status' => 1,
-                'msg' => $kartu
+                'msg' => $kartu,
+                'journal_number' => $kartu->journal_number,
             ];
         } catch (Throwable $th) {
             $lock->release();
@@ -131,18 +138,19 @@ class KartuPiutang extends Model
         }
         return [
             'status' => 1,
-            'msg' => $kartu
+            'msg' => $kartu,
+            'journal_number' => $kartu->journal_number,
         ];
     }
 
 
-    public static function createMutation(Request $request)
+    public static function createMutation(Request $request, $useTransaction = true, ?LockManager $lockManager = null)
     {
 
-
-        DB::beginTransaction();
+        if ($useTransaction)
+            DB::beginTransaction();
         try {
-            $factur = $request->input('package_number');
+            $SONumber = $request->input('sales_order_number');
             $amountMutasi = $request->input('amount_mutasi');
             $personID = $request->input('person_id');
             $personType = $request->input('person_type');
@@ -153,12 +161,17 @@ class KartuPiutang extends Model
             if (!$chart) {
                 throw new \Exception('chart not found');
             }
+            $desc = $request->input('description');
             $codeName = $chart->name;
-            $invoicePack = InvoicePack::where('invoice_number', $factur)->first();
-            if (!$invoicePack) {
+            $sales = SalesOrder::where('sales_order_number', $SONumber)->first();
+            $SOID = $sales ? $sales->id : null;
+            $invoiceNumber = $request->input('invoice_pack_number');
+            $invoice = InvoicePack::where('invoice_number', $invoiceNumber)->first();
+            $invoiceID = $invoice ? $invoice->id : null;
+            if (!$invoice) {
                 $tokoid = null;
             } else {
-                $tokoid = $invoicePack->toko_id;
+                $tokoid = $invoice->toko_id;
             }
             if ($amountMutasi > 0) {
                 //piutang bertambah
@@ -166,13 +179,11 @@ class KartuPiutang extends Model
                 $codeKredit = $lawanCodeGroup;
                 $amountDebet = $amountMutasi;
                 $amountKredit = 0;
-                $desc = 'claim piutang dari  ' . $factur;
             } else {
                 $codeDebet = $lawanCodeGroup;
                 $codeKredit = $codeGroup;
                 $amountKredit = abs($amountMutasi);
                 $amountDebet = 0;
-                $desc = 'pembatalan claim piutang dari ' . $factur;
             }
             if ($isOtomatisJurnal) {
                 $kredits = [
@@ -204,7 +215,7 @@ class KartuPiutang extends Model
                     'title' => 'create mutation transaction',
                     'url_try_again' => 'try_again'
 
-                ]), false);
+                ]), false, $lockManager);
                 if ($st['status'] == 0) return $st;
                 $number = $st['journal_number'];
                 $journal = Journal::where('journal_number', $number)->whereBetween('code_group', [120000, 130000])->first();
@@ -215,7 +226,10 @@ class KartuPiutang extends Model
             }
             $st = self::createKartu(new Request([
                 'type' => 'mutasi',
-                'package_number' => $factur,
+                'sales_order_number' => $SONumber,
+                'invoice_pack_number' => $invoiceNumber,
+                'sales_order_id' => $SOID,
+                'invoice_pack_id' => $invoiceID,
                 'description' => $desc,
                 'amount_debet' => $amountDebet, //debet untuk nilai piutang yang bertambah
                 'amount_kredit' => $amountKredit,
@@ -231,14 +245,17 @@ class KartuPiutang extends Model
             ]));
 
             if ($st['status'] == 1) {
-                DB::commit();
+                if ($useTransaction)
+                    DB::commit();
                 return $st;
             } else {
-                DB::rollBack();
+                if ($useTransaction)
+                    DB::rollBack();
                 return $st;
             }
         } catch (Throwable $th) {
-            DB::rollBack();
+            if ($useTransaction)
+                DB::rollBack();
             return [
                 'status' => 0,
                 'msg' => $th->getMessage()
@@ -250,17 +267,24 @@ class KartuPiutang extends Model
 
 
 
-    public static function createPelunasan(Request $request)
+    public static function createPelunasan(Request $request, $useTransaction = true, ?LockManager $lockManager = null)
     {
 
-
-        DB::beginTransaction();
+        if ($useTransaction)
+            DB::beginTransaction();
         try {
-            $factur = $request->input('package_number');
+            $SONumber = $request->input('sales_order_number');
+            $sales = SalesOrder::where('sales_order_number', $SONumber)->first();
+            $SOID = $sales ? $sales->id : null;
+            $invoiceNumber = $request->input('invoice_pack_number');
+            $invoice = InvoicePack::where('invoice_number', $invoiceNumber)->first();
+            $invoiceID = $invoice ? $invoice->id : null;
             $amountBayar = $request->input('amount_bayar');
             $lawanCodeGroup = $request->input('lawan_code_group');
             $codeGroup = $request->input('code_group');
             $isOtomatisJurnal = $request->input('is_otomatis_jurnal') ?? 0;
+            $desc = $request->input('description');
+
             $chart = ChartAccount::where('code_group', $codeGroup)->first();
             if (!$chart) {
                 throw new \Exception('chart not found');
@@ -269,11 +293,9 @@ class KartuPiutang extends Model
             if ($amountBayar > 0) {
                 $codeDebet = $lawanCodeGroup;
                 $codeKredit = $codeGroup;
-                $desc = 'penerimaan penjualan ' . $factur;
             } else {
                 $codeDebet = $codeGroup;
                 $codeKredit = $lawanCodeGroup;
-                $desc = 'pembatalan penerimaan penjualan ' . $factur;
             }
             $personID = $request->input('person_id');
             $personType = $request->input('person_type');
@@ -306,7 +328,7 @@ class KartuPiutang extends Model
                     'title' => 'create penerimaan penjualan',
                     'url_try_again' => null
 
-                ]), false);
+                ]), false, $lockManager);
                 if ($st['status'] == 0) return $st;
                 $number = $st['journal_number'];
                 $journal = Journal::where('journal_number', $number)->whereBetween('code_group', [120000, 130000])->first();
@@ -319,7 +341,10 @@ class KartuPiutang extends Model
             $amountDebet = $amountBayar < 0 ? abs($amountBayar) : 0;
             $st = self::createKartu(new Request([
                 'type' => 'pelunasan',
-                'package_number' => $factur,
+                'sales_order_number' => $SONumber,
+                'invoice_pack_number' => $invoiceNumber,
+                'sales_order_id' => $SOID,
+                'invoice_pack_id' => $invoiceID,
                 'description' => $desc,
                 'amount_debet' => $amountDebet, //debet untuk nilai utang yang bertambah
                 'amount_kredit' => $amountKredit,
@@ -335,14 +360,17 @@ class KartuPiutang extends Model
             ]));
 
             if ($st['status'] == 1) {
-                DB::commit();
+                if ($useTransaction)
+                    DB::commit();
                 return $st;
             } else {
-                DB::rollBack();
+                if ($useTransaction)
+                    DB::rollBack();
                 return $st;
             }
         } catch (Throwable $th) {
-            DB::rollBack();
+            if ($useTransaction)
+                DB::rollBack();
             return [
                 'status' => 0,
                 'msg' => $th->getMessage()

@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class RetailSales extends Model
 {
     //
-    protected $connection = "retailSql";
+    protected $connection = "tokoSql";
     protected $table= 'transactions';
     public $timestamps = true;
+
+    
 }

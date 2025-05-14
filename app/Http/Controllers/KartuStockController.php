@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Journal;
 use App\Models\KartuStock;
 use App\Models\Stock;
 use Illuminate\Http\Request;
@@ -35,11 +36,18 @@ class KartuStockController extends Controller
                 ->where('created_at', '<', $dateAkhir)
                 ->groupBy('stock_id');
         });
-        $stock = Stock::leftJoinSub($saldoAwal, 'saldoAwal', function ($join) {
+
+        $arrayStock = $arrayStock = collect(
+            (clone $saldoAwal)->pluck('stock_id')
+        )->merge(
+            (clone $saldoAkhir)->pluck('stock_id')
+        )->unique()->all();
+        $stock = Stock::whereIn('stocks.id', $arrayStock)->leftJoinSub($saldoAwal, 'saldoAwal', function ($join) {
             $join->on('stocks.id', '=', 'saldoAwal.stock_id');
         })->leftJoinSub($saldoAkhir, 'saldoAkhir', function ($join) {
             $join->on('stocks.id', '=', 'saldoAkhir.stock_id');
-        })->join('stock_categories', 'stocks.category_id', '=', 'stock_categories.id')
+        })
+            ->join('stock_categories', 'stocks.category_id', '=', 'stock_categories.id')
             ->join('stock_units', function ($join) {
                 $join->on('stocks.id', '=', 'stock_units.stock_id')
                     ->on('stocks.unit_default', '=', 'stock_units.unit');
@@ -130,5 +138,21 @@ class KartuStockController extends Controller
     {
 
         return KartuStock::mutationStore($request);
+    }
+
+    public function refreshKartu(Request $request)
+    {
+        $id = $request->input('id');
+        $kartu = KartuStock::find($id);
+        if ($kartu->journal_id && !$kartu->journal_number) {
+            $journal = Journal::find($kartu->journal_id);
+            $kartu->journal_number = $journal->journal_number;
+        }
+
+        $kartu->save();
+        if (!$kartu->isHasKartuInvoice()) {
+            $kartu->createDetailKartuInvoice();
+        }
+        return ['status' => 1, 'msg' => $kartu];
     }
 }

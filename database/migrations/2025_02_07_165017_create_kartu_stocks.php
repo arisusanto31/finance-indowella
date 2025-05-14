@@ -18,6 +18,14 @@ class CreateKartuStocks extends Migration
             $table->integer('book_journal_id');
             $table->decimal('code_group', 6, 0);
             $table->string('code_group_name');
+
+            $table->string('sales_order_number')->nullable();;
+            $table->integer('sales_order_id')->nullable();
+            $table->string('invoice_pack_number')->nullable();
+            $table->integer('invoice_pack_id')->nullable();
+            $table->string('purchase_order_number')->nullable();
+            $table->integer('purchase_order_id')->nullable();
+
             $table->integer('stock_id');
             $table->decimal('mutasi_qty_backend', 10, 2);
             $table->string('unit_backend');

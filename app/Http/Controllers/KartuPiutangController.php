@@ -36,33 +36,33 @@ class KartuPiutangController extends Controller
         if (!$month) $month = Date('m');
         $date = $year . '-' . $month;
         $kartuPiutangAwal = KartuPiutang::whereIn('id', function ($q) use ($date) {
-            $q->from('kartu_piutangs')->select(DB::raw('max(id)'))->where('created_at', '<', $date . '-01')->groupBy('package_number');
-        })->where('amount_saldo_factur', '>', 0)->select('package_number', 'invoice_date', 'type', 'amount_saldo_factur', 'person_id', 'person_type')->get();
+            $q->from('kartu_piutangs')->select(DB::raw('max(id)'))->where('created_at', '<', $date . '-01')->groupBy('invoice_pack_number');
+        })->where('amount_saldo_factur', '>', 0)->select('invoice_pack_number', 'invoice_date', 'type', 'amount_saldo_factur', 'person_id', 'person_type')->get();
 
         $kartuPiutangBaru = KartuPiutang::whereMonth('created_at', $month)->whereYear('created_at', $year)
             ->select(
                 DB::raw('sum(amount_debet-amount_kredit) as total_amount '),
-                'package_number',
+                'invoice_pack_number',
                 'type',
                 'person_id',
                 'invoice_date',
                 'person_type',
-            )->groupBy('package_number', 'type')->get();
+            )->groupBy('invoice_pack_number', 'type')->get();
 
-        $allFactur = collect($kartuPiutangAwal)->pluck('package_number')->merge(collect($kartuPiutangBaru)->pluck('package_number'))->unique()->all();
+        $allFactur = collect($kartuPiutangAwal)->pluck('invoice_pack_number')->merge(collect($kartuPiutangBaru)->pluck('invoice_pack_number'))->unique()->all();
         $customTable = [];
         foreach ($allFactur as $factur) {
-            $dataAktif = $kartuPiutangAwal->where('package_number', $factur)->first();
-            $dataBaru = $kartuPiutangBaru->where('package_number', $factur)->first();
-            $dataMutasi = optional($kartuPiutangBaru->where('package_number', $factur)->where('type', 'mutasi')->first())->total_amount ?? 0;
-            $dataPelunasan = optional($kartuPiutangBaru->where('package_number', $factur)->where('type', 'pelunasan')->first())->total_amount ?? 0;
+            $dataAktif = $kartuPiutangAwal->where('invoice_pack_number', $factur)->first();
+            $dataBaru = $kartuPiutangBaru->where('invoice_pack_number', $factur)->first();
+            $dataMutasi = optional($kartuPiutangBaru->where('invoice_pack_number', $factur)->where('type', 'mutasi')->first())->total_amount ?? 0;
+            $dataPelunasan = optional($kartuPiutangBaru->where('invoice_pack_number', $factur)->where('type', 'pelunasan')->first())->total_amount ?? 0;
             $saldoAwal = (optional($dataAktif)->amount_saldo_factur ?? 0);
             $dataFix = $dataAktif ? $dataAktif : $dataBaru;
             $data = [
                 'person_name' => $dataFix->person->name,
                 'person_type' => $dataFix->person_type,
                 'invoice_date' => $dataFix->invoice_date,
-                'package_number' => $factur,
+                'invoice_pack_number' => $factur,
                 'saldo_awal' => $saldoAwal,
                 'mutasi' => $dataMutasi,
                 'pelunasan' => abs($dataPelunasan),
@@ -82,9 +82,9 @@ class KartuPiutangController extends Controller
     {
         $view = view('kartu.modal._kartu-mutasi-piutang');
         $view->factur = $nomer;
-        $kh = KartuPiutang::where('package_number', $nomer)->orderBy('created_at', 'desc')->first();
+        $kh = KartuPiutang::where('invoice_pack_number', $nomer)->orderBy('created_at', 'desc')->first();
         $view->person = $kh->person;
-        $data = KartuPiutang::where('package_number', $nomer)->get();
+        $data = KartuPiutang::where('invoice_pack_number', $nomer)->get();
         $view->data = $data;
         return $view;
     }
@@ -96,6 +96,19 @@ class KartuPiutangController extends Controller
         return [
             'status' => 1,
             'msg' => $journals
+        ];
+    }
+
+    public function refresh($id)
+    {
+        $kartu = KartuPiutang::find($id);
+        $detail = $kartu->createDetailKartuInvoice();
+        if ($detail['status'] == 0) {
+            return $detail;
+        }
+        return [
+            'status' => 1,
+            'msg' => $kartu
         ];
     }
 }

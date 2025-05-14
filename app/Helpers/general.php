@@ -106,7 +106,7 @@ if (!function_exists('format_price')) {
      * @param $length
      * @return string
      */
-    function format_price($number, $decimal = 2, $language = "eng")
+    function format_price($number, $decimal = 2, $language = "id")
     {
         try {
             if ($language == "eng") {
@@ -120,6 +120,24 @@ if (!function_exists('format_price')) {
     }
 }
 
+function detectFormat($input)
+{
+    $input = trim($input);
+
+    // Format database: -123.45 atau 1000.5
+    $dbPattern = '/^-?\d+(\.\d+)?$/';
+
+    // Format rupiah: 1.000.000,50 atau 123,45 atau 100.000
+    $rupiahPattern = '/^(\d{1,3}(\.\d{3})*|\d+)(,\d{1,2})?$/';
+
+    if (preg_match($rupiahPattern, $input)) {
+        return 'rupiah';
+    } elseif (preg_match($dbPattern, $input)) {
+        return 'database';
+    } else {
+        return 'unknown';
+    }
+}
 if (!function_exists('format_db')) {
     /**
      * Mengubah string harga terformat ke format angka standar (float string)
@@ -131,6 +149,16 @@ if (!function_exists('format_db')) {
     function format_db($formatted, $language = 'id')
     {
         try {
+            //parah se disini ternyata inputnya harus benar2 string dengan format indo
+            //kalo ternyata ini adalah format db yang ada komanya, hancur udah datanya.
+
+            // Cek format input
+            $format = detectFormat($formatted);
+            if ($format == 'database') {
+                info('database:' . $formatted);
+                return (string) $formatted;
+            }
+
             // Hilangkan spasi dan non-digit selain pemisah
             $formatted = trim($formatted);
 
@@ -141,9 +169,7 @@ if (!function_exists('format_db')) {
             } else {
                 // Format Indonesia: 1.234.567,89 → 1234567.89
                 //harus dicek dulu , kalau sudah integer g usah, kalau string baru di proses nih
-                if (is_numeric($formatted)) {
-                    return (string) $formatted;
-                }
+                $formatted = strval($formatted);
                 $formatted = str_replace(' ', '', $formatted); // Hilangkan spasi
                 $clean = str_replace('.', '', $formatted);      // Hilangkan pemisah ribuan
                 $clean = str_replace(',', '.', $clean);         // Ganti koma (desimal) jadi titik

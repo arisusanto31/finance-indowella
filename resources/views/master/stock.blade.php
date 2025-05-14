@@ -133,6 +133,15 @@
                                                     <option @if($stock->unit_backend=="Meter") selected @endif value="Meter">Meter</option>
                                                 </select>
                                             </div>
+
+                                            <div class="mb-3"><label class="form-label">Tipe <span style="font-size:11px">(tipe bahan)</span></label>
+                                                <select id="type" type="text" name="type" class="form-control">
+                                                    <option @if($stock->type=="bahan baku") selected @endif value="bahan baku">Bahan baku</option>
+                                                    <option @if($stock->type=="barang jadi") selected @endif value="barang jadi">Barang Jadi</option>
+                                                    <option @if($stock->type=="barang dagang") selected @endif value="barang dagang">Barang Dagang</option>
+
+                                                </select>
+                                            </div>
                                             <div class="mb-3"><label class="form-label">Unit Default</label>
                                                 <select id="unit-default{{$stock->id}}" type="text" name="unit_default" class="form-control">
                                                     @foreach($stock->units as $dataunit)
@@ -240,6 +249,14 @@
                         <div class="mb-3"><label class="form-label">Parent Category</label>
                             <select id="parent-category-id" type="text" name="parent_category_id" class="form-control category-select"></select>
                         </div>
+
+                        <div class="mb-3"><label class="form-label">Type</label>
+                            <select id="type" name="type" class="form-control">
+                                <option value="bahan baku">Bahan Baku</option>
+                                <option value="barang jadi">Barang Jadi</option>
+                                <option value="barang dagang">Barang Dagang</option>
+                            </select>
+                        </div>
                         <div class="mb-3"><label class="form-label">Unit backend <span style="font-size:12px">(satuan paling kecil)</span></label>
                             <select id="unit-backend" type="text" name="unit_backend" class="form-control">
                                 <option value="Pcs">Pcs</option>
@@ -271,6 +288,7 @@
                         <div class="mb-3"><label class="form-label">Parent</label>
                             <select id="parent-id" name="parent_id" class="form-control" rows="2"></select>
                         </div>
+
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -293,7 +311,7 @@
         });
 
         function showLink() {
-            id= '{{book()->id}}';
+            id = '{{book()->id}}';
             finalUrl = '{{route("stock.open-sinkron",["id"=>"idreplace"])}}';
             finalUrl = finalUrl.replace('idreplace', id);
             showDetailOnModal(finalUrl, 'xl');

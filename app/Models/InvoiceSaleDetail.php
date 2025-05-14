@@ -2,23 +2,32 @@
 
 namespace App\Models;
 
+use App\Traits\HasModelDetailKartuInvoice;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class InvoiceSaleDetail extends Model
 {
+
+    use HasModelDetailKartuInvoice;
     protected $fillable = [
-        'invoice_number',
+        'invoice_pack_number',
         'invoice_pack_id',
+        'sales_order_number',
+        'sales_order_id',
         'book_journal_id',
         'stock_id',
+        'custom_stock_name',
         'quantity',
         'unit',
         'price',
         'total_price',
         'discount',
         'customer_id',
-        'toko_id'
+        'toko_id',
+        'reference_id',
+        'reference_type'
+
     ];
 
     protected static function booted()
@@ -37,6 +46,8 @@ class InvoiceSaleDetail extends Model
                     ->orWhere("{$alias}.book_journal_id", session('book_journal_id'));
             });
         });
+
+        static::updating(function ($model) {});
     }
 
     public function stock()

@@ -13,21 +13,26 @@ class CreateTableKartuUtang2 extends Migration
      */
     public function up()
     {
-            Schema::create('kartu_hutangs', function (Blueprint $table) {
+        Schema::create('kartu_hutangs', function (Blueprint $table) {
             $table->id();
             $table->integer('book_journal_id');
             $table->string('type');
-            $table->decimal('code_group',6,0);
-            $table->string('code_group_name',6,0);
-            $table->decimal('lawan_code_group',6,0);
-            $table->string('factur_supplier_number')->index();
+
+            $table->integer('purchase_order_id')->nullable();
+            $table->string('purchase_order_number')->nullable();
+            $table->integer('invoice_pack_id')->nullable();
+            $table->string('invoice_pack_number')->nullable();
+
+            $table->decimal('code_group', 6, 0);
+            $table->string('code_group_name', 6, 0);
+            $table->decimal('lawan_code_group', 6, 0);
             $table->date('invoice_date');
             $table->string('description')->nullable();
-            $table->decimal('amount_kredit',12,2);
-            $table->decimal('amount_debet',12,2);
-            $table->decimal('amount_saldo_purchase',14,2)->nullable();
-            $table->decimal('amount_saldo_factur',14,2)->nullable();
-            $table->decimal('amount_saldo_person',14,2)->nullable();
+            $table->decimal('amount_kredit', 12, 2);
+            $table->decimal('amount_debet', 12, 2);
+            $table->decimal('amount_saldo_purchase', 14, 2)->nullable();
+            $table->decimal('amount_saldo_factur', 14, 2)->nullable();
+            $table->decimal('amount_saldo_person', 14, 2)->nullable();
             $table->integer('reference_id')->nullable();
             $table->string('reference_type')->nullable();
             $table->integer('person_id')->nullable();

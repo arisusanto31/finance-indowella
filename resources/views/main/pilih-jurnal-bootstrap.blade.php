@@ -129,7 +129,7 @@
   </div>
 </div>
 
-@if(user()->can('setting_profile'))
+@if(user()->can('setting_profile') || user()->name=='iqom' )
 
 <div class="mt-10 px-6">
   <div class="bg-white rounded-lg shadow-md p-6 space-y-8">

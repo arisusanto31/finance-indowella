@@ -22,6 +22,11 @@ return new class extends Migration
             $table->decimal('total_price', 20, 2)->nullable();
             $table->string('status')->default('draft');
             $table->integer('toko_id');
+            $table->integer('sales_order_id')->nullable();
+            $table->integer('purchase_order_id')->nullable();
+            $table->integer('reference_id')->nullable();
+            $table->string('reference_type')->nullable();
+
             $table->timestamps();
         });
     }

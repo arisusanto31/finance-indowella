@@ -9,117 +9,137 @@
     <form id="form-invoice">
         @csrf
 
-        <div class="container py-4 p-3 mb-4 card shadow-sm">
-            <h2>Create Invoice Sales</h2>
+        <div class=" mb-4 card shadow-sm">
+            <h5 class="text-primary-dark card-header"> <a href="javascript:void(openCardCreate())">⚒️ <strong>BUAT INVOICE SALE</strong>
+                    <i id="icon-create" class="bx bx-caret-down toggle-icon"></i> </a>
+            </h5>
+            <div id="card-create" class="container tree-toggle">
 
-            <div class="mb-3 mt-2">
-                <button type="button" class="btn btn-success" onclick="addrow()" id="addDebit">+Tambah</button>
-            </div>
+                <div class="mb-3 mt-2">
+                    <button type="button" class="btn btn-success" onclick="addrow()" id="addDebit">+Tambah</button>
+                    @if(book()->name=="Buku Toko")
+                    <button type="button" class="btn btn-success" onclick="openImport('{{book()->id}}')" id="btn-import">Import dari Toko</button>
+                    @else
+                    <button type="button" class="btn btn-success" onclick="openImport('{{book()->id}}')" id="btn-import">Import dari Manuf</button>
+                    @endif
+                </div>
 
-            <div class="row g-2 mb-3">
-                <div class="col-md-3">
-                    <label class="form-label">Pilih Customer</label>
-                    <select name="customer_id" class="form-control select2-customer" required></select>
+                <div class="row g-2 mb-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Pilih Customer</label>
+                        <select name="customer_id" class="form-control select2-customer" required></select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Pilih Toko</label>
+                        <select name="toko_id" class="form-control select2-toko" required></select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Nomor Invoice</label>
+                        <input name="invoice_number" type="text" class="form-control" required placeholder="Nomor Invoice">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Tanggal Invoice</label>
+                        <input type="text" class="form-control" value="{{ now()->format('Y-m-d H:i:s') }}" readonly>
+                    </div>
                 </div>
-                <div class="col-md-3">
-                    <label class="form-label">Pilih Toko</label>
-                    <select name="toko_id" class="form-control select2-toko" required></select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Nomor Invoice</label>
-                    <input name="invoice_number" type="text" class="form-control" required placeholder="Nomor Invoice">
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Tanggal Invoice</label>
-                    <input type="text" class="form-control" value="{{ now()->format('Y-m-d H:i:s') }}" readonly>
-                </div>
-            </div>
 
-            <div id="invoice-wrapper" class="debet-wrapper">
-            </div>
-
-            <hr>
-            <div class="d-flex justify-content-end pe-4">
-                <div class="d-flex align-items-center gap-2">
-                    <label for="total_invoice" class="me-2 fw-bold">TOTAL INVOICE</label>
-                    <input type="text" class="form-control text-end" autocomplete="off" readonly style="width: 200px;" id="total-invoice" readonly>
+                <div id="invoice-wrapper" class="debet-wrapper">
                 </div>
-            </div>
-            <div class="mt-4">
-                <button type="button" onclick="submitInvoice()" class="btn btn-primary w-100">Submit Invoice</button>
+
+                <hr>
+                <div class="d-flex justify-content-end pe-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <label for="total_invoice" class="me-2 fw-bold">TOTAL INVOICE</label>
+                        <input type="text" class="form-control text-end" autocomplete="off" readonly style="width: 200px;" id="total-invoice" readonly>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <button type="button" onclick="submitInvoice()" class="btn btn-primary mb-3 w-100">Submit Invoice</button>
+                </div>
             </div>
         </div>
     </form>
 
     @if ($invoices->isNotEmpty())
     <div class="card mb-4 shadow p-3">
-        <table class="table table-bordered">
-            <thead class="table-primary text-center">
-                <tr>
-                    <th>No</th>
-                    <th>Invoice</th>
-                    <th>Customer</th>
-                    <th>Produk</th>
-                    <th>Qty</th>
-                    <th>Unit</th>
-                    <th>Harga Satuan</th>
-                    <th>Diskon</th>
-                    <th>Sub-Total</th>
-                    <th>Total</th>
-                    <th> Aksi nya say</th>
-                </tr>
-            </thead>
-            <tbody>
-                @php $no = 1; @endphp
-                @foreach ($invoices as $invoiceNumber => $items)
-                @php
-                $rowspan = $items->count();
-                $invoiceSubtotal = $items->sum(fn($item) => ($item->quantity * $item->price) - $item->discount);
-                @endphp
 
-                @foreach ($items as $index => $item)
-                <tr>
-                    @if ($index === 0)
-                    <td rowspan="{{ $rowspan }}">{{ $no++ }}</td>
-                    <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }}</td>
-                    <td rowspan="{{ $rowspan }}">{{ $item->customer->name ?? '-' }}</td>
-                    @endif
-
-                    <td>{{ $item->stock->name ?? '-' }}</td>
-                    <td class="text-end">{{ $item->quantity }}</td>
-                    <td>{{ $item->unit }}</td>
-                    <td class="text-end">Rp{{ number_format($item->price) }}</td>
-                    <td class="text-end">Rp{{ number_format($item->discount) }}</td>
-
+        <h5 class="text-primary-dark card-header"> 📁 <strong>DAFTAR INVOICE </strong> </h5>
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead class="table-primary text-center">
+                    <tr>
+                        <th>No</th>
+                        <th>Invoice</th>
+                        <th>Customer</th>
+                        <th>Produk</th>
+                        <th>Qty</th>
+                        <th>Unit</th>
+                        <th>Harga Satuan</th>
+                        <th>Diskon</th>
+                        <th>Sub-Total</th>
+                        <th>Total</th>
+                        <th> Aksi nya say</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @php $no = 1; @endphp
+                    @foreach ($invoices as $invoiceNumber => $items)
                     @php
-                    $subtotal = ($item->quantity * $item->price) - $item->discount;
+                    $rowspan = $items->count();
+                    $invoiceSubtotal = $items->sum(fn($item) => ($item->quantity * $item->price) - $item->discount);
                     @endphp
-                    <td class="text-end">Rp{{ number_format($subtotal) }}</td>
 
-                    @if ($index === 0)
-                    <td rowspan="{{ $rowspan }}"><strong>Rp{{ number_format($invoiceSubtotal) }}</strong></td>
-                    @if ($index === 0)
-                    <td rowspan="{{ $rowspan }}">
-                        <a href="javascript:void(lihatDetailInvoice('{{$item->invoice_number}}'))" class="btn btn-sm btn-outline-primary" title="Lihat Invoice">
-                            <i class="fas fa-eye"></i>
-                        </a>
-                        <a href="" class="btn btn-sm btn-outline-primary" title="Edit Invoice">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                    </td>
-                    @endif
+                    @foreach ($items as $index => $item)
+                    <tr>
+                        @if ($index === 0)
+                        <td rowspan="{{ $rowspan }}">{{ $no++ }}</td>
+                        <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }}</td>
+                        <td rowspan="{{ $rowspan }}">{{ $item->customer->name ?? '-' }}</td>
+                        @endif
 
-                    @endif
-                </tr>
-                @endforeach
-                @endforeach
-            </tbody>
-        </table>
+                        <td>{{ $item->stock->name ?? '-' }}</td>
+                        <td class="text-end">{{ $item->quantity }}</td>
+                        <td>{{ $item->unit }}</td>
+                        <td class="text-end">Rp{{ number_format($item->price) }}</td>
+                        <td class="text-end">Rp{{ number_format($item->discount) }}</td>
+
+                        @php
+                        $subtotal = ($item->quantity * $item->price) - $item->discount;
+                        @endphp
+                        <td class="text-end">Rp{{ number_format($subtotal) }}</td>
+
+                        @if ($index === 0)
+                        <td rowspan="{{ $rowspan }}"><strong>Rp{{ number_format($invoiceSubtotal) }}</strong></td>
+                        @if ($index === 0)
+                        <td rowspan="{{ $rowspan }}">
+                            <a href="javascript:void(lihatDetailInvoice('{{$item->invoice_pack_number}}'))" class="btn btn-sm btn-outline-primary" title="Lihat Invoice">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="" class="btn btn-sm btn-outline-primary" title="Edit Invoice">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        </td>
+                        @endif
+
+                        @endif
+                    </tr>
+                    @endforeach
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
     </div>
+
+    <!-- Jika laporan stock external dan internal tercatat jelas selisihnya. maka purchase ppn bisa disetting,
+     menambah ulur tempo menuju pkp. masih banyak yang disiapkan menuju pkp, tapi pembelian dan penjualan ppn sudah
+     akan mencapai batas. penguasaan setting pembelian ppn harus segera learned agar nafas bisa lebih panjang -->
     @else
-    <div class="card mb-2 shadow p-3">
-        <div class="alert alert-warning text-center">
-            Belum ada data invoice.
+    <div class="card mb-2 shadow ">
+        <h5 class="text-primary-dark card-header"> 📁 <strong>DAFTAR INVOICE </strong> </h5>
+        <div class="container">
+            <div class="alert alert-warning text-center">
+                Belum ada data invoice.
+            </div>
         </div>
     </div>
     @endif
@@ -163,6 +183,15 @@
 
         function lihatDetailInvoice(invoiceNumber) {
             showDetailOnModal('{{url("admin/invoice/show-detail")}}/' + invoiceNumber, 'xl');
+        }
+
+        function openImport(bookID) {
+            showDetailOnModal('{{url("admin/invoice/open-import")}}/' + bookID, 'xl');
+        }
+
+        function openCardCreate() {
+            $('#card-create').toggleClass('open');
+            $('#icon-create').toggleClass('open');
         }
 
         function removeDebetRow(btn) {

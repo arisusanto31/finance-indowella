@@ -19,7 +19,8 @@ class Stock extends Model
         'unit_default',
         'book_journal_id',
         'reference_stock_id',
-        'reference_stock_type'
+        'reference_stock_type',
+        'type'
     ];
 
 
@@ -95,5 +96,15 @@ class Stock extends Model
             });
 
         return ['results' => $stocks];
+    }
+
+    public function getLastHPP($unit)
+    {
+        $lastCard = KartuStock::where('stock_id', $this->id)->orderBy('id', 'desc')->first();
+        if (!$lastCard) {
+            return 0;
+        }
+        $stockUnit = $this->units()->where('unit', $unit)->first();
+        return $lastCard->saldo_rupiah_total / $lastCard->saldo_qty_backend * $stockUnit->konversi;
     }
 }
