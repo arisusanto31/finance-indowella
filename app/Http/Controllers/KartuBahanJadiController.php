@@ -132,6 +132,7 @@ class KartuBahanJadiController extends Controller
         $flows = $request->input('flow'); //harusnya ini 1 atau 0
         $spkNumbers = $request->input('spk_number');
         $codeGroup = 140004;
+        $productionNumber = $request->input('production_number');
         $salesDetailIDs = $request->input('sales_detail_id');
         $saleOrderId = $request->input('sales_order_id');
         $salesOrderNumber = $request->input('sales_order_number');
@@ -152,15 +153,18 @@ class KartuBahanJadiController extends Controller
                 $stock_id = $stockIDs[$row];
                 $isCustomRupiah = 0;
                 $mutasiRupiahTotal = 0;
-                if ($flow == 0) {
-                    $hpp = Stock::find($stock_id)->getLastHPP($unit);
-                    $mutasiRupiahTotal = $hpp * $qty;
-                    $isCustomRupiah = 1;
-                }
+
 
                 $stStock = null;
+                $allStStock = [];
                 if ($lawanCodeGroup == 140001 || $lawanCodeGroup == 140002) {
                     //kalo bahan baku atau barang dagang
+                    if ($flow == 0) {
+                        $typeKartuLawan = "stock";
+                        $hpp = Stock::find($stock_id)->getLastHPP($unit, $typeKartuLawan, $spkNumbers[$row]);
+                        $mutasiRupiahTotal = $hpp * $qty;
+                        $isCustomRupiah = 1;
+                    }
                     $stStock = KartuStock::mutationStore(new Request([
                         'stock_id' => $stock_id,
                         'mutasi_quantity' => $qty,
@@ -178,8 +182,16 @@ class KartuBahanJadiController extends Controller
                     if ($stStock['status'] == 0) {
                         throw new \Exception($stStock['msg']);
                     }
+                    $allStStock[] = $stStock['msg'];
                 } else if ($lawanCodeGroup == 140003) {
                     //kalo dari barang dalam proses
+                    //nah disini lo lu memungkinkan ada lebih dari satu kartu bdp
+                    $lastCard = KartuBDP::where('stock_id', $stock_id)->where('production_number', $spkNumbers[$row])->orderBy('id', 'desc')->first();
+                    if (!$lastCard) {
+                        throw new \Exception('tidak ada saldo stock pada nomer produksi ' . $spkNumbers[$row]);
+                    }
+                    $prosenQty = $qty / ($lastCard->saldo_qty_backend * $lastCard->mutasi_quantity / $lastCard->mutasi_qty_backend);
+                    $stockIDCustom = KartuBDP::where('production_number', $spkNumbers[$row])->where('stock_id', '<>', $stock_id)->pluck('stock_id')->all();
                     $stStock = KartuBDP::mutationStore(new Request([
                         'stock_id' => $stock_id,
                         'mutasi_quantity' => $qty,
@@ -197,14 +209,43 @@ class KartuBahanJadiController extends Controller
                     if ($stStock['status'] == 0) {
                         throw new \Exception($stStock['msg']);
                     }
+
+                    $allStStock[] = $stStock['msg'];
+                    foreach ($stockIDCustom as $customID) {
+                        $lastCustomCard = KartuBDP::where('production_number', $spkNumbers[$row])
+                            ->where('stock_id', $customID)->orderBy('id', 'desc')->first();
+                        $qtyCustom = $lastCustomCard->saldo_qty_backend * $prosenQty;
+                        info('name: ' . $lastCustomCard->custom_stock_name);
+                        $rupiahCustom = $lastCustomCard->saldo_rupiah_total * $prosenQty;
+                        info('qtycustom:' . $qtyCustom . ' - rupiahcustom:' . $rupiahCustom);
+                        $stStock = KartuBDP::mutationStore(new Request([
+                            'stock_id' => $customID,
+                            'mutasi_quantity' => $qtyCustom,
+                            'unit' => $unit,
+                            'flow' => $flow == 1 ? 0 : 1,
+                            'sales_order_number' => $salesOrderNumber,
+                            'production_number' => $spkNumbers[$row],
+                            'sales_order_id' => $saleOrderId,
+                            'code_group' => $lawanCodeGroup,
+                            'lawan_code_group' => $codeGroup,
+                            'is_otomatis_jurnal' => 0,
+                            'is_custom_rupiah' => $isCustomRupiah,
+                            'mutasi_rupiah_total' => $rupiahCustom,
+                        ]), false, $lockManager);
+                        if ($stStock['status'] == 0) {
+                            throw new \Exception($stStock['msg']);
+                        }
+                        $allStStock[] = $stStock['msg'];
+                    }
                 }
+                $mutasiRupiahTotal = abs(collect($allStStock)->sum('mutasi_rupiah_total'));
                 $st = KartuBahanJadi::mutationStore(new Request([
                     'stock_id' => $stock_id,
                     'mutasi_quantity' => $qty,
                     'unit' => $unit,
                     'flow' => $flow,
                     'sales_order_number' => $salesOrderNumber,
-                    'production_number' => $spkNumbers[$row],
+                    'production_number' => $productionNumber,
                     'sales_order_id' => $saleOrderId,
                     'code_group' => $codeGroup,
                     'custom_stock_name' => $customStockNames[$row],
@@ -213,12 +254,15 @@ class KartuBahanJadiController extends Controller
                     'is_custom_rupiah' => $isCustomRupiah,
                     'mutasi_rupiah_total' => $mutasiRupiahTotal,
                 ]), false, $lockManager);
-                $allSt[] = $st;
+
+
                 if ($st['status'] == 0) {
                     throw new \Exception($st['msg']);
                 }
-                if ($stStock) {
-                    $kartuStock = $stStock['msg'];
+                $allSt[] = $st['msg'];
+                info(json_encode($st));
+                foreach ($allStStock as $kartuStock) {
+
                     $thejournal = Journal::where('journal_number', $st['journal_number'])->where('code_group', $lawanCodeGroup)->first();
                     $kartuStock->journal_id = $thejournal->id;
                     $kartuStock->journal_number = $st['journal_number'];
@@ -236,7 +280,8 @@ class KartuBahanJadiController extends Controller
         DB::commit();
         return [
             'status' => 1,
-            'msg' => $allSt
+            'msg' => $allSt,
+            'kartubahan' => $allStStock
         ];
     }
     public function getMutasiMasuk()
@@ -275,7 +320,6 @@ class KartuBahanJadiController extends Controller
 
     public function mutasiStore(Request $request)
     {
-
         return KartuBahanJadi::mutationStore($request);
     }
 }

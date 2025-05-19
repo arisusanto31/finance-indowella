@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class Stock extends Model
 {
@@ -12,6 +13,7 @@ class Stock extends Model
     protected $table = 'stocks';
     public $timestamps = true;
     protected $fillable = [
+        'id',
         'name',
         'category_id',
         'parent_category_id',
@@ -98,11 +100,24 @@ class Stock extends Model
         return ['results' => $stocks];
     }
 
-    public function getLastHPP($unit)
+    public function getLastHPP($unit, $kartu = "stock", $number = "")
     {
-        $lastCard = KartuStock::where('stock_id', $this->id)->orderBy('id', 'desc')->first();
-        if (!$lastCard) {
-            return 0;
+        if ($kartu == "stock") {
+
+            $lastCard = KartuStock::where('stock_id', $this->id)->orderBy('id', 'desc')->first();
+            if (!$lastCard) {
+                return 0;
+            }
+        } else if ($kartu == 'barang jadi') {
+            $lastCard = KartuBahanJadi::where('stock_id', $this->id)->where('production_number', $number)->orderBy('id', 'desc')->first();
+            if (!$lastCard) {
+                return 0;
+            }
+        } else if ($kartu == 'bdp') {
+            $lastCard = KartuBDP::where('stock_id', $this->id)->where('production_number', $number)->orderBy('id', 'desc')->first();
+            if (!$lastCard) {
+                return 0;
+            }
         }
         $stockUnit = $this->units()->where('unit', $unit)->first();
         return $lastCard->saldo_rupiah_total / $lastCard->saldo_qty_backend * $stockUnit->konversi;

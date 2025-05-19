@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\ChartAccount;
 use App\Models\DetailKartuInvoice;
 use App\Models\InvoicePack;
+use App\Models\InvoicePurchaseDetail;
+use App\Models\InvoiceSaleDetail;
 use App\Models\Journal;
 use App\Models\KartuHutang;
 use App\Models\KartuPiutang;
@@ -32,7 +34,6 @@ class InvoicePackController extends Controller
     {
         $data = InvoicePack::where('invoice_number', $number)->first();
         $invdetails = $data->reference_model::with('stock')->where('invoice_pack_number', $number)->get();
-
         $data['details'] = $invdetails;
         $data['kartus'] = $data->getAllKartu();
 
@@ -400,13 +401,13 @@ class InvoicePackController extends Controller
         $invoices = InvoicePack::where('sales_order_id', $id)
             ->where('invoice_number', 'like', '%' . getInput('search') . '%')
             ->select('invoice_number as text')->get()->map(function ($item) {
-                $data=[
-                    'id'=>$item->text,
-                    'text'=>$item->text
+                $data = [
+                    'id' => $item->text,
+                    'text' => $item->text
                 ];
                 return $data;
             });
-        
+
         return ['results' => $invoices];
     }
 }

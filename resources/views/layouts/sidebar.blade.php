@@ -70,7 +70,6 @@
             </a>
         </li>
 
-
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text">PANEL UTAMA</span>
         </li>
@@ -215,7 +214,7 @@
             <a href="cards-basic.html" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons  bx bx-list-ul"></i>
                 <div data-i18n="Basic">Invoice</div>
-                <input type="hidden" class="url-active" value="Invoice" />
+                <input type="hidden" class="url-active" value="invoice" />
             </a>
             <ul class="menu-sub">
                 <li class="menu-item">

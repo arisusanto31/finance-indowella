@@ -24,9 +24,10 @@ class DatabaseSeeder extends Seeder
             SupplierSeeder::class,
             OtherPersonSeeder::class,
             CustomerSeeder::class,
-            StockSeeder::class,
+            // StockSeeder::class,
             PermissionSeeder::class,
-            TokoSeeder::class,
+            // TokoSeeder::class,
+            StockCustomeSeeder::class,
             
         ]);
     }

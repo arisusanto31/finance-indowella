@@ -41,6 +41,7 @@ class KartuBahanJadi extends Model
 
     public static function create(Request $request)
     {
+        info('TRYING UPLOAD BHJ ' . json_encode($request->all()));
         $lock = Cache::lock('kartu-bahanjadi-' . $request->input('stock_id'), 40);
         try {
             $flow = $request->input('flow');
@@ -75,10 +76,10 @@ class KartuBahanJadi extends Model
                 throw new \Exception('tidak ada saldo qty barang bahan jadi nomer ' . $kartu->production_number);
             }
 
-            if ($isCustom == 0) {
+            if ($flow == 1) {
                 $rupiahUnit = $lastCard->saldo_rupiah_total / $lastCard->saldo_qty_backend;
                 $kartu->mutasi_rupiah_on_unit = $rupiahUnit; //ini kayak hpp gitu. pake defaultnya
-                $kartu->mutasi_rupiah_total = moneyMul($rupiahUnit, $kartu->mutasi_qty_backend);
+                $kartu->mutasi_rupiah_total = $lastCard->saldo_rupiah_total * $kartu->mutasi_qty_backend / $lastCard->saldo_qty_backend;
             } else {
 
                 $kartu->mutasi_rupiah_on_unit = $request->input('mutasi_rupiah_on_unit') ?? 0;
@@ -137,7 +138,7 @@ class KartuBahanJadi extends Model
             DB::beginTransaction();
         try {
             $stockid = $request->input('stock_id');
-            $qty = $request->input('mutasi_quantity');
+            $qty = format_db($request->input('mutasi_quantity'));
             $unit = $request->input('unit');
             $flow = $request->input('flow');
             $customStockName = $request->input('custom_stock_name');
@@ -229,7 +230,7 @@ class KartuBahanJadi extends Model
                         'amount' => $amount,
                         'reference_id' => null,
                         'reference_type' => null,
-                        'toko_id'=>$sales->toko_id,
+                        'toko_id' => $sales->toko_id,
                     ],
                 ];
                 $debets = [
@@ -239,10 +240,10 @@ class KartuBahanJadi extends Model
                         'amount' => $amount,
                         'reference_id' => null,
                         'reference_type' => null,
-                        'toko_id'=>$sales->toko_id,
+                        'toko_id' => $sales->toko_id,
                     ],
                 ];
-                $st = JournalController::createBaseJournal(new Request([
+                $stj = JournalController::createBaseJournal(new Request([
                     'kredits' => $kredits,
                     'debets' => $debets,
                     'type' => 'transaction',
@@ -252,8 +253,8 @@ class KartuBahanJadi extends Model
                     'url_try_again' => 'try_again'
 
                 ]), false, $lockManager);
-                if ($st['status'] != 1) return $st;
-                $number = $st['journal_number'];
+                if ($stj['status'] != 1) return $stj;
+                $number = $stj['journal_number'];
                 $journal = Journal::where('journal_number', $number)->where('code_group', 140004)->first();
                 $ks->journal_id = $journal->id;
                 $ks->journal_number = $number;
@@ -273,7 +274,7 @@ class KartuBahanJadi extends Model
 
         return [
             'status' => 1,
-            'msg' => $st['msg'],
+            'msg' => $ks,
             'journal_number' => $number
         ];
     }

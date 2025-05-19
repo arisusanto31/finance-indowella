@@ -61,8 +61,47 @@
 
 
   <div class="card mt-3">
+    <div>
+      <h5 class="text-primary-dark card-header"> 📤 <strong>MUTASI JURNAL </strong> </h5>
+      <div class="pull-right" style="float:right; ">
+        <div style="width:150px;position:relative; float:right;">
+          <button class="btn-control" type="text" id="btn-search" onclick="trySearch() "> search</button>
 
-    <h5 class="text-primary-dark card-header"> 📤 <strong>MUTASI JURNAL </strong> </h5>
+        </div>
+        <div style="width:150px;position:relative; float:right;">
+          <input class="form-control ps-4" type="text" placeholder="deskripsi" id="search-description">
+          <span style="position:absolute; left:10px; top:0px; transform: translate(0%, 50%);">
+            <i class="fas fa-search"></i> </span>
+        </div>
+        <div style="width:150px;position:relative; float:right;">
+          <input class="form-control ps-4" type="text" placeholder="nomer JURNAL" id="search-journal_number">
+          <span style="position:absolute; left:10px; top:0px; transform: translate(0%, 50%);">
+            <i class="fas fa-search"></i> </span>
+        </div>
+        <div style="width:150px;position:relative; float:right;">
+          <input class="form-control ps-4" type="text" placeholder="nama COA" id="search-name_coa">
+          <span style="position:absolute; left:10px; top:0px; transform: translate(0%, 50%);">
+            <i class="fas fa-search"></i> </span>
+        </div>
+        <div style="width:150px;position:relative; float:right;">
+          <input class="form-control ps-4" type="text" placeholder="kode COA" value="" id="search-coa">
+          <span style="position:absolute; left:10px; top:0px; transform: translate(0%, 50%);">
+            <i class="fas fa-search"></i>
+          </span>
+        </div>
+        <div style="width:100px;" class="position-relative pull-right">
+          <div style="position:relative; float:right;">
+            <span id="max-page" class="position-absolute" style="right:5px; top:5px;">of </span>
+            <div class="">
+              <input class="form-control ps-4 pr-10" type="text" placeholder="halaman" value="1" onchange="halamanChange()" id="halaman-input">
+              <span style="position:absolute; left:5px; top:0px; transform: translate(0%, 50%);">
+                <i class="fas fa-file"></i>
+            </div>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="card-body">
       <div class="table-responsive">
         <table id="kartuKasTable" class="table table-bordered table-striped table-hover align-middle">
@@ -262,9 +301,14 @@
 
     }
 
-    function getListMutasiJurnal() {
+    function halamanChange(){
+      page = $('#halaman-input').val();
+      getListMutasiJurnal(page);
+    }
+
+    function getListMutasiJurnal(page="") {
       $.ajax({
-        url: '{{url("admin/jurnal/get-list-mutasi")}}',
+        url: '{{url("admin/jurnal/get-list-mutasi")}}?page='+page,
         type: 'GET',
         success: function(res) {
           if (res.status == 1) {
@@ -281,6 +325,7 @@
     function renderListMutasiJurnal(res) {
       html = "";
       console.log(res);
+      $('#max-page').html('of ' + res.max_page);
       Object.keys(res.msg).forEach(function eachJournalNumber(journalNumber, i) {
         rowspan = res.msg[journalNumber].length;
         res.msg[journalNumber].forEach(function eachJournal(journal, j) {

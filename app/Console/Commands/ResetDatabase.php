@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Artisan;
 
 class ResetDatabase extends Command
 {
-    protected $signature = 'db:reset';
+    protected $signature = 'db:reset:sudahhabislur';
     protected $description = 'Drop all tables, run migrations, and seed the database';
 
     public function handle()

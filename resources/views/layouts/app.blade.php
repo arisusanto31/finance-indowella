@@ -157,8 +157,8 @@
 
     <!-- Page JS -->
     <script src="{{ asset('assets/js/dashboards-analytics.js') }}"></script>
-    <script src="{{ asset('assets/js/collect.min.js') }}"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/collect.js@4.33.0/build/collect.min.js"></script>
 
     <!-- Place this tag in your head or just before your close body tag. -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
