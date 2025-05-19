@@ -25,7 +25,7 @@ class SalesOrderController extends Controller
     //
     public function index()
     {
-        $salesOrders = \App\Models\SalesOrderDetail::with('customer:name,id', 'stock:name,id', 'parent:sales_order_number,id,status,status_payment,status_delivery')
+        $salesOrders = \App\Models\SalesOrderDetail::with('customer:name,id', 'stock:name,id', 'parent:sales_order_number,id,is_final,ref_akun_cash_kind_name,status,status_payment,status_delivery')
             ->get()
             ->groupBy('sales_order_number');
 
@@ -165,6 +165,21 @@ class SalesOrderController extends Controller
         }
     }
 
+    public function makeFinal(Request $request)
+    {
+        $id = $request->id;
+        $salesOrder = SalesOrder::find($id);
+        $details = SalesOrderDetail::where('sales_order_number', $salesOrder->sales_order_number)->get();
+        $salesOrder->is_final = 1;
+        $salesOrder->sales_order_number = $salesOrder->getCodeFix();
+        foreach ($details as $detail) {
+            $detail->sales_order_number = $salesOrder->sales_order_number;
+            $detail->save();
+        }
+        $salesOrder->save();
+        return ['status' => 1, 'msg' => $salesOrder];
+    }
+
     public function showDetail($number)
     {
         $data = SalesOrder::where('sales_order_number', $number)->first();
@@ -186,6 +201,7 @@ class SalesOrderController extends Controller
         $view = view('invoice.modal._sale_order_import');
         return $view;
     }
+
     public function getDataImport($book_journal_id)
     {
         $monthYear = getInput('monthyear') ? getInput('monthyear') : Date('Y-m');
@@ -201,30 +217,32 @@ class SalesOrderController extends Controller
         $saleModel = $book->name == 'Buku Toko' ? RetailSalesPackage::class : ManufSalesPackage::class;
         $modeBook = $book->name == 'Buku Toko' ? 'toko' : 'manuf';
         $sales = $saleModel::from('packages as pack')
-            ->leftJoin($defaultDB . '.sales_orders as inv', function ($join) use ($saleModel) {
+            ->leftJoin($defaultDB . '.invoice_packs as inv', function ($join) use ($saleModel) {
                 $join->on('pack.id', '=', 'inv.reference_id')
                     ->where('inv.reference_type', $saleModel);
-            })->whereNull('inv.id')->whereMonth('pack.created_at', $month)->whereYear('pack.created_at', $year);
+            })
+            ->leftJoin($defaultDB . '.sales_orders as so', function ($join) use ($saleModel) {
+                $join->on('pack.id', '=', 'so.reference_id')
+                    ->where('so.reference_type', $saleModel);
+            })
+            ->whereNull('inv.id')->whereNull('so.id')->whereMonth('pack.created_at', $month)->whereYear('pack.created_at', $year);
         if ($book->name == 'Buku Toko') {
             // la disini ngambil data yang dari toko aja yaa
             if (getInput('toko'))
                 $sales = $sales->join('tokoes as t', 't.id', '=', 'pack.toko_id')
                     ->where('t.name', getInput('toko'));
-
             $sales = $sales->where(function ($q) {
                 $q->where('pack.is_ppn', 1)->orWhere('pack.is_wajib_lapor', 1);
-            })
-                ->select(
-                    'pack.id',
-                    DB::raw('"App\\\Models\\\RetailSalesPackage" as reference_type'),
-                    DB::raw('"App\\\Models\\\RetailStock" as stock_type'),
-                    'pack.is_ppn',
-                    'pack.is_wajib_lapor',
-                    'pack.package_number',
-                    'pack.akun_cash_kind_name',
-
-                    DB::raw('"anonim" as customer_name'),
-                );
+            })->select(
+                'pack.id',
+                DB::raw('"App\\\Models\\\RetailSalesPackage" as reference_type'),
+                DB::raw('"App\\\Models\\\RetailStock" as stock_type'),
+                'pack.is_ppn',
+                'pack.is_wajib_lapor',
+                'pack.package_number',
+                'pack.akun_cash_kind_name',
+                DB::raw('"anonim" as customer_name'),
+            );
         } else {
 
             if (getInput('toko'))
@@ -246,7 +264,6 @@ class SalesOrderController extends Controller
 
         $sales = $sales->with('detailSales')->get()->map(function ($val) use ($modeBook) {
             $val['details'] = collect($val['detailSales'])->map(function ($detailVal) use ($modeBook) {
-
                 $data = [];
                 $data['stock_id'] = $detailVal['stock_id'];
                 $data['quantity'] = $detailVal['quantity'];

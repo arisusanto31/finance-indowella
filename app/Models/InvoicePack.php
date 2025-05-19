@@ -79,4 +79,21 @@ class InvoicePack extends Model
         })->groupBy('type_kartu');
         return $kartus ?? [];
     }
+
+    public function getCodeFix($data)
+    {
+        $personType = $data->person_type;
+        $personID = $data->person_id;
+        $inv = InvoicePack::where('is_final', 1)->where('person_id', $personID)
+            ->where('person_type', $personType)
+            ->orderBy('index', 'desc')->first();
+        if ($inv) {
+            $count = $inv->index + 1;
+        } else {
+            $count = 1;
+        }
+        $this->index=$count;
+        $code = 'INV-SALE' . date('Y') . '-' . toDigit($this->personID, 4) . '-' . toDigit($count, 4);
+        return $code;
+    }
 }

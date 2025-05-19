@@ -96,7 +96,7 @@
                         @if ($index === 0)
                         <td rowspan="{{ $rowspan }}">{{ $no++ }}</td>
                         <td rowspan="{{ $rowspan }}">{{ $item->created_at->format('Y-m-d') }}</td>
-                        <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }}</td>
+                        <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }}  </td>
                         <td rowspan="{{ $rowspan }}">{{ $item->customer->name ?? '-' }}</td>
                         @endif
 
@@ -112,7 +112,13 @@
                         <td class="text-end">Rp{{ format_price($subtotal) }}</td>
 
                         @if ($index === 0)
-                        <td rowspan="{{ $rowspan }}"><strong>Rp{{ format_price($invoiceSubtotal) }}</strong></td>
+                        <td rowspan="{{ $rowspan }}"><strong>Rp{{ format_price($invoiceSubtotal) }}</strong>
+                            @if($item->parent->ref_akun_cash_kind_name)
+                            <br>
+                            <div class="bg-primary p-2 rounded-2 text-white"><i class="fas fa-wallet"></i> {{$item->parent->ref_akun_cash_kind_name}}</div>
+                            @endif
+                            
+                        </td>
                         <td rowspan="{{ $rowspan }}">
                             <p class="colorblack text-center" style="width:100%;line-height:120%;"><strong>{{strtoupper($item->parent->status)}}</strong></p>
                             @php
@@ -145,12 +151,21 @@
                             <span class="badge {{$bgPayment}}"> <i class="fas fa-wallet"></i> {{$item->parent->status_payment}}</span>
                             <span class="badge {{$bgDelivery}}"> <i class="fas fa-truck"></i> {{$item->parent->status_delivery}}</span>
                         <td rowspan="{{ $rowspan }}">
+
+                            @if($item->parent->is_final==1)
                             <a href="javascript:void(lihatDetailInvoice('{{$item->sales_order_number}}'))" class="btn btn-sm btn-outline-primary" title="Lihat Invoice">
                                 <i class="fas fa-eye"></i>
                             </a>
+                            @endif
+                            @if($item->parent->is_final==0)
+                            <a href="javascript:void(makeFinal('{{$item->sales_order_id}}'))" class="btn btn-sm btn-outline-primary" title="make final" id="btn-final{{$item->sales_order_id}}">
+                                <i class="fas fa-upload"></i>
+                            </a>
+
                             <a href="" class="btn btn-sm btn-outline-primary" title="Edit Invoice">
                                 <i class="fas fa-edit"></i>
                             </a>
+                            @endif
                         </td>
 
                         @endif
@@ -220,6 +235,19 @@
         function openCardCreate() {
             $('#card-create').toggleClass('open');
             $('#icon-create').toggleClass('open');
+        }
+
+        function makeFinal(id) {
+            swalConfirmAndSubmit({
+                url: '{{url("admin/invoice/sales-make-final")}}',
+                data: {
+                    id:id,
+                    _token: '{{csrf_token()}}'
+                },
+                onSuccess: function(res) {
+                    $('#btn-final' + id).remove();
+                },
+            });
         }
 
         function removeDebetRow(btn) {

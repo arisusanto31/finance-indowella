@@ -16,11 +16,11 @@
             <div id="card-create" class="container tree-toggle">
 
                 <div class="mb-3 mt-2">
-                    <button type="button" class="btn btn-success" onclick="addrow()" id="addDebit">+Tambah</button>
+                    <button type="button" class="btn btn-primary" onclick="addrow()" id="addDebit">+Tambah</button>
                     @if(book()->name=="Buku Toko")
-                    <button type="button" class="btn btn-success" onclick="openImport('{{book()->id}}')" id="btn-import">Import dari Toko</button>
+                    <button type="button" class="btn btn-primary" onclick="openImport('{{book()->id}}')" id="btn-import">Import dari Toko</button>
                     @else
-                    <button type="button" class="btn btn-success" onclick="openImport('{{book()->id}}')" id="btn-import">Import dari Manuf</button>
+                    <button type="button" class="btn btn-primary" onclick="openImport('{{book()->id}}')" id="btn-import">Import dari Manuf</button>
                     @endif
                 </div>
 
@@ -111,14 +111,21 @@
                         @if ($index === 0)
                         <td rowspan="{{ $rowspan }}"><strong>Rp{{ number_format($invoiceSubtotal) }}</strong></td>
                         @if ($index === 0)
-                        <td rowspan="{{ $rowspan }}">
-                            <a href="javascript:void(lihatDetailInvoice('{{$item->invoice_pack_number}}'))" class="btn btn-sm btn-outline-primary" title="Lihat Invoice">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                            <a href="" class="btn btn-sm btn-outline-primary" title="Edit Invoice">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                        </td>
+
+                        @if($item->parent->is_final==1)
+                        <a href="javascript:void(lihatDetailInvoice('{{$item->sales_order_number}}'))" class="btn btn-sm btn-outline-primary" title="Lihat Invoice">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        @endif
+                        @if($item->parent->is_final==0)
+                        <a href="javascript:void(makeFinal('{{$item->sales_order_id}}'))" class="btn btn-sm btn-outline-primary" title="make final" id="btn-final{{$item->sales_order_id}}">
+                            <i class="fas fa-upload"></i>
+                        </a>
+
+                        <a href="" class="btn btn-sm btn-outline-primary" title="Edit Invoice">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        @endif
                         @endif
 
                         @endif
@@ -237,6 +244,19 @@
                 }
             });
             $('#total-invoice').val(formatRupiah(totalInvoice.toFixed(2)));
+        }
+
+        function makeFinal(id) {
+            swalConfirmAndSubmit({
+                url: '{{url("admin/invoice/invoice-make-final")}}',
+                data: {
+                    id: id,
+                    _token: '{{csrf_token()}}'
+                },
+                onSuccess: function(res) {
+                    $('#btn-final' + id).remove();
+                },
+            });
         }
 
         function updateStockUnit(el) {
