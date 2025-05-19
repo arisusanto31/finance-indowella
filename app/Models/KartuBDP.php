@@ -41,6 +41,7 @@ class KartuBDP extends Model
 
     public static function create(Request $request)
     {
+        info('TRYING UPLOAD ' . json_encode($request->all()));
         $lock = Cache::lock('kartu-bdp-' . $request->input('stock_id'), 40);
         try {
             $flow = $request->input('flow');
@@ -49,13 +50,13 @@ class KartuBDP extends Model
             $kartu->stock_id = $request->input('stock_id');
             $kartu->mutasi_qty_backend = $request->input('mutasi_qty_backend');
             $kartu->unit_backend = $request->input('unit_backend');
-            $kartu->mutasi_quantity = $request->input('mutasi_quantity');
+            $kartu->mutasi_quantity = ($request->input('mutasi_quantity'));
             $kartu->unit = $request->input('unit');
             $kartu->sales_order_number = $request->input('sales_order_number');
             $kartu->sales_order_id = $request->input('sales_order_id');
             $kartu->invoice_pack_number = $request->input('invoice_pack_number');
             $kartu->invoice_pack_id = $request->input('invoice_pack_id');
-
+            $kartu->custom_stock_name = $request->input('custom_stock_name');
 
             $kartu->production_number = $request->input('production_number');
             if (!$kartu->production_number) {
@@ -72,7 +73,7 @@ class KartuBDP extends Model
                 //kalo keluar
                 throw new \Exception('tidak ada saldo qty barang pada BDP nomer ' . $kartu->production_number);
             }
-            if ($isCustom == 0) {
+            if ($isCustom == 0 || $flow == 1) {
                 //ini ngambil hpp yang lama.
                 if ($lastCard->saldo_qty_backend == 0) {
                     $rupiahUnit = 0;
@@ -86,7 +87,7 @@ class KartuBDP extends Model
                     ];
                 }
                 $kartu->mutasi_rupiah_on_unit = $rupiahUnit; //ini kayak hpp gitu. pake defaultnya
-                $kartu->mutasi_rupiah_total = moneyMul($rupiahUnit, $kartu->mutasi_qty_backend);
+                $kartu->mutasi_rupiah_total = $lastCard->saldo_rupiah_total * $kartu->mutasi_qty_backend / $lastCard->saldo_qty_backend;
             } else {
                 $kartu->mutasi_rupiah_on_unit = $request->input('mutasi_rupiah_on_unit') ?? 0;
                 $kartu->mutasi_rupiah_total = $request->input('mutasi_rupiah_total') ?? 0;
@@ -136,27 +137,59 @@ class KartuBDP extends Model
         ];
     }
 
-    public static function mutationStore(Request $request, $useTransaction = true,?LockManager $lockManager=null )
+    public static function mutationStore(Request $request, $useTransaction = true, ?LockManager $lockManager = null)
     {
 
         if ($useTransaction)
             DB::beginTransaction();
         try {
             $stockid = $request->input('stock_id');
-            $qty = $request->input('mutasi_quantity');
+            $qty = format_db($request->input('mutasi_quantity'));
             $unit = $request->input('unit');
             $flow = $request->input('flow');
             $codeGroup = $request->input('code_group');
             $chart = ChartAccount::where('code_group', $codeGroup)->first();
-
+            $customStockName = $request->input('custom_stock_name');
             $SONumber = $request->input('sales_order_number');
             $invoiceNumber = $request->input('invoice_pack_number');
+            $productionNumber = $request->input('production_number');
+            if (!$productionNumber) {
+                $productionNumber = $SONumber;
+            }
             $sales = SalesOrder::where('sales_order_number', $SONumber)->first();
             $SOID = $sales ? $sales->id : null;
             $invoice = InvoicePack::where('invoice_number', $invoiceNumber)->first();
             $invID = $invoice ? $invoice->id : null;
+            $modeStock = 'normal';
+            if (!$stockid && !$customStockName) {
+                throw new \Exception('stock id tidak boleh kosong jika custom stock name tidak diisi');
+            }
+            if (!$stockid && $customStockName) {
+                //map stockid custom stock
+                $modeStock = 'custom';
+                $kartuBDP = KartuBDP::where('production_number', $productionNumber)->where('custom_stock_name', $customStockName)->first();
+                if ($kartuBDP) {
+                    $stockid = $kartuBDP->stock_id;
+                } else {
+                    $idCustom = Stock::withoutGlobalScope('journal')->where('name', 'like', 'stock_custom%')->pluck('id')->all();
 
+                    $stockCustomTerpakai = KartuBDP::where('production_number', $productionNumber)->whereIn('stock_id', $idCustom)->pluck('stock_id')->all();
+                    $stockid = $idCustom[0];
+                    $i = 0;
+                    foreach ($stockCustomTerpakai as $stockCustom) {
+                        if ($stockCustom == $stockid) {
+                            $i++;
+                        } else {
+                            break;
+                        }
+                    }
+                    $stockid = $idCustom[$i];
+                }
+            }
             $lawanCodeGroup = $request->input('lawan_code_group');
+            if ($lawanCodeGroup == $codeGroup) {
+                throw new \Exception('lawan code group tidak boleh sama dengan code group');
+            }
             $isOtomatisJurnal = $request->input('is_otomatis_jurnal');
 
             if (!$chart) {
@@ -179,10 +212,18 @@ class KartuBDP extends Model
                 }
             } else
                 $mutasiRupiahTotal = 0;
+            $stock = DB::table('stocks')->where('id', $stockid)->first();
+            if ($stock->book_journal_id == 0) {
+                $modeStock = 'custom';
+            }
             $isCustom = $request->input('is_custom_rupiah');
-            $dataunit = StockUnit::where('stock_id', $stockid)->where('unit', $unit)->first();
-            $stock = Stock::find($stockid);
-            if (!$unit) {
+            if ($modeStock == 'normal')
+                $dataunit = StockUnit::where('stock_id', $stockid)->where('unit', $unit)->first();
+            else if ($modeStock == "custom") {
+                $dataunit = StockUnit::where('stock_id', $stockid)->where('unit', 'Pcs')->first();
+            }
+
+            if (!$dataunit) {
                 if ($useTransaction)
                     DB::rollBack();
                 return [
@@ -192,7 +233,12 @@ class KartuBDP extends Model
             }
             $qtybackend = $qty * $dataunit->konversi;
             $unitbackend = $stock->unit_backend;
-
+            if (!$productionNumber) {
+                $productionNumber = $SONumber;
+            }
+            if (!$customStockName) {
+                $customStockName = $stock->name;
+            }
             $mutasiRupiahUnit = money($mutasiRupiahTotal / $qtybackend);
             $st = self::create(new Request([
                 'stock_id' => $stockid,
@@ -210,26 +256,30 @@ class KartuBDP extends Model
                 'mutasi_rupiah_total' => $mutasiRupiahTotal,
                 'code_group' => $codeGroup,
                 'code_group_name' => $codeGroupName,
-                'production_number' => $request->input('production_number'),
+                'production_number' => $productionNumber,
+                'custom_stock_name' => $customStockName,
             ]));
             if ($st['status'] == 0) {
                 throw new \Exception($st['msg']);
             }
-            $spkNumber = $request->input('sales_order_number');
+
             $ks = $st['msg'];
             $number = null;
             if ($isOtomatisJurnal) {
+                //buat kartu lawan yaa
+
+
                 $amount = abs($ks->mutasi_rupiah_total);
 
                 if ($flow == 1) {
                     //keluar
                     $codeDebet = $lawanCodeGroup;
                     $codeKredit = $codeGroup;
-                    $desc = 'bahan dalam proses keluar ' . $spkNumber;
+                    $desc = 'bahan dalam proses keluar ' . $productionNumber;
                 } else {
                     $codeDebet = $codeGroup;
                     $codeKredit = $lawanCodeGroup;
-                    $desc = 'bahan dalam proses masuk ' . $spkNumber;
+                    $desc = 'bahan dalam proses masuk ' . $productionNumber;
                 }
                 $kredits = [
                     [
@@ -258,7 +308,7 @@ class KartuBDP extends Model
                     'title' => 'create mutation transaction',
                     'url_try_again' => 'try_again'
 
-                ]), false,$lockManager);
+                ]), false, $lockManager);
                 if ($st['status'] != 1) return $st;
                 $number = $st['journal_number'];
                 $journal = Journal::where('journal_number', $number)->where('code_group', 140003)->first();
@@ -266,6 +316,55 @@ class KartuBDP extends Model
                 $ks->journal_number = $number;
                 $ks->save();
                 $ks->createDetailKartuInvoice();
+
+                // if ($lawanCodeGroup == 140001 || $lawanCodeGroup == 140002) {
+                //     //kalo bahan baku atau barang dagang
+                //     $stStock = KartuStock::mutationStore(new Request([
+                //         'stock_id' => $stockid,
+                //         'mutasi_qty_backend' => $qty,
+                //         'unit_backend' => $unit,
+                //         'mutasi_quantity' => $qty,
+                //         'unit' => $unit,
+                //         'flow' => $flow == 1 ? 0 : 1,
+                //         'sales_order_number' =>  $SONumber,
+                //         'production_number' => $productionNumber,
+                //         'sales_order_id' => $SOID,
+                //         'code_group' => $lawanCodeGroup,
+                //         'lawan_code_group' => $codeGroup,
+                //         'is_otomatis_jurnal' => 0,
+                //         'is_custom_rupiah' => $isCustom,
+                //         'mutasi_rupiah_total' => $mutasiRupiahTotal,
+
+                //     ]), false);
+                //     if ($stStock['status'] == 0) {
+                //         throw new \Exception($stStock['msg']);
+                //     }
+                // } else if ($lawanCodeGroup == 140004) {
+                //     //kalo barang jadi
+                //     $stStock = KartuBahanJadi::mutationStore(new Request([
+                //         'stock_id' => $stockid,
+                //         'mutasi_qty_backend' => $qty,
+                //         'unit_backend' => $unit,
+                //         'mutasi_quantity' => $qty,
+                //         'unit' => $unit,
+                //         'flow' => $flow == 1 ? 0 : 1,
+                //         'sales_order_number' => $SONumber,
+                //         'production_number' => $productionNumber,
+                //         'sales_order_id' => $SOID,
+                //         'code_group' => $lawanCodeGroup,
+                //         'lawan_code_group' => $codeGroup,
+                //         'is_otomatis_jurnal' => 0,
+                //         'is_custom_rupiah' => $isCustom,
+                //         'mutasi_rupiah_total' => $mutasiRupiahTotal,
+                //     ]), false);
+                //     if ($stStock['status'] == 0) {
+                //         throw new \Exception($stStock['msg']);
+                //     }
+                // }
+                // $stStock->journal_id = $journal->id;
+                // $stStock->journal_number = $number;
+                // $stStock->save();
+                // $stStock->createDetailKartuInvoice();
             }
         } catch (Throwable $th) {
             if ($useTransaction)

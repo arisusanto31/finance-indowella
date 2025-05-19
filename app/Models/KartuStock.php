@@ -66,7 +66,12 @@ class KartuStock extends Model
                 $lastCard->saldo_rupiah_total = 0;
             }
 
-            if ($isCustom == 0) {
+            if ($lastCard->saldo_qty_backend == 0 && $flow == 1) {
+                //kalo keluar
+                throw new \Exception('tidak ada saldo qty barang ini ');
+            }
+
+            if ($isCustom == 0 || $flow == 1) {
                 if ($lastCard->saldo_qty_backend == 0) {
                     $rupiahUnit = 0;
                 } else {
@@ -79,7 +84,7 @@ class KartuStock extends Model
                     ];
                 }
                 $kartu->mutasi_rupiah_on_unit = $rupiahUnit; //ini kayak hpp gitu. pake defaultnya
-                $kartu->mutasi_rupiah_total = moneyMul($rupiahUnit, $kartu->mutasi_qty_backend);
+                $kartu->mutasi_rupiah_total =  $lastCard->saldo_rupiah_total * $kartu->mutasi_qty_backend / $lastCard->saldo_qty_backend;
             } else {
 
                 $kartu->mutasi_rupiah_on_unit = $request->input('mutasi_rupiah_on_unit') ?? 0;
@@ -138,7 +143,7 @@ class KartuStock extends Model
             DB::beginTransaction();
         try {
             $stockid = $request->input('stock_id');
-            $qty = $request->input('mutasi_quantity');
+            $qty = format_db($request->input('mutasi_quantity'));
             $unit = $request->input('unit');
             $flow = $request->input('flow');
             $codeGroup = $request->input('code_group');

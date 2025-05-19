@@ -23,7 +23,7 @@
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Nomor Invoice</label>
-                    <input name="invoice_number" type="text" class="form-control" required placeholder="Nomor Invoice">
+                    <input name="invoice_pack_number" type="text" class="form-control" required placeholder="Nomor Invoice">
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Tanggal Invoice</label>
@@ -96,7 +96,7 @@
                     <td rowspan="{{ $rowspan }}"><strong>Rp{{ number_format($invoiceSubtotal) }}</strong></td>
                     @if ($index === 0)
                     <td rowspan="{{ $rowspan }}">
-                        <a href="javascript:void(lihatDetailInvoice('{{$item->invoice_number}}'))" class="btn btn-sm btn-outline-primary" title="Lihat Invoice">
+                        <a href="javascript:void(lihatDetailInvoice('{{$item->invoice_pack_number}}'))" class="btn btn-sm btn-outline-primary" title="Lihat Invoice">
                             <i class="fas fa-eye"></i>
                         </a>
                         <a href="" class="btn btn-sm btn-outline-primary" title="Edit Invoice">

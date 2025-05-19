@@ -64,8 +64,8 @@
                     <h5 class="text-primary-dark"> <a href="javascript:void(toggleDivUangMuka())"> <strong>buat uang muka penjualan</strong>
                             <i id="icon-create" class="bx bx-caret-down toggle-icon card-uang-muka"></i> </a>
                     </h5>
-                    <div id="" class="tree-toggle card-uang-muka" style="height:80px ;">
-                        <div class="row">
+                    <div id="" class="tree-toggle mb-3 bg-primary-lightest card-uang-muka" style="height:80px ;">
+                        <div class="row p-2">
                             <div class="col-md-3 col-xs-12">
                                 <label>deskripsi jurnal</label>
                                 <input type="text" class="form-control" placeholder="deskripsi" id="uangmuka-description" />
@@ -96,11 +96,13 @@
                     <div id="" class="tree-toggle mb-3  card-bdp bg-primary-lightest">
                         <div class="row p-2">
                             <div class="col-md-12 col-xs-12">
-                                <form id="form-bdp">
+                                @php $index=1; @endphp
+                                @foreach($data['details'] as $key => $item)
+                                <form id="form-bdp{{$index}}">
                                     {{csrf_field()}}
+                                    <input type="hidden" name="production_number" value="{{$data->sales_order_number}}-{{toDigit($index,2)}}" />
                                     <input type="hidden" name="sales_order_number" value="{{$data->sales_order_number}}" />
                                     <input type="hidden" name="sales_order_id" value="{{$data->id}}" />
-                                    @foreach($data['details'] as $key => $item)
                                     <div class="row">
                                         <div class="col-md-3 col-xs-12">
                                             <label>Nama Barang</label>
@@ -131,16 +133,23 @@
                                         </div>
                                         <div class="col-md-3 col-xs-12">
                                             <label>Dari Barang Nomer? <span class="fs-7">(isi jika perlu)</span> </Label>
-                                            <input type="text" class="form-control" name="spk_number[]" placeholder="number" id="bdp-spk_number" />
+                                            <input type="text" class="form-control" name="spk_number[]" value="{{$data->sales_order_number}}-{{toDigit($index,2)}}" placeholder="number" id="bdp-spk_number" />
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label>Aksi</label><br>
+                                            <button type="button" onclick="submitBDP('{{$index}}')" class="mb-3 btn btn-primary">submit</button>
                                         </div>
 
                                     </div>
-                                    <hr>
-                                    @endforeach
                                 </form>
+                                <hr>
+                                @php $index++; @endphp
+                                @endforeach
+
+
                             </div>
                             <div class="col-md-2 col-xs-12">
-                                <button onclick="submitBDP()" class="mb-3 btn btn-primary">submit</button>
+
                             </div>
                         </div>
 
@@ -152,16 +161,21 @@
                     <div id="" class="tree-toggle card-bahan-jadi bg-primary-lightest">
                         <div class="row p-2">
                             <div class="col-md-12 col-xs-12">
-                                <form id="form-bahan-jadi">
+                                @php $index=1; @endphp
+                                @foreach($data['details'] as $key => $item)
+                                <form id="form-bahan-jadi{{$index}}">
                                     {{csrf_field()}}
                                     <input type="hidden" name="sales_order_number" value="{{$data->sales_order_number}}" />
                                     <input type="hidden" name="sales_order_id" value="{{$data->id}}" />
-                                    @foreach($data['details'] as $key => $item)
-                                    <div class="row">
+                                    <input type="hidden" name="production_number" value="{{$data->sales_order_number}}-{{toDigit($index,2)}}" />
+
+
+                                    <div class="row p-2">
                                         <div class="col-md-3 col-xs-12">
                                             <label>Nama Barang</label>
                                             <input type="hidden" id="bahan-jadi-stock_id" name="stock_id[]" value="{{$item->stock_id}}" />
                                             <input type="hidden" id="" name="sales_detail_id[]" value="{{$item->id}}" />
+
                                             <input type="text" class="form-control" id="bahan-jadi-stock_name" value="{{$item->stock->name}}" readonly />
 
                                         </div>
@@ -195,172 +209,175 @@
                                         </div>
                                         <div class="col-md-3 col-xs-12">
                                             <label>Dari Barang Nomer? <span class="fs-7">(isi jika perlu)</span> </Label>
-                                            <input type="text" class="form-control" name="spk_number[]" placeholder="number" id="bahan-jadi-spk_number" />
-                                        </div>
-
-
-                                    </div>
-                                    <hr>
-                                    @endforeach
-                                </form>
-                                <div class="col-md-2 col-xs-12">
-                                    <button onclick="submitBahanJadi()" class="btn btn-primary">submit</button>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                    <h5 class="text-primary-dark"> <a href="javascript:void(toggleDivInvoice())"> <strong>buat Invoice</strong>
-                            <i id="icon-create" class="bx bx-caret-down toggle-icon card-invoice"></i> </a>
-                    </h5>
-                    <div id="" class="tree-toggle card-invoice bg-primary-lightest">
-                        <div class="row p-2">
-                            <div class="col-md-12 col-xs-12">
-                                <form id="form-invoice-so">
-                                    {{csrf_field()}}
-                                    <input type="hidden" name="sales_order_number" value="{{$data->sales_order_number}}" />
-                                    <input type="hidden" name="sales_order_id" value="{{$data->id}}" />
-
-                                    @foreach($data['details'] as $key => $item)
-                                    <div class="row">
-                                        <div class="col-md-3 col-xs-12">
-                                            <label>Nama Barang</label>
-                                            <input type="text" class="form-control" id="invoice-stock_name" value="{{$item->stock->name}}" readonly />
-                                            <input type="hidden" id="invoice-stock_id{{$item->id}}" name="stock_id[]" value="{{$item->stock_id}}" />
-                                            <input type="hidden" name="sales_detail_id[]" value="{{$item->id}}" />
+                                            <input type="text" class="form-control" name="spk_number[]" placeholder="number" id="bahan-jadi-spk_number" value="{{$data->sales_order_number}}-{{toDigit($index,2)}}" />
                                         </div>
                                         <div class="col-md-2 col-xs-12">
-                                            <label>Jumlah</label>
-                                            <input type="text" onchange="updateBiaya('{{$item->id}}')" class="form-control" name="quantity[]" placeholder="jumlah qty " id="invoice-quantity{{$item->id}}" />
+                                            <label>Aksi</label> <br>
+                                            <button type="button" onclick="submitBahanJadi('{{$index}}')" class="btn btn-primary">submit</button>
                                         </div>
 
-                                        <div class="col-md-1 col-xs-12">
-                                            <label>Satuan</label>
-                                            <input class="form-control" type="text" name="unit[]" readonly id="invoice-unit" value="{{$item->unit}}" />
-                                        </div>
-                                        <div class="col-md-3 col-xs-12">
-                                            <label>Akun Penjualan</label>
-                                            <select class="form-control select-coa-penjualan" type="text" name="code_group_penjualan[]"></select>
-                                        </div>
-                                        <div class="col-md-3 col-xs-12">
-                                            <label>Akun Piutang</label>
-                                            <select class="form-control select-coa-piutang" type="text" name="code_group_piutang[]"></select>
-                                        </div>
-
-                                        <div class="col-md-5 col-xs-12">
-                                            <label>Barang jadi</label>
-                                            <input type="text" class="form-control" id="invoice-ket-barang-jadi{{$item->id}}" value="" readonly />
-                                            <input type="hidden" name="custom_stock_name[]" id="invoice-custom_stock_name{{$item->id}}" value="" />
-                                            <input type="hidden" name="production_number[]" id="invoice-production_number{{$item->id}}" value="" />
-                                        </div>
-                                        <div class="col-md-3 col-xs-12">
-                                            <label>Pembiayaan HPP</label>
-                                            <input type="text" id="invoice-biaya_hpp{{$item->id}}" class="form-control" placeholder="pembiayaan hpp" name="hpp[]" readonly />
-                                        </div>
-                                    </div>
-                                    <hr>
-                                    @endforeach
                                 </form>
-                                <div class="col-md-2 col-xs-12">
-                                    <button onclick="submitInvoice()" class="btn btn-primary">submit</button>
-                                </div>
                             </div>
+                            <hr>
+                            @php $index++; @endphp
+                            @endforeach
+
+
                         </div>
                     </div>
-                    <h5 class="text-primary-dark"> <a href="javascript:void(toggleDivBayarInvoice())"> <strong>buat pembayaran invoice</strong>
-                            <i id="icon-create" class="bx bx-caret-down toggle-icon card-bayar-invoice"></i> </a>
-                    </h5>
-                    <div id="" class="tree-toggle card-bayar-invoice">
-                        <form id="form-bayar-invoice">
-                            {{csrf_field()}}
-                            <div class="row">
-                                <div class="col-md-3 col-xs-12">
-                                    <label>Nomer Invoice</label>
-                                    <select class="form-control" name="invoice_number" id="bayar-invoice-invoice_number">
 
-                                    </select>
-                                </div>
+                </div>
+                <h5 class="text-primary-dark"> <a href="javascript:void(toggleDivInvoice())"> <strong>buat Invoice</strong>
+                        <i id="icon-create" class="bx bx-caret-down toggle-icon card-invoice"></i> </a>
+                </h5>
+                <div id="" class="tree-toggle card-invoice bg-primary-lightest">
+                    <div class="row p-2">
+                        <div class="col-md-12 col-xs-12">
+                            <form id="form-invoice-so">
+                                {{csrf_field()}}
+                                <input type="hidden" name="sales_order_number" value="{{$data->sales_order_number}}" />
+                                <input type="hidden" name="sales_order_id" value="{{$data->id}}" />
 
-                                <div class="col-md-2 col-xs-12">
-                                    <label>Jumlah bayar</label>
-                                    <input type="text" class="form-control" placeholder="nilai pembayaran" name="amount" id="bayar-invoice-amount" />
-                                </div>
+                                @foreach($data['details'] as $key => $item)
+                                <div class="row">
+                                    <div class="col-md-3 col-xs-12">
+                                        <label>Nama Barang</label>
+                                        <input type="text" class="form-control" id="invoice-stock_name" value="{{$item->stock->name}}" readonly />
+                                        <input type="hidden" id="invoice-stock_id{{$item->id}}" name="stock_id[]" value="{{$item->stock_id}}" />
+                                        <input type="hidden" name="sales_detail_id[]" value="{{$item->id}}" />
+                                    </div>
+                                    <div class="col-md-2 col-xs-12">
+                                        <label>Jumlah</label>
+                                        <input type="text" onchange="updateBiaya('{{$item->id}}')" class="form-control" name="quantity[]" placeholder="jumlah qty " id="invoice-quantity{{$item->id}}" />
+                                    </div>
 
-                                <div class="col-md-3 col-xs-12">
-                                    <label>Akun Piutang</label>
-                                    <select class="select-coa-piutang form-control" name="codegroup_piutang" id="bayar-invoice-akun-piutang">
-                                    </select>
-                                </div>
-                                <div class="col-md-3 col-xs-12">
-                                    <label>Akun Pembayaran</label>
-                                    <select class="select-coa-kas-uangmuka form-control" name="codegroup_bayar" id="bayar-invoice-akun-pembayaran">
-                                    </select>
-                                </div>
-                                <div class="col-md-1 col-xs-12">
-                                    <label>Aksi</label>
-                                    <br>
-                                    <button type="button" onclick="submitBayarInvoice()" class="btn btn-primary">submit</button>
-                                </div>
-                            </div>
-                        </form>
+                                    <div class="col-md-1 col-xs-12">
+                                        <label>Satuan</label>
+                                        <input class="form-control" type="text" name="unit[]" readonly id="invoice-unit" value="{{$item->unit}}" />
+                                    </div>
+                                    <div class="col-md-3 col-xs-12">
+                                        <label>Akun Penjualan</label>
+                                        <select class="form-control select-coa-penjualan" type="text" name="code_group_penjualan[]"></select>
+                                    </div>
+                                    <div class="col-md-3 col-xs-12">
+                                        <label>Akun Piutang</label>
+                                        <select class="form-control select-coa-piutang" type="text" name="code_group_piutang[]"></select>
+                                    </div>
 
-                    </div>
-
-
-                    <div class="row">
-
-                        <h6>Kartu Kartu </h6>
-
-
-                        @if(count($data['kartus'])>0)
-                        @foreach($data['kartus'] as $key => $itemsType)
-
-                        <div class="col-xs-12">
-                            <span class="text-white bg-primary-dark ps-2">{{$key}}</span>
-                            <div class="row bg-primary-light p-2 mb-2">
-
-                                <div class="col-xs-12 col-md-6 p-2">
-                                    <h6 class="text-white">Debet</h6>
-                                    <div class="row text-white">
-                                        @if(array_key_exists('debet',$itemsType))
-                                        @foreach($itemsType['debet'] as $item)
-                                        <div class="col-xs-12 col-md-6 ">
-                                            <div class="bg-primary-dark p-2 ">
-                                                <p>{{$item->created_at}}  <strong>{{$item->code_group_name}}</strong> : {{format_price(abs($item->amount_journal))}} <span class="fs-8">[journal_id : {{$item->journal_id}}, kartu_id= {{$item->kartu_id}}]</span></p>
-                                            </div>
-                                        </div>
-                                        @endforeach
-                                        @endif
+                                    <div class="col-md-5 col-xs-12">
+                                        <label>Barang jadi</label>
+                                        <input type="text" class="form-control" id="invoice-ket-barang-jadi{{$item->id}}" value="" readonly />
+                                        <input type="hidden" name="custom_stock_name[]" id="invoice-custom_stock_name{{$item->id}}" value="" />
+                                        <input type="hidden" name="production_number[]" id="invoice-production_number{{$item->id}}" value="" />
+                                    </div>
+                                    <div class="col-md-3 col-xs-12">
+                                        <label>Pembiayaan HPP</label>
+                                        <input type="text" id="invoice-biaya_hpp{{$item->id}}" class="form-control" placeholder="pembiayaan hpp" name="hpp[]" readonly />
                                     </div>
                                 </div>
-                                <div class="col-xs-12 col-md-6 p-2 ">
-                                    <h6 class="text-white">Kredit</h6>
-                                    <div class="row text-white">
-                                        @if(array_key_exists('kredit',$itemsType))
-                                        @foreach($itemsType['kredit'] as $item)
-                                        <div class="col-xs-12 col-md-6">
-                                            <div class="bg-primary-dark p-2">
-                                                <p>{{$item->created_at}}  <strong>{{$item->code_group_name}}</strong> : {{format_price(abs($item->amount_journal))}} <span class="fs-8">[journal_id : {{$item->journal_id}}, kartu_id= {{$item->kartu_id}}]</span></p>
-                                            </div>
-                                        </div>
-                                        @endforeach
-                                        @endif
-                                    </div>
-                                </div>
-
+                                <hr>
+                                @endforeach
+                            </form>
+                            <div class="col-md-2 col-xs-12">
+                                <button onclick="submitInvoice()" class="btn btn-primary">submit</button>
                             </div>
                         </div>
-                        @endforeach
-
-                        @endif
-
-
                     </div>
                 </div>
-            </div>
+                <h5 class="text-primary-dark"> <a href="javascript:void(toggleDivBayarInvoice())"> <strong>buat pembayaran invoice</strong>
+                        <i id="icon-create" class="bx bx-caret-down toggle-icon card-bayar-invoice"></i> </a>
+                </h5>
+                <div id="" class="tree-toggle card-bayar-invoice mb-3 bg-primary-lightest">
+                    <form id="form-bayar-invoice">
+                        {{csrf_field()}}
+                        <div class="row p-2">
+                            <div class="col-md-3 col-xs-12">
+                                <label>Nomer Invoice</label>
+                                <select class="form-control" name="invoice_number" id="bayar-invoice-invoice_number">
 
+                                </select>
+                            </div>
+
+                            <div class="col-md-2 col-xs-12">
+                                <label>Jumlah bayar</label>
+                                <input type="text" class="form-control" placeholder="nilai pembayaran" name="amount" id="bayar-invoice-amount" />
+                            </div>
+
+                            <div class="col-md-3 col-xs-12">
+                                <label>Akun Piutang</label>
+                                <select class="select-coa-piutang form-control" name="codegroup_piutang" id="bayar-invoice-akun-piutang">
+                                </select>
+                            </div>
+                            <div class="col-md-3 col-xs-12">
+                                <label>Akun Pembayaran</label>
+                                <select class="select-coa-kas-uangmuka form-control" name="codegroup_bayar" id="bayar-invoice-akun-pembayaran">
+                                </select>
+                            </div>
+                            <div class="col-md-1 col-xs-12">
+                                <label>Aksi</label>
+                                <br>
+                                <button type="button" onclick="submitBayarInvoice()" class="btn btn-primary">submit</button>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+
+
+                <div class="row">
+
+                    <h6>Kartu Kartu </h6>
+
+
+                    @if(count($data['kartus'])>0)
+                    @foreach($data['kartus'] as $key => $itemsType)
+
+                    <div class="col-xs-12">
+                        <span class="text-white bg-primary-dark ps-2">{{$key}}</span>
+                        <div class="row bg-primary-light p-2 mb-2">
+
+                            <div class="col-xs-12 col-md-6 p-2">
+                                <h6 class="text-white">Debet</h6>
+                                <div class="row text-white">
+                                    @if(array_key_exists('debet',$itemsType))
+                                    @foreach($itemsType['debet'] as $item)
+                                    <div class="col-xs-12 col-md-6 ">
+                                        <div class="bg-primary-dark p-2 ">
+                                            <p>{{$item->created_at}} <strong>{{$item->code_group_name}}</strong> : {{format_price(abs($item->amount_journal))}} <span class="fs-8">[journal_id : {{$item->journal_id}}, kartu_id= {{$item->kartu_id}}]</span></p>
+                                        </div>
+                                    </div>
+                                    @endforeach
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-md-6 p-2 ">
+                                <h6 class="text-white">Kredit</h6>
+                                <div class="row text-white">
+                                    @if(array_key_exists('kredit',$itemsType))
+                                    @foreach($itemsType['kredit'] as $item)
+                                    <div class="col-xs-12 col-md-6">
+                                        <div class="bg-primary-dark p-2">
+                                            <p>{{$item->created_at}} <strong>{{$item->code_group_name}}</strong> : {{format_price(abs($item->amount_journal))}} <span class="fs-8">[journal_id : {{$item->journal_id}}, kartu_id= {{$item->kartu_id}}]</span></p>
+                                        </div>
+                                    </div>
+                                    @endforeach
+                                    @endif
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    @endforeach
+
+                    @endif
+
+
+                </div>
+            </div>
         </div>
+
     </div>
+</div>
 </div>
 
 <div class="modal-footer">
@@ -498,10 +515,10 @@
 
     }
 
-    function submitBDP() {
+    function submitBDP(i) {
         swalConfirmAndSubmit({
             url: '{{url("admin/kartu/kartu-bdp/create-mutations")}}',
-            data: $('#form-bdp').serialize(),
+            data: $('#form-bdp' + i).serialize(),
             onSuccess: function(res) {
                 console.log(res);
 
@@ -509,10 +526,10 @@
         });
     }
 
-    function submitBahanJadi() {
+    function submitBahanJadi(i) {
         swalConfirmAndSubmit({
             url: '{{url("admin/kartu/kartu-bahan-jadi/create-mutations")}}',
-            data: $('#form-bahan-jadi').serialize(),
+            data: $('#form-bahan-jadi' + i).serialize(),
             onSuccess: function(res) {
                 console.log(res);
 

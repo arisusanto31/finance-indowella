@@ -51,22 +51,32 @@ class KartuBDPController extends Controller
                 'stocks.*',
                 'stock_units.konversi as konversi',
                 'stock_categories.name as category_name',
-            )->get()->keyBy('id');
+            )->get()->keyBy('id')->all();
 
         $summary = $summary->groupBy('production_number')
-            ->map(function ($dataspk) use ($dataStock) {
-                return collect($dataspk)->groupBy('stock_id')->map(function ($item, $stockid) use ($dataStock) {
+            ->map(function ($dataspk, $productionNumber) use ($dataStock) {
+                return collect($dataspk)->groupBy('stock_id')->map(function ($item, $stockid) use ($dataStock, $productionNumber) {
                     $data = []; //$dataStock[$stockid];
-                    $data['name'] = $dataStock[$stockid]->name;
-                    $data['konversi'] = $dataStock[$stockid]->konversi;
-                    $data['category_name'] = $dataStock[$stockid]->category_name;
+                    if (array_key_exists($stockid, $dataStock)) {
+                        $data['name'] = $dataStock[$stockid]->name;
+                        $data['konversi'] = $dataStock[$stockid]->konversi;
+                        $data['category_name'] = $dataStock[$stockid]->category_name;
 
-                    $data['unit_default'] = $dataStock[$stockid]->unit_default;
+                        $data['unit_default'] = $dataStock[$stockid]->unit_default;
+                    } else {
+                        //ini pasti stock custom soalnya heuheu
+                        $kartu = KartuBDP::where('stock_id', $stockid)->where('production_number', $productionNumber)->first();
+                        $data['name'] = $kartu->custom_stock_name;
+                        $data['konversi'] = 1;
+                        $data['category_name'] = 'custom';
+                        $data['unit_default'] = $kartu->unit;
+                    }
                     $data['id'] = $stockid;
                     $data['saldo_qty_awal'] = collect($item)->sum('saldo_qty_awal');
                     $data['saldo_rupiah_awal'] = collect($item)->sum('saldo_rupiah_awal');
                     $data['saldo_qty_akhir'] = collect($item)->sum('saldo_qty_akhir');
                     $data['saldo_rupiah_akhir'] = collect($item)->sum('saldo_rupiah_akhir');
+
                     return $data;
                 })->values();
             });
@@ -124,6 +134,7 @@ class KartuBDPController extends Controller
         $stockIDs = $request->input('stock_id');
         $quantitys = $request->input('quantity');
         $spkNumbers = $request->input('spk_number');
+        $productionNumber = $request->input('production_number');
         $units = $request->input('unit');
         $flows = $request->input('flow'); //harusnya ini 1 atau 0
         $codeGroup = 140003;
@@ -134,7 +145,7 @@ class KartuBDPController extends Controller
         try {
             DB::beginTransaction();
             foreach ($stockIDs as $row => $stock_id) {
-                $qty = $quantitys[$row];
+                $qty = format_db($quantitys[$row]);
                 $unit = $units[$row];
                 $flow = $flows[$row];
                 $lawanCodeGroup = $lawanCodeGroups[$row];
@@ -144,7 +155,12 @@ class KartuBDPController extends Controller
                 $isCustomRupiah = 0;
                 $mutasiRupiahTotal = 0;
                 if ($flow == 0) {
-                    $hpp = Stock::find($stock_id)->getLastHPP($unit);
+                    $typekartulawan = "stock";
+                    if ($lawanCodeGroup == 140004) {
+                        $typekartulawan = "barang jadi";
+                    }
+                    $hpp = Stock::find($stock_id)->getLastHPP($unit, $typekartulawan, $spkNumbers[$row]);
+
                     $mutasiRupiahTotal = $hpp * $qty;
                     $isCustomRupiah = 1;
                 }
@@ -200,6 +216,7 @@ class KartuBDPController extends Controller
                     'mutasi_quantity' => $qty,
                     'unit' => $unit,
                     'flow' => $flow,
+                    'production_number' => $productionNumber,
                     'sales_order_number' => $salesOrderNumber,
                     'sales_order_id' => $saleOrderId,
                     'code_group' => $codeGroup,
@@ -271,6 +288,7 @@ class KartuBDPController extends Controller
     public function mutasiStore(Request $request)
     {
 
+        // return ['status' => 0, 'msg' => $request->all()];
         return KartuBDP::mutationStore($request);
     }
     public function refreshKartu(Request $request)

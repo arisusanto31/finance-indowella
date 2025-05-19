@@ -419,7 +419,7 @@
                     "_token": "{{ csrf_token() }}",
                     "model_id": model_id,
                     "journal_id": id,
-                    "model": "App\\Models\\KartuStock",
+                    "model": "App\\Models\\KartuBDP",
                 },
                 success: function(res) {
                     console.log(res);

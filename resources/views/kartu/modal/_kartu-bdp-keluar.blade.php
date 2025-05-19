@@ -1,10 +1,19 @@
 <form id="mutasi-keluar">
     @csrf
     <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Buat Mutasi Stock Keluar</h5>
+        <div class="flex-column align-items-start">
+            <h5 class="modal-title" id="exampleModalLabel1">Buat Mutasi BDP Keluar</h5>
+
+
+            <div class="form-check form-switch ">
+                <input class="form-check-input" type="checkbox" name="is_otomatis_jurnal" id="is_otomatis_jurnal" checked />
+                <label class="form-check-label" for="is_otomatis_jurnal">Buat Jurnal</label>
+            </div>
+
+        </div>
         <button
             type="button"
-            class="btn-close"
+            class="btn-close position-absolute end-0 top-0 m-3"
             data-bs-dismiss="modal"
             aria-label="Close"></button>
     </div>
@@ -27,8 +36,14 @@
         </div>
         <div class="row">
             <div class="col mb-3">
-                <label for="akun" class="form-label">Akun Persediaan</label>
+                <label for="akun" class="form-label">Akun BDP</label>
                 <select type="text" name="code_group" id="code-group" class="form-control select-coa">
+                    <option value="140003" selected>Persediaan Dalam Proses</option>
+                </select>
+            </div>
+            <div class="col mb-3">
+                <label for="akun" class="form-label">Ke Akun </label>
+                <select type="text" name="lawan_code_group" id="lawan-code-group" class="form-control select-coa">
                 </select>
             </div>
         </div>

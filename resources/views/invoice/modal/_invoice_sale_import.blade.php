@@ -5,51 +5,59 @@
 
     <div class="row">
         <div class="col-md-3 col-xs-12">
+            import data ke toko:
             <select id="select-toko" class="form-control">
             </select>
         </div>
     </div>
 
-    <div class="table-responsive mt-2">
-        <table class="table table-bordered table-striped">
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>Number</th>
-                    <th>Nama Barang</th>
-                    <th>Qty</th>
-                    <th>Satuan</th>
-                    <th>Harga</th>
-                    <th>Total</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($sales as $row =>$sale)
-                @php
-                $jumlah= count($sale['details']);
-                $id= $sale['id'];
-                @endphp
+    <div class="bglevel1 p-2">
+        <div class="pull-right">
+            <select id="select-search-toko"></select>
+            <select id="select-search-cashkind"></select>
+            <select id="select-search-date"></select>
+        </div>
+        <div class="table-responsive mt-2">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Number</th>
+                        <th>Nama Barang</th>
+                        <th>Qty</th>
+                        <th>Satuan</th>
+                        <th>Harga</th>
+                        <th>Total</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($sales as $row =>$sale)
+                    @php
+                    $jumlah= count($sale['details']);
+                    $id= $sale['id'];
+                    @endphp
 
-                @foreach($sale['details'] as $detail)
-                <tr>
-                    <td rowspan="{{$jumlah}}">{{$row+1}}</td>
-                    <td rowspan="{{$jumlah}}">{{$sale['package_number']}}</td>
-                    <td rowspan="{{$jumlah}}">{{$detail['stock_name']}}</td>
-                    <td>{{$detail['quantity']}}</td>
-                    <td>{{$detail['unit']}}</td>
-                    <td>{{$detail['price']}}</td>
-                    <td>{{$detail['total_price']}}</td>
-                    <td id="status{{$id}}">
-                        <button class="btn btn-primary btn-sm" onclick="importData('{{$id}}')">
-                            import
-                        </button>
-                    </td>
-                </tr>
-                @endforeach
-                @endforeach
-            </tbody>
-        </table>
+                    @foreach($sale['details'] as $detail)
+                    <tr>
+                        <td rowspan="{{$jumlah}}">{{$row+1}}</td>
+                        <td rowspan="{{$jumlah}}">{{$sale['package_number']}}</td>
+                        <td rowspan="{{$jumlah}}">{{$detail['stock_name']}}</td>
+                        <td>{{$detail['quantity']}}</td>
+                        <td>{{$detail['unit']}}</td>
+                        <td>{{$detail['price']}}</td>
+                        <td>{{$detail['total_price']}}</td>
+                        <td id="status{{$id}}">
+                            <button class="btn btn-primary btn-sm" onclick="importData('{{$id}}')">
+                                import
+                            </button>
+                        </td>
+                    </tr>
+                    @endforeach
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
     </div>
 
 </div>

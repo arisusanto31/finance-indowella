@@ -18,6 +18,7 @@ class SalesOrder extends Model
         'status',
         'reference_id',
         'reference_type',
+        'ref_akun_cash_kind_name'
 
     ];
 
@@ -58,7 +59,7 @@ class SalesOrder extends Model
             return $val;
         })->groupBy('code_group_name')->map(function ($val) {
             return $val->sum('total');
-        });
+        })->all();
 
         return $kartus ?? [];
     }
@@ -75,5 +76,78 @@ class SalesOrder extends Model
 
 
         return $kartus ?? [];
+    }
+
+    public function updateStatus()
+    {
+        $total = collect($this->getTotalKartu())->mapWithKeys(function ($value, $key) {
+            $keys = explode(' ', $key);
+            if ($keys[0] == 'Piutang') {
+                $thekey = 'Piutang';
+            } else if ($keys[0] == 'Penjualan') {
+                $thekey = 'Penjualan';
+            } else {
+                $thekey = $key;
+            }
+            return [$thekey => $value];
+        })->all();
+        $this->status_payment = "draft";
+        $this->status_delivery = "draft";
+        $this->status = "draft";
+
+
+        if (array_key_exists('Uang Muka Penjualan', $total)) {
+            $totalDP = $total['Uang Muka Penjualan'];
+            if ($totalDP >= $this->total_price) {
+                $this->status_payment = "DP LUNAS";
+            } else if ($totalDP > 0) {
+                $prosen = round($totalDP / $this->total_price * 100);
+                $this->status_payment = "DP " . $prosen . '%';
+            }
+            $this->status = "DP";
+        }
+        if (array_key_exists('Persediaan Dalam Proses', $total)) {
+            $totalPersediaan = $total['Persediaan Dalam Proses'];
+            if ($totalPersediaan > 0) {
+                $this->status_delivery = "Barang diproses";
+            } else {
+                $this->status_delivery = "Barang Ready";
+            }
+            $this->status = "Proses";
+        }
+        if (array_key_exists('Penjualan', $total)) {
+            //sudah invoices atau sudah dikirim
+            $totalPenjualan = $total['Penjualan'];
+            if ($totalPenjualan >= $this->total_price) {
+                $this->status_delivery = "terkirim 100%";
+                $this->status = "terkirim";
+            } else if ($totalPenjualan > 0) {
+                $prosen = round($totalPenjualan / $this->total_price * 100);
+                $this->status_delivery = "terkirim " . $prosen . '%';
+                $this->status = "Kirim";
+            }
+        }
+        if (array_key_exists('Piutang', $total)) {
+            $totalPiutang = $total['Piutang'];
+            $totalBayar = $this->total_price - $totalPiutang;
+            if ($totalBayar >= $this->total_price) {
+                $this->status_payment = "LUNAS 100%";
+                //sudah invoices atau sudah dikirim
+                if ($this->status == "terkirim") {
+                    $this->status = "Selesai";
+                } else {
+                }
+            } else if ($totalBayar > 0) {
+                $prosen = round($totalBayar / $this->total_price * 100);
+                $this->status_payment = "LUNAS " . $prosen . '%';
+            }
+        } else {
+            if (!preg_match('/^DP/', $this->status_payment)) {
+                if ($this->status_delivery != "draft") {
+                    $this->status_payment = "BELUM BAYAR";
+                }
+            }
+        }
+        $this->save();
     }
 }

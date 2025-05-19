@@ -77,6 +77,17 @@ function getListMonth()
     ];
 }
 
+function getListMonthYear()
+{
+    $date = carbonDate();
+    $listMonthYear = [];
+    for ($i = 0; $i < 12; $i++) {
+        $thedate = $date->copy()->subMonth($i);
+        $listMonthYear[] = $thedate->format('Y-m');
+    }
+    return $listMonthYear;
+}
+
 function getProsen($data, $total)
 {
     if ($total == 0) {
@@ -231,4 +242,11 @@ if (!function_exists('moneyCmp')) {
     {
         return bccomp(money($a), money($b), 2);
     }
+}
+
+
+function toDigit($number, $digit)
+{
+    $str = sprintf("%0" . $digit . "d", $number);
+    return $str;
 }

@@ -272,9 +272,11 @@ function getProsen($data, $total) {
 
 function initCurrencyInput(elem) {
     $(elem).on('input', function () {
-        let value = $(this).val().replace(/[^\d]/g, '');
+        let value = $(this).val().replace(/[^\d,]/g, '');
+        console.log('value:'+value);
+        // Cek apakah input adalah format database atau format rupiah
         // Format angka dengan locale 'id-ID' → hasilnya: 50.000
-        let formatted = new Intl.NumberFormat('id-ID').format(value);
+        let formatted =  formatRupiah(value);
         $(this).val(formatted);
     });
 }

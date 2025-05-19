@@ -1,23 +1,29 @@
 <form id="mutasi-masuk">
     @csrf
     <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Buat Mutasi BDP Masuk</h5>
+        <div class="flex-column align-items-start">
+            <h5 class="modal-title" id="exampleModalLabel1">Buat Mutasi BDP Masuk</h5>
+
+
+            <div class="form-check form-switch ">
+                <input class="form-check-input" type="checkbox" name="is_otomatis_jurnal" id="is_otomatis_jurnal" checked />
+                <label class="form-check-label" for="is_otomatis_jurnal">Buat Jurnal</label>
+            </div>
+
+        </div>
         <button
             type="button"
-            class="btn-close"
+            class="btn-close position-absolute end-0 top-0 m-3"
             data-bs-dismiss="modal"
             aria-label="Close"></button>
     </div>
     <div class="modal-body">
-
-
         <div class="row">
             <div class="col mb-3">
                 <label for="nameBasic" class="form-label">Nomer SO</label>
                 <input type="text" name="sales_order_number" id="sales-order-number" class="form-control " placeholder="Nomer SO">
             </div>
         </div>
-
         <div class="row">
             <div class="col mb-3">
                 <label for="nameBasic" class="form-label">Stock</label>
@@ -29,9 +35,20 @@
         </div>
         <div class="row">
             <div class="col mb-3">
-                <label for="akun" class="form-label">Akun Persediaan</label>
-                <select type="text" name="code_group" id="code-group" class="form-control select-coa">
-
+                <label for="nameBasic" class="form-label">Custom Stock (bahan lain lain)</label>
+                <input type="text" name="custom_stock_name" id="custom-stock-name" class="form-control " onchange="kosongkanStockID()" placeholder="Custom Stock / Bahan Lain custom">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col mb-3">
+                <label for="akun" class="form-label">Akun BDP</label>
+                <select type="text" name="code_group" id="code-group" class="form-control">
+                    <option value="140003" selected>Persediaan Dalam Proses</option>
+                </select>
+            </div>
+            <div class="col mb-3">
+                <label for="akun" class="form-label">Dari Akun </label>
+                <select type="text" name="lawan_code_group" id="lawan-code-group" class="form-control select-coa">
                 </select>
             </div>
         </div>
@@ -40,7 +57,7 @@
                 <label for="quantity" class="form-label">Jumlah Mutasi</label>
                 <input type="text" name="mutasi_quantity" id="mutasi_quantity" autocomplete="off" class="form-control currency-input" placeholder="jumlah" />
             </div>
-            <div class="col mb-3">
+            <div class="col mb-3" id="div-unit">
                 <label for="unit" class="form-label">Satuan</label>
                 <select type="text" id="unit" autocomplete="off" class="form-control" name="unit">
                     <option value="">Pilih Satuan</option>
@@ -71,8 +88,35 @@
     initItemSelectManual('.select-coa', '{{route("chart-account.get-item-keuangan")}}?kind=persediaan', 'Pilih Akun Persediaan', '#global-modal');
     initItemSelectManual('.select-stock', '{{route("stock.get-item")}}', 'Pilih Stock', '#global-modal');
 
+
+    function kosongkanStockID() {
+        if ('#custom-stock-name' != '') {
+            $('#select-stock').val('').change();
+            initItemSelectManual('.select-coa', '{{route("chart-account.get-item-keuangan")}}?kind=hutang|kas', 'Pilih Akun Hutang / Kas', '#global-modal');
+            changeUnitDiv('manual');
+        } else {
+            initItemSelectManual('.select-coa', '{{route("chart-account.get-item-keuangan")}}?kind=persediaan', 'Pilih Akun Persediaan', '#global-modal');
+            changeUnitDiv('normal');
+        }
+    }
+
+    function changeUnitDiv(mode = "normal") {
+        if (mode == "normal") {
+            html = `<label for="unit" class="form-label">Satuan</label>
+                   <select type="text" id="unit" autocomplete="off" class="form-control" name="unit">
+                     <option value="">Pilih Satuan</option>
+                   </select>`;
+            $('#div-unit').html(html);
+
+        } else {
+            html = `<label for="unit" class="form-label">Satuan</label>
+                   <input type="text" id="unit" autocomplete="off" placeholder="satuan" class="form-control" name="unit" value="" >`;
+            $('#div-unit').html(html);
+        }
+    }
+
     function updateTotalRupiah() {
-        let quantity = $('#mutasi_quantity').val();
+        let quantity = formatDB($('#mutasi_quantity').val());
         let totalRupiah = formatDB($('#mutasi-rupiah-total').val()) / quantity;
         let unit = $('#unit').val();
         let keterangan = 'Total Nilai Per unit : ' + formatRupiah(totalRupiah) + ' / ' + unit;
@@ -82,9 +126,11 @@
 
     function selectStock() {
         let stockid = $('#select-stock option:selected').val();
-        if (stockid == '') {
+        if (stockid == '' || stockid == undefined) {
             return;
         }
+        changeUnitDiv('normal');
+        $('#custom-stock-name').val('');
         $.ajax({
             url: '{{url("admin/master/stock/get-info")}}/' + stockid,
             method: 'get',

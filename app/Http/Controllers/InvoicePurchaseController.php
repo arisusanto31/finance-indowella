@@ -17,7 +17,7 @@ class InvoicePurchaseController extends Controller
     {
         $invoices = \App\Models\InvoicePurchaseDetail::with('supplier', 'stock')
             ->get()
-            ->groupBy('invoice_number');
+            ->groupBy('invoice_pack_number');
 
         // dd($invoices);
 
@@ -30,7 +30,7 @@ class InvoicePurchaseController extends Controller
 
       
         $request->validate([
-            'invoice_number' => 'required|string|max:255',
+            'invoice_pack_number' => 'required|string|max:255',
             'supplier_id' => 'required|integer',
             'stock_id' => 'required|array',
             'stock_id.*' => 'required|integer',
@@ -46,13 +46,13 @@ class InvoicePurchaseController extends Controller
             'discount.*' => 'nullable|numeric',
         ]);
 
-        $invoice_number = $request->invoice_number;
+        $invoice_pack_number = $request->invoice_pack_number;
         $grouped = [];
 
         foreach ($request->stock_id as $i => $stockId) {
 
             $grouped[] = [
-                'invoice_number' => $invoice_number,
+                'invoice_pack_number' => $invoice_pack_number,
                 'stock_id' => $stockId,
                 'quantity' => $request->quantity[$i],
                 'unit' => $request->unit[$i],
@@ -69,7 +69,7 @@ class InvoicePurchaseController extends Controller
 
             //create pack ya
             $invoicePack = InvoicePack::create([
-                'invoice_number' => $invoice_number,
+                'invoice_number' => $invoice_pack_number,
                 'book_journal_id' => session('book_journal_id'),
                 'person_id' => $request->supplier_id,
                 'person_type' => 'App\Models\Supplier',

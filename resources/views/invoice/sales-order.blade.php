@@ -16,11 +16,11 @@
             <div id="card-create" class="container tree-toggle">
 
                 <div class="mb-3 mt-2">
-                    <button type="button" class="btn btn-success" onclick="addrow()" id="addDebit">+Tambah</button>
+                    <button type="button" class="btn btn-primary" onclick="addrow()" id="addDebit">+Tambah</button>
                     @if(book()->name=="Buku Toko")
-                    <button type="button" class="btn btn-success" onclick="openImportData('{{book()->id}}')" id="btn-import">Import dari Toko</button>
+                    <button type="button" class="btn btn-primary" onclick="openImportData('{{book()->id}}')" id="btn-import">Import dari Toko</button>
                     @else
-                    <button type="button" class="btn btn-success" onclick="openImportData('{{book()->id}}')" id="btn-import">Import dari Manuf</button>
+                    <button type="button" class="btn btn-primary" onclick="openImportData('{{book()->id}}')" id="btn-import">Import dari Manuf</button>
                     @endif
                 </div>
 
@@ -62,13 +62,14 @@
 
     @if ($salesOrders->isNotEmpty())
     <div class="card mb-4 shadow p-3">
-  
+
         <h5 class="text-primary-dark card-header"> 📁 <strong>DAFTAR SALE ORDER </strong> </h5>
         <div class="table-responsive mt-2">
             <table class="table table-bordered">
                 <thead class="table-primary text-center">
                     <tr>
                         <th>No</th>
+                        <th>TGL</th>
                         <th>Nomer SO</th>
                         <th>Customer</th>
                         <th>Produk</th>
@@ -78,6 +79,7 @@
                         <th>Diskon</th>
                         <th>Sub-Total</th>
                         <th>Total</th>
+                        <th>Status</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -93,6 +95,7 @@
                     <tr>
                         @if ($index === 0)
                         <td rowspan="{{ $rowspan }}">{{ $no++ }}</td>
+                        <td rowspan="{{ $rowspan }}">{{ $item->created_at->format('Y-m-d') }}</td>
                         <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }}</td>
                         <td rowspan="{{ $rowspan }}">{{ $item->customer->name ?? '-' }}</td>
                         @endif
@@ -110,7 +113,37 @@
 
                         @if ($index === 0)
                         <td rowspan="{{ $rowspan }}"><strong>Rp{{ format_price($invoiceSubtotal) }}</strong></td>
-                        @if ($index === 0)
+                        <td rowspan="{{ $rowspan }}">
+                            <p class="colorblack text-center" style="width:100%;line-height:120%;"><strong>{{strtoupper($item->parent->status)}}</strong></p>
+                            @php
+                            $bgPayment='bglevel3';
+                            if(preg_match('/^DP/',$item->parent->status_payment)){
+                            $bgPayment='bg-warning';
+                            }if(preg_match('/^LUNAS.*/',$item->parent->status_payment)){
+                            $bgPayment='bg-warning';
+                            }
+                            if($item->parent->status_payment=="LUNAS 100%"){
+                            $bgPayment='bg-success';
+                            }
+                            if($item->parent->status_payment=="BELUM BAYAR"){
+                            $bgPayment='bg-danger';
+                            }
+
+                            $bgDelivery='bglevel3';
+                            if($item->parent->status_delivery=="Barang diproses"){
+                            $bgDelivery='bg-danger';
+                            }if($item->parent->status_delivery=="Barang Ready"){
+                            $bgDelivery='bg-warning';
+                            }
+                            if(preg_match('/^terkirim/',$item->parent->status_delivery)){
+                            $bgDelivery='bg-warning';
+                            }
+                            if($item->parent->status_delivery=="terkirim 100%"){
+                            $bgDelivery='bg-success';
+                            }
+                            @endphp
+                            <span class="badge {{$bgPayment}}"> <i class="fas fa-wallet"></i> {{$item->parent->status_payment}}</span>
+                            <span class="badge {{$bgDelivery}}"> <i class="fas fa-truck"></i> {{$item->parent->status_delivery}}</span>
                         <td rowspan="{{ $rowspan }}">
                             <a href="javascript:void(lihatDetailInvoice('{{$item->sales_order_number}}'))" class="btn btn-sm btn-outline-primary" title="Lihat Invoice">
                                 <i class="fas fa-eye"></i>
@@ -119,7 +152,6 @@
                                 <i class="fas fa-edit"></i>
                             </a>
                         </td>
-                        @endif
 
                         @endif
                     </tr>

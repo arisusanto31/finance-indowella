@@ -28,6 +28,9 @@ class SalesOrderDetail extends Model
         'reference_type'
     ];
 
+    public function parent(){
+        return $this->belongsTo(SalesOrder::class, 'sales_order_number', 'sales_order_number');
+    }
     public function customer()
     {
         return $this->belongsTo(Customer::class, 'customer_id', 'id');
