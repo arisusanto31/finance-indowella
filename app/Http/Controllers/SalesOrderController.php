@@ -18,6 +18,7 @@ use App\Models\StockCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Throwable;
+use App\Models\InvoiceSaleDetail;
 
 
 class SalesOrderController extends Controller
@@ -265,6 +266,69 @@ class SalesOrderController extends Controller
         return ['status' => 1, 'msg' => $sales];
     }
 
+    
+
+    public function editInvoice($number)
+    {
+        $data = SalesOrder::where('sales_order_number', $number)->first();
+
+        $data->updateStatus();
+        $invdetails = SalesOrderDetail::with('stock')->where('sales_order_number', $number)->get();
+
+        $data['details'] = $invdetails;
+        $view= view ('invoice.modal._sale-edit');
+        $view->data = $data;
+        return $view;
+    }
+    
+    public function updateDetail(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $totalHargaBaru = 0;
+            $salesOrderNumberBaru = null;
+            $salesOrderId = null;
+    
+            foreach ($request->quantity as $index => $qty) {
+                $detail = \App\Models\SalesOrderDetail::find($request->detail_id[$index] ?? null);
+                if ($detail) {
+                    $detail->quantity = $qty;
+                    $detail->price = $request->price[$index] ?? 0;
+                    $detail->discount = $request->discount[$index] ?? 0;
+                    $detail->total_price = ($qty * $detail->price) - $detail->discount;
+    
+                    if (isset($request->sales_order_number[$index])) {
+                        $detail->sales_order_number = $request->sales_order_number[$index];
+                        $salesOrderNumberBaru = $request->sales_order_number[$index]; 
+                    }
+    
+                    $salesOrderId = $detail->sales_order_id;
+                    $detail->save();
+    
+                    $totalHargaBaru += $detail->total_price;
+                }
+            }
+    
+           
+            if ($salesOrderId && $salesOrderNumberBaru) {
+                $salesOrder = \App\Models\SalesOrder::find($salesOrderId);
+                if ($salesOrder) {
+                    $salesOrder->sales_order_number = $salesOrderNumberBaru;
+                    $salesOrder->total_price = $totalHargaBaru;
+                    $salesOrder->save();
+                }
+            }
+    
+            DB::commit();
+            return response()->json(['status' => 'success']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    }
+    
+    
+    
 
     public function updateInputInvoice($number)
     {
