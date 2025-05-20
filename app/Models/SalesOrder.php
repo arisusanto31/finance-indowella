@@ -18,7 +18,8 @@ class SalesOrder extends Model
         'status',
         'reference_id',
         'reference_type',
-        'ref_akun_cash_kind_name'
+        'ref_akun_cash_kind_name',
+        'created_at',
 
     ];
 
@@ -148,6 +149,21 @@ class SalesOrder extends Model
                 }
             }
         }
+
+        if ($this->is_final == 1) {
+            $this->status = "FINAL";
+        } else {
+            $this->status = "DRAFT";
+        }
         $this->save();
+    }
+
+    public function getCodeFix()
+    {
+        $salesOrder = SalesOrder::where('is_final', 1)->where('customer_id', $this->customer_id)->orderBy('index', 'desc')->first();
+        $count = $salesOrder ? $salesOrder->index + 1 : 1;
+        $this->index = $count;
+        $number = 'SO-' . date('Y') . '-' . toDigit($this->customer_id, 4) . '-' . toDigit($count, 4);
+        return $number;
     }
 }

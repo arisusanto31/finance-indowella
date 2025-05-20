@@ -38,9 +38,13 @@ class InvoicePurchaseDetail extends Model
             });
         });
     }
+
+    public function parent(){
+        return $this->belongsTo(InvoicePack::class, 'invoice_pack_number', 'invoice_number');
+    }
     public function invoicePack()
     {
-        return $this->belongsTo(InvoicePack::class, 'invoice_number', 'invoice_number');
+        return $this->belongsTo(InvoicePack::class, 'invoice_pack_number', 'invoice_number');
     }
 
 

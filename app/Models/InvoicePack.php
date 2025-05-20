@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Traits\HasModelChilds;
 use Illuminate\Support\Str;
 
+
 class InvoicePack extends Model
 {
     use HasModelChilds;
@@ -25,6 +26,7 @@ class InvoicePack extends Model
         'toko_id',
         'reference_id',
         'reference_type',
+        'created_at',
     ];
 
     protected static function booted()
@@ -78,5 +80,29 @@ class InvoicePack extends Model
             return $val;
         })->groupBy('type_kartu');
         return $kartus ?? [];
+    }
+
+    public function getCodeFix()
+    {
+        $data = $this;
+        $personType = $data->person_type;
+        $personID = $data->person_id;
+        $inv = InvoicePack::where('is_final', 1)->where('person_id', $personID)
+            ->where('person_type', $personType)
+            ->orderBy('index', 'desc')->first();
+        if ($inv) {
+            $count = $inv->index + 1;
+        } else {
+            $count = 1;
+        }
+        $this->index = $count;
+        $code = 'INV-S' . date('y') . '-' . toDigit($personID, 4) . '-' . toDigit($count, 4);
+        return $code;
+    }
+
+    public function updateStatus()
+    {
+        $this->status = $this->is_final == 1 ? 'FINAL' : 'DRAFT';
+        $this->save();
     }
 }

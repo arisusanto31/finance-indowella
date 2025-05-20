@@ -64,7 +64,7 @@
                     <h5 class="text-primary-dark"> <a href="javascript:void(toggleDivUangMuka())"> <strong>buat uang muka penjualan</strong>
                             <i id="icon-create" class="bx bx-caret-down toggle-icon card-uang-muka"></i> </a>
                     </h5>
-                    <div id="" class="tree-toggle mb-3 bg-primary-lightest card-uang-muka" style="height:80px ;">
+                    <div id="" class="tree-toggle bg-primary-lightest card-uang-muka" style="height:80px ;">
                         <div class="row p-2">
                             <div class="col-md-3 col-xs-12">
                                 <label>deskripsi jurnal</label>

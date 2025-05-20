@@ -16,11 +16,11 @@
             <div id="card-create" class="container tree-toggle">
 
                 <div class="mb-3 mt-2">
-                    <button type="button" class="btn btn-success" onclick="addrow()" id="addDebit">+Tambah</button>
+                    <button type="button" class="btn btn-primary" onclick="addrow()" id="addDebit">+Tambah</button>
                     @if(book()->name=="Buku Toko")
-                    <button type="button" class="btn btn-success" onclick="openImport('{{book()->id}}')" id="btn-import">Import dari Toko</button>
+                    <button type="button" class="btn btn-primary" onclick="openImport('{{book()->id}}')" id="btn-import">Import dari Toko</button>
                     @else
-                    <button type="button" class="btn btn-success" onclick="openImport('{{book()->id}}')" id="btn-import">Import dari Manuf</button>
+                    <button type="button" class="btn btn-primary" onclick="openImport('{{book()->id}}')" id="btn-import">Import dari Manuf</button>
                     @endif
                 </div>
 
@@ -60,15 +60,23 @@
         </div>
     </form>
 
-    @if ($invoices->isNotEmpty())
+
     <div class="card mb-4 shadow p-3">
 
-        <h5 class="text-primary-dark card-header"> 📁 <strong>DAFTAR INVOICE </strong> </h5>
+        <div class="text-primary-dark "> 📁 <strong>DAFTAR INVOICE </strong> </div>
+        <div class="d-flex justify-content pe-4 mb-3">
+            <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="prevMonth()">
+                << </button>
+                    <span class="badge bg-primary d-flex justify-content-center align-items-center"> {{getListMonth()[$month]}} {{$year}}</span>
+                    <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="nextMonth()"> >></button>
+
+        </div> @if($invoices->isNotEmpty())
         <div class="table-responsive">
             <table class="table table-bordered">
                 <thead class="table-primary text-center">
                     <tr>
                         <th>No</th>
+                        <th>TGL</th>
                         <th>Invoice</th>
                         <th>Customer</th>
                         <th>Produk</th>
@@ -78,7 +86,8 @@
                         <th>Diskon</th>
                         <th>Sub-Total</th>
                         <th>Total</th>
-                        <th> Aksi nya say</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -93,6 +102,7 @@
                     <tr>
                         @if ($index === 0)
                         <td rowspan="{{ $rowspan }}">{{ $no++ }}</td>
+                        <td rowspan="{{ $rowspan }}">{{ createCarbon($item->created_at)->format('Y-m-d') }}</td>
                         <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }}</td>
                         <td rowspan="{{ $rowspan }}">{{ $item->customer->name ?? '-' }}</td>
                         @endif
@@ -110,39 +120,42 @@
 
                         @if ($index === 0)
                         <td rowspan="{{ $rowspan }}"><strong>Rp{{ number_format($invoiceSubtotal) }}</strong></td>
-                        @if ($index === 0)
                         <td rowspan="{{ $rowspan }}">
+                            <p class="colorblack text-center" style="width:100%;line-height:120%;"><strong>{{strtoupper($item->parent->status)}}</strong></p>
+                        </td>
+                        <td rowspan="{{$rowspan}}">
+                            @if($item->parent->is_final==1)
                             <a href="javascript:void(lihatDetailInvoice('{{$item->invoice_pack_number}}'))" class="btn btn-sm btn-outline-primary" title="Lihat Invoice">
                                 <i class="fas fa-eye"></i>
+                            </a>
+                            @endif
+                            @if($item->parent->is_final==0)
+                            <a href="javascript:void(makeFinal('{{$item->invoice_pack_id}}'))" class="btn btn-sm btn-outline-primary" title="make final" id="btn-final{{$item->invoice_pack_id}}">
+                                <i class="fas fa-upload"></i>
                             </a>
                             <a href="" class="btn btn-sm btn-outline-primary" title="Edit Invoice">
                                 <i class="fas fa-edit"></i>
                             </a>
+                            @endif
                         </td>
                         @endif
 
-                        @endif
                     </tr>
                     @endforeach
                     @endforeach
                 </tbody>
             </table>
         </div>
-    </div>
-
-    <!-- Jika laporan stock external dan internal tercatat jelas selisihnya. maka purchase ppn bisa disetting,
-     menambah ulur tempo menuju pkp. masih banyak yang disiapkan menuju pkp, tapi pembelian dan penjualan ppn sudah
-     akan mencapai batas. penguasaan setting pembelian ppn harus segera learned agar nafas bisa lebih panjang -->
-    @else
-    <div class="card mb-2 shadow ">
-        <h5 class="text-primary-dark card-header"> 📁 <strong>DAFTAR INVOICE </strong> </h5>
-        <div class="container">
+        @else
+        <div class="container px-0">
             <div class="alert alert-warning text-center">
-                Belum ada data invoice.
+                Belum ada data Sales order.
             </div>
         </div>
+        @endif
     </div>
-    @endif
+
+
 
     @push('styles')
     <style>
@@ -217,6 +230,30 @@
             });
         }
 
+
+        function prevMonth() {
+            month = '{{$month}}';
+            year = '{{$year}}';
+            month--;
+            if (month < 1) {
+                month = 12;
+                year--;
+            }
+            window.location.href = '{{url("admin/invoice/invoice-sales")}}?month=' + month + '&year=' + year;
+        }
+
+        function nextMonth() {
+            month = '{{$month}}';
+            year = '{{$year}}';
+            month++;
+            if (month > 12) {
+                month = 1;
+                year++;
+            }
+            window.location.href = '{{url("admin/invoice/invoice-sales")}}?month=' + month + '&year=' + year;
+        }
+
+
         function updateHarga(el) {
             const card = el.closest('.rowdebet');
             const quantity = card.querySelector('.quantity').value;
@@ -237,6 +274,19 @@
                 }
             });
             $('#total-invoice').val(formatRupiah(totalInvoice.toFixed(2)));
+        }
+
+        function makeFinal(id) {
+            swalConfirmAndSubmit({
+                url: '{{url("admin/invoice/invoice-make-final")}}',
+                data: {
+                    id: id,
+                    _token: '{{csrf_token()}}'
+                },
+                onSuccess: function(res) {
+                    $('#btn-final' + id).remove();
+                },
+            });
         }
 
         function updateStockUnit(el) {

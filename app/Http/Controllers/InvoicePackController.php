@@ -22,8 +22,7 @@ class InvoicePackController extends Controller
 
     public function show($id)
     {
-        $invoice = \App\Models\InvoicePack::find($id);
-
+         $invoice = InvoicePack::find($id);
         if (!$invoice) {
             dd('Invoice tidak ditemukan');
         }
@@ -39,7 +38,6 @@ class InvoicePackController extends Controller
 
         $view = view('invoice.modal._invoice-detail');
         $view->data = $data;
-
         return $view;
     }
 
@@ -259,7 +257,6 @@ class InvoicePackController extends Controller
         if (!$chartPersediaan || !$chartHutangKas) {
             return ['status' => 0, 'msg' => 'Chart account tidak ditemukan'];
         }
-
         //buat kartu stock
         //dari sini apa yang sudah dibuat harus disimpan dulu. trus kalo gagal ditengah jalan kita rollback atau delete
         DB::beginTransaction();

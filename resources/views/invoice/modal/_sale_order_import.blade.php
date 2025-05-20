@@ -9,8 +9,12 @@
             <select id="select-toko" class="form-control">
             </select>
         </div>
-    </div>
+        <div class="col-md-3 col-xs-12">
+            import ke tanggal:
+            <input type="date" id="select-date" class="form-control" />
 
+        </div>
+    </div>
     <div class="bglevel1 p-2">
         <div class="row">
             <div class="col-xs-12 col-md-12 ">
@@ -43,6 +47,7 @@
                     <thead>
                         <tr>
                             <th>No</th>
+                            <th>TGL</th>
                             <th>Number</th>
                             <th>Toko </th>
                             <th>Nama Barang</th>
@@ -116,6 +121,7 @@
                         html += `
                                 <tr>
                                     <td rowspan="${jumlah}">${i+1}</td>
+                                    <td rowspan="${jumlah}">${formatNormalDate(new Date(item.created_at))}</td>
                                     <td rowspan="${jumlah}">${item.package_number} (${item.customer_name})</td>
                                     <td rowspan="${jumlah}">${detail.toko}</td>
                                     <td rowspan="${jumlah}">${detail.stock_name}</td>
@@ -150,7 +156,15 @@
             swalInfo('opps', 'tolong pilih toko', 'info');
             return 0;
         }
+        date = $('#select-date').val();
+        if (date == null || date == undefined) {
+            swalInfo('opps', 'tolong pilih tanggal import', 'info');
+            return 0;
+        }
+        date = normalizeDate(date);
+
         let dataPost = {
+            created_at: date,
             customer_name: data.customer_name,
             sales_order_number: data.package_number,
             custom_stock_name: data.details.map(item => item.stock_name),

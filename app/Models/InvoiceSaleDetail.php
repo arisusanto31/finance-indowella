@@ -26,8 +26,8 @@ class InvoiceSaleDetail extends Model
         'customer_id',
         'toko_id',
         'reference_id',
-        'reference_type'
-
+        'reference_type',
+        'created_at',
     ];
 
     protected static function booted()
@@ -50,6 +50,11 @@ class InvoiceSaleDetail extends Model
         static::updating(function ($model) {});
     }
 
+    public function parent()
+    {
+
+        return $this->belongsTo(InvoicePack::class, 'invoice_pack_number', 'invoice_number');
+    }
     public function stock()
 
     {
