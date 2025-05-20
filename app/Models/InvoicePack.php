@@ -26,6 +26,7 @@ class InvoicePack extends Model
         'toko_id',
         'reference_id',
         'reference_type',
+        'created_at',
     ];
 
     protected static function booted()

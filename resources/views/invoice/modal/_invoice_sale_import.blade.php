@@ -9,6 +9,11 @@
             <select id="select-toko" class="form-control">
             </select>
         </div>
+         <div class="col-md-3 col-xs-12">
+            import ke tanggal:
+            <input type="date" id="select-date" class="form-control" />
+            
+        </div>
     </div>
 
     <div class="bglevel1 p-2">
@@ -43,6 +48,7 @@
                     <thead>
                         <tr>
                             <th>No</th>
+                            <th>TGL</th>
                             <th>Number</th>
                             <th>Toko </th>
                             <th>Nama Barang</th>
@@ -116,6 +122,7 @@
                         html += `
                                 <tr>
                                     <td rowspan="${jumlah}">${i+1}</td>
+                                    <td rowspan="${jumlah}">${formatNormalDate(new Date(item.created_at))}</td>
                                     <td rowspan="${jumlah}">${item.package_number} (${item.customer_name})</td>
                                     <td rowspan="${jumlah}">${detail.toko}</td>
                                     <td rowspan="${jumlah}">${detail.stock_name}</td>

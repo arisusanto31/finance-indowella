@@ -18,7 +18,8 @@ class SalesOrder extends Model
         'status',
         'reference_id',
         'reference_type',
-        'ref_akun_cash_kind_name'
+        'ref_akun_cash_kind_name',
+        'created_at',
 
     ];
 

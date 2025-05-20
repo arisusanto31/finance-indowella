@@ -5,16 +5,13 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     @endif
-
     <form id="form-invoice">
         @csrf
-
         <div class=" mb-4 card shadow-sm">
             <h5 class="text-primary-dark card-header"> <a href="javascript:void(openCardCreate())">⚒️ <strong>BUAT SALE ORDER</strong>
                     <i id="icon-create" class="bx bx-caret-down toggle-icon"></i> </a>
             </h5>
             <div id="card-create" class="container tree-toggle">
-
                 <div class="mb-3 mt-2">
                     <button type="button" class="btn btn-primary" onclick="addrow()" id="addDebit">+Tambah</button>
                     @if(book()->name=="Buku Toko")
@@ -23,7 +20,6 @@
                     <button type="button" class="btn btn-primary" onclick="openImportData('{{book()->id}}')" id="btn-import">Import dari Manuf</button>
                     @endif
                 </div>
-
                 <div class="row g-2 mb-3">
                     <div class="col-md-3">
                         <label class="form-label">Pilih Customer</label>
@@ -42,10 +38,8 @@
                         <input type="text" class="form-control" value="{{ now()->format('Y-m-d H:i:s') }}" readonly>
                     </div>
                 </div>
-
                 <div id="invoice-wrapper" class="debet-wrapper">
                 </div>
-
                 <hr>
                 <div class="d-flex justify-content-end pe-4">
                     <div class="d-flex align-items-center gap-2">
@@ -60,10 +54,19 @@
         </div>
     </form>
 
-    @if ($salesOrders->isNotEmpty())
+
     <div class="card mb-4 shadow p-3">
 
-        <h5 class="text-primary-dark card-header"> 📁 <strong>DAFTAR SALE ORDER </strong> </h5>
+        <div class="text-primary-dark "> 📁 <strong>DAFTAR SALE ORDER </strong> </div>
+        <div class="d-flex justify-content pe-4 mb-3">
+            <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="prevMonth()">
+                << </button>
+                    <span class="badge bg-primary d-flex justify-content-center align-items-center"> {{getListMonth()[$month]}} {{$year}}</span>
+                    <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="nextMonth()"> >></button>
+
+        </div>
+
+        @if($salesOrders->isNotEmpty())
         <div class="table-responsive mt-2">
             <table class="table table-bordered">
                 <thead class="table-primary text-center">
@@ -176,17 +179,15 @@
                 </tbody>
             </table>
         </div>
-    </div>
-    @else
-    <div class="card mb-2 shadow ">
-        <h5 class="text-primary-dark card-header"> 📁 <strong>DAFTAR SALES ORDER </strong> </h5>
-        <div class="container">
+        @else
+        <div class="container px-0">
             <div class="alert alert-warning text-center">
                 Belum ada data Sales order.
             </div>
         </div>
+        @endif
     </div>
-    @endif
+
 
     @push('styles')
     <style>
@@ -224,6 +225,28 @@
         initItemSelectManual('.select2-stock', '{{ url("admin/master/stock/get-item") }}', '-- Pilih Produk --');
         initItemSelectManual('.select2-customer', '{{ url("admin/master/customer/get-item") }}', '-- Pilih Customer --');
         initItemSelectManual('.select2-toko', '{{ url("admin/master/toko/get-item") }}', '-- Pilih Toko --');
+
+        function prevMonth() {
+            month = '{{$month}}';
+            year = '{{$year}}';
+            month--;
+            if (month < 1) {
+                month = 12;
+                year--;
+            }
+            window.location.href = '{{url("admin/invoice/sales-order")}}?month=' + month + '&year=' + year;
+        }
+
+        function nextMonth() {
+            month = '{{$month}}';
+            year = '{{$year}}';
+            month++;
+            if (month > 12) {
+                month = 1;
+                year++;
+            }
+            window.location.href = '{{url("admin/invoice/sales-order")}}?month=' + month + '&year=' + year;
+        }
 
         function lihatDetailInvoice(invoiceNumber) {
             showDetailOnModal('{{url("admin/invoice/show-sales-detail")}}/' + invoiceNumber, 'xl');

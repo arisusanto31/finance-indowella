@@ -25,11 +25,14 @@ class SalesOrderController extends Controller
     //
     public function index()
     {
-        $salesOrders = \App\Models\SalesOrderDetail::with('customer:name,id', 'stock:name,id', 'parent:sales_order_number,id,is_final,ref_akun_cash_kind_name,status,status_payment,status_delivery')
+        $month = getInput('month') ? toDigit(getInput('month'),2) : date('m');
+        $year = getInput('year') ? getInput('year') : date('Y');
+        $salesOrders = SalesOrderDetail::whereMonth('created_at', $month)
+            ->whereYear('created_at', Date('Y'))->with('customer:name,id', 'stock:name,id', 'parent:sales_order_number,id,is_final,ref_akun_cash_kind_name,status,status_payment,status_delivery')
             ->get()
             ->groupBy('sales_order_number');
 
-        return view('invoice.sales-order', compact('salesOrders'));
+        return view('invoice.sales-order', compact('salesOrders', 'month', 'year'));
     }
 
     public function store(Request $request)
@@ -118,11 +121,8 @@ class SalesOrderController extends Controller
             } else {
                 $customerID = $request->customer_id;
             }
-
             $sales_order_number = $request->sales_order_number . '-draft';
-
             $grouped = [];
-
             foreach ($arrayStockID as $i => $stockId) {
                 $grouped[] = [
                     'sales_order_number' => $sales_order_number,
@@ -138,8 +138,6 @@ class SalesOrderController extends Controller
                     'custom_stock_name' => $request->custom_stock_name[$i] ?? null,
                 ];
             }
-
-
             //create pack ya
             $invoicePack = SalesOrder::create([
                 'sales_order_number' => $sales_order_number,
@@ -164,6 +162,7 @@ class SalesOrderController extends Controller
             return ['status' => 0, 'msg' => $e->getMessage()];
         }
     }
+
 
     public function makeFinal(Request $request)
     {

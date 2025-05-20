@@ -28,12 +28,15 @@ class InvoiceSaleController extends Controller
 
     public function showSales()
     {
-        $invoices = \App\Models\InvoiceSaleDetail::with('customer', 'stock', 'parent')
+        $month = getInput('month') ? toDigit(getInput('month'), 2) : date('m');
+        $year = getInput('year') ? getInput('year') : date('Y');
+
+        $invoices = InvoiceSaleDetail::whereMonth('created_at', $month)->whereYear('created_at', $year)->with('customer', 'stock', 'parent')
             ->get()
             ->groupBy('invoice_pack_number');
 
         // dd($invoices);
-        return view('invoice.invoice-sales', compact('invoices'));
+        return view('invoice.invoice-sales', compact('invoices', 'month', 'year'));
     }
 
     // public function showSales()
@@ -149,6 +152,7 @@ class InvoiceSaleController extends Controller
                     'total_price' => format_db($request->total_price[$i]) ?? 0,
                     'toko_id' => $request->toko_id,
                     'custom_stock_name' => $request->custom_stock_name[$i] ?? null,
+                    'created_at' => $request->input('created_at') ?? now(),
                 ];
             }
 
@@ -164,6 +168,7 @@ class InvoiceSaleController extends Controller
                 'reference_id' => $request->input('reference_id'),
                 'reference_type' => $request->input('reference_type'),
                 'reference_model' => InvoiceSaleDetail::class,
+                'created_at' => $request->input('created_at') ?? now(),
             ]);
 
             foreach ($grouped as $data) {
@@ -434,6 +439,7 @@ class InvoiceSaleController extends Controller
                     'pack.package_number',
                     'pack.akun_cash_kind_name',
                     DB::raw('"anonim" as customer_name'),
+                    'pack.created_at'
                 );
         } else {
 
@@ -451,12 +457,14 @@ class InvoiceSaleController extends Controller
                 'pack.customer_id',
                 'pack.akun_cash_kind_name',
                 'c.instance as customer_name',
+                'pack.created_at'
             );
         }
 
         $sales = $sales->with('detailSales')->get()->map(function ($val) use ($modeBook) {
             $val['details'] = collect($val['detailSales'])->map(function ($detailVal) use ($modeBook) {
                 $data = [];
+
                 $data['stock_id'] = $detailVal['stock_id'];
                 $data['quantity'] = $detailVal['quantity'];
                 $data['unit'] = $modeBook == 'toko' ? $detailVal['unit'] : $detailVal['unit_info'];
@@ -468,7 +476,7 @@ class InvoiceSaleController extends Controller
                 $data['toko'] = $modeBook == 'toko' ? $detailVal->toko->name : $detailVal->kind;
                 return $data;
             });
-            return collect($val)->only('id', 'reference_type', 'is_ppn', 'customer_name', 'is_wajib_lapor', 'details', 'package_number', 'stock_type', 'akun_cash_kind_name');
+            return collect($val)->only('id', 'reference_type', 'is_ppn', 'customer_name', 'is_wajib_lapor', 'details', 'package_number', 'stock_type', 'akun_cash_kind_name', 'created_at');
         });
 
         return ['status' => 1, 'msg' => $sales];

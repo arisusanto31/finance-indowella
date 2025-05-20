@@ -26,8 +26,8 @@ class InvoiceSaleDetail extends Model
         'customer_id',
         'toko_id',
         'reference_id',
-        'reference_type'
-
+        'reference_type',
+        'created_at',
     ];
 
     protected static function booted()
