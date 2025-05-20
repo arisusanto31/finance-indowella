@@ -9,10 +9,10 @@
             <select id="select-toko" class="form-control">
             </select>
         </div>
-         <div class="col-md-3 col-xs-12">
+        <div class="col-md-3 col-xs-12">
             import ke tanggal:
             <input type="date" id="select-date" class="form-control" />
-            
+
         </div>
     </div>
 
@@ -153,10 +153,18 @@
     function importData(id) {
         let data = allTrans[id];
         tokoid = $('#select-toko option:selected').val();
-        if (tokoid == null || tokoid == undefined) {
-            swalInfo('opps', 'tolong pilih toko', 'info');
+        date = $('#select-date').val();
+        if (date == null || date == undefined) {
+            swalInfo('opps', 'tolong pilih tanggal import', 'info');
             return 0;
         }
+        if (tokoid == null || tokoid == undefined) {
+            swalInfo('opps', 'tolong pilih toko import', 'info');
+            return 0;
+        }
+        date = normalizeDate(date);
+        console.log(date);
+
         let dataPost = {
             invoice_number: data.package_number,
             customer_name: data.customer_name,
@@ -170,6 +178,7 @@
             akun_cash_kind_name: data.akun_cash_kind_name,
             toko_id: tokoid,
             reference_id: data.id,
+            created_at:date,
             reference_type: data.reference_type,
             _token: '{{csrf_token()}}'
         };

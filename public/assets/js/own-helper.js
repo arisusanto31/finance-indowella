@@ -247,6 +247,32 @@ function initItemSelectManual(el, url, placeholder = "", parent = null) {
 
 }
 
+function normalizeDate(input) {
+    // Ganti separator jadi '-'
+    const clean = input.replace(/[\/\.]/g, '-'); // handle / atau .
+    const parts = clean.split('-');
+
+    if (parts.length !== 3) return null;
+
+    let [a, b, c] = parts;
+
+    // deteksi posisi tahun (asumsi tahun selalu 4 digit)
+    if (a.length === 4) {
+        // format: yyyy-mm-dd
+        return `${a}-${b.padStart(2, '0')}-${c.padStart(2, '0')}`;
+    } else if (c.length === 4) {
+        // format: dd-mm-yyyy atau mm-dd-yyyy
+        // heuristik: jika a > 12 → anggap dd-mm-yyyy
+        if (parseInt(b) > 12) {
+            return `${c}-${a.padStart(2, '0')}-${b.padStart(2, '0')}`; // mm-dd-yyyy
+        } else {
+            return `${c}-${b.padStart(2, '0')}-${a.padStart(2, '0')}`; // dd-mm-yyyy
+        }
+    }
+
+    return null; // format tidak diketahui
+}
+
 function formatNormalDateTime(date) {
     const pad = (n) => n.toString().padStart(2, '0');
 
@@ -283,10 +309,10 @@ function getProsen($data, $total) {
 function initCurrencyInput(elem) {
     $(elem).on('input', function () {
         let value = $(this).val().replace(/[^\d,]/g, '');
-        console.log('value:'+value);
+        console.log('value:' + value);
         // Cek apakah input adalah format database atau format rupiah
         // Format angka dengan locale 'id-ID' → hasilnya: 50.000
-        let formatted =  formatRupiah(value);
+        let formatted = formatRupiah(value);
         $(this).val(formatted);
     });
 }

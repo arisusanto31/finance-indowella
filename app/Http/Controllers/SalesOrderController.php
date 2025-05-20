@@ -25,7 +25,7 @@ class SalesOrderController extends Controller
     //
     public function index()
     {
-        $month = getInput('month') ? toDigit(getInput('month'),2) : date('m');
+        $month = getInput('month') ? toDigit(getInput('month'), 2) : date('m');
         $year = getInput('year') ? getInput('year') : date('Y');
         $salesOrders = SalesOrderDetail::whereMonth('created_at', $month)
             ->whereYear('created_at', Date('Y'))->with('customer:name,id', 'stock:name,id', 'parent:sales_order_number,id,is_final,ref_akun_cash_kind_name,status,status_payment,status_delivery')
@@ -136,6 +136,7 @@ class SalesOrderController extends Controller
                     'total_price' => format_db($request->total_price[$i]) ?? 0,
                     'toko_id' => $request->toko_id,
                     'custom_stock_name' => $request->custom_stock_name[$i] ?? null,
+                    'created_at' => $request->input('created_at') ?? now(),
                 ];
             }
             //create pack ya
@@ -149,6 +150,7 @@ class SalesOrderController extends Controller
                 'reference_id' => $request->input('reference_id'),
                 'reference_type' => $request->input('reference_type'),
                 'ref_akun_cash_kind_name' => $request->input('akun_cash_kind_name'),
+                'created_at' => $request->input('created_at') ?? now(),
             ]);
 
             foreach ($grouped as $data) {
@@ -241,6 +243,7 @@ class SalesOrderController extends Controller
                 'pack.package_number',
                 'pack.akun_cash_kind_name',
                 DB::raw('"anonim" as customer_name'),
+                'pack.created_at',
             );
         } else {
 
@@ -258,6 +261,7 @@ class SalesOrderController extends Controller
                 'pack.customer_id',
                 'pack.akun_cash_kind_name',
                 'c.instance as customer_name',
+                'pack.created_at',
             );
         }
 
@@ -275,7 +279,7 @@ class SalesOrderController extends Controller
                 $data['toko'] = $modeBook == 'toko' ? $detailVal->toko->name : $detailVal->kind;
                 return $data;
             });
-            return collect($val)->only('id', 'reference_type', 'is_ppn', 'customer_name', 'is_wajib_lapor', 'details', 'package_number', 'stock_type', 'akun_cash_kind_name');
+            return collect($val)->only('id', 'reference_type', 'is_ppn', 'customer_name', 'is_wajib_lapor', 'details', 'package_number', 'stock_type', 'akun_cash_kind_name', 'created_at');
         });
 
         return ['status' => 1, 'msg' => $sales];

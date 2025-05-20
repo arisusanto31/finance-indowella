@@ -239,7 +239,7 @@
                 month = 12;
                 year--;
             }
-            window.location.href = '{{url("admin/invoice/sales-order")}}?month=' + month + '&year=' + year;
+            window.location.href = '{{url("admin/invoice/invoice-sales")}}?month=' + month + '&year=' + year;
         }
 
         function nextMonth() {
@@ -250,7 +250,7 @@
                 month = 1;
                 year++;
             }
-            window.location.href = '{{url("admin/invoice/sales-order")}}?month=' + month + '&year=' + year;
+            window.location.href = '{{url("admin/invoice/invoice-sales")}}?month=' + month + '&year=' + year;
         }
 
 
