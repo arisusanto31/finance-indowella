@@ -78,7 +78,8 @@
                         <th>Diskon</th>
                         <th>Sub-Total</th>
                         <th>Total</th>
-                        <th> Aksi nya say</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -110,25 +111,27 @@
 
                         @if ($index === 0)
                         <td rowspan="{{ $rowspan }}"><strong>Rp{{ number_format($invoiceSubtotal) }}</strong></td>
-                        @if ($index === 0)
+                        <td rowspan="{{ $rowspan }}">
+                            <p class="colorblack text-center" style="width:100%;line-height:120%;"><strong>{{strtoupper($item->parent->status)}}</strong></p>
 
-                        @if($item->parent->is_final==1)
-                        <a href="javascript:void(lihatDetailInvoice('{{$item->sales_order_number}}'))" class="btn btn-sm btn-outline-primary" title="Lihat Invoice">
-                            <i class="fas fa-eye"></i>
-                        </a>
+                        </td>
+                        <td rowspan="{{$rowspan}}">
+                            @if($item->parent->is_final==1)
+                            <a href="javascript:void(lihatDetailInvoice('{{$item->invoice_pack_number}}'))" class="btn btn-sm btn-outline-primary" title="Lihat Invoice">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            @endif
+                            @if($item->parent->is_final==0)
+                            <a href="javascript:void(makeFinal('{{$item->invoice_pack_id}}'))" class="btn btn-sm btn-outline-primary" title="make final" id="btn-final{{$item->invoice_pack_id}}">
+                                <i class="fas fa-upload"></i>
+                            </a>
+                            <a href="" class="btn btn-sm btn-outline-primary" title="Edit Invoice">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            @endif
+                        </td>
                         @endif
-                        @if($item->parent->is_final==0)
-                        <a href="javascript:void(makeFinal('{{$item->sales_order_id}}'))" class="btn btn-sm btn-outline-primary" title="make final" id="btn-final{{$item->sales_order_id}}">
-                            <i class="fas fa-upload"></i>
-                        </a>
 
-                        <a href="" class="btn btn-sm btn-outline-primary" title="Edit Invoice">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        @endif
-                        @endif
-
-                        @endif
                     </tr>
                     @endforeach
                     @endforeach

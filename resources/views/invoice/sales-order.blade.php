@@ -96,7 +96,7 @@
                         @if ($index === 0)
                         <td rowspan="{{ $rowspan }}">{{ $no++ }}</td>
                         <td rowspan="{{ $rowspan }}">{{ $item->created_at->format('Y-m-d') }}</td>
-                        <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }}  </td>
+                        <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }} </td>
                         <td rowspan="{{ $rowspan }}">{{ $item->customer->name ?? '-' }}</td>
                         @endif
 
@@ -117,7 +117,7 @@
                             <br>
                             <div class="bg-primary p-2 rounded-2 text-white"><i class="fas fa-wallet"></i> {{$item->parent->ref_akun_cash_kind_name}}</div>
                             @endif
-                            
+
                         </td>
                         <td rowspan="{{ $rowspan }}">
                             <p class="colorblack text-center" style="width:100%;line-height:120%;"><strong>{{strtoupper($item->parent->status)}}</strong></p>
@@ -150,6 +150,7 @@
                             @endphp
                             <span class="badge {{$bgPayment}}"> <i class="fas fa-wallet"></i> {{$item->parent->status_payment}}</span>
                             <span class="badge {{$bgDelivery}}"> <i class="fas fa-truck"></i> {{$item->parent->status_delivery}}</span>
+                        </td>
                         <td rowspan="{{ $rowspan }}">
 
                             @if($item->parent->is_final==1)
@@ -241,7 +242,7 @@
             swalConfirmAndSubmit({
                 url: '{{url("admin/invoice/sales-make-final")}}',
                 data: {
-                    id:id,
+                    id: id,
                     _token: '{{csrf_token()}}'
                 },
                 onSuccess: function(res) {

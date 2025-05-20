@@ -39,7 +39,6 @@ class InvoicePackController extends Controller
 
         $view = view('invoice.modal._invoice-detail');
         $view->data = $data;
-
         return $view;
     }
 

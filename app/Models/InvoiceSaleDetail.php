@@ -50,6 +50,11 @@ class InvoiceSaleDetail extends Model
         static::updating(function ($model) {});
     }
 
+    public function parent()
+    {
+
+        return $this->belongsTo(InvoicePack::class, 'invoice_pack_number', 'invoice_number');
+    }
     public function stock()
 
     {

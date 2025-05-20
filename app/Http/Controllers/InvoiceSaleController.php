@@ -28,9 +28,10 @@ class InvoiceSaleController extends Controller
 
     public function showSales()
     {
-        $invoices = \App\Models\InvoiceSaleDetail::with('customer', 'stock')
+        $invoices = \App\Models\InvoiceSaleDetail::with('customer', 'stock', 'parent')
             ->get()
             ->groupBy('invoice_pack_number');
+
         // dd($invoices);
         return view('invoice.invoice-sales', compact('invoices'));
     }
@@ -44,7 +45,6 @@ class InvoiceSaleController extends Controller
     //     $stocks = Stock::with(['category', 'parentCategory', 'units'])->get();
     //     return view('invoice.invoice-sales', compact('invoices','stocks','categories'));
     // }
-
     //fungsi ini bisa  store manual dan dari import data
     public function store(Request $request)
     {
@@ -179,19 +179,19 @@ class InvoiceSaleController extends Controller
     }
 
 
-     public function makeFinal(Request $request)
+    public function makeFinal(Request $request)
     {
-        $id = $request->id;
+        $id = $request->input('id');
         $inv = InvoicePack::find($id);
-        $details = $inv->model_reference::where('invoice_pack_number', $inv->invoice_number)->get();
+        // return ['status' => 0, 'msg' => $inv];
+        $details = $inv->reference_model::where('invoice_pack_number', $inv->invoice_number)->get();
         $inv->is_final = 1;
         $inv->invoice_number = $inv->getCodeFix();
         foreach ($details as $detail) {
             $detail->invoice_pack_number = $inv->invoice_number;
-
             $detail->save();
         }
-        $inv->save();
+        $inv->updateStatus();
         return ['status' => 1, 'msg' => $inv];
     }
 
@@ -411,7 +411,7 @@ class InvoiceSaleController extends Controller
                 $join->on('pack.id', '=', 'inv.reference_id')
                     ->where('inv.reference_type', $saleModel);
             })
-              ->leftJoin($defaultDB . '.sales_orders as so', function ($join) use ($saleModel) {
+            ->leftJoin($defaultDB . '.sales_orders as so', function ($join) use ($saleModel) {
                 $join->on('pack.id', '=', 'so.reference_id')
                     ->where('so.reference_type', $saleModel);
             })
