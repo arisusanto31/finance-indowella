@@ -19,6 +19,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 use App\Models\InvoiceSaleDetail;
+use Illuminate\Support\Facades\Log; 
+
 
 
 class SalesOrderController extends Controller
@@ -300,52 +302,135 @@ class SalesOrderController extends Controller
         $view->data = $data;
         return $view;
     }
+   
+  
     
     public function updateDetail(Request $request)
     {
-        DB::beginTransaction();
         try {
-            $totalHargaBaru = 0;
-            $salesOrderNumberBaru = null;
-            $salesOrderId = null;
+            Log::info('Masuk ke updateDetail', $request->all()); // Log awal semua data masuk
     
-            foreach ($request->quantity as $index => $qty) {
-                $detail = \App\Models\SalesOrderDetail::find($request->detail_id[$index] ?? null);
+            DB::beginTransaction();
+    
+            if (empty($request->sales_order_number)) {
+                Log::warning('Nomor Sales Order kosong!');
+                return response()->json(['status' => 'error', 'message' => 'Nomor Sales Order tidak boleh kosong']);
+            }
+    
+            $firstDetail = \App\Models\SalesOrderDetail::find($request->detail_id[0]);
+            if (!$firstDetail) {
+                Log::error('Detail tidak ditemukan');
+                return response()->json(['status' => 'error', 'message' => 'Detail tidak ditemukan']);
+            }
+    
+            $salesOrder = \App\Models\SalesOrder::find($firstDetail->sales_order_id);
+            if (!$salesOrder) {
+                Log::error('Sales Order tidak ditemukan');
+                return response()->json(['status' => 'error', 'message' => 'Sales Order tidak ditemukan']);
+            }
+    
+            $salesOrder->sales_order_number = $request->sales_order_number;
+            $salesOrder->save();
+            Log::info("Sales order {$salesOrder->id} updated with number: {$request->sales_order_number}");
+    
+            $totalBaru = 0;
+    
+            foreach ($request->detail_id as $index => $id) {
+                $detail = \App\Models\SalesOrderDetail::find($id);
+    
                 if ($detail) {
-                    $detail->quantity = $qty;
-                    $detail->price = $request->price[$index] ?? 0;
-                    $detail->discount = $request->discount[$index] ?? 0;
-                    $detail->total_price = ($qty * $detail->price) - $detail->discount;
+                    $qty   = $request->quantity[$index] ?? 0;
+                    $price = $request->price[$index] ?? 0;
+                    $disc  = $request->discount[$index] ?? 0;
+                    $unit  = $request->unit[$index] ?? $detail->unit;
+                    $total = ($qty * $price) - $disc;
     
-                    if (isset($request->sales_order_number[$index])) {
-                        $detail->sales_order_number = $request->sales_order_number[$index];
-                        $salesOrderNumberBaru = $request->sales_order_number[$index]; 
+                    $detail->quantity      = $qty;
+                    $detail->price         = $price;
+                    $detail->discount      = $disc;
+                    $detail->unit          = $unit;
+                    $detail->total_price   = $total;
+                    $detail->sales_order_number = $request->sales_order_number;
+    
+                    if (!$detail->save()) {
+                        Log::error("Gagal menyimpan detail ID: {$detail->id}");
+                    } else {
+                        Log::info("Detail ID {$detail->id} disimpan.");
                     }
     
-                    $salesOrderId = $detail->sales_order_id;
-                    $detail->save();
-    
-                    $totalHargaBaru += $detail->total_price;
+                    $totalBaru += $total;
+                } else {
+                    Log::warning("Detail ID {$id} tidak ditemukan.");
                 }
             }
     
-           
-            if ($salesOrderId && $salesOrderNumberBaru) {
-                $salesOrder = \App\Models\SalesOrder::find($salesOrderId);
-                if ($salesOrder) {
-                    $salesOrder->sales_order_number = $salesOrderNumberBaru;
-                    $salesOrder->total_price = $totalHargaBaru;
-                    $salesOrder->save();
-                }
-            }
+            $salesOrder->total_price = $totalBaru;
+            $salesOrder->save();
+    
+            Log::info("Total sales order updated: {$totalBaru}");
     
             DB::commit();
+    
             return response()->json(['status' => 'success']);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+            Log::error('Exception saat update sales order:', ['message' => $e->getMessage()]);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan server',
+            ], 500);
         }
     }
+    
+
+    
+    
+    
+    // public function updateDetail(Request $request)
+    // {
+    //     DB::beginTransaction();
+    //     try {
+    //         $totalHargaBaru = 0;
+    //         $salesOrderNumberBaru = null;
+    //         $salesOrderId = null;
+    
+    //         foreach ($request->quantity as $index => $qty) {
+    //             $detail = \App\Models\SalesOrderDetail::find($request->detail_id[$index] ?? null);
+    //             if ($detail) {
+    //                 $detail->quantity = $qty;
+    //                 $detail->price = $request->price[$index] ?? 0;
+    //                 $detail->discount = $request->discount[$index] ?? 0;
+    //                 $detail->total_price = ($qty * $detail->price) - $detail->discount;
+    
+    //                 if (isset($request->sales_order_number[$index])) {
+    //                     $detail->sales_order_number = $request->sales_order_number[$index];
+    //                     $salesOrderNumberBaru = $request->sales_order_number[$index]; 
+    //                 }
+    
+    //                 $salesOrderId = $detail->sales_order_id;
+    //                 $detail->save();
+    
+    //                 $totalHargaBaru += $detail->total_price;
+    //             }
+    //         }
+    
+           
+    //         if ($salesOrderId && $salesOrderNumberBaru) {
+    //             $salesOrder = \App\Models\SalesOrder::find($salesOrderId);
+    //             if ($salesOrder) {
+    //                 $salesOrder->sales_order_number = $salesOrderNumberBaru;
+    //                 $salesOrder->total_price = $totalHargaBaru;
+    //                 $salesOrder->save();
+    //             }
+    //         }
+    
+    //         DB::commit();
+    //         return response()->json(['status' => 'success']);
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //         return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+    //     }
+    // }
     
     
     
