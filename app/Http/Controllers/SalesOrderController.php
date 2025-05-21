@@ -337,32 +337,37 @@ class SalesOrderController extends Controller
     
             foreach ($request->detail_id as $index => $id) {
                 $detail = \App\Models\SalesOrderDetail::find($id);
-    
+            
                 if ($detail) {
                     $qty   = $request->quantity[$index] ?? 0;
                     $price = $request->price[$index] ?? 0;
                     $disc  = $request->discount[$index] ?? 0;
                     $unit  = $request->unit[$index] ?? $detail->unit;
+                    $tanggal = $request->tanggal[$index] ?? $detail->created_at;
                     $total = ($qty * $price) - $disc;
-    
+            
                     $detail->quantity      = $qty;
                     $detail->price         = $price;
                     $detail->discount      = $disc;
                     $detail->unit          = $unit;
                     $detail->total_price   = $total;
                     $detail->sales_order_number = $request->sales_order_number;
-    
+            
+                    $detail->created_at = $tanggal;
+                    $detail->timestamps = false;
+            
                     if (!$detail->save()) {
                         Log::error("Gagal menyimpan detail ID: {$detail->id}");
                     } else {
                         Log::info("Detail ID {$detail->id} disimpan.");
                     }
-    
+            
                     $totalBaru += $total;
                 } else {
                     Log::warning("Detail ID {$id} tidak ditemukan.");
                 }
             }
+            
     
             $salesOrder->total_price = $totalBaru;
             $salesOrder->save();

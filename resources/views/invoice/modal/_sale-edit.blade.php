@@ -12,7 +12,6 @@
     <form id="form-edit-detail">
         @csrf
 
-        {{-- ✅ Pindahkan input nomor ke dalam form --}}
         <div class="mb-3">
             <label for="sales_order_number" class="form-label">Nomor Sales Order</label>
             <input type="text" name="sales_order_number" class="form-control" value="{{ $data->sales_order_number }}">
@@ -37,7 +36,12 @@
                     @foreach ($data['details'] as $key => $item)
                     <tr>
                         <td>{{ $key + 1 }}</td>
-                        <td>{{ $item->created_at->format('Y-m-d') }}</td>
+                        <td>
+                            <input type="date" name="tanggal[{{ $key }}]"
+                                   value="{{ $item->created_at->format('Y-m-d') }}"
+                                   class="form-control form-control-sm text-end">
+                        </td>
+                        
                         <td>{{ $item->stock->name }}</td>
 
                         <td>
@@ -49,9 +53,7 @@
                                 @endforeach
                             </select>
                         </td>
-                        
-
-                      
+                
                         <input type="hidden" name="detail_id[{{ $key }}]" value="{{ $item->id }}">
 
                         <td>
