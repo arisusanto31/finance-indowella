@@ -13,8 +13,8 @@
         </div>
     </div>
 
-    <div id="div-form-small" style="width:90vw; max-width:400px; border:1px solid #888;position:fixed" class="hidden fixed-center relativepos bglevel3 colorblack br-10 pa-5">
-        <div class="absolutepos" style="right:0px; top:0px;">
+    <div id="div-form-small" style="width:90vw; max-width:400px;position:fixed" class="hidden fixed-center relativepos bg-primary-lighter colorblack br-10 p-3">
+        <div class="position-absolute" style="right:0px; top:0px;">
             <a href="javascript:void(hideFormSmall())">
                 <div class="colorwhite flex flex-center" style="border-radius:50%; width:25px; height:25px; background-color:red">
                     <i class="colorwhite fas fa-close"></i>
@@ -66,25 +66,25 @@
                             html += '               <option value="' + data.parent_id + '" >' + data.parent.name + '</option>';
                         html += '        </select>';
                         html += '  </div>';
-                        html += '  <div class="col-xs-12">';
+                        html += '  <div class="col-xs-12 ">';
                         html += '      <label>Code group</label>';
                         html += '        <div class="row"> ';
-                        html += '            <div class="col-xs-2 pa-5">';
+                        html += '            <div class="col-xs-2 col-md-2 p-1">';
                         html += '              <input class="theinput form-control" value="' + theCodeGrop[0] + '" id="code1" onkeyup="moveInput(2)" name="code_group[]" /> ';
                         html += '            </div>';
-                        html += '            <div class="col-xs-2 pa-5">';
+                        html += '            <div class="col-xs-2  col-md-2 p-1">';
                         html += '              <input class="theinput form-control" value="' + theCodeGrop[1] + '" id="code2" onkeyup="moveInput(3)" name="code_group[]" /> ';
                         html += '            </div>';
-                        html += '            <div class="col-xs-2 pa-5">';
+                        html += '            <div class="col-xs-2 col-md-2 p-1">';
                         html += '              <input class="theinput form-control" value="' + theCodeGrop[2] + '" id="code3" onkeyup="moveInput(4)" name="code_group[]" /> ';
                         html += '            </div>';
-                        html += '            <div class="col-xs-2 pa-5">';
+                        html += '            <div class="col-xs-2 col-md-2 p-1">';
                         html += '              <input class="theinput form-control" value="' + theCodeGrop[3] + '" id="code4" onkeyup="moveInput(5)" name="code_group[]" /> ';
                         html += '            </div>';
-                        html += '            <div class="col-xs-2 pa-5">';
+                        html += '            <div class="col-xs-2 col-md-2 p-1">';
                         html += '              <input class="theinput form-control" value="' + theCodeGrop[4] + '" id="code5" onkeyup="moveInput(6)" name="code_group[]" /> ';
                         html += '            </div>';
-                        html += '            <div class="col-xs-2 pa-5">';
+                        html += '            <div class="col-xs-2 col-md-2 p-1">';
                         html += '              <input class="theinput form-control" value="' + theCodeGrop[5] + '" id="code6" name="code_group[]" /> ';
                         html += '            </div>';
                         html += '        </div>';
@@ -133,27 +133,27 @@
             html += '<div class="row"> ';
             html += '  <div class="col-xs-12">';
             html += '      <label>parent</label>';
-            html += '       <select class="form-control" id="account-parent_id" onchange="getCodeGroup()" name="parent_id" />';
+            html += '       <select class="form-control" id="account-parent_id" onchange="getCodeGroup()" name="parent_id" ></select>';
             html += '  </div>';
             html += '  <div class="col-xs-12">';
             html += '      <label>Code group</label>';
             html += '        <div class="row"> ';
-            html += '            <div class="col-xs-2 pa-5">';
+            html += '            <div class=" col-md-2 p-1">';
             html += '              <input class="theinput form-control" id="code1" onkeyup="moveInput(2)" name="code_group[]" /> ';
             html += '            </div>';
-            html += '            <div class="col-xs-2 pa-5">';
+            html += '            <div class="col-xs-2 col-md-2 p-1">';
             html += '              <input class="theinput form-control" id="code2" onkeyup="moveInput(3)" name="code_group[]" /> ';
             html += '            </div>';
-            html += '            <div class="col-xs-2 pa-5">';
+            html += '            <div class="col-xs-2 col-md-2 p-1">';
             html += '              <input class="theinput form-control" id="code3" onkeyup="moveInput(4)" name="code_group[]" /> ';
             html += '            </div>';
-            html += '            <div class="col-xs-2 pa-5">';
+            html += '            <div class="col-xs-2 col-md-2 p-1">';
             html += '              <input class="theinput form-control" id="code4" onkeyup="moveInput(5)" name="code_group[]" /> ';
             html += '            </div>';
-            html += '            <div class="col-xs-2 pa-5">';
+            html += '            <div class="col-xs-2 col-md-2 p-1">';
             html += '              <input class="theinput form-control" id="code5" onkeyup="moveInput(6)" name="code_group[]" /> ';
             html += '            </div>';
-            html += '            <div class="col-xs-2 pa-5">';
+            html += '            <div class="col-xs-2 col-md-2 p-1">';
             html += '              <input class="theinput form-control" id="code6" name="code_group[]" /> ';
             html += '            </div>';
             html += '        </div>';
@@ -179,7 +179,7 @@
             html += '</form>';
             $('#form-body').html(html);
             $('#form-title').html('FORM ADD ACCOUNT');
-            initItemSelectManual('#account-parent_id', '{{url("admin/get-item-chart-account-all")}}');
+            initItemSelectManual('#account-parent_id', '{{route("chart-account.get-item-all")}}');
             showFormSmall();
         }
 
@@ -191,7 +191,7 @@
             parentID = $('#account-parent_id option:selected').val();
 
             $.ajax({
-                url: '{{url("admin/get-code-group-account")}}/' + parentID,
+                url: '{{url("admin/master/chart-account/get-code-group")}}/' + parentID,
                 method: 'get',
                 success: function(res) {
                     console.log(res);
@@ -217,13 +217,13 @@
 
         function submitNewAccount() {
             $.ajax({
-                url: '{{url("admin/master/chart-account")}}',
+                url: '{{url("admin/master/chart-account/main")}}',
                 method: 'post',
                 data: $('#form-new-account').serialize(),
                 success: function(res) {
                     console.log(res);
                     if (res.status == 1) {
-                        swal_success('success', 'data berhasil disubmit');
+                        swalInfo('success', 'data berhasil disubmit');
                         hideFormSmall();
                         setTimeout(getChartAccount, 100);
                     } else {

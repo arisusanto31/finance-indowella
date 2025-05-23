@@ -278,7 +278,7 @@ class ChartAccountController extends Controller
     {
 
         $theFixCode = 0;
-        $chart = ChartAccount::find($id);
+        $chart = ChartAccount::where('code_group', $id)->first();
         $code = $chart->code_group;
         for ($i = 1; $i < 10000000; $i *= 10) {
             if ($code % $i != 0) {

@@ -209,6 +209,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('/get-item-all', [ChartAccountController::class, 'getItemChartAccountAll'])->name('get-item-all');
             Route::get('/get-item-keuangan', [ChartAccountController::class, 'getItemChartAccountKeuanganManual'])->name('get-item-keuangan');
             Route::get('/get-chart-accounts', [ChartAccountController::class, 'getChartAccounts']);
+            Route::get('/get-code-group/{id}', [ChartAccountController::class, 'getCodeGroupAccount']);
             Route::get('/master-suplier', [SupplierController::class, 'master.supplier']);
             Route::get('/category-json', function () {
                 return \App\Models\StockCategory::select('id', 'name as text')->get();
@@ -276,7 +277,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::post('invoice/update-detail', [SalesOrderController::class, 'updateDetail']);
         Route::post('invoice-sales/update/{invoiceNumber}', [InvoiceSaleController::class, 'updateInvoiceSales'])->name('invoice.sales.update');
 
-        
+
         Route::get('invoice-get-data-import/{id}', [InvoiceSaleController::class, 'getDataImport']);
         Route::post('invoice-make-final', [InvoiceSaleController::class, 'makeFinal'])->name('invoice-make-final');
 
@@ -289,9 +290,6 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::post('sales-make-final', [SalesOrderController::class, 'makeFinal'])->name('sales-make-final');
         Route::post('submit-bayar-sales-invoice', [InvoiceSaleController::class, 'submitBayarSalesInvoice']);
         Route::get('invoice-sales/edit/{id}', [InvoiceSaleController::class, 'editInvoiceSales']);
-
-
-
     });
 });
 
