@@ -301,7 +301,7 @@
         }
 
         function editInvoice(invoiceNumber) {
-            console.log("edit" + invoiceNumber);
+          
             showDetailOnModal('{{ url("/admin/invoice/edit-sales-order")}}/' + invoiceNumber, 'xl');
         }
 

@@ -133,9 +133,13 @@
                             <a href="javascript:void(makeFinal('{{$item->invoice_pack_id}}'))" class="btn btn-sm btn-outline-primary" title="make final" id="btn-final{{$item->invoice_pack_id}}">
                                 <i class="fas fa-upload"></i>
                             </a>
-                            <a href="" class="btn btn-sm btn-outline-primary" title="Edit Invoice">
+
+                            <a href="javascript:void(editInvoiceSales('{{ $item->invoice_pack_number }}'))" class="btn btn-sm btn-outline-primary" title="Edit Invoice">
                                 <i class="fas fa-edit"></i>
-                            </a>
+                             </a>
+                             
+                             
+                            
                             @endif
                         </td>
                         @endif
@@ -197,6 +201,14 @@
         function lihatDetailInvoice(invoiceNumber) {
             showDetailOnModal('{{url("admin/invoice/show-detail")}}/' + invoiceNumber, 'xl');
         }
+ 
+        function editInvoiceSales(invoiceNumber) {
+            console.log("ari data :"+invoiceNumber);
+             showDetailOnModal('{{ url("/admin/invoice/invoice-sales/edit") }}/' + invoiceNumber, 'xl');
+}
+
+ 
+
 
         function openImport(bookID) {
             showDetailOnModal('{{url("admin/invoice/open-import")}}/' + bookID, 'xl');
@@ -315,6 +327,10 @@
             const unit = selectedOption.getAttribute('data-unit');
             card.querySelector('.unit').value = unit;
         }
+
+//         $.get('/admin/invoice/invoice-sales/' + id + '/edit', function(res) {
+//              showOnModal(res.html);
+// });
 
 
         function addrow() {

@@ -21,10 +21,58 @@ use App\Models\SalesOrder;
 use App\Services\LockManager;
 use Illuminate\Support\Facades\DB;
 use Throwable;
+use App\Models\InvoiceSale;
+
+
+
 
 class InvoiceSaleController extends Controller
 {
 
+
+    public function editInvoiceSales($invoiceNumber)
+    {
+        $data = InvoicePack::where('invoice_number', $invoiceNumber)->first();
+    
+        $details = InvoiceSaleDetail::with('stock')
+            ->where('invoice_pack_id', $data->id)
+            ->get();
+    
+     
+        foreach ($details as $detail) {
+            $detail->total_price = ($detail->quantity * $detail->price) - $detail->discount;
+        }
+    
+        $data['details'] = $details;
+    
+        $data['total_price'] = $details->sum(fn($item) => $item->total_price);
+    
+        $view = view('invoice.modal._edit-sales');
+        $view->data = $data;
+    
+        return $view;
+    }
+    
+
+
+//     public function editInvoiceSales($invoiceNumber)
+// {
+   
+//     $data = InvoicePack::where('invoice_number', $invoiceNumber)->first();
+//     $details = InvoiceSaleDetail::with('stock')
+//                 ->where('invoice_pack_number', $invoiceNumber)
+//                 ->get();
+
+//     $data['details'] = $details;
+
+//     $view = view('invoice.modal._edit-sales');
+//     $view->data = $data;
+
+//     return $view;
+// }
+
+    
+    
 
     public function showSales()
     {

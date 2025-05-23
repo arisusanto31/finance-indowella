@@ -162,6 +162,10 @@
             showDetailOnModal('{{url("admin/invoice/show-detail")}}/' + invoiceNumber, 'xl');
         }
 
+     
+        fu
+
+
         function removeDebetRow(btn) {
             const card = btn.closest('.rowdebet');
             const totalRows = document.querySelectorAll('.rowdebet').length;
