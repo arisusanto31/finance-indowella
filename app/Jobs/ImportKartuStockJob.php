@@ -62,7 +62,7 @@ class ImportKartuStockJob implements ShouldQueue
                 if ($task->book_journal_id == 1) {
                     $manufStock = ManufStock::where('name', $data['name'])->with(['parentCategory', 'category', 'units'])->first();
                     if ($manufStock) {
-                        $manufStock['units_manual'] = $manufStock->units;
+                        $manufStock['units_manual'] = $manufStock->getUnits();
                         $st = StockController::sync(new Request([
                             'book_journal_id' => 1,
                             'data' => $manufStock,
@@ -76,7 +76,7 @@ class ImportKartuStockJob implements ShouldQueue
                 } else if ($task->book_journal_id == 2) {
                     $retailStock = RetailStock::where('name', $data['name'])->with(['parentCategory', 'category', 'units'])->first();
                     if ($retailStock) {
-                        $retailStock['units_manual'] = $retailStock->units;
+                        $retailStock['units_manual'] = $retailStock->getUnits();
                         $st = StockController::sync(new Request([
                             'book_journal_id' => 2,
                             'data' => $retailStock,
@@ -158,6 +158,7 @@ class ImportKartuStockJob implements ShouldQueue
             }
 
             $task->status = 'success';
+            $task->error_message="";
             $task->journal_number = $journalNumber;
             $task->finished_at = now();
             $task->save();

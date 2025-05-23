@@ -25,6 +25,15 @@ class Stock extends Model
         'type'
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+        static::updating(function ($model) {
+            if ($model->parent_category_id == null) {
+                $model->parent_category_id = $model->category_id;
+            }
+        });
+    }
 
     protected static function booted()
     {
@@ -54,12 +63,6 @@ class Stock extends Model
                 $q->whereNull("{$alias}.book_journal_id")
                     ->orWhere("{$alias}.book_journal_id", bookID());
             });
-        });
-
-        static::updating(function ($model) {
-            if ($model->parent_category_id == null) {
-                $model->parent_category_id = $model->category_id;
-            }
         });
     }
 

@@ -42,6 +42,12 @@ class SalesOrder extends Model
         return $this->hasMany(DetailKartuInvoice::class, 'sales_order_id', 'id');
     }
 
+    public function parent()
+{
+    return $this->belongsTo(SalesOrder::class, 'sales_order_id');
+}
+
+
     public function getTotalKartu()
     {
         $kartus = collect($this->detailKartuInvoices)->map(function ($val) {

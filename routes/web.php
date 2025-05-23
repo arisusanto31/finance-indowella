@@ -273,7 +273,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::post('create-invoices', [InvoiceSaleController::class, 'createInvoices'])->name('create-invoices');
         Route::get('edit-sales-order/{id}', [SalesOrderController::class, 'editInvoice']);
         Route::post('invoice/update-detail', [SalesOrderController::class, 'updateDetail']);
-
+        
+        
         Route::get('invoice-get-data-import/{id}', [InvoiceSaleController::class, 'getDataImport']);
         Route::post('invoice-make-final', [InvoiceSaleController::class, 'makeFinal'])->name('invoice-make-final');
 
@@ -285,6 +286,10 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::get('update-input-invoice/{id}', [SalesOrderController::class, 'updateInputInvoice'])->name('update-input-invoice');
         Route::post('sales-make-final', [SalesOrderController::class, 'makeFinal'])->name('sales-make-final');
         Route::post('submit-bayar-sales-invoice', [InvoiceSaleController::class, 'submitBayarSalesInvoice']);
+        Route::get('invoice-sales/edit/{id}', [InvoiceSaleController::class, 'editInvoiceSales']);
+
+
+
     });
 });
 

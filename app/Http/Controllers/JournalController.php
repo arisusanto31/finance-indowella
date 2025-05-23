@@ -754,7 +754,7 @@ class JournalController extends Controller
     function resendImportTaskAll($id)
     {
         $task = TaskImport::find($id);
-        $details = $task->details()->where('status', '<>', 'success')->select('id', 'type')->get();
+        $details = $task->details()->where('status', '<>', 'success')->select('id', 'type', 'status')->get();
         $antrianKartuStock = [];
         $antrianNL = [];
         $antrianMboh = [];
@@ -763,16 +763,19 @@ class JournalController extends Controller
                 if ($detail->type == 'saldo_nl') {
                     // ImportSaldoNLJob::dispatch($detail->id);
                     dispatch(new ImportSaldoNLJob($detail->id));
-                    $antrianNL[] = $detail->id;
+                    usleep(5000);
+                    $antrianNL[] = $detail;
                 } else if ($detail->type == 'kartu_stock') {
                     // ImportKartuStockJob::dispatch($detail->id);
                     dispatch(new ImportKartuStockJob($detail->id));
-                    $antrianKartuStock[] = $detail->id;
+                    usleep(5000);
+
+                    $antrianKartuStock[] = $detail;
                 } else {
-                    $antrianMboh[] = $detail->id;
+                    $antrianMboh[] = $detail;
                 }
             } catch (Throwable $e) {
-                $antrianMboh[] = $detail->id;
+                $antrianMboh[] = $detail;
             }
         }
         return [
