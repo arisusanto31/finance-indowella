@@ -67,7 +67,7 @@
                   <input type="hidden" id="stock-ref_id{{$key}}" value="{{$item[1]}}" />
                 </td>
                 <td>{{$name}}
-                  @if(!in_array($name,$stocks))
+                  @if(!in_array($name,$stocks) && !in_array($item[1], $stockRefs))
                   <span class="badge bg-primary text-white"> NEW </span>
                   @endif
                   <input type="hidden" value="{{$name}}" id="stock-name{{$key}}" class="stock" name="stock['name'][]" />
@@ -139,7 +139,7 @@
         data: {
           _token: '{{csrf_token()}}',
           data: encoded,
-          date:'{{$date}}'
+          date: '{{$date}}'
         },
         onSuccess: function(res) {
           console.log(res);

@@ -634,10 +634,10 @@ class JournalController extends Controller
         $data = $import->data;
         $coas = ChartAccount::aktif()->pluck('name', 'code_group')->all();
         $stocks = Stock::pluck('name')->all();
-
+        $stockRefs = Stock::whereNotNull('reference_stock_id')->pluck('reference_stock_id')->all();
 
         // Kirim ke view konfirmasi
-        return view('main.import-saldo', compact('data', 'coas', 'stocks', 'date'));
+        return view('main.import-saldo', compact('data', 'coas', 'stocks', 'date', 'stockRefs'));
     }
 
     public function importSaldo(Request $request)
