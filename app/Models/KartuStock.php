@@ -214,7 +214,7 @@ class KartuStock extends Model
                 'code_group' => $codeGroup,
                 'code_group_name' => $codeGroupName,
             ]));
-            return $st;
+            
             if ($st['status'] == 0) {
                 throw new \Exception($st['msg']);
             }

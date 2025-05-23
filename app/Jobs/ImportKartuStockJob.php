@@ -152,6 +152,7 @@ class ImportKartuStockJob implements ShouldQueue
                     'mutasi_rupiah_total' => floatval($data['amount']),
 
                 ]), false);
+                info('hasil dari kartu stcok:'. json_encode($stStock));
                 if ($stStock['status'] == 0) {
                     throw new \Exception($stStock['msg']);
                 }
