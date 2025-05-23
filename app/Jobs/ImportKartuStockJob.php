@@ -48,6 +48,7 @@ class ImportKartuStockJob implements ShouldQueue
         $data = json_decode($task->payload, true);
         $qty = $data['quantity'];
         $unit = $data['unit'];
+        info('data :'. json_encode($data));
         $lawanCode = 301000;
         $bookModel = $task->book_journal_id == 1 ? ManufStock::class : RetailStock::class;
         $stock = Stock::where('reference_stock_id', $data['ref_id'])
@@ -134,7 +135,7 @@ class ImportKartuStockJob implements ShouldQueue
 
             $journal = TaskImportDetail::where('task_import_id', $task->task_import_id)->whereNotNull('journal_number')->first();
             $journalNumber = $journal ? $journal->journal_number : null;
-            // info('stock terdaftar:' . json_encode($stock));
+            info('stock terdaftar:' . json_encode($stock));
             if ($data['amount'] > 0) {
                 $stStock = KartuStock::mutationStore(new Request([
                     'stock_id' => $stock->id,
