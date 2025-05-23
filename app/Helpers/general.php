@@ -271,6 +271,12 @@ function toDigit($number, $digit)
     return $str;
 }
 
+function ownucfirst($string)
+{
+    $lower = strtolower(trim($string));
+    return ucfirst($lower);
+}
+
 function bgStatus($text)
 {
     if ($text == "success") {

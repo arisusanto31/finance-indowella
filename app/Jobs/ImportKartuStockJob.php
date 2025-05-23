@@ -144,8 +144,6 @@ class ImportKartuStockJob implements ShouldQueue
                 info('try to create kartu stock');
                 $stStock = KartuStock::mutationStore(new Request([
                     'stock_id' => $stock->id,
-                    'mutasi_qty_backend' => floatval($qty),
-                    'unit_backend' => $unit,
                     'mutasi_quantity' => floatval($qty),
                     'unit' => $unit,
                     'flow' => 0,
