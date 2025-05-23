@@ -694,12 +694,12 @@ class JournalController extends Controller
                 $taskKartuStock[] = $taskImportDetail->id;
             }
             DB::commit();
-            foreach ($taskSaldo as $saldo) {
-                ImportSaldoNLJob::dispatch($saldo);
-            }
-            foreach ($taskKartuStock as $stock) {
-                ImportKartuStockJob::dispatch($stock);
-            }
+            // foreach ($taskSaldo as $saldo) {
+            //     ImportSaldoNLJob::dispatch($saldo);
+            // }
+            // foreach ($taskKartuStock as $stock) {
+            //     ImportKartuStockJob::dispatch($stock);
+            // }
             return [
                 'status' => 1,
                 'msg' => $task
