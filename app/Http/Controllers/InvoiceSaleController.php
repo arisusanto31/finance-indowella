@@ -22,6 +22,7 @@ use App\Services\LockManager;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 use App\Models\InvoiceSale;
+use Illuminate\Support\Facades\Log; 
 
 
 
@@ -29,6 +30,58 @@ use App\Models\InvoiceSale;
 class InvoiceSaleController extends Controller
 {
 
+
+    private function normalizeDate($input)
+{
+    $clean = str_replace(['/', '.'], '-', $input);
+    $parts = explode('-', $clean);
+    if (count($parts) !== 3) return null;
+
+    [$a, $b, $c] = $parts;
+
+    if (strlen($a) === 4) {
+        return sprintf('%04d-%02d-%02d', $a, $b, $c); // yyyy-mm-dd
+    }
+
+    if (strlen($c) === 4) {
+        if ((int)$b >= 12) {
+            return sprintf('%04d-%02d-%02d', $c, $a, $b); // mm-dd-yyyy → yyyy-mm-dd
+        } else {
+            return sprintf('%04d-%02d-%02d', $c, $b, $a); // dd-mm-yyyy → yyyy-mm-dd
+        }
+    }
+
+    return null;
+}
+
+    public function updateInvoiceSales(Request $request, $invoiceNumber)
+    {
+        $detailIds = $request->input('detail_id');
+        $quantities = $request->input('quantity');
+        $prices = $request->input('price');
+        $discounts = $request->input('discount');
+        $tanggal = $this->normalizeDate($request->input('tanggal_global'));
+
+        foreach ($detailIds as $index => $id) {
+            $detail = InvoiceSaleDetail::find($id);
+            if ($detail) {
+                $detail->update([
+                    'quantity' => $quantities[$index],
+                    'price' => $prices[$index],
+                    'discount' => $discounts[$index],
+                ]);
+            }
+        }
+        $totalPrice = InvoiceSaleDetail::where('invoice_pack_number', $invoiceNumber)
+            ->sum(DB::raw('(quantity * price) - discount'));
+    
+        InvoicePack::where('invoice_number', $invoiceNumber)
+            ->update(['total_price' => $totalPrice]);
+    
+        return response()->json(['success' => true]);
+    }
+    
+    
 
     public function editInvoiceSales($invoiceNumber)
     {
