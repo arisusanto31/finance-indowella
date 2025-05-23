@@ -25,14 +25,14 @@ class KartuStockController extends Controller
         $saldoAwal = kartuStock::whereIn('id', function ($q) use ($dateAwal) {
             $q->from('kartu_stocks')
                 ->select(DB::raw('max(id)'))
-                ->where('book_journal_id', session('book_journal_id'))
+                ->where('book_journal_id', bookID())
                 ->where('created_at', '<', $dateAwal)
                 ->groupBy('stock_id');
         });
         $saldoAkhir = kartuStock::whereIn('id', function ($q) use ($dateAkhir) {
             $q->from('kartu_stocks')
                 ->select(DB::raw('max(id)'))
-                ->where('book_journal_id', session('book_journal_id'))
+                ->where('book_journal_id', bookID())
                 ->where('created_at', '<', $dateAkhir)
                 ->groupBy('stock_id');
         });

@@ -44,7 +44,7 @@ class KartuDPSales extends Model
 
             $query->where(function ($q) use ($alias) {
                 $q->whereNull("{$alias}.book_journal_id")
-                    ->orWhere("{$alias}.book_journal_id", session('book_journal_id'));
+                    ->orWhere("{$alias}.book_journal_id", bookID());
             });
         });
     }
@@ -107,7 +107,7 @@ class KartuDPSales extends Model
                 $kartu->lawan_code_group = $request->input('lawan_code_group');
                 $kartu->code_group_name = $request->input('code_group_name');
                 $kartu->invoice_date = Date('Y-m-d');
-                $kartu->book_journal_id = session('book_journal_id');
+                $kartu->book_journal_id = bookID();
                 $kartu->save();
                 $salesOrder = SalesOrder::where('sales_order_number', $SONumber)->first();
 

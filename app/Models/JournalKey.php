@@ -26,7 +26,7 @@ class JournalKey extends Model
 
             $query->where(function ($q) use ($alias) {
                 $q->whereNull("{$alias}.book_journal_id")
-                    ->orWhere("{$alias}.book_journal_id", session('book_journal_id'));
+                    ->orWhere("{$alias}.book_journal_id", bookID());
             });
         });
     }

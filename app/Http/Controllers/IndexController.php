@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\ImportSaldoNLJob;
 use App\Models\Journal;
 use App\Models\KartuHutang;
 use App\Models\KartuInventory;
 use App\Models\KartuPiutang;
 use App\Models\KartuPrepaidExpense;
 use App\Models\KartuStock;
+use App\Models\TaskImportDetail;
 use Illuminate\Http\Request;
 
 class IndexController extends Controller
@@ -75,12 +77,34 @@ class IndexController extends Controller
         ];
     }
 
-    public function areaDeveloper(){
-        if(getInput('type')=="pattern"){
+    public function areaDeveloper()
+    {
+        if (getInput('type') == "pattern") {
             return detectFormat(getInput('nilai'));
         }
-        if(getInput('type')=='format_db'){
+        if (getInput('type') == 'format_db') {
             return format_db(getInput('nilai'));
+        }
+
+
+        if (getInput('type') == 'repair-task') {
+
+            $task = TaskImportDetail::where('type', 'kartu_stock');
+            if (getInput('take')) {
+                $task = $task->take(getInput('take'));
+            }
+            $repair = [];
+            $task = $task->get();
+            foreach ($task as $t) {
+                $payload = json_decode($t->payload, true);
+                $qty = $payload['unit'];
+                $payload['unit'] = $payload['quantity'];
+                $payload['quantity'] = $qty;
+                $t->payload = json_encode($payload);
+                $t->save();
+                $repair[] = $t;
+            }
+            return $repair;
         }
     }
 }

@@ -45,7 +45,7 @@ class KartuPrepaidExpense extends Model
             }
             $query->where(function ($q) use ($alias) {
                 $q->whereNull("{$alias}.book_journal_id")
-                    ->orWhere("{$alias}.book_journal_id", session('book_journal_id'));
+                    ->orWhere("{$alias}.book_journal_id", bookID());
             });
         });
     }
@@ -65,7 +65,7 @@ class KartuPrepaidExpense extends Model
             $formattedAmount = $request->input('type_mutasi') == 'amortisasi' ? format_db($request->input('amount')) * -1 : format_db($request->input('amount'));
             $isOtomatisJurnal = $request->input('is_otomatis_jurnal');
             $request->merge([
-                'book_journal_id' => session('book_journal_id'),
+                'book_journal_id' => bookID(),
                 'amount'          => $formattedAmount,
                 // nilai_buku dihitung berdasarkan kartu terakhir dan amount yang sudah diformat
                 'nilai_buku'      => bcadd($lastNilaiBuku, $formattedAmount),

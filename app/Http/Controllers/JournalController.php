@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\MultiSheetImport;
+use App\Jobs\ImportKartuStockJob;
+use App\Jobs\ImportSaldoNLJob;
 use App\Jobs\RecalculateJournalJob;
 use App\Jobs\UpdateLawanCodeJournalJob;
 use App\Models\BookJournal;
@@ -9,12 +12,19 @@ use App\Models\ChartAccount;
 use App\Models\Journal;
 use App\Models\JournalJobFailed;
 use App\Models\JournalKey;
+use App\Models\Stock;
+use App\Models\TaskImport;
+use App\Models\TaskImportDetail;
 use App\Models\Toko;
 use App\Services\LockManager;
+use CustomLogger;
+use Illuminate\Console\View\Components\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
+use Maatwebsite\Excel\Facades\Excel;
 use SebastianBergmann\CodeUnit\FunctionUnit;
+use Throwable;
 
 class JournalController extends Controller
 {
@@ -224,7 +234,9 @@ class JournalController extends Controller
         $isBackDate = $request->input('is_backdate');
         $date = $isBackDate == 1 ? $request->input('date') : Date('Y-m-d H:i:s');
         $key = JournalKey::orderBy('id', 'desc')->first();
+        $isLockIntern = 0;
         if ($lockManager == null) {
+            $isLockIntern = 1;
             $lockManager = new LockManager();
         }
         if ($key && createCarbon($date) < $key->key_at) {
@@ -240,7 +252,7 @@ class JournalController extends Controller
             ];
         }
 
-        $callback = function () use ($request, $urlTryAgain, $date, $lockManager, $isBackDate, $useTransaction) {
+        $callback = function () use ($request, $isLockIntern, $urlTryAgain, $date, $lockManager, $isBackDate, $useTransaction) {
             $kredits = $request->input('kredits');
             $debets = $request->input('debets');
             $type = $request->input('type');
@@ -277,7 +289,6 @@ class JournalController extends Controller
             $allJournals = [];
 
             foreach ($debets as $debet) {
-                self::addExpireTimeLocks($allLocks);
 
                 $st = Journal::generateJournal(new Request([
                     'journal_number' => $theJournalNumber,
@@ -291,6 +302,7 @@ class JournalController extends Controller
                     'is_backdate' => $isBackDate,
                     'toko_id' =>  array_key_exists('toko_id', $debet) ? $debet['toko_id'] : null,
                     'user_backdate_id' => $userBackdate,
+                    'book_journal_id' => $request->input('book_journal_id'),
                     'date' => $date
                 ]), $lockManager);
                 // $allLocks[] = ['lock' => $st['lock'], 'name' => $st['lock_name']];
@@ -308,7 +320,6 @@ class JournalController extends Controller
             }
 
             foreach ($kredits as $kredit) {
-                self::addExpireTimeLocks($allLocks);
                 $st = Journal::generateJournal(new Request([
                     'journal_number' => $theJournalNumber,
                     'code_group' => $kredit['code_group'],
@@ -321,7 +332,8 @@ class JournalController extends Controller
                     'is_backdate' => $isBackDate,
                     'toko_id' => array_key_exists('toko_id', $kredit) ? $kredit['toko_id'] : null,
                     'user_backdate_id' => $userBackdate,
-                    'date' => $date
+                    'date' => $date,
+                    'book_journal_id' => $request->input('book_journal_id')
                 ]), $lockManager);
                 // $allLocks[] = ['lock' => $st['lock'], 'name' => $st['lock_name']];
                 if ($st['status'] == 0) {
@@ -339,18 +351,8 @@ class JournalController extends Controller
 
 
 
-            // DB::afterCommit(function () use ($allLocks, $allJournals, $theJournalNumber) {
-            //     self::releaseLocks($allLocks);
-            //     info('recalculate journal ' . $theJournalNumber);
-            //     foreach ($allJournals as $thej) {
-            //         $journal = Journal::find($thej->id);
-            //         if ($journal->is_backdate == 1) {
-            //             RecalculateJournalJob::dispatch($journal->id);
-            //         }
-            //         $journal->updateLawanCode();
-            //     }
-            // });
-            if ($useTransaction == true) {
+
+            if ($isLockIntern == 1) {
                 //lock manual dilepas setelah semua proses transaksi selesai
                 $lockManager->releaseAll();
             }
@@ -365,7 +367,7 @@ class JournalController extends Controller
         try {
             return $useTransaction ? DB::transaction($callback) : $callback();
         } catch (\Throwable $e) {
-            if ($useTransaction == true) {
+            if ($isLockIntern) {
                 $lockManager->releaseAll();
             }
             JournalJobFailed::create(new Request([
@@ -613,6 +615,176 @@ class JournalController extends Controller
         return [
             'status' => 1,
             'msg' => $saldo
+        ];
+    }
+
+
+    public function getImportSaldo(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls'
+        ]);
+        $date = $request->input('date');
+
+
+        $import = new MultiSheetImport;
+        Excel::import($import, $request->file('file'));
+
+        // Ambil data yang sudah diproses
+        $data = $import->data;
+        $coas = ChartAccount::aktif()->pluck('name', 'code_group')->all();
+        $stocks = Stock::pluck('name')->all();
+
+
+        // Kirim ke view konfirmasi
+        return view('main.import-saldo', compact('data', 'coas', 'stocks', 'date'));
+    }
+
+    public function importSaldo(Request $request)
+    {
+
+        DB::beginTransaction();
+        try {
+            $data = $request->input('data');
+            $data = base64_decode($data);
+            $date = $request->input('date');
+            $data = json_decode($data, true);
+            $taskSaldo = [];
+            $taskKartuStock = [];
+            $saldos = $data['saldo'];
+            $stocks =  $data['stock'];
+            $bookID = book()->id;
+            $task = TaskImport::create([
+                'book_journal_id' => $bookID,
+                'type' => 'saldo_dan_stock_awal',
+                'description' => 'import saldo awal ' . $date,
+
+            ]);
+            foreach ($saldos as $saldo) {
+
+                $fixData = [
+                    'code_group' => $saldo['code'],
+                    'amount' => $saldo['amount'],
+                    'date' => $date,
+                    'name' => $saldo['name'],
+                ];
+                $taskImportDetail = TaskImportDetail::create([
+                    'book_journal_id' => $bookID,
+                    'task_import_id' => $task->id,
+                    'type' => 'saldo_nl',
+                    'payload' => json_encode($fixData),
+                ]);
+                $taskSaldo[] = $taskImportDetail->id;
+                // ImportSaldoNLJob::dispatch($taskImportDetail->id);
+            }
+            foreach ($stocks as $stock) {
+                $fixData = [
+                    'name' => $stock['name'],
+                    'amount' => $stock['amount'],
+                    'quantity' => $stock['qty'],
+                    'unit' => $stock['satuan'],
+                    'ref_id' => $stock['ref_id'],
+                ];
+                $taskImportDetail = TaskImportDetail::create([
+                    'task_import_id' => $task->id,
+                    'type' => 'kartu_stock',
+                    'payload' => json_encode($fixData),
+                    'book_journal_id' => $bookID,
+                ]);
+                $taskKartuStock[] = $taskImportDetail->id;
+            }
+            DB::commit();
+            foreach ($taskSaldo as $saldo) {
+                ImportSaldoNLJob::dispatch($saldo);
+            }
+            foreach ($taskKartuStock as $stock) {
+                ImportKartuStockJob::dispatch($stock);
+            }
+            return [
+                'status' => 1,
+                'msg' => $task
+            ];
+        } catch (Throwable $e) {
+            DB::rollBack();
+            return [
+                'status' => 0,
+                'msg' => $e->getMessage()
+            ];
+        }
+    }
+
+    function getImportSaldoFollowup($id)
+    {
+        $task = TaskImport::find($id);
+        $details = $task->details->groupBy('type');
+        $view = view('main.import-saldo-followup');
+        $view->details = $details;
+        $view->task = $task;
+        return $view;
+    }
+
+    function getTaskImportAktif()
+    {
+        $taks = TaskImport::where('status', '<>', 'success')->with('details')->get()->map(function ($val) {
+            $resume = collect($val->details)->groupBy('status')->map(function ($vals) {
+                return $vals->count();
+            });
+            $resumeString = "";
+            foreach ($resume as $key => $status) {
+                $resumeString .= $key . " : " . $status . "x, ";
+            }
+            $val['resume_string'] = $resumeString;
+            return $val;
+        });
+        return ['status' => 1, 'msg' => $taks];
+    }
+
+
+    function resendImportTask($id)
+    {
+        $taskDetail = TaskImportDetail::find($id);
+        if ($taskDetail->type == 'saldo_nl') {
+            ImportSaldoNLJob::dispatch($id);
+        } else if ($taskDetail->type == 'kartu_stock') {
+            ImportKartuStockJob::dispatch($id);
+        }
+        return ['status' => 1, 'msg' => 'success'];
+    }
+
+    function resendImportTaskAll($id)
+    {
+        $task = TaskImport::find($id);
+        $details = $task->details()->where('status', '<>', 'success')->select('id', 'type', 'status')->get();
+        $antrianKartuStock = [];
+        $antrianNL = [];
+        $antrianMboh = [];
+        foreach ($details as $detail) {
+            try {
+                if ($detail->type == 'saldo_nl') {
+                    // ImportSaldoNLJob::dispatch($detail->id);
+                    dispatch(new ImportSaldoNLJob($detail->id));
+                    usleep(5000);
+                    $antrianNL[] = $detail;
+                } else if ($detail->type == 'kartu_stock') {
+                    // ImportKartuStockJob::dispatch($detail->id);
+                    dispatch(new ImportKartuStockJob($detail->id));
+                    usleep(5000);
+
+                    $antrianKartuStock[] = $detail;
+                } else {
+                    $antrianMboh[] = $detail;
+                }
+            } catch (Throwable $e) {
+                $antrianMboh[] = $detail;
+            }
+        }
+        return [
+            'status' => 1,
+            'msg' => 'success',
+            'details' => $details,
+            'antrian_kartu_stock' => $antrianKartuStock,
+            'antrian_nl' => $antrianNL,
+            'antrian_mboh' => $antrianMboh
         ];
     }
 }

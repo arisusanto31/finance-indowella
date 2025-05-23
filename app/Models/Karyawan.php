@@ -31,7 +31,7 @@ class Karyawan extends Model
                 $alias = $from;
             }
     
-            $sessionId = session('book_journal_id');
+            $sessionId = bookID();
     
             $query->where(function ($q) use ($alias, $sessionId) {
                 if ($sessionId) {

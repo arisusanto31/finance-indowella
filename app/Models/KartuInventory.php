@@ -47,7 +47,7 @@ class KartuInventory extends Model
 
             $query->where(function ($q) use ($alias) {
                 $q->whereNull("{$alias}.book_journal_id")
-                    ->orWhere("{$alias}.book_journal_id", session('book_journal_id'));
+                    ->orWhere("{$alias}.book_journal_id", bookID());
             });
         });
     }
@@ -69,7 +69,7 @@ class KartuInventory extends Model
             $isOtomatisJurnal = $request->input('is_otomatis_jurnal');
 
             $request->merge([
-                'book_journal_id' => session('book_journal_id'),
+                'book_journal_id' => bookID(),
                 'amount'          => $formattedAmount,
                 // nilai_buku dihitung berdasarkan kartu terakhir dan amount yang sudah diformat
                 'nilai_buku'      => bcadd($lastNilaiBuku, $formattedAmount),

@@ -249,7 +249,7 @@ class InvoiceSaleController extends Controller
                     'price' => $request->price_unit[$i],
                     'discount' => $request->discount[$i] ?? 0,
                     'customer_id' => $customerID,
-                    'book_journal_id' => session('book_journal_id'),
+                    'book_journal_id' => bookID(),
                     'total_price' => format_db($request->total_price[$i]) ?? 0,
                     'toko_id' => $request->toko_id,
                     'custom_stock_name' => $request->custom_stock_name[$i] ?? null,
@@ -260,7 +260,7 @@ class InvoiceSaleController extends Controller
             //create pack ya
             $invoicePack = InvoicePack::create([
                 'invoice_number' => $invoiceNumber,
-                'book_journal_id' => session('book_journal_id'),
+                'book_journal_id' => bookID(),
                 'person_id' => $customerID,
                 'person_type' => Customer::class,
                 'total_price' => collect($grouped)->sum('total_price'),
@@ -338,7 +338,7 @@ class InvoiceSaleController extends Controller
                     'customer_id' => $sales->customer_id,
                     'sales_order_id' => $saleDetailID,
                     'sales_order_number' => $salesOrderNumber,
-                    'book_journal_id' => session('book_journal_id'),
+                    'book_journal_id' => bookID(),
                     'total_price' => $dataDetailSale->price * $quantities[$i] - $discount,
                     'toko_id' => $dataDetailSale->toko_id,
                     'custom_stock_name' => $customStockNames[$i] ?? null,
@@ -346,7 +346,7 @@ class InvoiceSaleController extends Controller
             }
             $invoicePack = InvoicePack::create([
                 'invoice_number' => $invoiceNumber,
-                'book_journal_id' => session('book_journal_id'),
+                'book_journal_id' => bookID(),
                 'person_id' => $sales->customer_id,
                 'person_type' => Customer::class,
                 'total_price' => collect($grouped)->sum('total_price'),

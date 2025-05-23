@@ -69,7 +69,7 @@ class DetailKartuInvoice extends Model
             $dataUpdate = [
                 'kartu_type' => $kartuType,
                 'kartu_id' => $kartuId,
-                'book_journal_id' => session('book_journal_id'),
+                'book_journal_id' => bookID(),
                 'invoice_pack_id' => $invoicePackID,
                 'invoice_pack_number' => $invoiceNumber,
                 'sales_order_id' => $saleOrderID,

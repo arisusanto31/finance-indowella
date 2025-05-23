@@ -52,7 +52,7 @@ class TokoController extends Controller
     public function update(Request $request, $id)
     {
         $request->merge([
-            'book_journal_id' => session('book_journal_id'),
+            'book_journal_id' => bookID(),
         ]);
         $data = $request->validate([
             'name' => 'required',
@@ -79,7 +79,7 @@ class TokoController extends Controller
     public function store(Request $request)
     {
         $request->merge([
-            'book_journal_id' => session('book_journal_id'),
+            'book_journal_id' => bookID(),
         ]);
         $data = $request->validate([
             'name' => 'required',

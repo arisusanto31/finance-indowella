@@ -49,7 +49,7 @@ class StockController extends Controller
 
     public function store(Request $request)
     {
-        $request->merge(['book_journal_id', session('book_journal_id')]);
+        $request->merge(['book_journal_id', bookID()]);
 
         try {
             $validated = $request->validate([
@@ -57,7 +57,7 @@ class StockController extends Controller
                 'category_id' => 'required|integer',
                 'parent_category_id' => 'required|integer',
                 'unit_backend' => 'required|string|max:10',
-                'type'=> 'required|string|max:10',
+                'type' => 'required|string|max:10',
             ]);
 
             Stock::create($validated);
@@ -235,7 +235,11 @@ class StockController extends Controller
 
         DB::beginTransaction();
         try {
-            $bookModel = book()->name == "Buku Toko" ? RetailStock::class : ManufStock::class;
+            if ($request->input('book_journal_id')) {
+                $bookID = $request->input('book_journal_id');
+                $bookModel = $bookID == 1 ? ManufStock::class : RetailStock::class;
+            } else
+                $bookModel = book()->name == "Buku Toko" ? RetailStock::class : ManufStock::class;
             $datastock = $request->input('data');
             $referenceStockID = $request->input('stock_id');
             $name = $datastock['name'];
@@ -255,7 +259,7 @@ class StockController extends Controller
                 'parent_category_id' => $parentcat->id,
                 'unit_default' => $unit_default,
                 'unit_backend' => $unit_backend,
-                'book_journal_id' => session('book_journal_id'),
+                'book_journal_id' => bookID(),
                 'reference_stock_id' => $referenceStockID,
                 'reference_stock_type' => $bookModel
             ];
@@ -301,7 +305,7 @@ class StockController extends Controller
             return [
                 'status' => 1,
                 'msg' => $stock->refresh(),
-                'request'=> $request->all()
+                'request' => $request->all()
 
             ];
         } catch (Throwable $th) {

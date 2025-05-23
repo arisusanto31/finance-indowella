@@ -1,5 +1,11 @@
 <div class="modal-header">
     <h5 class="modal-title" id="exampleModalLabel">Import sales order </h5>
+
+    <button
+        type="button"
+        class="btn-close position-absolute end-0 top-0 m-3"
+        data-bs-dismiss="modal"
+        aria-label="Close"></button>
 </div>
 <div class="modal-body">
 

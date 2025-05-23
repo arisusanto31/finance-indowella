@@ -49,6 +49,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/get-item-permission', [ProfileController::class, 'getItemPermission'])->name('get-item-permission');
         Route::get('/get-item-role', [ProfileController::class, 'getItemRole'])->name('get-item-role');
         Route::get('/get-item-user', [ProfileController::class, 'getItemUser'])->name('get-item-user');
+        Route::post('update-password', [ProfileController::class, 'updatePassword'])->name('update-password');
     });
 
     Route::prefix('permission')->group(function () {
@@ -89,6 +90,13 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::get('/get-saldo-highlight', [JournalController::class, 'getSaldoHighlight'])->name('get-saldo-highlight');
         Route::get('/get-saldo-custom/{id}', [JournalController::class, 'getSaldoCustom'])->name('get-saldo-custom');
         Route::get('/get-laba-rugi/{id}', [JournalController::class, 'getLabaRugi'])->name('get-laba-rugi');
+
+        Route::post('get-import-saldo', [JournalController::class, 'getImportSaldo'])->name('get-import-saldo');
+        Route::post('import-saldo', [JournalController::class, 'importSaldo'])->name('import-saldo');
+        Route::get('get-import-saldo-followup/{id}', [JournalController::class, 'getImportSaldoFollowup']);
+        Route::get('get-task-import-aktif', [JournalController::class, 'getTaskImportAktif']);
+        Route::get('resend-import-task/{id}', [JournalController::class, 'resendImportTask']);
+        Route::get('resend-import-task-all/{id}', [JournalController::class, 'resendImportTaskAll']);
     });
 
     Route::prefix('daftar')->group(function () {
@@ -173,7 +181,6 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('show-detail/{id}', [KartuHutangController::class, 'showDetail'])->name('show-detail');
             Route::get('search-link-journal', [KartuHutangController::class, 'searchLinkJournal'])->name('search-link-journal');
         });
-
 
         Route::prefix('kartu-piutang')->name('kartu-piutang.')->group(function () {
             Route::resource('main', KartuPiutangController::class);

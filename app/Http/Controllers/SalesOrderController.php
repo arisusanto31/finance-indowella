@@ -19,7 +19,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 use App\Models\InvoiceSaleDetail;
-use Illuminate\Support\Facades\Log; 
+use Illuminate\Support\Facades\Log;
 
 
 class SalesOrderController extends Controller
@@ -134,7 +134,7 @@ class SalesOrderController extends Controller
                     'price' => $request->price_unit[$i],
                     'discount' => $request->discount[$i] ?? 0,
                     'customer_id' => $customerID,
-                    'book_journal_id' => session('book_journal_id'),
+                    'book_journal_id' => bookID(),
                     'total_price' => format_db($request->total_price[$i]) ?? 0,
                     'toko_id' => $request->toko_id,
                     'custom_stock_name' => $request->custom_stock_name[$i] ?? null,
@@ -144,7 +144,7 @@ class SalesOrderController extends Controller
             //create pack ya
             $invoicePack = SalesOrder::create([
                 'sales_order_number' => $sales_order_number,
-                'book_journal_id' => session('book_journal_id'),
+                'book_journal_id' => bookID(),
                 'customer_id' => $customerID,
                 'total_price' => collect($grouped)->sum('total_price'),
                 'status' => 'draft',
@@ -287,7 +287,7 @@ class SalesOrderController extends Controller
         return ['status' => 1, 'msg' => $sales];
     }
 
-    
+
 
     public function editInvoice($number)
     {
@@ -297,7 +297,7 @@ class SalesOrderController extends Controller
         $invdetails = SalesOrderDetail::with('stock')->where('sales_order_number', $number)->get();
 
         $data['details'] = $invdetails;
-        $view= view ('invoice.modal._sale-edit');
+        $view = view('invoice.modal._sale-edit');
         $view->data = $data;
         return $view;
     }
@@ -332,12 +332,12 @@ class SalesOrderController extends Controller
             Log::info('Masuk ke updateDetail', $request->all());
     
             DB::beginTransaction();
-    
+
             if (empty($request->sales_order_number)) {
                 Log::warning('Nomor Sales Order kosong!');
                 return response()->json(['status' => 'error', 'message' => 'Nomor Sales Order tidak boleh kosong']);
             }
-    
+
             $firstDetail = \App\Models\SalesOrderDetail::find($request->detail_id[0]);
             if (!$firstDetail) {
                 Log::error('Detail tidak ditemukan');

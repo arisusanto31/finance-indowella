@@ -334,6 +334,31 @@ function swalInfo(title, text, icon = "info") {
         }
     });
 }
+
+function safeBtoa(obj) {
+    try {
+        const json = JSON.stringify(obj);
+        const utf8 = encodeURIComponent(json);
+        const bin = unescape(utf8);
+        return btoa(bin);
+    } catch (e) {
+        console.error("❌ safeBtoa error:", e);
+        return null;
+    }
+}
+
+function safeAtob(b64) {
+    try {
+        const bin = atob(b64);
+        const utf8 = escape(bin);
+        const json = decodeURIComponent(utf8);
+        return JSON.parse(json);
+    } catch (e) {
+        console.error("❌ safeAtob error:", e);
+        return null;
+    }
+}
+
 function swalConfirmAndSubmit({ url, data, onSuccess = null, successText = "Berhasil!", confirmText = "Yes", cancelText = "No" }) {
     Swal.fire({
         title: "Apakah kamu yakin?",
@@ -351,7 +376,8 @@ function swalConfirmAndSubmit({ url, data, onSuccess = null, successText = "Berh
             return $.ajax({
                 url: url,
                 method: 'post',
-                data: data
+                data: data,
+
             }).then(res => {
                 console.log(res);
                 if (res.status == 1) {

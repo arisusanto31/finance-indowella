@@ -1,15 +1,54 @@
 <x-app-layout>
 
+  <div class="card mt-3 rounded-3 mb-3">
+    <h5 class="text-primary-dark card-header"> 📥 <strong>IMPORT AWAL DATA </strong> </h5>
+    <div class="card-body">
+      <form action="{{ route('jurnal.get-import-saldo') }}" method="POST" enctype="multipart/form-data">
+        @csrf
+        <div class="row">
+          <div class="col-md-2">
+            <input type="date" class="form-control" name="date">
+          </div>
+          <div class="col-md-6">
+            <input type="file" class="form-control" name="file">
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-primary" type="submit">Import</button>
+          </div>
+        </div>
+      </form>
+      <div class="row">
+        <div class="col-xs-12" id="container-task">
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div class="card shadow-sm rounded-3 ">
+    <h5 class="text-primary-dark card-header">
+      <a href="javascript:void(openCardCreate())">
 
-    <h5 class="text-primary-dark card-header"> <a href="javascript:void(openCardCreate())">⚒️ <strong>BUAT MUTASI JURNAL</strong>
-        <i id="icon-create" class="bx bx-caret-down toggle-icon"></i> </a>
+        <div class="flex-column align-items-start">
+          ⚒️ <strong>BUAT MUTASI JURNAL</strong>
+          <i id="icon-create" class="bx bx-caret-down toggle-icon"></i>
+          <div class="form-check form-switch ">
+            <input onchange="changeBackdate()" class="form-check-input mt-2" type="checkbox" id="is_backdate" />
+            <label class="form-check-label mt-2" for="is_backdate">backdate</label>
+          </div>
+        </div>
+      </a>
+
     </h5>
-
     <div id="card-create" class="tree-toggle">
       <input type="hidden" value="{{Date('Y-m-d H:i:s')}}" id="date-mutasi" />
+
       <div class="card-body" style="padding-top: 0px;">
+
+        <div id="div-backdate" class="d-backdate">
+          Tanggal Backdate
+          <input type="date" class="form-control" placeholder="tanggal" id="date-mutasi-journal" />
+        </div>
+        <hr class="d-backdate">
         <div>
           Debit
           <button type="button" class="btn btn-sm btn-primary-light ms-2" id="addDebit">+tambah</button>
@@ -28,9 +67,7 @@
             </div>
           </div>
         </div>
-
         <hr>
-
         <div>
           Kredit
           <button type="button" class="btn btn-sm btn-primary-light ms-2" id="addKredit">+tambah</button>
@@ -55,10 +92,8 @@
           <button onclick="submitJournalManual()" class="btn btn-primary w-100">Submit Journal</button>
         </div>
       </div>
-
     </div>
   </div>
-
 
   <div class="card mt-3">
     <div>
@@ -133,6 +168,8 @@
       initItemSelectManual('.select-coa', '{{url("admin/master/chart-account/get-item")}}', 'chart account');
 
     }, 100);
+
+    changeBackdate();
     document.getElementById('addDebit').addEventListener('click', function() {
       const debitWrapper = document.getElementById('div-debet');
       const newRow = document.createElement('div');
@@ -181,6 +218,16 @@
 
     });
 
+
+    function changeBackdate() {
+      if ($('#is_backdate').is(':checked')) {
+        $('.d-backdate').removeClass('hidden');
+      } else {
+        $('.d-backdate').addClass('hidden');
+      }
+
+    }
+
     function openCardCreate() {
       $('#card-create').toggleClass('open');
       $('#icon-create').toggleClass('open');
@@ -213,7 +260,8 @@
 
 
     function submitJournalManual() {
-      date = $('#date-mutasi').val();
+      isBackdate = $('#is_backdate').is(':checked') == true ? 1 : 0;
+      date = isBackdate == 1 ? $('#date-mutasi-journal').val() : $('#date-mutasi').val();
       type = null;
       debets = [];
       kredits = [];
@@ -259,7 +307,7 @@
         debets: debets,
         kredits: kredits,
         is_auto_geterated: 0,
-        is_backdate: $('#is-backdate').is(':checked') == true ? 1 : 0,
+        is_backdate: isBackdate,
         user_backdate_id: '{{user()->id}}',
         url_try_again: "tidak tersedia",
         _token: '{{csrf_token()}}'
@@ -301,14 +349,14 @@
 
     }
 
-    function halamanChange(){
+    function halamanChange() {
       page = $('#halaman-input').val();
       getListMutasiJurnal(page);
     }
 
-    function getListMutasiJurnal(page="") {
+    function getListMutasiJurnal(page = "") {
       $.ajax({
-        url: '{{url("admin/jurnal/get-list-mutasi")}}?page='+page,
+        url: '{{url("admin/jurnal/get-list-mutasi")}}?page=' + page,
         type: 'GET',
         success: function(res) {
           if (res.status == 1) {
@@ -395,6 +443,39 @@
         },
         error: function(err) {
           console.log(err);
+        }
+      });
+    }
+
+    setTimeout(getTaskImport, 100);
+
+    function getTaskImport() {
+      $.ajax({
+        url: '{{url("admin/jurnal/get-task-import-aktif")}}',
+        method: 'get',
+        success: function(res) {
+          console.log(res);
+          if (res.status == 1) {
+            html = "";
+            res.msg.forEach(function(item) {
+              html += ` <div class="row p-2">
+               <a href="{{url('admin/jurnal/get-import-saldo-followup')}}/${item.id}">
+                  <div class="col-xs-12 bg-primary p-2 rounded-3">
+                  <p class="text-white fs-5 mb-0"><strong>${item.description}</strong></p> 
+                  <p class="text-white fs-7 mb-2">${item.resume_string}</p> 
+                  </div>
+                </a>
+
+              </div>`;
+            });
+            $('#container-task').html(html);
+          } else {
+
+          }
+        },
+        error: function(res) {
+
+
         }
       });
     }

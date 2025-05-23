@@ -21,7 +21,7 @@ class Toko extends Model
             $from = $query->getQuery()->from ?? 'tokoes'; // untuk dukung alias `j` kalau pakai from('journals as j')
             $query->where(function ($q) use ($from) {
                 $q->whereNull("{$from}.book_journal_id")
-                    ->orWhere("{$from}.book_journal_id", session('book_journal_id'));
+                    ->orWhere("{$from}.book_journal_id", bookID());
             });
         });
         static::addGlobalScope('aktif', function ($query) {
