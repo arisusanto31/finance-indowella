@@ -42,20 +42,22 @@ class ImportKartuStockJob implements ShouldQueue
         CustomLogger::log('journal', 'info', 'ImportKartuStockJob-' . $this->taskID);
 
         $task = TaskImportDetail::find($this->taskID);
-        if($task->status == 'success'){
+        if ($task->status == 'success') {
             return;
-        }   
+        }
         $data = json_decode($task->payload, true);
         $qty = $data['quantity'];
         $unit = $data['unit'];
-        info('data :'. json_encode($data));
+        info('data :' . json_encode($data));
         $lawanCode = 301000;
         $bookModel = $task->book_journal_id == 1 ? ManufStock::class : RetailStock::class;
-        $stock = Stock::where('reference_stock_id', $data['ref_id'])
+        $stock = Stock::where('reference_stock_id', intval($data['ref_id']))
             ->where('reference_stock_type', $bookModel)
             ->first();
         if (!$stock)
             $stock = Stock::where('name', $data['name'])->first();
+        info('stock terdaftar:' . json_encode($stock));
+
         try {
 
 
@@ -135,8 +137,8 @@ class ImportKartuStockJob implements ShouldQueue
 
             $journal = TaskImportDetail::where('task_import_id', $task->task_import_id)->whereNotNull('journal_number')->first();
             $journalNumber = $journal ? $journal->journal_number : null;
-            info('stock terdaftar:' . json_encode($stock));
             if ($data['amount'] > 0) {
+                info('try to create kartu stock');
                 $stStock = KartuStock::mutationStore(new Request([
                     'stock_id' => $stock->id,
                     'mutasi_qty_backend' => floatval($qty),
@@ -153,14 +155,14 @@ class ImportKartuStockJob implements ShouldQueue
                     'mutasi_rupiah_total' => floatval($data['amount']),
 
                 ]), false);
-                info('hasil dari kartu stcok:'. json_encode($stStock));
+                info('hasil dari kartu stcok:' . json_encode($stStock));
                 if ($stStock['status'] == 0) {
                     throw new \Exception($stStock['msg']);
                 }
             }
 
             $task->status = 'success';
-            $task->error_message="";
+            $task->error_message = "";
             $task->journal_number = $journalNumber;
             $task->finished_at = now();
             $task->save();
