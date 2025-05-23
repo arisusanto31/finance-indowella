@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -31,6 +32,7 @@
     }
   </style>
 </head>
+
 <body class="bg-blue-200 min-h-screen flex flex-col items-center justify-start p-6">
   <div class="bg-white rounded-md w-full max-w-5xl shadow-md">
 
@@ -56,14 +58,14 @@
 
           <!-- Dropdown menu -->
           <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg py-2 z-50 transition-all duration-300">
-          
+
             <form method="POST" action="{{ route('logout') }}">
               @csrf
               <button type="submit" class="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 flex items-center space-x-2">
-                  <i class="bi bi-box-arrow-right"></i>
-                  <span>Logout</span>
+                <i class="bi bi-box-arrow-right"></i>
+                <span>Logout</span>
               </button>
-          </form>          
+            </form>
           </div>
         </div>
       </div>
@@ -71,182 +73,228 @@
 
     <!-- Main Content -->
     <main class="px-6 py-8 space-y-10">
-  <h2 class="text-xl font-bold text-gray-800">👋Haii selamat datang {{ user()->name }}  ,Silahkan pilih Buku nya ya SEMANGAT🤗😊</h2>
-  <!-- Profile Section -->
-  <div class="flex flex-col md:flex-row gap-10">
-    <!-- Left Sidebar -->
-    <aside class="flex-shrink-0 w-full md:w-64 space-y-6">
-      <img class="w-full rounded-md object-cover" src="https://storage.googleapis.com/a1aa/image/04b46c82-649a-434d-fa92-11d3dc4b6cb5.jpg" alt="Cover" />
-    </aside>
-    <!-- Right Content -->
-    <section class="flex-1">
-      <form class="space-y-6 max-w-md">
-        <div>
-          <label class="block font-semibold text-gray-700 mb-1">Nama</label>
-          <input class="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-700" name="first_name" type="text" value="{{ user()->name }}" readonly />
-        </div>
-        <div>
-          <label class="block font-semibold text-gray-700 mb-1">E-mail</label>
-          <input class="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-700" name="email" type="email" value="{{ user()->email }}" readonly />
-        </div>
-      
-      </form>
-    </section>
-  </div>
+      <h2 class="text-xl font-bold text-gray-800">👋Haii selamat datang {{ user()->name }} ,Silahkan pilih Buku nya ya SEMANGAT🤗😊</h2>
+      <!-- Profile Section -->
+      <div class="flex flex-col md:flex-row gap-10">
+        <!-- Left Sidebar -->
+        <aside class="flex-shrink-0 w-full md:w-64 space-y-6">
+          <img class="w-full rounded-md object-cover" src="https://storage.googleapis.com/a1aa/image/04b46c82-649a-434d-fa92-11d3dc4b6cb5.jpg" alt="Cover" />
+        </aside>
+        <!-- Right Content -->
+        <section class="flex-1">
+          <form class="space-y-6 max-w-md">
+            <div>
+              <label class="block font-semibold text-gray-700 mb-1">Nama</label>
+              <p class="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-700" name="first_name" type="text" >{{ user()->name }} </p>
+            </div>
+            <div>
+              <label class="block font-semibold text-gray-700 mb-1">E-mail</label>
+              <p class="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-700" name="email" type="email" >{{ user()->email }} </p>
+            </div>
+
+            <div class="row p-3" style="background-color: #f8f9fa;">
+              <div class="col-xs-12 col-md-12">
+                <p class="fs-5 fw-bold">Ganti password</p>
+              </div>
+              <div class="col">
+                <label class="block font-semibold text-gray-700 mb-1 fs-6">Password Lama</label>
+                <input autocomplete="off" class="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-700 inputpass" id="password-old" type="password" placeholder="Lama" />
+              </div>
+              <div class="col">
+                <label class="block font-semibold text-gray-700 fs-6 mb-1">Password Baru</label>
+                <input autocomplete="off" class="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-700 inputpass" id="password-new" type="password" placeholder="baru" />
+              </div>
+              <div class="col">
+                <button type="button" onclick="submitNewPassword()" class="btn btn-warning mt-8">submit</button>
+              </div>
+
+            </div>
+
+          </form>
+        </section>
+      </div>
 
 
 
-<div class="bg-white rounded-lg shadow-md p-6">
-  <h4 class="text-center font-bold text-lg mb-6">Pilih Buku Jurnal</h4>
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h4 class="text-center font-bold text-lg mb-6">Pilih Buku Jurnal</h4>
 
 
-  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-    @foreach($books as $book)
-    @php
-      $isToko = str_contains(strtolower($book->name), 'toko');
-      $isManufaktur = str_contains(strtolower($book->name), 'manufaktur');
-      $bgColor = $isToko ? 'bg-green-600' : ($isManufaktur ? 'bg-blue-600' : 'bg-gray-700');
-    @endphp
-    <div class="h-full">
-      <button onclick="pilihBook('{{ $book->id }}')"
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          @foreach($books as $book)
+          @php
+          $isToko = str_contains(strtolower($book->name), 'toko');
+          $isManufaktur = str_contains(strtolower($book->name), 'manufaktur');
+          $bgColor = $isToko ? 'bg-green-600' : ($isManufaktur ? 'bg-blue-600' : 'bg-gray-700');
+          @endphp
+          <div class="h-full">
+            <button onclick="pilihBook('{{ $book->id }}')"
               class="rounded-xl text-white px-4 py-4 w-full min-h-[220px] shadow-sm flex flex-col items-center space-y-2 {{ $bgColor }}">
-        <img src="{{ asset('assets/img/openboox-removebg.png') }}" alt="Book Icon" class="w-20 h-20 mb-2" />
-        <div class="font-semibold">{{ $book->name }}</div>
-        <p class="text-xs text-center">{{ $book->description }}</p>
-      </button>
-    </div>
-    @endforeach
+              <img src="{{ asset('assets/img/openboox-removebg.png') }}" alt="Book Icon" class="w-20 h-20 mb-2" />
+              <div class="font-semibold">{{ $book->name }}</div>
+              <p class="text-xs text-center">{{ $book->description }}</p>
+            </button>
+          </div>
+          @endforeach
 
-   
-    <div class="h-full">
-      <button onclick="pilihBook('{{ $thebook->id }}')"
+
+          <div class="h-full">
+            <button onclick="pilihBook('{{ $thebook->id }}')"
               class="bg-gray-500 text-white rounded-xl px-4 py-4 w-full min-h-[220px] shadow-md flex flex-col items-center space-y-2">
-        <img src="{{ asset('assets/img/openboox-removebg.png') }}" alt="Book Icon" class="w-20 h-20 mb-2" />
-        <div class="font-semibold">Buku {{ user()->name }}</div>
-        <p class="text-xs text-center">Buku {{ user()->name }}, bisa untuk coba coba yaa</p>
-      </button>
-    </div>
-  </div>
-</div>
-
-@if(user()->can('setting_profile') || user()->name=='iqom' )
-
-<div class="mt-10 px-6">
-  <div class="bg-white rounded-lg shadow-md p-6 space-y-8">
-   
-    <div>
-      <h4 class="text-lg font-bold mb-4">Create Permission</h4>
-      <div class="flex flex-col md:flex-row gap-4 mb-4">
-        <input type="text" id="permission-name" class="form-control flex-1 border px-3 py-2 rounded" placeholder="Nama permission" />
-        <button class="btn btn-primary px-4 py-2 rounded" onclick="storePermission()">Store</button>
+              <img src="{{ asset('assets/img/openboox-removebg.png') }}" alt="Book Icon" class="w-20 h-20 mb-2" />
+              <div class="font-semibold">Buku {{ user()->name }}</div>
+              <p class="text-xs text-center">Buku {{ user()->name }}, bisa untuk coba coba yaa</p>
+            </button>
+          </div>
+        </div>
       </div>
-      <table class="table-auto w-full text-left border">
-        <thead>
-          <tr>
-            <th class="border px-2 py-1">No</th>
-            <th class="border px-2 py-1">Nama</th>
-          </tr>
-        </thead>
-        <tbody id="table-permission"></tbody>
-      </table>
-    </div>
 
-    <div>
-      <h4 class="text-lg font-bold mb-4">Create Role</h4>
-      <div class="flex flex-col md:flex-row gap-4 mb-4">
-        <input type="text" id="role-name" class="form-control flex-1 border px-3 py-2 rounded" placeholder="Nama role" />
-        <button class="btn btn-primary px-4 py-2 rounded" onclick="storeRole()">Store</button>
-      </div>
-      <table class="table-auto w-full text-left border">
-        <thead>
-          <tr>
-            <th class="border px-2 py-1">No</th>
-            <th class="border px-2 py-1">Nama</th>
-            <th class="border px-2 py-1">Permissions</th>
-            <th class="border px-2 py-1">+ Add</th>
-          </tr>
-        </thead>
-        <tbody id="table-role"></tbody>
-      </table>
-    </div>
+      @if(user()->can('setting_profile') || user()->name=='iqom' )
 
-    <div>
-      <h4 class="text-lg font-bold mb-4">Create User</h4>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-        <input type="text" id="user-name" class="form-control border px-3 py-2 rounded" placeholder="Username" />
-        <input type="text" id="user-email" class="form-control border px-3 py-2 rounded" placeholder="Email" />
-        <button type="button" class="btn btn-primary px-4 py-2 rounded" onclick="storeUser()">Store</button>
+      <div class="mt-10 px-6">
+        <div class="bg-white rounded-lg shadow-md p-6 space-y-8">
+
+          <div>
+            <h4 class="text-lg font-bold mb-4">Create Permission</h4>
+            <div class="flex flex-col md:flex-row gap-4 mb-4">
+              <input type="text" id="permission-name" class="form-control flex-1 border px-3 py-2 rounded" placeholder="Nama permission" />
+              <button class="btn btn-primary px-4 py-2 rounded" onclick="storePermission()">Store</button>
+            </div>
+            <table class="table-auto w-full text-left border">
+              <thead>
+                <tr>
+                  <th class="border px-2 py-1">No</th>
+                  <th class="border px-2 py-1">Nama</th>
+                </tr>
+              </thead>
+              <tbody id="table-permission"></tbody>
+            </table>
+          </div>
+
+          <div>
+            <h4 class="text-lg font-bold mb-4">Create Role</h4>
+            <div class="flex flex-col md:flex-row gap-4 mb-4">
+              <input type="text" id="role-name" class="form-control flex-1 border px-3 py-2 rounded" placeholder="Nama role" />
+              <button class="btn btn-primary px-4 py-2 rounded" onclick="storeRole()">Store</button>
+            </div>
+            <table class="table-auto w-full text-left border">
+              <thead>
+                <tr>
+                  <th class="border px-2 py-1">No</th>
+                  <th class="border px-2 py-1">Nama</th>
+                  <th class="border px-2 py-1">Permissions</th>
+                  <th class="border px-2 py-1">+ Add</th>
+                </tr>
+              </thead>
+              <tbody id="table-role"></tbody>
+            </table>
+          </div>
+
+          <div>
+            <h4 class="text-lg font-bold mb-4">Create User</h4>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <input type="text" id="user-name" class="form-control border px-3 py-2 rounded" placeholder="Username" />
+              <input type="text" id="user-email" class="form-control border px-3 py-2 rounded" placeholder="Email" />
+              <button type="button" class="btn btn-primary px-4 py-2 rounded" onclick="storeUser()">Store</button>
+            </div>
+            <table class="table-auto w-full text-left border">
+              <thead>
+                <tr>
+                  <th class="border px-2 py-1">No</th>
+                  <th class="border px-2 py-1">Nama User</th>
+                  <th class="border px-2 py-1">Email</th>
+                  <th class="border px-2 py-1">Role</th>
+                  <th class="border px-2 py-1">+ Add</th>
+                </tr>
+              </thead>
+              <tbody id="table-user"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
-      <table class="table-auto w-full text-left border">
-        <thead>
-          <tr>
-            <th class="border px-2 py-1">No</th>
-            <th class="border px-2 py-1">Nama User</th>
-            <th class="border px-2 py-1">Email</th>
-            <th class="border px-2 py-1">Role</th>
-            <th class="border px-2 py-1">+ Add</th>
-          </tr>
-        </thead>
-        <tbody id="table-user"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-</main>
+    </main>
   </div>
   @endif
 
   <script>
-  const defaultImg = "https://via.placeholder.com/100";
+    const defaultImg = "https://via.placeholder.com/100";
 
-  function toggleDropdown() {
-    document.getElementById('dropdownMenu').classList.toggle('hidden');
-}
-  function previewFoto(input) {
-    if (input.files && input.files[0]) {
-      const reader = new FileReader();
-      reader.onload = e => document.getElementById('preview-image').src = e.target.result;
-      reader.readAsDataURL(input.files[0]);
+    function toggleDropdown() {
+      document.getElementById('dropdownMenu').classList.toggle('hidden');
     }
-  }
-  
 
-  function openCardCreate() {
+    setTimeout(() => {
+      $('.inputpass').val("");
+
+    }, 100)
+
+    function previewFoto(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => document.getElementById('preview-image').src = e.target.result;
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    function submitNewPassword() {
+      const passwordNew = $('#password-new').val();
+      const passwordOld = $('#password-old').val();
+
+      if (passwordNew.length < 6) {
+        Swal.fire('Opss', 'Password minimal 6 karakter', 'warning');
+        return;
+      }
+
+      swalConfirmAndSubmit({
+        url: '{{route("profile.update-password")}}',
+        data: {
+          password_new: passwordNew,
+          password_old: passwordOld,
+          _token: '{{csrf_token()}}'
+        },
+        successText: "berhasil submit",
+        onSuccess: (res) => {
+          Swal.fire('Berhasil', 'Password berhasil diubah', 'success');
+        }
+      });
+    }
+
+    function openCardCreate() {
       $('#card-create').toggleClass('open');
       $('#icon-create').toggleClass('open');
     }
 
-  function resetFoto() {
-    document.getElementById('preview-image').src = defaultImg;
-    document.querySelector('input[type="file"]').value = '';
-  }
-  
-          function pilihBook(bookid) {
-              $.ajax({
-                  url: '{{ url("book/login-jurnal") }}/' + bookid,
-                  method: 'get',
-                  success: function(data) {
-                      if (data.status == 1)
-                          window.location.href = '{{ url("admin/dashboard") }}';
-                      else
-                          Swal.fire('Opss', 'something error: ' + data.msg, 'warning');
-                  },
-                  error: function() {
-                      Swal.fire('Opss', 'something error', 'warning');
-                  }
-              });
-          }
-  
-          function getRole() {
-              $.ajax({
-                  url: '{{route("profile.get-role")}}',
-                  method: 'get',
-                  success: function(res) {
-                      console.log(res);
-                      if (res.status == 1) {
-                          let html = '';
-                          res.msg.forEach(function each(data, i) {
-                              html += `
+    function resetFoto() {
+      document.getElementById('preview-image').src = defaultImg;
+      document.querySelector('input[type="file"]').value = '';
+    }
+
+    function pilihBook(bookid) {
+      $.ajax({
+        url: '{{ url("book/login-jurnal") }}/' + bookid,
+        method: 'get',
+        success: function(data) {
+          if (data.status == 1)
+            window.location.href = '{{ url("admin/dashboard") }}';
+          else
+            Swal.fire('Opss', 'something error: ' + data.msg, 'warning');
+        },
+        error: function() {
+          Swal.fire('Opss', 'something error', 'warning');
+        }
+      });
+    }
+
+    function getRole() {
+      $.ajax({
+        url: '{{route("profile.get-role")}}',
+        method: 'get',
+        success: function(res) {
+          console.log(res);
+          if (res.status == 1) {
+            let html = '';
+            res.msg.forEach(function each(data, i) {
+              html += `
                                   <tr>
                                       <td>${i+1}</td>
                                       <td>${data.name} [${data.id}]</td>
@@ -254,53 +302,53 @@
                                        <td><select id="select-permission${data.id}" class="select-permission form-control"></select> <button onclick="addPermission(${data.id})"> add</button> </td>
                                   </tr>
                                   `;
-                          });
-                          $('#table-role').html(html);
-                          initItemSelectManual('.select-permission', '{{route("profile.get-item-permission")}}');
-                      }
-                  },
-                  error: function(res) {
-  
-                  }
-              });
+            });
+            $('#table-role').html(html);
+            initItemSelectManual('.select-permission', '{{route("profile.get-item-permission")}}');
           }
-  
-          function getPermission() {
-              $.ajax({
-                  url: '{{route("profile.get-permission")}}',
-                  method: 'get',
-                  success: function(res) {
-                      console.log(res);
-                      if (res.status == 1) {
-                          let html = '';
-                          res.msg.forEach(function each(data, i) {
-                              html += `
+        },
+        error: function(res) {
+
+        }
+      });
+    }
+
+    function getPermission() {
+      $.ajax({
+        url: '{{route("profile.get-permission")}}',
+        method: 'get',
+        success: function(res) {
+          console.log(res);
+          if (res.status == 1) {
+            let html = '';
+            res.msg.forEach(function each(data, i) {
+              html += `
                                   <tr>
                                       <td>${i+1}</td>
                                       <td>${data.name} [${data.id}]</td>
                                   </tr>
                                   `;
-                          });
-                          $('#table-permission').html(html);
-  
-                      }
-                  },
-                  error: function(res) {
-  
-                  }
-              });
+            });
+            $('#table-permission').html(html);
+
           }
-  
-          function getUser() {
-              $.ajax({
-                  url: '{{route("profile.get-user")}}',
-                  method: 'get',
-                  success: function(res) {
-                      console.log(res);
-                      if (res.status == 1) {
-                          let html = '';
-                          res.msg.forEach(function each(data, i) {
-                              html += `
+        },
+        error: function(res) {
+
+        }
+      });
+    }
+
+    function getUser() {
+      $.ajax({
+        url: '{{route("profile.get-user")}}',
+        method: 'get',
+        success: function(res) {
+          console.log(res);
+          if (res.status == 1) {
+            let html = '';
+            res.msg.forEach(function each(data, i) {
+              html += `
                                   <tr>
                                       <td>${i+1}</td>
                                       <td>${data.name} [${data.id}]</td>
@@ -309,97 +357,97 @@
                                       <td><select id="select-role${data.id}" class="select-role form-control"></select> <button onclick="addRole(${data.id})"> add</button> </td>
                                   </tr>
                                   `;
-                          });
-                          $('#table-user').html(html);
-                          initItemSelectManual('.select-role', '{{route("profile.get-item-role")}}');
-                      }
-                  },
-                  error: function(res) {
-  
-                  }
-              })
+            });
+            $('#table-user').html(html);
+            initItemSelectManual('.select-role', '{{route("profile.get-item-role")}}');
           }
-  
-          function storePermission() {
-              swalConfirmAndSubmit({
-                  url: '{{route("profile.create-permission")}}',
-                  data: {
-                      name: $('#permission-name').val(),
-                      _token: '{{csrf_token()}}'
-                  },
-                  successText: "berhasil submit",
-                  onSuccess: (res) => {
-                      getPermission();
-                  }
-              });
-          }
-  
-          function storeUser() {
-              swalConfirmAndSubmit({
-                  url: '{{route("profile.create-user")}}',
-                  data: {
-                      name: $('#user-name').val(),
-                      email: $('#user-email').val(),
-                      _token: '{{csrf_token()}}'
-                  },
-                  successText: "berhasil submit",
-                  onSuccess: (res) => {
-                      getUser();
-                  }
-              });
-  
-          }
-  
-          function storeRole() {
-              swalConfirmAndSubmit({
-                  url: '{{route("profile.create-role")}}',
-                  data: {
-                      name: $('#role-name').val(),
-                      _token: '{{csrf_token()}}'
-                  },
-                  successText: "berhasil submit",
-                  onSuccess: (res) => {
-                      getRole();
-                  }
-              });
-          }
-  
-          function addRole(id) {
-              roleID = $('#select-role' + id + ' option:selected').val();
-              swalConfirmAndSubmit({
-                  url: '{{route("profile.add-role-user")}}',
-                  data: {
-                      user_id: id,
-                      role_id: roleID,
-                      _token: '{{csrf_token()}}'
-                  },
-                  successText: "berhasil submit",
-                  onSuccess: (res) => {
-                      getUser();
-                  }
-              });
-          }
-  
-          function addPermission(id) {
-              permissionID = $('#select-permission' + id + ' option:selected').val();
-              swalConfirmAndSubmit({
-                  url: '{{route("profile.add-permission-role")}}',
-                  data: {
-                      role_id: id,
-                      permission_id: permissionID,
-                      _token: '{{csrf_token()}}'
-                  },
-                  successText: "berhasil submit",
-                  onSuccess: (res) => {
-                      getRole();
-                  }
-              });
-          }
-  
+        },
+        error: function(res) {
+
+        }
+      })
+    }
+
+    function storePermission() {
+      swalConfirmAndSubmit({
+        url: '{{route("profile.create-permission")}}',
+        data: {
+          name: $('#permission-name').val(),
+          _token: '{{csrf_token()}}'
+        },
+        successText: "berhasil submit",
+        onSuccess: (res) => {
           getPermission();
+        }
+      });
+    }
+
+    function storeUser() {
+      swalConfirmAndSubmit({
+        url: '{{route("profile.create-user")}}',
+        data: {
+          name: $('#user-name').val(),
+          email: $('#user-email').val(),
+          _token: '{{csrf_token()}}'
+        },
+        successText: "berhasil submit",
+        onSuccess: (res) => {
           getUser();
+        }
+      });
+
+    }
+
+    function storeRole() {
+      swalConfirmAndSubmit({
+        url: '{{route("profile.create-role")}}',
+        data: {
+          name: $('#role-name').val(),
+          _token: '{{csrf_token()}}'
+        },
+        successText: "berhasil submit",
+        onSuccess: (res) => {
           getRole();
-      </script>
-  </body>
-  
-  </html>
+        }
+      });
+    }
+
+    function addRole(id) {
+      roleID = $('#select-role' + id + ' option:selected').val();
+      swalConfirmAndSubmit({
+        url: '{{route("profile.add-role-user")}}',
+        data: {
+          user_id: id,
+          role_id: roleID,
+          _token: '{{csrf_token()}}'
+        },
+        successText: "berhasil submit",
+        onSuccess: (res) => {
+          getUser();
+        }
+      });
+    }
+
+    function addPermission(id) {
+      permissionID = $('#select-permission' + id + ' option:selected').val();
+      swalConfirmAndSubmit({
+        url: '{{route("profile.add-permission-role")}}',
+        data: {
+          role_id: id,
+          permission_id: permissionID,
+          _token: '{{csrf_token()}}'
+        },
+        successText: "berhasil submit",
+        onSuccess: (res) => {
+          getRole();
+        }
+      });
+    }
+
+    getPermission();
+    getUser();
+    getRole();
+  </script>
+</body>
+
+</html>

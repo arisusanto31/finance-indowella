@@ -240,4 +240,28 @@ class ProfileController extends Controller
             'results' => $role
         ];
     }
+
+
+
+    function updatePassword(Request $request)
+    {
+        $request->validate([
+            'password_old' => 'required|string',
+            'password_new' => 'required|string'
+        ]);
+        $user = user();
+        if (Hash::check($request->input('password_old'), $user->password)) {
+            $user->password = Hash::make($request->input('password_new'));
+            $user->save();
+            return [
+                'status' => 1,
+                'msg' => 'password updated'
+            ];
+        } else {
+            return [
+                'status' => 0,
+                'msg' => 'password lama salah'
+            ];
+        }
+    }
 }

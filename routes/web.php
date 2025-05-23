@@ -49,6 +49,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/get-item-permission', [ProfileController::class, 'getItemPermission'])->name('get-item-permission');
         Route::get('/get-item-role', [ProfileController::class, 'getItemRole'])->name('get-item-role');
         Route::get('/get-item-user', [ProfileController::class, 'getItemUser'])->name('get-item-user');
+        Route::post('update-password', [ProfileController::class, 'updatePassword'])->name('update-password');
     });
 
     Route::prefix('permission')->group(function () {
