@@ -42,6 +42,8 @@ class ImportKartuStockJob implements ShouldQueue
         CustomLogger::log('journal', 'info', 'ImportKartuStockJob-' . $this->taskID);
 
         $task = TaskImportDetail::find($this->taskID);
+        ContextService::setBookJournalID($task->book_journal_id);
+
         if ($task->status == 'success') {
             return;
         }
@@ -54,7 +56,7 @@ class ImportKartuStockJob implements ShouldQueue
         info('ref_id:' . intval($data['ref_id']));
         info('book model:' . $bookModel);
         $stock = Stock::where('reference_stock_id', intval($data['ref_id']))
-            // ->where('reference_stock_type', $bookModel)
+            ->where('reference_stock_type', $bookModel)
             ->first();
         if (!$stock)
             $stock = Stock::where('name', $data['name'])->first();
@@ -132,7 +134,6 @@ class ImportKartuStockJob implements ShouldQueue
                     ]);
                 }
             }
-            ContextService::setBookJournalID($task->book_journal_id);
             DB::beginTransaction();
             if ($task->processed_at == null)
                 $task->processed_at = now();
