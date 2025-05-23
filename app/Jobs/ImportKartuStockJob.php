@@ -54,7 +54,7 @@ class ImportKartuStockJob implements ShouldQueue
         info('ref_id:' . intval($data['ref_id']));
         info('book model:' . $bookModel);
         $stock = Stock::where('reference_stock_id', intval($data['ref_id']))
-            ->where('reference_stock_type', $bookModel)
+            // ->where('reference_stock_type', $bookModel)
             ->first();
         if (!$stock)
             $stock = Stock::where('name', $data['name'])->first();
