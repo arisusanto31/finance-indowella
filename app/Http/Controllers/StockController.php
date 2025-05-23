@@ -213,7 +213,7 @@ class StockController extends Controller
                     ->where('st.reference_stock_type', '=', $stockModelClass);
             })->where(function ($q) {
                 $q->where('st.id', null)->orWhere('st.updated_at', '<', DB::raw('rst.updated_at'));
-            })->whereNull('rst.deleted')->where('rst.is_ppn',1)->with('category:id,name')->with('parentCategory:id,name')
+            })->whereNull('rst.deleted')->where('rst.is_stock',1)->where('rst.is_ppn',1)->with('category:id,name')->with('parentCategory:id,name')
             ->select(
                 'rst.name',
                 'rst.unit_info as unit_default',
