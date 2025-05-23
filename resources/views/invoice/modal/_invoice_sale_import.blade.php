@@ -1,5 +1,11 @@
 <div class="modal-header">
     <h5 class="modal-title" id="exampleModalLabel">Import Invoice order </h5>
+
+    <button
+        type="button"
+        class="btn-close position-absolute end-0 top-0 m-3"
+        data-bs-dismiss="modal"
+        aria-label="Close"></button>
 </div>
 <div class="modal-body">
 
@@ -178,7 +184,7 @@
             akun_cash_kind_name: data.akun_cash_kind_name,
             toko_id: tokoid,
             reference_id: data.id,
-            created_at:date,
+            created_at: date,
             reference_type: data.reference_type,
             _token: '{{csrf_token()}}'
         };

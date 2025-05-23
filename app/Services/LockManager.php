@@ -15,6 +15,7 @@ class LockManager
             $lock = Cache::lock($key, $ttl);
             $lock->block($wait);
             $this->locks[$key] = $lock;
+            info('make lock '.$key);
         }
 
         return $this->locks[$key];
@@ -22,8 +23,9 @@ class LockManager
 
     public function releaseAll()
     {
-        foreach ($this->locks as $lock) {
+        foreach ($this->locks as  $key =>$lock) {
             optional($lock)->release();
+            info('release lock '.$key);
         }
     }
 }

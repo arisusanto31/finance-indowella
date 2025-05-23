@@ -133,7 +133,7 @@ class SalesOrderController extends Controller
                     'price' => $request->price_unit[$i],
                     'discount' => $request->discount[$i] ?? 0,
                     'customer_id' => $customerID,
-                    'book_journal_id' => session('book_journal_id'),
+                    'book_journal_id' => bookID(),
                     'total_price' => format_db($request->total_price[$i]) ?? 0,
                     'toko_id' => $request->toko_id,
                     'custom_stock_name' => $request->custom_stock_name[$i] ?? null,
@@ -143,7 +143,7 @@ class SalesOrderController extends Controller
             //create pack ya
             $invoicePack = SalesOrder::create([
                 'sales_order_number' => $sales_order_number,
-                'book_journal_id' => session('book_journal_id'),
+                'book_journal_id' => bookID(),
                 'customer_id' => $customerID,
                 'total_price' => collect($grouped)->sum('total_price'),
                 'status' => 'draft',
@@ -286,7 +286,7 @@ class SalesOrderController extends Controller
         return ['status' => 1, 'msg' => $sales];
     }
 
-    
+
 
     public function editInvoice($number)
     {
@@ -296,11 +296,11 @@ class SalesOrderController extends Controller
         $invdetails = SalesOrderDetail::with('stock')->where('sales_order_number', $number)->get();
 
         $data['details'] = $invdetails;
-        $view= view ('invoice.modal._sale-edit');
+        $view = view('invoice.modal._sale-edit');
         $view->data = $data;
         return $view;
     }
-    
+
     public function updateDetail(Request $request)
     {
         DB::beginTransaction();
@@ -308,7 +308,7 @@ class SalesOrderController extends Controller
             $totalHargaBaru = 0;
             $salesOrderNumberBaru = null;
             $salesOrderId = null;
-    
+
             foreach ($request->quantity as $index => $qty) {
                 $detail = \App\Models\SalesOrderDetail::find($request->detail_id[$index] ?? null);
                 if ($detail) {
@@ -316,20 +316,20 @@ class SalesOrderController extends Controller
                     $detail->price = $request->price[$index] ?? 0;
                     $detail->discount = $request->discount[$index] ?? 0;
                     $detail->total_price = ($qty * $detail->price) - $detail->discount;
-    
+
                     if (isset($request->sales_order_number[$index])) {
                         $detail->sales_order_number = $request->sales_order_number[$index];
-                        $salesOrderNumberBaru = $request->sales_order_number[$index]; 
+                        $salesOrderNumberBaru = $request->sales_order_number[$index];
                     }
-    
+
                     $salesOrderId = $detail->sales_order_id;
                     $detail->save();
-    
+
                     $totalHargaBaru += $detail->total_price;
                 }
             }
-    
-           
+
+
             if ($salesOrderId && $salesOrderNumberBaru) {
                 $salesOrder = \App\Models\SalesOrder::find($salesOrderId);
                 if ($salesOrder) {
@@ -338,7 +338,7 @@ class SalesOrderController extends Controller
                     $salesOrder->save();
                 }
             }
-    
+
             DB::commit();
             return response()->json(['status' => 'success']);
         } catch (\Exception $e) {
@@ -346,9 +346,9 @@ class SalesOrderController extends Controller
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
-    
-    
-    
+
+
+
 
     public function updateInputInvoice($number)
     {

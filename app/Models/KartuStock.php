@@ -32,7 +32,7 @@ class KartuStock extends Model
 
             $query->where(function ($q) use ($alias) {
                 $q->whereNull("{$alias}.book_journal_id")
-                    ->orWhere("{$alias}.book_journal_id", session('book_journal_id'));
+                    ->orWhere("{$alias}.book_journal_id", bookID());
             });
         });
     }
@@ -104,7 +104,7 @@ class KartuStock extends Model
             }
             $kartu->code_group = $request->input('code_group');
             $kartu->code_group_name = $request->input('code_group_name');
-            $kartu->book_journal_id = session('book_journal_id');
+            $kartu->book_journal_id = bookID();
             $kartu->saldo_qty_backend = moneyAdd($lastCard->saldo_qty_backend, $kartu->mutasi_qty_backend);
             $kartu->saldo_rupiah_total = moneyAdd($lastCard->saldo_rupiah_total, $kartu->mutasi_rupiah_total);
             if ($kartu->saldo_rupiah_total < 0 || $kartu->saldo_qty_backend < 0) {
@@ -143,6 +143,7 @@ class KartuStock extends Model
             DB::beginTransaction();
         try {
             $stockid = $request->input('stock_id');
+            info('create kartu stock ' . $stockid);
             $qty = format_db($request->input('mutasi_quantity'));
             $unit = $request->input('unit');
             $flow = $request->input('flow');
@@ -181,6 +182,7 @@ class KartuStock extends Model
             $dataunit = StockUnit::where('stock_id', $stockid)->where('unit', $unit)->first();
 
             $stock = Stock::find($stockid);
+            // info('info stock:' . json_encode($stock));
             if (!$unit) {
                 if ($useTransaction)
                     DB::rollBack();

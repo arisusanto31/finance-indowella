@@ -79,7 +79,7 @@ class KaryawanController extends Controller
             'date_keluar' => 'nullable|date',
         ]);
 
-        $validated['book_journal_id'] = session('book_journal_id');
+        $validated['book_journal_id'] = bookID();
         $karyawan = Karyawan::create($validated);
 
         $status = is_null($karyawan->date_keluar) ? 'Aktif' : 'Keluar';
@@ -122,7 +122,7 @@ class KaryawanController extends Controller
 
     public function index()
     {
-        // dd(session('book_journal_id'));
+        // dd(bookID());
         
         $karyawans = Karyawan::where('is_deleted', 0)->get();
         $karyawans = Karyawan::all();

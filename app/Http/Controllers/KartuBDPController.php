@@ -29,7 +29,7 @@ class KartuBDPController extends Controller
         $saldoAkhir = KartuBDP::whereIn('id', function ($q) use ($dateAkhir) {
             $q->from('kartu_bdps')
                 ->select(DB::raw('max(id)'))
-                ->where('book_journal_id', session('book_journal_id'))
+                ->where('book_journal_id', bookID())
                 ->where('created_at', '<', $dateAkhir)
                 ->groupBy('stock_id', 'production_number');
         })->select('production_number', 'stock_id', 'saldo_qty_backend as saldo_qty_awal', 'saldo_rupiah_total as saldo_rupiah_awal', DB::raw('"0" as saldo_qty_akhir'), DB::raw('"0" as saldo_rupiah_akhir'));
@@ -37,7 +37,7 @@ class KartuBDPController extends Controller
         $summary = KartuBDP::whereIn('kartu_bdps.id', function ($q) use ($dateAwal) {
             $q->from('kartu_bdps')
                 ->select(DB::raw('max(id)'))
-                ->where('book_journal_id', session('book_journal_id'))
+                ->where('book_journal_id', bookID())
                 ->where('created_at', '<', $dateAwal)
                 ->groupBy('stock_id', 'production_number');
         })->select('production_number', 'stock_id', 'saldo_qty_backend as saldo_qty_akhir', 'saldo_rupiah_total as saldo_rupiah_akhir', DB::raw('"0" as saldo_qty_awal'), DB::raw('"0" as saldo_rupiah_awal'))

@@ -51,7 +51,7 @@ class Journal extends Model
 
             $query->where(function ($q) use ($alias) {
                 $q->whereNull("{$alias}.book_journal_id")
-                    ->orWhere("{$alias}.book_journal_id", session('book_journal_id'));
+                    ->orWhere("{$alias}.book_journal_id", bookID());
             });
         });
     }
@@ -139,15 +139,24 @@ class Journal extends Model
             try {
                 // CustomLogger::log('journal', 'info', $journal_number . ' get lock ' . $name);
                 $now = createCarbon($request->input('date'));
-                $indexDate = $now->format('ymdHis');
-                $lastIndexDate = Journal::where('chart_account_id', $coaID)->whereRaw('floor(index_date/100) = ?', [$indexDate])->select(DB::raw('max(index_date) as maxindex'))->first();
-                $counter = $lastIndexDate ? $lastIndexDate->maxindex % 100 : 0;
-                // info('counter:' . $counter);
+                $counter = 9999;
+                while ($counter >= 99) {
+                    $indexDate = $now->format('ymdHis');
+                    info('code Group:' . $coaID . ' on ' . $indexDate . ',bookid=' . bookID());
+                    $lastIndexDate = Journal::where('chart_account_id', $coaID)->where('index_date_group', $indexDate)->select(DB::raw('max(index_date) as maxindex'))->first();
+                    $counter = $lastIndexDate ? $lastIndexDate->maxindex % 100 : 0;
+                    if ($counter >= 99) {
+                        $now->addSecond();
+                    }
+                }
+                info('counter:' . $counter);
                 $finalIndexDate = $indexDate . sprintf("%02d", ($counter + 1));
                 $lastJournal = Journal::where('chart_account_id', $coaID)->where('index_date', '<', $finalIndexDate)->orderBy('index_date', 'desc')->first();
 
                 $journal = new Journal;
                 $chartAccount = ChartAccount::find($coaID);
+                $journal->index_date = $finalIndexDate;
+                $journal->index_date_group = $indexDate; //nilai ymdHis
                 $journal->chart_account_id = $coaID;
                 $journal->reference_model = $chartAccount->reference_model;
                 $journal->journal_number = $journal_number;
@@ -172,9 +181,8 @@ class Journal extends Model
                 $journal->user_backdate_id = $request->input('user_backdate_id');
                 $journal->toko_id = $request->input('toko_id');
                 $journal->created_at = $now->format('Y-m-d H:i:s');
-                $journal->index_date = $finalIndexDate;
                 $journal->is_auto_generated = $request->input('is_auto_generated');
-                $journal->book_journal_id = session('book_journal_id');
+                $journal->book_journal_id = bookID() ?? $request->Input('book_journal_id');
                 $journal->toko_id = $request->input('toko_id');
                 $journal->save();
                 $reference = null;
@@ -197,6 +205,7 @@ class Journal extends Model
                 info('success creating journal' . $codeGroup);
                 $journal->verifyJournal();
             } catch (Throwable $e) {
+                info('failed creating journal: ' . $e->getMessage());
                 return [
                     'status' => 0,
                     'msg' => $e->getMessage(),
@@ -205,6 +214,7 @@ class Journal extends Model
                 ];
             }
         } catch (LockTimeoutException $e) {
+            info('failed creating journal: antrian timeout');
             return [
                 'status' => 0,
                 'msg' => 'jurnal tidak berhasil masuk, antrian timeout',

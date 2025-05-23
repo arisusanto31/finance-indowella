@@ -54,7 +54,7 @@ class InventoryController extends Controller
         $inv = null;
         $st = null;
         try {
-            $request['book_journal_id'] = session('book_journal_id');
+            $request['book_journal_id'] = bookID();
             $request['nilai_perolehan'] = format_db($request['nilai_perolehan']);
             $request = $request->validate([
                 'name' => 'required|string',
@@ -139,7 +139,7 @@ class InventoryController extends Controller
     {
         $year = getInput('year') ? getInput('year') : date('Y');
         $inv = Inventory::from('inventories as inv')->leftJoin('kartu_inventories as ki', 'ki.inventory_id', '=', 'inv.id')
-            ->where('ki.book_journal_id', session('book_journal_id'))
+            ->where('ki.book_journal_id', bookID())
             ->whereYear('ki.date', $year)
             ->select(
                 'inv.id',
@@ -171,7 +171,7 @@ class InventoryController extends Controller
                 });
             });
         $saldoBukuAkhir = KartuInventory::join('inventories as inv', 'inv.id', '=', 'kartu_inventories.inventory_id')->whereIn('kartu_inventories.id', function ($q) use ($year) {
-            $q->from('kartu_inventories as ki')->where('ki.book_journal_id', session('book_journal_id'))
+            $q->from('kartu_inventories as ki')->where('ki.book_journal_id', bookID())
                 ->whereYear('ki.date', $year)->select(DB::raw('max(id) as maxid'))->groupBy('inventory_id');
         })->select('inventory_id', 'nilai_buku', 'inv.name')->get()->keyBy('inventory_id');
 

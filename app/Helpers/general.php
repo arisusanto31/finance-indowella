@@ -1,7 +1,9 @@
 <?php
 
 use App\Models\BookJournal;
+use App\Services\ContextService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Request as FacadeRequest;
 
 if (! function_exists('createCarbon')) {
@@ -32,11 +34,29 @@ if (!function_exists('user')) {
 if (!function_exists('book')) {
     function book()
     {
-        return BookJournal::find(session('book_journal_id'));
+        return BookJournal::find(bookID());
+    }
+}
+
+if (!function_exists('bookID')) {
+    function bookID()
+    {
+        $bookJournalID = ContextService::getBookJournalID();
+        return $bookJournalID;
     }
 }
 
 
+class CustomLogger
+{
+    public static function log($title, $level, $message, $context = [])
+    {
+        try {
+            Log::channel($title)->$level($message, $context);
+        } catch (Throwable $th) {
+        }
+    }
+}
 
 if (!function_exists('getInput')) {
     function getInput($key)
@@ -249,4 +269,17 @@ function toDigit($number, $digit)
 {
     $str = sprintf("%0" . $digit . "d", $number);
     return $str;
+}
+
+function bgStatus($text)
+{
+    if ($text == "success") {
+        return "bg-success";
+    } else if ($text == "failed") {
+        return "bg-danger";
+    } else if ($text == "process") {
+        return "bg-warning";
+    } else {
+        return "bglevel3";
+    }
 }

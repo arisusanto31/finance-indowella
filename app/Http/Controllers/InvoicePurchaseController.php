@@ -59,7 +59,7 @@ class InvoicePurchaseController extends Controller
                 'price' => $request->price_unit[$i],
                 'discount' => $request->discount[$i] ?? 0,
                 'supplier_id' => $request->supplier_id,
-                'book_journal_id' => session('book_journal_id'),
+                'book_journal_id' => bookID(),
                 'total_price' => format_db($request->total_price[$i]) ?? 0,
             ];
         }
@@ -70,7 +70,7 @@ class InvoicePurchaseController extends Controller
             //create pack ya
             $invoicePack = InvoicePack::create([
                 'invoice_number' => $invoice_pack_number,
-                'book_journal_id' => session('book_journal_id'),
+                'book_journal_id' => bookID(),
                 'person_id' => $request->supplier_id,
                 'person_type' => 'App\Models\Supplier',
                 'reference_model' => 'App\Models\InvoicePurchaseDetail',

@@ -5,19 +5,22 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
-class PrepaidExpense extends Model
+class TaskImport extends Model
 {
     //
-
-    protected $table = "prepaid_expenses";
-    public $timestamps  = true;
-
+    protected $table = "task_imports";
+    protected $fillable = [
+        'book_journal_id',
+        'type',
+        'description',
+        'status',
+    ];
 
     protected static function booted()
     {
 
-        static::addGlobalScope('book_journal', function ($query) {
-            $from = $query->getQuery()->from ?? 'prepaid_expenses'; // untuk dukung alias `j` kalau pakai from('journals as j')
+        static::addGlobalScope('journal', function ($query) {
+            $from = $query->getQuery()->from ?? 'task_imports'; // untuk dukung alias `j` kalau pakai from('journals as j')
             if (Str::contains($from, ' as ')) {
                 [$table, $alias] = explode(' as ', $from);
                 $alias = trim($alias);
@@ -31,14 +34,8 @@ class PrepaidExpense extends Model
             });
         });
     }
-
-
-    public $fillable = [
-        'book_journal_id',
-        'name',
-        'type_bdd',
-        'date',
-        'nilai_perolehan',
-        'periode'
-    ];
+    public function details()
+    {
+        return $this->hasMany(TaskImportDetail::class, 'task_import_id');
+    }
 }
