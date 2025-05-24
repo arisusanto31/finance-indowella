@@ -97,7 +97,16 @@
 
   <div class="card mt-3">
     <div>
-      <h5 class="text-primary-dark card-header"> 📤 <strong>MUTASI JURNAL </strong> </h5>
+      <h5 class="text-primary-dark card-header"> 📤 <strong>MUTASI JURNAL </strong>
+        <div class="d-flex justify-content pe-4 mt-1 mb-3">
+          <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="prevMonth()">
+            << </button>
+              <span class="badge bg-primary d-flex justify-content-center align-items-center"> {{getListMonth()[$month]}} {{$year}}</span>
+              <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="nextMonth()"> >></button>
+
+        </div>
+      </h5>
+
       <div class="pull-right" style="float:right; ">
         <div style="width:150px;position:relative; float:right;">
           <button class="btn-control" type="text" id="btn-search" onclick="trySearch() "> search</button>
@@ -259,6 +268,28 @@
     setTimeout(getListMutasiJurnal, 100);
 
 
+    function prevMonth() {
+      month = '{{$month}}';
+      year = '{{$year}}';
+      month--;
+      if (month < 1) {
+        month = 12;
+        year--;
+      }
+      window.location.href = '{{url("admin/jurnal/mutasi")}}?month=' + month + '&year=' + year;
+    }
+
+    function nextMonth() {
+      month = '{{$month}}';
+      year = '{{$year}}';
+      month++;
+      if (month > 12) {
+        month = 1;
+        year++;
+      }
+      window.location.href = '{{url("admin/jurnal/mutasi")}}?month=' + month + '&year=' + year;
+    }
+
     function submitJournalManual() {
       isBackdate = $('#is_backdate').is(':checked') == true ? 1 : 0;
       date = isBackdate == 1 ? $('#date-mutasi-journal').val() : $('#date-mutasi').val();
@@ -356,7 +387,7 @@
 
     function getListMutasiJurnal(page = "") {
       $.ajax({
-        url: '{{url("admin/jurnal/get-list-mutasi")}}?page=' + page,
+        url: '{{url("admin/jurnal/get-list-mutasi")}}?page=' + page+'&year={{$year}}&month={{$month}}',
         type: 'GET',
         success: function(res) {
           if (res.status == 1) {
@@ -450,9 +481,10 @@
     setTimeout(getTaskImport, 100);
 
 
-    function trySearch(){
+    function trySearch() {
       getListMutasiJurnal();
     }
+
     function getTaskImport() {
       $.ajax({
         url: '{{url("admin/jurnal/get-task-import-aktif")}}',

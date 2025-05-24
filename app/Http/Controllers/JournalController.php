@@ -206,7 +206,12 @@ class JournalController extends Controller
 
     public function mutasi()
     {
-        return view('main.mutasi');
+        $view= view('main.mutasi');
+        $month= getInput('month')?toDigit(getInput('month'),2):Date('m');
+        $year= getInput('year')??Date('Y');
+        $view->month= $month;
+        $view->year= $year;
+        return $view;
     }
 
     public function getListBukuBesar()
