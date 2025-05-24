@@ -209,8 +209,10 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('/get-item-all', [ChartAccountController::class, 'getItemChartAccountAll'])->name('get-item-all');
             Route::get('/get-item-keuangan', [ChartAccountController::class, 'getItemChartAccountKeuanganManual'])->name('get-item-keuangan');
             Route::get('/get-chart-accounts', [ChartAccountController::class, 'getChartAccounts']);
+            Route::get('/get-chart-account/{id}', [ChartAccountController::class, 'getChartAccount']);
             Route::get('/get-code-group/{id}', [ChartAccountController::class, 'getCodeGroupAccount']);
             Route::get('/master-suplier', [SupplierController::class, 'master.supplier']);
+            Route::post('/make-alias', [ChartAccountController::class, 'makeAlias']);
             Route::get('/category-json', function () {
                 return \App\Models\StockCategory::select('id', 'name as text')->get();
             });

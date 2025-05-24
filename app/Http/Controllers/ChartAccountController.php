@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\ChartAccount;
+use App\Models\ChartAccountAlias;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -57,9 +58,11 @@ class ChartAccountController extends Controller
     public function getChartAccounts()
     {
         $charts = ChartAccount::aktif()->orderBy('code_group')->get()->groupBy('parent_id');
+        $alias = ChartAccountAlias::pluck('name', 'code_group')->all();
         return [
             'status' => 1,
-            'msg' => $charts
+            'msg' => $charts,
+            'alias' => $alias
         ];
     }
 
@@ -300,6 +303,24 @@ class ChartAccountController extends Controller
         return [
             'status' => 1,
             'msg' => $chart
+        ];
+    }
+
+    function makeAlias(Request $request)
+    {
+        $codeGroups = $request->input('code_group');
+        $codeGroup = implode("", $codeGroups);
+        $name = $request->input('name');
+        $chart = ChartAccount::where('code_group', $codeGroup)->first();
+        $alias = ChartAccountAlias::createOrUpdate(new Request([
+            'book_journal_id' => bookID(),
+            'chart_account_id' => $chart->id,
+            'code_group' => $codeGroup,
+            'name' => $name
+        ]));
+        return [
+            'status' => 1,
+            'msg' => $alias
         ];
     }
 
