@@ -67,7 +67,7 @@ class ImportSaldoNLJob implements ShouldQueue
             } else {
                 if ($amount > 0) {
                     //kalo aset debet, kalo liabilitas kredit
-                    if ($codeGroup > 400000) {
+                    if ($codeGroup > 200000) {
                         //liabilitas
                         $codeKredit = $codeGroup;
                         $codeDebet = $lawanCode;
@@ -76,7 +76,7 @@ class ImportSaldoNLJob implements ShouldQueue
                         $codeKredit = $lawanCode;
                     }
                 } else {
-                    if ($codeGroup > 400000) {
+                    if ($codeGroup > 200000) {
                         //liabilitas
                         $codeKredit = $lawanCode;
                         $codeDebet = $codeGroup;
