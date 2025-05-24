@@ -137,7 +137,11 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
     });
 
     Route::prefix('kartu')->group(function () {
-        Route::resource('/kartu-kas', KartuKasController::class);
+        Route::prefix('kartu-kas')->name('kartu-kas.')->group(function () {
+            Route::resource('main', KartuKasController::class);
+            Route::get('get-buku-kas', [KartuKasController::class, 'getBukuKas'])->name('get-buku-kas');
+            Route::post('add-kas', [KartuKasController::class, 'addKas'])->name('add-kas');
+        });
 
         Route::prefix('kartu-stock')->name('kartu-stock.')->group(function () {
             Route::resource('main', KartuStockController::class);

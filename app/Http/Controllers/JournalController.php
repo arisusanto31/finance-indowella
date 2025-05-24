@@ -29,10 +29,6 @@ use Throwable;
 class JournalController extends Controller
 {
     //
-
-
-
-
     public function neraca()
     {
         $view = view('main.neraca');
@@ -206,11 +202,11 @@ class JournalController extends Controller
 
     public function mutasi()
     {
-        $view= view('main.mutasi');
-        $month= getInput('month')?toDigit(getInput('month'),2):Date('m');
-        $year= getInput('year')??Date('Y');
-        $view->month= $month;
-        $view->year= $year;
+        $view = view('main.mutasi');
+        $month = getInput('month') ? toDigit(getInput('month'), 2) : Date('m');
+        $year = getInput('year') ?? Date('Y');
+        $view->month = $month;
+        $view->year = $year;
         return $view;
     }
 
@@ -220,7 +216,7 @@ class JournalController extends Controller
         $month = getInput('month');
         $year = getInput('year');
         $journals = Journal::searchCOA($code)->whereMonth('created_at', $month)->whereYear('created_at', $year)->orderBy('index_date', 'asc')->get();
-        $chartAccount = ChartAccount::aktif()->pluck('name', 'code_group');
+        $chartAccount = ChartAccount::aktif()->withAlias()->pluck('alias_name', 'code_group');
         return [
             'status' => 1,
             'msg' => $journals,
@@ -353,7 +349,9 @@ class JournalController extends Controller
                 }
                 $allJournals[] = $st['msg'];
             }
-
+            foreach ($allJournals as $journal) {
+                $journal->updateLawanCode();
+            }
 
 
 

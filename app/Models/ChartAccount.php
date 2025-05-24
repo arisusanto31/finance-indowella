@@ -89,6 +89,19 @@ class ChartAccount extends Model
         }
     }
 
+    public function scopeWithAlias($q)
+    {
+        $q->leftJoin('chart_account_aliases as ca', function ($join) {
+            $join->on('ca.chart_account_id', '=', 'chart_accounts.id')
+                ->on('ca.book_journal_id', '=', DB::raw(bookID()));
+        })->where(function ($q) {
+            $q->where('ca.book_journal_id', bookID())
+                ->orWhereNull('ca.id');
+        })
+            ->select('chart_accounts.*', DB::raw('coalesce(ca.name,chart_accounts.name) as alias_name'));
+        return $q;
+    }
+
     public function updateLevel()
     {
         $level = 0;

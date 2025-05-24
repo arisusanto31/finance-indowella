@@ -31,20 +31,20 @@ class ChartAccountController extends Controller
         if (getInput('search')) {
             $searchs = explode(' ', getInput('search'));
         }
-        $charts = ChartAccount::aktif()->child();
+        $charts = ChartAccount::aktif()->child()->withAlias();
         foreach ($searchs as $search) {
-            $charts = $charts->where('name', 'like', '%' . $search . '%');
+            $charts = $charts->where(DB::raw('coalesce(ca.name,chart_accounts.name)','like','%'.$search.'%'));
         }
-        $charts = $charts->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
-        $alias = ChartAccountAlias::pluck('name', 'code_group')->all();
-        $finalChart = $charts->map(function ($val) use ($alias) {
-            if (array_key_exists($val['id'], $alias)) {
-                $val['text'] = $alias[$val->id];
-            }
-            return $val;
-        });
+        $charts = $charts->select(DB::raw('chart_accounts.code_group as id'), DB::raw('coalesce(ca.name,chart_accounts.name) as text'))->get();
+        // $alias = ChartAccountAlias::pluck('name', 'code_group')->all();
+        // $finalChart = $charts->map(function ($val) use ($alias) {
+        //     if (array_key_exists($val['id'], $alias)) {
+        //         $val['text'] = $alias[$val->id];
+        //     }
+        //     return $val;
+        // });
         return [
-            'results' => $finalChart
+            'results' => $charts
         ];
     }
 

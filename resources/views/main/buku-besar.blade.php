@@ -41,25 +41,12 @@
       </div>
 
 
+      <div class="row mt-2">
+        <div class="col-md-12" id="container-buku">
 
-      <div class="table-responsive mt-2">
-        <table id="kartuKasTable" class="table table-bordered table-striped table-hover align-middle">
-          <thead class="bg-white text-dark text-center">
-            <tr>
-              <th>No</th>
-              <th>📅 Tanggal</th>
-              <th>#️⃣ No Jurnal</th>
-              <th>🔢 LAWAN COA</th>
-              <th>📎 Description</th>
-              <th>📥 Debet</th>
-              <th>📤 Kredit</th>
-              <th>💲saldo</th>
-            </tr>
-          </thead>
-          <tbody id="body-mutasi-bukubesar">
-          </tbody>
-        </table>
+        </div>
       </div>
+
 
     </div>
   </div>
@@ -78,7 +65,23 @@
         success: function(res) {
           console.log(res);
           if (res.status == 1) {
-            html = '';
+            html = `
+                  <div class="table-responsive mt-2">
+                    <table id="kartuKasTable" class="table table-bordered table-striped table-hover align-middle">
+                      <thead class="bg-white text-dark text-center">
+                        <tr>
+                          <th>No</th>
+                          <th>📅 Tanggal</th>
+                          <th>#️⃣ No Jurnal</th>
+                          <th>🔢 LAWAN COA</th>
+                          <th>📎 Description</th>
+                          <th>📥 Debet</th>
+                          <th>📤 Kredit</th>
+                          <th>💲saldo</th>
+                        </tr>
+                      </thead>
+                      <tbody id="body-mutasi-bukubesar">
+                     `;
 
             if (res.msg.length == 0) {
               html += `
@@ -103,7 +106,20 @@
                   </tr>
                 `;
             });
-            $('#body-mutasi-bukubesar').html(html);
+
+            html += ` </tbody>
+                      <tfoot>
+                          <tr>
+                              <td colspan="5" class="text-end">Total</td>
+                              <td><strong>${formatRupiah(res.msg.reduce((acc, item) => acc + parseFloat(item.amount_debet), 0))} </strong></td>
+                              <td><strong>${formatRupiah(res.msg.reduce((acc, item) => acc + parseFloat(item.amount_kredit), 0))} </strong></td>
+                              <td><strong>${formatRupiah(res.msg.reduce((acc, item) => acc + parseFloat(item.amount_saldo), 0))} </strong></td>
+                          </tr>
+                    </tfoot>
+                    </table>
+                  </div>`;
+
+            $('#container-buku').html(html);
           } else {
             Swal.fire('opps', res.msg, 'error');
           }
