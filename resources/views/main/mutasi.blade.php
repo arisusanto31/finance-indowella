@@ -449,6 +449,10 @@
 
     setTimeout(getTaskImport, 100);
 
+
+    function trySearch(){
+      getListMutasiJurnal();
+    }
     function getTaskImport() {
       $.ajax({
         url: '{{url("admin/jurnal/get-task-import-aktif")}}',
