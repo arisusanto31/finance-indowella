@@ -7,6 +7,7 @@ use App\Models\ChartAccount;
 use App\Models\ChartAccountAlias;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use PhpOffice\PhpSpreadsheet\Chart\Chart;
 
 class ChartAccountController extends Controller
 {
@@ -35,8 +36,15 @@ class ChartAccountController extends Controller
             $charts = $charts->where('name', 'like', '%' . $search . '%');
         }
         $charts = $charts->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
+        $alias = ChartAccountAlias::pluck('name', 'code_group')->all();
+        $finalChart = $charts->map(function ($val) use ($alias) {
+            if (array_key_exists($val['id'], $alias)) {
+                $val['text'] = $alias[$val->id];
+            }
+            return $val;
+        });
         return [
-            'results' => $charts
+            'results' => $finalChart
         ];
     }
 
@@ -51,8 +59,15 @@ class ChartAccountController extends Controller
             $charts = $charts->where('name', 'like', '%' . $search . '%');
         }
         $charts = $charts->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
+        $alias = ChartAccountAlias::pluck('name', 'code_group')->all();
+        $finalChart = $charts->map(function ($val) use ($alias) {
+            if (array_key_exists($val['id'], $alias)) {
+                $val['text'] = $alias[$val->id];
+            }
+            return $val;
+        });
         return [
-            'results' => $charts
+            'results' => $finalChart
         ];
     }
     public function getChartAccounts()
@@ -241,6 +256,14 @@ class ChartAccountController extends Controller
                 $finalChart = $finalChart->merge($chart);
             }
         }
+        $alias = ChartAccountAlias::pluck('name', 'code_group')->all();
+
+        $finalChart = $finalChart->map(function ($val) use ($alias) {
+            if (array_key_exists($val['id'], $alias)) {
+                $val['text'] = $alias[$val->id];
+            }
+            return $val;
+        });
         return [
             'results' => $finalChart
         ];
