@@ -100,6 +100,8 @@
         });
         fixToko = collect(fixToko).unique().all();
         option = "";
+        option += `<option value="">All</option>`;
+
         fixToko.forEach(function(item) {
             option += `<option value="${item}">${item}</option>`;
         });
@@ -115,7 +117,7 @@
         if (toko == undefined) toko = "";
         $('#table-body').html("");
         $.ajax({
-            url: '{{url("admin/invoice/sales-get-data-import")}}/' + id + '?monthyear=' + monthyear + '&&toko=' + toko + '&customer=' + customer,
+            url: '{{url("admin/invoice/sales-get-data-import")}}/' + id + '?monthyear=' + monthyear + '&toko=' + toko + '&customer=' + customer,
             method: 'get',
             success: function(res) {
                 console.log(res);
