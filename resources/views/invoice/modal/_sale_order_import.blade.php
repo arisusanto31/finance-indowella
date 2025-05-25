@@ -26,7 +26,7 @@
             <div class="col-xs-12 col-md-12 ">
                 <div class="d-flex  justify-content-end gap-2 " style="width: 100%;">
                     <div class="" style="width:20%">
-                        <input class="form-control" id="customer" />
+                        <input class="form-control" id="customer" placeholder="customer" />
                     </div>
                     <div class="" style="width:20%">
                         <select class="select-toko form-control" id="select-search-toko">
