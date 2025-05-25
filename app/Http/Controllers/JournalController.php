@@ -351,6 +351,9 @@ class JournalController extends Controller
             }
             foreach ($allJournals as $journal) {
                 $journal->updateLawanCode();
+                if ($isBackDate == 1) {
+                    $journal->recalculateJournal();
+                }
             }
 
 
@@ -443,6 +446,10 @@ class JournalController extends Controller
     {
         $journal = Journal::find($id);
         $journal->verifyJournal();
+        $journal->updateLawanCode();
+        if ($journal->is_backdate == 1) {
+            $journal->recalculateJournal();
+        }
         return [
             'status' => 1,
             'msg' => 'success'
@@ -498,6 +505,7 @@ class JournalController extends Controller
             }
 
             DB::commit();
+            return ['status' => 1, 'msg' => 'success'];
         } catch (\Throwable $e) {
             DB::rollBack();
             return [

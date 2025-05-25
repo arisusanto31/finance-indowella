@@ -71,6 +71,8 @@ class KartuKasController extends Controller
                 'amount' => $amount,
                 'reference_id' => null,
                 'reference_type' => null,
+               
+              
             ],
         ];
         $debets = [
@@ -80,16 +82,19 @@ class KartuKasController extends Controller
                 'amount' => $amount,
                 'reference_id' => null,
                 'reference_type' => null,
+               
             ],
         ];
         $st = JournalController::createBaseJournal(new Request([
             'kredits' => $kredits,
             'debets' => $debets,
-            'type' => 'transaction',
-            'date' => Date('Y-m-d H:i:s'),
+            'type' => 'keuangan',
+            'date' => $date,
             'is_auto_generated' => 1,
             'title' => 'create mutation transaction',
-            'url_try_again' => 'try_again'
+            'url_try_again' => 'try_again',
+            'is_backdate'=>1,
+            
 
         ]));
         return $st;
