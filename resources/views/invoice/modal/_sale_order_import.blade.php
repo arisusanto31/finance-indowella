@@ -26,6 +26,9 @@
             <div class="col-xs-12 col-md-12 ">
                 <div class="d-flex  justify-content-end gap-2 " style="width: 100%;">
                     <div class="" style="width:20%">
+                        <input class="form-control" id="customer" />
+                    </div>
+                    <div class="" style="width:20%">
                         <select class="select-toko form-control" id="select-search-toko">
                         </select>
                     </div>
@@ -107,11 +110,12 @@
     function getImportData() {
         id = "{{book()->id}}";
         let monthyear = $('#select-search-date option:selected').val();
+        let customer = $('#customer').val();
         let toko = $('#select-search-toko option:selected').val();
         if (toko == undefined) toko = "";
         $('#table-body').html("");
         $.ajax({
-            url: '{{url("admin/invoice/sales-get-data-import")}}/' + id + '?monthyear=' + monthyear + '&&toko=' + toko,
+            url: '{{url("admin/invoice/sales-get-data-import")}}/' + id + '?monthyear=' + monthyear + '&&toko=' + toko + '&customer=' + customer,
             method: 'get',
             success: function(res) {
                 console.log(res);

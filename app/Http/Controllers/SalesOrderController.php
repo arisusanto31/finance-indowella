@@ -230,7 +230,7 @@ class SalesOrderController extends Controller
             })
             ->whereNull('inv.id')->whereNull('so.id')->whereMonth('pack.created_at', $month)->whereYear('pack.created_at', $year);
         if ($book->name == 'Buku Toko') {
-         
+
             if (getInput('toko'))
                 $sales = $sales->join('tokoes as t', 't.id', '=', 'pack.toko_id')
                     ->where('t.name', getInput('toko'));
@@ -253,7 +253,14 @@ class SalesOrderController extends Controller
                 $sales = $sales->join('transactions as tr', 'tr.package_id', '=', 'pack.id')->where('tr.kind', getInput('toko'));
             $sales = $sales->where(function ($q) {
                 $q->where('pack.is_ppn', 1)->orWhere('pack.is_wajib_lapor', 1);
-            })->join('customers as c', 'c.id', '=', 'pack.customer_id')->select(
+            })->join('customers as c', 'c.id', '=', 'pack.customer_id');
+            if (getInput('customer')) {
+                $sales = $sales->where(function ($q) {
+                    $q->where('c.name', 'like', '%' . getInput('customer') . '%')
+                        ->orWhere('c.instance', 'like', '%' . getInput('customer') . '%');
+                });
+            }
+            $sales = $sales->select(
                 'pack.id',
                 DB::raw('"App\\\Models\\\ManufSalesPackage" as reference_type'),
                 DB::raw('"App\\\Models\\\ManufStock" as stock_type'),
@@ -301,8 +308,9 @@ class SalesOrderController extends Controller
         $view->data = $data;
         return $view;
     }
-   
-    private function normalizeDate($input) {
+
+    private function normalizeDate($input)
+    {
         $clean = str_replace(['/', '.'], '-', $input);
         $parts = explode('-', $clean);
 
@@ -325,12 +333,12 @@ class SalesOrderController extends Controller
         return null;
     }
 
-    
+
     public function updateDetail(Request $request)
     {
         try {
             Log::info('Masuk ke updateDetail', $request->all());
-    
+
             DB::beginTransaction();
 
             if (empty($request->sales_order_number)) {
@@ -343,68 +351,67 @@ class SalesOrderController extends Controller
                 Log::error('Detail tidak ditemukan');
                 return response()->json(['status' => 'error', 'message' => 'Detail tidak ditemukan']);
             }
-    
-            
+
+
             $salesOrder = \App\Models\SalesOrder::find($firstDetail->sales_order_id);
             if (!$salesOrder) {
                 Log::error('Sales Order tidak ditemukan');
                 return response()->json(['status' => 'error', 'message' => 'Sales Order tidak ditemukan']);
             }
-    
-           
+
+
             $tanggalGlobal = $this->normalizeDate($request->tanggal_global);
-    
-           
+
+
             $salesOrder->sales_order_number = $request->sales_order_number;
             $salesOrder->created_at = $tanggalGlobal;
-         
-           
-    
+
+
+
             Log::info("Sales order {$salesOrder->id} updated dengan nomor: {$request->sales_order_number}, tanggal: {$tanggalGlobal}");
-    
+
             $totalBaru = 0;
-    
-       
+
+
             foreach ($request->detail_id as $index => $id) {
                 $detail = \App\Models\SalesOrderDetail::find($id);
-    
+
                 if ($detail) {
                     $qty     = $request->quantity[$index] ?? 0;
                     $price   = $request->price[$index] ?? 0;
                     $disc    = $request->discount[$index] ?? 0;
                     $unit    = $request->unit[$index] ?? $detail->unit;
-                 
+
                     $total   = ($qty * $price) - $disc;
-    
+
                     $detail->quantity      = $qty;
                     $detail->price         = $price;
                     $detail->discount      = $disc;
                     $detail->unit          = $unit;
                     $detail->total_price   = $total;
                     $detail->sales_order_number = $request->sales_order_number;
-    
+
                     $detail->created_at = $tanggalGlobal;
-                 
-    
+
+
                     if (!$detail->save()) {
                         Log::error("❌ Gagal menyimpan detail ID: {$detail->id}");
                     } else {
                         Log::info("✅ Detail ID {$detail->id} berhasil disimpan");
                     }
-    
+
                     $totalBaru += $total;
                 } else {
                     Log::warning("Detail ID {$id} tidak ditemukan.");
                 }
             }
-    
-       
+
+
             $salesOrder->total_price = $totalBaru;
             $salesOrder->save();
-    
+
             DB::commit();
             return response()->json(['status' => 'success']);
-    
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('❌ Exception saat update sales order:', ['message' => $e->getMessage()]);
@@ -414,12 +421,8 @@ class SalesOrderController extends Controller
             ], 500);
         }
     }
-    
-    
-    
- 
-    
-    
+
+
 
     public function updateInputInvoice($number)
     {
