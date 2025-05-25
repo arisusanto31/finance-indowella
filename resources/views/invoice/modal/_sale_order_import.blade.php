@@ -123,24 +123,28 @@
                     allTrans[item.id] = item;
                     jumlah = item.details.length;
 
-                    item.details.forEach(function(detail) {
+                    item.details.forEach(function(detail, j) {
                         html += `
                                 <tr>
+                                    ${j==0?`
                                     <td rowspan="${jumlah}">${i+1}</td>
                                     <td rowspan="${jumlah}">${formatNormalDate(new Date(item.created_at))}</td>
                                     <td rowspan="${jumlah}">${item.package_number} (${item.customer_name})</td>
                                     <td rowspan="${jumlah}">${detail.toko}</td>
-                                    <td rowspan="${jumlah}">${detail.stock_name}</td>
+                                    `:''}
+                                    <td>${detail.stock_name}</td>
                                     <td>${detail['quantity']}</td>
                                     <td>${detail['unit']}</td>
                                     <td>${detail['price']}</td>
                                     <td>${detail['total_price']}</td>
-                                    <td>${item.akun_cash_kind_name}</td>
-                                    <td id="status${item.id}">
+                                    ${j==0?`
+                                    <td rowspan="${jumlah}">${item.akun_cash_kind_name}</td>
+                                    <td rowspan="${jumlah}" id="status${item.id}">
                                         <button class="btn btn-primary btn-sm" onclick="importData('${item.id}')">
                                             import
                                         </button>
                                     </td>
+                                    `:''}
                                 </tr>`;
                     });
 
