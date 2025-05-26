@@ -187,6 +187,22 @@ class SalesOrderController extends Controller
         $salesOrder->is_final = 1;
         $salesOrder->sales_order_number = $salesOrder->getCodeFix();
         foreach ($details as $detail) {
+            //cek data
+            if ($detail->qtyjadi == 0 && $detail->unitjadi == '??' && $detail->pricejadi == 0) {
+                //brati ini data lama
+                $typeSales = bookID() == 1 ? ManufSales::class : RetailSales::class;
+                $referenceSale = $typeSales::where('package_id', $salesOrder->reference_id)
+                    ->where('stock_name', $detail->custom_stock_name)->first();
+                if ($referenceSale) {
+                    $detail->reference_id = $referenceSale->id;
+                    $detail->qtyjadi = $referenceSale->qtyjadi;
+                    $detail->unitjadi = $referenceSale->unitjadi;
+                    $detail->pricejadi = $referenceSale->pricejadi;
+                    $detail->reference_type = $typeSales;
+                } else {
+                    return ['status' => 0, 'msg' => 'Tidak ditemukan data penjualan untuk stock ' . $detail->custom_stock_name];
+                }
+            }
             $detail->sales_order_number = $salesOrder->sales_order_number;
             $detail->save();
         }

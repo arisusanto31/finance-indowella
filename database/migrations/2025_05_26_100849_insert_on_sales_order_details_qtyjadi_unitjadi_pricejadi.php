@@ -13,9 +13,9 @@ return new class extends Migration
     {
         //
         Schema::table('sales_order_details', function (Blueprint $table) {
-            $table->decimal('qtyjadi', 20, 4)->default(0)->after('quantity');
+            $table->decimal('qtyjadi', 15, 2)->default(0)->after('quantity');
             $table->string('unitjadi')->default("??")->after('unit');
-            $table->decimal('pricejadi', 20, 4)->default(0)->after('price');
+            $table->decimal('pricejadi', 15, 2)->default(0)->after('price');
         });
     }
 
