@@ -15,14 +15,14 @@
         <div class="row">
             <div class="col mb-3">
                 <label for="npwp" class="form-label">NPWP</label>
-                <input type="number" name="npwp" id="npwp" class="form-control" placeholder="NPWP" required />
+                <input type="number" name="npwp" id="npwp" class="form-control" placeholder="NPWP"  />
             </div>
         </div>
 
         <div class="row">
             <div class="col mb-3">
                 <label for="ktp" class="form-label">KTP</label>
-                <input type="text" name="ktp" id="ktp" class="form-control" placeholder="KTP" required />
+                <input type="text" name="ktp" id="ktp" class="form-control" placeholder="KTP"  />
             </div>
         </div>
 
