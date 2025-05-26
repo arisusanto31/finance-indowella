@@ -31,6 +31,7 @@ class SalesOrderController extends Controller
         $year = getInput('year') ? getInput('year') : date('Y');
         $salesOrders = SalesOrderDetail::whereMonth('created_at', $month)
             ->whereYear('created_at', Date('Y'))->with('customer:name,id', 'stock:name,id', 'parent:sales_order_number,id,is_final,ref_akun_cash_kind_name,status,status_payment,status_delivery')
+            ->orderBy('created_at', 'asc')
             ->get()
             ->groupBy('sales_order_number');
 
