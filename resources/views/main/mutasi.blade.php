@@ -453,7 +453,7 @@
       console.log(url);
       swalDelete({
         url: url,
-        successText: "Transaksi berhasil!",
+        successText: "Delete berhasil!",
         onSuccess: (res) => {
 
         }

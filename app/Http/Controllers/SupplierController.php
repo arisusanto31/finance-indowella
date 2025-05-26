@@ -55,6 +55,7 @@ class SupplierController extends Controller
             'phone' => 'required',
             'address' => 'nullable',
         ]);
+        $data['book_journal_id'] = bookID();
 
         $supplier = Supplier::findOrFail($id);
         $supplier->update($data);
@@ -89,6 +90,7 @@ class SupplierController extends Controller
                     ->route('supplier.main.index')
                     ->with('error', 'Supplier gagal ditambahkan! NPWP atau KTP harus diisi salah satu');
             }
+            $data['book_journal_id'] = bookID();
             Supplier::create($data);
             return redirect()
                 ->route('supplier.main.index')

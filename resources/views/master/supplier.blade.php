@@ -1,5 +1,5 @@
 <x-app-layout>
-   
+
 
     <div class="card shadow-sm mb-4">
         <h5 class="text-primary-dark card-header" style="padding-bottom:0px;"> 🦸 <strong>Create Supplier</strong> </h5>
@@ -31,7 +31,7 @@
                     @foreach ($suppliers as $key => $supplier)
                     <tr>
                         <td>{{ $key + 1 }}</td>
-                        <td>{{ $supplier->created_at ? $supplier->created_at->format('Y-m-d H:') : '-' }}</td>
+                        <td>{{ $supplier->created_at ? $supplier->created_at->format('Y-m-d H:i:s') : '-' }}</td>
                         <td>{{ $supplier->name }}</td>
                         <td>{{ $supplier->address }}</td>
                         <td>{{ $supplier->phone }}</td>
@@ -62,14 +62,22 @@
                 }
 
                 function deleteSupplier(id) {
-                    swalDelete('{{url("admin/master/supplier/main")}}/' + id);
+                    url = '{{url("admin/master/supplier/main")}}/' + id;
+                    console.log(url);
+                    swalDelete({
+                        url: url,
+                        successText: "delete berhasil!",
+                        onSuccess: (res) => {
+
+                        }
+                    });
                 }
 
                 $(document).ready(function() {
                     $('#supplier-table').DataTable();
                 });
 
-                
+
                 @if(session('success'))
                 Swal.fire({
                     icon: 'success',
@@ -85,8 +93,6 @@
                     confirmButtonText: 'OK'
                 });
                 @endif
-
-              
             </script>
             @endpush
 
