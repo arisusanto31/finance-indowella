@@ -144,7 +144,7 @@
                                     <td>${detail['price']}</td>
                                     <td>${detail['total_price']}</td>
                                     ${j==0?`
-                                    <td rowspan="${jumlah}"> ${formatRupiah(collect(item.details).sum('total'))}<br>${item.akun_cash_kind_name}</td>
+                                    <td rowspan="${jumlah}"> ${formatRupiah(collect(item.details).sum('total_price'))}<br>${item.akun_cash_kind_name}</td>
                                     <td rowspan="${jumlah}" id="status${item.id}">
                                         <button class="btn btn-primary btn-sm" onclick="importData('${item.id}')">
                                             import
