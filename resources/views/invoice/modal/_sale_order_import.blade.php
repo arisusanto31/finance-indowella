@@ -193,6 +193,8 @@
             total_price: data.details.map(item => item.total_price),
             akun_cash_kind_name: data.akun_cash_kind_name,
             toko_id: tokoid,
+            detail_reference_id: data.details.map(item => item.reference_id),
+            detail_reference_type: data.details.map(item => item.reference_type),
             reference_id: data.id,
             reference_type: data.reference_type,
             _token: '{{csrf_token()}}'

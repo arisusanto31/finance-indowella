@@ -61,12 +61,18 @@ class SalesOrderController extends Controller
                 'toko_id' => 'required|integer',
                 'reference_id' => 'nullable|integer',
                 'reference_type' => 'nullable|string',
+                'detail_reference_id' => 'nullable|array',
+                'detail_reference_id.*' => 'nullable|integer',
+                'detail_reference_type' => 'nullable|array',
+                'detail_reference_type.*' => 'nullable|string',
                 'custom_stock_name' => 'nullable|array',
                 'custom_stock_name.*' => 'nullable|string',
                 'akun_cash_kind_name' => 'nullable|string',
             ]);
             $customerID = null;
             $arrayStockID = [];
+            $detailReferenceID = $request->detail_reference_id ?? null;
+            $detailReferenceType = $request->detail_reference_type ?? null;
             if (!$request->stock_id) {
                 if ($request->reference_stock_id) {
                     foreach ($request->reference_stock_id as $row => $refStockID) {
@@ -132,9 +138,9 @@ class SalesOrderController extends Controller
                     'quantity' => $request->quantity[$i],
                     'unit' => $request->unit[$i],
                     'price' => $request->price_unit[$i],
-                    'qtyjadi'=>$request->qtyjadi[$i],
-                    'unitjadi'=>$request->unitjadi[$i],
-                    'pricejadi'=>$request->pricejadi[$i],
+                    'qtyjadi' => $request->qtyjadi[$i],
+                    'unitjadi' => $request->unitjadi[$i],
+                    'pricejadi' => $request->pricejadi[$i],
                     'discount' => $request->discount[$i] ?? 0,
                     'customer_id' => $customerID,
                     'book_journal_id' => bookID(),
@@ -142,6 +148,8 @@ class SalesOrderController extends Controller
                     'toko_id' => $request->toko_id,
                     'custom_stock_name' => $request->custom_stock_name[$i] ?? null,
                     'created_at' => $request->input('created_at') ?? now(),
+                    'reference_id' => $detailReferenceID ? $detailReferenceID[$i] : null,
+                    'reference_type' => $detailReferenceType ? $detailReferenceType[$i] : null,
                 ];
             }
             //create pack ya
@@ -291,6 +299,8 @@ class SalesOrderController extends Controller
                 $data['discount'] = $detailVal['discount'];
                 $data['customer_id'] = $detailVal['customer_id'];
                 $data['stock_name'] = $detailVal['stock_name'];
+                $data['reference_id'] = $detailVal['id'] ?? null;
+                $data['reference_type'] = $modeBook == 'toko' ? 'App\Models\RetailSales' : 'App\Models\ManufSales';
                 $data['toko'] = $modeBook == 'toko' ? $detailVal->toko->name : $detailVal->kind;
                 return $data;
             });
