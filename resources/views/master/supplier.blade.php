@@ -62,7 +62,7 @@
                 }
 
                 function deleteSupplier(id) {
-                    swalDelete('{{url("admin/master/supplier/main/destroy")}}/' + id);
+                    swalDelete('{{url("admin/master/supplier/main")}}/' + id);
                 }
 
                 $(document).ready(function() {
