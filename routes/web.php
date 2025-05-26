@@ -262,8 +262,9 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
     });
 
     Route::prefix('invoice')->name('invoice.')->group(function () {
+
         Route::get('invoice-sales', [InvoiceSaleController::class, 'ShowSales'])->name('sales.index');
-        Route::get('invoice-purchase', [InvoicePurchaseController::class, 'ShowPurchase'])->name('purchase.index');
+        Route::get('invoice-purchase', [InvoicePurchaseController::class, 'index'])->name('purchase.index');
         Route::post('invoice-sales', [InvoiceSaleController::class, 'store'])->name('sales.store');
         Route::post('invoice-purchase', [InvoicePurchaseController::class, 'store'])->name('purchase.store');
         Route::get('show-detail/{id}', [InvoicePackController::class, 'showDetail'])->name('detail');
@@ -290,6 +291,9 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::post('submit-bayar-sales-invoice', [InvoiceSaleController::class, 'submitBayarSalesInvoice']);
         Route::get('invoice-sales/edit/{id}', [InvoiceSaleController::class, 'editInvoiceSales']);
 
+        Route::get('invoice-purchase/edit/{id}', [InvoicePurchaseController::class, 'editInvoicePurchase']);
+        Route::post('invoice-purchase/update', [InvoicePurchaseController::class, 'updateInvoicePurchase']);
+       
 
 
     });

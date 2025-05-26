@@ -8,21 +8,41 @@ use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Throwable;
+use App\Models\InvoicePurchase;
+
 
 class InvoicePurchaseController extends Controller
 {
 
-    protected $table = 'invoice_purchase_details';
-    public function ShowPurchase()
+
+
+    public function editInvoicePurchase($invoiceNumber)
     {
-        $invoices = \App\Models\InvoicePurchaseDetail::with('supplier', 'stock')
-            ->get()
-            ->groupBy('invoice_pack_number');
+     
+        $data = InvoicePack::where('invoice_number', $invoiceNumber)->first();
 
-        // dd($invoices);
-
-        return view('invoice.invoice-purchase', compact('invoices'));
-    }
+        $details = InvoicePurchaseDetail::with('stock')
+        ->where('invoice_pack_id', $data->id)
+            ->get();
+    
+      
+            foreach ($details as $detail) {
+                $detail->total_price = ($detail->quantity * $detail->price) - $detail->discount;
+            }
+        
+            $data['details'] = $details;
+        
+            $data['total_price'] = $details->sum(fn($item) => $item->total_price);
+        
+            $view = view('invoice.modal._edit-purchase', [
+                'invoiceNumber' => $invoiceNumber,
+                'data' => $data,
+            ]);
+            $view->invoiceNumber = $invoiceNumber;
+            $view->data = $data;
+        
+            return $view;
+        }
 
 
     public function store(Request $request)
