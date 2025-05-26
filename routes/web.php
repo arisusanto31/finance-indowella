@@ -282,6 +282,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::get('edit-sales-order/{id}', [SalesOrderController::class, 'editInvoice']);
         Route::post('invoice/update-detail', [SalesOrderController::class, 'updateDetail']);
         Route::post('invoice-sales/update/{invoiceNumber}', [InvoiceSaleController::class, 'updateInvoiceSales'])->name('invoice.sales.update');
+        Route::post('submit-bayar-sales-invoice', [InvoiceSaleController::class, 'submitBayarSalesInvoice']);
 
 
         Route::get('invoice-get-data-import/{id}', [InvoiceSaleController::class, 'getDataImport']);
@@ -294,8 +295,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::get('show-sales-detail/{id}', [SalesOrderController::class, 'showDetail'])->name('sale-order-detail');
         Route::get('update-input-invoice/{id}', [SalesOrderController::class, 'updateInputInvoice'])->name('update-input-invoice');
         Route::post('sales-make-final', [SalesOrderController::class, 'makeFinal'])->name('sales-make-final');
-        Route::post('submit-bayar-sales-invoice', [InvoiceSaleController::class, 'submitBayarSalesInvoice']);
         Route::get('invoice-sales/edit/{id}', [InvoiceSaleController::class, 'editInvoiceSales']);
+        Route::delete('sales-order-delete/{id}', [SalesOrderController::class, 'destroy']);
     });
 });
 

@@ -471,4 +471,19 @@ class SalesOrderController extends Controller
             'bahan_jadi' => $bahanJadi,
         ];
     }
+
+    function destroy($number)
+    {
+        $so = SalesOrder::where('sales_order_number', $number)->first();
+        $details = $so->details;
+        $kartus = $so->detailKartuInvoices;
+        if (count($kartus) > 0) {
+            return ['status' => 0, 'msg' => 'Tidak bisa menghapus data ini karena sudah ada proses'];
+        }
+        foreach ($details as $detail) {
+            $detail->delete();
+        }
+        $so->delete();
+        return ['status' => 1, 'msg' => 'data berhasil dihapus'];
+    }
 }
