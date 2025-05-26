@@ -177,8 +177,6 @@
             swalInfo('opps', 'tolong pilih tanggal import', 'info');
             return 0;
         }
-        date = normalizeDate(date);
-
         let dataPost = {
             created_at: date,
             customer_name: data.customer_name,
@@ -187,8 +185,11 @@
             reference_stock_id: data.details.map(item => item.stock_id),
             reference_stock_type: data.stock_type,
             quantity: data.details.map(item => item.quantity),
+            qtyjadi:data.details.map(item => item.qtyjadi),
             price_unit: data.details.map(item => item.price),
+            pricejadi: data.details.map(item => item.pricejadi),
             unit: data.details.map(item => item.unit),
+            unitjadi:data.details.map(item => item.unitjadi),
             total_price: data.details.map(item => item.total_price),
             akun_cash_kind_name: data.akun_cash_kind_name,
             toko_id: tokoid,

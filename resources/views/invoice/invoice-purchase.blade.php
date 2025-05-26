@@ -162,8 +162,6 @@
             showDetailOnModal('{{url("admin/invoice/show-detail")}}/' + invoiceNumber, 'xl');
         }
 
-     
-        fu
 
 
         function removeDebetRow(btn) {

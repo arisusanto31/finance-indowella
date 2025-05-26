@@ -26,9 +26,18 @@
                     @foreach($data['details'] as $key => $item)
                     <tr>
                         <td>{{$key+1}}</td>
-                        <td>{{$item->stock->name}}</td>
-                        <td>{{$item->quantity}}</td>
-                        <td>{{format_price($item->price)}}</td>
+                        <td>
+                            {{$item->custom_stock_name}}
+                            <div class="fs-8 bg-primary px-1 text-white rounded-1">bahan: {{$item->stock->name}} </div>
+                        </td>
+                        <td>
+                            {{$item->qtyjadi}} {{$item->unitjadi}}
+                            <div class="fs-8 bg-primary px-1 text-white rounded-1"> {{$item->quantity}} {{$item->unit}} </div>
+                        </td>
+                        <td>{{format_price($item->pricejadi)}}
+                            <div class="fs-8 bg-primary px-1 text-white rounded-1"> {{$item->price}} </div>
+
+                        </td>
                         <td>{{format_price($item->discount)}}</td>
                         <td>{{format_price($item->total_price)}}</td>
                     </tr>
@@ -67,16 +76,20 @@
                     <div id="" class="tree-toggle bg-primary-lightest card-uang-muka" style="height:80px ;">
                         <div class="row p-2">
                             <div class="col-md-3 col-xs-12">
+                                <label>Tanggal </label>
+                                <input type="datetime-local" class="form-control" id="uangmuka-date" value="{{date('Y-m-d H:i:s')}}" />
+                            </div>
+                            <div class="col-md-3 col-xs-12">
                                 <label>deskripsi jurnal</label>
                                 <input type="text" class="form-control" placeholder="deskripsi" id="uangmuka-description" />
                             </div>
 
-                            <div class="col-md-3 col-xs-12">
+                            <div class="col-md-2 col-xs-12">
                                 <label>Jumlah</label>
                                 <input type="text" class="form-control" placeholder="nilai pembayaran" id="uangmuka-amount" />
                             </div>
 
-                            <div class="col-md-3 col-xs-12">
+                            <div class="col-md-2 col-xs-12">
                                 <label>Lawan Akun</label>
                                 <select class="select-coa-kas form-control" id="uangmuka-lawanakun">
                                 </select>
@@ -118,7 +131,7 @@
 
                                         <div class="col-md-3 col-xs-12">
                                             <label>Jumlah</label>
-                                            <input type="text" class="form-control" name="quantity[]" placeholder="quantity" id="bdp-quantity" />
+                                            <input type="text" class="form-control" name="quantity[]" placeholder="qty bahan: {{$item->quantity}}" id="bdp-quantity" />
                                         </div>
 
                                         <div class="col-md-3 col-xs-12">
@@ -181,7 +194,7 @@
                                         </div>
                                         <div class="col-md-3 col-xs-12">
                                             <label>Nama Custom</label>
-                                            <input type="text" class="form-control" id="bahan-jadi-custom_name" name="custom_stock_name[]" value="{{$item->stock->name}}" />
+                                            <input type="text" class="form-control" id="bahan-jadi-custom_name" name="custom_stock_name[]" value="{{$item->custom_stock_name}}" />
 
                                         </div>
 
@@ -193,8 +206,9 @@
                                         </div>
 
                                         <div class="col-md-2 col-xs-12">
-                                            <label>Jumlah</label>
-                                            <input type="text" class="form-control" name="quantity[]" placeholder="quantity" id="bahan-jadi-quantity" />
+                                            <label>Jumlah Jadi</label>
+                                            <input type="text" class="form-control" name="quantity[]" placeholder="qty jadi : {{$item->qtyjadi}}" id="bahan-jadi-quantity" />
+                                            <input type="hidden" name="konversi_jadi[]" id="bahan-jadi-konversijadi" value="{{$item->qtyjadi/ $item->quantity}}" />
                                         </div>
 
                                         <div class="col-md-2 col-xs-12">
@@ -253,7 +267,7 @@
 
                                     <div class="col-md-1 col-xs-12">
                                         <label>Satuan</label>
-                                        <input class="form-control" type="text" name="unit[]" readonly id="invoice-unit" value="{{$item->unit}}" />
+                                        <input class="form-control" type="text" name="unit[]" readonly id="invoice-unit" value="{{$item->unitjadi}}" />
                                     </div>
                                     <div class="col-md-3 col-xs-12">
                                         <label>Akun Penjualan</label>
@@ -467,11 +481,13 @@
                 if (res.status == 1) {
                     res.msg.forEach(function eachItem(item) {
                         bahanJadi = res.bahan_jadi[item.stock_id];
-                        dataBahanJadi[item.id] = bahanJadi;
-                        html = `${bahanJadi.custom_stock_name} : ${bahanJadi.saldo_qty_backend/bahanJadi.mutasi_qty_backend*bahanJadi.mutasi_quantity} ${bahanJadi.unit} = ${formatRupiah(bahanJadi.saldo_rupiah_total)} `;
-                        $('#invoice-ket-barang-jadi' + item.id).val(html)
-                        $('#invoice-custom_stock_name' + item.id).val(bahanJadi.custom_stock_name);
-                        $('#invoice-production_number' + item.id).val(bahanJadi.production_number);
+                        if (bahanJadi != undefined) {
+                            dataBahanJadi[item.id] = bahanJadi;
+                            html = `${bahanJadi.custom_stock_name} : ${bahanJadi.saldo_qty_backend/bahanJadi.mutasi_qty_backend*bahanJadi.mutasi_quantity} ${bahanJadi.unit} = ${formatRupiah(bahanJadi.saldo_rupiah_total)} `;
+                            $('#invoice-ket-barang-jadi' + item.id).val(html)
+                            $('#invoice-custom_stock_name' + item.id).val(bahanJadi.custom_stock_name);
+                            $('#invoice-production_number' + item.id).val(bahanJadi.production_number);
+                        }
                     });
                 } else {
                     Swal.fire('ops', 'something error ' + res.msg, 'error');
@@ -492,6 +508,7 @@
         let amount = formatDB($('#uangmuka-amount').val());
         let lawanakun = $('#uangmuka-lawanakun option:selected').val();
         let factur = '{{$data->sales_order_number}}';
+        let date= formatNormalDateTime(new Date($('#uangmuka-date').val()));
 
         swalConfirmAndSubmit({
             url: '{{url("admin/kartu/kartu-dp-sales/create-mutation")}}',
@@ -503,6 +520,7 @@
                 person_id: '{{$data->customer_id}}',
                 person_type: 'App\\\Models\\\Customer',
                 code_group: 214000,
+                date:date,
                 is_otomatis_jurnal: 1,
                 _token: '{{csrf_token()}}'
             },

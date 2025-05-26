@@ -107,7 +107,7 @@
                         <td rowspan="{{ $rowspan }}">{{ $item->customer->name ?? '-' }}</td>
                         @endif
 
-                        <td>{{ $item->stock->name ?? '-' }}</td>
+                        <td>{{ $item->custom_stock_name ?? '-' }}</td>
                         <td class="text-end">{{ $item->quantity }}</td>
                         <td>{{ $item->unit }}</td>
                         <td class="text-end">Rp{{ number_format($item->price) }}</td>

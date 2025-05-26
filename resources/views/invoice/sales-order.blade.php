@@ -109,10 +109,10 @@
                         <td rowspan="{{ $rowspan }}">{{ $item->customer->name ?? '-' }}</td>
                         @endif
 
-                        <td>{{ $item->stock->name ?? '-' }}</td>
-                        <td class="text-end">{{ format_price($item->quantity) }}</td>
-                        <td>{{ $item->unit }}</td>
-                        <td class="text-end">Rp{{ format_price($item->price) }}</td>
+                        <td>{{ $item->custom_stock_name ?? '-' }}</td>
+                        <td class="text-end">{{ format_price($item->qtyjadi) }}</td>
+                        <td>{{ $item->unitjadi }}</td>
+                        <td class="text-end">Rp{{ format_price($item->pricejadi) }}</td>
                         <td class="text-end">Rp{{ format_price($item->discount) }}</td>
 
                         @php

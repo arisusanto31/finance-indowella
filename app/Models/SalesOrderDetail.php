@@ -18,8 +18,11 @@ class SalesOrderDetail extends Model
         'stock_id',
         'custom_stock_name',
         'quantity',
+        'qtyjadi',
         'unit',
+        'unitjadi',
         'price',
+        'pricejadi',
         'total_price',
         'discount',
         'customer_id',
@@ -27,7 +30,6 @@ class SalesOrderDetail extends Model
         'reference_id',
         'reference_type',
         'created_at'
-
     ];
 
     public function parent()
@@ -43,6 +45,36 @@ class SalesOrderDetail extends Model
         return $this->belongsTo(Stock::class, 'stock_id', 'id');
     }
 
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Automatically set the book_journal_id to the current book ID if not set
+        static::creating(function ($model) {
+            if (!$model->qtyjadi) {
+                $model->qtyjadi = $model->quantity;
+            }
+            if (!$model->unitjadi) {
+                $model->unitjadi = $model->unit;
+            }
+            if (!$model->pricejadi) {
+                $model->pricejadi = $model->price;
+            }
+        });
+
+        static::updating(function ($model) {
+            if (!$model->qtyjadi) {
+                $model->qtyjadi = $model->quantity;
+            }
+            if (!$model->unitjadi) {
+                $model->unitjadi = $model->unit;
+            }
+            if (!$model->pricejadi) {
+                $model->pricejadi = $model->price;
+            }
+        });
+    }
     protected static function booted()
     {
         static::addGlobalScope('journal', function ($query) {

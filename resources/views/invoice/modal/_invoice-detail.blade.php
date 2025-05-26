@@ -20,7 +20,7 @@
                     @foreach($data['details'] as $key => $item)
                     <tr>
                         <td>{{$key+1}}</td>
-                        <td>{{$item->stock->name}}</td>
+                        <td>{{$item->cutom_stock_name ? $item->custom_stock_name: $item->stock->name}}</td>
                         <td>{{$item->quantity}}</td>
                         <td>{{format_price($item->price)}}</td>
                         <td>{{format_price($item->discount)}}</td>

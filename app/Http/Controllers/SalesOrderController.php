@@ -132,6 +132,9 @@ class SalesOrderController extends Controller
                     'quantity' => $request->quantity[$i],
                     'unit' => $request->unit[$i],
                     'price' => $request->price_unit[$i],
+                    'qtyjadi'=>$request->qtyjadi[$i],
+                    'unitjadi'=>$request->unitjadi[$i],
+                    'pricejadi'=>$request->pricejadi[$i],
                     'discount' => $request->discount[$i] ?? 0,
                     'customer_id' => $customerID,
                     'book_journal_id' => bookID(),
@@ -281,6 +284,9 @@ class SalesOrderController extends Controller
                 $data['quantity'] = $detailVal['quantity'];
                 $data['unit'] = $modeBook == 'toko' ? $detailVal['unit'] : $detailVal['unit_info'];
                 $data['price'] = $detailVal['recent_selling_price'];
+                $data['qtyjadi'] = $detailVal['qtyjadi'] ?? $detailVal['quantity'];
+                $data['pricejadi'] = $detailVal['pricejadi'] ?? $detailVal['recent_selling_price'];
+                $data['unitjadi'] = $detailVal['unitjadi'] ?? $data['unit'];
                 $data['total_price'] = $detailVal['total'];
                 $data['discount'] = $detailVal['discount'];
                 $data['customer_id'] = $detailVal['customer_id'];
