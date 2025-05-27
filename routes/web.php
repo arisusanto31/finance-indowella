@@ -289,6 +289,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::post('submit-bayar-sales-invoice', [InvoiceSaleController::class, 'submitBayarSalesInvoice']);
         Route::get('invoice-get-data-import/{id}', [InvoiceSaleController::class, 'getDataImport']);
         Route::post('invoice-make-final', [InvoiceSaleController::class, 'makeFinal'])->name('invoice-make-final');
+        Route::post('invoice-mark', [InvoicePackController::class, 'mark'])->name('invoice-mark');
 
         Route::get('sales-order', [SalesOrderController::class, 'index'])->name('sales-order.index');
         Route::post('sales-order-store', [SalesOrderController::class, 'store'])->name('sales-order.store');
@@ -297,6 +298,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::get('show-sales-detail/{id}', [SalesOrderController::class, 'showDetail'])->name('sale-order-detail');
         Route::get('update-input-invoice/{id}', [SalesOrderController::class, 'updateInputInvoice'])->name('update-input-invoice');
         Route::post('sales-make-final', [SalesOrderController::class, 'makeFinal'])->name('sales-make-final');
+        Route::post('sales-mark', [SalesOrderController::class, 'mark'])->name('sales-mark');
+
         Route::get('invoice-sales/edit/{id}', [InvoiceSaleController::class, 'editInvoiceSales']);
 
         Route::get('invoice-purchase/edit/{id}', [InvoicePurchaseController::class, 'editInvoicePurchase']);

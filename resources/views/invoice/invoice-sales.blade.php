@@ -72,14 +72,24 @@
         <div class="text-primary-dark "> 📁 <strong>DAFTAR INVOICE </strong> </div>
         <div class="d-flex justify-content pe-4 mb-3">
             <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="prevMonth()">
-                </button>
-                    <span class="badge bg-primary d-flex justify-content-center align-items-center">
-                        {{ getListMonth()[$month] }} {{ $year }}</span>
-                    <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="nextMonth()">
+            </button>
+            <span class="badge bg-primary d-flex justify-content-center align-items-center">
+                {{ getListMonth()[$month] }} {{ $year }}</span>
+            <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="nextMonth()">
             </button>
 
 
 
+
+        </div>
+        <div class="d-flex flex-column bg-primary text-white p-2 rounded-2 mb-3" style="max-width:400px">
+            <p class="mb-0">Total Invoice: <strong>Rp{{ format_price($totalInvoice) }}</strong></p>
+            <p class="mb-0" id="total-final">Total Invoice Final:
+                <strong>Rp{{ format_price($totalInvoiceFinal) }}</strong>
+            </p>
+            <p class="mb-0" id="total-mark">Total Invoice Mark:
+                <strong>Rp{{ format_price($totalInvoiceMark) }}</strong>
+            </p>
         </div>
         @if ($invoices->isNotEmpty())
             <div class="table-responsive">
@@ -102,9 +112,14 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @php $no = 1; @endphp
+                        @php
+                            $no = 1;
+                            $parent = [];
+                        @endphp
                         @foreach ($invoices as $invoiceNumber => $items)
                             @php
+                                $theparent = $items->first()->parent;
+                                $parent[$theparent->id] = $theparent;
                                 $rowspan = $items->count();
                                 $invoiceSubtotal = $items->sum(
                                     fn($item) => $item->quantity * $item->price - $item->discount,
@@ -145,7 +160,7 @@
                                                 <strong>{{ $status }}</strong>
                                             </p>
                                         </td>
-                                        <td rowspan="{{ $rowspan }}">
+                                        <td id="action{{$item->parent->id}}" rowspan="{{ $rowspan }}">
 
                                             @if ($item->parent)
                                                 @if ($item->parent->is_final == 1)
@@ -169,6 +184,10 @@
                                                         <i class="fas fa-edit"></i>
                                                     </a>
                                                 @endif
+                                                <a href="javascript:void(makeMark('{{ $item->parent->id }}'))"
+                                                    class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-paw"></i>
+                                                </a>
                                             @endif
                                         </td>
                                     @endif
@@ -325,10 +344,46 @@
                         _token: '{{ csrf_token() }}'
                     },
                     onSuccess: function(res) {
-                        $('#btn-final' + id).remove();
+                        html = ` <a href="javascript:void(lihatDetailInvoice('${res.msg.invoice_pack_number}')))"
+                                    class="btn btn-sm btn-outline-primary" title="Lihat Invoice">
+                                    <i class="fas fa-eye"></i>
+                                </a>`;
+                        $('#action' + id).html(html);
+                        parents[id].is_final = 1;
+                        updateTotalMarked();
                     },
                 });
             }
+
+            function makeMark(id) {
+                $.ajax({
+                    url: '{{ url('admin/invoice/invoice-mark') }}',
+                    method: 'post',
+                    data: {
+                        id: id,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(res) {
+                        $('.parent' + id).addClass('bg-primary-lightest');
+                        parents[id].is_mark = res.msg.is_mark;
+                        updateTotalMarked();
+                    },
+                });
+            }
+
+            function updateTotalMarked() {
+                totalMarked = collect(parents).where('is_mark', 1).sum('total_price');
+                totalFinal = collect(parents).where('is_final', 1).sum('total_price');
+                $('#total-mark').html('Total Invoice Mark: <strong>Rp' + formatRupiah(totalMarked) + '</strong>');
+                $('#total-final').html('Total Invoice Final: <strong>Rp' + formatRupiah(totalFinal) + '</strong>');
+                collect(parents).each(function(item) {
+                    if (item.is_mark == 1)
+                        $('.parent' + item.id).addClass('bg-primary-lightest');
+                    if (item.is_mark == 0)
+                        $('.parent' + item.id).removeClass('bg-primary-lightest');
+                });
+            }
+
 
             function updateStockUnit(el) {
                 const card = el.closest('.rowdebet');
@@ -401,10 +456,10 @@
 
 
             }
-
+            var parents = [];
             $(document).ready(function() {
                 addrow();
-
+                parents = {!! json_encode($parent) !!};
             });
         </script>
     @endpush

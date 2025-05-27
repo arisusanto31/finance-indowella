@@ -1,9 +1,9 @@
 <x-app-layout>
     @if (session('success'))
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        {{ session('success') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
     @endif
     <form id="form-invoice">
         @csrf
@@ -16,11 +16,11 @@
                 <div class="mb-3 mt-2">
                     <button type="button" class="btn btn-primary" onclick="addrow()" id="addDebit">+Tambah</button>
                     @if (book()->name == 'Buku Toko')
-                    <button type="button" class="btn btn-primary" onclick="openImportData('{{ book()->id }}')"
-                        id="btn-import">Import dari Toko</button>
+                        <button type="button" class="btn btn-primary" onclick="openImportData('{{ book()->id }}')"
+                            id="btn-import">Import dari Toko</button>
                     @else
-                    <button type="button" class="btn btn-primary" onclick="openImportData('{{ book()->id }}')"
-                        id="btn-import">Import dari Manuf</button>
+                        <button type="button" class="btn btn-primary" onclick="openImportData('{{ book()->id }}')"
+                            id="btn-import">Import dari Manuf</button>
                     @endif
                 </div>
                 <div class="row g-2 mb-3">
@@ -67,142 +67,175 @@
         <div class="d-flex justify-content pe-4 mb-3">
             <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="prevMonth()">
                 << </button>
-                    <span class="badge bg-primary d-flex justify-content-center align-items-center"> {{getListMonth()[$month]}} {{$year}}</span>
-                    <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="nextMonth()"> >></button>
+                    <span class="badge bg-primary d-flex justify-content-center align-items-center">
+                        {{ getListMonth()[$month] }} {{ $year }}</span>
+                    <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="nextMonth()">
+                        >></button>
 
         </div>
 
-        @if($salesOrders->isNotEmpty())
-        <div class="table-responsive mt-2">
-            <table class="table table-bordered">
-                <thead class="table-primary text-center">
-                    <tr>
-                        <th>No</th>
-                        <th>TGL</th>
-                        <th>Nomer SO</th>
-                        <th>Customer</th>
-                        <th>Produk</th>
-                        <th>Qty</th>
-                        <th>Unit</th>
-                        <th>Harga Satuan</th>
-                        <th>Diskon</th>
-                        <th>Sub-Total</th>
-                        <th>Total</th>
-                        <th>Status</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @php $no = 1; @endphp
-                    @foreach ($salesOrders as $invoiceNumber => $items)
-                    @php
-                    $rowspan = $items->count();
-                    $invoiceSubtotal = $items->sum(fn($item) => ($item->quantity * $item->price) - $item->discount);
-                    @endphp
+        <div class="d-flex flex-column bg-primary text-white p-2 rounded-2 mb-3" style="max-width:400px">
+            <p class="mb-0">Total Invoice: <strong>Rp{{ format_price($totalInvoice) }}</strong></p>
+            <p class="mb-0" id="total-final">Total Invoice Final:
+                <strong>Rp{{ format_price($totalInvoiceFinal) }}</strong>
+            </p>
+            <p class="mb-0" id="total-mark">Total Invoice Mark:
+                <strong>Rp{{ format_price($totalInvoiceMark) }}</strong>
+            </p>
+        </div>
 
-                    @foreach ($items as $index => $item)
-                    <tr id="tr-{{$invoiceNumber}}">
-                        @if ($index === 0)
-                        <td rowspan="{{ $rowspan }}">{{ $no++ }}</td>
-                        <td rowspan="{{ $rowspan }}">{{ $item->created_at->format('Y-m-d') }}</td>
-                        <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }} </td>
-                        <td rowspan="{{ $rowspan }}">{{ $item->customer->name ?? '-' }}</td>
-                        @endif
-
-                        <td>{{ $item->custom_stock_name ?? '-' }}</td>
-                        <td class="text-end">{{ format_price($item->qtyjadi) }}</td>
-                        <td>{{ $item->unitjadi }}</td>
-                        <td class="text-end">Rp{{ format_price($item->pricejadi) }}</td>
-                        <td class="text-end">Rp{{ format_price($item->discount) }}</td>
-
+        @if ($salesOrders->isNotEmpty())
+            <div class="table-responsive mt-2">
+                <table class="table table-bordered">
+                    <thead class="table-primary text-center">
+                        <tr>
+                            <th>No</th>
+                            <th>TGL</th>
+                            <th>Nomer SO</th>
+                            <th>Customer</th>
+                            <th>Produk</th>
+                            <th>Qty</th>
+                            <th>Unit</th>
+                            <th>Harga Satuan</th>
+                            <th>Diskon</th>
+                            <th>Sub-Total</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                         @php
-                        $subtotal = ($item->quantity * $item->price) - $item->discount;
+                            $no = 1;
+                            $parent = [];
                         @endphp
-                        <td class="text-end">Rp{{ format_price($subtotal) }}</td>
-
-                        @if ($index === 0)
-
-                        <td rowspan="{{ $rowspan }}"><strong>Rp{{ format_price($invoiceSubtotal) }}</strong>
-                            @if($item->parent->ref_akun_cash_kind_name)
-                            <br>
-                            <div class="bg-primary p-2 rounded-2 text-white"><i class="fas fa-wallet"></i> {{$item->parent->ref_akun_cash_kind_name}}</div>
-                            @endif
-
-                        </td>
-                        <td rowspan="{{ $rowspan }}">
-                            <p class="colorblack text-center" style="width:100%;line-height:120%;"><strong>{{strtoupper($item->parent->status)}}</strong></p>
-
-
-
+                        @foreach ($salesOrders as $invoiceNumber => $items)
                             @php
-                            $bgPayment = 'bglevel3';
-                            if (preg_match('/^DP/', $item->parent->status_payment)) {
-                            $bgPayment = 'bg-warning';
-                            }
-                            if (preg_match('/^LUNAS.*/', $item->parent->status_payment)) {
-                            $bgPayment = 'bg-warning';
-                            }
-                            if ($item->parent->status_payment == 'LUNAS 100%') {
-                            $bgPayment = 'bg-success';
-                            }
-                            if ($item->parent->status_payment == 'BELUM BAYAR') {
-                            $bgPayment = 'bg-danger';
-                            }
-
-                            $bgDelivery = 'bglevel3';
-                            if ($item->parent->status_delivery == 'Barang diproses') {
-                            $bgDelivery = 'bg-danger';
-                            }
-                            if ($item->parent->status_delivery == 'Barang Ready') {
-                            $bgDelivery = 'bg-warning';
-                            }
-                            if (preg_match('/^terkirim/', $item->parent->status_delivery)) {
-                            $bgDelivery = 'bg-warning';
-                            }
-                            if ($item->parent->status_delivery == 'terkirim 100%') {
-                            $bgDelivery = 'bg-success';
-                            }
+                                $theparent = $items->first()->parent;
+                                $parent[$theparent->id] = $theparent;
+                                $rowspan = $items->count();
+                                $invoiceSubtotal = $items->sum(
+                                    fn($item) => $item->quantity * $item->price - $item->discount,
+                                );
                             @endphp
-                            <span class="badge {{ $bgPayment }}"> <i class="fas fa-wallet"></i>
-                                {{ $item->parent->status_payment }}</span>
-                            <span class="badge {{ $bgDelivery }}"> <i class="fas fa-truck"></i>
-                                {{ $item->parent->status_delivery }}</span>
-                        </td>
-                        <td rowspan="{{ $rowspan }}">
 
-                            @if($item->parent->is_final==1)
-                            <a href="javascript:void(lihatDetailInvoice('{{$item->sales_order_number}}'))" class="btn btn-sm btn-outline-primary" title="Lihat ">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                            @endif
-                            @if($item->parent->is_final==0)
-                            <a href="javascript:void(makeFinal('{{$item->sales_order_id}}'))" class="btn btn-sm btn-outline-primary" title="make final" id="btn-final{{$item->sales_order_id}}">
-                                <i class="fas fa-upload"></i>
-                            </a>
+                            @foreach ($items as $index => $item)
+                                <tr class="parent{{ $item->parent->id }}
+                                     @if($item->parent->is_mark==1)bg-primary-lightest @endif"
+                                    id="tr-{{ $invoiceNumber }}">
+                                    @if ($index === 0)
+                                        <td rowspan="{{ $rowspan }}">{{ $no++ }}</td>
+                                        <td rowspan="{{ $rowspan }}">{{ $item->created_at->format('Y-m-d') }}
+                                        </td>
+                                        <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }} </td>
+                                        <td rowspan="{{ $rowspan }}">{{ $item->customer->name ?? '-' }}</td>
+                                    @endif
 
-                            <a href="javascript:void(editInvoice('{{$item->sales_order_number}}'))" class="btn btn-sm btn-outline-primary" title="Edit ">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <a href="javascript:void(destroySO('{{$item->sales_order_number}}'))" class="btn btn-sm btn-outline-danger" title="Delete ">
-                                <i class="fas fa-trash"></i>
-                            </a>
+                                    <td>{{ $item->custom_stock_name ?? '-' }}</td>
+                                    <td class="text-end">{{ format_price($item->qtyjadi) }}</td>
+                                    <td>{{ $item->unitjadi }}</td>
+                                    <td class="text-end">Rp{{ format_price($item->pricejadi) }}</td>
+                                    <td class="text-end">Rp{{ format_price($item->discount) }}</td>
 
-                            @endif
-                        </td>
-                        @endif
-                    </tr>
-                    @endforeach
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-        @else
+                                    @php
+                                        $subtotal = $item->quantity * $item->price - $item->discount;
+                                    @endphp
+                                    <td class="text-end">Rp{{ format_price($subtotal) }}</td>
 
-        <div class="container p-0">
-            <div class="alert alert-warning text-center">
-                Belum ada data Sales order.
+                                    @if ($index === 0)
+                                        <td rowspan="{{ $rowspan }}">
+                                            <strong>Rp{{ format_price($invoiceSubtotal) }}</strong>
+                                            @if ($item->parent->ref_akun_cash_kind_name)
+                                                <br>
+                                                <div class="bg-primary p-2 rounded-2 text-white"><i
+                                                        class="fas fa-wallet"></i>
+                                                    {{ $item->parent->ref_akun_cash_kind_name }}</div>
+                                            @endif
+
+                                        </td>
+                                        <td rowspan="{{ $rowspan }}">
+                                            <p class="colorblack text-center" style="width:100%;line-height:120%;">
+                                                <strong>{{ strtoupper($item->parent->status) }}</strong>
+                                            </p>
+
+
+
+                                            @php
+                                                $bgPayment = 'bglevel3';
+                                                if (preg_match('/^DP/', $item->parent->status_payment)) {
+                                                    $bgPayment = 'bg-warning';
+                                                }
+                                                if (preg_match('/^LUNAS.*/', $item->parent->status_payment)) {
+                                                    $bgPayment = 'bg-warning';
+                                                }
+                                                if ($item->parent->status_payment == 'LUNAS 100%') {
+                                                    $bgPayment = 'bg-success';
+                                                }
+                                                if ($item->parent->status_payment == 'BELUM BAYAR') {
+                                                    $bgPayment = 'bg-danger';
+                                                }
+
+                                                $bgDelivery = 'bglevel3';
+                                                if ($item->parent->status_delivery == 'Barang diproses') {
+                                                    $bgDelivery = 'bg-danger';
+                                                }
+                                                if ($item->parent->status_delivery == 'Barang Ready') {
+                                                    $bgDelivery = 'bg-warning';
+                                                }
+                                                if (preg_match('/^terkirim/', $item->parent->status_delivery)) {
+                                                    $bgDelivery = 'bg-warning';
+                                                }
+                                                if ($item->parent->status_delivery == 'terkirim 100%') {
+                                                    $bgDelivery = 'bg-success';
+                                                }
+                                            @endphp
+                                            <span class="badge {{ $bgPayment }}"> <i class="fas fa-wallet"></i>
+                                                {{ $item->parent->status_payment }}</span>
+                                            <span class="badge {{ $bgDelivery }}"> <i class="fas fa-truck"></i>
+                                                {{ $item->parent->status_delivery }}</span>
+                                        </td>
+                                        <td id="action{{ $item->parent->id }}" rowspan="{{ $rowspan }}">
+
+                                            @if ($item->parent->is_final == 1)
+                                                <a href="javascript:void(lihatDetailInvoice('{{ $item->sales_order_number }}'))"
+                                                    class="btn btn-sm btn-outline-primary" title="Lihat ">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            @endif
+                                            @if ($item->parent->is_final == 0)
+                                                <a href="javascript:void(makeFinal('{{ $item->sales_order_id }}'))"
+                                                    class="btn btn-sm btn-outline-primary" title="make final"
+                                                    id="btn-final{{ $item->sales_order_id }}">
+                                                    <i class="fas fa-upload"></i>
+                                                </a>
+
+                                                <a href="javascript:void(editInvoice('{{ $item->sales_order_number }}'))"
+                                                    class="btn btn-sm btn-outline-primary" title="Edit ">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="javascript:void(destroySO('{{ $item->sales_order_number }}'))"
+                                                    class="btn btn-sm btn-outline-danger" title="Delete ">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            @endif
+                                            <a href="javascript:void(makeMark('{{ $item->parent->id }}'))"
+                                                class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-paw"></i>
+                                            </a>
+                                        </td>
+                                    @endif
+                                </tr>
+                            @endforeach
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
-        </div>
+        @else
+            <div class="container p-0">
+                <div class="alert alert-warning text-center">
+                    Belum ada data Sales order.
+                </div>
+            </div>
 
         @endif
     </div>
@@ -215,199 +248,241 @@
 
 
     @push('styles')
-    <style>
-        .btn-close-card {
-            position: absolute;
-            top: -12px;
-            right: -12px;
-            width: 30px;
-            height: 30px !important;
-            background-color: red;
-            border: none;
-            border-radius: 50%;
-            font-size: 23px;
-            font-weight: bold;
-            cursor: pointer;
-            color: #fff;
-            z-index: 10;
-        }
+        <style>
+            .btn-close-card {
+                position: absolute;
+                top: -12px;
+                right: -12px;
+                width: 30px;
+                height: 30px !important;
+                background-color: red;
+                border: none;
+                border-radius: 50%;
+                font-size: 23px;
+                font-weight: bold;
+                cursor: pointer;
+                color: #fff;
+                z-index: 10;
+            }
 
-        .centered-flex {
-            display: flex;
-            justify-content: center;
-            /* Horizontal */
-            align-items: center;
-            height: 30px;
-            width: 30px;
-            /* Vertical */
-            /* Kalau mau vertikal tengah terhadap layar penuh */
-        }
-    </style>
+            .centered-flex {
+                display: flex;
+                justify-content: center;
+                /* Horizontal */
+                align-items: center;
+                height: 30px;
+                width: 30px;
+                /* Vertical */
+                /* Kalau mau vertikal tengah terhadap layar penuh */
+            }
+        </style>
     @endpush
 
     @push('scripts')
-    <script>
-        initItemSelectManual('.select2-stock', '{{url("admin/master/stock/get-item") }}', '-- Pilih Produk --');
-        initItemSelectManual('.select2-customer', '{{url("admin/master/customer/get-item") }}', '-- Pilih Customer --');
-        initItemSelectManual('.select2-toko', '{{ url("admin/master/toko/get-item")}}', '-- Pilih Toko --');
+        <script>
+            initItemSelectManual('.select2-stock', '{{ url('admin/master/stock/get-item') }}', '-- Pilih Produk --');
+            initItemSelectManual('.select2-customer', '{{ url('admin/master/customer/get-item') }}', '-- Pilih Customer --');
+            initItemSelectManual('.select2-toko', '{{ url('admin/master/toko/get-item') }}', '-- Pilih Toko --');
 
 
-        function lihatDetailInvoice(invoiceNumber) {
-            showDetailOnModal('{{url("admin/invoice/show-sales-detail")}}/' + invoiceNumber, 'xl');
-        }
-
-        function prevMonth() {
-            month = '{{$month}}';
-            year = '{{$year}}';
-            month--;
-            if (month < 1) {
-                month = 12;
-                year--;
+            function lihatDetailInvoice(invoiceNumber) {
+                showDetailOnModal('{{ url('admin/invoice/show-sales-detail') }}/' + invoiceNumber, 'xl');
             }
-            window.location.href = '{{url("admin/invoice/sales-order")}}?month=' + month + '&year=' + year;
-        }
 
-        function nextMonth() {
-            month = '{{$month}}';
-            year = '{{$year}}';
-            month++;
-            if (month > 12) {
-                month = 1;
-                year++;
+            function prevMonth() {
+                month = '{{ $month }}';
+                year = '{{ $year }}';
+                month--;
+                if (month < 1) {
+                    month = 12;
+                    year--;
+                }
+                window.location.href = '{{ url('admin/invoice/sales-order') }}?month=' + month + '&year=' + year;
             }
-            window.location.href = '{{url("admin/invoice/sales-order")}}?month=' + month + '&year=' + year;
-        }
 
-        function lihatDetailInvoice(invoiceNumber) {
-            showDetailOnModal('{{url("admin/invoice/show-sales-detail")}}/' + invoiceNumber, 'xl');
-        }
-
-        function openImportData(bookID) {
-            showDetailOnModal('{{url("admin/invoice/sales-open-import")}}/' + bookID, 'xl');
-        }
-
-        function destroySO(SONumber) {
-            swalDelete({
-                url: '{{url("admin/invoice/sales-order-delete")}}/' + SONumber,
-                onSuccess: function(res) {
-                    if (res.status == 1) {
-                        $('#tr-' + SONumber).remove();
-                    }
+            function nextMonth() {
+                month = '{{ $month }}';
+                year = '{{ $year }}';
+                month++;
+                if (month > 12) {
+                    month = 1;
+                    year++;
                 }
-            });
-        }
-
-        function openCardCreate() {
-            $('#card-create').toggleClass('open');
-            $('#icon-create').toggleClass('open');
-        }
-
-        function makeFinal(id) {
-            swalConfirmAndSubmit({
-                url: '{{url("admin/invoice/sales-make-final")}}',
-                data: {
-                    id: id,
-                    _token: '{{csrf_token()}}'
-                },
-                onSuccess: function(res) {
-                    $('#btn-final' + id).remove();
-                },
-            });
-        }
-
-        function editInvoice(invoiceNumber) {
-
-            showDetailOnModal('{{ url("/admin/invoice/edit-sales-order")}}/' + invoiceNumber, 'xl');
-        }
-
-
-
-
-
-        function openImportData(bookID) {
-            showDetailOnModal('{{ url("admin/invoice/sales-open-import")}}/' + bookID, 'xl');
-        }
-
-        function openCardCreate() {
-            $('#card-create').toggleClass('open');
-            $('#icon-create').toggleClass('open');
-        }
-
-        function removeDebetRow(btn) {
-            const card = btn.closest('.rowdebet');
-            const totalRows = document.querySelectorAll('.rowdebet').length;
-            console.log(totalRows);
-            if (totalRows > 1) {
-                card.remove();
-            } else {
-                Swal.fire('Oops!', 'Minimal harus ada satu baris lur 😈!', 'warning');
+                window.location.href = '{{ url('admin/invoice/sales-order') }}?month=' + month + '&year=' + year;
             }
-        }
 
-        function submitData() {
-            swalConfirmAndSubmit({
-                url: '{{ route("invoice.sales-order.store") }}',
-                data: $('#form-invoice').serialize(),
-                onSuccess: function(res) {
-                    if (res.status == 1) {
-                        window.location.reload();
+            function lihatDetailInvoice(invoiceNumber) {
+                showDetailOnModal('{{ url('admin/invoice/show-sales-detail') }}/' + invoiceNumber, 'xl');
+            }
+
+            function openImportData(bookID) {
+                showDetailOnModal('{{ url('admin/invoice/sales-open-import') }}/' + bookID, 'xl');
+            }
+
+            function destroySO(SONumber) {
+                swalDelete({
+                    url: '{{ url('admin/invoice/sales-order-delete') }}/' + SONumber,
+                    onSuccess: function(res) {
+                        if (res.status == 1) {
+                            $('#tr-' + SONumber).remove();
+                        }
                     }
-                },
-            });
-        }
+                });
+            }
 
-        function updateHarga(el) {
-            const card = el.closest('.rowdebet');
-            const quantity = card.querySelector('.quantity').value;
-            const price = card.querySelector('.price').value;
-            const discount = card.querySelector('.diskon').value;
+            function openCardCreate() {
+                $('#card-create').toggleClass('open');
+                $('#icon-create').toggleClass('open');
+            }
 
-            const subTotal = (quantity * price) - discount;
-            card.querySelector('.sub-total').value = formatRupiah(subTotal.toFixed(2));
-            updateTotalInvoice();
-        }
+            function makeFinal(id) {
+                swalConfirmAndSubmit({
+                    url: '{{ url('admin/invoice/sales-make-final') }}',
+                    data: {
+                        id: id,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    onSuccess: function(res) {
+                        html = ` <a href="javascript:void(lihatDetailInvoice('{{ $item->invoice_pack_number }}'))"
+                                    class="btn btn-sm btn-outline-primary" title="Lihat Invoice">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                  <a href="javascript:void(makeMark('${res.msg.id}'))"
+                                    class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-paw"></i>
+                                </a>
+                                `;
+                        $('#action' + id).html(html);
+                        parents[id].is_final = 1;
+                        updateTotalMarked();
+                    },
+                });
+            }
 
-        function updateTotalInvoice() {
-            totalInvoice = 0;
-            $('.sub-total').each(function() {
-                const total = parseFloat(formatDB($(this).val()));
-                if (!isNaN(total)) {
-                    totalInvoice += total;
+            function makeMark(id) {
+                $.ajax({
+                    url: '{{ url('admin/invoice/sales-mark') }}',
+                    method: 'post',
+                    data: {
+                        id: id,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(res) {
+                        $('.parent' + id).addClass('bg-primary-lightest');
+                        parents[id].is_mark = res.msg.is_mark;
+                        updateTotalMarked();
+                    },
+                });
+            }
+
+            function updateTotalMarked() {
+                console.log("ini parentS");
+                console.log(parents);
+                totalMarked = collect(parents).where('is_mark', 1).sum('total_price');
+                totalFinal = collect(parents).where('is_final', 1).sum('total_price');
+                $('#total-mark').html('Total Invoice Mark: <strong>Rp' + formatRupiah(totalMarked) + '</strong>');
+                $('#total-final').html('Total Invoice Final: <strong>Rp' + formatRupiah(totalFinal) + '</strong>');
+                collect(parents).each(function(item) {
+                    if (item.is_mark == 1)
+                        $('.parent' + item.id).addClass('bg-primary-lightest');
+                    if (item.is_mark == 0)
+                        $('.parent' + item.id).removeClass('bg-primary-lightest');
+                });
+            }
+
+            function editInvoice(invoiceNumber) {
+
+                showDetailOnModal('{{ url('/admin/invoice/edit-sales-order') }}/' + invoiceNumber, 'xl');
+            }
+
+
+
+
+
+            function openImportData(bookID) {
+                showDetailOnModal('{{ url('admin/invoice/sales-open-import') }}/' + bookID, 'xl');
+            }
+
+            function openCardCreate() {
+                $('#card-create').toggleClass('open');
+                $('#icon-create').toggleClass('open');
+            }
+
+            function removeDebetRow(btn) {
+                const card = btn.closest('.rowdebet');
+                const totalRows = document.querySelectorAll('.rowdebet').length;
+                console.log(totalRows);
+                if (totalRows > 1) {
+                    card.remove();
+                } else {
+                    Swal.fire('Oops!', 'Minimal harus ada satu baris lur 😈!', 'warning');
                 }
-            });
-            $('#total-invoice').val(formatRupiah(totalInvoice.toFixed(2)));
-        }
+            }
 
-        function updateStockUnit(el) {
-            const card = el.closest('.rowdebet');
-            const selectedOption = el.options[el.selectedIndex];
-            const unitSelect = card.querySelector('.unit');
-            const id = selectedOption.value;
-            console.log('searching for ' + id);
-            $.ajax({
-                url: '{{url("admin/master/stock/get-unit")}}/' + id,
-                method: 'get',
-                success: function(res) {
-                    console.log(res);
-                    if (res.status == 1) {
-                        html = "";
-                        res.msg.forEach(function(item) {
-                            html += `<option value="${item.unit}">${item.unit}</option>`;
-                        });
-                        unitSelect.innerHTML = html;
+            function submitData() {
+                swalConfirmAndSubmit({
+                    url: '{{ route('invoice.sales-order.store') }}',
+                    data: $('#form-invoice').serialize(),
+                    onSuccess: function(res) {
+                        if (res.status == 1) {
+                            window.location.reload();
+                        }
+                    },
+                });
+            }
+
+            function updateHarga(el) {
+                const card = el.closest('.rowdebet');
+                const quantity = card.querySelector('.quantity').value;
+                const price = card.querySelector('.price').value;
+                const discount = card.querySelector('.diskon').value;
+
+                const subTotal = (quantity * price) - discount;
+                card.querySelector('.sub-total').value = formatRupiah(subTotal.toFixed(2));
+                updateTotalInvoice();
+            }
+
+            function updateTotalInvoice() {
+                totalInvoice = 0;
+                $('.sub-total').each(function() {
+                    const total = parseFloat(formatDB($(this).val()));
+                    if (!isNaN(total)) {
+                        totalInvoice += total;
                     }
-                },
-                error: function(res) {
+                });
+                $('#total-invoice').val(formatRupiah(totalInvoice.toFixed(2)));
+            }
 
-                }
-            });
-            const unit = selectedOption.getAttribute('data-unit');
-            card.querySelector('.unit').value = unit;
-        }
+            function updateStockUnit(el) {
+                const card = el.closest('.rowdebet');
+                const selectedOption = el.options[el.selectedIndex];
+                const unitSelect = card.querySelector('.unit');
+                const id = selectedOption.value;
+                console.log('searching for ' + id);
+                $.ajax({
+                    url: '{{ url('admin/master/stock/get-unit') }}/' + id,
+                    method: 'get',
+                    success: function(res) {
+                        console.log(res);
+                        if (res.status == 1) {
+                            html = "";
+                            res.msg.forEach(function(item) {
+                                html += `<option value="${item.unit}">${item.unit}</option>`;
+                            });
+                            unitSelect.innerHTML = html;
+                        }
+                    },
+                    error: function(res) {
+
+                    }
+                });
+                const unit = selectedOption.getAttribute('data-unit');
+                card.querySelector('.unit').value = unit;
+            }
 
 
-        function addrow() {
-            newRow = `
+            function addrow() {
+                newRow = `
                 <div class="card border shadow-sm rounded p-3 mb-3 position-relative rowdebet">
                     <div type="button" class="btn-close-card" onclick="removeDebetRow(this)"><div class="centered-flex"><i class="fas fa-close"></i></div></div>
                     <div class="row g-2">
@@ -440,16 +515,18 @@
                     </div>
                 </div>
                     `;
-            $('#invoice-wrapper').append(newRow);
-            initItemSelectManual('.select2-stock', '{{url("admin/master/stock/get-item") }}', '-- Pilih Produk --');
+                $('#invoice-wrapper').append(newRow);
+                initItemSelectManual('.select2-stock', '{{ url('admin/master/stock/get-item') }}', '-- Pilih Produk --');
 
 
-        }
-
-        $(document).ready(function() {
-            addrow();
-
-        });
-    </script>
+            }
+            var parents = [];
+            $(document).ready(function() {
+                addrow();
+                parents = {!! json_encode($parent) !!};
+                console.log(parents);
+                updateTotalMarked();
+            });
+        </script>
     @endpush
 </x-app-layout>

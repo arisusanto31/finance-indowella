@@ -19,8 +19,12 @@ class StockController extends Controller
     public function index()
     {
         $view = view('master.stock');
-        $view->stocks = Stock::with(['category', 'parentCategory'])->get();
+        $view->stocks=[];
         return $view;
+    }
+
+    public function getData(){
+           $view->stocks = Stock::with(['category', 'parentCategory'])->get();
     }
 
     public function update(Request $request, $id)

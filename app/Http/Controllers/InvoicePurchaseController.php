@@ -18,12 +18,21 @@ class InvoicePurchaseController extends Controller
 
     public function showPurchase()
     {
-        $invoices = InvoicePurchaseDetail::with(['parent', 'stock', 'supplier'])
+        $month = getInput('month') ? toDigit(getInput('month'), 2) : date('m');
+        $year = getInput('year') ? getInput('year') : date('Y');
+
+
+        $invoices = InvoicePurchaseDetail::whereMonth('created_at',$month)->whereYear('created_at',$year)->with(['parent', 'stock', 'supplier'])
             ->orderBy('created_at', 'desc')
             ->get()
             ->groupBy('invoice_pack_number');
-
-        return view('invoice.invoice-purchase', compact('invoices'));
+        $invPack= InvoicePack::whereMonth('created_at',$month)->whereYear('created_at',$year)->where('reference_model', InvoicePurchaseDetail::class)
+          ->select('is_final','is_mark','total_price')->get();
+        $totalInvoice= collect($invPack)->sum('total_price');
+        $totalInvoiceFinal= collect($invPack)->where('is_final',1)->sum('total_price');
+        $totalInvoiceMark= collect($invPack)->where('is_mark',1)->sum('total_price');
+        
+        return view('invoice.invoice-purchase', compact('invoices','month','year','totalInvoice','totalInvoiceFinal','totalInvoiceMark'));
     }
 
 

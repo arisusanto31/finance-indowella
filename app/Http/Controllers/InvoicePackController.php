@@ -397,6 +397,15 @@ class InvoicePackController extends Controller
         }
     }
 
+    public function mark(Request $request)
+    {
+        $id = $request->input('id');
+        $invoice = InvoicePack::find($id);
+        $invoice->is_mark = !$invoice->is_mark ? 1 : 0;
+        $invoice->save();
+        return ['status' => 1, 'msg' => $invoice];
+    }
+
     public function getItemInvoiceAktif($id)
     {
         $invoices = InvoicePack::where('sales_order_id', $id)

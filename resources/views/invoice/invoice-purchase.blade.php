@@ -49,90 +49,133 @@
         </div>
     </form>
 
-    @if ($invoices->isNotEmpty())
-        <div class="card mb-4 shadow p-3">
-            <table class="table table-bordered">
-                <thead class="table-primary text-center">
-                    <tr>
-                        <th>No</th>
-                        <th>tanggal</th>
-                        <th>Invoice</th>
-                        <th>Supplier</th>
-                        <th>Produk</th>
-                        <th>Qty</th>
-                        <th>Unit</th>
-                        <th>Harga Satuan</th>
-                        <th>Diskon</th>
-                        <th>Sub-Total</th>
-                        <th>Total</th>
-                        <th> Aksi nya say</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @php $no = 1; @endphp
-                    @foreach ($invoices as $invoiceNumber => $items)
+
+    <div class="card mb-4 shadow p-3">
+
+
+        <div class="text-primary-dark "> 📁 <strong>DAFTAR INVOICE</strong></div>
+        <div class="d-flex justify-content pe-4 mb-3">
+            <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="prevMonth()">
+                << </button>
+                    <span class="badge bg-primary d-flex justify-content-center align-items-center">
+                        {{ getListMonth()[$month] }} {{ $year }}</span>
+                    <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="nextMonth()">
+                        >>
+                    </button>
+        </div>
+
+        <div class="d-flex flex-column bg-primary text-white p-2 rounded-2 mb-3" style="max-width:400px">
+            <p class="mb-0">Total Invoice: <strong>Rp{{ format_price($totalInvoice) }}</strong></p>
+            <p class="mb-0" id="total-final">Total Invoice Final:
+                <strong>Rp{{ format_price($totalInvoiceFinal) }}</strong>
+            </p>
+            <p class="mb-0" id="total-mark">Total Invoice Mark:
+                <strong>Rp{{ format_price($totalInvoiceMark) }}</strong>
+            </p>
+        </div>
+
+        @if ($invoices->isNotEmpty())
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="table-primary text-center">
+                        <tr>
+                            <th>No</th>
+                            <th>tanggal</th>
+                            <th>Invoice</th>
+                            <th>Supplier</th>
+                            <th>Produk</th>
+                            <th>Qty</th>
+                            <th>Unit</th>
+                            <th>Harga Satuan</th>
+                            <th>Diskon</th>
+                            <th>Sub-Total</th>
+                            <th>Total</th>
+                            <th> Aksi nya say</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                         @php
-                            $rowspan = $items->count();
-                            $invoiceSubtotal = $items->sum(
-                                fn($item) => $item->quantity * $item->price - $item->discount,
-                            );
+                            $no = 1;
+                            $parent = [];
                         @endphp
+                        @foreach ($invoices as $invoiceNumber => $items)
+                            @php
+                                $theparent = $items->first()->parent;
+                                $parent[$theparent->id] = $theparent;
+                                $rowspan = $items->count();
+                                $invoiceSubtotal = $items->sum(
+                                    fn($item) => $item->quantity * $item->price - $item->discount,
+                                );
+                            @endphp
 
-                        @foreach ($items as $index => $item)
-                            <tr>
-                                @if ($index === 0)
-                                    <td rowspan="{{ $rowspan }}">{{ $no++ }}</td>
-                                    <td rowspan="{{ $rowspan }}">
-                                        {{ createCarbon($item->created_at)->format('Y-m-d') }}</td>
-                                    <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }}</td>
-                                    <td rowspan="{{ $rowspan }}">{{ $item->supplier->name ?? '-' }}</td>
-                                @endif
+                            @foreach ($items as $index => $item)
+                                <tr
+                                    class="parent{{ $item->parent->id }} @if ($item->parent->is_mark == 1) bg-primary-lightest @endif">
+                                    @if ($index === 0)
+                                        <td rowspan="{{ $rowspan }}">{{ $no++ }}</td>
+                                        <td rowspan="{{ $rowspan }}">
+                                            {{ createCarbon($item->created_at)->format('Y-m-d') }}</td>
+                                        <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }}</td>
+                                        <td rowspan="{{ $rowspan }}">{{ $item->supplier->name ?? '-' }}</td>
+                                    @endif
 
-                                <td>{{ $item->custom_stock_name != '??' ? $item->custom_stock_name : $item->stock->name }}
-                                </td>
-                                <td class="text-end">{{ $item->quantity }}</td>
-                                <td>{{ $item->unit }}</td>
-                                <td class="text-end">Rp{{ number_format($item->price) }}</td>
-                                <td class="text-end">Rp{{ number_format($item->discount) }}</td>
-
-                                @php
-                                    $subtotal = $item->quantity * $item->price - $item->discount;
-                                @endphp
-                                <td class="text-end">Rp{{ number_format($subtotal) }}</td>
-
-                                @if ($index === 0)
-                                    <td rowspan="{{ $rowspan }}">
-                                        <strong>Rp{{ number_format($invoiceSubtotal) }}</strong>
+                                    <td>{{ $item->custom_stock_name != '??' ? $item->custom_stock_name : $item->stock->name }}
                                     </td>
+                                    <td class="text-end">{{ $item->quantity }}</td>
+                                    <td>{{ $item->unit }}</td>
+                                    <td class="text-end">Rp{{ number_format($item->price) }}</td>
+                                    <td class="text-end">Rp{{ number_format($item->discount) }}</td>
+
+                                    @php
+                                        $subtotal = $item->quantity * $item->price - $item->discount;
+                                    @endphp
+                                    <td class="text-end">Rp{{ number_format($subtotal) }}</td>
+
                                     @if ($index === 0)
                                         <td rowspan="{{ $rowspan }}">
-                                            <a href="javascript:void(lihatDetailInvoice('{{ $item->invoice_pack_number }}'))"
-                                                class="btn btn-sm btn-outline-primary" title="Lihat Invoice">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a href="javascript:void(editInvoicePurchase('{{ $item->invoice_pack_number }}'))"
-                                                class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-
+                                            <strong>Rp{{ number_format($invoiceSubtotal) }}</strong>
                                         </td>
+                                        @if ($index === 0)
+                                            <td id="action{{ $item->parent->id }}" rowspan="{{ $rowspan }}">
+                                                @if ($item->parent->is_final == 1)
+                                                    <a href="javascript:void(lihatDetailInvoice('{{ $item->invoice_pack_number }}'))"
+                                                        class="btn btn-sm btn-outline-primary" title="Lihat Invoice">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                @endif
+                                                @if ($item->parent->is_final == 0)
+                                                    <a href="javascript:void(makeFinal('{{ $item->invoice_pack_id }}'))"
+                                                        class="btn btn-sm btn-outline-primary" title="make final"
+                                                        id="btn-final{{ $item->invoice_pack_id }}">
+                                                        <i class="fas fa-upload"></i>
+                                                    </a>
+                                                    <a href="javascript:void(editInvoicePurchase('{{ $item->invoice_pack_number }}'))"
+                                                        class="btn btn-sm btn-outline-primary">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                @endif
+                                                <a href="javascript:void(makeMark('{{ $item->parent->id }}'))"
+                                                    class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-paw"></i>
+                                                </a>
+
+                                            </td>
+                                        @endif
                                     @endif
-                                @endif
-                            </tr>
+                                </tr>
+                            @endforeach
                         @endforeach
-                    @endforeach
 
-                </tbody>
+                    </tbody>
 
-            </table>
-        </div>
-    @else
-        <div class="card mb-2 shadow p-3">
+                </table>
+            </div>
+        @else
             <div class="alert alert-warning text-center">
                 Belum ada data invoice.
             </div>
-        </div>
-    @endif
+        @endif
+    </div>
 
     @push('styles')
         <style>
@@ -194,6 +237,60 @@
                 }
             }
 
+            function makeFinal(id) {
+                swalConfirmAndSubmit({
+                    url: '{{ url('admin/invoice/invoice-make-final') }}',
+                    data: {
+                        id: id,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    onSuccess: function(res) {
+                        html = ` <a href="javascript:void(lihatDetailInvoice('${res.msg.invoice_pack_number}')))"
+                                    class="btn btn-sm btn-outline-primary" title="Lihat Invoice">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                 <a href="javascript:void(makeMark('${res.msg.id}'))"
+                                    class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-paw"></i>
+                                </a>
+                                `;
+                        $('#action' + id).html(html);
+                        parents[id].is_final = 1;
+                        updateTotalMarked();
+                    },
+                });
+            }
+
+            function makeMark(id) {
+                $.ajax({
+                    url: '{{ url('admin/invoice/invoice-mark') }}',
+                    method: 'post',
+                    data: {
+                        id: id,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(res) {
+                        $('.parent' + id).addClass('bg-primary-lightest');
+                        parents[id].is_mark = res.msg.is_mark;
+                        updateTotalMarked();
+                    },
+                });
+            }
+
+            function updateTotalMarked() {
+                totalMarked = collect(parents).where('is_mark', 1).sum('total_price');
+                totalFinal = collect(parents).where('is_final', 1).sum('total_price');
+                $('#total-mark').html('Total Invoice Mark: <strong>Rp' + formatRupiah(totalMarked) + '</strong>');
+                $('#total-final').html('Total Invoice Final: <strong>Rp' + formatRupiah(totalFinal) + '</strong>');
+                collect(parents).each(function(item) {
+                    if (item.is_mark == 1)
+                        $('.parent' + item.id).addClass('bg-primary-lightest');
+                    if (item.is_mark == 0)
+                        $('.parent' + item.id).removeClass('bg-primary-lightest');
+                });
+            }
+
+
 
 
             function submitInvoice() {
@@ -217,6 +314,28 @@
                 const subTotal = (quantity * price) - discount;
                 card.querySelector('.sub-total').value = formatRupiah(subTotal.toFixed(2));
                 updateTotalInvoice();
+            }
+
+            function prevMonth() {
+                month = '{{ $month }}';
+                year = '{{ $year }}';
+                month--;
+                if (month < 1) {
+                    month = 12;
+                    year--;
+                }
+                window.location.href = '{{ url('admin/invoice/invoice-purchase') }}?month=' + month + '&year=' + year;
+            }
+
+            function nextMonth() {
+                month = '{{ $month }}';
+                year = '{{ $year }}';
+                month++;
+                if (month > 12) {
+                    month = 1;
+                    year++;
+                }
+                window.location.href = '{{ url('admin/invoice/invoice-purchase') }}?month=' + month + '&year=' + year;
             }
 
 
@@ -309,9 +428,10 @@
 
 
             }
-
+            var parents = [];
             $(document).ready(function() {
                 addrow();
+                parents = {!! json_encode($parent) !!};
 
             });
         </script>

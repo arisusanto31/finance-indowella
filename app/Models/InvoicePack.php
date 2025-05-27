@@ -96,7 +96,12 @@ class InvoicePack extends Model
             $count = 1;
         }
         $this->index = $count;
-        $code = 'INV-S' . date('y') . '-' . toDigit($personID, 4) . '-' . toDigit($count, 4);
+        if ($inv->reference_model == InvoiceSaleDetail::class)
+            $code = 'INV-S' . date('y') . '-' . toDigit($personID, 4) . '-' . toDigit($count, 4);
+        else if ($inv->refence_model == InvoicePurchaseDetail::class)
+            $code = 'INV-P' . date('y') . '-' . toDigit($personID, 4) . '-' . toDigit($count, 4);
+        else
+            $code = 'INV-' . date('y') . '-' . toDigit($personID, 4) . '-' . toDigit($count, 4);
         return $code;
     }
 

@@ -22,7 +22,7 @@ use App\Services\LockManager;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 use App\Models\InvoiceSale;
-use Illuminate\Support\Facades\Log; 
+use Illuminate\Support\Facades\Log;
 
 
 
@@ -33,91 +33,90 @@ class InvoiceSaleController extends Controller
 
 
     private function normalizeDate($input)
-{
-    $clean = str_replace(['/', '.'], '-', $input);
-    $parts = explode('-', $clean);
-    if (count($parts) !== 3) return null;
+    {
+        $clean = str_replace(['/', '.'], '-', $input);
+        $parts = explode('-', $clean);
+        if (count($parts) !== 3) return null;
 
-    [$a, $b, $c] = $parts;
+        [$a, $b, $c] = $parts;
 
-    if (strlen($a) === 4) {
-        return sprintf('%04d-%02d-%02d', $a, $b, $c); // yyyy-mm-dd
-    }
-
-    if (strlen($c) === 4) {
-        if ((int)$b >= 12) {
-            return sprintf('%04d-%02d-%02d', $c, $a, $b); // mm-dd-yyyy → yyyy-mm-dd
-        } else {
-            return sprintf('%04d-%02d-%02d', $c, $b, $a); // dd-mm-yyyy → yyyy-mm-dd
+        if (strlen($a) === 4) {
+            return sprintf('%04d-%02d-%02d', $a, $b, $c); // yyyy-mm-dd
         }
-    }
 
-    return null;
-}
-
-public function updateInvoiceSales(Request $request, $originalInvoiceNumber)
-{
-
-    $detailIds = $request->input('detail_id');
-    $quantities = $request->input('quantity');
-    $prices = $request->input('price');
-    $discounts = $request->input('discount');
-    $newInvoiceNumber = $request->input('sales_order_number_pack');
-    $tanggal = $this->normalizeDate($request->input('tanggal_global'));
-
-    // return [$originalInvoiceNumber, $newInvoiceNumber];
-
-    if (empty($detailIds)) {
-        return response()->json(['success' => false, 'message' => 'Data detail kosong']);
-    }
-
-    DB::beginTransaction();
-
-    try {
-        InvoiceSaleDetail::where('invoice_pack_number', $originalInvoiceNumber)
-            ->update(['invoice_pack_number' => $newInvoiceNumber]);
-
-        $totalPrice = 0;
-
-        foreach ($detailIds as $index => $id) {
-            $detail = InvoiceSaleDetail::find($id);
-            if ($detail) {
-                $qty = $quantities[$index] ?? 0;
-                $price = $prices[$index] ?? 0;
-                $disc = $discounts[$index] ?? 0;
-                $total = ($qty * $price) - $disc;
-
-                $detail->update([
-                    'quantity' => $qty,
-                    'price' => $price,
-                    'discount' => $disc,
-                    'invoice_pack_number' => $newInvoiceNumber,
-                    'created_at' => $tanggal,
-                ]);
-
-                $totalPrice += $total;
+        if (strlen($c) === 4) {
+            if ((int)$b >= 12) {
+                return sprintf('%04d-%02d-%02d', $c, $a, $b); // mm-dd-yyyy → yyyy-mm-dd
+            } else {
+                return sprintf('%04d-%02d-%02d', $c, $b, $a); // dd-mm-yyyy → yyyy-mm-dd
             }
         }
 
-        InvoicePack::where('invoice_number', $originalInvoiceNumber)->update([
-            'invoice_number' => $newInvoiceNumber,
-            'created_at' => $tanggal,
-            'total_price' => $totalPrice,
-        ]);
-
-        DB::commit();
-        return response()->json(['success' => true]);
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-        Log::error('❌ Gagal update invoice sales: ' . $e->getMessage());
-
-        return response()->json([
-            'success' => false,
-            'message' => 'Terjadi kesalahan server',
-        ], 500);
+        return null;
     }
-}
+
+    public function updateInvoiceSales(Request $request, $originalInvoiceNumber)
+    {
+
+        $detailIds = $request->input('detail_id');
+        $quantities = $request->input('quantity');
+        $prices = $request->input('price');
+        $discounts = $request->input('discount');
+        $newInvoiceNumber = $request->input('sales_order_number_pack');
+        $tanggal = $this->normalizeDate($request->input('tanggal_global'));
+
+        // return [$originalInvoiceNumber, $newInvoiceNumber];
+
+        if (empty($detailIds)) {
+            return response()->json(['success' => false, 'message' => 'Data detail kosong']);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            InvoiceSaleDetail::where('invoice_pack_number', $originalInvoiceNumber)
+                ->update(['invoice_pack_number' => $newInvoiceNumber]);
+
+            $totalPrice = 0;
+
+            foreach ($detailIds as $index => $id) {
+                $detail = InvoiceSaleDetail::find($id);
+                if ($detail) {
+                    $qty = $quantities[$index] ?? 0;
+                    $price = $prices[$index] ?? 0;
+                    $disc = $discounts[$index] ?? 0;
+                    $total = ($qty * $price) - $disc;
+
+                    $detail->update([
+                        'quantity' => $qty,
+                        'price' => $price,
+                        'discount' => $disc,
+                        'invoice_pack_number' => $newInvoiceNumber,
+                        'created_at' => $tanggal,
+                    ]);
+
+                    $totalPrice += $total;
+                }
+            }
+
+            InvoicePack::where('invoice_number', $originalInvoiceNumber)->update([
+                'invoice_number' => $newInvoiceNumber,
+                'created_at' => $tanggal,
+                'total_price' => $totalPrice,
+            ]);
+
+            DB::commit();
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('❌ Gagal update invoice sales: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan server',
+            ], 500);
+        }
+    }
 
 
 
@@ -125,46 +124,46 @@ public function updateInvoiceSales(Request $request, $originalInvoiceNumber)
     public function editInvoiceSales($invoiceNumber)
     {
         $data = InvoicePack::where('invoice_number', $invoiceNumber)->first();
-    
+
         $details = InvoiceSaleDetail::with('stock')
             ->where('invoice_pack_id', $data->id)
             ->get();
-    
-     
+
+
         foreach ($details as $detail) {
             $detail->total_price = ($detail->quantity * $detail->price) - $detail->discount;
         }
-    
+
         $data['details'] = $details;
-    
+
         $data['total_price'] = $details->sum(fn($item) => $item->total_price);
-    
+
         $view = view('invoice.modal._edit-sales');
         $view->data = $data;
-    
+
         return $view;
     }
-    
 
 
-//     public function editInvoiceSales($invoiceNumber)
-// {
-   
-//     $data = InvoicePack::where('invoice_number', $invoiceNumber)->first();
-//     $details = InvoiceSaleDetail::with('stock')
-//                 ->where('invoice_pack_number', $invoiceNumber)
-//                 ->get();
 
-//     $data['details'] = $details;
+    //     public function editInvoiceSales($invoiceNumber)
+    // {
 
-//     $view = view('invoice.modal._edit-sales');
-//     $view->data = $data;
+    //     $data = InvoicePack::where('invoice_number', $invoiceNumber)->first();
+    //     $details = InvoiceSaleDetail::with('stock')
+    //                 ->where('invoice_pack_number', $invoiceNumber)
+    //                 ->get();
 
-//     return $view;
-// }
+    //     $data['details'] = $details;
 
-    
-    
+    //     $view = view('invoice.modal._edit-sales');
+    //     $view->data = $data;
+
+    //     return $view;
+    // }
+
+
+
 
     public function showSales()
     {
@@ -174,9 +173,15 @@ public function updateInvoiceSales(Request $request, $originalInvoiceNumber)
         $invoices = InvoiceSaleDetail::whereMonth('created_at', $month)->whereYear('created_at', $year)->with('customer', 'stock', 'parent')
             ->get()
             ->groupBy('invoice_pack_number');
+        $invPack = InvoicePack::whereMonth('created_at', $month)->whereYear('created_at', $year)->where('reference_model', InvoiceSaleDetail::class)
+            ->select('is_final', 'is_mark', 'total_price')->get();
+        $totalInvoice = collect($invPack)->sum('total_price');
+        $totalInvoiceFinal = collect($invPack)->where('is_final', 1)->sum('total_price');
+        $totalInvoiceMark = collect($invPack)->where('is_mark', 1)->sum('total_price');
+
 
         // dd($invoices);
-        return view('invoice.invoice-sales', compact('invoices', 'month', 'year'));
+        return view('invoice.invoice-sales', compact('invoices', 'month', 'year', 'totalInvoice', 'totalInvoiceFinal', 'totalInvoiceMark'));
     }
 
     // public function showSales()
