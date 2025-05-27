@@ -55,6 +55,7 @@
                 <thead class="table-primary text-center">
                     <tr>
                         <th>No</th>
+                        <th>tanggal</th>
                         <th>Invoice</th>
                         <th>Supplier</th>
                         <th>Produk</th>
@@ -81,6 +82,8 @@
                             <tr>
                                 @if ($index === 0)
                                     <td rowspan="{{ $rowspan }}">{{ $no++ }}</td>
+                                    <td rowspan="{{ $rowspan }}">
+                                        {{ createCarbon($item->created_at)->format('Y-m-d') }}</td>
                                     <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }}</td>
                                     <td rowspan="{{ $rowspan }}">{{ $item->supplier->name ?? '-' }}</td>
                                 @endif

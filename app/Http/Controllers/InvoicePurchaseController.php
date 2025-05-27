@@ -15,6 +15,17 @@ class InvoicePurchaseController extends Controller
 {
 
 
+    public function showPurchase()
+{
+    $invoices = InvoicePurchaseDetail::with(['parent', 'stock', 'supplier'])
+        ->orderBy('created_at', 'desc')
+        ->get()
+        ->groupBy('invoice_pack_number'); 
+
+    return view('invoice.invoice-purchase', compact('invoices'));
+}
+
+
 
     public function editInvoicePurchase($invoiceNumber)
     {
