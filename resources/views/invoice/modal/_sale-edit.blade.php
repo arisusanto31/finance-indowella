@@ -83,12 +83,12 @@
                 
                             <td>
                                 <input type="text" name="quantity[{{ $key }}]" class="form-control form-control-sm text-end qty"
-                                    value="{{ $item->quantity }}">
+                                    value="{{ $item->qtyjadi }}">
                             </td>
                 
                             <td>
                                 <input type="text" name="price[{{ $key }}]" class="form-control form-control-sm text-end price"
-                                    value="{{ $item->price }}">
+                                    value="{{ $item->pricejadi }}">
                             </td>
                 
                             <td>
