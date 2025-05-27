@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\InvoicePack;
 use App\Models\InvoicePurchaseDetail;
+use App\Models\Stock;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -25,10 +26,15 @@ class InvoicePurchaseController extends Controller
     }
 
 
+    public function createMutations(Request $request)
+    {
+        return $request->all();
+    }
+
     public function store(Request $request)
     {
 
-      
+
         $request->validate([
             'invoice_pack_number' => 'required|string|max:255',
             'supplier_id' => 'required|integer',
@@ -50,7 +56,7 @@ class InvoicePurchaseController extends Controller
         $grouped = [];
 
         foreach ($request->stock_id as $i => $stockId) {
-
+            $thestock = Stock::find($stockId);
             $grouped[] = [
                 'invoice_pack_number' => $invoice_pack_number,
                 'stock_id' => $stockId,
@@ -61,6 +67,7 @@ class InvoicePurchaseController extends Controller
                 'supplier_id' => $request->supplier_id,
                 'book_journal_id' => bookID(),
                 'total_price' => format_db($request->total_price[$i]) ?? 0,
+                'custom_stock_name' => $request->custom_stock_name[$i] ?? $thestock->name
             ];
         }
 

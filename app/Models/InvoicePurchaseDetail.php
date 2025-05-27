@@ -19,8 +19,31 @@ class InvoicePurchaseDetail extends Model
         'total_price',
         'discount',
         'supplier_id',
+        'custom_stock_name'
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (!$model->custom_stock_name) {
+                $stock = Stock::find($model->stock_id);
+                if ($stock) {
+                    $model->custom_stock_name = $stock->name;
+                }
+            }
+        });
+
+        static::updating(function ($model) {
+            if (!$model->custom_stock_name) {
+                $stock = Stock::find($model->stock_id);
+                if ($stock) {
+                    $model->custom_stock_name = $stock->name;
+                }
+            }
+        });
+    }
     protected static function booted()
     {
         static::addGlobalScope('journal', function ($query) {
@@ -39,7 +62,8 @@ class InvoicePurchaseDetail extends Model
         });
     }
 
-    public function parent(){
+    public function parent()
+    {
         return $this->belongsTo(InvoicePack::class, 'invoice_pack_number', 'invoice_number');
     }
     public function invoicePack()

@@ -273,6 +273,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::get('invoice-purchase', [InvoicePurchaseController::class, 'ShowPurchase'])->name('purchase.index');
         Route::post('invoice-sales', [InvoiceSaleController::class, 'store'])->name('sales.store');
         Route::post('invoice-purchase', [InvoicePurchaseController::class, 'store'])->name('purchase.store');
+        Route::post('purchase-create-mutations', [InvoicePurchaseController::class, 'createMutations'])->name('purchase.create-mutations');
+        
         Route::get('show-detail/{id}', [InvoicePackController::class, 'showDetail'])->name('detail');
         Route::post('create-claim-pembelian', [InvoicePackController::class, 'createClaimPembelian'])->name('create-claim-pembelian');
         Route::post('create-claim-penjualan', [InvoicePackController::class, 'createClaimPenjualan'])->name('create-claim-penjualan');
@@ -281,10 +283,9 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::post('create-invoices', [InvoiceSaleController::class, 'createInvoices'])->name('create-invoices');
         Route::get('edit-sales-order/{id}', [SalesOrderController::class, 'editInvoice']);
         Route::post('invoice/update-detail', [SalesOrderController::class, 'updateDetail']);
+        
         Route::post('invoice-sales/update/{invoiceNumber}', [InvoiceSaleController::class, 'updateInvoiceSales'])->name('invoice.sales.update');
         Route::post('submit-bayar-sales-invoice', [InvoiceSaleController::class, 'submitBayarSalesInvoice']);
-
-
         Route::get('invoice-get-data-import/{id}', [InvoiceSaleController::class, 'getDataImport']);
         Route::post('invoice-make-final', [InvoiceSaleController::class, 'makeFinal'])->name('invoice-make-final');
 
