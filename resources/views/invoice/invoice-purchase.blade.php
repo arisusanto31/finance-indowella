@@ -13,7 +13,7 @@
             <h2>Create Invoice Purchase</h2>
 
             <div class="mb-3 mt-2">
-                <button type="button" class="btn btn-success" onclick="addrow()" id="addDebit">+Tambah</button>
+                <button type="button" class="btn btn-primary" onclick="addrow()" id="addDebit">+Tambah</button>
             </div>
 
             <div class="row g-2 mb-3">
@@ -111,8 +111,8 @@
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                             <a href="javascript:void(editInvoicePurchase('{{ $item->invoice_pack_number }}'))"
-                                                class="btn btn-sm btn-outline-success">
-                                                <i class="fas fa-edit"></i> Edit
+                                                class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-edit"></i> 
                                             </a>
 
                                         </td>

@@ -19,7 +19,9 @@ class InvoicePurchaseDetail extends Model
         'total_price',
         'discount',
         'supplier_id',
-        'custom_stock_name'
+        'custom_stock_name',
+        'created_at'
+
     ];
 
     protected static function boot()
@@ -29,7 +31,7 @@ class InvoicePurchaseDetail extends Model
         static::creating(function ($model) {
             if (!$model->custom_stock_name) {
                 $stock = Stock::find($model->stock_id);
-                if ($stock) {
+                if ($stock->name != 'custom') {
                     $model->custom_stock_name = $stock->name;
                 }
             }
@@ -38,7 +40,7 @@ class InvoicePurchaseDetail extends Model
         static::updating(function ($model) {
             if (!$model->custom_stock_name) {
                 $stock = Stock::find($model->stock_id);
-                if ($stock) {
+                if ($stock->name != 'custom') {
                     $model->custom_stock_name = $stock->name;
                 }
             }

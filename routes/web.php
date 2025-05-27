@@ -300,7 +300,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::get('invoice-sales/edit/{id}', [InvoiceSaleController::class, 'editInvoiceSales']);
 
         Route::get('invoice-purchase/edit/{id}', [InvoicePurchaseController::class, 'editInvoicePurchase']);
-        Route::post('invoice-purchase/update', [InvoicePurchaseController::class, 'updateInvoicePurchase']);
+        Route::post('invoice-purchase-update', [InvoicePurchaseController::class, 'updateInvoicePurchase']);
        
 
 
