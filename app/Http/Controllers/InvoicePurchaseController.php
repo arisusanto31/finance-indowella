@@ -49,14 +49,11 @@ class InvoicePurchaseController extends Controller
             ->get();
 
 
-        foreach ($details as $detail) {
-            $detail->total_price = ($detail->quantity * $detail->price) - $detail->discount;
-        }
+     
 
         $data['details'] = $details;
 
-        $data['total_price'] = $details->sum(fn($item) => $item->total_price);
-
+     
         $view = view('invoice.modal._edit-purchase', [
             'invoiceNumber' => $invoiceNumber,
             'data' => $data,
