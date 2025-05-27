@@ -114,14 +114,12 @@
                                 $theparent = $items->first()->parent;
                                 $parent[$theparent->id] = $theparent;
                                 $rowspan = $items->count();
-                                $invoiceSubtotal = $items->sum(
-                                    fn($item) => $item->quantity * $item->price - $item->discount,
-                                );
+
                             @endphp
 
                             @foreach ($items as $index => $item)
                                 <tr class="parent{{ $item->parent->id }}
-                                     @if($item->parent->is_mark==1)bg-primary-lightest @endif"
+                                     @if ($item->parent->is_mark == 1) bg-primary-lightest @endif"
                                     id="tr-{{ $invoiceNumber }}">
                                     @if ($index === 0)
                                         <td rowspan="{{ $rowspan }}">{{ $no++ }}</td>
@@ -139,7 +137,7 @@
                                     <td class="text-end">Rp{{ format_price($item->total_price) }}</td>
                                     @if ($index === 0)
                                         <td rowspan="{{ $rowspan }}">
-                                            <strong>Rp{{ format_price($invoiceSubtotal) }}</strong>
+                                            <strong>Rp{{ format_price($item->parent->total_price) }}</strong>
                                             @if ($item->parent->ref_akun_cash_kind_name)
                                                 <br>
                                                 <div class="bg-primary p-2 rounded-2 text-white"><i
@@ -520,7 +518,7 @@
                 addrow();
                 parents = {!! json_encode($parent) !!};
                 console.log(parents);
-               
+
             });
         </script>
     @endpush
