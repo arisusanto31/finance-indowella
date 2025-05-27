@@ -82,17 +82,17 @@
                             <input type="hidden" name="detail_id[{{ $key }}]" value="{{ $item->id }}">
                 
                             <td>
-                                <input type="number" name="quantity[{{ $key }}]" class="form-control form-control-sm text-end qty"
+                                <input type="text" name="quantity[{{ $key }}]" class="form-control form-control-sm text-end qty"
                                     value="{{ $item->quantity }}">
                             </td>
                 
                             <td>
-                                <input type="number" name="price[{{ $key }}]" class="form-control form-control-sm text-end price"
+                                <input type="text" name="price[{{ $key }}]" class="form-control form-control-sm text-end price"
                                     value="{{ $item->price }}">
                             </td>
                 
                             <td>
-                                <input type="number" name="discount[{{ $key }}]" class="form-control form-control-sm text-end disc"
+                                <input type="text" name="discount[{{ $key }}]" class="form-control form-control-sm text-end disc"
                                     value="{{ $item->discount }}">
                             </td>
                 
