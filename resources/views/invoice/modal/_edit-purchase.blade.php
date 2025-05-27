@@ -61,7 +61,7 @@
 
                                     </td>
                                     <td>
-                                        <input onchange="updateHarga(this)" type="text" name="quantity[]"
+                                        <input onchange="updateHargaEdit(this)" type="text" name="quantity[]"
                                             class="form-control rupiah qty"
                                             value="{{ format_price($item->quantity) }}" />
 
@@ -70,12 +70,12 @@
                                         {{ $item->unit }}
                                     </td>
                                     <td>
-                                        <input onchange="updateHarga(this)" type="text" name="price[]"
+                                        <input onchange="updateHargaEdit(this)" type="text" name="price[]"
                                             class="form-control rupiah price"
                                             value="{{ format_price($item->price) }}" />
                                     </td>
                                     <td>
-                                        <input onchange="updateHarga(this)" type="text" name="discount[]"
+                                        <input onchange="updateHargaEdit(this)" type="text" name="discount[]"
                                             class="form-control rupiah discount"
                                             value="{{ format_price($item->discount) }}" />
                                     </td>
@@ -108,7 +108,7 @@
 <script>
     initCurrencyInput('.rupiah');
 
-    function updateHarga(input) {
+    function updateHargaEdit(input) {
         const row = input.closest('tr');
         const qty = formatDB(row.querySelector('.qty').value) || 0;
         const price = formatDB(row.querySelector('.price').value) || 0;
@@ -119,7 +119,7 @@
         updateGrandTotal();
     }
 
-    function updateGrandTotal() {
+    function updateGrandTotalEdit() {
         let grandTotal = 0;
         document.querySelectorAll('#body-detail-invoice .total').forEach(function(totalInput) {
             grandTotal += formatDB(totalInput.value) || 0;

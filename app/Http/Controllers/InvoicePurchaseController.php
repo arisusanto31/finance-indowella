@@ -82,7 +82,7 @@ class InvoicePurchaseController extends Controller
                     'discount' => format_db($request->input('discount')[$i]) ?? 0,
                     'total_price' => format_db($request->input('total_price')[$i]) ?? 0,
                     'custom_stock_name' => $request->input('custom_stock_name')[$i] ?? $invDetail->stock->name,
-                    'created_at'=>$date
+                    'created_at' => $date
                 ];
                 $invDetail->update($data);
                 $allInv[] = $invDetail;
@@ -90,7 +90,7 @@ class InvoicePurchaseController extends Controller
             $invoicePack->update([
                 'invoice_number' => $newInvoiceNumber,
                 'total_price' => collect($allInv)->sum('total_price'),
-                'created_at'=>$date
+                'created_at' => $date
             ]);
             DB::commit();
             return ['status' => 1, 'msg' => $invoicePack, 'details' => $allInv];
@@ -131,7 +131,7 @@ class InvoicePurchaseController extends Controller
 
         $invoice_pack_number = $request->invoice_pack_number;
         $grouped = [];
-
+        $date = $request->input('date');
         foreach ($request->stock_id as $i => $stockId) {
             $thestock = Stock::find($stockId);
             $grouped[] = [
@@ -144,7 +144,8 @@ class InvoicePurchaseController extends Controller
                 'supplier_id' => $request->supplier_id,
                 'book_journal_id' => bookID(),
                 'total_price' => format_db($request->total_price[$i]) ?? 0,
-                'custom_stock_name' => $request->custom_stock_name[$i] ?? $thestock->name
+                'custom_stock_name' => $request->custom_stock_name[$i] ?? $thestock->name,
+                'created_at' => $date ?? now()
             ];
         }
 
@@ -153,6 +154,7 @@ class InvoicePurchaseController extends Controller
 
             //create pack ya
             $invoicePack = InvoicePack::create([
+
                 'invoice_number' => $invoice_pack_number,
                 'book_journal_id' => bookID(),
                 'person_id' => $request->supplier_id,
@@ -161,6 +163,7 @@ class InvoicePurchaseController extends Controller
                 'invoice_date' => now(),
                 'total_price' => collect($grouped)->sum('total_price'),
                 'status' => 'draft',
+                'created_at' => $date ?? now()
             ]);
 
 

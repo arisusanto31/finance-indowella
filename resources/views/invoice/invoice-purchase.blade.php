@@ -28,7 +28,7 @@
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Tanggal Invoice</label>
-                    <input type="text" class="form-control" value="{{ now()->format('Y-m-d H:i:s') }}" readonly>
+                    <input type="datetime-local" name="date" class="form-control" value="{{ now() }}" />
                 </div>
             </div>
 
@@ -112,7 +112,7 @@
                                             </a>
                                             <a href="javascript:void(editInvoicePurchase('{{ $item->invoice_pack_number }}'))"
                                                 class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-edit"></i> 
+                                                <i class="fas fa-edit"></i>
                                             </a>
 
                                         </td>
