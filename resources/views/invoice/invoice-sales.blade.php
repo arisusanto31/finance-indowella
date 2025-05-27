@@ -72,11 +72,12 @@
         <div class="text-primary-dark "> 📁 <strong>DAFTAR INVOICE </strong> </div>
         <div class="d-flex justify-content pe-4 mb-3">
             <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="prevMonth()">
-            </button>
-            <span class="badge bg-primary d-flex justify-content-center align-items-center">
-                {{ getListMonth()[$month] }} {{ $year }}</span>
-            <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="nextMonth()">
-            </button>
+                << </button>
+                    <span class="badge bg-primary d-flex justify-content-center align-items-center">
+                        {{ getListMonth()[$month] }} {{ $year }}</span>
+                    <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="nextMonth()">
+                        >>
+                    </button>
 
 
 
@@ -160,7 +161,7 @@
                                                 <strong>{{ $status }}</strong>
                                             </p>
                                         </td>
-                                        <td id="action{{$item->parent->id}}" rowspan="{{ $rowspan }}">
+                                        <td id="action{{ $item->parent->id }}" rowspan="{{ $rowspan }}">
 
                                             @if ($item->parent)
                                                 @if ($item->parent->is_final == 1)
