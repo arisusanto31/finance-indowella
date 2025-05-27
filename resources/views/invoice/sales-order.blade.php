@@ -525,7 +525,7 @@
                 addrow();
                 parents = {!! json_encode($parent) !!};
                 console.log(parents);
-                updateTotalMarked();
+               
             });
         </script>
     @endpush

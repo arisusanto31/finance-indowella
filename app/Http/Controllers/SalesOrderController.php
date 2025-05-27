@@ -42,7 +42,8 @@ class SalesOrderController extends Controller
         $totalInvoiceFinal = collect($invPack)->where('is_final', 1)->sum('total_price');
         $totalInvoiceMark = collect($invPack)->where('is_mark', 1)->sum('total_price');
 
-        return view('invoice.sales-order', compact('salesOrders', 'month', 'year', 'totalInvoice', 'totalInvoiceFinal', 'totalInvoiceMark'));
+        $parent=[];
+        return view('invoice.sales-order', compact('salesOrders', 'month', 'year', 'totalInvoice', 'totalInvoiceFinal', 'totalInvoiceMark','parent'));
     }
 
     public function store(Request $request)
