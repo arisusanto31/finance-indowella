@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Http\Controllers\JournalController;
+use App\Services\LockManager;
 use App\Traits\HasModelDetailKartuInvoice;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Database\Eloquent\Model;
@@ -142,6 +143,7 @@ class KartuDPSales extends Model
     {
         DB::beginTransaction();
         try {
+            $lockManager = new LockManager();
             $SONumber = $request->input('sales_order_number');
             $invoiceNumber = $request->input('invoice_pack_number');
             $date = $request->input('date') ?? Date('Y-m-d H:i:s');
@@ -214,7 +216,7 @@ class KartuDPSales extends Model
                     'title' => 'create mutation transaction',
                     'url_try_again' => 'try_again'
 
-                ]), false);
+                ]), false, $lockManager);
                 if ($st['status'] == 0) return $st;
 
                 $number = $st['journal_number'];
@@ -249,6 +251,7 @@ class KartuDPSales extends Model
             ]));
 
             if ($st['status'] == 1) {
+                $lockManager->releaseAll();
                 DB::commit();
                 return $st;
             } else {
