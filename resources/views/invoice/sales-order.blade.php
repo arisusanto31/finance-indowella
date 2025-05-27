@@ -343,7 +343,7 @@
                         _token: '{{ csrf_token() }}'
                     },
                     onSuccess: function(res) {
-                        html = ` <a href="javascript:void(lihatDetailInvoice('{{ $item->invoice_pack_number }}'))"
+                        html = ` <a href="javascript:void(lihatDetailInvoice('${res.msg.sales_order_number}'))"
                                     class="btn btn-sm btn-outline-primary" title="Lihat Invoice">
                                     <i class="fas fa-eye"></i>
                                 </a>
