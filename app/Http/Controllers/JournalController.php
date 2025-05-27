@@ -352,7 +352,7 @@ class JournalController extends Controller
             foreach ($allJournals as $journal) {
                 $journal->updateLawanCode();
                 if ($isBackDate == 1) {
-                    $journal->recalculateJournal();
+                    $journal->recalculateJournal(false);
                 }
             }
 

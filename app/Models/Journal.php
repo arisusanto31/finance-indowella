@@ -305,15 +305,19 @@ class Journal extends Model
         return $this;
     }
 
-    public function recalculateJournal()
+    public function recalculateJournal($isLock = true)
     {
         $thejournal = $this;
         $codeGroup = $this->code_group;
         $name = 'generate-journal' . $codeGroup;
-        $lock = Cache::lock($name, 120);
+        if ($isLock == true) {
+            $lock = Cache::lock($name, 120);
+        }
         // CustomLogger::log('journal', 'info', 'recalculate make lock ' . $name);
         try {
-            $lock->block(20);
+            if ($isLock == true) {
+                $lock->block(20);
+            }
             $mustEditJournal = Journal::where('index_date', '>', $thejournal->index_date)->where('code_group', $thejournal->code_group)->sortindex()->get();
             $lastSaldo = $thejournal->amount_saldo;
             $newdata = [];
@@ -335,7 +339,8 @@ class Journal extends Model
                 'lock' => $lock
             ];
         } finally {
-            $lock->release();
+            if ($isLock == true)
+                $lock->release();
             // CustomLogger::log('journal', 'info', 'recalculate release lock ' . $name);
         }
         return ['status' => 1, 'msg' => $newdata, 'journal' => $thejournal];
