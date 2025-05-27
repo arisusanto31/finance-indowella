@@ -438,6 +438,7 @@ class SalesOrderController extends Controller
                     $detail->discount      = $disc;
                     $detail->unit          = $unit;
                     $detail->total_price   = $total;
+                    $detail->pricejadi= $total/$detail->qtyjadi;
                     $detail->sales_order_number = $request->sales_order_number;
 
                     $detail->created_at = $tanggalGlobal;
