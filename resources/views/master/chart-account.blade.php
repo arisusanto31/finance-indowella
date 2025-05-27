@@ -13,8 +13,8 @@
         </div>
     </div>
 
-    <div id="div-form-small" style="width:90vw; max-width:400px; border:1px solid #888;position:fixed" class="hidden fixed-center relativepos bglevel3 colorblack br-10 pa-5">
-        <div class="absolutepos" style="right:0px; top:0px;">
+    <div id="div-form-small" style="width:90vw; max-width:400px;position:fixed" class="hidden fixed-center relativepos bg-primary-lighter colorblack br-10 p-3">
+        <div class="position-absolute" style="right:0px; top:0px;">
             <a href="javascript:void(hideFormSmall())">
                 <div class="colorwhite flex flex-center" style="border-radius:50%; width:25px; height:25px; background-color:red">
                     <i class="colorwhite fas fa-close"></i>
@@ -44,7 +44,7 @@
         function editAccount(id) {
             loading(1);
             $.ajax({
-                url: '{{url("admin/get-chart-account")}}/' + id,
+                url: '{{url("admin/master/chart-account/get-chart-account")}}/' + id,
                 method: 'get',
                 success: function(res) {
                     console.log(res);
@@ -55,37 +55,37 @@
                         theCodeGrop = data.code_group.split("");
 
                         html = "";
-                        html += '<form id="form-new-account">';
+                        html += '<form id="form-edit-account">';
                         html += ' {{csrf_field()}} ';
                         html += '<div class="row"> ';
-                        html += '  <div class="col-xs-12">';
-                        html += '      <label>parent</label>';
-                        html += '        <input type="hidden" name="id" value="' + data.id + '"/>'
-                        html += '        <select class="form-control" id="account-parent_id" onchange="getCodeGroup()" name="parent_id" >';
-                        if (data.parent_id != null)
-                            html += '               <option value="' + data.parent_id + '" >' + data.parent.name + '</option>';
-                        html += '        </select>';
-                        html += '  </div>';
-                        html += '  <div class="col-xs-12">';
+                        // html += '  <div class="col-xs-12">';
+                        // html += '      <label>parent</label>';
+                        // html += '        <input type="hidden" name="id" value="' + data.id + '"/>'
+                        // html += '        <select class="form-control" id="account-parent_id" onchange="getCodeGroup()" name="parent_id" >';
+                        // if (data.parent_id != null)
+                        //     html += '               <option value="' + data.parent_id + '" >' + data.parent.name + '</option>';
+                        // html += '        </select>';
+                        // html += '  </div>';
+                        html += '  <div class="col-xs-12 ">';
                         html += '      <label>Code group</label>';
                         html += '        <div class="row"> ';
-                        html += '            <div class="col-xs-2 pa-5">';
-                        html += '              <input class="theinput form-control" value="' + theCodeGrop[0] + '" id="code1" onkeyup="moveInput(2)" name="code_group[]" /> ';
+                        html += '            <div class="col-xs-2 col-md-2 p-1">';
+                        html += '              <input class="theinput form-control" readonly value="' + theCodeGrop[0] + '" id="code1" onkeyup="moveInput(2)" name="code_group[]" /> ';
                         html += '            </div>';
-                        html += '            <div class="col-xs-2 pa-5">';
-                        html += '              <input class="theinput form-control" value="' + theCodeGrop[1] + '" id="code2" onkeyup="moveInput(3)" name="code_group[]" /> ';
+                        html += '            <div class="col-xs-2  col-md-2 p-1">';
+                        html += '              <input class="theinput form-control" readonly value="' + theCodeGrop[1] + '" id="code2" onkeyup="moveInput(3)" name="code_group[]" /> ';
                         html += '            </div>';
-                        html += '            <div class="col-xs-2 pa-5">';
-                        html += '              <input class="theinput form-control" value="' + theCodeGrop[2] + '" id="code3" onkeyup="moveInput(4)" name="code_group[]" /> ';
+                        html += '            <div class="col-xs-2 col-md-2 p-1">';
+                        html += '              <input class="theinput form-control" readonly value="' + theCodeGrop[2] + '" id="code3" onkeyup="moveInput(4)" name="code_group[]" /> ';
                         html += '            </div>';
-                        html += '            <div class="col-xs-2 pa-5">';
-                        html += '              <input class="theinput form-control" value="' + theCodeGrop[3] + '" id="code4" onkeyup="moveInput(5)" name="code_group[]" /> ';
+                        html += '            <div class="col-xs-2 col-md-2 p-1">';
+                        html += '              <input class="theinput form-control" readonly value="' + theCodeGrop[3] + '" id="code4" onkeyup="moveInput(5)" name="code_group[]" /> ';
                         html += '            </div>';
-                        html += '            <div class="col-xs-2 pa-5">';
-                        html += '              <input class="theinput form-control" value="' + theCodeGrop[4] + '" id="code5" onkeyup="moveInput(6)" name="code_group[]" /> ';
+                        html += '            <div class="col-xs-2 col-md-2 p-1">';
+                        html += '              <input class="theinput form-control" readonly value="' + theCodeGrop[4] + '" id="code5" onkeyup="moveInput(6)" name="code_group[]" /> ';
                         html += '            </div>';
-                        html += '            <div class="col-xs-2 pa-5">';
-                        html += '              <input class="theinput form-control" value="' + theCodeGrop[5] + '" id="code6" name="code_group[]" /> ';
+                        html += '            <div class="col-xs-2 col-md-2 p-1">';
+                        html += '              <input class="theinput form-control" readonly value="' + theCodeGrop[5] + '" id="code6" name="code_group[]" /> ';
                         html += '            </div>';
                         html += '        </div>';
                         html += '  </div>';
@@ -95,23 +95,17 @@
                         html += '  </div>';
                         html += '  <div class="col-xs-12">';
                         html += '       <label>Account Type</label>';
-                        html += '       <select class="form-control" id="account-account_type" name="account_type" >';
-                        html += '            <option value="Aset" >Aset</option>';
-                        html += '            <option value="Kewajiban" >Kewajiban</option>';
-                        html += '            <option value="Ekuitas" >Ekuitas</option>';
-                        html += '            <option value="Pendapatan" >Pendapatan</option>';
-                        html += '            <option value="Beban" >Beban</option>';
-                        html += '       </select>';
+                        html += '       <input type="text" class="form-control" readonly value="' + data.account_type + '"/>';
                         html += '  </div>';
                         html += '  <div class="col-xs-12">';
-                        html += '       <button class="btn-control" type="button" onclick="submitNewAccount()">Submit</button>';
+                        html += '       <button class="btn-control" type="button" onclick="submitAlias()">Submit</button>';
                         html += '  </div>';
                         html += '</div>';
                         html += '</form>';
                         $('#form-body').html(html);
-                        $('#account-account_type').val(data.account_type);
-                        $('#form-title').html('FORM ADD ACCOUNT');
-                        initItemSelectManual('#account-parent_id', '{{url("admin/get-item-chart-account-all")}}');
+                        // $('#account-account_type').val(data.account_type);
+                        $('#form-title').html('FORM EDIT NAME');
+                        initItemSelectManual('#account-parent_id', '{{route("chart-account.get-item-all")}}', data.parent_id);
                         showFormSmall();
                     } else {
                         loading(0);
@@ -133,27 +127,27 @@
             html += '<div class="row"> ';
             html += '  <div class="col-xs-12">';
             html += '      <label>parent</label>';
-            html += '       <select class="form-control" id="account-parent_id" onchange="getCodeGroup()" name="parent_id" />';
+            html += '       <select class="form-control" id="account-parent_id" onchange="getCodeGroup()" name="parent_id" ></select>';
             html += '  </div>';
             html += '  <div class="col-xs-12">';
             html += '      <label>Code group</label>';
             html += '        <div class="row"> ';
-            html += '            <div class="col-xs-2 pa-5">';
+            html += '            <div class=" col-md-2 p-1">';
             html += '              <input class="theinput form-control" id="code1" onkeyup="moveInput(2)" name="code_group[]" /> ';
             html += '            </div>';
-            html += '            <div class="col-xs-2 pa-5">';
+            html += '            <div class="col-xs-2 col-md-2 p-1">';
             html += '              <input class="theinput form-control" id="code2" onkeyup="moveInput(3)" name="code_group[]" /> ';
             html += '            </div>';
-            html += '            <div class="col-xs-2 pa-5">';
+            html += '            <div class="col-xs-2 col-md-2 p-1">';
             html += '              <input class="theinput form-control" id="code3" onkeyup="moveInput(4)" name="code_group[]" /> ';
             html += '            </div>';
-            html += '            <div class="col-xs-2 pa-5">';
+            html += '            <div class="col-xs-2 col-md-2 p-1">';
             html += '              <input class="theinput form-control" id="code4" onkeyup="moveInput(5)" name="code_group[]" /> ';
             html += '            </div>';
-            html += '            <div class="col-xs-2 pa-5">';
+            html += '            <div class="col-xs-2 col-md-2 p-1">';
             html += '              <input class="theinput form-control" id="code5" onkeyup="moveInput(6)" name="code_group[]" /> ';
             html += '            </div>';
-            html += '            <div class="col-xs-2 pa-5">';
+            html += '            <div class="col-xs-2 col-md-2 p-1">';
             html += '              <input class="theinput form-control" id="code6" name="code_group[]" /> ';
             html += '            </div>';
             html += '        </div>';
@@ -179,7 +173,7 @@
             html += '</form>';
             $('#form-body').html(html);
             $('#form-title').html('FORM ADD ACCOUNT');
-            initItemSelectManual('#account-parent_id', '{{url("admin/get-item-chart-account-all")}}');
+            initItemSelectManual('#account-parent_id', '{{route("chart-account.get-item-all")}}');
             showFormSmall();
         }
 
@@ -191,7 +185,7 @@
             parentID = $('#account-parent_id option:selected').val();
 
             $.ajax({
-                url: '{{url("admin/get-code-group-account")}}/' + parentID,
+                url: '{{url("admin/master/chart-account/get-code-group")}}/' + parentID,
                 method: 'get',
                 success: function(res) {
                     console.log(res);
@@ -215,15 +209,36 @@
             });
         }
 
+        function submitAlias() {
+            $.ajax({
+                url: '{{url("admin/master/chart-account/make-alias")}}',
+                method: 'post',
+                data: $('#form-edit-account').serialize(),
+                success: function(res) {
+                    console.log(res);
+                    if (res.status == 1) {
+                        swalInfo('success', 'data berhasil disubmit', 'success');
+                        hideFormSmall();
+                        setTimeout(getChartAccount, 100);
+                    } else {
+                        swal("error", res.msg);
+                    }
+                },
+                error: function(res) {
+                    swal('opps', 'something wrong');
+                }
+            });
+        }
+
         function submitNewAccount() {
             $.ajax({
-                url: '{{url("admin/master/chart-account")}}',
+                url: '{{url("admin/master/chart-account/main")}}',
                 method: 'post',
                 data: $('#form-new-account').serialize(),
                 success: function(res) {
                     console.log(res);
                     if (res.status == 1) {
-                        swal_success('success', 'data berhasil disubmit');
+                        swalInfo('success', 'data berhasil disubmit');
                         hideFormSmall();
                         setTimeout(getChartAccount, 100);
                     } else {
@@ -238,6 +253,14 @@
 
         setTimeout(getChartAccount, 100);
 
+        function getNameChart(code, name) {
+            if (aliasChart[code] != undefined) {
+                return aliasChart[code];
+            } else {
+                return name;
+            }
+        }
+
         function tampilkan(data, master, margin) {
             html = "";
             isParent = master[data.id] != undefined ? true : false;
@@ -245,17 +268,20 @@
             if (data.parent_id == null)
                 html += `<li class="menu-item " style="margin-left: ${margin}px" >
                          <a class="" href="javascript:void(openToggle('${data.id}'))"> 
-                          <div class=""><strong> ${data.code_group} -  ${data.name} </strong>  ${stringParent} 
+                          <div class=""><strong> ${data.code_group} -  ${getNameChart(data.code_group,data.name)} </strong>  ${stringParent} 
                                     ${data.reference_model?'<span class="bg-primary px-2 text-white">'+data.reference_model+'</span>':''}
-                          </div>
+                                 <a href="javascript:void(editAccount(${data.id}))" style="font-size:12px;"> <i class="fas fa-pencil-alt " ></i> </a>
+                         </div> 
+                          
+                      
                         </a>
                         </li>`;
             else
                 html += `<li class="menu-item " style="margin-left:  ${margin}px" >
                          <a class="" href="javascript:void(openToggle('${data.id}'))"> 
-                          <div class=""><strong> ${data.code_group} </strong> -  ${data.name} ${stringParent} 
+                          <div class=""><strong> ${data.code_group} </strong> -  ${getNameChart(data.code_group,data.name)} ${stringParent} 
                                ${data.reference_model?'<span class="bg-primary px-2 text-white">'+data.reference_model+'</span>':''}
-
+                             <a href="javascript:void(editAccount(${data.id}))" style="font-size:12px;"> <i class="fas fa-pencil-alt"></i> </a>
                           </div>
                         </a>
                         </li>`;
@@ -272,6 +298,7 @@
             return html;
         }
 
+        var aliasChart = [];
 
         function getChartAccount() {
             $.ajax({
@@ -280,6 +307,7 @@
                 success: function(res) {
                     console.log(res);
                     if (res.status == 1) {
+                        aliasChart = res.alias;
                         html = "";
                         margin = 0;
                         html += '<ul class="">';

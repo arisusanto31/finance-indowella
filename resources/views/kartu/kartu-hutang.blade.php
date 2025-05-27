@@ -63,16 +63,12 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-
                     <div class="flex-column align-items-start">
                         <h5 class="modal-title" id="exampleModalLabel1">Buat Mutasi Kartu Hutang</h5>
-
-
                         <div class="form-check form-switch ">
                             <input class="form-check-input" type="checkbox" id="is_otomatis_jurnal" checked />
                             <label class="form-check-label" for="is_otomatis_jurnal">Buat Jurnal</label>
                         </div>
-
                     </div>
                     <button
                         type="button"
@@ -109,7 +105,6 @@
                         <div class="col mb-3">
                             <label for="amount_mutasi" class="form-label">Akun hutang</label>
                             <select type="text" id="akun-hutang" class="form-control select-coa">
-
                             </select>
                         </div>
                         <div class="col mb-3">

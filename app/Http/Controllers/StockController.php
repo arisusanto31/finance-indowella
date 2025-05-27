@@ -32,13 +32,15 @@ class StockController extends Controller
             'unit_backend' => 'required|string|max:10',
             'unit_default' => 'string|max:20'
         ]);
+        $request->merge(['book_journal_id', bookID()]);
         $stock = Stock::findOrFail($id);
         $stock->update($request->only([
             'name',
             'category_id',
             'parent_category_id',
             'unit_backend',
-            'unit_default'
+            'unit_default',
+            'bbok_journal_id',
         ]));
         return [
             'status' => 1,
@@ -59,6 +61,7 @@ class StockController extends Controller
                 'unit_backend' => 'required|string|max:10',
                 'type' => 'required|string|max:10',
             ]);
+            $validated['book_journal_id'] = bookID();
 
             Stock::create($validated);
             return redirect()->back()->with('success', 'Stock berhasil disimpan!');
@@ -183,6 +186,7 @@ class StockController extends Controller
     function getUnit($id)
     {
         $unit = StockUnit::where('stock_id', $id)->get();
+        $stock= Stock::find($id);
         if (!$unit) {
             return [
                 'status' => 0,
@@ -191,7 +195,8 @@ class StockController extends Controller
         }
         return [
             'status' => 1,
-            'msg' => $unit
+            'msg' => $unit,
+            'stock'=>$stock,
         ];
     }
     function openSinkron($book_journal_id)
@@ -213,7 +218,7 @@ class StockController extends Controller
                     ->where('st.reference_stock_type', '=', $stockModelClass);
             })->where(function ($q) {
                 $q->where('st.id', null)->orWhere('st.updated_at', '<', DB::raw('rst.updated_at'));
-            })->with('category:id,name')->with('parentCategory:id,name')
+            })->whereNull('rst.deleted')->where('rst.is_stock',1)->where('rst.is_ppn',1)->with('category:id,name')->with('parentCategory:id,name')
             ->select(
                 'rst.name',
                 'rst.unit_info as unit_default',

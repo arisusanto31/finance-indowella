@@ -57,7 +57,7 @@ class ManufStock extends Model
 
         // Ambil semua ManufUnit yang berkaitan dari database manuf
         $units = ManufUnit::whereIn('stock_id', $stockIds)
-            ->where('is_dagang', 1)
+            // ->where('is_dagang', 1)
             ->whereNull('is_disabled')
             ->select('unit', 'konversi', 'stock_id')
             ->get()

@@ -49,12 +49,13 @@ class SupplierController extends Controller
     {
         $data = $request->validate([
             'name' => 'required',
-            'npwp' => 'required',
-            'ktp' => 'required',
+            'npwp' => 'nullable',
+            'ktp' => 'nullable|digits:16',
             'cp_name' => 'required',
             'phone' => 'required',
             'address' => 'nullable',
         ]);
+        $data['book_journal_id'] = bookID();
 
         $supplier = Supplier::findOrFail($id);
         $supplier->update($data);
@@ -76,18 +77,24 @@ class SupplierController extends Controller
     public function store(Request $request)
     {
         try {
-        $data = $request->validate([
-            'name'     => 'required|unique:suppliers,name',
-            'npwp'     => 'required',
-            'ktp'      => 'required|digits:16',
-            'cp_name'  => 'required',
-            'phone'    => 'required',
-            'address'  => 'nullable',
-        ]);
-        Supplier::create($data);
-        return redirect()
-            ->route('supplier.main.index')
-            ->with('success', 'Supplier berhasil ditambahkan!');
+            $data = $request->validate([
+                'name'     => 'required|unique:suppliers,name',
+                'npwp'     => 'nullable',
+                'ktp'      => 'nullable|digits:16',
+                'cp_name'  => 'required',
+                'phone'    => 'required',
+                'address'  => 'nullable',
+            ]);
+            if ($data['npwp'] == null && $data['ktp'] == null) {
+                return redirect()
+                    ->route('supplier.main.index')
+                    ->with('error', 'Supplier gagal ditambahkan! NPWP atau KTP harus diisi salah satu');
+            }
+            $data['book_journal_id'] = bookID();
+            Supplier::create($data);
+            return redirect()
+                ->route('supplier.main.index')
+                ->with('success', 'Supplier berhasil ditambahkan!');
         } catch (ValidationException $e) {
             return redirect()
                 ->route('supplier.main.index')

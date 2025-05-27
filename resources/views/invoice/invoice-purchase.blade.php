@@ -88,7 +88,8 @@
                                     <td rowspan="{{ $rowspan }}">{{ $item->supplier->name ?? '-' }}</td>
                                 @endif
 
-                                <td>{{ $item->stock->name ?? '-' }}</td>
+                                <td>{{ $item->custom_stock_name != '??' ? $item->custom_stock_name : $item->stock->name }}
+                                </td>
                                 <td class="text-end">{{ $item->quantity }}</td>
                                 <td>{{ $item->unit }}</td>
                                 <td class="text-end">Rp{{ number_format($item->price) }}</td>
@@ -101,7 +102,8 @@
 
                                 @if ($index === 0)
                                     <td rowspan="{{ $rowspan }}">
-                                        <strong>Rp{{ number_format($invoiceSubtotal) }}</strong></td>
+                                        <strong>Rp{{ number_format($invoiceSubtotal) }}</strong>
+                                    </td>
                                     @if ($index === 0)
                                         <td rowspan="{{ $rowspan }}">
                                             <a href="javascript:void(lihatDetailInvoice('{{ $item->invoice_pack_number }}'))"
@@ -111,8 +113,8 @@
                                             <a href="javascript:void(editInvoicePurchase('{{ $item->invoice_pack_number }}'))"
                                                 class="btn btn-sm btn-outline-success">
                                                 <i class="fas fa-edit"></i> Edit
-                                             </a>
-                                             
+                                            </a>
+
                                         </td>
                                     @endif
                                 @endif
@@ -173,6 +175,7 @@
             }
 
 
+
             function editInvoicePurchase(invoiceNumber) {
                 console.log("Edit Purchase Invoice:", invoiceNumber);
                 showDetailOnModal('{{ url('/admin/invoice/invoice-purchase/edit') }}/' + invoiceNumber, 'xl');
@@ -190,6 +193,8 @@
                     Swal.fire('Oops!', 'Minimal harus ada satu baris lur 😈!', 'warning');
                 }
             }
+
+
 
             function submitInvoice() {
                 swalConfirmAndSubmit({
@@ -214,6 +219,7 @@
                 updateTotalInvoice();
             }
 
+
             function updateTotalInvoice() {
                 totalInvoice = 0;
                 $('.sub-total').each(function() {
@@ -227,6 +233,8 @@
 
             function updateStockUnit(el) {
                 const card = el.closest('.rowdebet');
+                const divStock = card.querySelector('.col-stock');
+                const divCustomStock = card.querySelector('.col-custom-stock');
                 const selectedOption = el.options[el.selectedIndex];
                 const unitSelect = card.querySelector('.unit');
                 const id = selectedOption.value;
@@ -237,6 +245,11 @@
                     success: function(res) {
                         console.log(res);
                         if (res.status == 1) {
+                            if (res.stock.name == 'custom') {
+                                divStock.classList.add('col-md-1');
+                                divStock.classList.remove('col-md-3');
+                                divCustomStock.classList.remove('hidden');
+                            }
                             html = "";
                             res.msg.forEach(function(item) {
                                 html += `<option value="${item.unit}">${item.unit}</option>`;
@@ -258,9 +271,13 @@
                 <div class="card border shadow-sm rounded p-3 mb-3 position-relative rowdebet">
                     <div type="button" class="btn-close-card" onclick="removeDebetRow(this)"><div class="centered-flex"><i class="fas fa-close"></i></div></div>
                     <div class="row g-2">
-                        <div class="col-md-3">
+                        <div class="col-md-3 col-stock">
                             <label class="form-label">Nama Produk</label>
                             <select name="stock_id[]" onchange="updateStockUnit(this)" class="form-control select2-stock stock" required></select>
+                        </div>
+                        <div class="col-md-2 col-custom-stock hidden">
+                            <label class="form-label">Nama Custom </label>
+                            <input type="text" name="custom_stock_name[]" class="form-control"/>
                         </div>
                         <div class="col-md-1">
                             <label class="form-label">Qty</label>

@@ -144,7 +144,11 @@ class KartuDPSales extends Model
         try {
             $SONumber = $request->input('sales_order_number');
             $invoiceNumber = $request->input('invoice_pack_number');
-
+            $date = $request->input('date') ?? Date('Y-m-d H:i:s');
+            $isBackdate = 0;
+            if (carbonDate()->subMinute(5) > createCarbon($date)) {
+                $isBackdate = 1;
+            }
             $sales = SalesOrder::where('sales_order_number', $SONumber)->first();
             $SOID = $sales ? $sales->id : null;
             $invoices = InvoicePack::where('invoice_number', $invoiceNumber)->first();
@@ -204,8 +208,9 @@ class KartuDPSales extends Model
                     'kredits' => $kredits,
                     'debets' => $debets,
                     'type' => 'transaction',
-                    'date' => Date('Y-m-d H:i:s'),
+                    'date' => $isBackdate ? $date : Date('Y-m-d H:i:s'),
                     'is_auto_generated' => 1,
+                    'is_backdate' => $isBackdate,
                     'title' => 'create mutation transaction',
                     'url_try_again' => 'try_again'
 

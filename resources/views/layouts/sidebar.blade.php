@@ -133,7 +133,7 @@
             </a>
             <ul class="menu-sub">
                 <li class="menu-item">
-                    <a href="{{url('admin/kartu/kartu-kas') }}" class="menu-link">
+                    <a href="{{url('admin/kartu/kartu-kas/main') }}" class="menu-link">
                         <!-- <i class="menu-icon tf-icons bx bx-money mr-2 fs-6 me-2" style="margin-right: 10px;"></i> -->
                         <div data-i18n="Accordion">Kartu Kas</div>
                     </a>

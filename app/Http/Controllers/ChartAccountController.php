@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\ChartAccount;
+use App\Models\ChartAccountAlias;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use PhpOffice\PhpSpreadsheet\Chart\Chart;
 
 class ChartAccountController extends Controller
 {
@@ -29,12 +31,12 @@ class ChartAccountController extends Controller
         if (getInput('search')) {
             $searchs = explode(' ', getInput('search'));
         }
-        $charts = ChartAccount::aktif()->child();
+        $charts = ChartAccount::aktif()->child()->withAlias();
         foreach ($searchs as $search) {
-            $charts = $charts->where('name', 'like', '%' . $search . '%');
+            $charts = $charts->whereRaw('coalesce(ca.name,chart_accounts.name) like?', ['%'.$search.'%']);
         }
-        $charts = $charts->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
-        return [
+        $charts = $charts->select(DB::raw('chart_accounts.code_group as id'), DB::raw('coalesce(ca.name,chart_accounts.name) as text'))->get();
+          return [
             'results' => $charts
         ];
     }
@@ -50,16 +52,25 @@ class ChartAccountController extends Controller
             $charts = $charts->where('name', 'like', '%' . $search . '%');
         }
         $charts = $charts->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
+        $alias = ChartAccountAlias::pluck('name', 'code_group')->all();
+        $finalChart = $charts->map(function ($val) use ($alias) {
+            if (array_key_exists($val['id'], $alias)) {
+                $val['text'] = $alias[$val->id];
+            }
+            return $val;
+        });
         return [
-            'results' => $charts
+            'results' => $finalChart
         ];
     }
     public function getChartAccounts()
     {
         $charts = ChartAccount::aktif()->orderBy('code_group')->get()->groupBy('parent_id');
+        $alias = ChartAccountAlias::pluck('name', 'code_group')->all();
         return [
             'status' => 1,
-            'msg' => $charts
+            'msg' => $charts,
+            'alias' => $alias
         ];
     }
 
@@ -238,6 +249,14 @@ class ChartAccountController extends Controller
                 $finalChart = $finalChart->merge($chart);
             }
         }
+        $alias = ChartAccountAlias::pluck('name', 'code_group')->all();
+
+        $finalChart = $finalChart->map(function ($val) use ($alias) {
+            if (array_key_exists($val['id'], $alias)) {
+                $val['text'] = $alias[$val->id];
+            }
+            return $val;
+        });
         return [
             'results' => $finalChart
         ];
@@ -278,7 +297,7 @@ class ChartAccountController extends Controller
     {
 
         $theFixCode = 0;
-        $chart = ChartAccount::find($id);
+        $chart = ChartAccount::where('code_group', $id)->first();
         $code = $chart->code_group;
         for ($i = 1; $i < 10000000; $i *= 10) {
             if ($code % $i != 0) {
@@ -300,6 +319,24 @@ class ChartAccountController extends Controller
         return [
             'status' => 1,
             'msg' => $chart
+        ];
+    }
+
+    function makeAlias(Request $request)
+    {
+        $codeGroups = $request->input('code_group');
+        $codeGroup = implode("", $codeGroups);
+        $name = $request->input('name');
+        $chart = ChartAccount::where('code_group', $codeGroup)->first();
+        $alias = ChartAccountAlias::createOrUpdate(new Request([
+            'book_journal_id' => bookID(),
+            'chart_account_id' => $chart->id,
+            'code_group' => $codeGroup,
+            'name' => $name
+        ]));
+        return [
+            'status' => 1,
+            'msg' => $alias
         ];
     }
 

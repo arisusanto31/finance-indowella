@@ -6,6 +6,7 @@ use App\Http\Controllers\JournalController;
 use App\Models\ChartAccount;
 use App\Models\Journal;
 use App\Models\TaskImportDetail;
+use App\Models\Toko;
 use App\Services\ContextService;
 use App\Services\LockManager;
 use CustomLogger;
@@ -57,6 +58,7 @@ class ImportSaldoNLJob implements ShouldQueue
             $chart = ChartAccount::where('code_group', $codeGroup)->first();
             $codeName = $chart ? $chart->code_group : null;
             $lawanCode = 301000;
+            $tokoID = Toko::first()->id;
             if ($amount == 0) {
                 $task->status = 'success';
                 $task->finished_at = now();
@@ -65,7 +67,7 @@ class ImportSaldoNLJob implements ShouldQueue
             } else {
                 if ($amount > 0) {
                     //kalo aset debet, kalo liabilitas kredit
-                    if ($codeGroup > 400000) {
+                    if ($codeGroup > 200000) {
                         //liabilitas
                         $codeKredit = $codeGroup;
                         $codeDebet = $lawanCode;
@@ -74,7 +76,7 @@ class ImportSaldoNLJob implements ShouldQueue
                         $codeKredit = $lawanCode;
                     }
                 } else {
-                    if ($codeGroup > 400000) {
+                    if ($codeGroup > 200000) {
                         //liabilitas
                         $codeKredit = $lawanCode;
                         $codeDebet = $codeGroup;
@@ -91,6 +93,7 @@ class ImportSaldoNLJob implements ShouldQueue
                         'amount' => abs($amount),
                         'reference_id' => null,
                         'reference_type' => null,
+                        'toko_id'=>$codeKredit >400000? $tokoID:null
                     ],
                 ];
                 $debets = [
@@ -100,6 +103,7 @@ class ImportSaldoNLJob implements ShouldQueue
                         'amount' => abs($amount),
                         'reference_id' => null,
                         'reference_type' => null,
+                        'toko_id'=>$codeDebet>400000? $tokoID:null
                     ],
                 ];
                 $st = JournalController::createBaseJournal(new Request([

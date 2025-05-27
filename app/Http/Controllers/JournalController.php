@@ -29,10 +29,6 @@ use Throwable;
 class JournalController extends Controller
 {
     //
-
-
-
-
     public function neraca()
     {
         $view = view('main.neraca');
@@ -206,7 +202,12 @@ class JournalController extends Controller
 
     public function mutasi()
     {
-        return view('main.mutasi');
+        $view = view('main.mutasi');
+        $month = getInput('month') ? toDigit(getInput('month'), 2) : Date('m');
+        $year = getInput('year') ?? Date('Y');
+        $view->month = $month;
+        $view->year = $year;
+        return $view;
     }
 
     public function getListBukuBesar()
@@ -215,7 +216,7 @@ class JournalController extends Controller
         $month = getInput('month');
         $year = getInput('year');
         $journals = Journal::searchCOA($code)->whereMonth('created_at', $month)->whereYear('created_at', $year)->orderBy('index_date', 'asc')->get();
-        $chartAccount = ChartAccount::aktif()->pluck('name', 'code_group');
+        $chartAccount = ChartAccount::aktif()->withAlias()->pluck('alias_name', 'code_group');
         return [
             'status' => 1,
             'msg' => $journals,
@@ -348,7 +349,12 @@ class JournalController extends Controller
                 }
                 $allJournals[] = $st['msg'];
             }
-
+            foreach ($allJournals as $journal) {
+                $journal->updateLawanCode();
+                if ($isBackDate == 1) {
+                    $journal->recalculateJournal();
+                }
+            }
 
 
 
@@ -440,6 +446,10 @@ class JournalController extends Controller
     {
         $journal = Journal::find($id);
         $journal->verifyJournal();
+        $journal->updateLawanCode();
+        if ($journal->is_backdate == 1) {
+            $journal->recalculateJournal();
+        }
         return [
             'status' => 1,
             'msg' => 'success'
@@ -495,6 +505,7 @@ class JournalController extends Controller
             }
 
             DB::commit();
+            return ['status' => 1, 'msg' => 'success'];
         } catch (\Throwable $e) {
             DB::rollBack();
             return [
@@ -634,10 +645,10 @@ class JournalController extends Controller
         $data = $import->data;
         $coas = ChartAccount::aktif()->pluck('name', 'code_group')->all();
         $stocks = Stock::pluck('name')->all();
-
+        $stockRefs = Stock::whereNotNull('reference_stock_id')->pluck('reference_stock_id')->all();
 
         // Kirim ke view konfirmasi
-        return view('main.import-saldo', compact('data', 'coas', 'stocks', 'date'));
+        return view('main.import-saldo', compact('data', 'coas', 'stocks', 'date', 'stockRefs'));
     }
 
     public function importSaldo(Request $request)
@@ -694,12 +705,12 @@ class JournalController extends Controller
                 $taskKartuStock[] = $taskImportDetail->id;
             }
             DB::commit();
-            foreach ($taskSaldo as $saldo) {
-                ImportSaldoNLJob::dispatch($saldo);
-            }
-            foreach ($taskKartuStock as $stock) {
-                ImportKartuStockJob::dispatch($stock);
-            }
+            // foreach ($taskSaldo as $saldo) {
+            //     ImportSaldoNLJob::dispatch($saldo);
+            // }
+            // foreach ($taskKartuStock as $stock) {
+            //     ImportKartuStockJob::dispatch($stock);
+            // }
             return [
                 'status' => 1,
                 'msg' => $task

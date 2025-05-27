@@ -137,7 +137,11 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
     });
 
     Route::prefix('kartu')->group(function () {
-        Route::resource('/kartu-kas', KartuKasController::class);
+        Route::prefix('kartu-kas')->name('kartu-kas.')->group(function () {
+            Route::resource('main', KartuKasController::class);
+            Route::get('get-buku-kas', [KartuKasController::class, 'getBukuKas'])->name('get-buku-kas');
+            Route::post('add-kas', [KartuKasController::class, 'addKas'])->name('add-kas');
+        });
 
         Route::prefix('kartu-stock')->name('kartu-stock.')->group(function () {
             Route::resource('main', KartuStockController::class);
@@ -209,7 +213,10 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('/get-item-all', [ChartAccountController::class, 'getItemChartAccountAll'])->name('get-item-all');
             Route::get('/get-item-keuangan', [ChartAccountController::class, 'getItemChartAccountKeuanganManual'])->name('get-item-keuangan');
             Route::get('/get-chart-accounts', [ChartAccountController::class, 'getChartAccounts']);
+            Route::get('/get-chart-account/{id}', [ChartAccountController::class, 'getChartAccount']);
+            Route::get('/get-code-group/{id}', [ChartAccountController::class, 'getCodeGroupAccount']);
             Route::get('/master-suplier', [SupplierController::class, 'master.supplier']);
+            Route::post('/make-alias', [ChartAccountController::class, 'makeAlias']);
             Route::get('/category-json', function () {
                 return \App\Models\StockCategory::select('id', 'name as text')->get();
             });
@@ -267,6 +274,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::get('invoice-purchase', [InvoicePurchaseController::class, 'showPurchase'])->name('purchase');
         Route::post('invoice-sales', [InvoiceSaleController::class, 'store'])->name('sales.store');
         Route::post('invoice-purchase', [InvoicePurchaseController::class, 'store'])->name('purchase.store');
+        Route::post('purchase-create-mutations', [InvoicePurchaseController::class, 'createMutations'])->name('purchase.create-mutations');
+        
         Route::get('show-detail/{id}', [InvoicePackController::class, 'showDetail'])->name('detail');
         Route::post('create-claim-pembelian', [InvoicePackController::class, 'createClaimPembelian'])->name('create-claim-pembelian');
         Route::post('create-claim-penjualan', [InvoicePackController::class, 'createClaimPenjualan'])->name('create-claim-penjualan');
@@ -275,9 +284,9 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::post('create-invoices', [InvoiceSaleController::class, 'createInvoices'])->name('create-invoices');
         Route::get('edit-sales-order/{id}', [SalesOrderController::class, 'editInvoice']);
         Route::post('invoice/update-detail', [SalesOrderController::class, 'updateDetail']);
-        Route::post('invoice-sales/update/{invoiceNumber}', [InvoiceSaleController::class, 'updateInvoiceSales'])->name('invoice.sales.update');
-
         
+        Route::post('invoice-sales/update/{invoiceNumber}', [InvoiceSaleController::class, 'updateInvoiceSales'])->name('invoice.sales.update');
+        Route::post('submit-bayar-sales-invoice', [InvoiceSaleController::class, 'submitBayarSalesInvoice']);
         Route::get('invoice-get-data-import/{id}', [InvoiceSaleController::class, 'getDataImport']);
         Route::post('invoice-make-final', [InvoiceSaleController::class, 'makeFinal'])->name('invoice-make-final');
 
@@ -288,7 +297,6 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::get('show-sales-detail/{id}', [SalesOrderController::class, 'showDetail'])->name('sale-order-detail');
         Route::get('update-input-invoice/{id}', [SalesOrderController::class, 'updateInputInvoice'])->name('update-input-invoice');
         Route::post('sales-make-final', [SalesOrderController::class, 'makeFinal'])->name('sales-make-final');
-        Route::post('submit-bayar-sales-invoice', [InvoiceSaleController::class, 'submitBayarSalesInvoice']);
         Route::get('invoice-sales/edit/{id}', [InvoiceSaleController::class, 'editInvoiceSales']);
 
         Route::get('invoice-purchase/edit/{id}', [InvoicePurchaseController::class, 'editInvoicePurchase']);
@@ -296,6 +304,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
        
 
 
+        Route::delete('sales-order-delete/{id}', [SalesOrderController::class, 'destroy']);
     });
 });
 

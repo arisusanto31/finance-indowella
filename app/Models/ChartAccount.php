@@ -64,7 +64,9 @@ class ChartAccount extends Model
             $chart->name = $request->input('name');
             $code = $request->input('code_group');
             $chart->code_group = implode("", $code);
-            $chart->parent_id = $request->input('parent_id');
+            $parentCode = $request->input('parent_id');
+            $chartParent = ChartAccount::where('code_group', $parentCode)->first();
+            $chart->parent_id = $chartParent ? $chartParent->id : null;
             $chart->account_type = $request->input('account_type');
             $chart->reference_model = $request->input('reference_model');
             if (!in_array($chart->account_type, $allAccounts)) {
@@ -85,6 +87,19 @@ class ChartAccount extends Model
                 'msg' => $e->getMessage()
             ];
         }
+    }
+
+    public function scopeWithAlias($q)
+    {
+        $q->leftJoin('chart_account_aliases as ca', function ($join) {
+            $join->on('ca.chart_account_id', '=', 'chart_accounts.id')
+                ->on('ca.book_journal_id', '=', DB::raw(bookID()));
+        })->where(function ($q) {
+            $q->where('ca.book_journal_id', bookID())
+                ->orWhereNull('ca.id');
+        })
+            ->select('chart_accounts.*', DB::raw('coalesce(ca.name,chart_accounts.name) as alias_name'));
+        return $q;
     }
 
     public function updateLevel()
@@ -222,7 +237,7 @@ class ChartAccount extends Model
                 'ca.name',
                 'ca.id',
                 'ca.is_child',
-            ) ->groupBy('code_group')->get();
+            )->groupBy('code_group')->get();
             $revisiSaldo = collect($saldo)
                 ->map(function ($val) use ($saldo) {
                     if ($val->is_child == 0) {

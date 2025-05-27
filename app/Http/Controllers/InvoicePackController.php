@@ -22,7 +22,7 @@ class InvoicePackController extends Controller
 
     public function show($id)
     {
-         $invoice = InvoicePack::find($id);
+        $invoice = InvoicePack::find($id);
         if (!$invoice) {
             dd('Invoice tidak ditemukan');
         }
@@ -267,6 +267,10 @@ class InvoicePackController extends Controller
             }
             $ks = [];
             foreach ($details as $detail) {
+                $stock = $detail->stock;
+                if ($stock->name == 'custom') {
+                    throw new \Exception('Tidak bisa membuat kartu "stock custom"');
+                }
                 $kartuStock = KartuStock::mutationStore(new Request([
                     'stock_id' => $detail->stock_id,
                     'mutasi_quantity' => $detail->quantity,
@@ -293,7 +297,7 @@ class InvoicePackController extends Controller
                     'code_group' => $coaHutangKas,
                     'lawan_code_group' => $coaPersediaan,
                     'is_otomatis_jurnal' => 1,
-                    'description' => 'pembelian nomer ' . $invoicePack->invoice_number,
+                    'description' => 'pembelian ' . $invoicePack->person->name . ' nomer ' . $invoicePack->invoice_number,
                 ]), false);
                 if ($kartu['status'] == 0) {
                     throw new \Exception($kartu['msg']);
@@ -306,7 +310,7 @@ class InvoicePackController extends Controller
                 $debets = [
                     [
                         'code_group' => $coaPersediaan,
-                        'description' => 'pembelian nomer ' . $invoicePack->invoice_number,
+                        'description' => 'pembelian ' . $invoicePack->person->name . ' nomer ' . $invoicePack->invoice_number,
                         'amount' => $invoicePack->total_price,
                         'reference_id' => null,
                         'reference_type' => null,

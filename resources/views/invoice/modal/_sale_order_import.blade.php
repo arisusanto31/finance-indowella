@@ -26,6 +26,9 @@
             <div class="col-xs-12 col-md-12 ">
                 <div class="d-flex  justify-content-end gap-2 " style="width: 100%;">
                     <div class="" style="width:20%">
+                        <input class="form-control" id="customer" placeholder="customer" />
+                    </div>
+                    <div class="" style="width:20%">
                         <select class="select-toko form-control" id="select-search-toko">
                         </select>
                     </div>
@@ -97,6 +100,8 @@
         });
         fixToko = collect(fixToko).unique().all();
         option = "";
+        option += `<option value="">All</option>`;
+
         fixToko.forEach(function(item) {
             option += `<option value="${item}">${item}</option>`;
         });
@@ -107,11 +112,12 @@
     function getImportData() {
         id = "{{book()->id}}";
         let monthyear = $('#select-search-date option:selected').val();
+        let customer = $('#customer').val();
         let toko = $('#select-search-toko option:selected').val();
         if (toko == undefined) toko = "";
         $('#table-body').html("");
         $.ajax({
-            url: '{{url("admin/invoice/sales-get-data-import")}}/' + id + '?monthyear=' + monthyear + '&&toko=' + toko,
+            url: '{{url("admin/invoice/sales-get-data-import")}}/' + id + '?monthyear=' + monthyear + '&toko=' + toko + '&customer=' + customer,
             method: 'get',
             success: function(res) {
                 console.log(res);
@@ -123,24 +129,28 @@
                     allTrans[item.id] = item;
                     jumlah = item.details.length;
 
-                    item.details.forEach(function(detail) {
+                    item.details.forEach(function(detail, j) {
                         html += `
                                 <tr>
+                                    ${j==0?`
                                     <td rowspan="${jumlah}">${i+1}</td>
                                     <td rowspan="${jumlah}">${formatNormalDate(new Date(item.created_at))}</td>
                                     <td rowspan="${jumlah}">${item.package_number} (${item.customer_name})</td>
                                     <td rowspan="${jumlah}">${detail.toko}</td>
-                                    <td rowspan="${jumlah}">${detail.stock_name}</td>
+                                    `:''}
+                                    <td>${detail.stock_name}</td>
                                     <td>${detail['quantity']}</td>
                                     <td>${detail['unit']}</td>
                                     <td>${detail['price']}</td>
                                     <td>${detail['total_price']}</td>
-                                    <td>${item.akun_cash_kind_name}</td>
-                                    <td id="status${item.id}">
+                                    ${j==0?`
+                                    <td rowspan="${jumlah}"> ${formatRupiah(collect(item.details).sum('total_price'))}<br>${item.akun_cash_kind_name}</td>
+                                    <td rowspan="${jumlah}" id="status${item.id}">
                                         <button class="btn btn-primary btn-sm" onclick="importData('${item.id}')">
                                             import
                                         </button>
                                     </td>
+                                    `:''}
                                 </tr>`;
                     });
 
@@ -167,8 +177,6 @@
             swalInfo('opps', 'tolong pilih tanggal import', 'info');
             return 0;
         }
-        date = normalizeDate(date);
-
         let dataPost = {
             created_at: date,
             customer_name: data.customer_name,
@@ -177,11 +185,16 @@
             reference_stock_id: data.details.map(item => item.stock_id),
             reference_stock_type: data.stock_type,
             quantity: data.details.map(item => item.quantity),
+            qtyjadi:data.details.map(item => item.qtyjadi),
             price_unit: data.details.map(item => item.price),
+            pricejadi: data.details.map(item => item.pricejadi),
             unit: data.details.map(item => item.unit),
+            unitjadi:data.details.map(item => item.unitjadi),
             total_price: data.details.map(item => item.total_price),
             akun_cash_kind_name: data.akun_cash_kind_name,
             toko_id: tokoid,
+            detail_reference_id: data.details.map(item => item.reference_id),
+            detail_reference_type: data.details.map(item => item.reference_type),
             reference_id: data.id,
             reference_type: data.reference_type,
             _token: '{{csrf_token()}}'

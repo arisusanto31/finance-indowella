@@ -101,7 +101,7 @@
                     @endphp
 
                     @foreach ($items as $index => $item)
-                    <tr>
+                    <tr id="tr-{{$invoiceNumber}}">
                         @if ($index === 0)
                         <td rowspan="{{ $rowspan }}">{{ $no++ }}</td>
                         <td rowspan="{{ $rowspan }}">{{ $item->created_at->format('Y-m-d') }}</td>
@@ -109,10 +109,10 @@
                         <td rowspan="{{ $rowspan }}">{{ $item->customer->name ?? '-' }}</td>
                         @endif
 
-                        <td>{{ $item->stock->name ?? '-' }}</td>
-                        <td class="text-end">{{ format_price($item->quantity) }}</td>
-                        <td>{{ $item->unit }}</td>
-                        <td class="text-end">Rp{{ format_price($item->price) }}</td>
+                        <td>{{ $item->custom_stock_name ?? '-' }}</td>
+                        <td class="text-end">{{ format_price($item->qtyjadi) }}</td>
+                        <td>{{ $item->unitjadi }}</td>
+                        <td class="text-end">Rp{{ format_price($item->pricejadi) }}</td>
                         <td class="text-end">Rp{{ format_price($item->discount) }}</td>
 
                         @php
@@ -171,7 +171,7 @@
                         <td rowspan="{{ $rowspan }}">
 
                             @if($item->parent->is_final==1)
-                            <a href="javascript:void(lihatDetailInvoice('{{$item->sales_order_number}}'))" class="btn btn-sm btn-outline-primary" title="Lihat Invoice">
+                            <a href="javascript:void(lihatDetailInvoice('{{$item->sales_order_number}}'))" class="btn btn-sm btn-outline-primary" title="Lihat ">
                                 <i class="fas fa-eye"></i>
                             </a>
                             @endif
@@ -180,9 +180,13 @@
                                 <i class="fas fa-upload"></i>
                             </a>
 
-                            <a href="javascript:void(editInvoice('{{$item->sales_order_number}}'))" class="btn btn-sm btn-outline-primary" title="Edit Invoice">
+                            <a href="javascript:void(editInvoice('{{$item->sales_order_number}}'))" class="btn btn-sm btn-outline-primary" title="Edit ">
                                 <i class="fas fa-edit"></i>
                             </a>
+                            <a href="javascript:void(destroySO('{{$item->sales_order_number}}'))" class="btn btn-sm btn-outline-danger" title="Delete ">
+                                <i class="fas fa-trash"></i>
+                            </a>
+
                             @endif
                         </td>
                         @endif
@@ -282,6 +286,17 @@
             showDetailOnModal('{{url("admin/invoice/sales-open-import")}}/' + bookID, 'xl');
         }
 
+        function destroySO(SONumber) {
+            swalDelete({
+                url: '{{url("admin/invoice/sales-order-delete")}}/' + SONumber,
+                onSuccess: function(res) {
+                    if (res.status == 1) {
+                        $('#tr-' + SONumber).remove();
+                    }
+                }
+            });
+        }
+
         function openCardCreate() {
             $('#card-create').toggleClass('open');
             $('#icon-create').toggleClass('open');
@@ -301,7 +316,7 @@
         }
 
         function editInvoice(invoiceNumber) {
-          
+
             showDetailOnModal('{{ url("/admin/invoice/edit-sales-order")}}/' + invoiceNumber, 'xl');
         }
 

@@ -129,6 +129,7 @@ class KartuBahanJadiController extends Controller
         $stockIDs = $request->input('stock_id');
         $quantitys = $request->input('quantity');
         $units = $request->input('unit');
+        $konversiJadi = $request->input('konversi_jadi');
         $flows = $request->input('flow'); //harusnya ini 1 atau 0
         $spkNumbers = $request->input('spk_number');
         $codeGroup = 140004;
@@ -144,6 +145,7 @@ class KartuBahanJadiController extends Controller
             $lockManager = new LockManager();
             foreach ($salesDetailIDs as $row => $saleDetailID) {
                 $qty = $quantitys[$row];
+                $konversiJadi = $konversiJadi[$row] ?? 1;
                 $unit = $units[$row];
                 $flow = $flows[$row];
                 $lawanCodeGroup = $lawanCodeGroups[$row];
@@ -167,7 +169,7 @@ class KartuBahanJadiController extends Controller
                     }
                     $stStock = KartuStock::mutationStore(new Request([
                         'stock_id' => $stock_id,
-                        'mutasi_quantity' => $qty,
+                        'mutasi_quantity' => $qty / $konversiJadi,
                         'unit' => $unit,
                         'flow' => $flow == 1 ? 0 : 1,
                         'sales_order_number' =>  $salesOrderNumber,
@@ -190,11 +192,11 @@ class KartuBahanJadiController extends Controller
                     if (!$lastCard) {
                         throw new \Exception('tidak ada saldo stock pada nomer produksi ' . $spkNumbers[$row]);
                     }
-                    $prosenQty = $qty / ($lastCard->saldo_qty_backend * $lastCard->mutasi_quantity / $lastCard->mutasi_qty_backend);
+                    $prosenQty = ($qty /$konversiJadi)/ ($lastCard->saldo_qty_backend * $lastCard->mutasi_quantity / $lastCard->mutasi_qty_backend);
                     $stockIDCustom = KartuBDP::where('production_number', $spkNumbers[$row])->where('stock_id', '<>', $stock_id)->pluck('stock_id')->all();
                     $stStock = KartuBDP::mutationStore(new Request([
                         'stock_id' => $stock_id,
-                        'mutasi_quantity' => $qty,
+                        'mutasi_quantity' => $qty / $konversiJadi,
                         'unit' => $unit,
                         'flow' => $flow == 1 ? 0 : 1,
                         'sales_order_number' => $salesOrderNumber,

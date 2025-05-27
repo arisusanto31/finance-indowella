@@ -1,5 +1,11 @@
 <div class="modal-header flex-column align-items-start">
-    <h5 class="modal-title" id="exampleModalLabel">Detail Invoice {{$data->invoice_number}} - {{$data->person->name}} <span class="fs-8 px-2 rounded-1 bg-primary text-white"> {{getModel($data->person_type)}} </span></h5>
+    <h5 class="modal-title" id="exampleModalLabel">Detail Invoice {{$data->invoice_number}} - {{$data->person->name}} 
+        <span class="fs-8 px-2 rounded-1 bg-primary text-white"> {{getModel($data->person_type)}} </span></h5>
+        <button
+        type="button"
+        class="btn-close position-absolute end-0 top-0 m-3"
+        data-bs-dismiss="modal"
+        aria-label="Close"></button>
 </div>
    <!-- Baris input sejajar kiri -->
    <div class="d-flex w-100 gap-3">
@@ -14,6 +20,7 @@
     </div>
 </div>
 </div>
+
 
 
 <div class="modal-body">
@@ -63,6 +70,10 @@
                 </tfoot>
             </table>
         </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+        <button type="button" onclick="" class="btn btn-primary">Simpan</button>
     </div>
 </div>
 
