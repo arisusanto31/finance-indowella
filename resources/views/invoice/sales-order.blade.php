@@ -136,12 +136,7 @@
                                     <td>{{ $item->unitjadi }}</td>
                                     <td class="text-end">Rp{{ format_price($item->pricejadi) }}</td>
                                     <td class="text-end">Rp{{ format_price($item->discount) }}</td>
-
-                                    @php
-                                        $subtotal = $item->quantity * $item->price - $item->discount;
-                                    @endphp
-                                    <td class="text-end">Rp{{ format_price($subtotal) }}</td>
-
+                                    <td class="text-end">Rp{{ format_price($item->total_price) }}</td>
                                     @if ($index === 0)
                                         <td rowspan="{{ $rowspan }}">
                                             <strong>Rp{{ format_price($invoiceSubtotal) }}</strong>

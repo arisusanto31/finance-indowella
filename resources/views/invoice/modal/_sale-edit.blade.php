@@ -3,7 +3,7 @@
 
     <div class="modal-header flex-column align-items-start">
         <div class="w-100 d-flex justify-content-between flex-wrap align-items-center gap-2">
-           
+
             <div class="d-flex align-items-center gap-2">
                 <h5 class="modal-title mb-0">
                     Edit Sales Order - {{ $data->customer->name }}
@@ -12,8 +12,8 @@
                     status: {{ $data->status }}
                 </span>
             </div>
-            
-           
+
+
             <div class="d-flex flex-wrap align-items-center gap-2">
                 <div class="d-flex align-items-center gap-1">
                     <label class="small text-muted mb-0">Tanggal:</label>
@@ -22,21 +22,20 @@
 
                 <div class="d-flex align-items-center gap-1">
                     <label for="sales_order_number" class="form-label mb-0">Nomor SO:</label>
-                    <input type="text" name="sales_order_number"
-                           class="form-control form-control-sm w-auto"
-                           value="{{ $data->sales_order_number }}">
+                    <input type="text" name="sales_order_number" class="form-control form-control-sm w-auto"
+                        value="{{ $data->sales_order_number }}">
                     <input type="hidden" name="sales_order_id" value="{{ $data->id }}">
                 </div>
             </div>
         </div>
 
-        <button type="button" class="btn-close position-absolute end-0 top-0 m-2"
-                data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close position-absolute end-0 top-0 m-2" data-bs-dismiss="modal"
+            aria-label="Close"></button>
     </div>
 
 
-<div class="modal-body">
-    {{-- <form id="form-edit-detail">
+    <div class="modal-body">
+        {{-- <form id="form-edit-detail">
         @csrf
 
         <div class="mb-3">
@@ -66,87 +65,85 @@
                             <td class="text-center">
                                 {{ $data->created_at instanceof \Carbon\Carbon ? $data->created_at->format('Y-m-d') : '-' }}
                             </td>
-                
+
                             <td>{{ $item->stock->name }}</td>
-                
+
                             <td>
                                 <select name="unit[{{ $key }}]" class="form-control form-control-sm">
                                     @foreach ($item->stock->units as $u)
-                                        <option value="{{ $u->unit }}" {{ $u->unit == $item->unit ? 'selected' : '' }}>
+                                        <option value="{{ $u->unit }}"
+                                            {{ $u->unit == $item->unit ? 'selected' : '' }}>
                                             {{ ucfirst($u->unit) }}
                                         </option>
                                     @endforeach
                                 </select>
                             </td>
-                
+
                             <input type="hidden" name="detail_id[{{ $key }}]" value="{{ $item->id }}">
-                
+
                             <td>
-                                <input type="text" name="quantity[{{ $key }}]" class="form-control form-control-sm text-end qty"
-                                    value="{{ $item->qtyjadi }}">
+                                <input type="text" name="quantity[{{ $key }}]"
+                                    class="form-control form-control-sm text-end qty" value="{{ $item->qtyjadi }}">
                             </td>
-                
+
                             <td>
-                                <input type="text" name="price[{{ $key }}]" class="form-control form-control-sm text-end price"
-                                    value="{{ $item->pricejadi }}">
+                                <input type="text" name="price[{{ $key }}]"
+                                    class="form-control form-control-sm text-end price" value="{{ $item->pricejadi }}">
                             </td>
-                
+
                             <td>
-                                <input type="text" name="discount[{{ $key }}]" class="form-control form-control-sm text-end disc"
-                                    value="{{ $item->discount }}">
+                                <input type="text" name="discount[{{ $key }}]"
+                                    class="form-control form-control-sm text-end disc" value="{{ $item->discount }}">
                             </td>
-                
+
                             <td>
-                                <input type="text" class="form-control form-control-sm text-end bg-light border-0 total-field"
-                                    value="{{ number_format(($item->quantity * $item->price) - $item->discount, 2, ',', '.') }}"
-                                    readonly>
+                                <input type="text"
+                                    class="form-control form-control-sm text-end bg-light border-0 total-field"
+                                    value="{{ $item->total_price }}" readonly>
                             </td>
                         </tr>
                     @endforeach
                 </tbody>
-                
+
             </table>
         </div>
-    </form>
+</form>
 </div>
 <div class="modal-footer">
     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
     <button type="submit" form="form-edit-detail" class="btn btn-primary">Simpan Perubahan</button>
 </div>
 
-<script> 
+<script>
+    $(document).on('input', '.qty, .price, .disc', function() {
+        const row = $(this).closest('tr');
+        const qty = parseFloat(row.find('.qty').val()) || 0;
+        const price = parseFloat(row.find('.price').val()) || 0;
+        const disc = parseFloat(row.find('.disc').val()) || 0;
+        const total = (qty * price) - disc;
 
-
-
-$(document).on('input', '.qty, .price, .disc', function () {
-    const row = $(this).closest('tr');
-    const qty = parseFloat(row.find('.qty').val()) || 0;
-    const price = parseFloat(row.find('.price').val()) || 0;
-    const disc = parseFloat(row.find('.disc').val()) || 0;
-    const total = (qty * price) - disc;
-
-    row.find('.total-field').val(
-        total.toLocaleString('id-ID', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        })
-    );
-});
-
-$('#form-edit-detail').on('submit', function(e) {
-    e.preventDefault();
-    $.ajax({
-        url: '{{ url("admin/invoice/invoice/update-detail") }}',
-        method: 'POST',
-        data: $(this).serialize(),
-        success: function(res) {
-            alert('Berhasil disimpan');
-            $('#editModal').modal('hide');
-            location.reload();
-        },
-        error: function() {
-            alert('Gagal menyimpan');
-        }
+        row.find('.total-field').val(
+            total.toLocaleString('id-ID', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            })
+        );
     });
-});
+
+    $('#form-edit-detail').on('submit', function(e) {
+        e.preventDefault();
+        $.ajax({
+            url: '{{ url('admin/invoice/invoice/update-detail') }}',
+            method: 'POST',
+            data: $(this).serialize(),
+            success: function(res) {
+                alert('Berhasil disimpan');
+                $('#editModal').modal('hide');
+                location.reload();
+            },
+            error: function() {
+                alert('Gagal menyimpan');
+            }
+        });
+    });
 </script>

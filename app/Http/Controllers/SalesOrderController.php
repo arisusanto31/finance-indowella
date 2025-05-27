@@ -455,7 +455,6 @@ class SalesOrderController extends Controller
                     $detail->discount      = $disc;
                     $detail->unit          = $unit;
                     $detail->total_price   = $total;
-                    info('iki lo cok total e ' . $total);
                     $detail->price = ($total) / $detail->quantity;
                     $detail->sales_order_number = $request->sales_order_number;
 
