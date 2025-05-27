@@ -20,7 +20,7 @@ class InvoicePurchaseController extends Controller
     {
         $month = getInput('month') ? toDigit(getInput('month'), 2) : date('m');
         $year = getInput('year') ? getInput('year') : date('Y');
-
+        $parent=[];
 
         $invoices = InvoicePurchaseDetail::whereMonth('created_at',$month)->whereYear('created_at',$year)->with(['parent', 'stock', 'supplier'])
             ->orderBy('created_at', 'desc')
@@ -32,7 +32,7 @@ class InvoicePurchaseController extends Controller
         $totalInvoiceFinal= collect($invPack)->where('is_final',1)->sum('total_price');
         $totalInvoiceMark= collect($invPack)->where('is_mark',1)->sum('total_price');
         
-        return view('invoice.invoice-purchase', compact('invoices','month','year','totalInvoice','totalInvoiceFinal','totalInvoiceMark'));
+        return view('invoice.invoice-purchase', compact('invoices','month','year','totalInvoice','totalInvoiceFinal','totalInvoiceMark','parent'));
     }
 
 

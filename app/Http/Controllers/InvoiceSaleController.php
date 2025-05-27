@@ -178,10 +178,10 @@ class InvoiceSaleController extends Controller
         $totalInvoice = collect($invPack)->sum('total_price');
         $totalInvoiceFinal = collect($invPack)->where('is_final', 1)->sum('total_price');
         $totalInvoiceMark = collect($invPack)->where('is_mark', 1)->sum('total_price');
-
+        $parent=[];
 
         // dd($invoices);
-        return view('invoice.invoice-sales', compact('invoices', 'month', 'year', 'totalInvoice', 'totalInvoiceFinal', 'totalInvoiceMark'));
+        return view('invoice.invoice-sales', compact('invoices', 'month', 'year', 'totalInvoice', 'totalInvoiceFinal', 'totalInvoiceMark','parent'));
     }
 
     // public function showSales()
