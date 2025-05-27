@@ -35,15 +35,15 @@ class SalesOrderController extends Controller
             ->get()
             ->groupBy('sales_order_number');
 
-      
+
         $invPack = SalesOrder::whereMonth('created_at', $month)->whereYear('created_at', $year)
             ->select('is_final', 'is_mark', 'total_price')->get();
         $totalInvoice = collect($invPack)->sum('total_price');
         $totalInvoiceFinal = collect($invPack)->where('is_final', 1)->sum('total_price');
         $totalInvoiceMark = collect($invPack)->where('is_mark', 1)->sum('total_price');
 
-        $parent=[];
-        return view('invoice.sales-order', compact('salesOrders', 'month', 'year', 'totalInvoice', 'totalInvoiceFinal', 'totalInvoiceMark','parent'));
+        $parent = [];
+        return view('invoice.sales-order', compact('salesOrders', 'month', 'year', 'totalInvoice', 'totalInvoiceFinal', 'totalInvoiceMark', 'parent'));
     }
 
     public function store(Request $request)
@@ -438,7 +438,7 @@ class SalesOrderController extends Controller
                     $detail->discount      = $disc;
                     $detail->unit          = $unit;
                     $detail->total_price   = $total;
-                    $detail->pricejadi= $total/$detail->qtyjadi;
+                    $detail->pricejadi = ($total + $disc) / $detail->qtyjadi;
                     $detail->sales_order_number = $request->sales_order_number;
 
                     $detail->created_at = $tanggalGlobal;

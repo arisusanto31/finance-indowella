@@ -9,6 +9,7 @@ use App\Models\KartuInventory;
 use App\Models\KartuPiutang;
 use App\Models\KartuPrepaidExpense;
 use App\Models\KartuStock;
+use App\Models\SalesOrderDetail;
 use App\Models\TaskImportDetail;
 use Illuminate\Http\Request;
 
@@ -84,6 +85,15 @@ class IndexController extends Controller
         }
         if (getInput('type') == 'format_db') {
             return format_db(getInput('nilai'));
+        }
+        if (getInput('type') == 'repair-price') {
+            $sodetail = SalesOrderDetail::where('sales_order_number', getInput('number'))
+                ->get();
+            foreach ($sodetail as $detail) {
+                $detail->pricejadi = ($detail->total_price + $detail->discount) / $detail->qtyjadi;
+                $detail->save();
+            }
+            return $sodetail;
         }
 
 
