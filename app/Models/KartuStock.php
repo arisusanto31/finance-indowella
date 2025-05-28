@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasIndexDate;
 use App\Traits\HasModelDetailKartuInvoice;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Database\Eloquent\Model;
@@ -16,6 +17,7 @@ class KartuStock extends Model
     //
 
     use HasModelDetailKartuInvoice;
+    use HasIndexDate;
     protected $table = 'kartu_stocks';
     public $timestamps = true;
 
@@ -43,6 +45,8 @@ class KartuStock extends Model
     {
         $lock = Cache::lock('kartu-stock-' . $request->input('stock_id'), 40);
         try {
+            $date = $request->input('date') ?? now();
+            kartuStock::proteksiBackdate($date);
             $flow = $request->input('flow');
             $isCustom = $request->input('is_custom_rupiah');
             $kartu = new KartuStock;
@@ -58,8 +62,11 @@ class KartuStock extends Model
             $kartu->invoice_pack_number = $request->input('invoice_pack_number');
             $kartu->invoice_pack_id = $request->input('invoice_pack_id');
 
+            $indexDate = KartuStock::getNextIndexDate($date);
+            $kartu->index_date = $indexDate;
+            $kartu->index_date_group = createCarbon($date)->format('ymdHis');
             //mutasi terakhir sebelum mutasi id yg diinput oleh user
-            $lastCard = KartuStock::where('stock_id', $kartu->stock_id)->orderBy('id', 'desc')->first();
+            $lastCard = KartuStock::where('stock_id', $kartu->stock_id)->where('index_date', '<', $indexDate)->orderBy('index_date', 'desc')->first();
             if (!$lastCard) {
                 $lastCard = new KartuStock;
                 $lastCard->saldo_qty_backend = 0;
@@ -114,6 +121,9 @@ class KartuStock extends Model
                 ];
             }
             $kartu->save();
+            if (self::isBackdate($date)) {
+                $kartu->recalculateSaldo();
+            }
         } catch (LockTimeoutException $e) {
             info('kartu stock timeout on md' . $request->input('mutation_detail_id'));
             return [
@@ -135,6 +145,22 @@ class KartuStock extends Model
         ];
     }
 
+    public function recalculateSaldo()
+    {
+        $kartus = KartuStock::where('stock_id', $this->stock_id)->where('index_date', '>', $this->index_date)
+            ->orderBy('index_date', 'asc')->get();
+
+        $saldoQty = $this->saldo_qty_backend;
+        $saldoRupiah = $this->saldo_rupiah_total;
+        foreach ($kartus as $kartu) {
+
+            $saldoQty = moneyAdd($saldoQty, $kartu->mutasi_qty_backend);
+            $saldoRupiah = moneyAdd($saldoRupiah, $kartu->mutasi_rupiah_total);
+            $kartu->saldo_qty_backend = $saldoQty;
+            $kartu->saldo_rupiah_total = $saldoRupiah;
+            $kartu->save();
+        }
+    }
     public static function mutationStore(Request $request, $useTransaction = true)
     {
 
@@ -145,6 +171,7 @@ class KartuStock extends Model
             $stockid = $request->input('stock_id');
             info('create kartu stock ' . $stockid);
             $qty = format_db($request->input('mutasi_quantity'));
+            $date = $request->input('date') ?? now();
             $unit = $request->input('unit');
             $flow = $request->input('flow');
             $codeGroup = $request->input('code_group');
@@ -179,8 +206,8 @@ class KartuStock extends Model
             else
                 $mutasiRupiahTotal = 0;
             $isCustom = $request->input('is_custom_rupiah');
-            info('stockid:'.$stockid);
-            info('unit:'.$unit);
+            info('stockid:' . $stockid);
+            info('unit:' . $unit);
             $dataunit = StockUnit::where('stock_id', $stockid)->where('unit', ownucfirst($unit))->first();
 
             $stock = Stock::find($stockid);
@@ -215,8 +242,9 @@ class KartuStock extends Model
                 'mutasi_rupiah_total' => $mutasiRupiahTotal,
                 'code_group' => $codeGroup,
                 'code_group_name' => $codeGroupName,
+                'date' => $date,
             ]));
-            
+
             if ($st['status'] == 0) {
                 throw new \Exception($st['msg']);
             }

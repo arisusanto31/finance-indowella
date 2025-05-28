@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Http\Controllers\JournalController;
 use App\Services\LockManager;
+use App\Traits\HasIndexDate;
 use App\Traits\HasModelDetailKartuInvoice;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Database\Eloquent\Model;
@@ -16,6 +17,7 @@ use Illuminate\Support\Str;
 class KartuPiutang extends Model
 {
     //
+    use HasIndexDate;
     use HasModelDetailKartuInvoice;
     protected $table = 'kartu_piutangs';
     public $timestamps = true;
@@ -28,6 +30,7 @@ class KartuPiutang extends Model
     {
         return $this->mrophTo();
     }
+
 
     protected static function booted()
     {
@@ -58,7 +61,8 @@ class KartuPiutang extends Model
 
             try {
                 $lock->block(30);
-
+                $date = $request->input('date') ?? now();
+                self::proteksiBackdate($date);
                 $amount_debet = $request->input('amount_debet');
                 $amount_kredit = $request->input('amount_kredit');
                 if ($amount_debet < 0) {
@@ -75,19 +79,20 @@ class KartuPiutang extends Model
                 $SOID = $request->input('sales_order_id');
                 $invoiceID = $request->input('invoice_pack_id');
                 $realAmount = $amount_debet - $amount_kredit;
-
+                $indexDate = self::getNextIndexDate($date);
 
                 $lastKartu = KartuPiutang::where('person_id', $personID)->where('person_type', $personType)
-                    ->where('invoice_pack_number', $invoiceNumber)->orderBy('id', 'desc')->first();
+                    ->where('invoice_pack_number', $invoiceNumber)->where('index_date', '<', $indexDate)->orderBy('index_date', 'desc')->first();
                 $lastSaldo =  $lastKartu ? $lastKartu->amount_saldo_factur : 0;
                 $lastSaldoFactur = $lastSaldo;
 
 
-                $lastSaldoPerson = KartuPiutang::whereIn('id', function ($q) use ($personID, $personType) {
+                $lastSaldoPerson = KartuPiutang::whereIn('index_date', function ($q) use ($personID, $personType, $indexDate) {
                     $q->from('kartu_piutangs')->where('person_id', $personID)->where('person_type', $personType)
+                        ->where('index_date', '<', $indexDate)
                         ->select(
-                            DB::raw('max(id) as maxid'),
-                        )->groupBy('sales_order_number');
+                            DB::raw('max(index_date) as maxid'),
+                        )->groupBy('invoice_pack_number');
                 })->sum('amount_saldo_factur');
                 $kartu = new KartuPiutang();
                 $kartu->type = $request->input('type');
@@ -112,8 +117,12 @@ class KartuPiutang extends Model
                 $kartu->code_group_name = $request->input('code_group_name');
                 $kartu->invoice_date = Date('Y-m-d');
                 $kartu->book_journal_id = bookID();
+                $kartu->index_date = $indexDate;
+                $kartu->index_date_group = createCarbon($date)->format('ymdHis');
                 $kartu->save();
-
+                if (self::isBackdate($date)) {
+                    $kartu->recalculateSaldo();
+                }
 
 
 
@@ -150,6 +159,8 @@ class KartuPiutang extends Model
         if ($useTransaction)
             DB::beginTransaction();
         try {
+            $date = $request->input('date') ?? now();
+            self::proteksiBackdate($date);
             $SONumber = $request->input('sales_order_number');
             $amountMutasi = $request->input('amount_mutasi');
             $personID = $request->input('person_id');
@@ -210,7 +221,8 @@ class KartuPiutang extends Model
                     'kredits' => $kredits,
                     'debets' => $debets,
                     'type' => 'transaction',
-                    'date' => Date('Y-m-d H:i:s'),
+                    'date' => $date,
+                    'is_backdate' => self::isBackdate($date),
                     'is_auto_generated' => 1,
                     'title' => 'create mutation transaction',
                     'url_try_again' => 'try_again'
@@ -241,7 +253,8 @@ class KartuPiutang extends Model
                 'journal_id' => $journalID,
                 'code_group' => $codeGroup,
                 'lawan_code_group' => $lawanCodeGroup,
-                'code_group_name' => $codeName
+                'code_group_name' => $codeName,
+                'date' => $request->input('date') ?? now()
             ]));
 
             if ($st['status'] == 1) {
@@ -273,6 +286,8 @@ class KartuPiutang extends Model
         if ($useTransaction)
             DB::beginTransaction();
         try {
+            $date = $request->input('date') ?? now();
+            self::proteksiBackdate($date);
             $SONumber = $request->input('sales_order_number');
             $sales = SalesOrder::where('sales_order_number', $SONumber)->first();
             $SOID = $sales ? $sales->id : null;
@@ -323,7 +338,8 @@ class KartuPiutang extends Model
                     'kredits' => $kredits,
                     'debets' => $debets,
                     'type' => 'transaction',
-                    'date' => Date('Y-m-d H:i:s'),
+                    'date' => $date,
+                    'is_backdate' => self::isBackdate($date),
                     'is_auto_generated' => 1,
                     'title' => 'create penerimaan penjualan',
                     'url_try_again' => null
@@ -356,7 +372,8 @@ class KartuPiutang extends Model
                 'journal_id' => $journalID,
                 'code_group' => $codeGroup,
                 'lawan_code_group' => $lawanCodeGroup,
-                'code_group_name' => $codeName
+                'code_group_name' => $codeName,
+                'date' => $request->input('date') ?? now()
             ]));
 
             if ($st['status'] == 1) {
@@ -375,6 +392,29 @@ class KartuPiutang extends Model
                 'status' => 0,
                 'msg' => $th->getMessage()
             ];
+        }
+    }
+
+
+    public function recalculateSaldo()
+    {
+        $kartus = KartuPiutang::where('person_id', $this->person_id)->where('person_type', $this->person_type)
+            ->where('invoice_pack_number', $this->invoice_pack_number)->where('index_date', '>', $this->index_date)->get();
+
+        $saldo = $this->amount_saldo_factur;
+        foreach ($kartus as $kartu) {
+            $saldo = $saldo + $kartu->amount_debet - $kartu->amount_kredit;
+            $kartu->amount_saldo_factur = $saldo;
+            $kartu->save();
+        }
+
+        $kartuOrang = KartuPiutang::where('person_id', $this->person_id)->where('person_type', $this->person_type)
+            ->where('index_date', '>', $this->index_date)->get();
+        $saldoOrang = $this->amount_saldo_person;
+        foreach ($kartuOrang as $kartu) {
+            $saldoOrang = $saldoOrang + $kartu->amount_debet - $kartu->amount_kredit;
+            $kartu->amount_saldo_person = $saldoOrang;
+            $kartu->save();
         }
     }
 }

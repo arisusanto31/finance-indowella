@@ -248,6 +248,12 @@ class InvoicePackController extends Controller
         $coaPersediaan = $request->input('coa_persediaan');
         $coaHutangKas = $request->input('coa_hutang_kas');
         $invoicePackID = $request->input('invoice_pack_id');
+        $date= $request->input('date');
+        $isBackdate = 0;
+        if(carbonDate()->subMinutes(5) > $date){
+            //date lebih dari 5 menit dari sekarang, berarti backdate
+            $isBackdate = 1;
+        }
         $invoicePack = InvoicePack::find($invoicePackID);
         if (!$invoicePack) {
             return ['status' => 0, 'msg' => 'Invoice tidak ditemukan'];
@@ -279,6 +285,7 @@ class InvoicePackController extends Controller
                     'code_group' => $coaPersediaan,
                     'is_custom_rupiah' => 1,
                     'mutasi_rupiah_total' => $detail->total_price,
+                    'date'=>$date
                 ]), false);
                 if ($kartuStock['status'] == 0) {
                     throw new \Exception($kartuStock['msg']);
@@ -297,6 +304,7 @@ class InvoicePackController extends Controller
                     'code_group' => $coaHutangKas,
                     'lawan_code_group' => $coaPersediaan,
                     'is_otomatis_jurnal' => 1,
+                    'date'=>$date,
                     'description' => 'pembelian ' . $invoicePack->person->name . ' nomer ' . $invoicePack->invoice_number,
                 ]), false);
                 if ($kartu['status'] == 0) {
@@ -330,8 +338,9 @@ class InvoicePackController extends Controller
                     'kredits' => $kredits,
                     'debets' => $debets,
                     'type' => 'purchasing',
-                    'date' => Date('Y-m-d H:i:s'),
+                    'date' => $date,
                     'is_auto_generated' => 1,
+                    'is_backdate'=>$isBackdate,
                     'title' => 'create mutation purchase',
                     'url_try_again' => null
 

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Http\Controllers\JournalController;
 use App\Services\LockManager;
+use App\Traits\HasIndexDate;
 use App\Traits\HasModelDetailKartuInvoice;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Database\Eloquent\Model;
@@ -16,6 +17,7 @@ use Throwable;
 class KartuBDP extends Model
 {
     //
+    use HasIndexDate;
 
     use HasModelDetailKartuInvoice;
     protected $table = 'kartu_bdps';
@@ -44,6 +46,8 @@ class KartuBDP extends Model
         info('TRYING UPLOAD ' . json_encode($request->all()));
         $lock = Cache::lock('kartu-bdp-' . $request->input('stock_id'), 40);
         try {
+            $date = $request->input('date') ?? now();
+            self::proteksiBackdate($date);
             $flow = $request->input('flow');
             $isCustom = $request->input('is_custom_rupiah');
             $kartu = new KartuBDP;
@@ -62,8 +66,13 @@ class KartuBDP extends Model
             if (!$kartu->production_number) {
                 $kartu->production_number = $request->input('sales_order_number');
             }
+            $indexDate = self::getNextIndexDate($date);
+            $kartu->index_date = $indexDate;
+            $kartu->index_date_group = createCarbon($date)->format('ymdHis');
+
             //mutasi terakhir sebelum mutasi id yg diinput oleh user
-            $lastCard = KartuBDP::where('stock_id', $kartu->stock_id)->where('production_number', $kartu->production_number)->orderBy('id', 'desc')->first();
+            $lastCard = KartuBDP::where('stock_id', $kartu->stock_id)->where('production_number', $kartu->production_number)
+                ->where('index_date', '<', $indexDate)->orderBy('index_date', 'desc')->first();
             if (!$lastCard) {
                 $lastCard = new KartuBDP;
                 $lastCard->saldo_qty_backend = 0;
@@ -116,6 +125,9 @@ class KartuBDP extends Model
                 ];
             }
             $kartu->save();
+            if (self::isBackdate($date)) {
+                $kartu->recalculateSaldo();
+            }
         } catch (LockTimeoutException $e) {
             info('kartu stock timeout on md' . $request->input('mutation_detail_id'));
             return [
@@ -143,6 +155,9 @@ class KartuBDP extends Model
         if ($useTransaction)
             DB::beginTransaction();
         try {
+            $date = $request->input('date') ?? now();
+            self::proteksiBackdate($date);
+
             $stockid = $request->input('stock_id');
             $qty = format_db($request->input('mutasi_quantity'));
             $unit = $request->input('unit');
@@ -255,6 +270,7 @@ class KartuBDP extends Model
                 'mutasi_rupiah_on_unit' => $mutasiRupiahUnit,
                 'mutasi_rupiah_total' => $mutasiRupiahTotal,
                 'code_group' => $codeGroup,
+                'date' => $date,
                 'code_group_name' => $codeGroupName,
                 'production_number' => $productionNumber,
                 'custom_stock_name' => $customStockName,
@@ -303,7 +319,8 @@ class KartuBDP extends Model
                     'kredits' => $kredits,
                     'debets' => $debets,
                     'type' => 'transaction',
-                    'date' => Date('Y-m-d H:i:s'),
+                    'date' => $date,
+                    'is_backdate' => self::isBackdate($date),
                     'is_auto_generated' => 1,
                     'title' => 'create mutation transaction',
                     'url_try_again' => 'try_again'
@@ -382,5 +399,22 @@ class KartuBDP extends Model
             'msg' => $st['msg'],
             'journal_number' => $number
         ];
+    }
+
+    public function recalculateSaldo()
+    {
+        $kartus = KartuBDP::where('stock_id', $this->stock_id)->where('index_date', '>', $this->index_date)->where('production_number', $this->production_number)
+            ->orderBy('index_date', 'asc')->get();
+
+        $saldoQty = $this->saldo_qty_backend;
+        $saldoRupiah = $this->saldo_rupiah_total;
+        foreach ($kartus as $kartu) {
+
+            $saldoQty = moneyAdd($saldoQty, $kartu->mutasi_qty_backend);
+            $saldoRupiah = moneyAdd($saldoRupiah, $kartu->mutasi_rupiah_total);
+            $kartu->saldo_qty_backend = $saldoQty;
+            $kartu->saldo_rupiah_total = $saldoRupiah;
+            $kartu->save();
+        }
     }
 }

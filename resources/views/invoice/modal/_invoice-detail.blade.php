@@ -1,5 +1,7 @@
 <div class="modal-header">
-    <h5 class="modal-title" id="exampleModalLabel">Detail Invoice {{$data->invoice_number}} - {{$data->person->name}} <span class="fs-8 px-2 rounded-1 bg-primary text-white"> {{getModel($data->person_type)}} </span></h5>
+    <h5 class="modal-title" id="exampleModalLabel">Detail Invoice {{ $data->invoice_number }} - {{ $data->person->name }}
+        <span class="fs-8 px-2 rounded-1 bg-primary text-white"> {{ getModel($data->person_type) }} </span>
+    </h5>
 </div>
 <div class="modal-body">
     <div class="row">
@@ -17,21 +19,21 @@
                     </tr>
                 </thead>
                 <tbody id="body-detail-invoice">
-                    @foreach($data['details'] as $key => $item)
-                    <tr>
-                        <td>{{$key+1}}</td>
-                        <td>{{$item->cutom_stock_name ? $item->custom_stock_name: $item->stock->name}}</td>
-                        <td>{{$item->quantity}}</td>
-                        <td>{{format_price($item->price)}}</td>
-                        <td>{{format_price($item->discount)}}</td>
-                        <td>{{format_price($item->total_price)}}</td>
-                    </tr>
+                    @foreach ($data['details'] as $key => $item)
+                        <tr>
+                            <td>{{ $key + 1 }}</td>
+                            <td>{{ $item->cutom_stock_name ? $item->custom_stock_name : $item->stock->name }}</td>
+                            <td>{{ $item->quantity }}</td>
+                            <td>{{ format_price($item->price) }}</td>
+                            <td>{{ format_price($item->discount) }}</td>
+                            <td>{{ format_price($item->total_price) }}</td>
+                        </tr>
                     @endforeach
                 </tbody>
                 <tfoot>
                     <tr>
                         <td colspan="5" class="text-center">Total</td>
-                        <td>{{format_price($data->total_price)}}</td>
+                        <td>{{ format_price($data->total_price) }}</td>
                     </tr>
             </table>
         </div>
@@ -40,123 +42,168 @@
         <div class="col-xs-12 col-md-12">
             <div class="card mt-4">
                 <div class="card-body">
-                    <p>status : {{$data->status}}</p>
+                    <p>status : {{ $data->status }}</p>
 
                     <div class="row">
 
                         <h6>Kartu Kartu </h6>
-                        @if(count($data['kartus'])>0)
-                        @foreach($data['kartus'] as $key => $items)
-
-                        <div class="col-xs-12">
-                            <div class="bg-primary p-2 mb-2">
-                                <h6 class="text-white">{{$key}}</h6>
-                                <div class="row text-white">
-                                    @foreach($items as $item)
-                                    <div class="col-xs-12 col-md-4">
-                                        <p>{{$item->created_at}} - <strong>{{$item->code_group_name}}</strong> : {{format_price($item->amount_journal)}} <span class="fs-8">[journal_id : {{$item->journal_id}}, kartu_id= {{$item->kartu_id}}]</span></p>
+                        @if (count($data['kartus']) > 0)
+                            @foreach ($data['kartus'] as $key => $items)
+                                <div class="col-xs-12">
+                                    <div class="bg-primary p-2 mb-2">
+                                        <h6 class="text-white">{{ $key }}</h6>
+                                        <div class="row text-white">
+                                            @foreach ($items as $item)
+                                                <div class="col-xs-12 col-md-4">
+                                                    <p>{{ $item->created_at }} -
+                                                        <strong>{{ $item->code_group_name }}</strong> :
+                                                        {{ format_price($item->amount_journal) }} <span
+                                                            class="fs-8">[journal_id : {{ $item->journal_id }},
+                                                            kartu_id= {{ $item->kartu_id }}]</span>
+                                                    </p>
+                                                </div>
+                                            @endforeach
+                                        </div>
                                     </div>
-                                    @endforeach
                                 </div>
-                            </div>
-                        </div>
-                        @endforeach
+                            @endforeach
                         @else
-                        <div class="row" id="div-input">
-                            @if($data->reference_model=='App\\Models\\InvoiceSaleDetail')
-                            <div class="col-xs-12 ">
-                                <p class="">Akun Persediaan</p>
-                                <select class="form-control" id="select-pcoa-persediaan"></select>
-                                <p class="">Akun (Piutang /kas )</p>
-                                <select class="form-control" id="select-pcoa-piutang-kas"></select>
-                                <p>Akun Penjualan</p>
-                                <select class="form-control" id="select-pcoa-penjualan"></select>
-                                <button class="btn btn-primary" onclick="createClaimPenjualan()">Claim Penjualan</button>
-                            </div>
-                            @elseif($data->reference_model=='App\\Models\\InvoicePurchaseDetail')
-
-
-                            <div class="col-xs-12 mt-1 ">
-                                <h5 class="text-primary-dark mb-1"> <a href="javascript:void(toggleDivMutasiPurchaseAll())"> <strong>Klaim pembelian Seluruhnya </strong>
-                                        <i id="icon-create" class="bx bx-caret-down toggle-icon card-mutasi-purchase-all"></i> </a>
-                                </h5>
-
-                                <div id="" class="tree-toggle mb-3  card-mutasi-purchase-all bg-primary-lightest">
-                                    <div class="bg-primary-lightest p-2 rounded-2 ">
+                            <div class="row" id="div-input">
+                                @if ($data->reference_model == 'App\\Models\\InvoiceSaleDetail')
+                                    <div class="col-xs-12 ">
+                                        <p class="">Tanggal </p>
+                                        <input type="datetime-local" class="form-control" id="date-penjualan" />
                                         <p class="">Akun Persediaan</p>
-                                        <select class="form-control select-coa-persediaan" id="select-coa-persediaan"></select>
-                                        <p class="">Lawan Akun (hutang /kas )</p>
-                                        <select class="form-control select-coa-hutang-kas" id="select-coa-hutang-kas"></select>
-                                        <button class="btn btn-primary" onclick="createClaimPembelian()">Submit</button>
+                                        <select class="form-control" id="select-pcoa-persediaan"></select>
+                                        <p class="">Akun (Piutang /kas )</p>
+                                        <select class="form-control" id="select-pcoa-piutang-kas"></select>
+                                        <p>Akun Penjualan</p>
+                                        <select class="form-control" id="select-pcoa-penjualan"></select>
+                                        <button class="btn btn-primary" onclick="createClaimPenjualan()">Claim
+                                            Penjualan</button>
                                     </div>
-                                </div>
-                            </div>
+                                @elseif($data->reference_model == 'App\\Models\\InvoicePurchaseDetail')
+                                    <div class="col-xs-12 mt-1 ">
+                                        <h5 class="text-primary-dark mb-1"> <a
+                                                href="javascript:void(toggleDivMutasiPurchaseAll())"> <strong>Klaim
+                                                    pembelian Seluruhnya </strong>
+                                                <i id="icon-create"
+                                                    class="bx bx-caret-down toggle-icon card-mutasi-purchase-all"></i>
+                                            </a>
+                                        </h5>
+
+                                        <div id=""
+                                            class="tree-toggle mb-3  card-mutasi-purchase-all bg-primary-lightest">
+                                            <div class="bg-primary-lightest p-2 rounded-2 ">
+                                                <p class="">Tanggal </p>
+                                                <input type="datetime-local" class="form-control" id="date-pembelian" />
+                                                <p class="">Akun Persediaan</p>
+                                                <select class="form-control select-coa-persediaan"
+                                                    id="select-coa-persediaan"></select>
+                                                <p class="">Lawan Akun (hutang /kas )</p>
+                                                <select class="form-control select-coa-hutang-kas"
+                                                    id="select-coa-hutang-kas"></select>
+                                                <button class="btn btn-primary"
+                                                    onclick="createClaimPembelian()">Submit</button>
+                                            </div>
+                                        </div>
+                                    </div>
 
 
 
-                            <div class="col-xs-12 mt-2">
-                                <h5 class="text-primary-dark mb-1"> <a href="javascript:void(toggleDivMutasiPurchase())"> <strong>Klaim pembelian sebagian </strong>
-                                        <i id="icon-create" class="bx bx-caret-down toggle-icon card-mutasi-purchase"></i> </a>
-                                </h5>
+                                    <div class="col-xs-12 mt-2">
+                                        <h5 class="text-primary-dark mb-1"> <a
+                                                href="javascript:void(toggleDivMutasiPurchase())"> <strong>Klaim
+                                                    pembelian sebagian </strong>
+                                                <i id="icon-create"
+                                                    class="bx bx-caret-down toggle-icon card-mutasi-purchase"></i> </a>
+                                        </h5>
 
-                                <div id="" class="tree-toggle mb-3  card-mutasi-purchase bg-primary-lightest">
-                                    <div class="row p-2">
-                                        <div class="col-md-12 col-xs-12">
-                                            @php $index=1; @endphp
-                                            @foreach($data['details'] as $key => $item)
-                                            <form id="form-mutasi-purchase{{$index}}">
-                                                {{csrf_field()}}
-                                                <input type="hidden" name="invoice_pack_number" value="{{$data->invoice_pack_number}}" />
-                                                <input type="hidden" name="invoice_pack_id" value="{{$data->id}}" />
-                                                <div class="row pb-1 mt-1" style="border-bottom:1px solid  rgb(0, 98.4, 204);">
-                                                    <div class="col-md-3 col-xs-12">
-                                                        <label>Nama Barang</label>
-                                                        <input type="text" class="form-control" id="bdp-stock_name" value="{{$item->custom_stock_name??$item->stock->name}}" readonly />
-                                                        <input type="hidden" id="bdp-stock_id" name="stock_id[]" value="{{$item->stock_id}}" />
-                                                    </div>
+                                        <div id=""
+                                            class="tree-toggle mb-3  card-mutasi-purchase bg-primary-lightest">
+                                            <div class="row p-2">
+                                                <div class="col-md-12 col-xs-12">
+                                                    @php $index=1; @endphp
+                                                    @foreach ($data['details'] as $key => $item)
+                                                        <form id="form-mutasi-purchase{{ $index }}">
+                                                            {{ csrf_field() }}
+                                                            <input type="hidden" name="invoice_pack_number"
+                                                                value="{{ $data->invoice_pack_number }}" />
+                                                            <input type="hidden" name="invoice_pack_id"
+                                                                value="{{ $data->id }}" />
+                                                            <div class="row pb-1 mt-1"
+                                                                style="border-bottom:1px solid  rgb(0, 98.4, 204);">
+                                                                <div class="col-md-3 col-xs-12">
+                                                                    <label>Tangal</label>
+                                                                    <input type="datetime-local" class="form-control"
+                                                                        id="bdp-date"
+                                                                        value="{{ $item->created_at ?? now }}"
+                                                                        readonly />
+                                                                </div>
+
+                                                                <div class="col-md-3 col-xs-12">
+                                                                    <label>Nama Barang</label>
+                                                                    <input type="text" class="form-control"
+                                                                        id="bdp-stock_name"
+                                                                        value="{{ $item->custom_stock_name ?? $item->stock->name }}"
+                                                                        readonly />
+                                                                    <input type="hidden" id="bdp-stock_id"
+                                                                        name="stock_id[]"
+                                                                        value="{{ $item->stock_id }}" />
+                                                                </div>
 
 
-                                                    <div class="col-md-3 col-xs-12">
-                                                        <label>Jumlah</label>
-                                                        <input type="text" class="form-control" name="quantity[]" placeholder="qty bahan: {{$item->quantity}}" id="bdp-quantity" />
-                                                    </div>
+                                                                <div class="col-md-3 col-xs-12">
+                                                                    <label>Jumlah</label>
+                                                                    <input type="text" class="form-control"
+                                                                        name="quantity[]"
+                                                                        placeholder="qty bahan: {{ $item->quantity }}"
+                                                                        id="bdp-quantity" />
+                                                                </div>
 
-                                                    <div class="col-md-3 col-xs-12">
-                                                        <label>Satuan</label>
-                                                        <input class="form-control" type="text" readonly name="unit[]" id="bdp-satuan" value="{{$item->unit}}" />
-                                                    </div>
-                                                    <div class="col-md-3 col-xs-12">
-                                                        <label>Akun Persediaan / Beban</Label>
-                                                        <select class="select-coa-persediaan-beban form-control" name="code_group_debet[]">
+                                                                <div class="col-md-3 col-xs-12">
+                                                                    <label>Satuan</label>
+                                                                    <input class="form-control" type="text" readonly
+                                                                        name="unit[]" id="bdp-satuan"
+                                                                        value="{{ $item->unit }}" />
+                                                                </div>
+                                                                <div class="col-md-3 col-xs-12">
+                                                                    <label>Akun Persediaan / Beban</Label>
+                                                                    <select
+                                                                        class="select-coa-persediaan-beban form-control"
+                                                                        name="code_group_debet[]">
 
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-md-3 col-xs-12">
-                                                        <label>Akun Hutang / Kas</Label>
-                                                        <select class="select-coa-hutang-kas form-control" name="code_group_kredit[]">
+                                                                    </select>
+                                                                </div>
+                                                                <div class="col-md-3 col-xs-12">
+                                                                    <label>Akun Hutang / Kas</Label>
+                                                                    <select class="select-coa-hutang-kas form-control"
+                                                                        name="code_group_kredit[]">
 
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-md-2">
-                                                        <label>Aksi</label><br>
-                                                        <button type="button" onclick="submitMutasiPurchase('{{$index}}')" class="mb-3 btn btn-primary">submit</button>
-                                                    </div>
+                                                                    </select>
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <label>Aksi</label><br>
+                                                                    <button type="button"
+                                                                        onclick="submitMutasiPurchase('{{ $index }}')"
+                                                                        class="mb-3 btn btn-primary">submit</button>
+                                                                </div>
+
+                                                            </div>
+                                                        </form>
+                                                        <!-- <hr class="text-black" style="z-index:100"></hr> -->
+                                                        @php $index++; @endphp
+                                                    @endforeach
+
 
                                                 </div>
-                                            </form>
-                                            <!-- <hr class="text-black" style="z-index:100"></hr> -->
-                                            @php $index++; @endphp
-                                            @endforeach
-
-
-                                        </div>
-                                        <div class="col-md-2 col-xs-12">
+                                                <div class="col-md-2 col-xs-12">
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                @endif
                             </div>
-                            @endif
-                        </div>
                         @endif
                     </div>
                 </div>
@@ -172,12 +219,24 @@
 
 <script>
     $(document).ready(function() {
-        initItemSelectManual('#select-pcoa-persediaan', '{{route("chart-account.get-item-keuangan")}}?kind=persediaan', 'chart account', '#global-modal #div-input');
-        initItemSelectManual('#select-pcoa-piutang-kas', '{{route("chart-account.get-item-keuangan")}}?kind=piutang|kas', 'chart account', '#global-modal #div-input');
-        initItemSelectManual('#select-pcoa-penjualan', '{{route("chart-account.get-item-keuangan")}}?kind=penjualan', 'chart account', '#global-modal #div-input');
-        initItemSelectManual('.select-coa-persediaan', '{{route("chart-account.get-item-keuangan")}}?kind=persediaan', 'chart account', '#global-modal #div-input');
-        initItemSelectManual('.select-coa-persediaan-beban', '{{route("chart-account.get-item-keuangan")}}?kind=persediaan|beban', 'chart account', '#global-modal #div-input');
-        initItemSelectManual('.select-coa-hutang-kas', '{{route("chart-account.get-item-keuangan")}}?kind=hutang|kas', 'chart account', '#global-modal  #div-input');
+        initItemSelectManual('#select-pcoa-persediaan',
+            '{{ route('chart-account.get-item-keuangan') }}?kind=persediaan', 'chart account',
+            '#global-modal #div-input');
+        initItemSelectManual('#select-pcoa-piutang-kas',
+            '{{ route('chart-account.get-item-keuangan') }}?kind=piutang|kas', 'chart account',
+            '#global-modal #div-input');
+        initItemSelectManual('#select-pcoa-penjualan',
+            '{{ route('chart-account.get-item-keuangan') }}?kind=penjualan', 'chart account',
+            '#global-modal #div-input');
+        initItemSelectManual('.select-coa-persediaan',
+            '{{ route('chart-account.get-item-keuangan') }}?kind=persediaan', 'chart account',
+            '#global-modal #div-input');
+        initItemSelectManual('.select-coa-persediaan-beban',
+            '{{ route('chart-account.get-item-keuangan') }}?kind=persediaan|beban', 'chart account',
+            '#global-modal #div-input');
+        initItemSelectManual('.select-coa-hutang-kas',
+            '{{ route('chart-account.get-item-keuangan') }}?kind=hutang|kas', 'chart account',
+            '#global-modal  #div-input');
     });
 
 
@@ -197,14 +256,15 @@
 
     function createClaimPenjualan() {
         $.ajax({
-            url: '{{url(route("invoice.create-claim-penjualan"))}}',
+            url: '{{ url(route('invoice.create-claim-penjualan')) }}',
             method: 'post',
             data: {
                 coa_penjualan: $('#select-pcoa-penjualan').val(),
                 coa_persediaan: $('#select-pcoa-persediaan').val(),
                 coa_piutang_kas: $('#select-pcoa-piutang-kas').val(),
-                invoice_pack_id: '{{$data->id}}',
-                _token: '{{csrf_token()}}'
+                date: $('#date-penjualan').val(),
+                invoice_pack_id: '{{ $data->id }}',
+                _token: '{{ csrf_token() }}'
             },
             success: function(res) {
                 if (res.status == 1) {
@@ -224,13 +284,14 @@
 
     function createClaimPembelian() {
         $.ajax({
-            url: '{{url(route("invoice.create-claim-pembelian"))}}',
+            url: '{{ url(route('invoice.create-claim-pembelian')) }}',
             method: 'post',
             data: {
                 coa_persediaan: $('#select-coa-persediaan').val(),
                 coa_hutang_kas: $('#select-coa-hutang-kas').val(),
-                invoice_pack_id: '{{$data->id}}',
-                _token: '{{csrf_token()}}'
+                date: $('#date-pembelian').val(),
+                invoice_pack_id: '{{ $data->id }}',
+                _token: '{{ csrf_token() }}'
             },
             success: function(res) {
                 if (res.status == 1) {
@@ -250,7 +311,7 @@
 
     function submitMutasiPurchase(i) {
         swalConfirmAndSubmit({
-            url: '{{url("admin/invoice/purchase-create-mutations")}}',
+            url: '{{ url('admin/invoice/purchase-create-mutations') }}',
             data: $('#form-mutasi-purchase' + i).serialize(),
             onSuccess: function(res) {
                 console.log(res);

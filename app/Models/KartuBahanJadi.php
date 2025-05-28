@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Http\Controllers\JournalController;
 use App\Services\LockManager;
+use App\Traits\HasIndexDate;
 use App\Traits\HasModelDetailKartuInvoice;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Database\Eloquent\Model;
@@ -11,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Testing\Fluent\Concerns\Has;
 use Throwable;
 
 class KartuBahanJadi extends Model
@@ -18,6 +20,7 @@ class KartuBahanJadi extends Model
     //
 
     use HasModelDetailKartuInvoice;
+    use HasIndexDate;
     protected $table = 'kartu_bahan_jadis';
     public $timestamps = true;
 
@@ -44,6 +47,9 @@ class KartuBahanJadi extends Model
         info('TRYING UPLOAD BHJ ' . json_encode($request->all()));
         $lock = Cache::lock('kartu-bahanjadi-' . $request->input('stock_id'), 40);
         try {
+            $date = $request->input('date') ?? now();
+            self::proteksiBackdate($date);
+
             $flow = $request->input('flow');
             $isCustom = $request->input('is_custom_rupiah');
             $kartu = new KartuBahanJadi;
@@ -64,8 +70,14 @@ class KartuBahanJadi extends Model
                 $kartu->production_number = $request->input('sales_order_number');
             }
             //mutasi terakhir sebelum mutasi id yg diinput oleh user
+            $indexDate = self::getNextIndexDate($date);
+            $kartu->index_date = $indexDate;
+            $kartu->index_date_group = createCarbon($date)->format('ymdHis');
 
-            $lastCard = KartuBahanJadi::where('stock_id', $kartu->stock_id)->where('production_number', $kartu->production_number)->orderBy('id', 'desc')->first();
+            //mutasi terakhir sebelum mutasi id yg diinput oleh user
+            $lastCard = KartuBahanJadi::where('stock_id', $kartu->stock_id)->where('production_number', $kartu->production_number)
+                ->where('index_date', '<', $indexDate)->orderBy('index_date', 'desc')->first();
+
             if (!$lastCard) {
                 $lastCard = new KartuBahanJadi;
                 $lastCard->saldo_qty_backend = 0;
@@ -109,6 +121,9 @@ class KartuBahanJadi extends Model
                 ];
             }
             $kartu->save();
+            if (self::isBackdate($date)) {
+                $kartu->recalculateSaldo();
+            }
         } catch (LockTimeoutException $e) {
             info('kartu stock timeout on md' . $request->input('mutation_detail_id'));
             return [
@@ -137,6 +152,8 @@ class KartuBahanJadi extends Model
         if ($useTransaction)
             DB::beginTransaction();
         try {
+            $date = $request->input('date') ?? now();
+            self::proteksiBackdate($date);
             $stockid = $request->input('stock_id');
             $qty = format_db($request->input('mutasi_quantity'));
             $unit = $request->input('unit');
@@ -202,6 +219,7 @@ class KartuBahanJadi extends Model
                 'code_group' => $codeGroup,
                 'code_group_name' => $codeGroupName,
                 'custom_stock_name' => $customStockName,
+                'date' => $date,
                 'production_number' => $request->input('production_number')
             ]));
             if ($st['status'] == 0) {
@@ -247,7 +265,8 @@ class KartuBahanJadi extends Model
                     'kredits' => $kredits,
                     'debets' => $debets,
                     'type' => 'transaction',
-                    'date' => Date('Y-m-d H:i:s'),
+                    'date' => $date,
+                    'is_backdate' => self::isBackdate($date),
                     'is_auto_generated' => 1,
                     'title' => 'create mutation transaction',
                     'url_try_again' => 'try_again'
@@ -277,5 +296,22 @@ class KartuBahanJadi extends Model
             'msg' => $ks,
             'journal_number' => $number
         ];
+    }
+
+    public function recalculateSaldo()
+    {
+        $kartus = KartuBahanJadi::where('stock_id', $this->stock_id)->where('index_date', '>', $this->index_date)->where('production_number', $this->production_number)
+            ->orderBy('index_date', 'asc')->get();
+
+        $saldoQty = $this->saldo_qty_backend;
+        $saldoRupiah = $this->saldo_rupiah_total;
+        foreach ($kartus as $kartu) {
+
+            $saldoQty = moneyAdd($saldoQty, $kartu->mutasi_qty_backend);
+            $saldoRupiah = moneyAdd($saldoRupiah, $kartu->mutasi_rupiah_total);
+            $kartu->saldo_qty_backend = $saldoQty;
+            $kartu->saldo_rupiah_total = $saldoRupiah;
+            $kartu->save();
+        }
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Http\Controllers\JournalController;
+use App\Traits\HasIndexDate;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -14,6 +15,8 @@ use Illuminate\Support\Str;
 class KartuPrepaidExpense extends Model
 {
     //
+
+    use HasIndexDate;
     protected $table = "kartu_prepaid_expenses";
     public $timestamps = true;
     public $fillable = [
@@ -58,13 +61,19 @@ class KartuPrepaidExpense extends Model
         //diini kita ambil dulu kartu yang lama
         try {
             $lock->block(15);
-            $lastKartu = KartuPrepaidExpense::where('prepaid_expense_id', $invID)->orderBy('id', 'desc')->first();
+            $date = $request->input('date') ?? now();
+            self::proteksiBackdate($date);
+            $indexDate = self::getNextIndexDate($date);
+
+            $lastKartu = KartuPrepaidExpense::where('prepaid_expense_id', $invID)->where('index_date', '<', $indexDate)->orderBy('index_date', 'desc')->first();
             $lastNilaiBuku = $lastKartu ? $lastKartu->nilai_buku : 0;
             // Format nilai amount terlebih dahulu
             //input amount harus pakai languange indonesia
             $formattedAmount = $request->input('type_mutasi') == 'amortisasi' ? format_db($request->input('amount')) * -1 : format_db($request->input('amount'));
             $isOtomatisJurnal = $request->input('is_otomatis_jurnal');
             $request->merge([
+                'index_date' => $indexDate,
+                'index_date_group' => createCarbon($date)->format('ymdHis'),
                 'book_journal_id' => bookID(),
                 'amount'          => $formattedAmount,
                 // nilai_buku dihitung berdasarkan kartu terakhir dan amount yang sudah diformat
@@ -126,7 +135,8 @@ class KartuPrepaidExpense extends Model
                     'kredits' => $kredits,
                     'debets' => $debets,
                     'type' => 'umum',
-                    'date' => Date('Y-m-d H:i:s'),
+                    'date' => $date,
+                    'is_backdate' => self::isBackdate($date),
                     'is_auto_generated' => 1,
                     'title' => 'pembelian inventaris',
                     'url_try_again' => null
@@ -145,7 +155,12 @@ class KartuPrepaidExpense extends Model
 
             $validated['journal_id'] = $journalID;
             $validated['journal_number'] = $number;
+            $validated['index_date'] = $indexDate;
+            $validated['index_date_group'] = createCarbon($date)->format('ymdHis');
             $ki = KartuPrepaidExpense::create($validated);
+            if (self::isBackdate($date)) {
+                $ki->recalculateNilaiBuku();
+            }
             //masukkan data baru dengan nilai buku yang baru yaa..
             return ['status' => 1, 'msg' => $ki];
         } catch (ValidationException $e) {
@@ -170,5 +185,20 @@ class KartuPrepaidExpense extends Model
             'status' => 0,
             'msg' => 'something error ?'
         ];
+    }
+
+    public function recalculateNilaiBuku()
+    {
+        // Recalculate nilai buku based on the latest amount and previous nilai buku
+        $kartus = KartuPrepaidExpense::where('prepaid_expense_id', $this->prepaid_expense_id)
+            ->where('index_date', '>', $this->index_date)->get();
+        $nilaiBuku = $this->nilai_buku;
+        foreach ($kartus as $kartu) {
+            $realAmount = $kartu->type_mutasi == 'amortisasi' ? $kartu->amount * -1 : $kartu->amount;
+            $kartu->nilai_buku = $nilaiBuku + $realAmount;
+            $kartu->save();
+            $nilaiBuku = $kartu->nilai_buku;
+        }
+        
     }
 }
