@@ -14,6 +14,9 @@ class KartuHutangController extends Controller
     {
 
         $view = view('kartu.kartu-hutang');
+        $view->month = getInput('month') ? toDigit(getInput('month'), 2) : Date('m');
+        $view->year = getInput('year') ? getInput('year') : Date('Y');
+        
         return $view;
     }
 
@@ -92,7 +95,7 @@ class KartuHutangController extends Controller
     public function searchLinkJournal()
     {
         $journals = Journal::where('reference_model', KartuHutang::class)
-            ->whereNull('verified_by')->with(['codeGroupData:code_group,name','codeGroupLawanData:code_group,name'])->get();
+            ->whereNull('verified_by')->with(['codeGroupData:code_group,name', 'codeGroupLawanData:code_group,name'])->get();
         return [
             'status' => 1,
             'msg' => $journals

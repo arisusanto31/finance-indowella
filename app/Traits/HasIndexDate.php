@@ -3,15 +3,29 @@
 namespace App\Traits;
 
 use App\Models\JournalKey;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 trait HasIndexDate
 {
-    public function getNextIndexDate($inputDate)
-    {
-        $date = createCarbon($inputDate)->format('YmdHis');
 
-        $lastData = $this->where('index_date_group', $date)
+    public static function bootHasIndexDate()
+    {
+        static::creating(function ($model) {
+            $newdate = Carbon::createFromFormat('ymdHis', $model->index_date_group);
+            $model->created_at = $newdate;
+        });
+
+        static::updating(function ($model) {
+            $newdate = Carbon::createFromFormat('ymdHis', $model->index_date_group);
+            $model->created_at = $newdate;
+        });
+    }
+    public static function getNextIndexDate($inputDate)
+    {
+        $date = createCarbon($inputDate)->format('ymdHis');
+
+        $lastData = static::query()->where('index_date_group', $date)
             ->select(DB::raw('MAX(index_date) as maxindex'))
             ->first();
 
@@ -22,7 +36,7 @@ trait HasIndexDate
         return $newIndex;
     }
 
-    public function proteksiBackdate($date)
+    public static function proteksiBackdate($date)
     {
         if (carbonDate()->subMinutes(5) > createCarbon($date)) {
             // ini kan lebih dari 5 menit , jadi ini backdate
@@ -35,10 +49,8 @@ trait HasIndexDate
         }
     }
 
-    public function isBackdate($date)
+    public static function isBackdate($date)
     {
         return carbonDate()->subMinutes(5) > createCarbon($date);
     }
-
-   
 }

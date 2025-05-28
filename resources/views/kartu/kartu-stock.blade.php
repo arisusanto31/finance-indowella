@@ -1,14 +1,25 @@
 <x-app-layout>
     @push('styles')
-    <style>
-        .text-center th {
-            vertical-align: middle;
-        }
-    </style>
+        <style>
+            .text-center th {
+                vertical-align: middle;
+            }
+        </style>
     @endpush
 
     <div class="card shadow-sm mb-4">
-        <h5 class="text-primary-dark card-header" style="padding-bottom:0px;"> 💳 <strong>KARTU STOCK</strong> </h5>
+        <h5 class="text-primary-dark card-header" style="padding-bottom:0px;"> 💳 <strong>KARTU STOCK</strong>
+            <div class="d-flex justify-content pe-4 mb-3">
+                <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="prevMonth()">
+                    << </button>
+                        <span class="badge bg-primary d-flex justify-content-center align-items-center">
+                            {{ getListMonth()[$month] }} {{ $year }}</span>
+                        <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="nextMonth()">
+                            >>
+                        </button>
+            </div>
+
+        </h5>
         <div class="card-body">
             <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
                 <!-- <a href="#" class="btn btn-primary btn-big-custom rounded-0">Tambah Jurnal Umum</a> -->
@@ -20,41 +31,23 @@
                     <div class="nav-align-top mb-4">
                         <ul class="nav nav-pills mb-3" role="tablist">
                             <li class="nav-item">
-                                <button
-                                    type="button"
-                                    class="nav-link active"
-                                    role="tab"
-                                    data-bs-toggle="tab"
-                                    data-bs-target="#navs-pills-top-home"
-                                    aria-controls="navs-pills-top-home"
-                                    aria-selected="true"
-                                    onclick="getSummary()">
+                                <button type="button" class="nav-link active" role="tab" data-bs-toggle="tab"
+                                    data-bs-target="#navs-pills-top-home" aria-controls="navs-pills-top-home"
+                                    aria-selected="true" onclick="getSummary()">
                                     🗃 KARTU
                                 </button>
                             </li>
                             <li class="nav-item">
-                                <button
-                                    type="button"
-                                    class="nav-link"
-                                    role="tab"
-                                    data-bs-toggle="tab"
-                                    data-bs-target="#navs-pills-top-profile"
-                                    aria-controls="navs-pills-top-profile"
-                                    aria-selected="false"
-                                    onclick="getMutasiMasuk()">
+                                <button type="button" class="nav-link" role="tab" data-bs-toggle="tab"
+                                    data-bs-target="#navs-pills-top-profile" aria-controls="navs-pills-top-profile"
+                                    aria-selected="false" onclick="getMutasiMasuk()">
                                     📥 Masuk
                                 </button>
                             </li>
                             <li class="nav-item">
-                                <button
-                                    type="button"
-                                    class="nav-link"
-                                    role="tab"
-                                    data-bs-toggle="tab"
-                                    data-bs-target="#navs-pills-top-messages"
-                                    aria-controls="navs-pills-top-messages"
-                                    aria-selected="false"
-                                    onclick="getMutasiKeluar()">
+                                <button type="button" class="nav-link" role="tab" data-bs-toggle="tab"
+                                    data-bs-target="#navs-pills-top-messages" aria-controls="navs-pills-top-messages"
+                                    aria-selected="false" onclick="getMutasiKeluar()">
                                     📤 Keluar
                                 </button>
                             </li>
@@ -62,7 +55,8 @@
                         <div class="tab-content" style="background-color: #f8f9fa;">
                             <div class="tab-pane fade show active" id="navs-pills-top-home" role="tabpanel">
                                 <div class="table-responsive mt-2">
-                                    <table id="kartuKasTable" class="table table-bordered table-striped table-hover align-middle">
+                                    <table id="kartuKasTable"
+                                        class="table table-bordered table-striped table-hover align-middle">
                                         <thead class="bg-white text-dark text-center">
                                             <tr>
                                                 <th rowspan=2>No</th>
@@ -96,12 +90,14 @@
                             <div class="tab-pane fade" id="navs-pills-top-profile" role="tabpanel">
                                 <div class="row mt-1">
                                     <div class="col-md-2">
-                                        <button type="button" class=" btn-primary" onclick="showModalMasuk()"> 🔃 buat mutasi</button>
+                                        <button type="button" class=" btn-primary" onclick="showModalMasuk()"> 🔃 buat
+                                            mutasi</button>
                                     </div>
                                 </div>
                                 <div class="table-responsive mt-2">
 
-                                    <table id="kartuMasuk" class="table table-bordered table-striped table-hover align-middle">
+                                    <table id="kartuMasuk"
+                                        class="table table-bordered table-striped table-hover align-middle">
                                         <thead class="bg-white text-dark text-center">
                                             <tr>
                                                 <th>No</th>
@@ -123,10 +119,12 @@
                             </div>
                             <div class="tab-pane fade" id="navs-pills-top-messages" role="tabpanel">
                                 <div class="col-md-2">
-                                    <button type="button" class=" btn-primary" onclick="showModalOut()"> 🔃 buat mutasi</button>
+                                    <button type="button" class=" btn-primary" onclick="showModalOut()"> 🔃 buat
+                                        mutasi</button>
                                 </div>
                                 <div class="table-responsive mt-2">
-                                    <table id="kartuKeluar" class="table table-bordered table-striped table-hover align-middle">
+                                    <table id="kartuKeluar"
+                                        class="table table-bordered table-striped table-hover align-middle">
                                         <thead class="bg-white text-dark text-center">
                                             <tr>
                                                 <th>No</th>
@@ -158,11 +156,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">Buat Link ke Jurnal</h5>
-                    <button
-                        type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row">
@@ -186,7 +180,8 @@
                     </div>
                     <div class="row">
                         <div class="col">
-                            <input type="text" id="description" placeholder="cari deskripsi" class="form-control" />
+                            <input type="text" id="description" placeholder="cari deskripsi"
+                                class="form-control" />
                         </div>
                         <div class="col">
                             <button type="button" class="btn btn-primary" onclick="searchJournal()">Cari</button>
@@ -202,7 +197,8 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         Close
                     </button>
-                    <button id="btn-store-pelunasan" onclick="linkJournal()" type="button" class="btn btn-primary">LINK !!</button>
+                    <button id="btn-store-pelunasan" onclick="linkJournal()" type="button"
+                        class="btn btn-primary">LINK !!</button>
                 </div>
             </div>
         </div>
@@ -210,31 +206,56 @@
 
 
     @push('scripts')
-    <script>
-        var page = "kartu";
-        setTimeout(function() {
-            getSummary();
-        }, 200);
-        $('#daterange').daterangepicker({
-            opens: 'right',
-            locale: {
-                format: 'YYYY-MM-DD'
+        <script>
+            var page = "kartu";
+            setTimeout(function() {
+                getSummary();
+            }, 200);
+            $('#daterange').daterangepicker({
+                opens: 'right',
+                locale: {
+                    format: 'YYYY-MM-DD'
+                }
+            });
+            console.log('init berhasil lur ');
+            initItemSelectManual('#select-code_group', '{{ route('chart-account.get-item-keuangan') }}?kind=persediaan',
+                'pilih kode akun', '#modal-journal');
+
+
+            function prevMonth() {
+                month = '{{ $month }}';
+                year = '{{ $year }}';
+                month--;
+                if (month < 1) {
+                    month = 12;
+                    year--;
+                }
+                window.location.href = '{{ url('admin/kartu/kartu-stock/main') }}?month=' + month + '&year=' + year;
             }
-        });
-        console.log('init berhasil lur ');
-        initItemSelectManual('#select-code_group', '{{route("chart-account.get-item-keuangan")}}?kind=persediaan', 'pilih kode akun', '#modal-journal');
 
-        function searchJournal() {
+            function nextMonth() {
+                month = '{{ $month }}';
+                year = '{{ $year }}';
+                month++;
+                if (month > 12) {
+                    month = 1;
+                    year++;
+                }
+                window.location.href = '{{ url('admin/kartu/kartu-stock/main') }}?month=' + month + '&year=' + year;
+            }
 
-            $.ajax({
-                url: '{{route("jurnal.search-error")}}?code_group=' + $('#select-code_group').val() + '&daterange=' + $('#daterange').val() + '&description=' + $('#description').val(),
-                method: 'get',
-                success: function(res) {
-                    console.log(res);
-                    if (res.status == 1) {
-                        html = "";
-                        res.msg.forEach(function eachData(data) {
-                            html += `
+            function searchJournal() {
+
+                $.ajax({
+                    url: '{{ route('jurnal.search-error') }}?code_group=' + $('#select-code_group').val() +
+                        '&daterange=' + $('#daterange').val() + '&description=' + $('#description').val(),
+                    method: 'get',
+                    success: function(res) {
+                        console.log(res);
+                        if (res.status == 1) {
+                            html = "";
+                            res.msg.forEach(function eachData(data) {
+                                html += `
                                 <a href="javascript:void(pilihJurnal(${data.id}))" >
                                     <div id="item-jurnal${data.id}" class="col-md-12 col-xs-12 item-jurnal colorblack " style="position:relative; border-bottom:1px solid black;">
                                         <span style="position:absolute; top:0px; left:-17px"> <i class="fas fa-circle"></i></span>
@@ -243,50 +264,51 @@
                                     </div>
                                 </a>
                             `;
-                        });
-                        $('#container-journal').html(html);
-                    } else {
+                            });
+                            $('#container-journal').html(html);
+                        } else {
 
+                        }
+                    },
+                    error: function(res) {
+                        console.log(res);
                     }
-                },
-                error: function(res) {
-                    console.log(res);
-                }
-            });
-        }
+                });
+            }
 
 
-        function pilihJurnal(id) {
-            $('.item-jurnal').removeClass('bg-primary colorwhite');
-            $('#item-jurnal' + id).addClass('bg-primary colorwhite');
-            $('#journal_id').val(id);
-        }
+            function pilihJurnal(id) {
+                $('.item-jurnal').removeClass('bg-primary colorwhite');
+                $('#item-jurnal' + id).addClass('bg-primary colorwhite');
+                $('#journal_id').val(id);
+            }
 
-        function getSummary() {
-            page = "kartu";
-            $.ajax({
-                url: "{{ route('kartu-stock.get-summary') }}",
-                method: "GET",
-                success: function(res) {
-                    console.log(res);
-                    if (res.status == 1) {
-                        html = "";
-                        res.msg.forEach(function(item, i) {
-                            rupiahUnitAwal = item.awal_qty > 0 ? item.awal_rupiah / item.awal_qty : 0;
-                            rupiahUnitAkhir = item.akhir_qty > 0 ? item.akhir_rupiah / item.akhir_qty : 0;
-                            masuk = [0, 0, 0];
-                            keluar = [0, 0, 0];
-                            if (array_key_exists(item.id, res.mutasi_masuk)) {
-                                masuk[0] = res.mutasi_masuk[item.id].qty;
-                                masuk[1] = res.mutasi_masuk[item.id].rupiah_unit;
-                                masuk[2] = res.mutasi_masuk[item.id].total;
-                            }
-                            if (array_key_exists(item.id, res.mutasi_keluar)) {
-                                keluar[0] = res.mutasi_keluar[item.id].qty;
-                                keluar[1] = res.mutasi_keluar[item.id].rupiah_unit;
-                                keluar[2] = res.mutasi_keluar[item.id].total;
-                            }
-                            html += `
+            function getSummary() {
+                page = "kartu";
+                $.ajax({
+                    url: "{{ route('kartu-stock.get-summary') }}",
+                    method: "GET",
+                    success: function(res) {
+                        console.log(res);
+                        if (res.status == 1) {
+                            html = "";
+                            res.msg.forEach(function(item, i) {
+                                rupiahUnitAwal = item.awal_qty > 0 ? item.awal_rupiah / item.awal_qty : 0;
+                                rupiahUnitAkhir = item.akhir_qty > 0 ? item.akhir_rupiah / item.akhir_qty :
+                                    0;
+                                masuk = [0, 0, 0];
+                                keluar = [0, 0, 0];
+                                if (array_key_exists(item.id, res.mutasi_masuk)) {
+                                    masuk[0] = res.mutasi_masuk[item.id].qty;
+                                    masuk[1] = res.mutasi_masuk[item.id].rupiah_unit;
+                                    masuk[2] = res.mutasi_masuk[item.id].total;
+                                }
+                                if (array_key_exists(item.id, res.mutasi_keluar)) {
+                                    keluar[0] = res.mutasi_keluar[item.id].qty;
+                                    keluar[1] = res.mutasi_keluar[item.id].rupiah_unit;
+                                    keluar[2] = res.mutasi_keluar[item.id].total;
+                                }
+                                html += `
                                 <tr>
                                 <td>${i+1}</td>
                                 <td>${item.name} [${item.id}]</td>
@@ -305,177 +327,177 @@
                                 <td>${formatRupiah(item.akhir_rupiah)}</td>
                                 </tr>`;
 
-                        });
-                        $('#body-summary').html(html);
-                        // $('#kartuKasTable').DataTable({
-                        //     "destroy": true,
-                        //     "order": [
-                        //         [0, "asc"]
-                        //     ],
-                        //     "pageLength": 10,
-                        //     "lengthMenu": [
-                        //         [10, 25, 50, -1],
-                        //         [10, 25, 50, "All"]
-                        //     ],
-                        // });
-                    } else {
-
-                    }
-                },
-                error: function(err) {
-                    console.log(err);
-                }
-            });
-        }
-
-        function showModalMasuk() {
-            showDetailOnModal("{{ route('kartu-stock.create-mutasi-masuk') }}");
-        }
-
-        function showModalOut() {
-            showDetailOnModal("{{ route('kartu-stock.create-mutasi-keluar') }}");
-        }
-
-        function getMutasiMasuk() {
-            page = "masuk";
-            $.ajax({
-                url: "{{ route('kartu-stock.get-mutasi-masuk') }}",
-                method: "GET",
-                success: function(res) {
-                    console.log(res);
-                    if (res.status == 1) {
-                        html = "";
-                        res.msg.forEach(function(item, i) {
-                            html += `
-                                <tr>
-                                <td>${i+1}</td>
-                                <td>${formatNormalDateTime(new Date(item.created_at))}</td>
-                                <td>${item.stock_id}</td>
-                                <td>${item.stock_name}</td>
-                                <td>${formatRupiah(item.mutasi_quantity)}</td>
-                                <td>${item.unit}</td>
-                                <td>${formatRupiah(item.mutasi_rupiah_on_unit*(item.mutasi_qty_backend/item.mutasi_quantity))}</td>
-                                <td>${formatRupiah(item.mutasi_rupiah_total)}</td>
-                                <td>${(!item.journal_number?'<span> belum ada jurnal</span> <button onclick="openLinkJournal('+item.id+')"> <i class="fas fa-link"></i> jurnal</button>':item.journal_number)}
-                                       <button onclick="refreshKartu(${item.id})"> <i class="fas fa-sync"></i> </button>
-                                </td>
-                                </tr>`;
-                        });
-                        $('#body-mutasi-masuk').html(html);
-                    } else {
-
-                    }
-                },
-                error: function(err) {
-                    console.log(err);
-                }
-            });
-        }
-
-        function openLinkJournal(id) {
-            $('#modal-journal').modal('show');
-            $('#keterangan-kartu').html("Link Kartu Stock ID : " + id);
-            $('#model_id').val(id);
-
-        }
-
-        function linkJournal() {
-            id = $('#journal_id').val();
-            if (id == "") {
-                Swal.fire("opss", "Pilih jurnal terlebih dahulu", "error");
-                return;
-            }
-            model_id = $('#model_id').val();
-            if (model_id == "") {
-                Swal.fire("opss", "Pilih kartu stock terlebih dahulu", "error");
-                return;
-            }
-
-            $.ajax({
-                url: '{{route("jurnal.link-journal")}}',
-                method: 'POST',
-                data: {
-                    "_token": "{{ csrf_token() }}",
-                    "model_id": model_id,
-                    "journal_id": id,
-                    "model": "App\\Models\\KartuStock",
-                },
-                success: function(res) {
-                    console.log(res);
-                    if (res.status == 1) {
-                        $('#modal-journal').modal('hide');
-                    } else {
-                        Swal.fire("opss", res.msg, "error");
-                    }
-                },
-                error: function(err) {
-                    console.log(err);
-                }
-            });
-        }
-
-        function getMutasiKeluar() {
-            page = "keluar";
-            $.ajax({
-                url: "{{ route('kartu-stock.get-mutasi-keluar') }}",
-                method: "GET",
-                success: function(res) {
-                    console.log(res);
-                    if (res.status == 1) {
-                        html = "";
-                        res.msg.forEach(function(item, i) {
-                            html += `
-                                <tr>
-                                <td>${i+1}</td>
-                                <td>${formatNormalDateTime(new Date(item.created_at))}</td>
-                                <td>${item.stock_id}</td>
-                                <td>${item.stock_name}</td>
-                                <td>${formatRupiah(item.mutasi_quantity)}</td>
-                                <td>${item.unit}</td>
-                                <td>${formatRupiah(item.mutasi_rupiah_on_unit*(item.mutasi_qty_backend/item.mutasi_quantity))}</td>
-                                <td>${formatRupiah(item.mutasi_rupiah_total)}</td>
-                                <td>${(!item.journal_number?'<span> belum ada jurnal</span> <button onclick="openLinkJournal('+item.id+')"> <i class="fas fa-link"></i> jurnal</button>':item.journal_number)}
-                                       <button onclick="refreshKartu(${item.id})"> <i class="fas fa-sync"></i> </button>
-                                </td>
-                                </tr>`;
-                        });
-                        $('#body-mutasi-keluar').html(html);
-                    } else {
-
-                    }
-                },
-                error: function(err) {
-                    console.log(err);
-                }
-            });
-        }
-
-        function refreshKartu(id) {
-            $.ajax({
-                url: "{{ route('kartu-stock.refresh-kartu') }}",
-                method: "POST",
-                data: {
-                    "_token": "{{ csrf_token() }}",
-                    "id": id,
-                },
-                success: function(res) {
-                    console.log(res);
-                    if (res.status == 1) {
-                        if (page == "masuk") {
-                            getMutasiMasuk();
+                            });
+                            $('#body-summary').html(html);
+                            // $('#kartuKasTable').DataTable({
+                            //     "destroy": true,
+                            //     "order": [
+                            //         [0, "asc"]
+                            //     ],
+                            //     "pageLength": 10,
+                            //     "lengthMenu": [
+                            //         [10, 25, 50, -1],
+                            //         [10, 25, 50, "All"]
+                            //     ],
+                            // });
                         } else {
-                            getMutasiKeluar();
+
                         }
-                        Swal.fire("Berhasil", res.msg, "success");
-                    } else {
-                        Swal.fire("opss", res.msg, "error");
+                    },
+                    error: function(err) {
+                        console.log(err);
                     }
-                },
-                error: function(err) {
-                    console.log(err);
+                });
+            }
+
+            function showModalMasuk() {
+                showDetailOnModal("{{ route('kartu-stock.create-mutasi-masuk') }}");
+            }
+
+            function showModalOut() {
+                showDetailOnModal("{{ route('kartu-stock.create-mutasi-keluar') }}");
+            }
+
+            function getMutasiMasuk() {
+                page = "masuk";
+                $.ajax({
+                    url: "{{ route('kartu-stock.get-mutasi-masuk') }}",
+                    method: "GET",
+                    success: function(res) {
+                        console.log(res);
+                        if (res.status == 1) {
+                            html = "";
+                            res.msg.forEach(function(item, i) {
+                                html += `
+                                <tr>
+                                <td>${i+1}</td>
+                                <td>${formatNormalDateTime(new Date(item.created_at))}</td>
+                                <td>${item.stock_id}</td>
+                                <td>${item.stock_name}</td>
+                                <td>${formatRupiah(item.mutasi_quantity)}</td>
+                                <td>${item.unit}</td>
+                                <td>${formatRupiah(item.mutasi_rupiah_on_unit*(item.mutasi_qty_backend/item.mutasi_quantity))}</td>
+                                <td>${formatRupiah(item.mutasi_rupiah_total)}</td>
+                                <td>${(!item.journal_number?'<span> belum ada jurnal</span> <button onclick="openLinkJournal('+item.id+')"> <i class="fas fa-link"></i> jurnal</button>':item.journal_number)}
+                                       <button onclick="refreshKartu(${item.id})"> <i class="fas fa-sync"></i> </button>
+                                </td>
+                                </tr>`;
+                            });
+                            $('#body-mutasi-masuk').html(html);
+                        } else {
+
+                        }
+                    },
+                    error: function(err) {
+                        console.log(err);
+                    }
+                });
+            }
+
+            function openLinkJournal(id) {
+                $('#modal-journal').modal('show');
+                $('#keterangan-kartu').html("Link Kartu Stock ID : " + id);
+                $('#model_id').val(id);
+
+            }
+
+            function linkJournal() {
+                id = $('#journal_id').val();
+                if (id == "") {
+                    Swal.fire("opss", "Pilih jurnal terlebih dahulu", "error");
+                    return;
                 }
-            });
-        }
-    </script>
+                model_id = $('#model_id').val();
+                if (model_id == "") {
+                    Swal.fire("opss", "Pilih kartu stock terlebih dahulu", "error");
+                    return;
+                }
+
+                $.ajax({
+                    url: '{{ route('jurnal.link-journal') }}',
+                    method: 'POST',
+                    data: {
+                        "_token": "{{ csrf_token() }}",
+                        "model_id": model_id,
+                        "journal_id": id,
+                        "model": "App\\Models\\KartuStock",
+                    },
+                    success: function(res) {
+                        console.log(res);
+                        if (res.status == 1) {
+                            $('#modal-journal').modal('hide');
+                        } else {
+                            Swal.fire("opss", res.msg, "error");
+                        }
+                    },
+                    error: function(err) {
+                        console.log(err);
+                    }
+                });
+            }
+
+            function getMutasiKeluar() {
+                page = "keluar";
+                $.ajax({
+                    url: "{{ route('kartu-stock.get-mutasi-keluar') }}",
+                    method: "GET",
+                    success: function(res) {
+                        console.log(res);
+                        if (res.status == 1) {
+                            html = "";
+                            res.msg.forEach(function(item, i) {
+                                html += `
+                                <tr>
+                                <td>${i+1}</td>
+                                <td>${formatNormalDateTime(new Date(item.created_at))}</td>
+                                <td>${item.stock_id}</td>
+                                <td>${item.stock_name}</td>
+                                <td>${formatRupiah(item.mutasi_quantity)}</td>
+                                <td>${item.unit}</td>
+                                <td>${formatRupiah(item.mutasi_rupiah_on_unit*(item.mutasi_qty_backend/item.mutasi_quantity))}</td>
+                                <td>${formatRupiah(item.mutasi_rupiah_total)}</td>
+                                <td>${(!item.journal_number?'<span> belum ada jurnal</span> <button onclick="openLinkJournal('+item.id+')"> <i class="fas fa-link"></i> jurnal</button>':item.journal_number)}
+                                       <button onclick="refreshKartu(${item.id})"> <i class="fas fa-sync"></i> </button>
+                                </td>
+                                </tr>`;
+                            });
+                            $('#body-mutasi-keluar').html(html);
+                        } else {
+
+                        }
+                    },
+                    error: function(err) {
+                        console.log(err);
+                    }
+                });
+            }
+
+            function refreshKartu(id) {
+                $.ajax({
+                    url: "{{ route('kartu-stock.refresh-kartu') }}",
+                    method: "POST",
+                    data: {
+                        "_token": "{{ csrf_token() }}",
+                        "id": id,
+                    },
+                    success: function(res) {
+                        console.log(res);
+                        if (res.status == 1) {
+                            if (page == "masuk") {
+                                getMutasiMasuk();
+                            } else {
+                                getMutasiKeluar();
+                            }
+                            Swal.fire("Berhasil", res.msg, "success");
+                        } else {
+                            Swal.fire("opss", res.msg, "error");
+                        }
+                    },
+                    error: function(err) {
+                        console.log(err);
+                    }
+                });
+            }
+        </script>
     @endpush
 </x-app-layout>
