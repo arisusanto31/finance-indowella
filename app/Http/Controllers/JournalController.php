@@ -9,6 +9,7 @@ use App\Jobs\RecalculateJournalJob;
 use App\Jobs\UpdateLawanCodeJournalJob;
 use App\Models\BookJournal;
 use App\Models\ChartAccount;
+use App\Models\DetailKartuInvoice;
 use App\Models\Journal;
 use App\Models\JournalJobFailed;
 use App\Models\JournalKey;
@@ -477,32 +478,39 @@ class JournalController extends Controller
                 ];
             }
             $journals = Journal::where('journal_number', $journal->journal_number)->get();
-            if (date_diff(createCarbon($journal->created_at), carbonDate())->days > 3) {
-                //buat jurnal pembalikan balik aja 
-                return self::cancelJournal($journal->journal_number);
-            } else {
-                $lj = [];
-                foreach ($journals as $j) {
-                    //kalo disini langsung hapus aja, biar lebih clean datanya
-                    $lj[] = Journal::where('code_group', $j->code_group)->where('index_date', '<', $j->index_date)->orderBy('index_date', 'desc')->first();
-                    if ($j->reference_model != null) {
-                        //menghapus relasi di model yang di link ke jurnal ini
-                        $model = $j->reference_model::where('journal_id', $j->id)->get();
-                        if ($model->count() > 0) {
-                            $model->each(function ($item) {
-                                $item->journal_id = null;
-                                $item->journal_number = null;
-                                $item->save();
-                            });
-                        }
+            // if (date_diff(createCarbon($journal->created_at), carbonDate())->days > 3) {
+            //     //buat jurnal pembalikan balik aja 
+            //     return self::cancelJournal($journal->journal_number);
+            // } else {
+            $lj = [];
+            foreach ($journals as $j) {
+                //kalo disini langsung hapus aja, biar lebih clean datanya
+                $lj[] = Journal::where('code_group', $j->code_group)->where('index_date', '<', $j->index_date)->orderBy('index_date', 'desc')->first();
+                if ($j->reference_model != null) {
+                    //menghapus relasi di model yang di link ke jurnal ini
+                    $model = $j->reference_model::where('journal_number', $j->journal_number)->get();
+                    if ($model->count() > 0) {
+                        $model->each(function ($item) {
+                            $itemID = $item->id;
+                            $item->delete();
+                            $details = DetailKartuInvoice::where('kartu_id', $itemID)->get();
+                            foreach ($details as $detail) {
+                                $detail->delete();
+                            }
+                        });
                     }
-                    $j->delete();
                 }
-                foreach ($lj as $j) {
-                    if ($j)
-                        $j->recalculateJournal();
+                $details = DetailKartuInvoice::where('journal_id', $j->id)->get();
+                foreach ($details as $detail) {
+                    $detail->delete();
                 }
+                $j->delete();
             }
+            foreach ($lj as $j) {
+                if ($j)
+                    $j->recalculateJournal();
+            }
+            // }
 
             DB::commit();
             return ['status' => 1, 'msg' => 'success'];
