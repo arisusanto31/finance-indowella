@@ -233,7 +233,12 @@ class SalesOrderController extends Controller
 
         $data->updateStatus();
         $invdetails = SalesOrderDetail::with('stock')->where('sales_order_number', $number)->get();
-
+        foreach ($invdetails as $detail) {
+            if ($detail->unitjadi == '??') {
+                $detail->unitjadi = $detail->unit;
+                $detail->save();
+            }
+        }
         $data['details'] = $invdetails;
         $data['kartus'] = $data->getAllKartu();
         $data['resume_total'] = $data->getTotalKartu();
@@ -360,7 +365,7 @@ class SalesOrderController extends Controller
                 if ($referenceSale) {
                     $detail->reference_id = $referenceSale->id;
                     $detail->qtyjadi = $referenceSale->qtyjadi - $referenceSale->qtyrefund;
-                    $detail->unitjadi = $referenceSale->unitjadi? $referenceSale->unitjadi : $referenceSale->unit_info;
+                    $detail->unitjadi = $referenceSale->unitjadi ? $referenceSale->unitjadi : $referenceSale->unit_info;
                     $detail->pricejadi = $referenceSale->pricejadi;
                     $detail->quantity = $referenceSale->qtybahan + $referenceSale->insheet;
                     $detail->reference_type = $typeSales;
