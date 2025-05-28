@@ -77,6 +77,8 @@ class InvoicePack extends Model
         $kartus = collect($this->detailKartuInvoices)->map(function ($val) {
             $val['type_kartu'] = $val->kartu_type ? explode('\\', $val->kartu_type)[2] : 'Kartu lain-lain';
             $val['code_group_name'] = $val->journal->chartAccount->name;
+            $val['date'] = $val->journal->created_at->format('Y-m-d H:i:s');
+
             return $val;
         })->groupBy('type_kartu');
         return $kartus ?? [];
