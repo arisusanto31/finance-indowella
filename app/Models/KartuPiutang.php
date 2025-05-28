@@ -115,7 +115,7 @@ class KartuPiutang extends Model
                 $kartu->code_group = $request->input('code_group');
                 $kartu->lawan_code_group = $request->input('lawan_code_group');
                 $kartu->code_group_name = $request->input('code_group_name');
-                $kartu->invoice_date = Date('Y-m-d');
+                $kartu->invoice_date = $date;
                 $kartu->book_journal_id = bookID();
                 $kartu->index_date = $indexDate;
                 $kartu->index_date_group = createCarbon($date)->format('ymdHis');
