@@ -86,6 +86,11 @@
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    <div class="col mb-3">
+                        <label for="nameBasic" class="form-label">Date</label>
+                        <input type="datetime-local" id="mutasi-date" class="form-control"
+                            value="{{ now() }}" placeholder="date" />
+                    </div>
                     <div class="row">
                         <div class="col mb-3">
                             <label for="nameBasic" class="form-label">Nomer Purchase Order</label>
@@ -168,6 +173,13 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col mb-3">
+                            <label for="nameBasic" class="form-label">Date</label>
+                            <input type="datetime-local" id="pelunasan-date" class="form-control"
+                                value="{{ now() }}" placeholder="date" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col mb-3">
                             <label for="nameBasic" class="form-label">Nomer Purchase Order</label>
                             <input type="text" id="pelunasan-purchase_order" class="form-control"
                                 placeholder="Nomer Purchase Order" />
@@ -247,6 +259,7 @@
                     url: '{{ url('admin/kartu/kartu-hutang/create-mutation') }}',
                     method: 'post',
                     data: {
+                        date: $('#mutasi-date').val(),
                         invoice_pack_number: $('#factur').val(),
                         purchase_order_number: $('#purchase_order').val(),
                         description: $('#description').val(),
@@ -313,6 +326,7 @@
                     url: '{{ url('admin/kartu/kartu-hutang/create-pelunasan') }}',
                     method: 'post',
                     data: {
+                        date: $('#pelunasan-date').val(),
                         invoice_pack_number: $('#pelunasan-factur').val(),
                         purchase_order_number: $('#pelunasan-purchase_order').val(),
                         description: $('#pelunasan-description').val(),
@@ -397,14 +411,14 @@
                                     <td>${i+1}</td>
                                     <td>${data.person_name}</td>
                                     <td>${data.invoice_date}</td>
-                                    <td>${data.factur_supplier_number}</td>
+                                    <td>${data.invoice_pack_number}</td>
                                     <td class="textright">${formatRupiah(data.saldo_awal)}</td>
                                     <td class="textright">${formatRupiah(data.mutasi)}</td>
                                     <td class="textright">${formatRupiah(data.pelunasan)}</td>
                                     <td class="textright">${formatRupiah(data.saldo)}</td>
                                     <td class="textright">${formatRupiah(saldoAkhir)}</td>    
                                     <td>
-                                        <button type="button" class="btn btn-primary btn-sm" onclick="showDetailKartuHutang('${data.factur_supplier_number}')"><i class="fas fa-eye"></i> Detail</button>
+                                        <button type="button" class="btn btn-primary btn-sm" onclick="showDetailKartuHutang('${data.invoice_pack_number}')"><i class="fas fa-eye"></i> Detail</button>
                                     </td>                          
                                 </tr>
                             `;

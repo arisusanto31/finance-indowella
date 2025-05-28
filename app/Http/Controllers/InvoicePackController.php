@@ -297,7 +297,8 @@ class InvoicePackController extends Controller
             if ($coaHutangKas > 200000) {
                 //brati hutang, buat kartu hutang ya lur
                 $kartu = KartuHutang::createMutation(new Request([
-                    'factur_supplier_number' => $invoicePack->invoice_number,
+                    'invoice_pack_number' => $invoicePack->invoice_number,
+                    'invoice_pack_id' => $invoicePackID,
                     'amount_mutasi' => $invoicePack->total_price,
                     'person_id' => $invoicePack->person_id,
                     'person_type' => $invoicePack->person_type,

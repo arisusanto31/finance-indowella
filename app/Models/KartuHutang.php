@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Http\Controllers\JournalController;
 use App\Traits\HasIndexDate;
+use App\Traits\HasModelDetailKartuInvoice;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -18,6 +19,7 @@ class KartuHutang extends Model
 {
     //
     use HasIndexDate;
+    use HasModelDetailKartuInvoice;
 
     protected $table = 'kartu_hutangs';
 
@@ -85,7 +87,7 @@ class KartuHutang extends Model
                     $amount_debet = abs($amount_kredit);
                     $amount_kredit = 0;
                 }
-                $invoiceNumber = $request->input('ivoice_pack_number');
+                $invoiceNumber = $request->input('invoice_pack_number');
                 $PONumber = $request->input('purchase_order_number');
                 $POID = $request->input('purchase_order_id');
                 $invoiceID = $request->input('invoice_pack_id');
@@ -124,7 +126,7 @@ class KartuHutang extends Model
                 $kartu->code_group = $request->input('code_group');
                 $kartu->code_group_name = $request->input('code_group_name');
                 $kartu->lawan_code_group = $request->input('lawan_code_group');
-                $kartu->invoice_date = Date('Y-m-d');
+                $kartu->invoice_date = $date;
                 $kartu->book_journal_id = bookID();
                 $kartu->index_date = $indexDate;
                 $kartu->index_date_group = createCarbon($date)->format('ymdHis');
@@ -132,6 +134,7 @@ class KartuHutang extends Model
                 if (self::isBackdate($date)) {
                     $kartu->recalculateSaldo();
                 }
+                $kartu->createDetailKartuInvoice();
 
 
                 //wes sudah terhitung sema tinggal pudate
@@ -250,7 +253,7 @@ class KartuHutang extends Model
                 'code_group' => $codeGroup,
                 'lawan_code_group' => $lawanCodeGroup,
                 'code_group_name' => $codeGroupName,
-                'date'=>$date
+                'date' => $date
             ]));
 
             if ($st['status'] == 1) {
