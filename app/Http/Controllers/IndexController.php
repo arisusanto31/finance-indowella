@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Jobs\ImportSaldoNLJob;
 use App\Models\Journal;
+use App\Models\KartuDPSales;
 use App\Models\KartuHutang;
 use App\Models\KartuInventory;
 use App\Models\KartuPiutang;
 use App\Models\KartuPrepaidExpense;
 use App\Models\KartuStock;
+use App\Models\SalesOrder;
 use App\Models\SalesOrderDetail;
 use App\Models\TaskImportDetail;
 use Illuminate\Http\Request;
@@ -85,6 +87,16 @@ class IndexController extends Controller
         }
         if (getInput('type') == 'format_db') {
             return format_db(getInput('nilai'));
+        }
+
+        if (getInput('type') == 'repair-kartu-dp') {
+            $kartuDP = KartuDPSales::where('index_date', 0)->get();
+            foreach ($kartuDP as $dp) {
+                $so = SalesOrder::where('sales_order_number', $dp->sales_order_number)->first();
+                $dp->index_date = KartuDPSales::getNextIndexDate($so->created_at);
+                $dp->save();
+            }
+            return $kartuDP;
         }
         if (getInput('type') == 'repair-price') {
             $sodetail = SalesOrderDetail::where('sales_order_number', getInput('number'))
