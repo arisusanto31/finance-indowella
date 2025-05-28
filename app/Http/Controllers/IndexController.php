@@ -94,6 +94,7 @@ class IndexController extends Controller
             foreach ($kartuDP as $dp) {
                 $so = SalesOrder::where('sales_order_number', $dp->sales_order_number)->first();
                 $dp->index_date = KartuDPSales::getNextIndexDate($so->created_at);
+                $dp->index_date_group = $so->created_at;
                 $dp->save();
             }
             return $kartuDP;
