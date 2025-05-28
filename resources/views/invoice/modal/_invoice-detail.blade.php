@@ -55,7 +55,7 @@
                                         <div class="row text-white">
                                             @foreach ($items as $item)
                                                 <div class="col-xs-12 col-md-4">
-                                                    <p>{{ $item->created_at }} -
+                                                    <p>{{ $item->date }} -
                                                         <strong>{{ $item->code_group_name }}</strong> :
                                                         {{ format_price($item->amount_journal) }} <span
                                                             class="fs-8">[journal_id : {{ $item->journal_id }},

@@ -43,9 +43,9 @@ class SalesOrder extends Model
     }
 
     public function parent()
-{
-    return $this->belongsTo(SalesOrder::class, 'sales_order_id');
-}
+    {
+        return $this->belongsTo(SalesOrder::class, 'sales_order_id');
+    }
 
 
     public function getTotalKartu()
@@ -76,6 +76,7 @@ class SalesOrder extends Model
             $val['type_kartu'] = $val->kartu_type ? explode('\\', $val->kartu_type)[2] : 'Kartu lain-lain';
             $val['code_group_name'] = $val->journal->chartAccount->name;
             $val['type_flow'] = $val->journal->amount_debet > 0 ? 'debet' : 'kredit';
+            $val['date'] = $val->journal->created_at->format('Y-m-d H:i:s');
             return $val;
         })->groupBy('type_kartu')->map(function ($vals) {
             return $vals->groupBy('type_flow')->all();
