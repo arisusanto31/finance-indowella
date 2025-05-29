@@ -139,7 +139,7 @@
         );
         $('#grand-total').val(
             Array.from(document.querySelectorAll('.total-field'))
-            .reduce((sum, input) => sum + parseFloat(input.value.replace(/,/g, '')) || 0, 0)
+            .reduce((sum, input) => sum + formatDB(input.value), 0)
             .toLocaleString('id-ID', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
