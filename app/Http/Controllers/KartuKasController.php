@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ChartAccount;
 use App\Models\Journal;
+use App\Models\Toko;
 use Illuminate\Http\Request;
 
 class KartuKasController extends Controller
@@ -49,7 +50,7 @@ class KartuKasController extends Controller
         $amountDebet = $request->input('amount_debet');
         $amountKredit = $request->input('amount_kredit');
         $codeGroup = $request->input('code_group');
-
+        $toko=Toko::first();
         if ($amountDebet && $amountKredit) {
             return ['status' => 0, 'msg' => 'tidak bisa memasukkan nilai debet dan kredit bersamaan'];
         }
@@ -70,9 +71,8 @@ class KartuKasController extends Controller
                 'description' => $desc,
                 'amount' => $amount,
                 'reference_id' => null,
-                'reference_type' => null,
-               
-              
+                'reference_type' => null, 
+                'toko_id'=>$toko->id   
             ],
         ];
         $debets = [
@@ -82,6 +82,7 @@ class KartuKasController extends Controller
                 'amount' => $amount,
                 'reference_id' => null,
                 'reference_type' => null,
+                'toko_id'=>$toko->id,
                
             ],
         ];
