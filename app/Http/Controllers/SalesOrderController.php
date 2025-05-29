@@ -354,7 +354,7 @@ class SalesOrderController extends Controller
         $sales = SalesOrder::whereIn('id', $request->ids)->with('reference')->get()->map(function ($val) {
             $finished_at = null;
             if ($val->reference) {
-                $finished_at = $val->reference->finished_at;
+                $finished_at = $val->reference->delivery_at;
             }
             return [
                 'id' => $val->id,

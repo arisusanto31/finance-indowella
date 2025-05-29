@@ -368,9 +368,9 @@
                         console.log(res);
                         if (res.status == 1) {
                             res.msg.forEach(function(item){
-                                if(item.finished_at){
+                                if(item.delivery_at){
                                     $('#ket-finish' + item.id).html(
-                                        `<span class="badge bg-success fs-7" >finished: ${item.finished_at}</span>`
+                                        `<span class="badge bg-success fs-7" >finished: ${item.delivery_at}</span>`
                                     );
                                 } 
                             });
