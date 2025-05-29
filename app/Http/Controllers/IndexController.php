@@ -99,15 +99,12 @@ class IndexController extends Controller
             }
             return $kartuDP;
         }
-        // if (getInput('type') == 'repair-kartu-stock') {
-        //     $kartuStock = KartuStock::where('index_date', 0)->get();
-        //     foreach ($kartuStock as $stock) {
-        //         $date = '2025-03-31 20:00:00';
-        //         $stock->index_date = KartuStock::getNextIndexDate($date);
-        //         $stock->index_date_group = createCarbon($date)->format('ymdHis');
-        //         $stock->save();
-        //     }
-        // }
+        if (getInput('type') == 'recalculate-saldo') {
+            $kartuHutang = KartuHutang::find(getInput('id'));
+            $kartuHutang->recalculateSaldo();
+            return $kartuHutang;
+            
+        }
         if (getInput('type') == 'repair-price') {
             $sodetail = SalesOrderDetail::where('sales_order_number', getInput('number'))
                 ->get();
