@@ -123,7 +123,8 @@
                                     id="tr-{{ $invoiceNumber }}">
                                     @if ($index === 0)
                                         <td rowspan="{{ $rowspan }}">{{ $no++ }}</td>
-                                        <td rowspan="{{ $rowspan }}">{{ $item->created_at->format('Y-m-d') }}
+                                        <td rowspan="{{ $rowspan }}">
+                                            {{ $item->created_at->format('Y-m-d') }}
                                             <div id="ket-finish{{ $item->parent->id }}"></div>
                                         </td>
                                         <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }} </td>
@@ -367,12 +368,12 @@
                     success: function(res) {
                         console.log(res);
                         if (res.status == 1) {
-                            res.msg.forEach(function(item){
-                                if(item.delivery_at){
+                            res.msg.forEach(function(item) {
+                                if (item.finished_at) {
                                     $('#ket-finish' + item.id).html(
-                                        `<span class="badge bg-success fs-7" >finished: ${item.delivery_at}</span>`
+                                        `<span class="badge bg-success fs-7" >finished: ${item.finished_at}</span>`
                                     );
-                                } 
+                                }
                             });
                         } else {
 
@@ -424,7 +425,7 @@
                 showDetailOnModal('{{ url('/admin/invoice/edit-sales-order') }}/' + invoiceNumber, 'xl');
             }
 
-        
+
 
 
 
@@ -557,7 +558,6 @@
 
 
             });
-
         </script>
     @endpush
 </x-app-layout>
