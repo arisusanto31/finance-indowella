@@ -47,7 +47,7 @@
                     <div class="row">
 
                         <h6>Kartu Kartu </h6>
-                        @if (count($data['kartus']) > 0)
+                       
                             @foreach ($data['kartus'] as $key => $items)
                                 <div class="col-xs-12">
                                     <div class="bg-primary p-2 mb-2">
@@ -67,7 +67,7 @@
                                     </div>
                                 </div>
                             @endforeach
-                        @else
+                        
                             <div class="row" id="div-input">
                                 @if ($data->reference_model == 'App\\Models\\InvoiceSaleDetail')
                                     <div class="col-xs-12 ">
@@ -128,17 +128,19 @@
                                                         <form id="form-mutasi-purchase{{ $index }}">
                                                             {{ csrf_field() }}
                                                             <input type="hidden" name="invoice_pack_number"
-                                                                value="{{ $data->invoice_pack_number }}" />
+                                                                value="{{ $data->invoice_number }}" />
                                                             <input type="hidden" name="invoice_pack_id"
                                                                 value="{{ $data->id }}" />
-                                                            <div class="row pb-1 mt-1"
+                                                            <input type="hidden" name="invoice_purchase_detail_id"
+                                                                value="{{ $item->id }}" />
+                                                            <div class="row pb-1 mt-1 parent-input-detail"
                                                                 style="border-bottom:1px solid  rgb(0, 98.4, 204);">
                                                                 <div class="col-md-3 col-xs-12">
                                                                     <label>Tangal</label>
                                                                     <input type="datetime-local" class="form-control"
                                                                         id="bdp-date"
-                                                                        value="{{ $item->created_at ?? now }}"
-                                                                        readonly />
+                                                                        name="date"
+                                                                        value="{{ $item->created_at ?? now }}" />
                                                                 </div>
 
                                                                 <div class="col-md-3 col-xs-12">
@@ -148,37 +150,48 @@
                                                                         value="{{ $item->custom_stock_name ?? $item->stock->name }}"
                                                                         readonly />
                                                                     <input type="hidden" id="bdp-stock_id"
-                                                                        name="stock_id[]"
+                                                                        name="stock_id"
                                                                         value="{{ $item->stock_id }}" />
                                                                 </div>
 
 
-                                                                <div class="col-md-3 col-xs-12">
+                                                                <div class="col-md-2 col-xs-12">
                                                                     <label>Jumlah</label>
-                                                                    <input type="text" class="form-control"
-                                                                        name="quantity[]"
+                                                                    <input type="text"
+                                                                        class="form-control detail-qty"
+                                                                        onchange="updateHargaMutasiPurchase(this)"
+                                                                        name="quantity"
                                                                         placeholder="qty bahan: {{ $item->quantity }}"
                                                                         id="bdp-quantity" />
+
+                                                                    <input type="hidden" class="detail-price"
+                                                                        value="{{ $item->price }}" />
                                                                 </div>
 
-                                                                <div class="col-md-3 col-xs-12">
+                                                                <div class="col-md-2 col-xs-12">
                                                                     <label>Satuan</label>
-                                                                    <input class="form-control" type="text" readonly
-                                                                        name="unit[]" id="bdp-satuan"
+                                                                    <input class="form-control detail-unit"
+                                                                        type="text" readonly name="unit"
+                                                                        id="bdp-satuan"
                                                                         value="{{ $item->unit }}" />
+                                                                </div>
+                                                                <div class="col-md-2 col-xs-12">
+                                                                    <label>Nilai Mutasi</label>
+                                                                    <input class="form-control detail-nilai-mutasi "
+                                                                        type="text" readonly name="nilai_mutasi"
+                                                                        value="" />
                                                                 </div>
                                                                 <div class="col-md-3 col-xs-12">
                                                                     <label>Akun Persediaan / Beban</Label>
                                                                     <select
                                                                         class="select-coa-persediaan-beban form-control"
-                                                                        name="code_group_debet[]">
-
+                                                                        name="code_group_debet">
                                                                     </select>
                                                                 </div>
                                                                 <div class="col-md-3 col-xs-12">
                                                                     <label>Akun Hutang / Kas</Label>
                                                                     <select class="select-coa-hutang-kas form-control"
-                                                                        name="code_group_kredit[]">
+                                                                        name="code_group_kredit">
 
                                                                     </select>
                                                                 </div>
@@ -204,7 +217,7 @@
                                     </div>
                                 @endif
                             </div>
-                        @endif
+                       
                     </div>
                 </div>
             </div>
@@ -238,6 +251,15 @@
             '{{ route('chart-account.get-item-keuangan') }}?kind=hutang|kas', 'chart account',
             '#global-modal  #div-input');
     });
+
+
+    function updateHargaMutasiPurchase(elem) {
+        let parent = $(elem).closest('.parent-input-detail');
+        let qty = parent.find('.detail-qty').val();
+        let price = parent.find('.detail-price').val();
+        let total = qty * price;
+        parent.find('.detail-nilai-mutasi').val(formatRupiah(total));
+    }
 
 
     function toggleDivMutasiPurchase() {

@@ -174,6 +174,7 @@ class KartuHutang extends Model
             $invoiceID = $invoice ? $invoice->id : null;
             $PO = PurchaseOrder::where('purchase_order_number', $PONumber)->first();
             $POID = $PO ? $PO->id : null;
+            $tokoid= $request->input('toko_id');
 
 
             $amountMutasi = $request->input('amount_mutasi');
@@ -200,6 +201,7 @@ class KartuHutang extends Model
                         'amount' => $amountMutasi,
                         'reference_id' => null,
                         'reference_type' => null,
+                        'toko_id'=>$tokoid
                     ],
                 ];
                 $debets = [
@@ -209,6 +211,7 @@ class KartuHutang extends Model
                         'amount' => $amountMutasi,
                         'reference_id' => null,
                         'reference_type' => null,
+                        'toko_id'=>$tokoid
                     ],
                 ];
                 $st = JournalController::createBaseJournal(new Request([
