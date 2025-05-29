@@ -112,6 +112,9 @@ class Journal extends Model
         $codeGroup = $request->input('code_group');
         $isBackDate = $request->input('is_backdate');
         $tokoID = $request->input('toko_id');
+        if (!$tokoID) {
+            $tokoID = Toko::first()->id;
+        }
         if ($codeGroup > 400000) {
             if (!$tokoID) {
                 $msg = 'toko_id tidak boleh kosong untuk membuat jurnal ' . $codeGroup . ' ini' . json_encode($request->all());
