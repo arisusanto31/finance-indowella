@@ -371,7 +371,7 @@
                             res.msg.forEach(function(item) {
                                 if (item.finished_at) {
                                     $('#ket-finish' + item.id).html(
-                                        `<span class="badge bg-success fs-7" >finished: ${item.finished_at}</span>`
+                                        `<span class="badge bg-success fs-10" >finished: ${item.finished_at}</span>`
                                     );
                                 }
                             });
