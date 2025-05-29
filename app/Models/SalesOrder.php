@@ -23,6 +23,9 @@ class SalesOrder extends Model
 
     ];
 
+    public function reference(){
+        return $this->morphTo();
+    }
     public function details()
     {
         return $this->hasMany(SalesOrderDetail::class, 'sales_order_number', 'sales_order_number');

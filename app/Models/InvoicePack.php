@@ -100,7 +100,7 @@ class InvoicePack extends Model
         $this->index = $count;
         if ($data->reference_model == InvoiceSaleDetail::class)
             $code = 'INV-S' . date('y') . '-' . toDigit($personID, 4) . '-' . toDigit($count, 4);
-        else if ($data->refence_model == InvoicePurchaseDetail::class)
+        else if ($data->reference_model == InvoicePurchaseDetail::class)
             $code = 'INV-P' . date('y') . '-' . toDigit($personID, 4) . '-' . toDigit($count, 4);
         else
             $code = 'INV-' . date('y') . '-' . toDigit($personID, 4) . '-' . toDigit($count, 4);

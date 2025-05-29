@@ -124,6 +124,7 @@
                                     @if ($index === 0)
                                         <td rowspan="{{ $rowspan }}">{{ $no++ }}</td>
                                         <td rowspan="{{ $rowspan }}">{{ $item->created_at->format('Y-m-d') }}
+                                            <div id="ket-finish{{ $item->parent->id }}"></div>
                                         </td>
                                         <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }} </td>
                                         <td rowspan="{{ $rowspan }}">{{ $item->customer->name ?? '-' }}</td>
@@ -352,6 +353,41 @@
                 });
             }
 
+
+            function getInfoReferenceFinish() {
+                allParentId = collect(parents).keys().all();
+                console.log(allParentId);
+                $.ajax({
+                    url: '{{ route('invoice.sales-get-info-reference-finish') }}',
+                    method: 'post',
+                    data: {
+                        ids: allParentId,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(res) {
+                        console.log(res);
+                        if (res.status == 1) {
+                            res.msg.forEach(function(item){
+                                if(item.finished_at){
+                                    $('#ket-finish' + item.id).html(
+                                        `<span class="badge bg-success fs-7" >finished: ${item.finished_at}</span>`
+                                    );
+                                } 
+                            });
+                        } else {
+
+                        }
+                    },
+                    error: function(res) {
+
+                    }
+                });
+
+            }
+            setTimeout(() => {
+                getInfoReferenceFinish();
+            }, 1000);
+
             function makeMark(id) {
                 $.ajax({
                     url: '{{ url('admin/invoice/sales-mark') }}',
@@ -388,7 +424,7 @@
                 showDetailOnModal('{{ url('/admin/invoice/edit-sales-order') }}/' + invoiceNumber, 'xl');
             }
 
-
+        
 
 
 
@@ -519,7 +555,9 @@
                 parents = {!! json_encode($parent) !!};
                 console.log(parents);
 
+
             });
+
         </script>
     @endpush
 </x-app-layout>

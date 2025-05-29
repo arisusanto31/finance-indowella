@@ -349,6 +349,20 @@ class SalesOrderController extends Controller
     }
 
 
+    public function getInfoReferenceFinish(Request $request)
+    {
+        $sales = SalesOrder::whereIn('id', $request->ids)->with('reference')->get()->map(function ($val) {
+            $finished_at = null;
+            if ($val->reference) {
+                $finished_at = $val->reference->finished_at;
+            }
+            return [
+                'id' => $val->id,
+                'finished_at' => $finished_at
+            ];
+        });
+        return ['status' => 1, 'msg' => $sales];
+    }
 
     public function editInvoice($number)
     {
