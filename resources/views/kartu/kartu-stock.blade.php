@@ -286,7 +286,7 @@
             function getSummary() {
                 page = "kartu";
                 $.ajax({
-                    url: "{{ route('kartu-stock.get-summary') }}",
+                    url: "{{ route('kartu-stock.get-summary') }}?month={{$month}}&year={{$year}}",
                     method: "GET",
                     success: function(res) {
                         console.log(res);
@@ -361,7 +361,7 @@
             function getMutasiMasuk() {
                 page = "masuk";
                 $.ajax({
-                    url: "{{ route('kartu-stock.get-mutasi-masuk') }}",
+                    url: "{{ route('kartu-stock.get-mutasi-masuk') }}?month={{$month}}&year={{$year}}",
                     method: "GET",
                     success: function(res) {
                         console.log(res);
@@ -439,7 +439,7 @@
             function getMutasiKeluar() {
                 page = "keluar";
                 $.ajax({
-                    url: "{{ route('kartu-stock.get-mutasi-keluar') }}",
+                    url: "{{ route('kartu-stock.get-mutasi-keluar') }}?month={{$month}}&year={{$year}}",
                     method: "GET",
                     success: function(res) {
                         console.log(res);

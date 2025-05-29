@@ -151,6 +151,8 @@ class InvoicePurchaseController extends Controller
                     'unit' => $unit,
                     'flow' => 0,
                     'code_group' => $coaDebet,
+                    'invoice_pack_number'=>$invoicePackNumber,
+                    'invoice_pack_id' => $invoicePackID,
                     'is_custom_rupiah' => 1,
                     'mutasi_rupiah_total' => $nilaiMutasi,
                     'date' => $date
