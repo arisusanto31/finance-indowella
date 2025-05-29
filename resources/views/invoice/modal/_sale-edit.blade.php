@@ -104,6 +104,15 @@
                         </tr>
                     @endforeach
                 </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="6" class="text-end fw-bold">Grand Total</td>
+                        <td colspan="2">
+                            <input id="grand-total" type="text" id="grand-total"
+                                class="form-control form-control-sm text-end"
+                                value="{{ format_price($data->total_price) }}" readonly>
+                        </td>
+                    </tr>
 
             </table>
         </div>
@@ -124,6 +133,14 @@
 
         row.find('.total-field').val(
             total.toLocaleString('id-ID', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            })
+        );
+        $('#grand-total').val(
+            Array.from(document.querySelectorAll('.total-field'))
+            .reduce((sum, input) => sum + parseFloat(input.value.replace(/,/g, '')) || 0, 0)
+            .toLocaleString('id-ID', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
             })
