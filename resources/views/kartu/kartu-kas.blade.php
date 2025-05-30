@@ -51,7 +51,7 @@
 
                         Object.keys(res.msg).forEach(function eachKas(codeKas) {
                             html += `
-                            <p class="text-primary-dark fs-5 mt-3 mb-0 "> ${res.chart_accounts[codeKas]} </p>
+                            <p class="text-primary-dark fs-5 mt-3 mb-0 "> ${codeKas} - ${res.chart_accounts[codeKas]} </p>
                             <div class="table-responsive mt-1">
                                 <table id="kartuKasTable" class="table table-bordered table-striped table-hover align-middle">
                                     <thead class="bg-white text-dark text-center">
