@@ -12,7 +12,11 @@ class KartuDPSalesController extends Controller
 {
     public function index()
     {
+        $month = getInput('month') ? toDigit(getInput('month'), 2) : Date('m');
+        $year = getInput('year') ?? Date('Y');
         $view = view('kartu.kartu-dp-sale');
+        $view->month = $month;
+        $view->year = $year;
         return $view;
     }
 

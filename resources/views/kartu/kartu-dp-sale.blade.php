@@ -1,6 +1,16 @@
 <x-app-layout>
     <div class="card shadow-sm mb-4">
-        <h5 class="text-primary-dark card-header" style="padding-bottom:0px;"> 💳 <strong>KARTU DP SALE</strong> </h5>
+        <h5 class="text-primary-dark card-header" style="padding-bottom:0px;"> 💳 <strong>KARTU DP SALE</strong>
+            <div class="d-flex justify-content pe-4 mt-2 mb-3">
+                <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="prevMonth()">
+                    << </button>
+                        <span class="badge bg-primary d-flex justify-content-center align-items-center">
+                            {{ getListMonth()[$month] }} {{ $year }}</span>
+                        <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="nextMonth()">
+                            >></button>
+
+            </div>
+        </h5>
 
         <div class="card-body">
             <div class="row mt-1">
@@ -15,28 +25,6 @@
                 <!-- <a href="#" class="btn btn-primary btn-big-custom rounded-0">Tambah Jurnal Umum</a> -->
             </div>
 
-            <div class="row">
-
-                <div class="col-md-2">
-                    <select name="bulan" id="month" class="form-select ">
-                        <option value="">-- Bulan --</option>
-                        @foreach (getListMonth() as $key => $month)
-                            <option value="{{ $key }}">{{ $month }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <select name="tahun" id="year" class="form-select ">
-                        <option value="">-- Tahun --</option>
-                        @for ($year = 0; $year < 3; $year++)
-                            <option value="{{ intval(Date('Y') - $year) }}">{{ intval(Date('Y') - $year) }}</option>
-                        @endfor
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <button onclick="getSummary()" class="btn btn-primary btn-sm w-100">Cari</button>
-                </div>
-            </div>
 
 
 
@@ -83,7 +71,7 @@
                     <div class="row">
                         <div class="col mb-3">
                             <label for="nameBasic" class="form-label">Tanggal</label>
-                            <input type="timedate-local" id="date" class="form-control" placeholder="Tanggal" />
+                            <input type="datetime-local" id="date" class="form-control" placeholder="Tanggal" />
                         </div>
                     </div>
                     <div class="row">
@@ -168,7 +156,7 @@
                     <div class="row">
                         <div class="col mb-3">
                             <label for="nameBasic" class="form-label">Tanggal</label>
-                            <input type="timedate-local" id="pelunasan-date" class="form-control"
+                            <input type="datetime-local" id="pelunasan-date" class="form-control"
                                 placeholder="Tanggal" />
                         </div>
                     </div>
@@ -332,13 +320,36 @@
 
             }
 
+            function prevMonth() {
+                month = '{{ $month }}';
+                year = '{{ $year }}';
+                month--;
+                if (month < 1) {
+                    month = 12;
+                    year--;
+                }
+                window.location.href = '{{ url('admin/kartu/kartu-dp-sales/main') }}?month=' + month + '&year=' + year;
+            }
+
+            function nextMonth() {
+                month = '{{ $month }}';
+                year = '{{ $year }}';
+                month++;
+                if (month > 12) {
+                    month = 1;
+                    year++;
+                }
+                window.location.href = '{{ url('admin/kartu/kartu-dp-sales/main') }}?month=' + month + '&year=' + year;
+            }
+
             function initSelectPerson() {
                 type = $('#person_type option:selected').val();
                 if (type === 'App\\Models\\Customer') {
                     console.log('init oy ' + type);
                     initItemSelectManual('#person_id', '{{ route('customer.get-item') }}', 'Person Name ..', '#basicModal');
                 } else {
-                    initItemSelectManual('#person_id', '{{ route('other-person.get-item') }}', 'Person Name ..', '#basicModal');
+                    initItemSelectManual('#person_id', '{{ route('other-person.get-item') }}', 'Person Name ..',
+                        '#basicModal');
 
                 }
             }
@@ -367,8 +378,8 @@
 
 
             function getSummary() {
-                month = $('#month option:selected').val() ?? "";
-                year = $('#year option:selected').val() ?? "";
+                month = '{{ $month }}';
+                year = '{{ $year }}';
                 console.log(month + ',' + year);
                 $.ajax({
                     url: '{{ route('kartu-dp-sales.get-summary') }}?month=' + month + '&year=' + year,
