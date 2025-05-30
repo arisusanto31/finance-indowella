@@ -35,7 +35,13 @@ class JournalController extends Controller
         $view = view('main.neraca');
 
         $starttime = microtime(true);
-        $date = getInput('date') ? getInput('date') : carbonDate();
+        $date = getInput('date') ?? null;
+        if (!$date) {
+            //breati ga ada permintaan date, kita cari di month dan year ya
+            $month = getInput('month') ? toDigit(getInput('month'), 2) : Date('m');
+            $year = getInput('year') ? getInput('year') : Date('Y');
+            $date = createCarbon($year . '-' . $month . '-01')->format('Y-m-t 23:59:59');
+        }
         $query = ChartAccount::getRincianNeracaAt($date);
         if ($query['status'] == 0)
             return $query;
@@ -56,6 +62,8 @@ class JournalController extends Controller
             'balance' => $aset - ($kewajiban + $ekuitas + $laba)
         ];
         $view->jsdata = $jsdata;
+        $view->month= $month;
+        $view->year= $year;
 
         return $view;
     }
@@ -63,15 +71,17 @@ class JournalController extends Controller
     public function neracalajur()
     {
         $view = view('main.neraca-lajur');
-        $month = getInput('month') ? getInput('month') : Date('m');
-        $year = getInput('year') ? createCarbon(getInput('year') . '-01-01')->format('y') : Date('y');
+        $month = getInput('month') ? toDigit(getInput('month'),2) : Date('m');
+        $year = getInput('year') ? createCarbon(getInput('year') . '-01-01')->format('Y') : Date('Y');
         $view->data =  ChartAccount::getRincianSaldoNeracaLajur($month, $year);
+        $view->month= $month;
+        $view->year= $year;
         return $view;
     }
     public function getMutasiNeracaLajur()
     {
-        $month = getInput('month') ? getInput('month') : Date('m');
-        $year = getInput('year') ? createCarbon(getInput('year') . '-01-01')->format('y') : Date('y');
+        $month = getInput('month') ? toDigit(getInput('month'),2) : Date('m');
+        $year = getInput('year') ? createCarbon(getInput('year') . '-01-01')->format('Y') : Date('Y');
         return ChartAccount::getRincianMutationNeracaLajur($month, $year);
     }
 
@@ -123,7 +133,13 @@ class JournalController extends Controller
     public function labarugi()
     {
         $view = view('main.laba-rugi');
-        $date =  getInput('date') ? getInput('date') : carbonDate();
+        $date = getInput('date') ?? null;
+        if (!$date) {
+            //breati ga ada permintaan date, kita cari di month dan year ya
+            $month = getInput('month') ? toDigit(getInput('month'), 2) : Date('m');
+            $year = getInput('year') ? getInput('year') : Date('Y');
+            $date = createCarbon($year . '-' . $month . '-01')->format('Y-m-t 23:59:59');
+        }
         $labarugi = ChartAccount::getRincianLabaBulanAt($date);
         $data = [
             'status' => 1,
@@ -132,6 +148,8 @@ class JournalController extends Controller
         ];
         $view->tokoes = Toko::all();
         $view->data = $data;
+        $view->month= $month;
+        $view->year= $year;
         return $view;
     }
 

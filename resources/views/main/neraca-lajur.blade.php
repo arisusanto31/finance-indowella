@@ -1,7 +1,18 @@
 <x-app-layout>
     <div class="card">
 
-        <h5 class="text-primary-dark card-header">⚖️ <strong>NERACA LAJUR </strong> </h5>
+        <h5 class="text-primary-dark card-header">⚖️ <strong>NERACA LAJUR </strong>
+
+            <div class="d-flex justify-content pe-4 mt-2 mb-3">
+                <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="prevMonth()">
+                    << </button>
+                        <span class="badge bg-primary d-flex justify-content-center align-items-center">
+                            {{ getListMonth()[$month] }} {{ $year }}</span>
+                        <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="nextMonth()">
+                            >></button>
+
+            </div>
+        </h5>
         <div class="card-body">
             <div class="table-responsive text-nowrap">
                 <div id="container-neraca" class="text-primary-dark"></div>
@@ -117,6 +128,28 @@
                         swal('opss', 'load mutasi lajur error');
                     }
                 });
+            }
+
+            function prevMonth() {
+                month = '{{ $month }}';
+                year = '{{ $year }}';
+                month--;
+                if (month < 1) {
+                    month = 12;
+                    year--;
+                }
+                window.location.href = '{{ url('admin/neraca-lajur') }}?month=' + month + '&year=' + year;
+            }
+
+            function nextMonth() {
+                month = '{{ $month }}';
+                year = '{{ $year }}';
+                month++;
+                if (month > 12) {
+                    month = 1;
+                    year++;
+                }
+                window.location.href = '{{ url('admin/neraca-lajur') }}?month=' + month + '&year=' + year;
             }
         </script>
     @endpush

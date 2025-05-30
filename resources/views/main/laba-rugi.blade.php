@@ -1,11 +1,21 @@
 <x-app-layout>
     <div class="card">
         <div class="card-header">
-            <h5 class="text-primary-dark mb-1"> 💰 <strong>LABA RUGI </strong> </h5>
+            <h5 class="text-primary-dark mb-1"> 💰 <strong>LABA RUGI </strong>
+                <div class="d-flex justify-content pe-4 mt-2 mb-3">
+                    <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="prevMonth()">
+                        << </button>
+                            <span class="badge bg-primary d-flex justify-content-center align-items-center">
+                                {{ getListMonth()[$month] }} {{ $year }}</span>
+                            <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="nextMonth()">
+                                >></button>
+
+                </div>
+            </h5>
             <select onchange="changeToko()" id="select-toko" class="form-control ms-1" style="width:200px">
                 <option value="0">Semua Toko</option>
-                @foreach($tokoes as $toko)
-                <option value="{{$toko->id}}">{{$toko->name}}</option>
+                @foreach ($tokoes as $toko)
+                    <option value="{{ $toko->id }}">{{ $toko->name }}</option>
                 @endforeach
             </select>
         </div>
@@ -17,58 +27,58 @@
     </div>
 
     @push('scripts')
-    <script>
-        var res = @json($data);
+        <script>
+            var res = @json($data);
 
-        function changeToko() {
-            loading(1);
-            tokoid = $('#select-toko option:selected').val();
-            $.ajax({
-                url: "{{ url('admin/jurnal/get-laba-rugi') }}/" + tokoid,
-                method: 'get',
-                success: function(res) {
-                    loading(0);
+            function changeToko() {
+                loading(1);
+                tokoid = $('#select-toko option:selected').val();
+                $.ajax({
+                    url: "{{ url('admin/jurnal/get-laba-rugi') }}/" + tokoid,
+                    method: 'get',
+                    success: function(res) {
+                        loading(0);
 
-                    console.log(res);
-                    if (res.status == 1) {
-                        tampilkan(res);
-                    } else {
+                        console.log(res);
+                        if (res.status == 1) {
+                            tampilkan(res);
+                        } else {
+                            swalInfo('ops', 'something error', 'error');
+                        }
+                    },
+                    error: function(res) {
+                        loading(0);
+                        console.log(res);
                         swalInfo('ops', 'something error', 'error');
                     }
-                },
-                error: function(res) {
-                    loading(0);
-                    console.log(res);
-                    swalInfo('ops', 'something error', 'error');
-                }
-            });
-        }
-
-        function _tampilkanBaris(kodePerk, string, amount, isStrong, prosen = "") {
-            if (isStrong) {
-                stringStrong = "<strong>";
-                stringPenutupStrong = "</strong>";
-            } else {
-                stringStrong = "";
-                stringPenutupStrong = "";
+                });
             }
-            datahtml = `
+
+            function _tampilkanBaris(kodePerk, string, amount, isStrong, prosen = "") {
+                if (isStrong) {
+                    stringStrong = "<strong>";
+                    stringPenutupStrong = "</strong>";
+                } else {
+                    stringStrong = "";
+                    stringPenutupStrong = "";
+                }
+                datahtml = `
                     <div class="row">
                      <div class="col-md-4 col-xs-12 " style="border-bottom:1px solid #ddd;">
                         <div class ="row"> 
                         ${
                                  kodePerk?
                                          `<div class="col-xs-3 col-md-3">
-                                                 ${stringStrong} ${kodePerk} ${stringPenutupStrong}
-                                           </div>
-                                           <div class="col-xs-9 col-md-9">
-                                                ${stringStrong} ${string} ${stringPenutupStrong}
-                                           </div>`
+                                                                 ${stringStrong} ${kodePerk} ${stringPenutupStrong}
+                                                           </div>
+                                                           <div class="col-xs-9 col-md-9">
+                                                                ${stringStrong} ${string} ${stringPenutupStrong}
+                                                           </div>`
                                    :
                                  `
-                                           <div class="col-xs-12 col-md-12">
-                                                 ${stringStrong} ${string} ${stringPenutupStrong}
-                                           </div>`
+                                                           <div class="col-xs-12 col-md-12">
+                                                                 ${stringStrong} ${string} ${stringPenutupStrong}
+                                                           </div>`
                             
                         }
                         </div>
@@ -87,113 +97,142 @@
                      </div>
                     <div class="clearfix"></div>`;
 
-            return datahtml;
-        }
-
-        function tampilkan(res) {
-            if (res.status == 1) {
-                html = "";
-
-
-                penjualan = collect(res.msg).where('code_group', '<', 600000).where('code_group', '>', 400000).all();
-                totalPenjualan = collect(penjualan).sum('saldo_akhir');
-                html += _tampilkanBaris("", "PENDAPATAN", "", true);
-                penjualan.forEach(function eachNeraca(lajur) {
-                    isStrong = lajur.level < 1;
-                    prosen = getProsen(lajur.saldo_akhir, totalPenjualan);
-                    html += _tampilkanBaris(lajur.code_group, lajur.name, formatRupiah(lajur.saldo_akhir), isStrong, prosen);
-                });
-                html += _tampilkanBaris("", "Pendapatan Netto", formatRupiah(totalPenjualan), true, 100);
-
-                html += '<div style="margin-top:20px"></div>';
-                bebanPokok = collect(res.msg).where('code_group', '<', 700000).where('code_group', '>', 600000).all();
-                totalBeban = collect(bebanPokok).sum('saldo_akhir');
-                html += _tampilkanBaris("", "BEBAN POKOK", "", true);
-                bebanPokok.forEach(function eachNeraca(lajur) {
-                    isStrong = lajur.level < 1;
-                    prosen = getProsen(lajur.saldo_akhir, totalPenjualan);
-
-                    html += _tampilkanBaris(lajur.code_group, lajur.name, formatRupiah(lajur.saldo_akhir), isStrong, prosen);
-                });
-                prosen = getProsen(totalBeban, totalPenjualan);
-
-                html += _tampilkanBaris("", "Total Beban Pokok", formatRupiah(totalBeban), true, prosen);
-
-                html += '<div style="margin-top:20px"></div>';
-                labaKotor = totalPenjualan + totalBeban;
-                prosen = getProsen(labaKotor, totalPenjualan);
-                html += _tampilkanBaris("", "LABA KOTOR", formatRupiah(labaKotor), true, prosen);
-
-                html += '<div style="margin-top:20px"></div>';
-                bebanPenjualan = collect(res.msg).where('code_group', '<', 800000).where('code_group', '>', 700000).all();
-                totalBebanPenjualan = collect(bebanPenjualan).sum('saldo_akhir');
-                html += _tampilkanBaris("", "BEBAN PENJUALAN", "", true);
-                bebanPenjualan.forEach(function eachNeraca(lajur) {
-                    isStrong = lajur.level < 1;
-                    prosen = getProsen(lajur.saldo_akhir, totalPenjualan);
-
-                    html += _tampilkanBaris(lajur.code_group, lajur.name, formatRupiah(lajur.saldo_akhir), isStrong, prosen);
-                });
-                html += _tampilkanBaris("", "Total Beban Penjualan", formatRupiah(totalBebanPenjualan), true);
-
-                html += '<div style="margin-top:20px"></div>';
-                bebanAdmin = collect(res.msg).where('code_group', '<', 900000).where('code_group', '>', 800000).all();
-                totalBebanAdmin = collect(bebanAdmin).sum('saldo_akhir');
-                html += _tampilkanBaris("", "BEBAN ADMINISTRASI DAN UMUM", "", true);
-                bebanAdmin.forEach(function eachNeraca(lajur) {
-                    isStrong = lajur.level < 1;
-                    prosen = getProsen(lajur.saldo_akhir, totalPenjualan);
-
-                    html += _tampilkanBaris(lajur.code_group, lajur.name, formatRupiah(lajur.saldo_akhir), isStrong, prosen);
-                });
-                prosen = getProsen(totalBebanAdmin, totalPenjualan);
-
-                html += _tampilkanBaris("", "Total Beban Administrasi dan Umum", formatRupiah(totalBebanAdmin), true, prosen);
-
-                html += '<div style="margin-top:20px"></div>';
-                labaOperasional = totalPenjualan + totalBeban + totalBebanPenjualan + totalBebanAdmin;
-                prosen = getProsen(labaOperasional, totalPenjualan);
-                html += _tampilkanBaris("", "LABA OPERASIONAL", formatRupiah(labaOperasional), true, prosen);
-
-                html += '<div style="margin-top:20px"></div>';
-                pendapatanLain = collect(res.msg).where('code_group', '<', 902000).where('code_group', '>', 901000).all();
-                totalPendapatanLain = collect(pendapatanLain).sum('saldo_akhir');
-                bebanLain = collect(res.msg).where('code_group', '<', 905000).where('code_group', '>', 902000).all();
-                totalBebanLain = collect(bebanLain).sum('saldo_akhir');
-                html += _tampilkanBaris("", "PENDAPATAN DAN BEBAN LAIN", "", true);
-                html += _tampilkanBaris("", "PENDAPATAN LAIN", "", true);
-                pendapatanLain.forEach(function eachNeraca(lajur) {
-                    isStrong = lajur.level < 1;
-                    prosen = getProsen(lajur.saldo_akhir, totalPenjualan);
-
-                    html += _tampilkanBaris(lajur.code_group, lajur.name, formatRupiah(lajur.saldo_akhir), isStrong, prosen);
-                });
-                prosen = getProsen(totalPendapatanLain, totalPenjualan);
-
-                html += _tampilkanBaris("", "Total Pendapatan lain", formatRupiah(totalPendapatanLain), true, prosen);
-                html += _tampilkanBaris("", "BEBAN LAIN", "", true);
-                bebanLain.forEach(function eachNeraca(lajur) {
-                    isStrong = lajur.level < 1;
-                    prosen = getProsen(lajur.saldo_akhir, totalPenjualan);
-
-                    html += _tampilkanBaris(lajur.code_group, lajur.name, formatRupiah(lajur.saldo_akhir), isStrong, prosen);
-                });
-                prosen = getProsen(totalBebanLain, totalPenjualan);
-
-                html += _tampilkanBaris("", "Total Beban lain", formatRupiah(totalBebanLain), true, prosen);
-                prosen = getProsen(res.laba_bulan, totalPenjualan);
-
-                html += _tampilkanBaris("", "TOTAL Pendapatan dan Beban Lain", formatRupiah(res.laba_bulan), true, prosen);
-
-                html += '<div style="margin-top:20px"></div>';
-                html += _tampilkanBaris("", "TOTAL LABA BERSIH BERJALAN", formatRupiah(res.laba_bulan), true);
-
-                $('#container-laba-rugi').html(html);
-            } else {
-                swal('ops', 'something error');
+                return datahtml;
             }
-        }
-        tampilkan(res);
-    </script>
+
+            function tampilkan(res) {
+                if (res.status == 1) {
+                    html = "";
+
+
+                    penjualan = collect(res.msg).where('code_group', '<', 600000).where('code_group', '>', 400000).all();
+                    totalPenjualan = collect(penjualan).sum('saldo_akhir');
+                    html += _tampilkanBaris("", "PENDAPATAN", "", true);
+                    penjualan.forEach(function eachNeraca(lajur) {
+                        isStrong = lajur.level < 1;
+                        prosen = getProsen(lajur.saldo_akhir, totalPenjualan);
+                        html += _tampilkanBaris(lajur.code_group, lajur.name, formatRupiah(lajur.saldo_akhir), isStrong,
+                            prosen);
+                    });
+                    html += _tampilkanBaris("", "Pendapatan Netto", formatRupiah(totalPenjualan), true, 100);
+
+                    html += '<div style="margin-top:20px"></div>';
+                    bebanPokok = collect(res.msg).where('code_group', '<', 700000).where('code_group', '>', 600000).all();
+                    totalBeban = collect(bebanPokok).sum('saldo_akhir');
+                    html += _tampilkanBaris("", "BEBAN POKOK", "", true);
+                    bebanPokok.forEach(function eachNeraca(lajur) {
+                        isStrong = lajur.level < 1;
+                        prosen = getProsen(lajur.saldo_akhir, totalPenjualan);
+
+                        html += _tampilkanBaris(lajur.code_group, lajur.name, formatRupiah(lajur.saldo_akhir), isStrong,
+                            prosen);
+                    });
+                    prosen = getProsen(totalBeban, totalPenjualan);
+
+                    html += _tampilkanBaris("", "Total Beban Pokok", formatRupiah(totalBeban), true, prosen);
+
+                    html += '<div style="margin-top:20px"></div>';
+                    labaKotor = totalPenjualan + totalBeban;
+                    prosen = getProsen(labaKotor, totalPenjualan);
+                    html += _tampilkanBaris("", "LABA KOTOR", formatRupiah(labaKotor), true, prosen);
+
+                    html += '<div style="margin-top:20px"></div>';
+                    bebanPenjualan = collect(res.msg).where('code_group', '<', 800000).where('code_group', '>', 700000).all();
+                    totalBebanPenjualan = collect(bebanPenjualan).sum('saldo_akhir');
+                    html += _tampilkanBaris("", "BEBAN PENJUALAN", "", true);
+                    bebanPenjualan.forEach(function eachNeraca(lajur) {
+                        isStrong = lajur.level < 1;
+                        prosen = getProsen(lajur.saldo_akhir, totalPenjualan);
+
+                        html += _tampilkanBaris(lajur.code_group, lajur.name, formatRupiah(lajur.saldo_akhir), isStrong,
+                            prosen);
+                    });
+                    html += _tampilkanBaris("", "Total Beban Penjualan", formatRupiah(totalBebanPenjualan), true);
+
+                    html += '<div style="margin-top:20px"></div>';
+                    bebanAdmin = collect(res.msg).where('code_group', '<', 900000).where('code_group', '>', 800000).all();
+                    totalBebanAdmin = collect(bebanAdmin).sum('saldo_akhir');
+                    html += _tampilkanBaris("", "BEBAN ADMINISTRASI DAN UMUM", "", true);
+                    bebanAdmin.forEach(function eachNeraca(lajur) {
+                        isStrong = lajur.level < 1;
+                        prosen = getProsen(lajur.saldo_akhir, totalPenjualan);
+
+                        html += _tampilkanBaris(lajur.code_group, lajur.name, formatRupiah(lajur.saldo_akhir), isStrong,
+                            prosen);
+                    });
+                    prosen = getProsen(totalBebanAdmin, totalPenjualan);
+
+                    html += _tampilkanBaris("", "Total Beban Administrasi dan Umum", formatRupiah(totalBebanAdmin), true,
+                        prosen);
+
+                    html += '<div style="margin-top:20px"></div>';
+                    labaOperasional = totalPenjualan + totalBeban + totalBebanPenjualan + totalBebanAdmin;
+                    prosen = getProsen(labaOperasional, totalPenjualan);
+                    html += _tampilkanBaris("", "LABA OPERASIONAL", formatRupiah(labaOperasional), true, prosen);
+
+                    html += '<div style="margin-top:20px"></div>';
+                    pendapatanLain = collect(res.msg).where('code_group', '<', 902000).where('code_group', '>', 901000).all();
+                    totalPendapatanLain = collect(pendapatanLain).sum('saldo_akhir');
+                    bebanLain = collect(res.msg).where('code_group', '<', 905000).where('code_group', '>', 902000).all();
+                    totalBebanLain = collect(bebanLain).sum('saldo_akhir');
+                    html += _tampilkanBaris("", "PENDAPATAN DAN BEBAN LAIN", "", true);
+                    html += _tampilkanBaris("", "PENDAPATAN LAIN", "", true);
+                    pendapatanLain.forEach(function eachNeraca(lajur) {
+                        isStrong = lajur.level < 1;
+                        prosen = getProsen(lajur.saldo_akhir, totalPenjualan);
+
+                        html += _tampilkanBaris(lajur.code_group, lajur.name, formatRupiah(lajur.saldo_akhir), isStrong,
+                            prosen);
+                    });
+                    prosen = getProsen(totalPendapatanLain, totalPenjualan);
+
+                    html += _tampilkanBaris("", "Total Pendapatan lain", formatRupiah(totalPendapatanLain), true, prosen);
+                    html += _tampilkanBaris("", "BEBAN LAIN", "", true);
+                    bebanLain.forEach(function eachNeraca(lajur) {
+                        isStrong = lajur.level < 1;
+                        prosen = getProsen(lajur.saldo_akhir, totalPenjualan);
+
+                        html += _tampilkanBaris(lajur.code_group, lajur.name, formatRupiah(lajur.saldo_akhir), isStrong,
+                            prosen);
+                    });
+                    prosen = getProsen(totalBebanLain, totalPenjualan);
+
+                    html += _tampilkanBaris("", "Total Beban lain", formatRupiah(totalBebanLain), true, prosen);
+                    prosen = getProsen(res.laba_bulan, totalPenjualan);
+
+                    html += _tampilkanBaris("", "TOTAL Pendapatan dan Beban Lain", formatRupiah(res.laba_bulan), true, prosen);
+
+                    html += '<div style="margin-top:20px"></div>';
+                    html += _tampilkanBaris("", "TOTAL LABA BERSIH BERJALAN", formatRupiah(res.laba_bulan), true);
+
+                    $('#container-laba-rugi').html(html);
+                } else {
+                    swal('ops', 'something error');
+                }
+            }
+
+            function prevMonth() {
+                month = '{{ $month }}';
+                year = '{{ $year }}';
+                month--;
+                if (month < 1) {
+                    month = 12;
+                    year--;
+                }
+                window.location.href = '{{ url('admin/laba-rugi') }}?month=' + month + '&year=' + year;
+            }
+
+            function nextMonth() {
+                month = '{{ $month }}';
+                year = '{{ $year }}';
+                month++;
+                if (month > 12) {
+                    month = 1;
+                    year++;
+                }
+                window.location.href = '{{ url('admin/laba-rugi') }}?month=' + month + '&year=' + year;
+            }
+            tampilkan(res);
+        </script>
     @endpush
 </x-app-layout>
