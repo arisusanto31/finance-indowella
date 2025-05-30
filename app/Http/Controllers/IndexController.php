@@ -99,11 +99,17 @@ class IndexController extends Controller
             }
             return $kartuDP;
         }
-        if (getInput('type') == 'recalculate-saldo') {
+        if (getInput('type') == 'recalculate-kartu') {
             $kartu = getInput('model')::find(getInput('id'));
             $kartu->recalculateSaldo();
             return $kartu;
         }
+        if (getInput('type') == 'recalculate-journal') {
+            $journal = Journal::find(getInput('id'));
+            $journal->recalculateSaldo();
+            return $journal;
+        }
+
         if (getInput('type') == 'repair-price') {
             $sodetail = SalesOrderDetail::where('sales_order_number', getInput('number'))
                 ->get();
