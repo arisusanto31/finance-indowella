@@ -306,7 +306,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::post('invoice-purchase-update', [InvoicePurchaseController::class, 'updateInvoicePurchase']);
         Route::post('invoice/sales-get-info-reference-finish', [SalesOrderController::class, 'getInfoReferenceFinish'])->name('sales-get-info-reference-finish');
 
-
+        Route::get('kebutuhan-produksi-marked/{data}', [SalesOrderController::class, 'kebutuhanProduksiMarked'])->name('kebutuhan-produksi-marked');
         Route::delete('sales-order-delete/{id}', [SalesOrderController::class, 'destroy']);
     });
 });

@@ -71,17 +71,23 @@
                         {{ getListMonth()[$month] }} {{ $year }}</span>
                     <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="nextMonth()">
                         >></button>
-
         </div>
 
         <div class="d-flex flex-column bg-primary text-white p-2 rounded-2 mb-3" style="max-width:400px">
             <p class="mb-0">Total Invoice: <strong>Rp{{ format_price($totalInvoice) }}</strong></p>
-            <p class="mb-0" id="total-final">Total Invoice Final:
+            <p class="mb-0" id="total-final">Total Invoice Final:ch
                 <strong>Rp{{ format_price($totalInvoiceFinal) }}</strong>
             </p>
             <p class="mb-0" id="total-mark">Total Invoice Mark:
                 <strong>Rp{{ format_price($totalInvoiceMark) }}</strong>
             </p>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <button type="button" class="btn btn-primary mt-2 text-white" onclick="produksiMarked()">kebutuhan produksi
+                    marked!</button>
+            </div>
         </div>
 
         @if ($salesOrders->isNotEmpty())
@@ -312,6 +318,19 @@
 
             function openImportData(bookID) {
                 showDetailOnModal('{{ url('admin/invoice/sales-open-import') }}/' + bookID, 'xl');
+            }
+
+            function produksiMarked() {
+                parentsMarked = collect(parents).where('is_mark', 1).pluck('id').all();
+                if (parentsMarked.length == 0) {
+                    swal('Oops!', 'Tidak ada invoice yang ditandai untuk produksi!', 'warning');
+                    return;
+                }
+                //ini saya ingin enkripsi data enaknya pake apa ya
+                data = safeBtoa(parentsMarked);
+                console.log(data);
+                url = '{{ url('admin/invoice/kebutuhan-produksi-marked') }}/' + data
+                var win = window.open(url, '_blank');
             }
 
             function destroySO(SONumber) {

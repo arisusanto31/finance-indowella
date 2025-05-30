@@ -19,6 +19,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 use App\Models\InvoiceSaleDetail;
+use App\Models\KartuStock;
 use Illuminate\Support\Facades\Log;
 
 
@@ -506,6 +507,44 @@ class SalesOrderController extends Controller
                 'message' => 'Terjadi kesalahan server',
             ], 500);
         }
+    }
+
+    public function kebutuhanProduksiMarked($data)
+    {
+        //disini data itu dari btoa jadi harus di dekrip
+        $data = json_decode(base64_decode($data), true);
+        $sales = SalesOrder::from('sales_orders as so')->join('sales_order_details as sds', 'sds.sales_order_number', '=', 'so.sales_order_number')->whereIn('so.id', $data)
+            ->join('stock_units as theunit', function ($join) {
+                $join->on('sds.stock_id', '=', 'theunit.stock_id')
+                    ->on('sds.unit', '=', 'theunit.unit');
+            })
+            ->join('stocks as s', 's.id', '=', 'sds.stock_id')
+            ->select('s.name', DB::raw('sds.quantity * theunit.konversi as qtybackend'), 's.id', 'theunit.konversi', 's.unit_backend as unitbackend')->get()
+            ->groupBy('id')->map(function ($val) {
+                $data = [];
+                $data['id']= $val[0]->id;
+                $data['name'] = $val[0]->name;
+                $data['unit'] = $val[0]->unitbackend;
+                $data['quantity'] = collect($val)->sum('qtybackend');
+                return $data;
+            });
+
+        $allstockid = $sales->keys()->all();
+
+        $sisaStock = KartuStock::whereIn('index_date', function ($q) use ($allstockid) {
+            $q->from('kartu_stocks')->whereIn('stock_id', $allstockid)->where('book_journal_id', bookID())->select(DB::raw('max(index_date) as maxindexdate'))
+                ->groupBy('stock_id');
+        })->select('stock_id', 'saldo_qty_backend')->get()
+            ->pluck('saldo_qty_backend', 'stock_id')->all();
+
+        $view= view('invoice.kebutuhan-produksi');
+        $view->kebutuhanProduksi= $sales->values()->all();
+        $view->sisaStock= $sisaStock;
+       
+        return $view;
+        // ->groupBy('stock_id')->map(function ($val) {
+        //disini itung jumlah. tapi pastikan satuannya sama ya lur.
+        // });
     }
 
 
