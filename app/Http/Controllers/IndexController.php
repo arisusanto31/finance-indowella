@@ -106,7 +106,7 @@ class IndexController extends Controller
         }
         if (getInput('type') == 'recalculate-journal') {
             $journal = Journal::find(getInput('id'));
-            $journal->recalculateSaldo();
+            $journal->recalculateJournal();
             return $journal;
         }
 
