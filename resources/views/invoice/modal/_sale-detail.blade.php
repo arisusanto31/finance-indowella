@@ -111,8 +111,8 @@
                         </div>
 
                     </div>
-                    <h5 class="text-primary-dark mb-1"> <a href="javascript:void(toggleDivBDP())"> <strong>buat barang
-                                dalam proses </strong>
+                    <h5 class="text-primary-dark mb-1"> <a href="javascript:void(toggleDivBDP())">
+                            <strong>buat barang dalam proses </strong>
                             <i id="icon-create" class="bx bx-caret-down toggle-icon card-bdp"></i> </a>
                     </h5>
 
@@ -129,45 +129,60 @@
                                             value="{{ $data->sales_order_number }}" />
                                         <input type="hidden" name="sales_order_id" value="{{ $data->id }}" />
                                         <div class="row">
-                                            <div class="col-md-3 col-xs-12">
-                                                <label>Nama Barang</label>
-                                                <input type="text" class="form-control" id="bdp-stock_name"
-                                                    value="{{ $item->stock->name }}" readonly />
-                                                <input type="hidden" id="bdp-stock_id" name="stock_id[]"
-                                                    value="{{ $item->stock_id }}" />
+                                            <div class="col-md-3">
+                                                <label>Tanggal</label>
+                                                <input class="form-control" type="datetime-local" name="date"
+                                                    value="{{ $item->created_at }}" />
                                             </div>
                                             <div class="col-md-3 col-xs-12">
+                                                <label>Nama Barang</label>
+                                                <select class="form-control select-item-bahan"
+                                                    id="bdp-stock_id{{ $item->id }}" name="stock_id[]">
+                                                    <option value="{{ $item->stock_id }}" selected>
+                                                        {{ $item->stock->name }}</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-2 col-xs-12">
                                                 <label>Flow</label>
                                                 <select class="form-control" id="bdp-flow" name="flow[]">
                                                     <option value="0">Masuk</option>
                                                 </select>
                                             </div>
 
-                                            <div class="col-md-3 col-xs-12">
+                                            <div class="col-md-2 col-xs-12">
                                                 <label>Jumlah</label>
                                                 <input type="text" class="form-control" name="quantity[]"
                                                     placeholder="qty bahan: {{ $item->quantity }}"
-                                                    id="bdp-quantity" />
+                                                    onchange="updateKisaranBiaya('{{ $item->id }}')"
+                                                    id="bdp-quantity{{ $item->id }}" />
                                             </div>
 
-                                            <div class="col-md-3 col-xs-12">
+                                            <div class="col-md-2 col-xs-12">
                                                 <label>Satuan</label>
                                                 <input class="form-control" type="text" readonly name="unit[]"
-                                                    id="bdp-satuan" value="{{ $item->unit }}" />
+                                                    id="bdp-satuan{{ $item->id }}"
+                                                    value="{{ $item->unit }}" />
                                             </div>
                                             <div class="col-md-3 col-xs-12">
                                                 <label>Dari Akun </Label>
-                                                <select class="select-coa-persediaan form-control"
+                                                <select id="bdp-akun-persediaan{{ $item->id }}"
+                                                    class="select-coa-persediaan form-control"
+                                                    onchange="updateKisaranBiaya('{{ $item->id }}')"
                                                     name="lawan_code_group[]">
 
                                                 </select>
+                                            </div>
+                                            <div class="col-md-3 col-xs-12">
+                                                <label>Kisaran Biaya </Label>
+                                                <input type="text" id="kisaran-biaya{{ $item->id }}" readonly
+                                                    class="form-control" placeholder="kisaran biaya" />
                                             </div>
                                             <div class="col-md-3 col-xs-12">
                                                 <label>Dari Barang Nomer? <span class="fs-7">(isi jika perlu)</span>
                                                 </Label>
                                                 <input type="text" class="form-control" name="spk_number[]"
                                                     value="{{ $data->sales_order_number }}-{{ toDigit($index, 2) }}"
-                                                    placeholder="number" id="bdp-spk_number" />
+                                                    placeholder="number" id="bdp-spk_number{{ $item->id }}" />
                                             </div>
                                             <div class="col-md-2">
                                                 <label>Aksi</label><br>
@@ -209,6 +224,11 @@
 
 
                                         <div class="row p-2">
+                                            <div class="col-md-3">
+                                                <label>Tanggal</label>
+                                                <input class="form-control" type="datetime-local" name="date"
+                                                    value="{{ $item->created_at }}" />
+                                            </div>
                                             <div class="col-md-3 col-xs-12">
                                                 <label>Nama Barang</label>
                                                 <input type="hidden" id="bahan-jadi-stock_id" name="stock_id[]"
@@ -297,6 +317,11 @@
 
                                 @foreach ($data['details'] as $key => $item)
                                     <div class="row">
+                                        <div class="col-md-3">
+                                            <label>Tanggal</label>
+                                            <input class="form-control" type="datetime-local" name="date"
+                                                value="{{ $item->created_at }}" />
+                                        </div>
                                         <div class="col-md-3 col-xs-12">
                                             <label>Nama Barang</label>
                                             <input type="text" class="form-control" id="invoice-stock_name"
@@ -329,7 +354,7 @@
                                                 name="code_group_piutang[]"></select>
                                         </div>
 
-                                        <div class="col-md-5 col-xs-12">
+                                        <div class="col-md-3 col-xs-12">
                                             <label>Barang jadi</label>
                                             <input type="text" class="form-control"
                                                 id="invoice-ket-barang-jadi{{ $item->id }}" value=""
@@ -363,6 +388,10 @@
                     <form id="form-bayar-invoice">
                         {{ csrf_field() }}
                         <div class="row p-2">
+                            <div class="col-md-3">
+                                <label>Tanggal</label>
+                                <input class="form-control" type="datetime-local" name="date" value="{{ $item->created_at }}" />
+                            </div>
                             <div class="col-md-3 col-xs-12">
                                 <label>Nomer Invoice</label>
                                 <select class="form-control" name="invoice_number" id="bayar-invoice-invoice_number">
@@ -494,8 +523,8 @@
             initItemSelectManual('.select-coa-piutang',
                 '{{ route('chart-account.get-item-keuangan') }}?kind=piutang', '- pilih akun -',
                 '#global-modal #div-creation');
-
-
+            initItemSelectManual('.select-item-bahan',
+                '{{ route('stock.get-item') }}', '- pilih bahan -', '#global-modal #div-creation');
             initItemSelectManual('.select-coa-kas-uangmuka',
                 '{{ route('chart-account.get-item-keuangan') }}?kind=kas|uang_muka_penjualan',
                 '- pilih akun -', '#global-modal #div-creation');
@@ -504,6 +533,39 @@
 
     }
     initAllItem();
+
+
+    function updateKisaranBiaya(id) {
+        qty = $('#bdp-quantity' + id).val();
+        unit = $('#bdp-satuan' + id).val();
+        persediaanID = $('#bdp-akun-persediaan' + id + ' option:selected').val();
+        stockID = $('#bdp-stock_id' + id).val();
+        productionNumber = $('#bdp-spk_number' + id).val();
+        $.ajax({
+            url: '{{ url('admin/invoice/hitung-kisaran-biaya') }}',
+            method: 'post',
+            data: {
+                _token: '{{ csrf_token() }}',
+                quantity: qty,
+                unit: unit,
+                stock_id: stockID,
+                production_number: productionNumber,
+                code_persediaan: persediaanID
+            },
+            success: function(res) {
+                console.log(res);
+                if (res.status == 1) {
+                    $('#kisaran-biaya' + id).val(formatRupiah(res.msg));
+                } else {
+
+                }
+            },
+            error: function(res) {
+
+            }
+
+        });
+    }
 
     function hitungReferenceBiaya() {
 

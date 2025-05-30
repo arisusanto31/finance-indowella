@@ -19,7 +19,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 use App\Models\InvoiceSaleDetail;
+use App\Models\KartuBDP;
 use App\Models\KartuStock;
+use App\Models\StockUnit;
 use Illuminate\Support\Facades\Log;
 
 
@@ -30,14 +32,17 @@ class SalesOrderController extends Controller
     {
         $month = getInput('month') ? toDigit(getInput('month'), 2) : date('m');
         $year = getInput('year') ? getInput('year') : date('Y');
-        $salesOrders = SalesOrderDetail::whereMonth('created_at', $month)
-            ->whereYear('created_at', Date('Y'))->with('customer:name,id', 'stock:name,id', 'parent:sales_order_number,id,is_final,is_mark,total_price,ref_akun_cash_kind_name,status,status_payment,status_delivery')
-            ->orderBy('created_at', 'asc')
+        $salesOrders = SalesOrderDetail::from('sales_order_details as sds')->join('sales_orders as so', 'so.sales_order_number', '=', 'sds.sales_order_number')
+            ->where(function ($q) use ($month, $year) {
+                $q->whereMonth('sds.created_at', $month)->whereYear('sds.created_at', $year)->orWhere('so.status_delivery', '<>', 'TERKIRIM 100%');
+            })
+            ->with('customer:name,id', 'stock:name,id', 'parent:sales_order_number,id,is_final,is_mark,total_price,ref_akun_cash_kind_name,status,status_payment,status_delivery')
+            ->orderBy('sds.created_at', 'asc')
             ->get()
             ->groupBy('sales_order_number');
 
 
-        $invPack = SalesOrder::whereMonth('created_at', $month)->whereYear('created_at', $year)
+        $invPack = SalesOrder::whereIn('sales_order_number', $salesOrders->keys()->all())
             ->select('is_final', 'is_mark', 'total_price')->get();
         $totalInvoice = collect($invPack)->sum('total_price');
         $totalInvoiceFinal = collect($invPack)->where('is_final', 1)->sum('total_price');
@@ -513,7 +518,7 @@ class SalesOrderController extends Controller
     {
         $ids = $request->input('ids');
         $salesOrders = SalesOrderDetail::whereIn('id', $ids)->get();
-        $alldata=[];
+        $alldata = [];
         foreach ($salesOrders as $detail) {
             $data = [];
             $reference = $detail->reference;
@@ -537,6 +542,42 @@ class SalesOrderController extends Controller
             'msg' => $alldata
         ];
     }
+
+    public function hitungKisaranBiaya(Request $request)
+    {
+
+        try {
+            $code = $request->input('code_persediaan');
+            $productionNumber = $request->input('production_number');
+            $reference = "";
+            if ($code == 140001 || $code == 140002)
+                $reference = KartuStock::class;
+            else if ($code == 140003) {
+                $reference = KartuBDP::class;
+            } else if ($code == 140004) {
+                $reference = KartuBahanJadi::class;
+            } else {
+                return ['status' => 0, 'msg' => 'Kode persediaan tidak valid'];
+            }
+
+            $stockID = $request->input('stock_id');
+            $lastStock = $reference::where('stock_id', $stockID)->where('saldo_qty_backend', '>', 0);
+            if ($code == 140003 || $code == 140004) {
+                $lastStock = $lastStock->where('production_number', $productionNumber);
+            }
+            $lastStock = $lastStock->orderBy('index_date', 'desc')->first();
+            $unit = $request->input('unit');
+            $dataUnit = StockUnit::where('stock_id', $stockID)->where('unit', $unit)->first();
+            $konversi = $dataUnit ? $dataUnit->konversi : 1;
+            $harga = $lastStock ? ($lastStock->saldo_rupiah_total / $lastStock->saldo_qty_backend) : 0;
+            $totalHarga = $harga * $request->input('quantity') * $konversi;
+            return ['status' => 1, 'msg' => $totalHarga];
+        } catch (Throwable $e) {
+            Log::error('Error calculating cost range: ' . $e->getMessage());
+            return ['status' => 0, 'msg' => $e->getMessage()];
+        }
+    }
+
 
     public function kebutuhanProduksiMarked($data)
     {

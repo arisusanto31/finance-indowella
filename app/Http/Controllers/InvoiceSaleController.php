@@ -130,10 +130,10 @@ class InvoiceSaleController extends Controller
             ->get();
 
 
-    
+
         $data['details'] = $details;
 
-   
+
         $view = view('invoice.modal._edit-sales');
         $view->data = $data;
 
@@ -174,10 +174,10 @@ class InvoiceSaleController extends Controller
         $totalInvoice = collect($invPack)->sum('total_price');
         $totalInvoiceFinal = collect($invPack)->where('is_final', 1)->sum('total_price');
         $totalInvoiceMark = collect($invPack)->where('is_mark', 1)->sum('total_price');
-        $parent=[];
+        $parent = [];
 
         // dd($invoices);
-        return view('invoice.invoice-sales', compact('invoices', 'month', 'year', 'totalInvoice', 'totalInvoiceFinal', 'totalInvoiceMark','parent'));
+        return view('invoice.invoice-sales', compact('invoices', 'month', 'year', 'totalInvoice', 'totalInvoiceFinal', 'totalInvoiceMark', 'parent'));
     }
 
     // public function showSales()
@@ -354,6 +354,7 @@ class InvoiceSaleController extends Controller
         $codeGroupPiutangs = $request->input('code_group_piutang');
         $quantities = $request->input('quantity');
         $units = $request->input('unit');
+        $date = $request->input('date');
         $stockIDs = $request->input('stock_id');
         $productionNumbers = $request->input('production_number');
         $sales = SalesOrder::find($salesOrderID);
@@ -382,6 +383,7 @@ class InvoiceSaleController extends Controller
                     'total_price' => $dataDetailSale->total_price,
                     'toko_id' => $dataDetailSale->toko_id,
                     'custom_stock_name' => $customStockNames[$i] ?? null,
+
                 ];
             }
             $invoicePack = InvoicePack::create([
@@ -397,12 +399,17 @@ class InvoiceSaleController extends Controller
                 'reference_type' => null,
                 'reference_model' => InvoiceSaleDetail::class,
             ]);
+            $invoicePack->invoice_number = $invoicePack->getCodeFix();
+            $invoicePack->is_final=1;
+            $invoicePack->save();
             //create pack ya
             $details = [];
             foreach ($grouped as $data) {
+                $data['invoice_pack_number'] = $invoicePack->invoice_number;
                 $data['invoice_pack_id'] = $invoicePack->id;
                 $details[] = InvoiceSaleDetail::create($data);
             }
+
 
 
             foreach ($salesDetailIDs as $i => $saleDetailID) {
@@ -416,6 +423,7 @@ class InvoiceSaleController extends Controller
                     'sales_order_number' => $salesOrderNumber,
                     'is_otomatis_jurnal' => 1,
                     'description' => 'penjualan ' . $customStockNames[$i] . ' nomer ' . $invoicePack->invoice_number,
+                    'date' => $date,
                 ]), $lockManager);
                 if ($kartu['status'] == 0) {
                     throw new \Exception($kartu['msg']);
@@ -445,6 +453,7 @@ class InvoiceSaleController extends Controller
                     'custom_stock_name' => $customStockNames[$i],
                     'lawan_code_group' => 601000, //hpp
                     'is_otomatis_jurnal' => 1,
+                    'date' => $date
                 ]), false, $lockManager);
                 if ($st['status'] == 0) {
                     throw new \Exception($st['msg']);
@@ -469,6 +478,7 @@ class InvoiceSaleController extends Controller
         $codeGroupBayar = $request->input('codegroup_bayar');
         $invoiceNumber = $request->input('invoice_number');
         $amount = $request->input('amount');
+        $date = $request->input('date');
 
         DB::beginTransaction();
         try {
@@ -486,6 +496,7 @@ class InvoiceSaleController extends Controller
                 'lawan_code_group' => $codeGroupBayar,
                 'sales_order_number' => $sales->sales_order_number,
                 'is_otomatis_jurnal' => 1,
+                'date' => $date,
                 'description' => 'pelunasan piutang dari invoice ' . $invoicePack->invoice_number,
             ]), $lockManager);
             if ($kartu['status'] == 0) {
@@ -505,6 +516,7 @@ class InvoiceSaleController extends Controller
                     'lawan_code_group' => $codeGroupPiutang,
                     'sales_order_number' => $sales->sales_order_number,
                     'is_otomatis_jurnal' => 0,
+                    'date' => $date,
                     'description' => 'pelunasan piutang dari invoice ' . $invoicePack->invoice_number,
                 ]), $lockManager);
                 if ($dpsales['status'] == 0) {

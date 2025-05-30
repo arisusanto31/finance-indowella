@@ -307,6 +307,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
 
         Route::get('kebutuhan-produksi-marked/{data}', [SalesOrderController::class, 'kebutuhanProduksiMarked'])->name('kebutuhan-produksi-marked');
         Route::post('hitung-reference-biaya', [SalesOrderController::class, 'hitungReferenceBiaya'])->name('hitung-reference-biaya');
+        Route::post('hitung-kisaran-biaya', [SalesOrderController::class, 'hitungKisaranBiaya'])->name('hitung-kisaran-biaya');
         Route::delete('sales-order-delete/{id}', [SalesOrderController::class, 'destroy']);
     });
 });

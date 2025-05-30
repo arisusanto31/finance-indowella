@@ -133,6 +133,7 @@ class KartuBahanJadiController extends Controller
         $flows = $request->input('flow'); //harusnya ini 1 atau 0
         $spkNumbers = $request->input('spk_number');
         $codeGroup = 140004;
+        $date=$request->input('date')??now();
         $productionNumber = $request->input('production_number');
         $salesDetailIDs = $request->input('sales_detail_id');
         $saleOrderId = $request->input('sales_order_id');
@@ -180,6 +181,7 @@ class KartuBahanJadiController extends Controller
                         'is_otomatis_jurnal' => 0,
                         'is_custom_rupiah' => $isCustomRupiah,
                         'mutasi_rupiah_total' => $mutasiRupiahTotal,
+                        'date'=>$date
                     ]), false, $lockManager);
                     if ($stStock['status'] == 0) {
                         throw new \Exception($stStock['msg']);
@@ -207,6 +209,7 @@ class KartuBahanJadiController extends Controller
                         'is_otomatis_jurnal' => 0,
                         'is_custom_rupiah' => $isCustomRupiah,
                         'mutasi_rupiah_total' => $mutasiRupiahTotal,
+                        'date'=>$date
                     ]), false, $lockManager);
                     if ($stStock['status'] == 0) {
                         throw new \Exception($stStock['msg']);
@@ -233,6 +236,7 @@ class KartuBahanJadiController extends Controller
                             'is_otomatis_jurnal' => 0,
                             'is_custom_rupiah' => $isCustomRupiah,
                             'mutasi_rupiah_total' => $rupiahCustom,
+                            'date'=>$date
                         ]), false, $lockManager);
                         if ($stStock['status'] == 0) {
                             throw new \Exception($stStock['msg']);
@@ -255,6 +259,7 @@ class KartuBahanJadiController extends Controller
                     'is_otomatis_jurnal' => 1,
                     'is_custom_rupiah' => $isCustomRupiah,
                     'mutasi_rupiah_total' => $mutasiRupiahTotal,
+                    'date'=>$date
                 ]), false, $lockManager);
 
 
