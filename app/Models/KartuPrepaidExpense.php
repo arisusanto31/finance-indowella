@@ -159,7 +159,7 @@ class KartuPrepaidExpense extends Model
             $validated['index_date_group'] = createCarbon($date)->format('ymdHis');
             $ki = KartuPrepaidExpense::create($validated);
             if (self::isBackdate($date)) {
-                $ki->recalculateNilaiBuku();
+                $ki->recalculateSaldo();
             }
             //masukkan data baru dengan nilai buku yang baru yaa..
             return ['status' => 1, 'msg' => $ki];
@@ -187,7 +187,7 @@ class KartuPrepaidExpense extends Model
         ];
     }
 
-    public function recalculateNilaiBuku()
+    public function recalculateSaldo()
     {
         // Recalculate nilai buku based on the latest amount and previous nilai buku
         $kartus = KartuPrepaidExpense::where('prepaid_expense_id', $this->prepaid_expense_id)

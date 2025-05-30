@@ -164,7 +164,7 @@ class KartuInventory extends Model
 
             $ki = KartuInventory::create($validated);
             if (self::isBackdate($date)) {
-                $ki->recalculateNilaiBuku();
+                $ki->recalculateSaldo();
             }
             //masukkan data baru dengan nilai buku yang baru yaa..
             return ['status' => 1, 'msg' => $ki];
@@ -192,7 +192,7 @@ class KartuInventory extends Model
         ];
     }
 
-    public function recalculateNilaiBuku()
+    public function recalculateSaldo()
     {
         // Recalculate nilai buku based on the latest amount and previous nilai buku
         $kartus = KartuInventory::where('inventory_id', $this->inventory_id)

@@ -100,10 +100,9 @@ class IndexController extends Controller
             return $kartuDP;
         }
         if (getInput('type') == 'recalculate-saldo') {
-            $kartuHutang = KartuHutang::find(getInput('id'));
-            $kartuHutang->recalculateSaldo();
-            return $kartuHutang;
-            
+            $kartu = getInput('model')::find(getInput('id'));
+            $kartu->recalculateSaldo();
+            return $kartu;
         }
         if (getInput('type') == 'repair-price') {
             $sodetail = SalesOrderDetail::where('sales_order_number', getInput('number'))
