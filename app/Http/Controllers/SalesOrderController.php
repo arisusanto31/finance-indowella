@@ -509,6 +509,35 @@ class SalesOrderController extends Controller
         }
     }
 
+    public function hitungReferenceBiaya(Request $request)
+    {
+        $ids = $request->input('ids');
+        $salesOrders = SalesOrderDetail::whereIn('id', $ids)->get();
+        $alldata=[];
+        foreach ($salesOrders as $detail) {
+            $data = [];
+            $reference = $detail->reference;
+            if ($detail->reference_type == RetailSales::class) {
+                $hpp = $reference->hpp * $reference->quantity;
+                $subkon = 0;
+            } else if ($detail->reference_type == ManufSales::class) {
+                $hpp = $reference->detailInvoices->sum('total_hpp');
+                $subkon = $reference->detailInvoices->sum('total_subkon');
+            } else {
+                $hpp = 0;
+                $subkon = 0;
+            }
+            $data['id'] = $detail->id;
+            $data['hpp'] = $hpp;
+            $data['subkon'] = $subkon;
+            $alldata[] = $data;
+        }
+        return [
+            'status' => 1,
+            'msg' => $alldata
+        ];
+    }
+
     public function kebutuhanProduksiMarked($data)
     {
         //disini data itu dari btoa jadi harus di dekrip
@@ -522,7 +551,7 @@ class SalesOrderController extends Controller
             ->select('s.name', DB::raw('sds.quantity * theunit.konversi as qtybackend'), 's.id', 'theunit.konversi', 's.unit_backend as unitbackend')->get()
             ->groupBy('id')->map(function ($val) {
                 $data = [];
-                $data['id']= $val[0]->id;
+                $data['id'] = $val[0]->id;
                 $data['name'] = $val[0]->name;
                 $data['unit'] = $val[0]->unitbackend;
                 $data['quantity'] = collect($val)->sum('qtybackend');
@@ -537,10 +566,10 @@ class SalesOrderController extends Controller
         })->select('stock_id', 'saldo_qty_backend')->get()
             ->pluck('saldo_qty_backend', 'stock_id')->all();
 
-        $view= view('invoice.kebutuhan-produksi');
-        $view->kebutuhanProduksi= $sales->values()->all();
-        $view->sisaStock= $sisaStock;
-       
+        $view = view('invoice.kebutuhan-produksi');
+        $view->kebutuhanProduksi = $sales->values()->all();
+        $view->sisaStock = $sisaStock;
+
         return $view;
         // ->groupBy('stock_id')->map(function ($val) {
         //disini itung jumlah. tapi pastikan satuannya sama ya lur.

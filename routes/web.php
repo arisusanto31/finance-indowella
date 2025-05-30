@@ -301,12 +301,12 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::post('sales-mark', [SalesOrderController::class, 'mark'])->name('sales-mark');
 
         Route::get('invoice-sales/edit/{id}', [InvoiceSaleController::class, 'editInvoiceSales']);
-
         Route::get('invoice-purchase/edit/{id}', [InvoicePurchaseController::class, 'editInvoicePurchase']);
         Route::post('invoice-purchase-update', [InvoicePurchaseController::class, 'updateInvoicePurchase']);
         Route::post('invoice/sales-get-info-reference-finish', [SalesOrderController::class, 'getInfoReferenceFinish'])->name('sales-get-info-reference-finish');
 
         Route::get('kebutuhan-produksi-marked/{data}', [SalesOrderController::class, 'kebutuhanProduksiMarked'])->name('kebutuhan-produksi-marked');
+        Route::post('hitung-reference-biaya', [SalesOrderController::class, 'hitungReferenceBiaya'])->name('hitung-reference-biaya');
         Route::delete('sales-order-delete/{id}', [SalesOrderController::class, 'destroy']);
     });
 });

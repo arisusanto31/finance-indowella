@@ -17,12 +17,14 @@
                         <th>Qty</th>
                         <th>Harga </th>
                         <th>Diskon</th>
+                        <th>Kisaran Biaya Bahan </th>
+                        <th>Kisaran Biaya lain</th>
                         <th>Total</th>
                     </tr>
                 </thead>
                 <tbody id="body-detail-invoice">
                     @foreach ($data['details'] as $key => $item)
-                        <tr>
+                        <tr class="item-tr">
                             <td>{{ $key + 1 }}</td>
                             <td>
                                 {{ $item->custom_stock_name }}
@@ -39,6 +41,8 @@
 
                             </td>
                             <td>{{ format_price($item->discount) }}</td>
+                            <td id="biaya-bahan{{ $item->id }}"> ?? </td>
+                            <td id="biaya-lain{{ $item->id }}"> ?? </td>
                             <td>{{ format_price($item->total_price) }}</td>
                         </tr>
                     @endforeach
@@ -142,7 +146,8 @@
                                             <div class="col-md-3 col-xs-12">
                                                 <label>Jumlah</label>
                                                 <input type="text" class="form-control" name="quantity[]"
-                                                    placeholder="qty bahan: {{ $item->quantity }}" id="bdp-quantity" />
+                                                    placeholder="qty bahan: {{ $item->quantity }}"
+                                                    id="bdp-quantity" />
                                             </div>
 
                                             <div class="col-md-3 col-xs-12">
@@ -500,6 +505,42 @@
     }
     initAllItem();
 
+    function hitungReferenceBiaya() {
+
+        data = <?php echo json_encode($data['details']); ?>;
+        console.log(data);
+
+        allIDs = collect(data).pluck('id').all();
+        $.ajax({
+            url: '{{ url('admin/invoice/hitung-reference-biaya') }}',
+            method: 'post',
+            data: {
+                _token: '{{ csrf_token() }}',
+                ids: allIDs
+            },
+            success: function(res) {
+                console.log(res);
+                if (res.status == 1) {
+                    res.msg.forEach(function eachItem(item) {
+                        item.hpp = item.hpp == 0 ? '??' : item.hpp;
+                        item.subkon = item.subkon == 0 ? '??' : item.subkon;
+                        $('#biaya-bahan' + item.id).html(item.hpp);
+                        $('#biaya-lain' + item.id).html(item.subkon);
+                    });
+                } else {
+                    Swal.fire('ops', 'something error ' + res.msg, 'error');
+                }
+            },
+            error: function(res) {}
+        });
+    }
+
+    setTimeout(function() {
+        hitungReferenceBiaya();
+    }, 500);
+
+
+
     function toggleDivUangMuka() {
         $('.card-uang-muka').toggleClass('open');
         if ($('.card-uang-muka').hasClass('open')) {
@@ -551,6 +592,8 @@
             $('#invoice-biaya_hpp' + id).val(formatRupiah(biaya));
         }
     }
+
+
 
     function updateInputInvoice(number) {
         $.ajax({

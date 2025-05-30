@@ -8,7 +8,12 @@ class ManufSales extends Model
 {
     //
 
-    protected $connection="manufSql";
+    protected $connection = "manufSql";
     protected $table = "transactions";
     public $timestamps = true;
+
+    public function detailInvoices()
+    {
+        return $this->hasMany(ManufSalesInvoiceDetail::class, 'transaction_id', 'id');
+    }
 }

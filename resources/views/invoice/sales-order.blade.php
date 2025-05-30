@@ -75,7 +75,7 @@
 
         <div class="d-flex flex-column bg-primary text-white p-2 rounded-2 mb-3" style="max-width:400px">
             <p class="mb-0">Total Invoice: <strong>Rp{{ format_price($totalInvoice) }}</strong></p>
-            <p class="mb-0" id="total-final">Total Invoice Final:ch
+            <p class="mb-0" id="total-final">Total Invoice Final:
                 <strong>Rp{{ format_price($totalInvoiceFinal) }}</strong>
             </p>
             <p class="mb-0" id="total-mark">Total Invoice Mark:

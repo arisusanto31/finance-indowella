@@ -44,6 +44,9 @@ class SalesOrderDetail extends Model
     {
         return $this->belongsTo(Stock::class, 'stock_id', 'id');
     }
+    public function reference(){
+        return $this->morphTo();
+    }
 
 
     protected static function boot()
