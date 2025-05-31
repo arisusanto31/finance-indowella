@@ -390,7 +390,8 @@
                         <div class="row p-2">
                             <div class="col-md-3">
                                 <label>Tanggal</label>
-                                <input class="form-control" type="datetime-local" name="date" value="{{ $item->created_at }}" />
+                                <input class="form-control" type="datetime-local" name="date"
+                                    value="{{ $item->created_at }}" />
                             </div>
                             <div class="col-md-3 col-xs-12">
                                 <label>Nomer Invoice</label>
@@ -718,6 +719,11 @@
             },
             onSuccess: (res) => {
                 console.log(res);
+                refreshIsiModal();
+                setTimeout(function() {
+                    updateStatusRow('{{ $data->id }}');
+                }, 1000);
+
 
             }
         });
@@ -731,6 +737,11 @@
             data: $('#form-bdp' + i).serialize(),
             onSuccess: function(res) {
                 console.log(res);
+                refreshIsiModal();
+                setTimeout(function() {
+                    updateStatusRow('{{ $data->id }}');
+                }, 1000);
+
 
             },
         });
@@ -742,6 +753,11 @@
             data: $('#form-bahan-jadi' + i).serialize(),
             onSuccess: function(res) {
                 console.log(res);
+                refreshIsiModal();
+                setTimeout(function() {
+                    updateStatusRow('{{ $data->id }}');
+                }, 1000);
+
 
             },
             error: function(res) {
@@ -755,7 +771,13 @@
         swalConfirmAndSubmit({
             url: '{{ url('admin/invoice/create-invoices') }}',
             data: $('#form-invoice-so').serialize(),
-            onSuccess: function(res) {},
+            onSuccess: function(res) {
+                refreshIsiModal();
+                setTimeout(function() {
+                    updateStatusRow('{{ $data->id }}');
+                }, 1000);
+
+            },
             error: function(res) {}
         });
     }
@@ -766,6 +788,10 @@
             data: $('#form-bayar-invoice').serialize(),
             onSuccess: function(res) {
                 console.log(res);
+                refreshIsiModal();
+                setTimeout(function() {
+                    updateStatusRow('{{ $data->id }}');
+                }, 1000);
             },
         });
     }

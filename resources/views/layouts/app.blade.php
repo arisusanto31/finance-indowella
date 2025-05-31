@@ -35,7 +35,7 @@
     <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{asset('assets/img/favicon/favicon.ico')}}" />
+    <link rel="icon" type="image/x-icon" href="{{ asset('assets/img/favicon/favicon.ico') }}" />
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -47,7 +47,7 @@
 
     <!-- Core CSS -->
     <link rel="stylesheet" href="{{ asset('assets/vendor/css/core.css') }}" class="template-customizer-core-css" />
-    <link rel="stylesheet" href="{{ asset('assets/vendor/css') }}/{{book()->theme}}" class="template-customizer-theme-css" />
+    <link rel="stylesheet" href="{{ asset('assets/vendor/css') }}/{{ book()->theme }}" class="template-customizer-theme-css" />
     <link rel="stylesheet" href="{{ asset('assets/css/helper.css') }}" />
 
     <link rel="stylesheet" href="{{ asset('assets/css/demo.css') }}" />
@@ -95,7 +95,7 @@
                     <!-- Content -->
 
                     <div class="container-xxl flex-grow-1 container-p-y">
-                        {{$slot}}
+                        {{ $slot }}
                     </div>
 
                     <footer class="content-footer footer bg-footer-theme mt-20">
@@ -164,9 +164,9 @@
     <script async defer src="https://buttons.github.io/buttons.js"></script>
     <script>
         $('.url-active').each(function(i, elem) {
-            if ($(elem).val() == '{{segmentRequest(2)}}') {
+            if ($(elem).val() == '{{ segmentRequest(2) }}') {
                 $(elem).closest('.menu-item').addClass('active');
-                segment3 = '{{segmentRequest(3)}}';
+                segment3 = '{{ segmentRequest(3) }}';
                 if (segment3) {
                     $(elem).closest('.menu-item').addClass('open');
                     $(elem).closest('.menu-item').find('.menu-sub').find('div').each(function(i, elem) {
@@ -180,11 +180,12 @@
             }
         });
         initCurrencyInput('.currency-input');
+
         function loading(vis) {
             if (vis) {
                 rand = Math.floor(Math.random() * 2);
                 console.log("random=" + rand);
-                $('#img-load').attr('src', "{{asset('dist/img/Spin_trans_')}}" + rand + '.gif');
+                $('#img-load').attr('src', "{{ asset('dist/img/Spin_trans_') }}" + rand + '.gif');
                 $('#load').removeClass("hidden");
                 $('#load').addClass("loading");
             } else {
@@ -192,23 +193,54 @@
                 $('#load').removeClass("loading");
             }
         }
-        function showDetailOnModal(url, size = "") {
-            if (size == "") {
-                $('#global-modal').find('.modal-dialog').remove('modal-xl modal-lg');
-            } else if (size == "l") {
-                $('#global-modal').find('.modal-dialog').remove('modal-xl modal-lg');
-                $('#global-modal').find('.modal-dialog').addClass('modal-lg');
 
-            } else if (size == "xl") {
-                $('#global-modal').find('.modal-dialog').remove('modal-xl modal-lg');
-                $('#global-modal').find('.modal-dialog').addClass('modal-xl');
-            }
-            $('#global-modal').modal('show');
-            $('#global-modal-content').html('');
-            $('#global-modal-content').load(url);
+        var _url_modal_active="";
+        function showDetailOnModal(url, size = "") {
+            _url_modal_active=url;
+            $.ajax({
+                url: url,
+                method: 'GET',
+                success: function(response) {
+                    // kalau berhasil, baru atur ukuran modal dan tampilkan
+                    const modalDialog = $('#global-modal').find('.modal-dialog');
+                    modalDialog.removeClass('modal-xl modal-lg');
+
+                    if (size === "l") {
+                        modalDialog.addClass('modal-lg');
+                    } else if (size === "xl") {
+                        modalDialog.addClass('modal-xl');
+                    }
+
+                    $('#global-modal-content').html(response);
+                    $('#global-modal').modal('show');
+                },
+                error: function(xhr) {
+                    // tampilkan error swal atau console
+                    Swal.fire('Oops!', `Gagal memuat konten modal: ${xhr.status} ${xhr.statusText}`, 'error');
+                }
+            });
+        }
+
+        function refreshIsiModal() {
+            if(_url_modal_active){
+            $.ajax({
+                url: _url_modal_active,
+                method: 'GET',
+                success: function(response) {
+                    // kalau berhasil, baru atur ukuran modal dan tampilkan
+
+                    $('#global-modal-content').html(response);
+                },
+                error: function(xhr) {
+                    // tampilkan error swal atau console
+                    Swal.fire('Oops!', `Gagal memuat konten modal: ${xhr.status} ${xhr.statusText}`, 'error');
+                }
+            });
+        }
         }
 
         function hideModal() {
+            _url_modal_active="";
             $('#global-modal-content').modal('hide');
         }
     </script>

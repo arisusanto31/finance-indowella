@@ -85,7 +85,8 @@
 
         <div class="row">
             <div class="col-md-4">
-                <button type="button" class="btn btn-primary mt-2 text-white" onclick="produksiMarked()">kebutuhan produksi
+                <button type="button" class="btn btn-primary mt-2 text-white" onclick="produksiMarked()">kebutuhan
+                    produksi
                     marked!</button>
             </div>
         </div>
@@ -154,7 +155,7 @@
                                             @endif
 
                                         </td>
-                                        <td rowspan="{{ $rowspan }}">
+                                        <td rowspan="{{ $rowspan }}" id="status-{{ $item->parent->id }}">
                                             <p class="colorblack text-center" style="width:100%;line-height:120%;">
                                                 <strong>{{ strtoupper($item->parent->status) }}</strong>
                                             </p>
@@ -318,6 +319,71 @@
 
             function openImportData(bookID) {
                 showDetailOnModal('{{ url('admin/invoice/sales-open-import') }}/' + bookID, 'xl');
+            }
+
+            function getBgPayment(statusPayment) {
+                let bgPayment = 'bglevel3';
+
+                if (/^DP/.test(statusPayment)) {
+                    bgPayment = 'bg-warning';
+                }
+                if (/^LUNAS.*/.test(statusPayment)) {
+                    bgPayment = 'bg-warning';
+                }
+                if (statusPayment === 'LUNAS 100%') {
+                    bgPayment = 'bg-success';
+                }
+                if (statusPayment === 'BELUM BAYAR') {
+                    bgPayment = 'bg-danger';
+                }
+
+                return bgPayment;
+            }
+
+            function getBgDelivery(statusDelivery) {
+                let bgDelivery = 'bglevel3';
+
+                if (statusDelivery === 'Barang diproses') {
+                    bgDelivery = 'bg-danger';
+                }
+                if (statusDelivery === 'Barang Ready') {
+                    bgDelivery = 'bg-warning';
+                }
+                if (/^terkirim/.test(statusDelivery)) {
+                    bgDelivery = 'bg-warning';
+                }
+                if (statusDelivery === 'terkirim 100%') {
+                    bgDelivery = 'bg-success';
+                }
+
+                return bgDelivery;
+            }
+
+            function updateStatusRow(id) {
+                $.ajax({
+                    url: '{{ url('admin/invoice/sales-update-status') }}/' + id,
+                    method: 'get',
+                    success: function(res) {
+                        console.log(res);
+                        if (res.status == 1) {
+                            html = `
+                            <p class="colorblack text-center" style="width:100%;line-height:120%;">
+                                <strong>${res.msg.status.toUpperCase()}</strong>
+                            </p>
+                            <span class="badge ${getBgPayment(res.msg.status_payment)}"> <i class="fas fa-wallet"></i>
+                                ${res.msg.status_payment}</span>
+                            <span class="badge ${getBgDelivery(res.msg.status_delivery)}"> <i class="fas fa-truck"></i>
+                                ${res.msg.status_delivery}</span>
+                            `;
+                            $('#status-' + id).html(html);
+                        } else {
+
+                        }
+                    },
+                    error: function(res) {
+
+                    }
+                });
             }
 
             function produksiMarked() {

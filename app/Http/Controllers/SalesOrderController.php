@@ -424,6 +424,14 @@ class SalesOrderController extends Controller
         return null;
     }
 
+    function updateStatus($id)
+    {
+        $sales = SalesOrder::find($id);
+        return [
+            'status' => 1,
+            'msg' => $sales
+        ];
+    }
 
     public function updateDetail(Request $request)
     {
@@ -560,12 +568,15 @@ class SalesOrderController extends Controller
                 return ['status' => 0, 'msg' => 'Kode persediaan tidak valid'];
             }
 
+
             $stockID = $request->input('stock_id');
             $lastStock = $reference::where('stock_id', $stockID)->where('saldo_qty_backend', '>', 0);
             if ($code == 140003 || $code == 140004) {
                 $lastStock = $lastStock->where('production_number', $productionNumber);
             }
             $lastStock = $lastStock->orderBy('index_date', 'desc')->first();
+
+
             $unit = $request->input('unit');
             $dataUnit = StockUnit::where('stock_id', $stockID)->where('unit', $unit)->first();
             $konversi = $dataUnit ? $dataUnit->konversi : 1;
