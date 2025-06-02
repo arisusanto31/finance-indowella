@@ -11,24 +11,30 @@
             </div>
 
         </div>
-        <button
-            type="button"
-            class="btn-close position-absolute end-0 top-0 m-3"
-            data-bs-dismiss="modal"
+        <button type="button" class="btn-close position-absolute end-0 top-0 m-3" data-bs-dismiss="modal"
             aria-label="Close"></button>
     </div>
     <div class="modal-body">
+        <div class="row">
+            <div class="col mb-3">
+                <label for="nameBasic" class="form-label">Date</label>
+                <input type="datetime-local" name="date" id="date" class="form-control "
+                    value="{{ now() }}" placeholder="date">
+            </div>
+        </div>
 
         <div class="row">
             <div class="col mb-3">
                 <label for="nameBasic" class="form-label">Nomer Sales Order</label>
-                <input type="text" name="sales_order_number" id="sales-order-number" class="form-control " placeholder="Nomer SO">
+                <input type="text" name="sales_order_number" id="sales-order-number" class="form-control "
+                    placeholder="Nomer SO">
             </div>
         </div>
         <div class="row">
             <div class="col mb-3">
                 <label for="nameBasic" class="form-label">Stock</label>
-                <select onchange="selectStock()" type="text" name="stock_id" id="select-stock" class="form-control select-stock" placeholder="stock">
+                <select onchange="selectStock()" type="text" name="stock_id" id="select-stock"
+                    class="form-control select-stock" placeholder="stock">
                 </select>
                 <input type="hidden" name="flow" value="1" />
                 <input type="hidden" name="is_custom_rupiah" value="0" />
@@ -50,7 +56,8 @@
         <div class="row">
             <div class="col mb-3">
                 <label for="quantity" class="form-label">Jumlah Mutasi</label>
-                <input type="text" name="mutasi_quantity" id="mutasi_quantity" autocomplete="off" class="form-control currency-input" placeholder="jumlah" />
+                <input type="text" name="mutasi_quantity" id="mutasi_quantity" autocomplete="off"
+                    class="form-control currency-input" placeholder="jumlah" />
             </div>
             <div class="col mb-3">
                 <label for="unit" class="form-label">Satuan</label>
@@ -71,8 +78,9 @@
 
 <script>
     console.log('masuk kok');
-    initItemSelectManual('.select-stock', '{{route("stock.get-item")}}', 'Pilih Stock', '#global-modal');
-    initItemSelectManual('.select-coa', '{{route("chart-account.get-item-keuangan")}}?kind=persediaan', 'Pilih Akun Persediaan', '#global-modal');
+    initItemSelectManual('.select-stock', '{{ route('stock.get-item') }}', 'Pilih Stock', '#global-modal');
+    initItemSelectManual('.select-coa', '{{ route('chart-account.get-item-keuangan') }}?kind=persediaan',
+        'Pilih Akun Persediaan', '#global-modal');
     initCurrencyInput('.currency-input');
 
 
@@ -83,7 +91,7 @@
             return;
         }
         $.ajax({
-            url: '{{url("admin/master/stock/get-info")}}/' + stockid,
+            url: '{{ url('admin/master/stock/get-info') }}/' + stockid,
             method: 'get',
             success: function(res) {
                 if (res.status == 1) {
@@ -104,7 +112,7 @@
 
     function submitMutasiStock() {
         $.ajax({
-            url: '{{route("kartu-bdp.mutasi-store")}}',
+            url: '{{ route('kartu-bdp.mutasi-store') }}',
             method: 'post',
             data: $('#mutasi-keluar').serialize(),
             success: function(res) {
