@@ -9,6 +9,15 @@
             aria-label="Close"></button>
     </div>
     <div class="modal-body">
+
+         <div class="row">
+            <div class="col mb-3">
+                <label for="nameBasic" class="form-label">Date</label>
+                <input type="datetime-local" name="date" id="date" class="form-control "
+                    value="{{ now() }}" placeholder="date">
+            </div>
+        </div>
+
         <div class="row">
             <div class="col mb-3">
                 <label for="nameBasic" class="form-label">Stock</label>
