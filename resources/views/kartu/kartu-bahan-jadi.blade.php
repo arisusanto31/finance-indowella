@@ -248,7 +248,7 @@
                     month = 12;
                     year--;
                 }
-                window.location.href = '{{ url('admin/kartu/kartu-bdp/main') }}?month=' + month + '&year=' + year;
+                window.location.href = '{{ url('admin/kartu/kartu-bahan-jadi/main') }}?month=' + month + '&year=' + year;
             }
 
             function nextMonth() {
@@ -259,7 +259,7 @@
                     month = 1;
                     year++;
                 }
-                window.location.href = '{{ url('admin/kartu/kartu-bdp/main') }}?month=' + month + '&year=' + year;
+                window.location.href = '{{ url('admin/kartu/kartu-bahan-jadi/main') }}?month=' + month + '&year=' + year;
             }
 
             function getSummary() {
