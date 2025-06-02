@@ -152,6 +152,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('get-mutasi-masuk', [KartuStockController::class, 'getMutasiMasuk'])->name('get-mutasi-masuk');
             Route::get('get-mutasi-keluar', [KartuStockController::class, 'getMutasiKeluar'])->name('get-mutasi-keluar');
             Route::post('refresh-kartu', [KartuStockController::class, 'refreshKartu'])->name('refresh-kartu');
+            Route::get('get-hpp', [KartuStockController::class, 'getHPP'])->name('get-hpp');
         });
 
         Route::prefix('kartu-bdp')->name('kartu-bdp.')->group(function () {

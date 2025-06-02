@@ -78,7 +78,7 @@ class KartuStock extends Model
                 throw new \Exception('tidak ada saldo qty barang ini ');
             }
 
-            if ($isCustom == 0 || $flow == 1) {
+            if ($isCustom == 0 && $flow == 1) {
                 if ($lastCard->saldo_qty_backend == 0) {
                     $rupiahUnit = 0;
                 } else {

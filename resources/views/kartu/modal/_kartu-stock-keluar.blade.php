@@ -21,7 +21,7 @@
                     class="form-control select-stock" placeholder="stock">
                 </select>
                 <input type="hidden" name="flow" value="1" />
-                <input type="hidden" name="is_custom_rupiah" value="0" />
+                <input type="hidden" name="is_custom_rupiah" value="1" />
             </div>
         </div>
         <div class="row">
@@ -52,14 +52,23 @@
         <div class="row">
             <div class="col mb-3">
                 <label for="quantity" class="form-label">Jumlah Mutasi</label>
-                <input type="text" name="mutasi_quantity" id="mutasi_quantity" autocomplete="off"
+                <input onchange="getTotalMutasiRupiah()" type="text" name="mutasi_quantity" id="mutasi_quantity" autocomplete="off"
                     class="form-control currency-input" placeholder="jumlah" />
             </div>
             <div class="col mb-3">
                 <label for="unit" class="form-label">Satuan</label>
-                <select type="text" id="unit" autocomplete="off" class="form-control" name="unit">
+                <select onchange="getTotalMutasiRupiah()" type="text" id="unit" autocomplete="off" class="form-control" name="unit">
                     <option value="">Pilih Satuan</option>
                 </select>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col mb-3">
+                <label for="mutasi-rupiah" class="form-label">Total Nilai Rupiah</label>
+                <input name="mutasi_rupiah_total" id="mutasi-rupiah-total" class="form-control currency-input"
+                    placeholder="total nilai rupiah" readonly />
+                <span id="keterangan"></span>
             </div>
         </div>
 
@@ -79,7 +88,24 @@
         'Pilih Akun Persediaan', '#global-modal');
     initCurrencyInput('.currency-input');
 
-
+    function getTotalMutasiRupiah() {
+        $.ajax({
+            url: '{{ route('kartu-stock.get-hpp') }}?date=' + $('#date').val() + '&stock_id=' + $(
+                '#select-stock option:selected').val()+'&unit=' + $('#unit option:selected').val(),
+            method: 'get',
+            success: function(res) {
+                console
+                if (res.status == 1) {
+                    hpp= res.msg.hppbackend* res.msg.konversi;
+                    $('#mutasi-rupiah-total').val(formatRupiah(hpp * $('#mutasi_quantity').val()));
+                    $('#keterangan').html('Nilai per unit :' + formatRupiah(hpp));
+                }
+            },
+            error: function(res) {
+                swal("opps", "something error", 'error');
+            }
+        });
+    }
 
     function selectStock() {
         let stockid = $('#select-stock option:selected').val();

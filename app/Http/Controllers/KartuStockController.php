@@ -94,6 +94,30 @@ class KartuStockController extends Controller
         ];
     }
 
+    public function getHPP()
+    {
+        $date = getInput('date') ?? date('Y-m-d 23:59:59');
+        $indexDate = createCarbon($date)->format('ymdHis999');
+        $stockid = getInput('stock_id');
+        $unit = getInput('unit');
+        if(!$date || !$stockid || !$unit){
+            return ['status' => 0, 'msg' => 'Tanggal, Stock ID dan Unit harus diisi'];
+        }
+        $kartu = KartuStock::where('kartu_stocks.stock_id', $stockid)
+            ->join('stock_units as su', 'su.stock_id', '=', 'kartu_stocks.stock_id')
+            ->where('su.unit', $unit)
+            ->where('kartu_stocks.index_date', '<=', $indexDate)
+            ->select(
+              
+            
+                DB::raw('coalesce(kartu_stocks.saldo_rupiah_total/ kartu_stocks.saldo_qty_backend,0) as hppbackend'),
+                DB::raw('su.konversi')
+            )
+            ->orderBy('kartu_stocks.index_date', 'desc')
+            ->first();
+        return ['status' => 1, 'msg' => $kartu];
+    }
+
     public function destroy($id)
     {
         $kartu = KartuStock::find($id);
