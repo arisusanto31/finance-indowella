@@ -300,6 +300,9 @@ class Journal extends Model
                 if (abs(collect($ks)->sum('total')) == abs($this->amount_debet - $this->amount_kredit)) {
                     $this->verified_by = 1;
                 }
+                foreach($ks as $k){
+                    $k->createDetailKartuInvoice();
+                }
             }
         } else {
             $this->verified_by = 1;
