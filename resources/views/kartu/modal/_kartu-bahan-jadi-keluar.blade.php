@@ -49,7 +49,8 @@
         <div class="row">
             <div class="col mb-3">
                 <label for="akun" class="form-label">Akun Persediaan</label>
-                <select type="text" name="code_group" id="code-group" class="form-control select-coa">
+                <select type="text" name="code_group" id="code-group" class="form-control">
+                    <option value="140004" selected>Persediaan Barang Jadi</option>
                 </select>
             </div>
         </div>
