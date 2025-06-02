@@ -130,22 +130,18 @@
     }
 
     function submitMutasiStock() {
-        $.ajax({
+        swalConfirmAndSubmit({
             url: '{{ route('kartu-bahan-jadi.mutasi-store') }}',
-            method: 'post',
             data: $('#mutasi-masuk').serialize(),
-            success: function(res) {
+            onSuccess: function(res) {
                 console.log(res);
                 if (res.status == 1) {
-                    Swal.fire('success', 'berhasil masuk', 'success');
                     hideModal();
                 } else {
                     Swal.fire('ops', 'something error ' + res.msg, 'error');
                 }
-            },
-            error: function(res) {
-                Swal.fire("opps", "something error", 'error');
             }
         });
+
     }
 </script>
