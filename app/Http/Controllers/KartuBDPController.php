@@ -16,7 +16,10 @@ class KartuBDPController extends Controller
     //
     public function index()
     {
-        return view('kartu.kartu-bdp');
+        $view = view('kartu.kartu-bdp');
+        $view->month = getInput('month') ? toDigit(getInput('month'), 2) : date('m');
+        $view->year = getInput('year') ? getInput('year') : date('Y');
+        return $view;
     }
 
     public function getSummary()
@@ -184,7 +187,7 @@ class KartuBDPController extends Controller
                         'is_otomatis_jurnal' => 0,
                         'is_custom_rupiah' => $isCustomRupiah,
                         'mutasi_rupiah_total' => $mutasiRupiahTotal,
-                        'date'=>$date
+                        'date' => $date
 
                     ]), false);
                     if ($stStock['status'] == 0) {
@@ -207,7 +210,7 @@ class KartuBDPController extends Controller
                         'is_otomatis_jurnal' => 0,
                         'is_custom_rupiah' => $isCustomRupiah,
                         'mutasi_rupiah_total' => $mutasiRupiahTotal,
-                        'date'=>$date
+                        'date' => $date
                     ]), false);
                     if ($stStock['status'] == 0) {
                         throw new \Exception($stStock['msg']);
@@ -228,7 +231,7 @@ class KartuBDPController extends Controller
                     'is_otomatis_jurnal' => 1,
                     'is_custom_rupiah' => $isCustomRupiah,
                     'mutasi_rupiah_total' => $mutasiRupiahTotal,
-                    'date'=>$date
+                    'date' => $date
                 ]), false);
                 $allSt[] = $st;
                 if ($st['status'] == 0) {

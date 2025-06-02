@@ -19,7 +19,10 @@ class KartuBahanJadiController extends Controller
 
     public function index()
     {
-        return view('kartu.kartu-bahan-jadi');
+        $view = view('kartu.kartu-stock');
+        $view->month = getInput('month') ? toDigit(getInput('month'), 2) : date('m');
+        $view->year = getInput('year') ? getInput('year') : date('Y');
+        return $view;
     }
 
     public function getSummary()
