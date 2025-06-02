@@ -52,12 +52,13 @@
         <div class="row">
             <div class="col mb-3">
                 <label for="quantity" class="form-label">Jumlah Mutasi</label>
-                <input onchange="getTotalMutasiRupiah()" type="text" name="mutasi_quantity" id="mutasi_quantity" autocomplete="off"
-                    class="form-control currency-input" placeholder="jumlah" />
+                <input onchange="getTotalMutasiRupiah()" type="text" name="mutasi_quantity" id="mutasi_quantity"
+                    autocomplete="off" class="form-control currency-input" placeholder="jumlah" />
             </div>
             <div class="col mb-3">
                 <label for="unit" class="form-label">Satuan</label>
-                <select onchange="getTotalMutasiRupiah()" type="text" id="unit" autocomplete="off" class="form-control" name="unit">
+                <select onchange="getTotalMutasiRupiah()" type="text" id="unit" autocomplete="off"
+                    class="form-control" name="unit">
                     <option value="">Pilih Satuan</option>
                 </select>
             </div>
@@ -91,12 +92,12 @@
     function getTotalMutasiRupiah() {
         $.ajax({
             url: '{{ route('kartu-stock.get-hpp') }}?date=' + $('#date').val() + '&stock_id=' + $(
-                '#select-stock option:selected').val()+'&unit=' + $('#unit option:selected').val(),
+                '#select-stock option:selected').val() + '&unit=' + $('#unit option:selected').val(),
             method: 'get',
             success: function(res) {
-                console
+                console.log(res);
                 if (res.status == 1) {
-                    hpp= res.msg.hppbackend* res.msg.konversi;
+                    hpp = res.msg.hppbackend * res.msg.konversi;
                     $('#mutasi-rupiah-total').val(formatRupiah(hpp * $('#mutasi_quantity').val()));
                     $('#keterangan').html('Nilai per unit :' + formatRupiah(hpp));
                 }
