@@ -305,7 +305,7 @@
                                 if (array_key_exists(item.id, res.mutasi_masuk)) {
                                     masuk[0] = res.mutasi_masuk[item.id].qty;
                                     masuk[2] = res.mutasi_masuk[item.id].total;
-                                    masuk[1]=masuk[2] / masuk[0];
+                                    masuk[1] = masuk[2] / masuk[0];
                                 }
                                 if (array_key_exists(item.id, res.mutasi_keluar)) {
                                     keluar[0] = res.mutasi_keluar[item.id].qty;
@@ -380,7 +380,7 @@
                                 <td>${item.stock_name}</td>
                                 <td>${formatRupiah(item.mutasi_quantity)}</td>
                                 <td>${item.unit}</td>
-                                <td>${formatRupiah(item.mutasi_rupiah_on_unit*(item.mutasi_qty_backend/item.mutasi_quantity))}</td>
+                                <td>${formatRupiah(item.mutasi_rupiah_total/item.mutasi_quantity)}</td>
                                 <td>${formatRupiah(item.mutasi_rupiah_total)}</td>
                                 <td>${(!item.journal_number?'<span> belum ada jurnal</span> <button onclick="openLinkJournal('+item.id+')"> <i class="fas fa-link"></i> jurnal</button>':item.journal_number)}
                                        <button onclick="refreshKartu(${item.id})"> <i class="fas fa-sync"></i> </button>
