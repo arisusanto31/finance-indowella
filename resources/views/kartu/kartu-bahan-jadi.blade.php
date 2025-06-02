@@ -387,7 +387,7 @@
             function getMutasiMasuk() {
                 page = "masuk";
                 $.ajax({
-                    url: "{{ route('kartu-bahan-jadi.get-mutasi-masuk') }}",
+                    url: "{{ route('kartu-bahan-jadi.get-mutasi-masuk') }}?month={{ $month }}&year={{ $year }}",
                     method: "GET",
                     success: function(res) {
                         console.log(res);
@@ -462,7 +462,7 @@
 
             function getMutasiKeluar() {
                 $.ajax({
-                    url: "{{ route('kartu-bahan-jadi.get-mutasi-keluar') }}",
+                    url: "{{ route('kartu-bahan-jadi.get-mutasi-keluar') }}?month={{ $month }}&year={{ $year }}",
                     method: "GET",
                     success: function(res) {
                         console.log(res);
