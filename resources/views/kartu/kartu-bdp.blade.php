@@ -242,7 +242,7 @@
             function getSummary() {
                 page = "kartu";
                 $.ajax({
-                    url: "{{ route('kartu-bdp.get-summary') }}",
+                    url: "{{ route('kartu-bdp.get-summary') }}?month={{ $month }}&year={{ $year }}",
                     method: "GET",
                     success: function(res) {
                         console.log(res);
@@ -354,11 +354,11 @@
             }
 
             function showModalMasuk() {
-                showDetailOnModal("{{ route('kartu-bdp.create-mutasi-masuk') }}");
+                showDetailOnModal("{{ route('kartu-bdp.create-mutasi-masuk') }}?month={{ $month }}&year={{ $year }}");
             }
 
             function showModalOut() {
-                showDetailOnModal("{{ route('kartu-bdp.create-mutasi-keluar') }}");
+                showDetailOnModal("{{ route('kartu-bdp.create-mutasi-keluar') }}?month={{ $month }}&year={{ $year }}");
             }
 
             function getMutasiMasuk() {

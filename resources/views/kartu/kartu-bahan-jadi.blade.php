@@ -265,7 +265,7 @@
             function getSummary() {
                 page = "kartu";
                 $.ajax({
-                    url: "{{ route('kartu-bahan-jadi.get-summary') }}",
+                    url: "{{ route('kartu-bahan-jadi.get-summary') }}?month={{ $month }}&year={{ $year }}",
                     method: "GET",
                     success: function(res) {
                         console.log(res);
@@ -377,11 +377,11 @@
             }
 
             function showModalMasuk() {
-                showDetailOnModal("{{ route('kartu-bahan-jadi.create-mutasi-masuk') }}");
+                showDetailOnModal("{{ route('kartu-bahan-jadi.create-mutasi-masuk') }}?month={{ $month }}&year={{ $year }}");
             }
 
             function showModalOut() {
-                showDetailOnModal("{{ route('kartu-bahan-jadi.create-mutasi-keluar') }}");
+                showDetailOnModal("{{ route('kartu-bahan-jadi.create-mutasi-keluar') }}?month={{ $month }}&year={{ $year }}");
             }
 
             function getMutasiMasuk() {
