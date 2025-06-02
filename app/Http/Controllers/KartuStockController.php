@@ -70,7 +70,7 @@ class KartuStockController extends Controller
             ->where('mutasi_qty_backend', '>', 0)
             ->select(
                 DB::raw('sum(coalesce(mutasi_qty_backend,0)) as qty'),
-                DB::raw('sum(coalesce(mutasi_rupiah_on_unit,0)) as rupiah_unit'),
+
                 DB::raw('sum(coalesce(mutasi_rupiah_total,0)) as total'),
                 DB::raw('max(stock_id) as stock_id')
 
@@ -80,7 +80,7 @@ class KartuStockController extends Controller
             ->where('mutasi_qty_backend', '<', 0)
             ->select(
                 DB::raw('sum(mutasi_qty_backend) as qty'),
-                DB::raw('sum(mutasi_rupiah_on_unit) as rupiah_unit'),
+
                 DB::raw('sum(mutasi_rupiah_total) as total'),
                 DB::raw('max(stock_id) as stock_id')
 
@@ -100,7 +100,7 @@ class KartuStockController extends Controller
         $indexDate = createCarbon($date)->format('ymdHis999');
         $stockid = getInput('stock_id');
         $unit = getInput('unit');
-        if(!$date || !$stockid || !$unit){
+        if (!$date || !$stockid || !$unit) {
             return ['status' => 0, 'msg' => 'Tanggal, Stock ID dan Unit harus diisi'];
         }
         $kartu = KartuStock::where('kartu_stocks.stock_id', $stockid)
@@ -108,8 +108,8 @@ class KartuStockController extends Controller
             ->where('su.unit', $unit)
             ->where('kartu_stocks.index_date', '<=', $indexDate)
             ->select(
-              
-            
+
+
                 DB::raw('coalesce(kartu_stocks.saldo_rupiah_total/ kartu_stocks.saldo_qty_backend,0) as hppbackend'),
                 DB::raw('su.konversi')
             )

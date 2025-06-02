@@ -304,13 +304,13 @@
                                 keluar = [0, 0, 0];
                                 if (array_key_exists(item.id, res.mutasi_masuk)) {
                                     masuk[0] = res.mutasi_masuk[item.id].qty;
-                                    masuk[1] = res.mutasi_masuk[item.id].rupiah_unit;
                                     masuk[2] = res.mutasi_masuk[item.id].total;
+                                    masuk[1]=masuk[2] / masuk[0];
                                 }
                                 if (array_key_exists(item.id, res.mutasi_keluar)) {
                                     keluar[0] = res.mutasi_keluar[item.id].qty;
-                                    keluar[1] = res.mutasi_keluar[item.id].rupiah_unit;
                                     keluar[2] = res.mutasi_keluar[item.id].total;
+                                    keluar[1] = keluar[2] / keluar[0];
                                 }
                                 html += `
                                 <tr>
