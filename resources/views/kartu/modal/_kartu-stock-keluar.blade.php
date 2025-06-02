@@ -98,7 +98,7 @@
                 console.log(res);
                 if (res.status == 1) {
                     hpp = res.msg.hppbackend * res.msg.konversi;
-                    total = hpp * $('#mutasi_quantity').val();
+                    total = hpp * formatDB($('#mutasi_quantity').val());
                     console.log('total', total);
                     $('#mutasi-rupiah-total').val(formatRupiah(total));
                     $('#keterangan').html('Nilai per unit :' + formatRupiah(hpp));
