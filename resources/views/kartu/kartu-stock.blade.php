@@ -109,6 +109,8 @@
                                                 <th>Rp/Unit</th>
                                                 <th>Total</th>
                                                 <th>Nomer Jurnal</th>
+                                                <th>Aksi</th>
+
                                             </tr>
 
                                         </thead>
@@ -136,6 +138,8 @@
                                                 <th>Rp/Unit</th>
                                                 <th>Total</th>
                                                 <th>Nomer Jurnal</th>
+                                                <th>Aksi</th>
+
                                             </tr>
 
                                         </thead>
@@ -286,7 +290,7 @@
             function getSummary() {
                 page = "kartu";
                 $.ajax({
-                    url: "{{ route('kartu-stock.get-summary') }}?month={{$month}}&year={{$year}}",
+                    url: "{{ route('kartu-stock.get-summary') }}?month={{ $month }}&year={{ $year }}",
                     method: "GET",
                     success: function(res) {
                         console.log(res);
@@ -361,7 +365,7 @@
             function getMutasiMasuk() {
                 page = "masuk";
                 $.ajax({
-                    url: "{{ route('kartu-stock.get-mutasi-masuk') }}?month={{$month}}&year={{$year}}",
+                    url: "{{ route('kartu-stock.get-mutasi-masuk') }}?month={{ $month }}&year={{ $year }}",
                     method: "GET",
                     success: function(res) {
                         console.log(res);
@@ -439,7 +443,7 @@
             function getMutasiKeluar() {
                 page = "keluar";
                 $.ajax({
-                    url: "{{ route('kartu-stock.get-mutasi-keluar') }}?month={{$month}}&year={{$year}}",
+                    url: "{{ route('kartu-stock.get-mutasi-keluar') }}?month={{ $month }}&year={{ $year }}",
                     method: "GET",
                     success: function(res) {
                         console.log(res);
@@ -459,6 +463,10 @@
                                 <td>${(!item.journal_number?'<span> belum ada jurnal</span> <button onclick="openLinkJournal('+item.id+')"> <i class="fas fa-link"></i> jurnal</button>':item.journal_number)}
                                        <button onclick="refreshKartu(${item.id})"> <i class="fas fa-sync"></i> </button>
                                 </td>
+                                <td>
+                                    <button onclick="deleteKartu('${item.id}')" class="btn btn-sm btn-outline-danger" > <i class="fas fa-trash"></i></button>
+                                </td>
+                                    
                                 </tr>`;
                             });
                             $('#body-mutasi-keluar').html(html);
@@ -469,6 +477,12 @@
                     error: function(err) {
                         console.log(err);
                     }
+                });
+            }
+
+            function deleteKartu(id) {
+                swalDelete({
+                    url: '{{ url('admin/kartu/kartu-stock/main') }}/' + id
                 });
             }
 

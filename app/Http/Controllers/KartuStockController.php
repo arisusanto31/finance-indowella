@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DetailKartuInvoice;
 use App\Models\Journal;
 use App\Models\KartuStock;
 use App\Models\Stock;
@@ -93,6 +94,25 @@ class KartuStockController extends Controller
         ];
     }
 
+    public function destroy($id)
+    {
+        $kartu = KartuStock::find($id);
+
+        if (!$kartu) {
+            return ['status' => 0, 'msg' => 'Kartu tidak ditemukan'];
+        }
+        if ($kartu->journal_id) {
+            return ['status' => 0, 'msg' => 'Kartu ini sudah terhubung dengan jurnal'];
+        }
+
+        $dk = DetailKartuInvoice::where('kartu_type', KartuStock::class)
+            ->where('kartu_id', $kartu->id)->get();
+        foreach ($dk as $d) {
+            $d->delete();
+        }
+        $kartu->delete();
+        return ['status' => 1, 'msg' => 'Kartu berhasil dihapus'];
+    }
     public function createMutasiMasuk()
     {
         $view = view('kartu.modal._kartu-stock-masuk');
