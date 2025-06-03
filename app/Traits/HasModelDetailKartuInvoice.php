@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use App\Models\DetailKartuInvoice;
+use App\Models\InvoicePack;
 use App\Models\SalesOrder;
 use Illuminate\Http\Request;
 
@@ -22,11 +23,13 @@ trait HasModelDetailKartuInvoice
         }
         if (isset($kartu->sales_order_number)) {
             $saleOrderNumber = $kartu->sales_order_number;
-            $SOID = $kartu->sales_order_id;;
+            $salesOrder=SalesOrder::where('sales_order_number', $saleOrderNumber)->first();
+            $SOID =$salesOrder ? $salesOrder->id : null;
         }
         if (isset($kartu->invoice_pack_number)) {
             $invoiceNumber = $kartu->invoice_pack_number;
-            $invID = $kartu->invoice_pack_id;
+            $invoice= InvoicePack::where('invoice_number', $invoiceNumber)->first();
+            $invID =$invoice ? $invoice->id : null;
         }
 
         $dks = DetailKartuInvoice::storeData(new Request([
