@@ -188,7 +188,7 @@ class KartuBahanJadi extends Model
             else
                 $mutasiRupiahTotal = 0;
             $isCustom = $request->input('is_custom_rupiah');
-            $dataunit = StockUnit::where('stock_id', $stockid)->where('unit', $unit)->first();
+            $dataunit = StockUnit::where('stock_id', $stockid)->where('unit', ownucfirst($unit))->first();
 
             $stock = Stock::find($stockid);
             if (!$unit) {
