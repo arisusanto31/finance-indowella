@@ -253,10 +253,11 @@
     });
 
     function refresh(id, model) {
-        if (model == 'App\\Models\\InvoiceSaleDetail') {
-            url = '{{ url('admin/invoice/invoice-sales-refresh') }}/' + id;
-        } else {
+        console.log(id, model);
+        if (model == 'App\\Models\\InvoicePurchaseDetail') {
             url = '{{ url('admin/invoice/invoice-purchase-refresh') }}/' + id;
+        } else {
+            url = '{{ url('admin/invoice/invoice-sales-refresh') }}/' + id;
         }
         loading(1);
         $.ajax({
