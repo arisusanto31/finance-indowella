@@ -401,6 +401,7 @@ class InvoiceSaleController extends Controller
             ]);
             $invoicePack->invoice_number = $invoicePack->getCodeFix();
             $invoicePack->is_final = 1;
+            $invoicePack->status= "FINAL";
             $invoicePack->save();
             //create pack ya
             $details = [];
