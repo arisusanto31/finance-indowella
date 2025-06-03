@@ -565,7 +565,7 @@
                 if (res.status == 1) {
                     html = "";
                     res.msg.forEach(function eachItem(item) {
-                        html += '<option value="' + item.unit + '" >' + item.name + '</option>';
+                        html += '<option value="' + item.unit + '" >' + item.unit + '</option>';
                     });
                     $('#bdp-satuan' + id).html(html);
                 } else {
