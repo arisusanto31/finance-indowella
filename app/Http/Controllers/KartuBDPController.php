@@ -327,9 +327,12 @@ class KartuBDPController extends Controller
         }
 
         $kartu->save();
-        if (!$kartu->isHasKartuInvoice()) {
-            $kartu->createDetailKartuInvoice();
+
+        $St = $kartu->createDetailKartuInvoice();
+        if ($St['status'] == 0) {
+            return ['status' => 0, 'msg' => $St['msg']];
         }
+
         return ['status' => 1, 'msg' => $kartu];
     }
 }
