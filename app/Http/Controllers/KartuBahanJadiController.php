@@ -305,13 +305,17 @@ class KartuBahanJadiController extends Controller
                 }
             }
         } catch (Throwable $th) {
+
             DB::rollBack();
+            $lockManager->releaseAll();
             return [
                 'status' => 0,
                 'msg' => $th->getMessage()
             ];
         }
         DB::commit();
+        $lockManager->releaseAll();
+
         return [
             'status' => 1,
             'msg' => $allSt,
