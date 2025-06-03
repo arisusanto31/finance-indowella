@@ -23,7 +23,8 @@ class SalesOrder extends Model
 
     ];
 
-    public function reference(){
+    public function reference()
+    {
         return $this->morphTo();
     }
     public function details()
@@ -91,7 +92,7 @@ class SalesOrder extends Model
 
     public function updateStatus()
     {
-        $total = collect($this->getTotalKartu())->mapWithKeys(function ($value, $key) {
+        $total = collect($this->getTotalKartu())->map(function ($value, $key) {
             $keys = explode(' ', $key);
             if ($keys[0] == 'Piutang') {
                 $thekey = 'Piutang';
@@ -100,7 +101,9 @@ class SalesOrder extends Model
             } else {
                 $thekey = $key;
             }
-            return [$thekey => $value];
+            return ['key' => $thekey, 'value' => $value];
+        })->values()->groupBy('key')->map(function ($items) {
+            return $items->sum('value');
         })->all();
         $this->status_payment = "draft";
         $this->status_delivery = "draft";
