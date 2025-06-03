@@ -228,8 +228,9 @@
                                         <div class="modal-dialog">
                                             <div class="modal-content">
                                                 <form autocomplete="off" id="form-edit-stock${item.id}">
-                                                {{ csrf_field() }}
-                                                    
+                                                     <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                                    <input type="hidden" name="_method" value="PUT">
+ 
                                                     <div class="modal-header">
                                                         <h5 class="modal-title" id="editModalLabel${item.id}">
                                                             Edit Stock ${item.name}
@@ -290,23 +291,23 @@
                                                             ${
                                                             item.units.length == 0 ? '<div class="text-center">belum ada satuan apapun</div>' : 
                                                             item.units.map(unit => `
-                                                                                <div class="row mb-2">
-                                                                                    <div class="col-md-4">
-                                                                                        <input class="form-control" placeholder="nama satuan" value="${unit.unit}" />
-                                                                                    </div>
-                                                                                    <div class="col-md-4">
-                                                                                        <div class="row">
-                                                                                            <div class="col-xs-12" style="position:relative; width:100%">
-                                                                                                <span class="unit-form${item.id}" style="position:absolute; right:20px; top:7px; color:#bbb"> ${item.unit_backend}</span>
-                                                                                                <input class="form-control" placeholder="konversi" value="${unit.konversi}" />
+                                                                                        <div class="row mb-2">
+                                                                                            <div class="col-md-4">
+                                                                                                <input class="form-control" placeholder="nama satuan" value="${unit.unit}" />
+                                                                                            </div>
+                                                                                            <div class="col-md-4">
+                                                                                                <div class="row">
+                                                                                                    <div class="col-xs-12" style="position:relative; width:100%">
+                                                                                                        <span class="unit-form${item.id}" style="position:absolute; right:20px; top:7px; color:#bbb"> ${item.unit_backend}</span>
+                                                                                                        <input class="form-control" placeholder="konversi" value="${unit.konversi}" />
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <div class="col-md-3">
+                                                                                                ${item.unit_default == unit.unit ? '<div class="bg-primary  colorwhite px-2 rounded-1"> default</div>' : ''}
                                                                                             </div>
                                                                                         </div>
-                                                                                    </div>
-                                                                                    <div class="col-md-3">
-                                                                                        ${item.unit_default == unit.unit ? '<div class="bg-primary  colorwhite px-2 rounded-1"> default</div>' : ''}
-                                                                                    </div>
-                                                                                </div>
-                                                                                `).join('')}
+                                                                                        `).join('')}
                                                         </div>
                                                         <div class="mb-1">+ tambah satuan baru</div>
                                                         <form id="create-unit${item.id }">
@@ -356,6 +357,7 @@
             }
 
             function updateStock(id) {
+                console.log($('#form-edit-stock' + id).serialize());
                 $.ajax({
                     url: '{{ url('admin/master/stock/main') }}/' + id,
                     method: 'POST',
