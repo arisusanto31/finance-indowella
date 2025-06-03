@@ -90,6 +90,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::get('/get-saldo-highlight', [JournalController::class, 'getSaldoHighlight'])->name('get-saldo-highlight');
         Route::get('/get-saldo-custom/{id}', [JournalController::class, 'getSaldoCustom'])->name('get-saldo-custom');
         Route::get('/get-laba-rugi/{id}', [JournalController::class, 'getLabaRugi'])->name('get-laba-rugi');
+        Route::get('/get-closing-journal', [JournalController::class, 'getClosingJournal'])->name('get-closing-journal');
 
         Route::post('get-import-saldo', [JournalController::class, 'getImportSaldo'])->name('get-import-saldo');
         Route::post('import-saldo', [JournalController::class, 'importSaldo'])->name('import-saldo');
@@ -97,6 +98,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::get('get-task-import-aktif', [JournalController::class, 'getTaskImportAktif']);
         Route::get('resend-import-task/{id}', [JournalController::class, 'resendImportTask']);
         Route::get('resend-import-task-all/{id}', [JournalController::class, 'resendImportTaskAll']);
+        Route::post('tutup-jurnal', [JournalController::class, 'tutupJurnal']);
     });
 
     Route::prefix('daftar')->group(function () {

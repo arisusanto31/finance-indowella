@@ -10,6 +10,12 @@ class JournalKey extends Model
     //
     protected $table = 'journal_keys';
     public $timestamps = true;
+    protected $fillable = [
+        'book_journal_id',
+        'name',
+        'user_id',
+        'key_at'
+       ];
 
 
     protected static function booted()

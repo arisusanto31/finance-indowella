@@ -62,8 +62,8 @@ class JournalController extends Controller
             'balance' => $aset - ($kewajiban + $ekuitas + $laba)
         ];
         $view->jsdata = $jsdata;
-        $view->month= $month;
-        $view->year= $year;
+        $view->month = $month;
+        $view->year = $year;
 
         return $view;
     }
@@ -71,16 +71,16 @@ class JournalController extends Controller
     public function neracalajur()
     {
         $view = view('main.neraca-lajur');
-        $month = getInput('month') ? toDigit(getInput('month'),2) : Date('m');
+        $month = getInput('month') ? toDigit(getInput('month'), 2) : Date('m');
         $year = getInput('year') ? createCarbon(getInput('year') . '-01-01')->format('Y') : Date('Y');
         $view->data =  ChartAccount::getRincianSaldoNeracaLajur($month, $year);
-        $view->month= $month;
-        $view->year= $year;
+        $view->month = $month;
+        $view->year = $year;
         return $view;
     }
     public function getMutasiNeracaLajur()
     {
-        $month = getInput('month') ? toDigit(getInput('month'),2) : Date('m');
+        $month = getInput('month') ? toDigit(getInput('month'), 2) : Date('m');
         $year = getInput('year') ? createCarbon(getInput('year') . '-01-01')->format('Y') : Date('Y');
         return ChartAccount::getRincianMutationNeracaLajur($month, $year);
     }
@@ -148,8 +148,8 @@ class JournalController extends Controller
         ];
         $view->tokoes = Toko::all();
         $view->data = $data;
-        $view->month= $month;
-        $view->year= $year;
+        $view->month = $month;
+        $view->year = $year;
         return $view;
     }
 
@@ -323,7 +323,8 @@ class JournalController extends Controller
                     'toko_id' =>  array_key_exists('toko_id', $debet) ? $debet['toko_id'] : null,
                     'user_backdate_id' => $userBackdate,
                     'book_journal_id' => $request->input('book_journal_id'),
-                    'date' => $date
+                    'date' => $date,
+                    'tag' => array_key_exists('tag', $debet) ? $debet['tag'] : null
                 ]), $lockManager);
                 // $allLocks[] = ['lock' => $st['lock'], 'name' => $st['lock_name']];
                 if ($st['status'] == 0) {
@@ -353,7 +354,9 @@ class JournalController extends Controller
                     'toko_id' => array_key_exists('toko_id', $kredit) ? $kredit['toko_id'] : null,
                     'user_backdate_id' => $userBackdate,
                     'date' => $date,
-                    'book_journal_id' => $request->input('book_journal_id')
+                    'book_journal_id' => $request->input('book_journal_id'),
+                    'tag' => array_key_exists('tag', $kredit) ? $kredit['tag'] : null
+
                 ]), $lockManager);
                 // $allLocks[] = ['lock' => $st['lock'], 'name' => $st['lock_name']];
                 if ($st['status'] == 0) {
@@ -823,5 +826,204 @@ class JournalController extends Controller
             'antrian_nl' => $antrianNL,
             'antrian_mboh' => $antrianMboh
         ];
+    }
+
+    public function getClosingJournal()
+    {
+        $date = getInput('date');
+        $journal = Journal::where('tag', 'closing ' . $date)->first();
+        $msg = $journal ? $journal->journal_number : null;
+        return [
+            'status' => 1,
+            'msg' => $msg
+        ];
+    }
+    public static function tutupJurnal(Request $request)
+    {
+
+        $lockManager = new LockManager();
+        DB::beginTransaction();
+        $errMsg = "";
+        try {
+            $monthyear = $request->input('monthyear');
+            $originalMonth = createCarbon($monthyear)->format('m');
+            $originalYear = createCarbon($monthyear)->format('y');
+            $originalYearLong = createCarbon($monthyear)->format('Y');
+            $aksi = $request->input('aksi');
+            $tag = 'closing ' . $monthyear;
+            $theLastDate = createCarbon($monthyear)->addMonth()->format('ymdHis') . '00';
+            $subquery = DB::table('journals')
+                ->where('index_date', '<', (float)$theLastDate)->whereRaw('CONVERT(code_group, UNSIGNED) > ?', [400000])
+                ->select('code_group', DB::raw('MAX(index_date) as max_index_date'))
+                ->groupBy('code_group');
+
+            $chartAccounts = DB::table('journals as j')
+                ->joinSub($subquery, 'subquery', function ($join) {
+                    $join->on('j.code_group', '=', 'subquery.code_group')
+                        ->on('j.index_date', '=', 'subquery.max_index_date');
+                })
+                ->rightJoin('chart_accounts as ca', 'ca.id', '=', 'j.chart_account_id')
+                ->where('ca.code_group', '>=', 400000)->where('ca.is_child', 1)
+                ->select(
+                    'ca.name',
+                    'ca.id',
+                    'ca.code_group',
+                    DB::raw('CAST(ROUND(COALESCE(j.amount_saldo,0),2) AS DECIMAL(15,2)) AS saldo'),
+                    'ca.is_child'
+                )
+                ->orderBy('ca.code_group')->get();
+
+            $debets = [];
+            $kredits = [];
+            $totalSaldo = '0';
+
+            foreach ($chartAccounts as $ca) {
+                $saldo = number_format((string) $ca->saldo, 2, '.', '');
+
+                $totalSaldo = bcadd($totalSaldo, $saldo, 2);
+
+                if (bccomp($saldo, '0', 2) > 0) {
+                    $debets[] = [
+                        'code_group' => $ca->code_group,
+                        'description' => 'penutupan ' . $ca->name . ' ' . $originalYear . '/' . $originalMonth,
+                        'amount' => $saldo,
+                        'reference_id' => null,
+                        'reference_type' => null,
+                        'tag' => $tag
+                    ];
+                } elseif (bccomp($saldo, '0', 2) < 0) {
+                    $kredits[] = [
+                        'code_group' => $ca->code_group,
+                        'description' => 'penutupan ' . $ca->name . ' ' . $originalYear . '/' . $originalMonth,
+                        'amount' => bcmul($saldo, '-1', 2),
+                        'reference_id' => null,
+                        'reference_type' => null,
+                        'tag' => $tag
+                    ];
+                }
+            }
+
+            $selisih = $totalSaldo;
+
+            if (bccomp($selisih, '0', 2) > 0) {
+                $kredits[] = [
+                    'code_group' => 302200,
+                    'description' => 'Ikhtisar laba rugi' . $originalYear . '/' . $originalMonth,
+                    'amount' => $selisih,
+                    'reference_id' => null,
+                    'reference_type' => null,
+                    'tag' => $tag
+                ];
+            } elseif (bccomp($selisih, '0', 2) < 0) {
+                $debets[] = [
+                    'code_group' => 302200,
+                    'description' => 'Ikhtisar laba rugi' . $originalYear . '/' . $originalMonth,
+                    'amount' => bcmul($selisih, '-1', 2),
+                    'reference_id' => null,
+                    'reference_type' => null,
+                    'tag' => $tag
+                ];
+            }
+
+            $allInput = [];
+            $allOutput = [];
+            $tanggalJurnal = createCarbon($monthyear)->addMonth()->format('Y-m-d 00:00:00');
+
+
+            if ($aksi == 1) {
+                if (count($debets) > 0 && count($kredits) > 0) {
+                    $st = JournalController::createBaseJournal(new Request([
+                        'debets' => $debets,
+                        'kredits' => $kredits,
+                        'type' => 'umum',
+                        'user_backdate_id' => user()->id,
+                        'is_backdate' => 1,
+                        'date' => $tanggalJurnal,
+                        'is_auto_generated' => 0,
+                        'title' => 'Jurnal tutup buku'
+                    ]), false, $lockManager);
+
+                    if ($st['status'] == 0) return $st;
+                    $allOutput[] = $st;
+                }
+            }
+
+            $allInput[] = [
+                'debet' => $debets,
+                'kredit' => $kredits
+            ];
+
+            $debets = [];
+            $kredits = [];
+
+            if (bccomp($selisih, '0', 2) > 0) {
+                $codeDebet = 302200;
+                $codeKredit = 302100;
+            } else {
+                $codeKredit = 302200;
+                $codeDebet = 302100;
+            }
+
+            $selisihAbs = bccomp($selisih, '0', 2) < 0 ? bcmul($selisih, '-1', 2) : $selisih;
+
+            $kredits[] = [
+                'code_group' => $codeKredit,
+                'description' => 'Pemindahan pada saldo laba ( ' . $originalYear . '/' . $originalMonth . ')',
+                'amount' => $selisihAbs,
+                'reference_id' => null,
+                'reference_type' => null,
+                'tag' => $tag
+            ];
+
+            $debets[] = [
+                'code_group' => $codeDebet,
+                'description' => 'Pemindahan pada saldo laba ( ' . $originalYear . '-' . $originalMonth . ')',
+                'amount' => $selisihAbs,
+                'reference_id' => null,
+                'reference_type' => null,
+                'tag' => $tag
+            ];
+
+            if ($aksi == 1) {
+                $st = JournalController::createBaseJournal(new Request([
+                    'debets' => $debets,
+                    'kredits' => $kredits,
+                    'type' => 'umum',
+                    'user_backdate_id' => user()->id,
+                    'is_backdate' => 1,
+                    'date' => $tanggalJurnal,
+                    'is_auto_generated' => 0,
+                    'title' => 'Jurnal tutup buku'
+                ]), false, $lockManager);
+
+                if ($st['status'] == 1) {
+                    JournalKey::create([
+                        'book_journal_id' => bookID(),
+                        'name' => 'kunci tutup buku ' . $tanggalJurnal,
+                        'user_id' => user()->id,
+                        'key_at' => createCarbon($tanggalJurnal),
+                    ]);
+                }
+                $allOutput[] = $st;
+            }
+
+            $allInput[] = [
+                'debet' => $debets,
+                'kredit' => $kredits
+            ];
+            DB::commit();
+            if ($lockManager) {
+                $lockManager->releaseAll();
+            }
+            return ['status' => 1, 'input' => $allInput, 'output' => $allOutput];
+        } catch (\Throwable $e) {
+            $errMsg = $e->getMessage();
+        }
+        DB::rollBack();
+        if ($lockManager) {
+            $lockManager->releaseAll();
+        }
+
+        return ['status' => 0, 'msg' => $errMsg];
     }
 }

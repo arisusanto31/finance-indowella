@@ -112,6 +112,7 @@ class Journal extends Model
         $codeGroup = $request->input('code_group');
         $isBackDate = $request->input('is_backdate');
         $tokoID = $request->input('toko_id');
+        $tag = $request->input('tag');
         if (!$tokoID) {
             $tokoID = Toko::first()->id;
         }
@@ -176,6 +177,7 @@ class Journal extends Model
                     // info($codeGroup . '-passiva');
                     // info($theAmount);
                 }
+                $journal->tag = $tag;
                 $journal->reference_id = $request->input('reference_id');
                 $journal->reference_type = $request->input('reference_type');
                 $lastSaldo = $lastJournal ? $lastJournal->amount_saldo : 0;
