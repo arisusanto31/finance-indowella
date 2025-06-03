@@ -137,6 +137,7 @@
                                             <div class="col-md-3 col-xs-12">
                                                 <label>Nama Barang</label>
                                                 <select class="form-control select-item-bahan"
+                                                    onchange="gantiBahanBDP('{{ $item->id }}')"
                                                     id="bdp-stock_id{{ $item->id }}" name="stock_id[]">
                                                     <option value="{{ $item->stock_id }}" selected>
                                                         {{ $item->stock->name }}</option>
@@ -160,9 +161,11 @@
 
                                             <div class="col-md-2 col-xs-12">
                                                 <label>Satuan</label>
-                                                <input class="form-control" type="text" readonly name="unit[]"
-                                                    id="bdp-satuan{{ $item->id }}"
-                                                    value="{{ $item->unit }}" />
+                                                <select class="form-control" type="text" readonly name="unit[]"
+                                                    id="bdp-satuan{{ $item->id }}">
+                                                    <option value="{{ $item->unit }}" selected>{{ $item->unit }}
+                                                    </option>
+                                                </select>
                                             </div>
                                             <div class="col-md-3 col-xs-12">
                                                 <label>Dari Akun </Label>
@@ -551,6 +554,29 @@
             updateBiaya(id);
         });
     }, 200);
+
+
+    function gantiBahanBDP(id) {
+        $.ajax({
+            url: '{{ url('admin/master/stock/get-item') }}/' + id,
+            method: 'get',
+            success: function(res) {
+                console.log(res);
+                if (res.status == 1) {
+                    html = "";
+                    res.msg.forEach(function eachItem(item) {
+                        html += '<option value="' + item.unit + '" >' + item.name + '</option>';
+                    });
+                    $('#bdp-satuan' + id).html(html);
+                } else {
+
+                }
+            },
+            error: function(res) {
+                Swal.fire("opps", "something error get unit", 'error');
+            }
+        });
+    }
 
     function updateKisaranBiaya(id) {
         qty = $('#bdp-quantity' + id).val();

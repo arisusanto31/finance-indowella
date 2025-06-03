@@ -576,16 +576,12 @@ class SalesOrderController extends Controller
             } else {
                 return ['status' => 0, 'msg' => 'Kode persediaan tidak valid'];
             }
-
-
             $stockID = $request->input('stock_id');
             $lastStock = $reference::where('stock_id', $stockID)->where('saldo_qty_backend', '>', 0);
             if ($code == 140003 || $code == 140004) {
                 $lastStock = $lastStock->where('production_number', $productionNumber);
             }
             $lastStock = $lastStock->orderBy('index_date', 'desc')->first();
-
-
             $unit = $request->input('unit');
             $dataUnit = StockUnit::where('stock_id', $stockID)->where('unit', $unit)->first();
             $konversi = $dataUnit ? $dataUnit->konversi : 1;
