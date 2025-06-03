@@ -334,7 +334,7 @@
                                         <div class="col-md-2 col-xs-12">
                                             <label>Jumlah</label>
                                             <input type="text" onchange="updateBiaya('{{ $item->id }}')"
-                                                class="form-control" name="quantity[]" placeholder="jumlah qty "
+                                                class="form-control" name="quantity[]" placeholder="qty: {{ $item->qtyjadi }}"
                                                 id="invoice-quantity{{ $item->id }}" />
                                         </div>
 
