@@ -19,12 +19,13 @@ class StockController extends Controller
     public function index()
     {
         $view = view('master.stock');
-        $view->stocks=[];
+        $view->stocks = [];
         return $view;
     }
 
-    public function getData(){
-           $view->stocks = Stock::with(['category', 'parentCategory'])->get();
+    public function getData()
+    {
+        $view->stocks = Stock::with(['category', 'parentCategory'])->get();
     }
 
     public function update(Request $request, $id)
@@ -190,7 +191,7 @@ class StockController extends Controller
     function getUnit($id)
     {
         $unit = StockUnit::where('stock_id', $id)->get();
-        $stock= Stock::find($id);
+        $stock = Stock::find($id);
         if (!$unit) {
             return [
                 'status' => 0,
@@ -200,7 +201,7 @@ class StockController extends Controller
         return [
             'status' => 1,
             'msg' => $unit,
-            'stock'=>$stock,
+            'stock' => $stock,
         ];
     }
     function openSinkron($book_journal_id)
@@ -222,7 +223,7 @@ class StockController extends Controller
                     ->where('st.reference_stock_type', '=', $stockModelClass);
             })->where(function ($q) {
                 $q->where('st.id', null)->orWhere('st.updated_at', '<', DB::raw('rst.updated_at'));
-            })->whereNull('rst.deleted')->where('rst.is_stock',1)->where('rst.is_ppn',1)->with('category:id,name')->with('parentCategory:id,name')
+            })->whereNull('rst.deleted')->where('rst.is_stock', 1)->where('rst.is_ppn', 1)->with('category:id,name')->with('parentCategory:id,name')
             ->select(
                 'rst.name',
                 'rst.unit_info as unit_default',
@@ -326,5 +327,24 @@ class StockController extends Controller
                 'request' => $request->all()
             ];
         }
+    }
+
+    public function getStock()
+    {
+        $search = getInput('search');
+        $searchs = explode(' ', $search);
+
+        $stock = Stock::from('stocks');
+        foreach ($searchs as $s) {
+            $stock = $stock->where('name', 'like', '%' . $s . '%');
+        }
+        if (getInput('category_id')) {
+            $stock = $stock->where('category_id', getInput('category_id'));
+        }
+        $stock = $stock->with(['category', 'parentCategory', 'units'])->get();
+        return [
+            'status' => 1,
+            'msg' => $stock
+        ];
     }
 }
