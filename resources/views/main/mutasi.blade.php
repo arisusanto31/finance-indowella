@@ -263,7 +263,7 @@
                     url: '{{ url('admin/jurnal/tutup-jurnal') }}',
                     data: {
                         monthyear: $('#date-closing-journal').val(),
-                        aksi:1,
+                        aksi: 1,
                         _token: '{{ csrf_token() }}'
                     },
                     onSuccess: (res) => {
@@ -492,17 +492,29 @@
             }
 
             function getListMutasiJurnal(page = "") {
+                description = $('#search-description').val();
+                journal_number = $('#search-journal_number').val();
+                name_coa = $('#search-name_coa').val();
+                coa = $('#search-coa').val();
+                loading(1);
                 $.ajax({
-                    url: '{{ url('admin/jurnal/get-list-mutasi') }}?page=' + page +
-                        '&year={{ $year }}&month={{ $month }}',
+                    url: '{{ url('admin/jurnal/get-list-mutasi') }}?search=' + description + '&coa=' + coa + '&page=' +
+                        page + '&month={{ getInput('month') }}&year={{ getInput('year') }}&journal_number=' +
+                        journal_number + '&namaCOA=' + name_coa,
                     type: 'GET',
                     success: function(res) {
+                        loading(0);
                         if (res.status == 1) {
                             renderListMutasiJurnal(res);
+                        } else {
+                            swalInfo('error', 'something error', 'error');
+
                         }
                     },
                     error: function(err) {
+                        loading(0);
                         console.log(err);
+                        swalInfo('error', 'something error', 'error');
                     }
                 });
 
