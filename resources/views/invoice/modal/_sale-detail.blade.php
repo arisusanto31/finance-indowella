@@ -445,7 +445,7 @@
                                                 @foreach ($itemsType['debet'] as $item)
                                                     <div class="col-xs-12 col-md-6 ">
                                                         <div class="bg-primary-dark p-2 ">
-                                                            <p>{{ $item->created_at }}
+                                                            <p>{{ $item->date }}
                                                                 <strong>{{ $item->code_group_name }}</strong> :
                                                                 {{ format_price(abs($item->amount_journal)) }} <span
                                                                     class="fs-8">[journal_id :
