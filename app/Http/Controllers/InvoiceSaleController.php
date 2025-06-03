@@ -346,7 +346,7 @@ class InvoiceSaleController extends Controller
     {
         $lockManager = new LockManager();
         // return ['status' => 0, 'msg' => $request->all()];
-        $codeGroupPenjualans = $request->input('code_group_penjualan');
+       $codeGroupPenjualans = $request->input('code_group_penjualan');
         $customStockNames = $request->input('custom_stock_name');
         $salesOrderID = $request->input('sales_order_id');
         $salesOrderNumber = $request->input('sales_order_number');
@@ -383,6 +383,7 @@ class InvoiceSaleController extends Controller
                     'total_price' => $dataDetailSale->total_price,
                     'toko_id' => $dataDetailSale->toko_id,
                     'custom_stock_name' => $customStockNames[$i] ?? null,
+                    'created_at'=>$date
 
                 ];
             }
@@ -398,6 +399,7 @@ class InvoiceSaleController extends Controller
                 'reference_id' => null,
                 'reference_type' => null,
                 'reference_model' => InvoiceSaleDetail::class,
+                'created_at'=>$date
             ]);
             $invoicePack->invoice_number = $invoicePack->getCodeFix();
             $invoicePack->is_final = 1;
