@@ -336,9 +336,10 @@
                                         <div class="col-md-2 col-xs-12">
                                             <label>Jumlah</label>
                                             <input type="text" onchange="updateBiaya('{{ $item->id }}')"
-                                                class="form-control" name="quantity[]"
+                                                class="form-control qty-invoice" name="quantity[]"
                                                 placeholder="qty: {{ $item->qtyjadi }}"
-                                                id="invoice-quantity{{ $item->id }}" />
+                                                id="invoice-quantity{{ $item->id }}"
+                                                value="{{ $item->total_price }}" />
                                         </div>
 
                                         <div class="col-md-1 col-xs-12">
@@ -354,7 +355,10 @@
                                         <div class="col-md-3 col-xs-12">
                                             <label>Akun Piutang</label>
                                             <select class="form-control select-coa-piutang" type="text"
-                                                name="code_group_piutang[]"></select>
+                                                name="code_group_piutang[]">
+                                                <option value="120001" selected> Piutang Usaha Offline</option>
+
+                                            </select>
                                         </div>
 
                                         <div class="col-md-3 col-xs-12">
@@ -413,6 +417,7 @@
                                 <label>Akun Piutang</label>
                                 <select class="select-coa-piutang form-control" name="codegroup_piutang"
                                     id="bayar-invoice-akun-piutang">
+                                    <option value="120001" selected> Piutang Usaha Offline</option>
                                 </select>
                             </div>
                             <div class="col-md-3 col-xs-12">

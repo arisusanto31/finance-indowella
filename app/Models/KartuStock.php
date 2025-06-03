@@ -138,8 +138,8 @@ class KartuStock extends Model
                 'msg' => $th->getMessage()
             ];
         } finally {
-            $lock->release();
         }
+        $lock->release();
         return [
             'status' => 1,
             'msg' => $kartu
