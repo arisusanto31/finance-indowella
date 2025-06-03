@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\ImportSaldoNLJob;
+use App\Models\InvoicePack;
 use App\Models\Journal;
 use App\Models\KartuDPSales;
 use App\Models\KartuHutang;
@@ -89,7 +90,17 @@ class IndexController extends Controller
             return format_db(getInput('nilai'));
         }
 
-        
+        if (getInput('type') == 'repair-tanggal') {
+            $invoicePacks = InvoicePack::all();
+            foreach ($invoicePacks as $invoicePack) {
+                $detail = collect($invoicePack->invoiceDetails())->first();
+                $invoicePack->created_at = $detail->created_at;
+                $invoicePack->save();
+            }
+            return $invoicePacks;
+        }
+
+
         if (getInput('type') == 'repair-kartu-dp') {
             $kartuDP = KartuDPSales::where('index_date', 0)->get();
             foreach ($kartuDP as $dp) {
