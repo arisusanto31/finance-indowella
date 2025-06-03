@@ -587,8 +587,8 @@
                     res.msg.forEach(function eachItem(item) {
                         item.hpp = item.hpp == 0 ? '??' : item.hpp;
                         item.subkon = item.subkon == 0 ? '??' : item.subkon;
-                        $('#biaya-bahan' + item.id).html(item.hpp);
-                        $('#biaya-lain' + item.id).html(item.subkon);
+                        $('#biaya-bahan' + item.id).html(formatRupiah(item.hpp));
+                        $('#biaya-lain' + item.id).html(formatRupiah(item.subkon));
                     });
                 } else {
                     Swal.fire('ops', 'something error ' + res.msg, 'error');
