@@ -239,6 +239,8 @@ class SalesOrderController extends Controller
     public function showDetail($number)
     {
         $data = SalesOrder::where('sales_order_number', $number)->first();
+        $reference= $data->reference;
+        $dateFinished=$reference->delivery_at??$data->created_at;
 
         $data->updateStatus();
         $invdetails = SalesOrderDetail::with('stock')->where('sales_order_number', $number)->get();
@@ -253,6 +255,10 @@ class SalesOrderController extends Controller
         $data['resume_total'] = $data->getTotalKartu();
         $view = view('invoice.modal._sale-detail');
         $view->data = $data;
+        $view->dateFinished= $dateFinished;
+        $view->dateUangMuka= $data->created_at;
+        $view->dateProses= createCarbon($data->created_at)->addDay()->format('Y-m-d H:i:s');
+
 
         return $view;
     }

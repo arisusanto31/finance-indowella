@@ -84,12 +84,12 @@
                             <div class="col-md-3 col-xs-12">
                                 <label>Tanggal </label>
                                 <input type="datetime-local" class="form-control" id="uangmuka-date"
-                                    value="{{ date('Y-m-d H:i:s') }}" />
+                                    value="{{ $dateUangMuka }}" />
                             </div>
                             <div class="col-md-3 col-xs-12">
                                 <label>deskripsi jurnal</label>
                                 <input type="text" class="form-control" placeholder="deskripsi"
-                                    id="uangmuka-description" />
+                                    id="uangmuka-description" value="Uang muka {{ $data->customer->name }}" />
                             </div>
 
                             <div class="col-md-2 col-xs-12">
@@ -132,7 +132,7 @@
                                             <div class="col-md-3">
                                                 <label>Tanggal</label>
                                                 <input class="form-control" type="datetime-local" name="date"
-                                                    value="{{ $item->created_at }}" />
+                                                    value="{{ $dateProses }}" />
                                             </div>
                                             <div class="col-md-3 col-xs-12">
                                                 <label>Nama Barang</label>
@@ -227,7 +227,7 @@
                                             <div class="col-md-3">
                                                 <label>Tanggal</label>
                                                 <input class="form-control" type="datetime-local" name="date"
-                                                    value="{{ $item->created_at }}" />
+                                                    value="{{ $dateFinished }}" />
                                             </div>
                                             <div class="col-md-3 col-xs-12">
                                                 <label>Nama Barang</label>
@@ -274,6 +274,8 @@
                                                 <label>Dari Akun </Label>
                                                 <select class="select-coa-persediaan form-control"
                                                     name="lawan_code_group[]">
+                                                    <option value="140003" selected> Persediaan Barang Dalam Proses
+                                                    </option>
 
                                                 </select>
                                             </div>
@@ -320,7 +322,7 @@
                                         <div class="col-md-3">
                                             <label>Tanggal</label>
                                             <input class="form-control" type="datetime-local" name="date"
-                                                value="{{ $item->created_at }}" />
+                                                value="{{ $dateFinished }}" />
                                         </div>
                                         <div class="col-md-3 col-xs-12">
                                             <label>Nama Barang</label>
@@ -392,7 +394,7 @@
                             <div class="col-md-3">
                                 <label>Tanggal</label>
                                 <input class="form-control" type="datetime-local" name="date"
-                                    value="{{ $item->created_at }}" />
+                                    value="{{ $dateFinished }}" />
                             </div>
                             <div class="col-md-3 col-xs-12">
                                 <label>Nomer Invoice</label>
@@ -404,7 +406,7 @@
                             <div class="col-md-2 col-xs-12">
                                 <label>Jumlah bayar</label>
                                 <input type="text" class="form-control" placeholder="nilai pembayaran"
-                                    name="amount" id="bayar-invoice-amount" value="{{$data->total_price}}"/>
+                                    name="amount" id="bayar-invoice-amount" value="{{ $data->total_price }}" />
                             </div>
 
                             <div class="col-md-3 col-xs-12">
@@ -417,6 +419,7 @@
                                 <label>Akun Pembayaran</label>
                                 <select class="select-coa-kas-uangmuka form-control" name="codegroup_bayar"
                                     id="bayar-invoice-akun-pembayaran">
+                                    <option value="214000" selected>Uang Muka Penjualan </option>
                                 </select>
                             </div>
                             <div class="col-md-1 col-xs-12">
