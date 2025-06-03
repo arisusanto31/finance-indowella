@@ -558,7 +558,7 @@
 
     function gantiBahanBDP(id) {
         $.ajax({
-            url: '{{ url('admin/master/stock/get-item') }}/' + id,
+            url: '{{ url('admin/master/stock/get-unit') }}/' + id,
             method: 'get',
             success: function(res) {
                 console.log(res);
