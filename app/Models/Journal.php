@@ -300,7 +300,7 @@ class Journal extends Model
                 if (abs(collect($ks)->sum('total')) == abs($this->amount_debet - $this->amount_kredit)) {
                     $this->verified_by = 1;
                 }
-                foreach($ks as $k){
+                foreach ($ks as $k) {
                     $k->createDetailKartuInvoice();
                 }
             }
@@ -314,6 +314,10 @@ class Journal extends Model
     public function recalculateJournal($isLock = true)
     {
         $thejournal = $this;
+        $lastJournal = Journal::where('code_group', $thejournal->code_group)->where('index_date', '<', $thejournal->index_date)->orderBy('index_date', 'desc')->first();
+        $lastSaldo = $lastJournal ? $lastJournal->amount_saldo : 0;
+        $thejournal->amount_saldo = round($lastSaldo + $thejournal->amount_debet - $thejournal->amount_kredit, 2);
+        $thejournal->save();
         $codeGroup = $this->code_group;
         $name = 'generate-journal' . $codeGroup;
         if ($isLock == true) {
