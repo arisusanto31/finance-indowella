@@ -92,7 +92,7 @@ class KartuStock extends Model
                 }
                 //ini kayak hpp gitu. pake defaultnya
                 $kartu->mutasi_rupiah_total = $lastCard->saldo_rupiah_total * $kartu->mutasi_qty_backend / $lastCard->saldo_qty_backend;
-                $kartu->mutasi_rupiah_on_unit = $lastCard->mutasi_rupiah_total / $kartu->mutasi_qty_backend;
+                $kartu->mutasi_rupiah_on_unit = $rupiahUnit;
             } else {
 
                 $kartu->mutasi_rupiah_on_unit = $request->input('mutasi_rupiah_on_unit') ?? 0;

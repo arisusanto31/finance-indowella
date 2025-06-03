@@ -270,6 +270,32 @@ class KartuBahanJadiController extends Controller
                         $allStStock[] = $stStock['msg'];
                     }
                 }
+                else if($lawanCodeGroup==14004){
+                    //kalo dari bahan jadi sendiri , cuma pindah kartu
+
+                     $stStock = KartuBahanJadi::mutationStore(new Request([
+                        'stock_id' => $stock_id,
+                        'mutasi_qty_backend' => $qty,
+                        'unit_backend' => $unit,
+                        'mutasi_quantity' => $qty,
+                        'unit' => $unit,
+                        'flow' => $flow == 1 ? 0 : 1,
+                        'sales_order_number' => $salesOrderNumber,
+                        'production_number' => $spkNumbers[$row],
+                        'sales_order_id' => $saleOrderId,
+                        'code_group' => $lawanCodeGroup,
+                        'lawan_code_group' => $codeGroup,
+                        'is_otomatis_jurnal' => 0,
+                        'is_custom_rupiah' => $isCustomRupiah,
+                        'mutasi_rupiah_total' => $mutasiRupiahTotal,
+                        'date' => $date,
+                        'description' => $desc
+                    ]), false, $lockManager);
+                    if ($stStock['status'] == 0) {
+                        throw new \Exception($stStock['msg']);
+                    }
+                        $allStStock[] = $stStock['msg'];
+                }
                 $mutasiRupiahTotal = abs(collect($allStStock)->sum('mutasi_rupiah_total'));
                 $st = KartuBahanJadi::mutationStore(new Request([
                     'stock_id' => $stock_id,
