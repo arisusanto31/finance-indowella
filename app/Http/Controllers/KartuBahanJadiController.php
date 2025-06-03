@@ -163,9 +163,9 @@ class KartuBahanJadiController extends Controller
                 }
 
                 $lawanCodeGroup = $lawanCodeGroups[$row];
-                if ($lawanCodeGroup == $codeGroup) {
-                    throw new \Exception('Lawan code group tidak boleh sama dengan code group');
-                }
+                // if ($lawanCodeGroup == $codeGroup) {
+                //     throw new \Exception('Lawan code group tidak boleh sama dengan code group');
+                // }
                 $stock_id = $stockIDs[$row];
                 $isCustomRupiah = 0;
                 $mutasiRupiahTotal = 0;
