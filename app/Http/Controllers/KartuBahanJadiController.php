@@ -7,6 +7,7 @@ use App\Models\KartuBahanJadi;
 use App\Models\KartuBDP;
 use App\Models\KartuStock;
 use App\Models\SalesOrder;
+use App\Models\SalesOrderDetail;
 use App\Models\Stock;
 use App\Services\LockManager;
 use Illuminate\Http\Request;
@@ -213,6 +214,7 @@ class KartuBahanJadiController extends Controller
                             throw new \Exception('tidak ada saldo stock pada nomer produksi ' . $spkNumbers[$row]);
                         }
                         $prosenQty = ($qty / $konversiJadi) / ($lastCard->saldo_qty_backend * $lastCard->mutasi_quantity / $lastCard->mutasi_qty_backend);
+
                         $stStock = KartuBDP::mutationStore(new Request([
                             'stock_id' => $stock_id,
                             'mutasi_quantity' => $qty / $konversiJadi,
@@ -233,6 +235,10 @@ class KartuBahanJadiController extends Controller
                             throw new \Exception($stStock['msg']);
                         }
                         $allStStock[] = $stStock['msg'];
+                    } else {
+                        $saleDetail = SalesOrderDetail::find($saleDetailID);
+                        $prosenQty = $qty / $saleDetail->quantity;
+                        info('prosenQty custom: ' . $prosenQty);
                     }
                     foreach ($stockIDCustom as $customID) {
                         $lastCustomCard = KartuBDP::where('production_number', $spkNumbers[$row])
