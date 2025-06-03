@@ -8,6 +8,7 @@ use App\Models\KartuBDP;
 use App\Models\KartuStock;
 use App\Models\SalesOrder;
 use App\Models\Stock;
+use App\Services\LockManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -154,6 +155,7 @@ class KartuBDPController extends Controller
         $allSt = [];
         try {
             DB::beginTransaction();
+            $lockManager = new LockManager();
             foreach ($stockIDs as $row => $stock_id) {
                 $qty = format_db($quantitys[$row]);
                 $unit = $units[$row];
@@ -224,7 +226,7 @@ class KartuBDPController extends Controller
                         'mutasi_rupiah_total' => $mutasiRupiahTotal,
                         'date' => $date,
                         'description' => $desc
-                    ]), false);
+                    ]), false, $lockManager);
                     if ($stStock['status'] == 0) {
                         throw new \Exception($stStock['msg']);
                     }
@@ -246,7 +248,7 @@ class KartuBDPController extends Controller
                     'mutasi_rupiah_total' => $mutasiRupiahTotal,
                     'date' => $date,
                     'description' => $desc
-                ]), false);
+                ]), false, $lockManager);
                 $allSt[] = $st;
                 if ($st['status'] == 0) {
                     throw new \Exception($st['msg']);
@@ -261,12 +263,14 @@ class KartuBDPController extends Controller
                 }
             }
         } catch (Throwable $th) {
+            $lockManager->releaseAll();
             DB::rollBack();
             return [
                 'status' => 0,
                 'msg' => $th->getMessage()
             ];
         }
+        $lockManager->releaseAll();
         DB::commit();
         return [
             'status' => 1,

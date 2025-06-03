@@ -95,7 +95,7 @@
                             <div class="col-md-2 col-xs-12">
                                 <label>Jumlah</label>
                                 <input type="text" class="form-control" placeholder="nilai pembayaran"
-                                    id="uangmuka-amount" />
+                                    value="{{ $data->total_price }}" id="uangmuka-amount" />
                             </div>
 
                             <div class="col-md-2 col-xs-12">
@@ -334,7 +334,8 @@
                                         <div class="col-md-2 col-xs-12">
                                             <label>Jumlah</label>
                                             <input type="text" onchange="updateBiaya('{{ $item->id }}')"
-                                                class="form-control" name="quantity[]" placeholder="qty: {{ $item->qtyjadi }}"
+                                                class="form-control" name="quantity[]"
+                                                placeholder="qty: {{ $item->qtyjadi }}"
                                                 id="invoice-quantity{{ $item->id }}" />
                                         </div>
 
@@ -403,7 +404,7 @@
                             <div class="col-md-2 col-xs-12">
                                 <label>Jumlah bayar</label>
                                 <input type="text" class="form-control" placeholder="nilai pembayaran"
-                                    name="amount" id="bayar-invoice-amount" />
+                                    name="amount" id="bayar-invoice-amount" value="{{$data->total_price}}"/>
                             </div>
 
                             <div class="col-md-3 col-xs-12">
