@@ -154,6 +154,7 @@
                                                 <input type="text" class="form-control" name="quantity[]"
                                                     placeholder="qty bahan: {{ $item->quantity }}"
                                                     onchange="updateKisaranBiaya('{{ $item->id }}')"
+                                                    value="{{ $item->quantity }}"
                                                     id="bdp-quantity{{ $item->id }}" />
                                             </div>
 
@@ -259,7 +260,7 @@
                                                 <label>Jumlah Jadi</label>
                                                 <input type="text" class="form-control" name="quantity[]"
                                                     placeholder="qty jadi : {{ $item->qtyjadi }}"
-                                                    id="bahan-jadi-quantity" />
+                                                    id="bahan-jadi-quantity" value="{{ $item->qtyjadi }}" />
                                                 <input type="hidden" name="konversi_jadi[]"
                                                     id="bahan-jadi-konversijadi"
                                                     value="{{ $item->qtyjadi / $item->quantity }}" />
@@ -339,7 +340,7 @@
                                                 class="form-control qty-invoice" name="quantity[]"
                                                 placeholder="qty: {{ $item->qtyjadi }}"
                                                 id="invoice-quantity{{ $item->id }}"
-                                                value="{{ $item->total_price }}" />
+                                                value="{{ $item->qtyjadi }}" />
                                         </div>
 
                                         <div class="col-md-1 col-xs-12">
