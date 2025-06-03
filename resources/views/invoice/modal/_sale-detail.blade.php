@@ -544,6 +544,12 @@
     }
     initAllItem();
 
+    setTimeout(function() {
+        $('.qty-invoice').each(function(i, elem) {
+            id = getNumID($(elem).attr('id'));
+            updateBiaya(id);
+        });
+    }, 200);
 
     function updateKisaranBiaya(id) {
         qty = $('#bdp-quantity' + id).val();
