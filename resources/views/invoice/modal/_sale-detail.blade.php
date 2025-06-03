@@ -557,8 +557,9 @@
 
 
     function gantiBahanBDP(id) {
+        stockid = $('#bdp-stock_id' + id + ' option:selected').val();
         $.ajax({
-            url: '{{ url('admin/master/stock/get-unit') }}/' + id,
+            url: '{{ url('admin/master/stock/get-unit') }}/' + stockid,
             method: 'get',
             success: function(res) {
                 console.log(res);
