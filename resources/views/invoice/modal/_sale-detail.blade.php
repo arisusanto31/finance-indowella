@@ -49,7 +49,7 @@
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td colspan="5" class="text-center">Total</td>
+                        <td colspan="7" class="text-center">Total</td>
                         <td>{{ format_price($data->total_price) }}</td>
                     </tr>
                 </tfoot>
