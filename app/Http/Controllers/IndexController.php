@@ -95,6 +95,7 @@ class IndexController extends Controller
             foreach ($invoicePacks as $invoicePack) {
                 $detail = collect($invoicePack->invoiceDetails())->first();
                 $invoicePack->created_at = $detail->created_at;
+                $invoicePack->invoice_date= $detail->created_at;
                 $invoicePack->save();
             }
             return $invoicePacks;
