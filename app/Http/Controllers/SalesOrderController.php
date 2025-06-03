@@ -44,7 +44,7 @@ class SalesOrderController extends Controller
             ->orderBy('sds.created_at', 'asc')
             ->get()
             ->groupBy('sales_order_number');
-        return $salesOrders;
+     
 
 
         $invPack = SalesOrder::whereIn('sales_order_number', $salesOrders->keys()->all())
