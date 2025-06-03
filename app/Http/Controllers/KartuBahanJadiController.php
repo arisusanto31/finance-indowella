@@ -203,33 +203,37 @@ class KartuBahanJadiController extends Controller
                 } else if ($lawanCodeGroup == 140003) {
                     //kalo dari barang dalam proses
                     //nah disini lo lu memungkinkan ada lebih dari satu kartu bdp
-                    $lastCard = KartuBDP::where('stock_id', $stock_id)->where('production_number', $spkNumbers[$row])->orderBy('id', 'desc')->first();
-                    if (!$lastCard) {
-                        throw new \Exception('tidak ada saldo stock pada nomer produksi ' . $spkNumbers[$row]);
-                    }
-                    $prosenQty = ($qty / $konversiJadi) / ($lastCard->saldo_qty_backend * $lastCard->mutasi_quantity / $lastCard->mutasi_qty_backend);
-                    $stockIDCustom = KartuBDP::where('production_number', $spkNumbers[$row])->where('stock_id', '<>', $stock_id)->pluck('stock_id')->all();
-                    $stStock = KartuBDP::mutationStore(new Request([
-                        'stock_id' => $stock_id,
-                        'mutasi_quantity' => $qty / $konversiJadi,
-                        'unit' => $unit,
-                        'flow' => $flow == 1 ? 0 : 1,
-                        'sales_order_number' => $salesOrderNumber,
-                        'production_number' => $spkNumbers[$row],
-                        'sales_order_id' => $saleOrderId,
-                        'code_group' => $lawanCodeGroup,
-                        'lawan_code_group' => $codeGroup,
-                        'is_otomatis_jurnal' => 0,
-                        'is_custom_rupiah' => $isCustomRupiah,
-                        'mutasi_rupiah_total' => $mutasiRupiahTotal,
-                        'date' => $date,
-                        'description' => $desc
-                    ]), false, $lockManager);
-                    if ($stStock['status'] == 0) {
-                        throw new \Exception($stStock['msg']);
-                    }
 
-                    $allStStock[] = $stStock['msg'];
+                    $stockIDCustom = KartuBDP::where('production_number', $spkNumbers[$row])->where('stock_id', '<>', $stock_id)->pluck('stock_id')->all();
+                    $stock = Stock::find($stock_id);
+                    if ($stock->name != 'custom') {
+                        //kalo bukan custom, berarti harus ada kartu bdp
+                        $lastCard = KartuBDP::where('stock_id', $stock_id)->where('production_number', $spkNumbers[$row])->orderBy('id', 'desc')->first();
+                        if (!$lastCard) {
+                            throw new \Exception('tidak ada saldo stock pada nomer produksi ' . $spkNumbers[$row]);
+                        }
+                        $prosenQty = ($qty / $konversiJadi) / ($lastCard->saldo_qty_backend * $lastCard->mutasi_quantity / $lastCard->mutasi_qty_backend);
+                        $stStock = KartuBDP::mutationStore(new Request([
+                            'stock_id' => $stock_id,
+                            'mutasi_quantity' => $qty / $konversiJadi,
+                            'unit' => $unit,
+                            'flow' => $flow == 1 ? 0 : 1,
+                            'sales_order_number' => $salesOrderNumber,
+                            'production_number' => $spkNumbers[$row],
+                            'sales_order_id' => $saleOrderId,
+                            'code_group' => $lawanCodeGroup,
+                            'lawan_code_group' => $codeGroup,
+                            'is_otomatis_jurnal' => 0,
+                            'is_custom_rupiah' => $isCustomRupiah,
+                            'mutasi_rupiah_total' => $mutasiRupiahTotal,
+                            'date' => $date,
+                            'description' => $desc
+                        ]), false, $lockManager);
+                        if ($stStock['status'] == 0) {
+                            throw new \Exception($stStock['msg']);
+                        }
+                        $allStStock[] = $stStock['msg'];
+                    }
                     foreach ($stockIDCustom as $customID) {
                         $lastCustomCard = KartuBDP::where('production_number', $spkNumbers[$row])
                             ->where('stock_id', $customID)->orderBy('id', 'desc')->first();
