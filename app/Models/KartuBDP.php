@@ -157,7 +157,7 @@ class KartuBDP extends Model
         try {
             $date = $request->input('date') ?? now();
             self::proteksiBackdate($date);
-
+            $desc = $request->input('description');
             $stockid = $request->input('stock_id');
             $qty = format_db($request->input('mutasi_quantity'));
             $unit = $request->input('unit');
@@ -291,11 +291,13 @@ class KartuBDP extends Model
                     //keluar
                     $codeDebet = $lawanCodeGroup;
                     $codeKredit = $codeGroup;
-                    $desc = 'bahan dalam proses keluar ' . $productionNumber;
+                    if (!$desc)
+                        $desc =  $productionNumber . ' selesai';
                 } else {
                     $codeDebet = $codeGroup;
                     $codeKredit = $lawanCodeGroup;
-                    $desc = 'bahan dalam proses masuk ' . $productionNumber;
+                    if (!$desc)
+                        $desc = $productionNumber . ' sedang diproses';
                 }
                 $kredits = [
                     [

@@ -136,7 +136,7 @@ class KartuBahanJadiController extends Controller
         $flows = $request->input('flow'); //harusnya ini 1 atau 0
         $spkNumbers = $request->input('spk_number');
         $codeGroup = 140004;
-        $date=$request->input('date')??now();
+        $date = $request->input('date') ?? now();
         $productionNumber = $request->input('production_number');
         $salesDetailIDs = $request->input('sales_detail_id');
         $saleOrderId = $request->input('sales_order_id');
@@ -144,6 +144,9 @@ class KartuBahanJadiController extends Controller
         $lawanCodeGroups = $request->input('lawan_code_group');
         $customStockNames = $request->input('custom_stock_name');
         $allSt = [];
+        $salesOrder = SalesOrder::where('sales_order_number', $salesOrderNumber)->first();
+        $customer = $salesOrder->customer ? $salesOrder->customer->name : "";
+
         try {
             DB::beginTransaction();
             $lockManager = new LockManager();
@@ -152,6 +155,12 @@ class KartuBahanJadiController extends Controller
                 $konversiJadi = $konversiJadi[$row] ?? 1;
                 $unit = $units[$row];
                 $flow = $flows[$row];
+                if ($flow == 0)
+                    $desc = 'produksi ' . $customer . ' - ' . $productionNumber . ' selesai';
+                else {
+                    $desc = 'produksi ' . $customer . ' dibebankan';
+                }
+
                 $lawanCodeGroup = $lawanCodeGroups[$row];
                 if ($lawanCodeGroup == $codeGroup) {
                     throw new \Exception('Lawan code group tidak boleh sama dengan code group');
@@ -184,7 +193,8 @@ class KartuBahanJadiController extends Controller
                         'is_otomatis_jurnal' => 0,
                         'is_custom_rupiah' => $isCustomRupiah,
                         'mutasi_rupiah_total' => $mutasiRupiahTotal,
-                        'date'=>$date
+                        'date' => $date,
+                        'description' => $desc
                     ]), false, $lockManager);
                     if ($stStock['status'] == 0) {
                         throw new \Exception($stStock['msg']);
@@ -197,7 +207,7 @@ class KartuBahanJadiController extends Controller
                     if (!$lastCard) {
                         throw new \Exception('tidak ada saldo stock pada nomer produksi ' . $spkNumbers[$row]);
                     }
-                    $prosenQty = ($qty /$konversiJadi)/ ($lastCard->saldo_qty_backend * $lastCard->mutasi_quantity / $lastCard->mutasi_qty_backend);
+                    $prosenQty = ($qty / $konversiJadi) / ($lastCard->saldo_qty_backend * $lastCard->mutasi_quantity / $lastCard->mutasi_qty_backend);
                     $stockIDCustom = KartuBDP::where('production_number', $spkNumbers[$row])->where('stock_id', '<>', $stock_id)->pluck('stock_id')->all();
                     $stStock = KartuBDP::mutationStore(new Request([
                         'stock_id' => $stock_id,
@@ -212,7 +222,8 @@ class KartuBahanJadiController extends Controller
                         'is_otomatis_jurnal' => 0,
                         'is_custom_rupiah' => $isCustomRupiah,
                         'mutasi_rupiah_total' => $mutasiRupiahTotal,
-                        'date'=>$date
+                        'date' => $date,
+                        'description' => $desc
                     ]), false, $lockManager);
                     if ($stStock['status'] == 0) {
                         throw new \Exception($stStock['msg']);
@@ -239,7 +250,8 @@ class KartuBahanJadiController extends Controller
                             'is_otomatis_jurnal' => 0,
                             'is_custom_rupiah' => $isCustomRupiah,
                             'mutasi_rupiah_total' => $rupiahCustom,
-                            'date'=>$date
+                            'date' => $date,
+                            'description' => $desc
                         ]), false, $lockManager);
                         if ($stStock['status'] == 0) {
                             throw new \Exception($stStock['msg']);
@@ -262,7 +274,8 @@ class KartuBahanJadiController extends Controller
                     'is_otomatis_jurnal' => 1,
                     'is_custom_rupiah' => $isCustomRupiah,
                     'mutasi_rupiah_total' => $mutasiRupiahTotal,
-                    'date'=>$date
+                    'date' => $date,
+                    'description' => $desc,
                 ]), false, $lockManager);
 
 

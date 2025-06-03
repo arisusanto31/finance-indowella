@@ -6,6 +6,7 @@ use App\Models\Journal;
 use App\Models\KartuBahanJadi;
 use App\Models\KartuBDP;
 use App\Models\KartuStock;
+use App\Models\SalesOrder;
 use App\Models\Stock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -146,6 +147,10 @@ class KartuBDPController extends Controller
         $saleOrderId = $request->input('sales_order_id');
         $salesOrderNumber = $request->input('sales_order_number');
         $lawanCodeGroups = $request->input('lawan_code_group');
+        $salesOrder = SalesOrder::where('sales_order_number', $salesOrderNumber)->first();
+        $customer = $salesOrder->customer ? $salesOrder->customer->name : "";
+
+
         $allSt = [];
         try {
             DB::beginTransaction();
@@ -156,6 +161,11 @@ class KartuBDPController extends Controller
                 $lawanCodeGroup = $lawanCodeGroups[$row];
                 if ($lawanCodeGroup == $codeGroup) {
                     throw new \Exception('Lawan code group tidak boleh sama dengan code group');
+                }
+                if ($flow == 0)
+                    $desc = 'produksi ' . $customer . ' - ' . $productionNumber . ' dalam proses';
+                else {
+                    $desc = 'produksi ' . $customer . ' - ' . $productionNumber . ' selesai';
                 }
                 $isCustomRupiah = 0;
                 $mutasiRupiahTotal = 0;
@@ -187,7 +197,9 @@ class KartuBDPController extends Controller
                         'is_otomatis_jurnal' => 0,
                         'is_custom_rupiah' => $isCustomRupiah,
                         'mutasi_rupiah_total' => $mutasiRupiahTotal,
-                        'date' => $date
+                        'date' => $date,
+                        'description' => $desc,
+
 
                     ]), false);
                     if ($stStock['status'] == 0) {
@@ -210,7 +222,8 @@ class KartuBDPController extends Controller
                         'is_otomatis_jurnal' => 0,
                         'is_custom_rupiah' => $isCustomRupiah,
                         'mutasi_rupiah_total' => $mutasiRupiahTotal,
-                        'date' => $date
+                        'date' => $date,
+                        'description' => $desc
                     ]), false);
                     if ($stStock['status'] == 0) {
                         throw new \Exception($stStock['msg']);
@@ -231,7 +244,8 @@ class KartuBDPController extends Controller
                     'is_otomatis_jurnal' => 1,
                     'is_custom_rupiah' => $isCustomRupiah,
                     'mutasi_rupiah_total' => $mutasiRupiahTotal,
-                    'date' => $date
+                    'date' => $date,
+                    'description' => $desc
                 ]), false);
                 $allSt[] = $st;
                 if ($st['status'] == 0) {

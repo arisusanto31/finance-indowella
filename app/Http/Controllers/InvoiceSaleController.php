@@ -400,7 +400,7 @@ class InvoiceSaleController extends Controller
                 'reference_model' => InvoiceSaleDetail::class,
             ]);
             $invoicePack->invoice_number = $invoicePack->getCodeFix();
-            $invoicePack->is_final=1;
+            $invoicePack->is_final = 1;
             $invoicePack->save();
             //create pack ya
             $details = [];
@@ -413,16 +413,18 @@ class InvoiceSaleController extends Controller
 
 
             foreach ($salesDetailIDs as $i => $saleDetailID) {
+                $dataDetailSale = $realDataSales[$saleDetailID];
+                $person = $invoicePack->person;
                 $kartu = KartuPiutang::createMutation(new Request([
                     'invoice_pack_number' => $invoicePack->invoice_number,
-                    'amount_mutasi' => $invoicePack->total_price,
+                    'amount_mutasi' => $dataDetailSale->total_price,
                     'person_id' => $invoicePack->person_id,
                     'person_type' => $invoicePack->person_type,
                     'code_group' => $codeGroupPiutangs[$i],
                     'lawan_code_group' => $codeGroupPenjualans[$i],
                     'sales_order_number' => $salesOrderNumber,
                     'is_otomatis_jurnal' => 1,
-                    'description' => 'penjualan ' . $customStockNames[$i] . ' nomer ' . $invoicePack->invoice_number,
+                    'description' => 'penjualan ' . $person->name . ' ' . $invoicePack->invoice_number . ' item-'.($i+1),
                     'date' => $date,
                 ]), $lockManager);
                 if ($kartu['status'] == 0) {

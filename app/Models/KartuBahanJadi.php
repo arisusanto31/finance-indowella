@@ -161,6 +161,7 @@ class KartuBahanJadi extends Model
             $customStockName = $request->input('custom_stock_name');
             $codeGroup = $request->input('code_group');
             $chart = ChartAccount::where('code_group', $codeGroup)->first();
+            $desc= $request->input('description');
 
             $SONumber = $request->input('sales_order_number');
             $invoiceNumber = $request->input('invoice_pack_number');
@@ -235,11 +236,13 @@ class KartuBahanJadi extends Model
                     //keluar
                     $codeDebet = $lawanCodeGroup;
                     $codeKredit = $codeGroup;
-                    $desc = 'barang jadi keluar dari' . $spkNumber . 'ke ' . $lawanCodeGroupName;
+                    if(!$desc)
+                    $desc =  'proses '.$spkNumber . ' dibebankan ' . $lawanCodeGroupName;
                 } else {
                     $codeDebet = $codeGroup;
                     $codeKredit = $lawanCodeGroup;
-                    $desc = 'barang jadi masuk ke ' . $spkNumber . ' dari ' . $lawanCodeGroupName;
+                    if(!$desc)
+                      $desc =  $spkNumber . 'proses selesai';
                 }
                 $kredits = [
                     [
