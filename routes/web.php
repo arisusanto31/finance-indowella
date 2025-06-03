@@ -303,6 +303,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::post('sales-make-final', [SalesOrderController::class, 'makeFinal'])->name('sales-make-final');
         Route::post('sales-mark', [SalesOrderController::class, 'mark'])->name('sales-mark');
 
+        Route::get('invoice-sales-refresh/{id}', [InvoiceSaleController::class, 'refresh'])->name('invoice-sales-refresh');
         Route::get('invoice-sales/edit/{id}', [InvoiceSaleController::class, 'editInvoiceSales']);
         Route::get('invoice-purchase/edit/{id}', [InvoicePurchaseController::class, 'editInvoicePurchase']);
         Route::post('invoice-purchase-update', [InvoicePurchaseController::class, 'updateInvoicePurchase']);

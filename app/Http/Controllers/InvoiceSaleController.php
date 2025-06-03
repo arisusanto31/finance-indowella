@@ -424,7 +424,7 @@ class InvoiceSaleController extends Controller
                     'lawan_code_group' => $codeGroupPenjualans[$i],
                     'sales_order_number' => $salesOrderNumber,
                     'is_otomatis_jurnal' => 1,
-                    'description' => 'penjualan ' . $person->name . ' ' . $invoicePack->invoice_number . ' item-'.($i+1),
+                    'description' => 'penjualan ' . $person->name . ' ' . $invoicePack->invoice_number . ' item-' . ($i + 1),
                     'date' => $date,
                 ]), $lockManager);
                 if ($kartu['status'] == 0) {
@@ -635,5 +635,16 @@ class InvoiceSaleController extends Controller
         });
 
         return ['status' => 1, 'msg' => $sales];
+    }
+
+    public function refresh($id)
+    {
+        try {
+            $invoiceSale = InvoiceSaleDetail::find($id);
+            $invoiceSale->createDetailKartuInvoice();
+            return ['status' => 1, 'msg' => $invoiceSale];
+        } catch (Throwable $e) {
+            return ['status' => 0, 'msg' => $e->getMessage()];
+        }
     }
 }

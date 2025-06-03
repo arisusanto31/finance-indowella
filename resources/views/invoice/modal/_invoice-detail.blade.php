@@ -16,6 +16,7 @@
                         <th>Harga </th>
                         <th>Diskon</th>
                         <th>Total</th>
+                        <th>Aksi </th>
                     </tr>
                 </thead>
                 <tbody id="body-detail-invoice">
@@ -27,6 +28,9 @@
                             <td>{{ format_price($item->price) }}</td>
                             <td>{{ format_price($item->discount) }}</td>
                             <td>{{ format_price($item->total_price) }}</td>
+                            <td> <button class="btn btn-outline-info btn-sm"
+                                    onclick="refresh('{{ $item->id }}','{{ $data->reference_model }}')">
+                                    <i class="fas fa-refresh"></i></button></td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -248,6 +252,33 @@
             '#global-modal  #div-input');
     });
 
+    function refresh(id, model) {
+        if (model == 'App\\Models\\InvoiceSaleDetail') {
+            url = '{{ url('admin/invoice/invoice-sales-refresh') }}/' + id;
+        } else {
+            url = '{{ url('admin/invoice/invoice-purchase-refresh') }}/' + id;
+        }
+        loading(1);
+        $.ajax({
+            url: url,
+            method: 'get',
+            success: function(res) {
+                loading(0);
+                if (res.status == 1) {
+                    swalInfo('success', 'berhasil refresh', 'success');
+
+                } else {
+                    swalInfo()('error', res.msg, 'error');
+                }
+            },
+            error: function(err) {
+                loading(0);
+                swalInfo('opps',
+                    'something wrong', 'error'
+                );
+            }
+        });
+    }
 
     function updateHargaMutasiPurchase(elem) {
         let parent = $(elem).closest('.parent-input-detail');

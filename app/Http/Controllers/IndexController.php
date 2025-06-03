@@ -89,6 +89,7 @@ class IndexController extends Controller
             return format_db(getInput('nilai'));
         }
 
+        
         if (getInput('type') == 'repair-kartu-dp') {
             $kartuDP = KartuDPSales::where('index_date', 0)->get();
             foreach ($kartuDP as $dp) {
