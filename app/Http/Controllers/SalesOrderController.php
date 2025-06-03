@@ -34,7 +34,10 @@ class SalesOrderController extends Controller
         $year = getInput('year') ? getInput('year') : date('Y');
         $salesOrders = SalesOrderDetail::from('sales_order_details as sds')->join('sales_orders as so', 'so.sales_order_number', '=', 'sds.sales_order_number')
             ->where(function ($q) use ($month, $year) {
-                $q->whereMonth('sds.created_at', $month)->whereYear('sds.created_at', $year)->orWhere('so.status_delivery', '<>', 'TERKIRIM 100%');
+                $q->whereMonth('sds.created_at', $month)->whereYear('sds.created_at', $year)->orWhere(function ($que) use ($month, $year) {
+                    $date = createCarbon($year . '-' . $month . '-01');
+                    $que->where('so.status_delivery', '<>', 'TERKIRIM 100%')->where('so.created_at', '<', $date);
+                });
             })
             ->with('customer:name,id', 'stock:name,id', 'parent:sales_order_number,id,is_final,is_mark,total_price,ref_akun_cash_kind_name,status,status_payment,status_delivery')
             ->orderBy('sds.created_at', 'asc')
