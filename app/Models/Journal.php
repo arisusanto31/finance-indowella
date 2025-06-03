@@ -316,7 +316,9 @@ class Journal extends Model
         $thejournal = $this;
         $lastJournal = Journal::where('code_group', $thejournal->code_group)->where('index_date', '<', $thejournal->index_date)->orderBy('index_date', 'desc')->first();
         $lastSaldo = $lastJournal ? $lastJournal->amount_saldo : 0;
-        $thejournal->amount_saldo = round($lastSaldo + $thejournal->amount_debet - $thejournal->amount_kredit, 2);
+        $amount = $thejournal->code_group > 200000 ?
+            ($thejournal->amount_kredit - $thejournal->amount_debet) : ($thejournal->amount_debet - $thejournal->amount_kredit);
+        $thejournal->amount_saldo = round($lastSaldo + $amount, 2);
         $thejournal->save();
         $codeGroup = $this->code_group;
         $name = 'generate-journal' . $codeGroup;
