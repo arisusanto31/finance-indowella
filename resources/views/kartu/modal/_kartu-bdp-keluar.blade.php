@@ -32,6 +32,13 @@
         </div>
         <div class="row">
             <div class="col mb-3">
+                <label for="nameBasic" class="form-label">Nomer Produksi</label>
+                <input type="text" name="production_number" id="production_number" class="form-control "
+                    placeholder="Nomer Produksi">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col mb-3">
                 <label for="nameBasic" class="form-label">Stock</label>
                 <select onchange="selectStock()" type="text" name="stock_id" id="select-stock"
                     class="form-control select-stock" placeholder="stock">
