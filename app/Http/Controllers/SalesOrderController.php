@@ -39,6 +39,7 @@ class SalesOrderController extends Controller
                     $que->where('so.status_delivery', '<>', 'TERKIRIM 100%')->where('so.created_at', '<', $date);
                 });
             })
+            ->select('sds.*')
             ->with('customer:name,id', 'stock:name,id', 'parent:sales_order_number,id,is_final,is_mark,total_price,ref_akun_cash_kind_name,status,status_payment,status_delivery')
             ->orderBy('sds.created_at', 'asc')
             ->get()
