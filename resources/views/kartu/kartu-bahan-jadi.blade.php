@@ -278,7 +278,7 @@
                                 <thead class="bg-white text-dark text-center">
                                     <tr>
                                         <th rowspan=2>No</th>
-                                        <th rowspan=2>NO SPK</th>
+                                    
                                         <th rowspan=2>Nama Barang</th>
                                         <th colspan=3>Saldo Awal</th>
                                         <th colspan=3>Masuk</th>
@@ -332,7 +332,7 @@
                                     html += `
                                 <tr>
                                 <td>${i+1}</td>
-                                <td>${spknumber}</td>
+                
                                 <td>${item.name} [${item.id}]</td>
                                 <td>${formatRupiah(item.saldo_qty_awal/item.konversi)} ${item.unit_default}</td>
                                 <td>${formatRupiah(rupiahUnitAwal*item.konversi)}</td>

@@ -65,7 +65,7 @@ class KartuBahanJadiController extends Controller
             ->map(function ($dataspk) use ($dataStock) {
                 return collect($dataspk)->groupBy('stock_id')->map(function ($item, $stockid) use ($dataStock) {
                     $data = []; //$dataStock[$stockid];
-                    $data['name'] = collect($item)->first()->custom_stock_name;
+                    $data['name'] = collect($item)->first()->custom_stock_name? collect($item)->first()->custom_stock_name : $dataStock[$stockid]->name;
                     $data['konversi'] = $dataStock[$stockid]->konversi;
                     $data['category_name'] = $dataStock[$stockid]->category_name;
 
