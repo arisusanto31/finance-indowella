@@ -238,7 +238,7 @@ class KartuBahanJadiController extends Controller
                     } else {
                         $saleDetail = SalesOrderDetail::find($saleDetailID);
                         $prosenQty = $qty / $saleDetail->quantity;
-                        info('prosenQty custom: ' . $prosenQty);
+                        info('g ada bahan utama, prosenQty custom: ' . $prosenQty);
                     }
                     foreach ($stockIDCustom as $customID) {
                         $lastCustomCard = KartuBDP::where('production_number', $spkNumbers[$row])
