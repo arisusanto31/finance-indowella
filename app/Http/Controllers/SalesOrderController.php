@@ -642,8 +642,8 @@ class SalesOrderController extends Controller
         $bahanJadi = KartuBahanJadi::whereIn('id', function ($q) use ($number) {
             $q->from('kartu_bahan_jadis')->select(DB::raw('max(id)'))
                 ->where('sales_order_number', $number)
-                ->groupBy('stock_id', 'sales_order_number');
-        })->where('sales_order_number', $number)->get()->keyBy('stock_id');
+                ->groupBy('stock_id', 'production_number');
+        })->where('sales_order_number', $number)->get()->keyBy('production_number');
         $details = SalesOrderDetail::where('sales_order_number', $number)->get();
 
         return [

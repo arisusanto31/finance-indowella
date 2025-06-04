@@ -365,7 +365,7 @@
                                             </select>
                                         </div>
 
-                                        <div class="col-md-3 col-xs-12">
+                                        <div class="col-md-4 col-xs-12">
                                             <label>Barang jadi</label>
                                             <input type="text" class="form-control"
                                                 id="invoice-ket-barang-jadi{{ $item->id }}" value=""
@@ -711,8 +711,8 @@
             success: function(res) {
                 console.log(res);
                 if (res.status == 1) {
-                    res.msg.forEach(function eachItem(item) {
-                        bahanJadi = res.bahan_jadi[item.stock_id];
+                    res.msg.forEach(function eachItem(item,i) {
+                        bahanJadi = res.bahan_jadi[item.sales_order_number+'-'+toDigit(i+1,2)];
                         if (bahanJadi != undefined) {
                             dataBahanJadi[item.id] = bahanJadi;
                             html =

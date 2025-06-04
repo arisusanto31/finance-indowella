@@ -359,6 +359,11 @@ function safeAtob(b64) {
     }
 }
 
+function toDigit(number, digit) {
+    return number.toString().padStart(digit, '0');
+}
+
+
 function swalConfirmAndSubmit({ url, data, onSuccess = null, successText = "Berhasil!", confirmText = "Yes", cancelText = "No" }) {
     Swal.fire({
         title: "Apakah kamu yakin?",
