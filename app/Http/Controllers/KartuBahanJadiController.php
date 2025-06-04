@@ -243,11 +243,11 @@ class KartuBahanJadiController extends Controller
                     foreach ($stockIDCustom as $customID) {
                         $lastCustomCard = KartuBDP::where('production_number', $spkNumbers[$row])
                             ->where('stock_id', $customID)->orderBy('id', 'desc')->first();
-                        $qtyCustom = $lastCustomCard->saldo_qty_backend * $prosenQty;
+                        $qtyCustom = ($lastCustomCard->saldo_qty_backend * $lastCustomCard->mutasi_quantity/$lastCustomCard->mutasi_qty_backend)  * $prosenQty; //ini jadikan unit normal aja
                         info('name: ' . $lastCustomCard->custom_stock_name);
                         $rupiahCustom = $lastCustomCard->saldo_rupiah_total * $prosenQty;
-                        info('qtycustom:' . $qtyCustom . ' - rupiahcustom:' . $rupiahCustom);
                         $unitCustom = $lastCustomCard->unit;
+                        info('qtycustom:' . $qtyCustom . ' '.$unitCustom.' - rupiahcustom:' . $rupiahCustom);
                         $stStock = KartuBDP::mutationStore(new Request([
                             'stock_id' => $customID,
                             'mutasi_quantity' => $qtyCustom,
