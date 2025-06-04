@@ -270,7 +270,7 @@ class KartuBahanJadiController extends Controller
                         $allStStock[] = $stStock['msg'];
                     }
                 }
-                else if($lawanCodeGroup==14004){
+                else if($lawanCodeGroup==140004){
                     //kalo dari bahan jadi sendiri , cuma pindah kartu
 
                      $stStock = KartuBahanJadi::mutationStore(new Request([
