@@ -237,7 +237,7 @@ class KartuBahanJadiController extends Controller
                     //     $allStStock[] = $stStock['msg'];
                     // } else {
                     $saleDetail = SalesOrderDetail::find($saleDetailID);
-                    $prosenQty = $qty / $saleDetail->quantity;
+                    $prosenQty = $qty / $saleDetail->qtyjadi;
                     info(' prosenQty custom: ' . $prosenQty);
                     // }
                     foreach ($stockIDCustom as $customID) {
