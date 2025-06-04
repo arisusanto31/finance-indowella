@@ -65,7 +65,7 @@ class KartuBahanJadiController extends Controller
             ->map(function ($dataspk) use ($dataStock) {
                 return collect($dataspk)->groupBy('stock_id')->map(function ($item, $stockid) use ($dataStock) {
                     $data = []; //$dataStock[$stockid];
-                    $data['name'] = collect($item)->first()->custom_stock_name? collect($item)->first()->custom_stock_name : $dataStock[$stockid]->name;
+                    $data['name'] = collect($item)->first()->custom_stock_name ? collect($item)->first()->custom_stock_name : $dataStock[$stockid]->name;
                     $data['konversi'] = $dataStock[$stockid]->konversi;
                     $data['category_name'] = $dataStock[$stockid]->category_name;
 
@@ -206,13 +206,13 @@ class KartuBahanJadiController extends Controller
                     //nah disini lo lu memungkinkan ada lebih dari satu kartu bdp
 
                     $stockIDCustom = KartuBDP::where('production_number', $spkNumbers[$row])->where('stock_id', '<>', $stock_id)->pluck('stock_id')->all();
-                    $stock = Stock::find($stock_id);
-                    if ($stock->name != 'custom') {
-                        //kalo bukan custom, berarti harus ada kartu bdp
-                        $lastCard = KartuBDP::where('stock_id', $stock_id)->where('production_number', $spkNumbers[$row])->orderBy('id', 'desc')->first();
-                        if (!$lastCard) {
-                            throw new \Exception('tidak ada saldo stock pada nomer produksi ' . $spkNumbers[$row]);
-                        }
+
+                    //kalo bukan custom, berarti harus ada kartu bdp
+                    $lastCard = KartuBDP::where('stock_id', $stock_id)->where('production_number', $spkNumbers[$row])->orderBy('id', 'desc')->first();
+                    if (!$lastCard &&  count($stockIDCustom) == 0) {
+                        throw new \Exception('tidak ada saldo stock pada nomer produksi ' . $spkNumbers[$row] . ', dan tidak ada pembebanan lain ');
+                    }
+                    if ($lastCard) {
                         $prosenQty = ($qty / $konversiJadi) / ($lastCard->saldo_qty_backend * $lastCard->mutasi_quantity / $lastCard->mutasi_qty_backend);
 
                         $stStock = KartuBDP::mutationStore(new Request([
@@ -269,11 +269,10 @@ class KartuBahanJadiController extends Controller
                         }
                         $allStStock[] = $stStock['msg'];
                     }
-                }
-                else if($lawanCodeGroup==140004){
+                } else if ($lawanCodeGroup == 140004) {
                     //kalo dari bahan jadi sendiri , cuma pindah kartu
 
-                     $stStock = KartuBahanJadi::mutationStore(new Request([
+                    $stStock = KartuBahanJadi::mutationStore(new Request([
                         'stock_id' => $stock_id,
                         'mutasi_qty_backend' => $qty,
                         'unit_backend' => $unit,
@@ -294,7 +293,7 @@ class KartuBahanJadiController extends Controller
                     if ($stStock['status'] == 0) {
                         throw new \Exception($stStock['msg']);
                     }
-                        $allStStock[] = $stStock['msg'];
+                    $allStStock[] = $stStock['msg'];
                 }
                 $mutasiRupiahTotal = abs(collect($allStStock)->sum('mutasi_rupiah_total'));
                 $st = KartuBahanJadi::mutationStore(new Request([
