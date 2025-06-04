@@ -294,6 +294,7 @@ class InvoiceSaleController extends Controller
                     'toko_id' => $request->toko_id,
                     'custom_stock_name' => $request->custom_stock_name[$i] ?? null,
                     'created_at' => $request->input('created_at') ?? now(),
+                    'row_index' => $i+1,
 
                 ];
             }
@@ -385,7 +386,8 @@ class InvoiceSaleController extends Controller
                     'total_price' => $dataDetailSale->total_price,
                     'toko_id' => $dataDetailSale->toko_id,
                     'custom_stock_name' => $customStockNames[$i] ?? null,
-                    'created_at' => $date
+                    'created_at' => $date,
+                    'row_index'=> $i+1,
 
                 ];
             }
@@ -439,7 +441,10 @@ class InvoiceSaleController extends Controller
                 $journalNumber = $kartu['msg']->journal_number;
                 $journal = Journal::where('journal_number', $journalNumber)->where('code_group', $codeGroupPenjualans[$i])->first();
                 $journalID = $journal ? $journal->id : null;
-                $dataSaleDetail = InvoiceSaleDetail::where('custom_stock_name', $customStockNames[$i])->where('invoice_pack_number', $invoicePack->invoice_number)->first();
+                $dataSaleDetail = InvoiceSaleDetail::where('row_index',$i+1)->where('custom_stock_name', $customStockNames[$i])->where('invoice_pack_number', $invoicePack->invoice_number)->first();
+                if (!$dataSaleDetail) {
+                    throw new \Exception('Data detail penjualan tidak ditemukan, index mungkin bermasalah');
+                }
 
                 $dataSaleDetail->journal_id = $journalID;
                 $dataSaleDetail->journal_number = $journalNumber;

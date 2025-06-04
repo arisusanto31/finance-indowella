@@ -11,6 +11,7 @@ class InvoiceSaleDetail extends Model
 
     use HasModelDetailKartuInvoice;
     protected $fillable = [
+        'row_index',
         'invoice_pack_number',
         'invoice_pack_id',
         'sales_order_number',
