@@ -108,6 +108,7 @@ class KartuBDP extends Model
                     ];
                 }
             }
+            info('BDP KARTU -perhitutngan mutasi berhasil') ;
             if ($flow == 1) {
                 $kartu->mutasi_qty_backend = moneyMul($kartu->mutasi_qty_backend, -1);
                 $kartu->mutasi_quantity = moneyMul($kartu->mutasi_quantity, -1);
