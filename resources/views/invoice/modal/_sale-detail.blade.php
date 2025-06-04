@@ -339,7 +339,7 @@
                                         </div>
                                         <div class="col-md-2 col-xs-12">
                                             <label>Jumlah</label>
-                                            <input type="text" onchange="updateBiaya('{{ $item->id }}')"
+                                            <input type="text" 
                                                 class="form-control qty-invoice" name="quantity[]"
                                                 placeholder="qty: {{ $item->qtyjadi }}"
                                                 id="invoice-quantity{{ $item->id }}"
@@ -365,7 +365,7 @@
                                             </select>
                                         </div>
 
-                                        <div class="col-md-4 col-xs-12">
+                                        <div class="col-md-6 col-xs-12">
                                             <label>Barang jadi</label>
                                             <input type="text" class="form-control"
                                                 id="invoice-ket-barang-jadi{{ $item->id }}" value=""
@@ -375,12 +375,12 @@
                                             <input type="hidden" name="production_number[]"
                                                 id="invoice-production_number{{ $item->id }}" value="" />
                                         </div>
-                                        <div class="col-md-3 col-xs-12">
+                                        {{-- <div class="col-md-3 col-xs-12">
                                             <label>Pembiayaan HPP</label>
                                             <input type="text" id="invoice-biaya_hpp{{ $item->id }}"
                                                 class="form-control" placeholder="pembiayaan hpp" name="hpp[]"
                                                 readonly />
-                                        </div>
+                                        </div> --}}
                                     </div>
                                     <hr>
                                 @endforeach
@@ -548,12 +548,7 @@
     }
     initAllItem();
 
-    setTimeout(function() {
-        $('.qty-invoice').each(function(i, elem) {
-            id = getNumID($(elem).attr('id'));
-            updateBiaya(id);
-        });
-    }, 200);
+    
 
 
     function gantiBahanBDP(id) {
@@ -688,16 +683,16 @@
     var dataBahanJadi = [];
 
 
-    function updateBiaya(id) {
-        let qty = $('#invoice-quantity' + id).val();
-        let stock_id = $('#invoice-stock_id' + id).val();
-        let bahanJadi = dataBahanJadi[id];
-        if (bahanJadi != undefined) {
-            let biaya = bahanJadi.saldo_rupiah_total / (bahanJadi.saldo_qty_backend * bahanJadi.mutasi_quantity /
-                bahanJadi.mutasi_qty_backend) * qty;
-            $('#invoice-biaya_hpp' + id).val(formatRupiah(biaya));
-        }
-    }
+    // function updateBiaya(id) {
+    //     let qty = $('#invoice-quantity' + id).val();
+    //     let stock_id = $('#invoice-stock_id' + id).val();
+    //     let bahanJadi = dataBahanJadi[id];
+    //     if (bahanJadi != undefined) {
+    //         let biaya = bahanJadi.saldo_rupiah_total / (bahanJadi.saldo_qty_backend * bahanJadi.mutasi_quantity /
+    //             bahanJadi.mutasi_qty_backend) * qty;
+    //         $('#invoice-biaya_hpp' + id).val(formatRupiah(biaya));
+    //     }
+    // }
 
 
 
