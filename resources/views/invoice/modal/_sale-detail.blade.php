@@ -365,7 +365,7 @@
                                             </select>
                                         </div>
 
-                                        <div class="col-md-6 col-xs-12">
+                                        <div class="col-md-9 col-xs-12">
                                             <label>Barang jadi</label>
                                             <input type="text" class="form-control"
                                                 id="invoice-ket-barang-jadi{{ $item->id }}" value=""
