@@ -205,49 +205,49 @@ class KartuBahanJadiController extends Controller
                     //kalo dari barang dalam proses
                     //nah disini lo lu memungkinkan ada lebih dari satu kartu bdp
 
-                    $stockIDCustom = KartuBDP::where('production_number', $spkNumbers[$row])->where('stock_id', '<>', $stock_id)->pluck('stock_id')->all();
+                    $stockIDCustom = KartuBDP::where('production_number', $spkNumbers[$row])->pluck('stock_id')->all();
 
                     //kalo bukan custom, berarti harus ada kartu bdp
-                    $lastCard = KartuBDP::where('stock_id', $stock_id)->where('production_number', $spkNumbers[$row])->orderBy('id', 'desc')->first();
-                    if (!$lastCard &&  count($stockIDCustom) == 0) {
+                    // $lastCard = KartuBDP::where('stock_id', $stock_id)->where('production_number', $spkNumbers[$row])->orderBy('id', 'desc')->first();
+                    if (count($stockIDCustom) == 0) {
                         throw new \Exception('tidak ada saldo stock pada nomer produksi ' . $spkNumbers[$row] . ', dan tidak ada pembebanan lain ');
                     }
-                    if ($lastCard) {
-                        $prosenQty = ($qty / $konversiJadi) / ($lastCard->saldo_qty_backend * $lastCard->mutasi_quantity / $lastCard->mutasi_qty_backend);
+                    // if ($lastCard) {
+                    //     $prosenQty = ($qty / $konversiJadi) / ($lastCard->saldo_qty_backend * $lastCard->mutasi_quantity / $lastCard->mutasi_qty_backend);
 
-                        $stStock = KartuBDP::mutationStore(new Request([
-                            'stock_id' => $stock_id,
-                            'mutasi_quantity' => $qty / $konversiJadi,
-                            'unit' => $unit,
-                            'flow' => $flow == 1 ? 0 : 1,
-                            'sales_order_number' => $salesOrderNumber,
-                            'production_number' => $spkNumbers[$row],
-                            'sales_order_id' => $saleOrderId,
-                            'code_group' => $lawanCodeGroup,
-                            'lawan_code_group' => $codeGroup,
-                            'is_otomatis_jurnal' => 0,
-                            'is_custom_rupiah' => $isCustomRupiah,
-                            'mutasi_rupiah_total' => $mutasiRupiahTotal,
-                            'date' => $date,
-                            'description' => $desc
-                        ]), false, $lockManager);
-                        if ($stStock['status'] == 0) {
-                            throw new \Exception($stStock['msg']);
-                        }
-                        $allStStock[] = $stStock['msg'];
-                    } else {
-                        $saleDetail = SalesOrderDetail::find($saleDetailID);
-                        $prosenQty = $qty / $saleDetail->quantity;
-                        info('g ada bahan utama, prosenQty custom: ' . $prosenQty);
-                    }
+                    //     $stStock = KartuBDP::mutationStore(new Request([
+                    //         'stock_id' => $stock_id,
+                    //         'mutasi_quantity' => $qty / $konversiJadi,
+                    //         'unit' => $unit,
+                    //         'flow' => $flow == 1 ? 0 : 1,
+                    //         'sales_order_number' => $salesOrderNumber,
+                    //         'production_number' => $spkNumbers[$row],
+                    //         'sales_order_id' => $saleOrderId,
+                    //         'code_group' => $lawanCodeGroup,
+                    //         'lawan_code_group' => $codeGroup,
+                    //         'is_otomatis_jurnal' => 0,
+                    //         'is_custom_rupiah' => $isCustomRupiah,
+                    //         'mutasi_rupiah_total' => $mutasiRupiahTotal,
+                    //         'date' => $date,
+                    //         'description' => $desc
+                    //     ]), false, $lockManager);
+                    //     if ($stStock['status'] == 0) {
+                    //         throw new \Exception($stStock['msg']);
+                    //     }
+                    //     $allStStock[] = $stStock['msg'];
+                    // } else {
+                    $saleDetail = SalesOrderDetail::find($saleDetailID);
+                    $prosenQty = $qty / $saleDetail->quantity;
+                    info(' prosenQty custom: ' . $prosenQty);
+                    // }
                     foreach ($stockIDCustom as $customID) {
                         $lastCustomCard = KartuBDP::where('production_number', $spkNumbers[$row])
                             ->where('stock_id', $customID)->orderBy('id', 'desc')->first();
-                        $qtyCustom = ($lastCustomCard->saldo_qty_backend * $lastCustomCard->mutasi_quantity/$lastCustomCard->mutasi_qty_backend)  * $prosenQty; //ini jadikan unit normal aja
+                        $qtyCustom = ($lastCustomCard->saldo_qty_backend * $lastCustomCard->mutasi_quantity / $lastCustomCard->mutasi_qty_backend)  * $prosenQty; //ini jadikan unit normal aja
                         info('name: ' . $lastCustomCard->custom_stock_name);
                         $rupiahCustom = $lastCustomCard->saldo_rupiah_total * $prosenQty;
                         $unitCustom = $lastCustomCard->unit;
-                        info('qtycustom:' . $qtyCustom . ' '.$unitCustom.' - rupiahcustom:' . $rupiahCustom);
+                        info('qtycustom:' . $qtyCustom . ' ' . $unitCustom . ' - rupiahcustom:' . $rupiahCustom);
                         $stStock = KartuBDP::mutationStore(new Request([
                             'stock_id' => $customID,
                             'mutasi_quantity' => $qtyCustom,
