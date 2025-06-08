@@ -261,8 +261,7 @@
                     <div class="row">
                         <div class="col-md-8">
                             <input value="{{ now() }}" type="datetime-local" class="form-control"
-                                id="date-cocok" onfocusout="onFDate()"
-                                onfocus="r" />
+                                id="date-cocok" onfocusout="onFocusOutDate()" onfocus="onFocusInDate()" />
                         </div>
                     </div>
                 </div>
@@ -433,6 +432,23 @@
                 getSaldoCustom();
                 getSummaryBalance();
             });
+
+            var lastDate = null;
+
+            function onFocusOutDate() {
+                dateCocok = $('#date-cocok').val();
+                if (dateCocok != lastDate) {
+                    lastDate = dateCocok;
+                    getSummaryBalance();
+                }
+
+            }
+
+            function onFocusInDate() {
+                dateCocok = $('#date-cocok').val();
+                lastDate = dateCocok;
+                console.log(lastDate);
+            }
 
             const donutChartConfig = {
                 chart: {
@@ -683,8 +699,10 @@
 
             function getSummaryBalance() {
                 dateCocok = $('#date-cocok').val();
+                url = '{{ url('admin/get-summary-balance') }}?date=' + dateCocok;
+                console.log('get summary balance :'+url);
                 $.ajax({
-                    url: '{{ url('admin/get-summary-balance') }}?date=' + dateCocok,
+                    url: url,
                     method: 'get',
                     success: function(res) {
                         console.log(res);

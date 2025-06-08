@@ -13,7 +13,8 @@ trait HasModelSaldoStock
     public static function getTotalSaldoRupiah($date, $productionNumber = null, $withProduction = false)
     {
 
-        $indexDate = createCarbon($date)->format('ymdHis000');
+        $indexDate = intval(createCarbon($date)->format('ymdHis000'));
+        info('index date : '.$indexDate);
         $saldo = static::query()->whereIn('index_date', function ($q) use ($indexDate, $withProduction, $productionNumber) {
             $q->select(DB::raw('max(index_date)'))
                 ->from(with(new static)->getTable())
