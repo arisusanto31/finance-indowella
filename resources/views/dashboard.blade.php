@@ -258,23 +258,34 @@
             <div class="card h-100">
                 <div class="card-header">
                     <h5 class="card-title m-0 me-2">Kecocokan kartu vs jurnal</h5>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <input value="{{ now() }}" type="datetime-local" class="form-control"
+                                id="date-cocok" onfocusout="onFDate()"
+                                onfocus="r" />
+                        </div>
+                    </div>
                 </div>
                 <div class="card-body ">
                     <div class="">
-                        <h5 id="" class="pb-0 mt-3 mb-0 text-primary"> <i class="fas fa-circle"></i> Kartu Stock <span style="font-size:14px" > vs jurnal</span> </h5>
+                        <h5 id="" class="pb-0 mt-3 mb-0 text-primary"> <i class="fas fa-circle"></i> Kartu
+                            Stock <span style="font-size:14px"> vs jurnal</span> </h5>
                         <div id="cocok-kartu-stock" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
                         <h5 id="" class="pb-0 mt-3 mb-0 text-primary"> <i class="fas fa-circle"></i> Kartu
-                            BDP <span style="font-size:14px" > vs jurnal</span> </h5>
+                            BDP <span style="font-size:14px"> vs jurnal</span> </h5>
                         <div id="cocok-kartu-bdp" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
                         <h5 id="" class="pb-0 mt-3 mb-0  text-primary"> <i class="fas fa-circle"></i> Kartu
-                            Bahan Jadi <span style="font-size:14px" > vs jurnal</span>
+                            Bahan Jadi <span style="font-size:14px"> vs jurnal</span>
                         </h5>
                         <div id="cocok-kartu-bahan-jadi" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
-                        <h5 class="pb-0 mt-3 mb-0 text-primary"> <i class="fas fa-circle"></i> Kartu Piutang <span style="font-size:14px" > vs jurnal</span> </h5>
+                        <h5 class="pb-0 mt-3 mb-0 text-primary"> <i class="fas fa-circle"></i> Kartu Piutang <span
+                                style="font-size:14px"> vs jurnal</span> </h5>
                         <div id="cocok-kartu-piutang" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
-                        <h5 class="pb-0 mt-3 mb-0 text-primary"> <i class="fas fa-circle"></i> Kartu Hutang <span style="font-size:14px" > vs jurnal</span></h5>
+                        <h5 class="pb-0 mt-3 mb-0 text-primary"> <i class="fas fa-circle"></i> Kartu Hutang <span
+                                style="font-size:14px"> vs jurnal</span></h5>
                         <div id="cocok-kartu-hutang" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
-                        <h5 class="pb-0 mt-3 mb-0 text-primary"> <i class="fas fa-circle"></i> Kartu DP Sales <span style="font-size:14px" > vs jurnal</span> </h5>
+                        <h5 class="pb-0 mt-3 mb-0 text-primary"> <i class="fas fa-circle"></i> Kartu DP Sales <span
+                                style="font-size:14px"> vs jurnal</span> </h5>
                         <div id="cocok-kartu-dp" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
 
                     </div>
@@ -671,8 +682,9 @@
             }
 
             function getSummaryBalance() {
+                dateCocok = $('#date-cocok').val();
                 $.ajax({
-                    url: '{{ url('admin/get-summary-balance') }}',
+                    url: '{{ url('admin/get-summary-balance') }}?date=' + dateCocok,
                     method: 'get',
                     success: function(res) {
                         console.log(res);
