@@ -39,7 +39,7 @@ class KartuDPSalesController extends Controller
         $date = $year . '-' . $month;
         $kartuPiutangAwal = KartuDPSales::whereIn('id', function ($q) use ($date) {
             $q->from('kartu_dp_sales')->select(DB::raw('max(id)'))->where('created_at', '<', $date . '-01')->groupBy('sales_order_number');
-        })->where('amount_saldo_factur', '>', 0)->select('sales_order_number', 'invoice_date', 'type', 'amount_saldo_factur', 'person_id', 'person_type')->get();
+        })->where('amount_saldo_factur', '<>', 0)->select('sales_order_number', 'invoice_date', 'type', 'amount_saldo_factur', 'person_id', 'person_type')->get();
 
         $kartuPiutangBaru = KartuDPSales::whereMonth('created_at', $month)->whereYear('created_at', $year)
             ->select(

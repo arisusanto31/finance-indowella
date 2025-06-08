@@ -390,7 +390,7 @@
                             html = "";
                             saldoAkhir = 0;
                             res.msg.forEach(function(data, i) {
-                                saldoAkhir += parseInt(data.saldo);
+                                saldoAkhir = (data.saldo);
                                 html += `
                                 <tr>
                                     <td>${i+1}</td>

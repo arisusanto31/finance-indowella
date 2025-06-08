@@ -37,7 +37,7 @@ class KartuPiutangController extends Controller
         $date = $year . '-' . $month;
         $kartuPiutangAwal = KartuPiutang::whereIn('id', function ($q) use ($date) {
             $q->from('kartu_piutangs')->select(DB::raw('max(id)'))->where('created_at', '<', $date . '-01')->groupBy('invoice_pack_number');
-        })->where('amount_saldo_factur', '>', 0)->select('invoice_pack_number', 'invoice_date', 'type', 'amount_saldo_factur', 'person_id', 'person_type')->get();
+        })->where('amount_saldo_factur', '<>', 0)->select('invoice_pack_number', 'invoice_date', 'type', 'amount_saldo_factur', 'person_id', 'person_type')->get();
 
         $kartuPiutangBaru = KartuPiutang::whereMonth('created_at', $month)->whereYear('created_at', $year)
             ->select(

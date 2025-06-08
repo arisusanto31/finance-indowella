@@ -90,9 +90,10 @@
                   </tr>
                 `;
             }
+            saldo= 0;
             res.msg.forEach((item, index) => {
               tanggal = formatNormalDateTime(new Date(item.created_at));
-
+              saldo= item.amount_saldo;
               html += `
                   <tr>
                     <td>${index+1}</td>
@@ -113,7 +114,7 @@
                               <td colspan="5" class="text-end">Total</td>
                               <td><strong>${formatRupiah(res.msg.reduce((acc, item) => acc + parseFloat(item.amount_debet), 0))} </strong></td>
                               <td><strong>${formatRupiah(res.msg.reduce((acc, item) => acc + parseFloat(item.amount_kredit), 0))} </strong></td>
-                              <td><strong>${formatRupiah(res.msg.reduce((acc, item) => acc + parseFloat(item.amount_saldo), 0))} </strong></td>
+                              <td><strong>${formatRupiah(saldo)} </strong></td>
                           </tr>
                     </tfoot>
                     </table>

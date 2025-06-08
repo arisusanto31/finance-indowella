@@ -17,8 +17,13 @@ trait HasModelSaldoUang
                 ->from(with(new static)->getTable())
                 ->where('book_journal_id', bookID())
                 ->where('index_date', '<', $indexDate)
-                ->groupBy('invoice_pack_number');
-        })->sum('amount_saldo_factur');
+                ->groupBy('invoice_pack_number','person_id','person_type');
+        })->get();
+        $data=collect($saldo)->map(function($item){
+            return collect($item)->only('amount_saldo_factur','invoice_pack_number','id');
+        });
+        info(static::class.' '.json_encode($data));
+        $saldo = $saldo->sum('amount_saldo_factur');
         return $saldo ? $saldo : 0;
     }
 
