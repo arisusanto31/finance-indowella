@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\HasIndexDate;
 use App\Traits\HasModelDetailKartuInvoice;
+use App\Traits\HasModelSaldoStock;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -17,6 +18,7 @@ class KartuStock extends Model
     //
 
     use HasModelDetailKartuInvoice;
+    use HasModelSaldoStock;
     use HasIndexDate;
     protected $table = 'kartu_stocks';
     public $timestamps = true;

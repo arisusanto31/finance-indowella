@@ -66,6 +66,7 @@ Route::prefix('book')->middleware(['auth', 'role:admin,web'])->group(function ()
 Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])->group(function () {
     Route::get('/', [IndexController::class, 'index'])->name('admin.index');
     Route::get('area-developer', [IndexController::class, 'areaDeveloper'])->name('admin.area-developer');
+    Route::get('get-summary-balance', [IndexController::class, 'getSummaryBalance'])->name('admin.get-summary');
     Route::get('/random', [IndexController::class, 'random']);
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
         Route::get('/', [IndexController::class, 'dashboard'])->name('index');;

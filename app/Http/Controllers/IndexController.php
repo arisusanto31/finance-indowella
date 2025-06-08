@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Jobs\ImportSaldoNLJob;
 use App\Models\InvoicePack;
 use App\Models\Journal;
+use App\Models\KartuBahanJadi;
+use App\Models\KartuBDP;
 use App\Models\KartuDPSales;
 use App\Models\KartuHutang;
 use App\Models\KartuInventory;
@@ -81,6 +83,55 @@ class IndexController extends Controller
         ];
     }
 
+    public function getSummaryBalance()
+    {
+        $ks = KartuStock::getTotalSaldoRupiah(getInput('date'));
+        $jks = KartuStock::getTotalJournal(getInput('date'));
+
+        $kbdp = KartuBDP::getTotalSaldoRupiah(getInput('date'));
+        $jkbdp = KartuBDP::getTotalJournal(getInput('date'));
+
+        $kbj = KartuBahanJadi::getTotalSaldoRupiah(getInput('date'));
+        $jbj = KartuBahanJadi::getTotalJournal(getInput('date'));
+
+        $kh = KartuHutang::getTotalsaldoRupiah(getInput('date'));
+        $jkh = KartuHutang::getTotalJournal(getInput('date'));
+
+        $kp = KartuPiutang::getTotalSaldoRupiah(getInput('date'));
+        $jkp = KartuPiutang::getTotalJournal(getInput('date'));
+
+        $kdp = KartuDPSales::getTotalSaldoRupiah(getInput('date'));
+        $jkdp = KartuDPSales::getTotalJournal(getInput('date'));
+
+        return [
+            'kartu_stock' => [
+                'saldo' => $ks,
+                'journal' => $jks
+            ],
+            'kartu_bdp' => [
+                'saldo' => $kbdp,
+                'journal' => $jkbdp
+            ],
+            'kartu_bahan_jadi' => [
+                'saldo' => $kbj,
+                'journal' => $jbj
+            ],
+            'kartu_hutang' => [
+                'saldo' => $kh,
+                'journal' => $jkh
+            ],
+            'kartu_piutang' => [
+                'saldo' => $kp,
+                'journal' => $jkp
+            ],
+            'kartu_dp' => [
+                'saldo' => $kdp,
+                'journal' => $jkdp
+            ],
+            'status' => 1
+        ];
+    }
+
     public function areaDeveloper()
     {
         if (getInput('type') == "pattern") {
@@ -90,12 +141,14 @@ class IndexController extends Controller
             return format_db(getInput('nilai'));
         }
 
+
+
         if (getInput('type') == 'repair-tanggal') {
             $invoicePacks = InvoicePack::all();
             foreach ($invoicePacks as $invoicePack) {
                 $detail = collect($invoicePack->invoiceDetails())->first();
                 $invoicePack->created_at = $detail->created_at;
-                $invoicePack->invoice_date= $detail->created_at;
+                $invoicePack->invoice_date = $detail->created_at;
                 $invoicePack->save();
             }
             return $invoicePacks;

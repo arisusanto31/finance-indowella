@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Http\Controllers\JournalController;
 use App\Traits\HasIndexDate;
 use App\Traits\HasModelDetailKartuInvoice;
+use App\Traits\HasModelSaldoUang;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -20,6 +21,7 @@ class KartuHutang extends Model
     //
     use HasIndexDate;
     use HasModelDetailKartuInvoice;
+    use HasModelSaldoUang;
 
     protected $table = 'kartu_hutangs';
 

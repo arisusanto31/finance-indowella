@@ -6,6 +6,7 @@ use App\Http\Controllers\JournalController;
 use App\Services\LockManager;
 use App\Traits\HasIndexDate;
 use App\Traits\HasModelDetailKartuInvoice;
+use App\Traits\HasModelSaldoStock;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -18,7 +19,7 @@ class KartuBDP extends Model
 {
     //
     use HasIndexDate;
-
+    use HasModelSaldoStock;
     use HasModelDetailKartuInvoice;
     protected $table = 'kartu_bdps';
     public $timestamps = true;
