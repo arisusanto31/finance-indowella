@@ -356,8 +356,8 @@
 
 
         function getSummary() {
-            month = $('#month option:selected').val() ?? "";
-            year = $('#year option:selected').val() ?? "";
+            month = '{{ $month }}';
+            year = '{{ $year }}';
             console.log(month + ',' + year);
             $.ajax({
                 url: '{{route("kartu-piutang.get-summary")}}?month=' + month + '&year=' + year,
