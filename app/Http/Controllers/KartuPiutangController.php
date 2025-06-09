@@ -15,6 +15,10 @@ class KartuPiutangController extends Controller
     {
 
         $view = view('kartu.kartu-piutang');
+        $view->month = getInput('month') ? toDigit(getInput('month'), 2) : Date('m');
+        $view->year = getInput('year') ? getInput('year') : Date('Y');
+
+
         return $view;
     }
 
@@ -32,50 +36,7 @@ class KartuPiutangController extends Controller
     {
         $month = getInput('month') ?? Date('m');
         $year = getInput('year') ?? Date('Y');
-        if (!$year) $year = Date('Y');
-        if (!$month) $month = Date('m');
-        $date = $year . '-' . $month;
-        $kartuPiutangAwal = KartuPiutang::whereIn('id', function ($q) use ($date) {
-            $q->from('kartu_piutangs')->select(DB::raw('max(id)'))->where('created_at', '<', $date . '-01')->groupBy('invoice_pack_number');
-        })->where('amount_saldo_factur', '<>', 0)->select('invoice_pack_number', 'invoice_date', 'type', 'amount_saldo_factur', 'person_id', 'person_type')->get();
-
-        $kartuPiutangBaru = KartuPiutang::whereMonth('created_at', $month)->whereYear('created_at', $year)
-            ->select(
-                DB::raw('sum(amount_debet-amount_kredit) as total_amount '),
-                'invoice_pack_number',
-                'type',
-                'person_id',
-                'invoice_date',
-                'person_type',
-            )->groupBy('invoice_pack_number', 'type')->get();
-
-        $allFactur = collect($kartuPiutangAwal)->pluck('invoice_pack_number')->merge(collect($kartuPiutangBaru)->pluck('invoice_pack_number'))->unique()->all();
-        $customTable = [];
-        foreach ($allFactur as $factur) {
-            $dataAktif = $kartuPiutangAwal->where('invoice_pack_number', $factur)->first();
-            $dataBaru = $kartuPiutangBaru->where('invoice_pack_number', $factur)->first();
-            $dataMutasi = optional($kartuPiutangBaru->where('invoice_pack_number', $factur)->where('type', 'mutasi')->first())->total_amount ?? 0;
-            $dataPelunasan = optional($kartuPiutangBaru->where('invoice_pack_number', $factur)->where('type', 'pelunasan')->first())->total_amount ?? 0;
-            $saldoAwal = (optional($dataAktif)->amount_saldo_factur ?? 0);
-            $dataFix = $dataAktif ? $dataAktif : $dataBaru;
-            $data = [
-                'person_name' => $dataFix->person->name,
-                'person_type' => $dataFix->person_type,
-                'invoice_date' => $dataFix->invoice_date,
-                'invoice_pack_number' => $factur,
-                'saldo_awal' => $saldoAwal,
-                'mutasi' => $dataMutasi,
-                'pelunasan' => abs($dataPelunasan),
-                'saldo' => $saldoAwal + $dataMutasi + $dataPelunasan
-            ];
-            $customTable[] = $data;
-        }
-
-        return [
-            'status' => 1,
-            'msg' => $customTable,
-            'month' => $month . '-' . $year
-        ];
+        return KartuPiutang::getSummary($year, $month, 'invoice_pack_number');
     }
 
     public function showDetail($nomer)

@@ -1,6 +1,16 @@
 <x-app-layout>
     <div class="card shadow-sm mb-4">
-        <h5 class="text-primary-dark card-header" style="padding-bottom:0px;"> 💳 <strong>KARTU PIUTANG</strong> </h5>
+        <h5 class="text-primary-dark card-header" style="padding-bottom:0px;"> 💳 <strong>KARTU PIUTANG</strong> 
+         <div class="d-flex justify-content pe-4 mb-3">
+                <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="prevMonth()">
+                    << </button>
+                        <span class="badge bg-primary d-flex justify-content-center align-items-center">
+                            {{ getListMonth()[$month] }} {{ $year }}</span>
+                        <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="nextMonth()">
+                            >>
+                        </button>
+            </div>
+        </h5>
 
         <div class="card-body">
             <div class="row mt-1">
@@ -13,28 +23,7 @@
                 <!-- <a href="#" class="btn btn-primary btn-big-custom rounded-0">Tambah Jurnal Umum</a> -->
             </div>
 
-            <div class="row">
-
-                <div class="col-md-2">
-                    <select name="bulan" id="month" class="form-select ">
-                        <option value="">-- Bulan --</option>
-                        @foreach(getListMonth() as $key => $month)
-                        <option value="{{$key}}">{{$month}}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <select name="tahun" id="year" class="form-select ">
-                        <option value="">-- Tahun --</option>
-                        @for($year=0; $year < 3; $year++)
-                            <option value="{{intval(Date('Y')-$year)}}">{{intval(Date('Y')-$year)}}</option>
-                            @endfor
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <button onclick="getSummary()" class="btn btn-primary btn-sm w-100">Cari</button>
-                </div>
-            </div>
+         
 
 
 
@@ -273,6 +262,27 @@
 
         }
 
+          function prevMonth() {
+                month = '{{ $month }}';
+                year = '{{ $year }}';
+                month--;
+                if (month < 1) {
+                    month = 12;
+                    year--;
+                }
+                window.location.href = '{{ url('admin/kartu/kartu-piutang/main') }}?month=' + month + '&year=' + year;
+            }
+
+            function nextMonth() {
+                month = '{{ $month }}';
+                year = '{{ $year }}';
+                month++;
+                if (month > 12) {
+                    month = 1;
+                    year++;
+                }
+                window.location.href = '{{ url('admin/kartu/kartu-piutang/main') }}?month=' + month + '&year=' + year;
+            }
         function storePelunasan() {
             $('#btn-store-pelunasan').attr('disabled', true);
             $('#btn-store-pelunasan').html(`<div class="spinner-border spinner-border-sm text-primary" role="status">

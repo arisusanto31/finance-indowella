@@ -25,28 +25,7 @@
                 <!-- <a href="#" class="btn btn-primary btn-big-custom rounded-0">Tambah Jurnal Umum</a> -->
             </div>
 
-            <div class="row">
 
-                <div class="col-md-2">
-                    <select name="bulan" id="month" class="form-select ">
-                        <option value="">-- Bulan --</option>
-                        @foreach (getListMonth() as $key => $mt)
-                            <option value="{{ $key }}">{{ $mt }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <select name="tahun" id="year" class="form-select ">
-                        <option value="">-- Tahun --</option>
-                        @for ($y = 0; $y < 3; $y++)
-                            <option value="{{ intval(Date('Y') - $y) }}">{{ intval(Date('Y') - $y) }}</option>
-                        @endfor
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <button onclick="getSummary()" class="btn btn-primary btn-sm w-100">Cari</button>
-                </div>
-            </div>
 
             <div class="table-responsive mt-2">
                 <table id="kartuKasTable" class="table table-bordered table-striped table-hover align-middle">
@@ -88,8 +67,8 @@
                 <div class="modal-body">
                     <div class="col mb-3">
                         <label for="nameBasic" class="form-label">Date</label>
-                        <input type="datetime-local" id="mutasi-date" class="form-control"
-                            value="{{ now() }}" placeholder="date" />
+                        <input type="datetime-local" id="mutasi-date" class="form-control" value="{{ now() }}"
+                            placeholder="date" />
                     </div>
                     <div class="row">
                         <div class="col mb-3">
