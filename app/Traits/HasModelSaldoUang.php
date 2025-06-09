@@ -50,7 +50,7 @@ trait HasModelSaldoUang
          
         $date = $year . '-' . $month.'-01 00:00:00';
         $indexDate=intval(createCarbon($date)->format('ymdHis000'));
-        $kartuPiutangAwal = static::query()->whereIn('index_date', function ($q) use ($indexDate) {
+        $kartuPiutangAwal = static::query()->whereIn('index_date', function ($q) use ($indexDate,$kolomGroup) {
             $q->from('kartu_dp_sales')->select(DB::raw('max(index_date)'))->where('index_date', '<', $indexDate)->groupBy($kolomGroup);
         })->where('amount_saldo_factur', '<>', 0)->select($kolomGroup, 'invoice_date', 'type', 'amount_saldo_factur', 'person_id', 'person_type')->get();
 
