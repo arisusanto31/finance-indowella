@@ -43,6 +43,11 @@ class KartuKasController extends Controller
             ->orderBy('index_date', 'asc')->get()->groupBy('code_group');
 
         $chartAccount = ChartAccount::aktif()->withAlias()->pluck('alias_name', 'code_group');
+        foreach ($coas as $coa) {
+            if (!array_key_exists($coa, $journals)) {
+                $journals[$coa] = [];
+            }
+        }
         return [
             'status' => 1,
             'msg' => $journals,
@@ -50,7 +55,7 @@ class KartuKasController extends Controller
             'month' => $month,
             'year' => $year,
             'code_group' => $kindCodeGroup,
-            'saldo_awal'=> $lastSaldoJournal,
+            'saldo_awal' => $lastSaldoJournal,
         ];
     }
 

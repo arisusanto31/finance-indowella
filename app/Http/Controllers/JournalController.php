@@ -240,20 +240,25 @@ class JournalController extends Controller
 
         $subData = Journal::select(DB::raw('max(index_date) as maxindex'), 'code_group')->where('index_date', '<', $indexDate)->whereIn('code_group', $coas)
             ->groupBy('code_group');
-        $lastSaldoJournal= Journal::joinSub($subData, 'sub_journals', function ($q) {
+        $lastSaldoJournal = Journal::joinSub($subData, 'sub_journals', function ($q) {
             $q->on('journals.index_date', '=', 'sub_journals.maxindex')
                 ->on('journals.code_group', '=', 'sub_journals.code_group');
-        })->pluck('journals.amount_saldo','journals.code_group')->all(); 
+        })->pluck('journals.amount_saldo', 'journals.code_group')->all();
         $journals = Journal::searchCOA($code)->whereMonth('created_at', $month)->whereYear('created_at', $year)
             ->orderBy('index_date', 'asc')->get()->groupBy('code_group');
         $chartAccount = ChartAccount::aktif()->withAlias()->pluck('alias_name', 'code_group');
+        foreach ($coas as $coa) {
+            if (!array_key_exists($coa, $journals)) {
+                $journals[$coa] = [];
+            }
+        }
         return [
             'status' => 1,
             'msg' => $journals,
             'chart_accounts' => $chartAccount,
             'month' => $month,
             'year' => $year,
-            'saldo_awal'=> $lastSaldoJournal,
+            'saldo_awal' => $lastSaldoJournal,
             'code_group' => $code
         ];
     }
