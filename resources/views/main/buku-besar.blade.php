@@ -102,7 +102,7 @@
                             </tr>
                             `;
                                 }
-                                lastSaldo = 0;
+                                lastSaldo = res.saldo_awal[codeKas];
                                 data.forEach((item, index) => {
                                     tanggal = formatNormalDateTime(new Date(item.created_at));
                                     lastSaldo = parseFloat(item.amount_saldo);
