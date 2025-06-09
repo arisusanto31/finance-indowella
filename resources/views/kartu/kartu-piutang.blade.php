@@ -1,7 +1,7 @@
 <x-app-layout>
     <div class="card shadow-sm mb-4">
-        <h5 class="text-primary-dark card-header" style="padding-bottom:0px;"> 💳 <strong>KARTU PIUTANG</strong> 
-         <div class="d-flex justify-content pe-4 mb-3">
+        <h5 class="text-primary-dark card-header" style="padding-bottom:0px;"> 💳 <strong>KARTU PIUTANG</strong>
+            <div class="d-flex justify-content pe-4 mb-3">
                 <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="prevMonth()">
                     << </button>
                         <span class="badge bg-primary d-flex justify-content-center align-items-center">
@@ -15,15 +15,17 @@
         <div class="card-body">
             <div class="row mt-1">
                 <div class="col-md-4">
-                    <button type="button" class=" btn-primary" data-bs-toggle="modal" data-bs-target="#basicModal"> 🔃 Mutasi</button>
-                    <button type="button" class=" btn-primary" data-bs-toggle="modal" data-bs-target="#pelunasanModal"> 💵 Pelunasan</button>
+                    <button type="button" class=" btn-primary" data-bs-toggle="modal" data-bs-target="#basicModal"> 🔃
+                        Mutasi</button>
+                    <button type="button" class=" btn-primary" data-bs-toggle="modal" data-bs-target="#pelunasanModal">
+                        💵 Pelunasan</button>
                 </div>
             </div>
             <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
                 <!-- <a href="#" class="btn btn-primary btn-big-custom rounded-0">Tambah Jurnal Umum</a> -->
             </div>
 
-         
+
 
 
 
@@ -45,6 +47,8 @@
                     </thead>
                     <tbody id="body-kartu-hutang">
                     </tbody>
+                    <tfoot id="footer-kartu-hutang">
+                    </tfoot>
                 </table>
             </div>
 
@@ -61,10 +65,7 @@
                             <label class="form-check-label" for="is_otomatis_jurnal">Buat Jurnal</label>
                         </div>
                     </div>
-                    <button
-                        type="button"
-                        class="btn-close position-absolute end-0 top-0 m-3"
-                        data-bs-dismiss="modal"
+                    <button type="button" class="btn-close position-absolute end-0 top-0 m-3" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -77,13 +78,15 @@
                     <div class="row">
                         <div class="col mb-3">
                             <label for="nameBasic" class="form-label">Nomer Ivoice </label>
-                            <input type="text" id="invoice_number" class="form-control" placeholder="Nomer Invoice" />
+                            <input type="text" id="invoice_number" class="form-control"
+                                placeholder="Nomer Invoice" />
                         </div>
                     </div>
                     <div class="row">
                         <div class="col mb-3">
                             <label for="nameBasic" class="form-label">Deskripsi Jurnal</label>
-                            <input type="text" id="description" class="form-control" placeholder="Deskripsi Jurnal" />
+                            <input type="text" id="description" class="form-control"
+                                placeholder="Deskripsi Jurnal" />
                         </div>
                     </div>
                     <div class="row">
@@ -104,13 +107,15 @@
                     <div class="row">
                         <div class="col mb-3">
                             <label for="amount_mutasi" class="form-label">Nilai mutasi</label>
-                            <input type="text" id="amount_mutasi" autocomplete="off" class="form-control currency-input" placeholder="Nilai Mutasi" />
+                            <input type="text" id="amount_mutasi" autocomplete="off"
+                                class="form-control currency-input" placeholder="Nilai Mutasi" />
                         </div>
                     </div>
                     <div class="row g-2">
                         <div class="col mb-0">
                             <label for="person_type" class="form-label">Type Person</label>
-                            <select onchange="initSelectPerson()" type="text" id="person_type" class="form-control" placeholder="type person">
+                            <select onchange="initSelectPerson()" type="text" id="person_type"
+                                class="form-control" placeholder="type person">
                                 <option value="App\Models\Customer" selected> Customer</option>
                                 <option value="App\Models\OtherPerson"> Orang Lain</option>
                             </select>
@@ -125,7 +130,8 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         Close
                     </button>
-                    <button id="btn-store" onclick="storeMutasi()" type="button" class="btn btn-primary">Save changes</button>
+                    <button id="btn-store" onclick="storeMutasi()" type="button" class="btn btn-primary">Save
+                        changes</button>
                 </div>
             </div>
         </div>
@@ -139,41 +145,43 @@
                         <h5 class="modal-title" id="exampleModalLabel1">Buat Pelunasan Kartu Piutang</h5>
 
                         <div class="form-check form-switch ">
-                            <input class="form-check-input" type="checkbox" id="is_pelunasan_otomatis_jurnal" checked />
+                            <input class="form-check-input" type="checkbox" id="is_pelunasan_otomatis_jurnal"
+                                checked />
                             <label class="form-check-label" for="is_pelunasan_otomatis_jurnal">Buat Jurnal</label>
                         </div>
 
                     </div>
-                    <button
-                        type="button"
-                        class="btn-close position-absolute end-0 top-0 m-3"
-                        data-bs-dismiss="modal"
-                        aria-label="Close"></button>
+                    <button type="button" class="btn-close position-absolute end-0 top-0 m-3"
+                        data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row">
                         <div class="col mb-3">
                             <label for="nameBasic" class="form-label">Nomer Sales Order</label>
-                            <input type="text" id="pelunasan-factur" class="form-control" placeholder="Nomer Sales order" />
+                            <input type="text" id="pelunasan-factur" class="form-control"
+                                placeholder="Nomer Sales order" />
                         </div>
                     </div>
                     <div class="row">
                         <div class="col mb-3">
                             <label for="nameBasic" class="form-label">Nomer Invoice</label>
-                            <input type="text" id="pelunasan-invoice_number" class="form-control" placeholder="Nomer Invoice" />
+                            <input type="text" id="pelunasan-invoice_number" class="form-control"
+                                placeholder="Nomer Invoice" />
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col mb-3">
                             <label for="nameBasic" class="form-label">Deskripsi Jurnal</label>
-                            <input type="text" id="pelunasan-description" class="form-control" placeholder="Deskripsi Jurnal" />
+                            <input type="text" id="pelunasan-description" class="form-control"
+                                placeholder="Deskripsi Jurnal" />
                         </div>
                     </div>
                     <div class="row">
                         <div class="col mb-3">
                             <label for="amount_mutasi" class="form-label">Nilai Pelunasan</label>
-                            <input type="text" id="pelunasan-amount" autocomplete="off" class="form-control currency-input" placeholder="Nilai Pelunasan" />
+                            <input type="text" id="pelunasan-amount" autocomplete="off"
+                                class="form-control currency-input" placeholder="Nilai Pelunasan" />
                         </div>
                     </div>
                     <div class="row">
@@ -193,7 +201,8 @@
                     <div class="row g-2">
                         <div class="col mb-0">
                             <label for="person_type" class="form-label">Type Person</label>
-                            <select onchange="initSelectPersonPelunasan()" type="text" id="pelunasan-person_type" class="form-control" placeholder="type person">
+                            <select onchange="initSelectPersonPelunasan()" type="text" id="pelunasan-person_type"
+                                class="form-control" placeholder="type person">
                                 <option value="App\Models\Customer" selected> Customer</option>
                                 <option value="App\Models\OtherPerson"> Orang Lain</option>
                             </select>
@@ -208,61 +217,62 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         Close
                     </button>
-                    <button id="btn-store-pelunasan" onclick="storePelunasan()" type="button" class="btn btn-primary">Save changes</button>
+                    <button id="btn-store-pelunasan" onclick="storePelunasan()" type="button"
+                        class="btn btn-primary">Save changes</button>
                 </div>
             </div>
         </div>
     </div>
 
     @push('scripts')
-    <script>
-        function storeMutasi() {
-            $('#btn-store').attr('disabled', true);
-            $('#btn-store').html(`<div class="spinner-border spinner-border-sm text-primary" role="status">
+        <script>
+            function storeMutasi() {
+                $('#btn-store').attr('disabled', true);
+                $('#btn-store').html(`<div class="spinner-border spinner-border-sm text-primary" role="status">
                           <span class="visually-hidden">Loading...</span>
                         </div> storing data..`);
-            if($('#invoice_number').val()==""){
-                swalInfo('Opss','','warnig')
-                return 0;
-            }
-            $.ajax({
-                url: '{{url("admin/kartu/kartu-piutang/create-mutation")}}',
-                method: 'post',
-                data: {
-                    sales_order_number: $('#factur').val(),
-                    invoice_pack_number: $('#invoice_number').val(),
-                    description: $('#description').val(),
-                    amount_mutasi: formatDB($('#amount_mutasi').val(), 'id'),
-                    person_id: $('#person_id option:selected').val(),
-                    person_type: $('#person_type option:selected').val(),
-                    code_group: $('#akun-piutang option:selected').val(),
-                    lawan_code_group: $('#akun-lawan option:selected').val(),
-                    is_otomatis_jurnal: $('#is_otomatis_jurnal').is(':checked') ? 1 : 0,
-                    _token: '{{csrf_token()}}'
-                },
-                success: function(res) {
-                    console.log(res);
-                    if (res.status == 1) {
-                        Swal.fire('success', 'data berhasil tersubmit', 'success');
-                        $('#btn-store').html('save changes');
-                        $('#btn-store').attr('disabled', false);
-                        $('#basicModal').modal('hide');
-                    } else {
-                        Swal.fire('opss', 'something error ' + res.msg, 'error');
+                if ($('#invoice_number').val() == "") {
+                    swalInfo('Opss', '', 'warnig')
+                    return 0;
+                }
+                $.ajax({
+                    url: '{{ url('admin/kartu/kartu-piutang/create-mutation') }}',
+                    method: 'post',
+                    data: {
+                        sales_order_number: $('#factur').val(),
+                        invoice_pack_number: $('#invoice_number').val(),
+                        description: $('#description').val(),
+                        amount_mutasi: formatDB($('#amount_mutasi').val(), 'id'),
+                        person_id: $('#person_id option:selected').val(),
+                        person_type: $('#person_type option:selected').val(),
+                        code_group: $('#akun-piutang option:selected').val(),
+                        lawan_code_group: $('#akun-lawan option:selected').val(),
+                        is_otomatis_jurnal: $('#is_otomatis_jurnal').is(':checked') ? 1 : 0,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(res) {
+                        console.log(res);
+                        if (res.status == 1) {
+                            Swal.fire('success', 'data berhasil tersubmit', 'success');
+                            $('#btn-store').html('save changes');
+                            $('#btn-store').attr('disabled', false);
+                            $('#basicModal').modal('hide');
+                        } else {
+                            Swal.fire('opss', 'something error ' + res.msg, 'error');
+                            $('#btn-store').html('save changes');
+                            $('#btn-store').attr('disabled', false);
+                        }
+                    },
+                    error: function(res) {
+                        Swal.fire('opss', 'something error ', 'error');
                         $('#btn-store').html('save changes');
                         $('#btn-store').attr('disabled', false);
                     }
-                },
-                error: function(res) {
-                    Swal.fire('opss', 'something error ', 'error');
-                    $('#btn-store').html('save changes');
-                    $('#btn-store').attr('disabled', false);
-                }
-            })
+                })
 
-        }
+            }
 
-          function prevMonth() {
+            function prevMonth() {
                 month = '{{ $month }}';
                 year = '{{ $year }}';
                 month--;
@@ -283,93 +293,109 @@
                 }
                 window.location.href = '{{ url('admin/kartu/kartu-piutang/main') }}?month=' + month + '&year=' + year;
             }
-        function storePelunasan() {
-            $('#btn-store-pelunasan').attr('disabled', true);
-            $('#btn-store-pelunasan').html(`<div class="spinner-border spinner-border-sm text-primary" role="status">
+
+            function storePelunasan() {
+                $('#btn-store-pelunasan').attr('disabled', true);
+                $('#btn-store-pelunasan').html(`<div class="spinner-border spinner-border-sm text-primary" role="status">
                           <span class="visually-hidden">Loading...</span>
                         </div> storing data..`);
-            $.ajax({
-                url: '{{url("admin/kartu/kartu-piutang/create-pelunasan")}}',
-                method: 'post',
-                data: {
-                    sales_order_number: $('#pelunasan-factur').val(),
-                    invoice_pack_number: $('#pelunasan-invoice_number').val(),
-                    description: $('#pelunasan-description').val(),
-                    amount_bayar: formatDB($('#pelunasan-amount').val(), 'id'),
-                    person_id: $('#pelunasan-person_id option:selected').val(),
-                    account_bayar: $('#pelunasan-akun-bayar option:selected').val(),
-                    person_type: $('#pelunasan-person_type option:selected').val(),
-                    lawan_code_group: $('#pelunasan-akun-lawan option:selected').val(),
-                    code_group: $('#pelunasan-akun-piutang option:selected').val(),
-                    is_otomatis_jurnal: $('#is_pelunasan_otomatis_jurnal').is(':checked') ? 1 : 0,
-                    _token: '{{csrf_token()}}'
-                },
-                success: function(res) {
-                    console.log(res);
-                    if (res.status == 1) {
-                        Swal.fire('success', 'data berhasil tersubmit', 'success');
-                        $('#btn-store-pelunasan').html('save changes');
-                        $('#btn-store-pelunasan').attr('disabled', false);
-                        $('#pelunasanModal').modal('hide');
-                    } else {
-                        Swal.fire('opss', 'something error ' + res.msg, 'error');
+                $.ajax({
+                    url: '{{ url('admin/kartu/kartu-piutang/create-pelunasan') }}',
+                    method: 'post',
+                    data: {
+                        sales_order_number: $('#pelunasan-factur').val(),
+                        invoice_pack_number: $('#pelunasan-invoice_number').val(),
+                        description: $('#pelunasan-description').val(),
+                        amount_bayar: formatDB($('#pelunasan-amount').val(), 'id'),
+                        person_id: $('#pelunasan-person_id option:selected').val(),
+                        account_bayar: $('#pelunasan-akun-bayar option:selected').val(),
+                        person_type: $('#pelunasan-person_type option:selected').val(),
+                        lawan_code_group: $('#pelunasan-akun-lawan option:selected').val(),
+                        code_group: $('#pelunasan-akun-piutang option:selected').val(),
+                        is_otomatis_jurnal: $('#is_pelunasan_otomatis_jurnal').is(':checked') ? 1 : 0,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(res) {
+                        console.log(res);
+                        if (res.status == 1) {
+                            Swal.fire('success', 'data berhasil tersubmit', 'success');
+                            $('#btn-store-pelunasan').html('save changes');
+                            $('#btn-store-pelunasan').attr('disabled', false);
+                            $('#pelunasanModal').modal('hide');
+                        } else {
+                            Swal.fire('opss', 'something error ' + res.msg, 'error');
+                            $('#btn-store-pelunasan').html('save changes');
+                            $('#btn-store-pelunasan').attr('disabled', false);
+                        }
+                    },
+                    error: function(res) {
+                        Swal.fire('opss', 'something error ', 'error');
                         $('#btn-store-pelunasan').html('save changes');
                         $('#btn-store-pelunasan').attr('disabled', false);
                     }
-                },
-                error: function(res) {
-                    Swal.fire('opss', 'something error ', 'error');
-                    $('#btn-store-pelunasan').html('save changes');
-                    $('#btn-store-pelunasan').attr('disabled', false);
+                })
+
+            }
+
+            function initSelectPerson() {
+                type = $('#person_type option:selected').val();
+                if (type === 'App\\Models\\Customer') {
+                    console.log('init oy ' + type);
+                    initItemSelectManual('#person_id', '{{ route('customer.get-item') }}', 'Person Name ..', '#basicModal');
+                } else {
+                    initItemSelectManual('#person_id', '{{ route('other-person.get-item') }}', 'Person Name ..',
+                        '#basicModal');
+
                 }
-            })
-
-        }
-
-        function initSelectPerson() {
-            type = $('#person_type option:selected').val();
-            if (type === 'App\\Models\\Customer') {
-                console.log('init oy ' + type);
-                initItemSelectManual('#person_id', '{{route("customer.get-item")}}', 'Person Name ..', '#basicModal');
-            } else {
-                initItemSelectManual('#person_id', '{{route("other-person.get-item")}}', 'Person Name ..', '#basicModal');
-
             }
-        }
 
-        function initSelectPersonPelunasan() {
-            type = $('#pelunasan-person_type option:selected').val();
-            if (type === 'App\\Models\\Customer') {
-                console.log('init oy ' + type);
-                initItemSelectManual('#pelunasan-person_id', '{{route("customer.get-item")}}', 'Person Name ..', '#pelunasanModal');
-            } else {
-                initItemSelectManual('#pelunasan-person_id', '{{route("other-person.get-item")}}', 'Person Name ..', '#pelunasanModal');
+            function initSelectPersonPelunasan() {
+                type = $('#pelunasan-person_type option:selected').val();
+                if (type === 'App\\Models\\Customer') {
+                    console.log('init oy ' + type);
+                    initItemSelectManual('#pelunasan-person_id', '{{ route('customer.get-item') }}', 'Person Name ..',
+                        '#pelunasanModal');
+                } else {
+                    initItemSelectManual('#pelunasan-person_id', '{{ route('other-person.get-item') }}', 'Person Name ..',
+                        '#pelunasanModal');
 
+                }
             }
-        }
-        initSelectPerson();
-        initSelectPersonPelunasan();
-        initItemSelectManual('#pelunasan-akun-lawan', '{{route("chart-account.get-item")}}', 'akun lawan ..', '#pelunasanModal');
-        initItemSelectManual('#pelunasan-akun-piutang', '{{route("chart-account.get-item-keuangan")}}?kind=piutang', 'akun piutang ..', '#pelunasanModal');
-        initItemSelectManual('#akun-piutang', '{{route("chart-account.get-item-keuangan")}}?kind=piutang', 'akun piutang ..', '#basicModal');
-        initItemSelectManual('#akun-lawan', '{{route("chart-account.get-item")}}', 'akun lawan ..', '#basicModal');
+            initSelectPerson();
+            initSelectPersonPelunasan();
+            initItemSelectManual('#pelunasan-akun-lawan', '{{ route('chart-account.get-item') }}', 'akun lawan ..',
+                '#pelunasanModal');
+            initItemSelectManual('#pelunasan-akun-piutang', '{{ route('chart-account.get-item-keuangan') }}?kind=piutang',
+                'akun piutang ..', '#pelunasanModal');
+            initItemSelectManual('#akun-piutang', '{{ route('chart-account.get-item-keuangan') }}?kind=piutang',
+                'akun piutang ..', '#basicModal');
+            initItemSelectManual('#akun-lawan', '{{ route('chart-account.get-item') }}', 'akun lawan ..', '#basicModal');
 
 
-        function getSummary() {
-            month = '{{ $month }}';
-            year = '{{ $year }}';
-            console.log(month + ',' + year);
-            $.ajax({
-                url: '{{route("kartu-piutang.get-summary")}}?month=' + month + '&year=' + year,
-                method: 'get',
-                success: function(res) {
-                    console.log(res);
-                    if (res.status == 1) {
-                        html = "";
-                        saldoAkhir = 0;
-                        res.msg.forEach(function(data, i) {
-                            saldoAkhir += parseInt(data.saldo);
-                            html += `
+            function getSummary() {
+                month = '{{ $month }}';
+                year = '{{ $year }}';
+                console.log(month + ',' + year);
+                $.ajax({
+                    url: '{{ route('kartu-piutang.get-summary') }}?month=' + month + '&year=' + year,
+                    method: 'get',
+                    success: function(res) {
+                        console.log(res);
+                        if (res.status == 1) {
+                            html = "";
+                            saldoAkhir = 0;
+                            totalSaldoAwal = 0;
+                            totalMutasi = 0;
+                            totalPelunasan = 0;
+                            totalSaldo = 0;
+                            res.msg.forEach(function(data, i) {
+                                saldoAkhir += parseInt(data.saldo);
+                                totalSaldoAwal += formatDB(formatRupiah(data.saldo_awal));
+                                totalMutasi += formatDB(formatRupiah(data.mutasi));
+                                totalPelunasan += formatDB(formatRupiah(data.pelunasan));
+                                totalSaldo += (data.saldo);
+
+                                html += `
                                 <tr>
                                     <td>${i+1}</td>
                                     <td>${data.person_name}</td>
@@ -385,22 +411,34 @@
                                     </td>                          
                                 </tr>
                             `;
-                        });
-                        $('#body-kartu-hutang').html(html);
-                    } else {
+                            });
+                            $('#body-kartu-hutang').html(html);
+                            htmlFooter = `
+                            <tr>
+                                <td colspan="4" class="text-center">Total</td>
+                                <td class="textright"><strong>${formatRupiah(totalSaldoAwal)} </strong></td>
+                                <td class="textright"><strong>${formatRupiah(totalMutasi)}</strong></td>
+                                <td class="textright"><strong>${formatRupiah(totalPelunasan)}</strong></td>
+                                <td class="textright"><strong>${formatRupiah(totalSaldo)}</strong></td>
+                                <td class="textright"><strong>${formatRupiah(saldoAkhir)}</strong></td>
+                                <td></td>
+                            </tr>
+                            `;
+                            $('#footer-kartu-hutang').append(htmlFooter);
+                        } else {
 
+                        }
+                    },
+                    error: function(res) {
+                        console.log(res);
                     }
-                },
-                error: function(res) {
-                    console.log(res);
-                }
-            });
-        }
+                });
+            }
 
-        function showDetailKartuPiutang(factur) {
-            showDetailOnModal('{{url("admin/kartu/kartu-piutang/show-detail")}}/' + factur, 'xl');
-        }
-        setTimeout(getSummary, 100);
-    </script>
+            function showDetailKartuPiutang(factur) {
+                showDetailOnModal('{{ url('admin/kartu/kartu-piutang/show-detail') }}/' + factur, 'xl');
+            }
+            setTimeout(getSummary, 100);
+        </script>
     @endpush
 </x-app-layout>
