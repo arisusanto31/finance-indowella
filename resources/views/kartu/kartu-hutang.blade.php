@@ -112,6 +112,8 @@
                                         </thead>
                                         <tbody id="body-kartu-hutang">
                                         </tbody>
+                                        <tfoot id="footer-kartu-hutang">
+                                        </tfoot>
                                     </table>
                                 </div>
 
@@ -448,7 +450,7 @@
             }
 
             function getMutasiKeluar() {
-               loading(1);
+                loading(1);
                 month = '{{ $month }}';
                 year = '{{ $year }}';
                 $.ajax({
@@ -591,8 +593,8 @@
                 '#basicModal');
 
             function getSummary() {
-                month='{{ $month }}';
-                year='{{ $year }}';
+                month = '{{ $month }}';
+                year = '{{ $year }}';
                 console.log(month + ',' + year);
                 $.ajax({
                     url: '{{ route('kartu-hutang.get-summary') }}?month=' + month + '&year=' + year,
@@ -642,7 +644,7 @@
                                 <td></td>
                             </tr>
                             `;
-                            $('#footer-kartu-hutang').append(htmlFooter);
+                            $('#footer-kartu-hutang').html(htmlFooter);
                         } else {
 
                         }
