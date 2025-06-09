@@ -6,6 +6,7 @@ use App\Models\ChartAccount;
 use App\Models\Journal;
 use App\Models\Toko;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class KartuKasController extends Controller
 {
@@ -27,6 +28,17 @@ class KartuKasController extends Controller
         $kindCodeGroup = getInput('kind');
         $month = getInput('month') ?? Date('m');
         $year = getInput('year') ?? Date('Y');
+
+        $indexDate = createCarbon($year . '-' . $month . '-01')->format('ymdHis00');
+        $coas = ChartAccount::aktif()->where('code_group', 'like', Journal::getPrimaryCode($kindCodeGroup) . '%')->pluck('code_group')->all();
+
+        $subData = Journal::select(DB::raw('max(index_date) as maxindex'), 'code_group')->where('index_date', '<', $indexDate)->whereIn('code_group', $coas)
+            ->groupBy('code_group');
+        $lastSaldoJournal = Journal::joinSub($subData, 'sub_journals', function ($q) {
+            $q->on('journals.index_date', '=', 'sub_journals.maxindex')
+                ->on('journals.code_group', '=', 'sub_journals.code_group');
+        })->pluck('journals.amount_saldo', 'journals.code_group')->all();
+
         $journals = Journal::searchCOA($kindCodeGroup)->whereMonth('created_at', $month)->whereYear('created_at', $year)
             ->orderBy('index_date', 'asc')->get()->groupBy('code_group');
 
@@ -37,7 +49,8 @@ class KartuKasController extends Controller
             'chart_accounts' => $chartAccount,
             'month' => $month,
             'year' => $year,
-            'code_group' => $kindCodeGroup
+            'code_group' => $kindCodeGroup,
+            'saldo_awal'=> $lastSaldoJournal,
         ];
     }
 
@@ -50,7 +63,7 @@ class KartuKasController extends Controller
         $amountDebet = $request->input('amount_debet');
         $amountKredit = $request->input('amount_kredit');
         $codeGroup = $request->input('code_group');
-        $toko=Toko::first();
+        $toko = Toko::first();
         if ($amountDebet && $amountKredit) {
             return ['status' => 0, 'msg' => 'tidak bisa memasukkan nilai debet dan kredit bersamaan'];
         }
@@ -71,8 +84,8 @@ class KartuKasController extends Controller
                 'description' => $desc,
                 'amount' => $amount,
                 'reference_id' => null,
-                'reference_type' => null, 
-                'toko_id'=>$toko->id   
+                'reference_type' => null,
+                'toko_id' => $toko->id
             ],
         ];
         $debets = [
@@ -82,8 +95,8 @@ class KartuKasController extends Controller
                 'amount' => $amount,
                 'reference_id' => null,
                 'reference_type' => null,
-                'toko_id'=>$toko->id,
-               
+                'toko_id' => $toko->id,
+
             ],
         ];
         $st = JournalController::createBaseJournal(new Request([
@@ -94,8 +107,8 @@ class KartuKasController extends Controller
             'is_auto_generated' => 1,
             'title' => 'create mutation transaction',
             'url_try_again' => 'try_again',
-            'is_backdate'=>1,
-            
+            'is_backdate' => 1,
+
 
         ]));
         return $st;
