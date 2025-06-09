@@ -46,6 +46,8 @@
                     </thead>
                     <tbody id="body-kartu-hutang">
                     </tbody>
+                    <tfoot id="footer-kartu-hutang">
+                    </tfoot>
                 </table>
             </div>
 
@@ -389,8 +391,16 @@
                         if (res.status == 1) {
                             html = "";
                             saldoAkhir = 0;
+                            totalSaldoAwal = 0;
+                            totalMutasi = 0;
+                            totalPelunasan = 0;
+                            totalSaldo = 0;
                             res.msg.forEach(function(data, i) {
-                                saldoAkhir+= (data.saldo);
+                                saldoAkhir += (data.saldo);
+                                totalSaldoAwal += formatDB(formatRupiah(data.saldo_awal));
+                                totalMutasi += formatDB(formatRupiah(data.mutasi));
+                                totalPelunasan += formatDB(formatRupiah(data.pelunasan));
+                                totalSaldo += (data.saldo);
                                 html += `
                                 <tr>
                                     <td>${i+1}</td>
@@ -409,6 +419,18 @@
                             `;
                             });
                             $('#body-kartu-hutang').html(html);
+                            htmlFooter = `
+                            <tr>
+                                <td colspan="4" class="text-center">Total</td>
+                                <td class="textright"><strong>${formatRupiah(totalSaldoAwal)} </strong></td>
+                                <td class="textright"><strong>${formatRupiah(totalMutasi)}</strong></td>
+                                <td class="textright"><strong>${formatRupiah(totalPelunasan)}</strong></td>
+                                <td class="textright"><strong>${formatRupiah(totalSaldo)}</strong></td>
+                                <td class="textright"><strong>${formatRupiah(saldoAkhir)}</strong></td>
+                                <td></td>
+                            </tr>
+                            `;
+                            $('#footer-kartu-hutang').append(htmlFooter);
                         } else {
 
                         }
