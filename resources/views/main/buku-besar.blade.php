@@ -53,7 +53,7 @@
 
     @push('scripts')
         <script>
-            initItemSelectManual('.select-coa', '{{ route('chart-account.get-item') }}', 'chart account');
+            initItemSelectManual('.select-coa', '{{ route('chart-account.get-item-all') }}', 'chart account');
 
             function searchData() {
                 month = $('#month').val();
