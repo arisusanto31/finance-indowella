@@ -94,6 +94,26 @@ trait HasModelSaldoUang
         ];
     }
 
+    public static function getMutasi($year, $month, $type)
+    {
+        $kartu = static::query()
+            ->select(
+                'invoice_pack_number',
+                'person_id',
+                'invoice_date',
+                'person_type',
+                'journal_number',
+                'description',
+                'created_at',
+                DB::raw('amount_debet- amount_kredit as total_amount'),
+            )
+            ->whereMonth('created_at', $month)->whereYear('created_at', $year)
+            ->where('type', $type)
+            ->with('person:id,name')
+            ->get();
+        return ['status' => 1, 'msg' => $kartu];
+    }
+
     public function refreshCurrentSaldo($kolomGroup = 'invoice_pack_number')
     {
         $lastKartu = static::query()->where('person_id', $this->person_id)->where('person_type', $this->person_type)

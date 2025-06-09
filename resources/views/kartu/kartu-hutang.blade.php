@@ -12,7 +12,8 @@
             </div>
         </h5>
 
-        <div class="card-body">
+        {{-- <div class="card-body">
+            
             <div class="row mt-1">
                 <div class="col-md-4">
                     <button type="button" class=" btn-primary" data-bs-toggle="modal" data-bs-target="#basicModal"> 🔃
@@ -24,8 +25,6 @@
             <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
                 <!-- <a href="#" class="btn btn-primary btn-big-custom rounded-0">Tambah Jurnal Umum</a> -->
             </div>
-
-
 
             <div class="table-responsive mt-2">
                 <table id="kartuKasTable" class="table table-bordered table-striped table-hover align-middle">
@@ -48,8 +47,141 @@
                 </table>
             </div>
 
+        </div> --}}
+        <div class="card-body">
+            <div class="row">
+                <div class="col-xl-12 col-md-12">
+                    <div class="nav-align-top mb-4">
+                        <ul class="nav nav-pills mb-3" role="tablist">
+                            <li class="nav-item">
+                                <button type="button" class="nav-link active" role="tab" data-bs-toggle="tab"
+                                    data-bs-target="#navs-pills-top-home" aria-controls="navs-pills-top-home"
+                                    aria-selected="true" onclick="getSummary()">
+                                    🗃 KARTU
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button type="button" class="nav-link" role="tab" data-bs-toggle="tab"
+                                    data-bs-target="#navs-pills-top-profile" aria-controls="navs-pills-top-profile"
+                                    aria-selected="false" onclick="getMutasiMasuk()">
+                                    📥 Mutasi
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button type="button" class="nav-link" role="tab" data-bs-toggle="tab"
+                                    data-bs-target="#navs-pills-top-messages" aria-controls="navs-pills-top-messages"
+                                    aria-selected="false" onclick="getMutasiKeluar()">
+                                    📤 Pelunasan
+                                </button>
+                            </li>
+                        </ul>
+                        <div class="tab-content" style="background-color: #f8f9fa;">
+                            <div class="tab-pane fade show active" id="navs-pills-top-home" role="tabpanel">
+
+
+                                <div class="row mt-1">
+                                    <div class="col-md-4">
+                                        <button type="button" class=" btn-primary" data-bs-toggle="modal"
+                                            data-bs-target="#basicModal"> 🔃
+                                            Mutasi</button>
+                                        <button type="button" class=" btn-primary" data-bs-toggle="modal"
+                                            data-bs-target="#pelunasanModal">
+                                            💵 Pelunasan</button>
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                                    <!-- <a href="#" class="btn btn-primary btn-big-custom rounded-0">Tambah Jurnal Umum</a> -->
+                                </div>
+
+                                <div class="table-responsive mt-2">
+                                    <table id="kartuKasTable"
+                                        class="table table-bordered table-striped table-hover align-middle">
+                                        <thead class="bg-white text-dark text-center">
+                                            <tr>
+                                                <th>No</th>
+                                                <th>🦸 Supplier</th>
+                                                <th>📅 Tanggal</th>
+                                                <th>#️⃣ No Invoice</th>
+                                                <th>🔖 Saldo Awal</th>
+                                                <th>🔃 Mutasi</th>
+                                                <th>💵 Pelunasan</th>
+                                                <th>💲 saldo</th>
+                                                <th>💸 saldo Akumulasi</th>
+                                                <th>📝 Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="body-kartu-hutang">
+                                        </tbody>
+                                    </table>
+                                </div>
+
+
+                            </div>
+                            <div class="tab-pane fade" id="navs-pills-top-profile" role="tabpanel">
+                                <div class="row mt-1">
+                                    <div class="col-md-2">
+                                        <button type="button" class=" btn-primary" data-bs-toggle="modal"
+                                            data-bs-target="#basicModal"> 🔃
+                                            mutasi</button>
+                                    </div>
+                                </div>
+                                <div class="table-responsive mt-2">
+
+                                    <table id="kartuMasuk"
+                                        class="table table-bordered table-striped table-hover align-middle">
+                                        <thead class="bg-white text-dark text-center">
+                                            <tr>
+                                                <th>No</th>
+                                                <th>Tanggal</th>
+                                                <th>Person </th>
+                                                <th> Nomer Invoice</th>
+                                                <th> Keterangan</th>
+                                                <th>Amount</th>
+                                                <th>Jurnal</th>
+                                                <th>Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="body-mutasi-masuk">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="navs-pills-top-messages" role="tabpanel">
+                                <div class="col-md-2">
+                                    <button type="button" class=" btn-primary" data-bs-toggle="modal"
+                                        data-bs-target="#pelunasanModal">
+                                        💵 Pelunasan</button>
+                                </div>
+                                <div class="table-responsive mt-2">
+
+                                    <table id="kartuKeluar"
+                                        class="table table-bordered table-striped table-hover align-middle">
+                                        <thead class="bg-white text-dark text-center">
+                                            <tr>
+                                                <th>No</th>
+                                                <th>Tanggal</th>
+                                                <th>Person</th>
+                                                <th> Nomer Invoice</th>
+                                                <th> Keterangan</th>
+                                                <th>Amount</th>
+                                                <th>Jurnal</th>
+                                                <th>Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="body-mutasi-keluar">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
+
+
     <div class="modal fade" id="basicModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -61,14 +193,14 @@
                             <label class="form-check-label" for="is_otomatis_jurnal">Buat Jurnal</label>
                         </div>
                     </div>
-                    <button type="button" class="btn-close position-absolute end-0 top-0 m-3" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
+                    <button type="button" class="btn-close position-absolute end-0 top-0 m-3"
+                        data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="col mb-3">
                         <label for="nameBasic" class="form-label">Date</label>
-                        <input type="datetime-local" id="mutasi-date" class="form-control" value="{{ now() }}"
-                            placeholder="date" />
+                        <input type="datetime-local" id="mutasi-date" class="form-control"
+                            value="{{ now() }}" placeholder="date" />
                     </div>
                     <div class="row">
                         <div class="col mb-3">
@@ -269,6 +401,93 @@
                         $('#btn-store').attr('disabled', false);
                     }
                 })
+            }
+
+            function getMutasiMasuk() {
+                loading(1);
+                month = '{{ $month }}';
+                year = '{{ $year }}';
+                $.ajax({
+                    url: '{{ route('kartu-hutang.get-mutasi-masuk') }}?month=' + month + '&year=' + year,
+                    method: 'get',
+                    success: function(res) {
+                        loading(0);
+                        console.log(res);
+                        if (res.status == 1) {
+                            html = "";
+                            res.msg.forEach(function(data, i) {
+                                html += `
+                                <tr>
+                                    <td>${i+1}</td>
+                                    <td>${formatNormalDateTime(new Date(data.created_at))}</td>
+                                    <td>${data.person.name} </td>
+                                    <td>${data.invoice_pack_number}</td>
+                                    <td>${data.description}</td>    
+                                    <td class="textright">${formatRupiah(data.total_amount)}</td>
+                                    <td>${data.journal_number}</td>
+                                    <td>
+                                      </td>
+                                </tr>
+                            `;
+                            });
+                            $('#body-mutasi-masuk').html(html);
+                        } else {
+                            $('#body-mutasi-masuk').html(`
+                            <tr>
+                                <td colspan="7" class="text-center">🤷‍♂️ Tidak ada data</td>
+                            </tr>
+                            `);
+                        }
+                    },
+                    error: function(res) {
+                        loading(0);
+                        swalInfo('opss', 'something error ', 'error');
+                    }
+                });
+
+            }
+
+            function getMutasiKeluar() {
+               loading(1);
+                month = '{{ $month }}';
+                year = '{{ $year }}';
+                $.ajax({
+                    url: '{{ route('kartu-hutang.get-mutasi-keluar') }}?month=' + month + '&year=' + year,
+                    method: 'get',
+                    success: function(res) {
+                        loading(0);
+                        console.log(res);
+                        if (res.status == 1) {
+                            html = "";
+                            res.msg.forEach(function(data, i) {
+                                html += `
+                                <tr>
+                                    <td>${i+1}</td>
+                                    <td>${formatNormalDateTime(new Date(data.created_at))}</td>
+                                    <td>${data.person.name} </td>
+                                    <td>${data.invoice_pack_number}</td>
+                                    <td>${data.description}</td>    
+                                    <td class="textright">${formatRupiah(data.total_amount)}</td>
+                                    <td>${data.journal_number}</td>
+                                    <td>
+                                      </td>
+                                </tr>
+                            `;
+                            });
+                            $('#body-mutasi-masuk').html(html);
+                        } else {
+                            $('#body-mutasi-masuk').html(`
+                            <tr>
+                                <td colspan="7" class="text-center">🤷‍♂️ Tidak ada data</td>
+                            </tr>
+                            `);
+                        }
+                    },
+                    error: function(res) {
+                        loading(0);
+                        swalInfo('opss', 'something error ', 'error');
+                    }
+                });
             }
 
             function prevMonth() {

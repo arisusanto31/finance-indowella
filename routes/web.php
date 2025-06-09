@@ -188,6 +188,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('get-summary', [KartuHutangController::class, 'getSummary'])->name('get-summary');
             Route::get('show-detail/{id}', [KartuHutangController::class, 'showDetail'])->name('show-detail');
             Route::get('search-link-journal', [KartuHutangController::class, 'searchLinkJournal'])->name('search-link-journal');
+            Route::get('get-mutasi-masuk', [KartuHutangController::class, 'getMutasiMasuk'])->name('get-mutasi-masuk');
+            Route::get('get-mutasi-keluar', [KartuHutangController::class, 'getMutasiKeluar'])->name('get-mutasi-keluar');
         });
 
         Route::prefix('kartu-piutang')->name('kartu-piutang.')->group(function () {

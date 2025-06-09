@@ -16,7 +16,7 @@ class KartuHutangController extends Controller
         $view = view('kartu.kartu-hutang');
         $view->month = getInput('month') ? toDigit(getInput('month'), 2) : Date('m');
         $view->year = getInput('year') ? getInput('year') : Date('Y');
-        
+
         return $view;
     }
 
@@ -37,6 +37,20 @@ class KartuHutangController extends Controller
         if (!$year) $year = Date('Y');
         if (!$month) $month = Date('m');
         return KartuHutang::getSummary($year, $month, 'invoice_pack_number');
+    }
+
+    function getMutasiMasuk()
+    {
+        $month = getInput('month') ?? Date('m');
+        $year = getInput('year') ?? Date('Y');
+        return KartuHutang::getMutasi($year, $month, 'mutasi');
+    }
+
+    function getMutasiKeluar()
+    {
+        $month = getInput('month') ?? Date('m');
+        $year = getInput('year') ?? Date('Y');
+        return KartuHutang::getMutasi($year, $month, 'pelunasan');
     }
 
     public function showDetail($nomer)

@@ -22,12 +22,10 @@
         </h5>
         <div class="card-body">
             <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
-                <!-- <a href="#" class="btn btn-primary btn-big-custom rounded-0">Tambah Jurnal Umum</a> -->
-            </div>
+             </div>
 
             <div class="row">
                 <div class="col-xl-12 col-md-12">
-
                     <div class="nav-align-top mb-4">
                         <ul class="nav nav-pills mb-3" role="tablist">
                             <li class="nav-item">
