@@ -285,7 +285,7 @@
                     <div class="row">
                         <div class="col mb-3">
                             <label for="nameBasic" class="form-label">Date</label>
-                            <input type="datetime-local" id="pelunasan-date" class="form-control"
+                            <input type="datetime-local" name="date" id="pelunasan-date" class="form-control"
                                 value="{{ now() }}" placeholder="date" />
                         </div>
                     </div>

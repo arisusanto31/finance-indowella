@@ -167,10 +167,19 @@ class IndexController extends Controller
         }
         if (getInput('type') == 'recalculate-kartu') {
             $kartu = getInput('model')::find(getInput('id'));
-         
             $kartu->recalculateSaldo();
-
             return $kartu;
+        }
+        if(getInput('type')=='repair-kartu-hutang-date'){
+            $kartuHutang= KartuHutang::where('type','pelunasan')->get();
+            foreach($kartuHutang as $kh){
+                $journal = Journal::where('journal_number',$kh->journal_number)->first();
+                if($journal){
+                    $kh->index_date= KartuHutang::getNextIndexDate($journal->created_at);
+                    $kh->index_date_group = createCarbon($journal->created_at)->format('ymdHis');
+                    $kh->save();
+                }
+            }
         }
         if (getInput('type') == 'recalculate-journal') {
             $journal = Journal::find(getInput('id'));
