@@ -100,7 +100,7 @@ class IndexController extends Controller
         $kp = KartuPiutang::getTotalSaldoRupiah(getInput('date'));
         $jkp = KartuPiutang::getTotalJournal(getInput('date'));
 
-        $kdp = KartuDPSales::getTotalSaldoRupiah(getInput('date'),'sales_order_number');
+        $kdp = KartuDPSales::getTotalSaldoRupiah(getInput('date'), 'sales_order_number');
         $jkdp = KartuDPSales::getTotalJournal(getInput('date'));
 
         return [
@@ -170,14 +170,16 @@ class IndexController extends Controller
             $kartu->recalculateSaldo();
             return $kartu;
         }
-        if(getInput('type')=='repair-kartu-hutang-date'){
-            $kartuHutang= KartuHutang::where('type','pelunasan')->get();
-            foreach($kartuHutang as $kh){
-                $journal = Journal::where('journal_number',$kh->journal_number)->first();
-                if($journal){
-                    $kh->index_date= KartuHutang::getNextIndexDate($journal->created_at);
+        if (getInput('type') == 'repair-kartu-hutang-date') {
+            $kartuHutang = KartuHutang::where('type', 'pelunasan')->get();
+            foreach ($kartuHutang as $kh) {
+                $journal = Journal::where('journal_number', $kh->journal_number)->first();
+                if ($journal) {
+                    $kh->index_date = KartuHutang::getNextIndexDate($journal->created_at);
                     $kh->index_date_group = createCarbon($journal->created_at)->format('ymdHis');
                     $kh->save();
+                    $kh->refreshCurrentSaldo('invoice_pack_number');
+                    $kh->recalculateListSaldo('invoice_pack_number');
                 }
             }
         }
