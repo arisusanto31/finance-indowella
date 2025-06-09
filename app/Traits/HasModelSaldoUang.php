@@ -9,18 +9,18 @@ use Illuminate\Support\Facades\DB;
 trait HasModelSaldoUang
 {
 
-    public static function getTotalSaldoRupiah($date)
+    public static function getTotalSaldoRupiah($date, $kolomGroup = 'invoice_pack_number')
     {
         $indexDate = createCarbon($date)->format('ymdHis000');
-        $saldo = static::query()->whereIn('index_date', function ($q) use ($indexDate) {
+        $saldo = static::query()->whereIn('index_date', function ($q) use ($indexDate, $kolomGroup) {
             $q->select(DB::raw('max(index_date)'))
                 ->from(with(new static)->getTable())
                 ->where('book_journal_id', bookID())
                 ->where('index_date', '<', $indexDate)
-                ->groupBy('invoice_pack_number', 'person_id', 'person_type');
+                ->groupBy($kolomGroup, 'person_id', 'person_type');
         })->get();
-        $data = collect($saldo)->map(function ($item) {
-            return collect($item)->only('amount_saldo_factur', 'invoice_pack_number', 'id');
+        $data = collect($saldo)->map(function ($item) use($kolomGroup) {
+            return collect($item)->only('amount_saldo_factur', $kolomGroup, 'id');
         });
         info(static::class . ' ' . json_encode($data));
         $saldo = $saldo->sum('amount_saldo_factur');
