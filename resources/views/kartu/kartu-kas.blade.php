@@ -70,6 +70,15 @@
                                     </thead>
                                     <tbody id="body-mutasi-bukubesar">
                             `;
+
+                                html += `
+                                    <tr>
+                                        <td colspan="5" class="text-center">Saldo Awal </td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td> ${formatRupiah(res.saldo_awal[codeKas])}</td>
+                                    </tr>
+                                    `;
                                 data = res.msg[codeKas];
                                 if (data.length == 0) {
                                     html += `
@@ -79,14 +88,7 @@
                             `;
                                 }
                                 lastSaldo = 0;
-                                html += `
-                                    <tr>
-                                        <td colspan="5" class="text-center">Saldo Awal </td>
-                                        <td>0</td>
-                                        <td>0</td>
-                                        <td> ${formatRupiah(res.saldo_awal[codeKas])}</td>
-                                    </tr>
-                                    `;
+
                                 data.forEach((item, index) => {
                                     tanggal = formatNormalDateTime(new Date(item.created_at));
                                     lastSaldo = parseFloat(item.amount_saldo);
