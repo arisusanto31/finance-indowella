@@ -107,7 +107,7 @@ trait HasModelSaldoUang
             'msg' => 'Saldo berhasil diperbarui'
         ];
     }
-    public function recalculateSaldo($kolomGroup = 'invoice_pack_number')
+    public function recalculateListSaldo($kolomGroup = 'invoice_pack_number')
     {
         $kartus = static::query()->where('person_id', $this->person_id)->where('person_type', $this->person_type)
             ->where($kolomGroup, $this->$kolomGroup)->where('index_date', '>', $this->index_date)->get();

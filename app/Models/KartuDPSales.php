@@ -418,5 +418,10 @@ class KartuDPSales extends Model
         }
     }
 
+    public function recalculateSaldo(){
+        $this->refreshCurrentSaldo('sales_order_number');
+        $this->recalculateListSaldo('sales_order_number');
+    }
+
   
 }
