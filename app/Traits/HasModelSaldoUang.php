@@ -43,4 +43,53 @@ trait HasModelSaldoUang
         })->sum('amount_saldo');
         return $journals ? $journals : 0;
     }
+
+
+    public static function getSummary($year,$month,$kolomGroup='invoice_pack_number'){
+
+         
+        $date = $year . '-' . $month.'-01 00:00:00';
+        $indexDate=intval(createCarbon($date)->format('ymdHis000'));
+        $kartuPiutangAwal = static::query()->whereIn('index_date', function ($q) use ($indexDate) {
+            $q->from('kartu_dp_sales')->select(DB::raw('max(index_date)'))->where('index_date', '<', $indexDate)->groupBy($kolomGroup);
+        })->where('amount_saldo_factur', '<>', 0)->select($kolomGroup, 'invoice_date', 'type', 'amount_saldo_factur', 'person_id', 'person_type')->get();
+
+        $kartuPiutangBaru = static::query()->whereMonth('created_at', $month)->whereYear('created_at', $year)
+            ->select(
+                DB::raw('sum(amount_debet-amount_kredit) as total_amount '),
+                $kolomGroup,
+                'type',
+                'person_id',
+                'invoice_date',
+                'person_type',
+            )->groupBy($kolomGroup, 'type')->get();
+
+        $allFactur = collect($kartuPiutangAwal)->pluck($kolomGroup)->merge(collect($kartuPiutangBaru)->pluck($kolomGroup))->unique()->all();
+        $customTable = [];
+        foreach ($allFactur as $factur) {
+            $dataAktif = $kartuPiutangAwal->where($kolomGroup, $factur)->first();
+            $dataBaru = $kartuPiutangBaru->where($kolomGroup, $factur)->first();
+            $dataMutasi = optional($kartuPiutangBaru->where($kolomGroup, $factur)->where('type', 'mutasi')->first())->total_amount ?? 0;
+            $dataPelunasan = optional($kartuPiutangBaru->where($kolomGroup, $factur)->where('type', 'pelunasan')->first())->total_amount ?? 0;
+            $saldoAwal = (optional($dataAktif)->amount_saldo_factur ?? 0);
+            $dataFix = $dataAktif ? $dataAktif : $dataBaru;
+            $data = [
+                'person_name' => $dataFix->person->name,
+                'person_type' => $dataFix->person_type,
+                'invoice_date' => $dataFix->invoice_date,
+                $kolomGroup => $factur,
+                'saldo_awal' => $saldoAwal,
+                'mutasi' => $dataMutasi,
+                'pelunasan' => abs($dataPelunasan),
+                'saldo' => $saldoAwal + $dataMutasi + $dataPelunasan
+            ];
+            $customTable[] = $data;
+        }
+
+        return [
+            'status' => 1,
+            'msg' => $customTable,
+            'month' => $month . '-' . $year
+        ];
+    }
 }

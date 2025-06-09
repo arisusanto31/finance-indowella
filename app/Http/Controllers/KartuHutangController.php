@@ -37,7 +37,7 @@ class KartuHutangController extends Controller
         if (!$year) $year = Date('Y');
         if (!$month) $month = Date('m');
         $date = $year . '-' . $month;
-        $kartuHutangAwal = KartuHutang::whereIn('id', function ($q) use ($date) {
+        $kartuHutangAwal = KartuHutang::whereIn('index_date', function ($q) use ($date) {
             $q->from('kartu_hutangs')->select(DB::raw('max(id)'))->where('created_at', '<', $date . '-01')->groupBy('invoice_pack_number');
         })->where('amount_saldo_factur', '<>', 0)->select('invoice_pack_number', 'invoice_date', 'type', 'amount_saldo_factur', 'person_id', 'person_type')->with('person:id,name')->get();
 
