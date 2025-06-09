@@ -100,7 +100,7 @@ class IndexController extends Controller
         $kp = KartuPiutang::getTotalSaldoRupiah(getInput('date'));
         $jkp = KartuPiutang::getTotalJournal(getInput('date'));
 
-        $kdp = KartuDPSales::getTotalSaldoRupiah(getInput('date'));
+        $kdp = KartuDPSales::getTotalSaldoRupiah(getInput('date'),'sales_order_number');
         $jkdp = KartuDPSales::getTotalJournal(getInput('date'));
 
         return [
