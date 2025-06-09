@@ -418,25 +418,5 @@ class KartuDPSales extends Model
         }
     }
 
-    public function recalculateSaldo()
-    {
-        $kartus = KartuDPSales::where('person_id', $this->person_id)->where('person_type', $this->person_type)
-            ->where('sales_order_number', $this->sales_order_number)->where('index_date', '>', $this->index_date)->get();
-
-        $saldo = $this->amount_saldo_factur;
-        foreach ($kartus as $kartu) {
-            $saldo = $saldo + $kartu->amount_debet - $kartu->amount_kredit;
-            $kartu->amount_saldo_factur = $saldo;
-            $kartu->save();
-        }
-
-        $kartuOrang = KartuDPSales::where('person_id', $this->person_id)->where('person_type', $this->person_type)
-            ->where('index_date', '>', $this->index_date)->get();
-        $saldoOrang = $this->amount_saldo_person;
-        foreach ($kartuOrang as $kartu) {
-            $saldoOrang = $saldoOrang + $kartu->amount_debet - $kartu->amount_kredit;
-            $kartu->amount_saldo_person = $saldoOrang;
-            $kartu->save();
-        }
-    }
+  
 }

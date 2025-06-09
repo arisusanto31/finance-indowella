@@ -167,7 +167,9 @@ class IndexController extends Controller
         }
         if (getInput('type') == 'recalculate-kartu') {
             $kartu = getInput('model')::find(getInput('id'));
+            $kartu->refreshCurrentSaldo();
             $kartu->recalculateSaldo();
+
             return $kartu;
         }
         if (getInput('type') == 'recalculate-journal') {

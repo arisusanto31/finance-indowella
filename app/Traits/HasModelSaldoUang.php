@@ -17,12 +17,12 @@ trait HasModelSaldoUang
                 ->from(with(new static)->getTable())
                 ->where('book_journal_id', bookID())
                 ->where('index_date', '<', $indexDate)
-                ->groupBy('invoice_pack_number','person_id','person_type');
+                ->groupBy('invoice_pack_number', 'person_id', 'person_type');
         })->get();
-        $data=collect($saldo)->map(function($item){
-            return collect($item)->only('amount_saldo_factur','invoice_pack_number','id');
+        $data = collect($saldo)->map(function ($item) {
+            return collect($item)->only('amount_saldo_factur', 'invoice_pack_number', 'id');
         });
-        info(static::class.' '.json_encode($data));
+        info(static::class . ' ' . json_encode($data));
         $saldo = $saldo->sum('amount_saldo_factur');
         return $saldo ? $saldo : 0;
     }
@@ -45,12 +45,13 @@ trait HasModelSaldoUang
     }
 
 
-    public static function getSummary($year,$month,$kolomGroup='invoice_pack_number'){
+    public static function getSummary($year, $month, $kolomGroup = 'invoice_pack_number')
+    {
 
-         
-        $date = $year . '-' . $month.'-01 00:00:00';
-        $indexDate=intval(createCarbon($date)->format('ymdHis000'));
-        $kartuPiutangAwal = static::query()->whereIn('index_date', function ($q) use ($indexDate,$kolomGroup) {
+
+        $date = $year . '-' . $month . '-01 00:00:00';
+        $indexDate = intval(createCarbon($date)->format('ymdHis000'));
+        $kartuPiutangAwal = static::query()->whereIn('index_date', function ($q) use ($indexDate, $kolomGroup) {
             $q->from('kartu_dp_sales')->select(DB::raw('max(index_date)'))->where('index_date', '<', $indexDate)->groupBy($kolomGroup);
         })->where('amount_saldo_factur', '<>', 0)->select($kolomGroup, 'invoice_date', 'type', 'amount_saldo_factur', 'person_id', 'person_type')->get();
 
@@ -91,5 +92,40 @@ trait HasModelSaldoUang
             'msg' => $customTable,
             'month' => $month . '-' . $year
         ];
+    }
+
+    public function refreshCurrentSaldo($kolomGroup = 'invoice_pack_number')
+    {
+        $lastKartu = static::query()->where('person_id', $this->person_id)->where('person_type', $this->person_type)
+            ->where($kolomGroup, $this->$kolomGroup)->where('index_date', '<', $this->index_date)->orderBy('index_date', 'desc')->first();
+        $saldo =
+            $lastKartu ? $lastKartu->amount_saldo_factur : 0;
+        $this->amount_saldo_factur = $saldo + $this->amount_debet - $this->amount_kredit;
+        $this->save();
+        return [
+            'status' => 1,
+            'msg' => 'Saldo berhasil diperbarui'
+        ];
+    }
+    public function recalculateSaldo($kolomGroup = 'invoice_pack_number')
+    {
+        $kartus = static::query()->where('person_id', $this->person_id)->where('person_type', $this->person_type)
+            ->where($kolomGroup, $this->$kolomGroup)->where('index_date', '>', $this->index_date)->get();
+
+        $saldo = $this->amount_saldo_factur;
+        foreach ($kartus as $kartu) {
+            $saldo = $saldo + $kartu->amount_debet - $kartu->amount_kredit;
+            $kartu->amount_saldo_factur = $saldo;
+            $kartu->save();
+        }
+
+        $kartuOrang = static::query()->where('person_id', $this->person_id)->where('person_type', $this->person_type)
+            ->where('index_date', '>', $this->index_date)->get();
+        $saldoOrang = $this->amount_saldo_person;
+        foreach ($kartuOrang as $kartu) {
+            $saldoOrang = $saldoOrang + $kartu->amount_debet - $kartu->amount_kredit;
+            $kartu->amount_saldo_person = $saldoOrang;
+            $kartu->save();
+        }
     }
 }
