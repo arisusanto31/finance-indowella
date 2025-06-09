@@ -236,7 +236,7 @@ class JournalController extends Controller
         $year = getInput('year');
 
         $indexDate = createCarbon($year . '-' . $month . '-01')->format('ymdHis00');
-        $coas = ChartAccount::aktif()->where('code_group', 'like', Journal::getPrimaryCode($code) . '%')->pluck('code_group')->all();
+        $coas = ChartAccount::aktif()->child()->where('code_group', 'like', Journal::getPrimaryCode($code) . '%')->pluck('code_group')->all();
 
         $subData = Journal::select(DB::raw('max(index_date) as maxindex'), 'code_group')->where('index_date', '<', $indexDate)->whereIn('code_group', $coas)
             ->groupBy('code_group');
@@ -244,6 +244,7 @@ class JournalController extends Controller
             $q->on('journals.index_date', '=', 'sub_journals.maxindex')
                 ->on('journals.code_group', '=', 'sub_journals.code_group');
         })->pluck('journals.amount_saldo', 'journals.code_group')->all();
+
         $journals = Journal::searchCOA($code)->whereMonth('created_at', $month)->whereYear('created_at', $year)
             ->orderBy('index_date', 'asc')->get()->groupBy('code_group');
         $chartAccount = ChartAccount::aktif()->withAlias()->pluck('alias_name', 'code_group');
