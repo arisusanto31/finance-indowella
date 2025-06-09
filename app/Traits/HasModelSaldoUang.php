@@ -19,7 +19,7 @@ trait HasModelSaldoUang
                 ->where('index_date', '<', $indexDate)
                 ->groupBy($kolomGroup, 'person_id', 'person_type');
         })->get();
-        $data = collect($saldo)->map(function ($item) use($kolomGroup) {
+        $data = collect($saldo)->map(function ($item) use ($kolomGroup) {
             return collect($item)->only('amount_saldo_factur', $kolomGroup, 'id');
         });
         info(static::class . ' ' . json_encode($data));
@@ -52,7 +52,7 @@ trait HasModelSaldoUang
         $date = $year . '-' . $month . '-01 00:00:00';
         $indexDate = intval(createCarbon($date)->format('ymdHis000'));
         $kartuPiutangAwal = static::query()->whereIn('index_date', function ($q) use ($indexDate, $kolomGroup) {
-            $q->from('kartu_dp_sales')->select(DB::raw('max(index_date)'))->where('index_date', '<', $indexDate)->groupBy($kolomGroup);
+            $q->from(with(new static)->getTable())->select(DB::raw('max(index_date)'))->where('index_date', '<', $indexDate)->groupBy($kolomGroup);
         })->where('amount_saldo_factur', '<>', 0)->select($kolomGroup, 'invoice_date', 'type', 'amount_saldo_factur', 'person_id', 'person_type')->get();
 
         $kartuPiutangBaru = static::query()->whereMonth('created_at', $month)->whereYear('created_at', $year)

@@ -36,7 +36,7 @@ class KartuPiutangController extends Controller
     {
         $month = getInput('month') ?? Date('m');
         $year = getInput('year') ?? Date('Y');
-        return KartuPiutang::getSummary($year, $month, 'invoice_pack_number');
+        return KartuPiutang::getSummary($year, $month, 'sales_order_number');
     }
 
     public function showDetail($nomer)
