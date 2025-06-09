@@ -34,8 +34,7 @@ class KartuHutangController extends Controller
     {
         $month = getInput('month') ?? Date('m');
         $year = getInput('year') ?? Date('Y');
-        if (!$year) $year = Date('Y');
-        if (!$month) $month = Date('m');
+  
         return KartuHutang::getSummary($year, $month, 'invoice_pack_number');
     }
 
