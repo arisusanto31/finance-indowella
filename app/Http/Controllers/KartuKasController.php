@@ -44,7 +44,7 @@ class KartuKasController extends Controller
 
         $chartAccount = ChartAccount::aktif()->withAlias()->pluck('alias_name', 'code_group');
         foreach ($coas as $coa) {
-            if (!array_key_exists($coa, $journals)) {
+            if (!array_key_exists($coa, $journals->all())) {
                 $journals[$coa] = [];
             }
         }
