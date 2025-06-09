@@ -474,9 +474,9 @@
                                 </tr>
                             `;
                             });
-                            $('#body-mutasi-masuk').html(html);
+                            $('#body-mutasi-keluar').html(html);
                         } else {
-                            $('#body-mutasi-masuk').html(`
+                            $('#body-mutasi-keluar').html(`
                             <tr>
                                 <td colspan="7" class="text-center">🤷‍♂️ Tidak ada data</td>
                             </tr>
