@@ -372,7 +372,8 @@ class KartuHutang extends Model
                 'journal_id' => $journalID,
                 'code_group' => $codeGroup,
                 'lawan_code_group' => $lawanCodeGroup,
-                'code_group_name' => $codeName
+                'code_group_name' => $codeName,
+                'date'=>$date
             ]));
 
             if ($st['status'] == 1) {
