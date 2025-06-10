@@ -69,6 +69,13 @@
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                     <div class="row">
+                        <div class="col mb-3">
+                            <label for="nameBasic" class="form-label">Date</label>
+                            <input type="datetime-local" id="mutasi-date" class="form-control"
+                                value="{{ now() }}" placeholder="date" />
+                        </div>
+                    </div>
                     <div class="row">
                         <div class="col mb-3">
                             <label for="nameBasic" class="form-label">Nomer Sales Order</label>
@@ -157,6 +164,13 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col mb-3">
+                            <label for="nameBasic" class="form-label">Date</label>
+                            <input type="datetime-local" id="pelunasan-date" class="form-control"
+                                value="{{ now() }}" placeholder="date" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col mb-3">
                             <label for="nameBasic" class="form-label">Nomer Sales Order</label>
                             <input type="text" id="pelunasan-factur" class="form-control"
                                 placeholder="Nomer Sales order" />
@@ -239,6 +253,7 @@
                     url: '{{ url('admin/kartu/kartu-piutang/create-mutation') }}',
                     method: 'post',
                     data: {
+                        date: $('#mutasi-date').val(),
                         sales_order_number: $('#factur').val(),
                         invoice_pack_number: $('#invoice_number').val(),
                         description: $('#description').val(),
@@ -303,6 +318,7 @@
                     url: '{{ url('admin/kartu/kartu-piutang/create-pelunasan') }}',
                     method: 'post',
                     data: {
+                        date: $('#pelunasan-date').val(),
                         sales_order_number: $('#pelunasan-factur').val(),
                         invoice_pack_number: $('#pelunasan-invoice_number').val(),
                         description: $('#pelunasan-description').val(),

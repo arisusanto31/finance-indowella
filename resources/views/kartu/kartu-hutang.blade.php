@@ -199,10 +199,12 @@
                         data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="col mb-3">
-                        <label for="nameBasic" class="form-label">Date</label>
-                        <input type="datetime-local" id="mutasi-date" class="form-control"
-                            value="{{ now() }}" placeholder="date" />
+                    <div class="row">
+                        <div class="col mb-3">
+                            <label for="nameBasic" class="form-label">Date</label>
+                            <input type="datetime-local" id="mutasi-date" class="form-control"
+                                value="{{ now() }}" placeholder="date" />
+                        </div>
                     </div>
                     <div class="row">
                         <div class="col mb-3">
