@@ -47,7 +47,7 @@
 
                 <div id="div-backdate" class="d-backdate">
                     Tanggal Backdate
-                    <input type="date" class="form-control" placeholder="tanggal" id="date-mutasi-journal" />
+                    <input type="datetime-local" value="{{now()}}" class="form-control" placeholder="tanggal" id="date-mutasi-journal" />
                 </div>
                 <hr class="d-backdate">
                 <div>
