@@ -315,16 +315,17 @@ class SalesOrderController extends Controller
             );
         } else {
 
+            $sales = $sales->join('transactions as tr', 'tr.package_id', '=', 'pack.id');
             if (getInput('toko'))
-                $sales = $sales->join('transactions as tr', 'tr.package_id', '=', 'pack.id')->where('tr.kind', getInput('toko'));
+                $sales= $sales->where('tr.kind', getInput('toko'));
             $sales = $sales->where(function ($q) {
                 $q->where('pack.is_ppn', 1)->orWhere('pack.is_wajib_lapor', 1);
             })->join('customers as c', 'c.id', '=', 'pack.customer_id');
             if (getInput('customer')) {
                 $sales = $sales->where(function ($q) {
                     $q->where('c.name', 'like', '%' . getInput('customer') . '%')
-                        ->orWhere('c.instance', 'like', '%' . getInput('customer') . '%');
-                        // ->orWhere('tr.instance_name','like','%'.getInput('customer').'%');
+                        ->orWhere('c.instance', 'like', '%' . getInput('customer') . '%')
+                        ->orWhere('tr.instance_name','like','%'.getInput('customer').'%');
                 });
             }
             $sales = $sales->select(
