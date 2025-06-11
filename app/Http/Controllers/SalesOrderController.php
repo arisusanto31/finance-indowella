@@ -323,7 +323,8 @@ class SalesOrderController extends Controller
             if (getInput('customer')) {
                 $sales = $sales->where(function ($q) {
                     $q->where('c.name', 'like', '%' . getInput('customer') . '%')
-                        ->orWhere('c.instance', 'like', '%' . getInput('customer') . '%');
+                        ->orWhere('c.instance', 'like', '%' . getInput('customer') . '%')
+                        ->orWhere('tr.instance_name','like','%'.getInput('customer').'%');
                 });
             }
             $sales = $sales->select(
