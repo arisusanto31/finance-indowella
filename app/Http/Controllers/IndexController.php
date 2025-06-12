@@ -88,10 +88,10 @@ class IndexController extends Controller
         $ks = KartuStock::getTotalSaldoRupiah(getInput('date'));
         $jks = KartuStock::getTotalJournal(getInput('date'));
 
-        $kbdp = KartuBDP::getTotalSaldoRupiah(getInput('date'));
+        $kbdp = KartuBDP::getTotalSaldoRupiah(getInput('date'), true);
         $jkbdp = KartuBDP::getTotalJournal(getInput('date'));
 
-        $kbj = KartuBahanJadi::getTotalSaldoRupiah(getInput('date'));
+        $kbj = KartuBahanJadi::getTotalSaldoRupiah(getInput('date'), true);
         $jbj = KartuBahanJadi::getTotalJournal(getInput('date'));
 
         $kh = KartuHutang::getTotalsaldoRupiah(getInput('date'));

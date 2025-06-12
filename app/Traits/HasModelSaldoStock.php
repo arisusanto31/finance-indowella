@@ -4,17 +4,18 @@ namespace App\Traits;
 
 use App\Models\ChartAccount;
 use App\Models\Journal;
+use App\Models\Stock;
 use Illuminate\Support\Facades\DB;
 
 trait HasModelSaldoStock
 {
 
 
-    public static function getTotalSaldoRupiah($date, $productionNumber = null, $withProduction = false)
+    public static function getTotalSaldoRupiah($date, $withProduction = false,$productionNumber = null, )
     {
 
         $indexDate = intval(createCarbon($date)->format('ymdHis000'));
-        info('index date : '.$indexDate);
+        info('index date : ' . $indexDate);
         $saldo = static::query()->whereIn('index_date', function ($q) use ($indexDate, $withProduction, $productionNumber) {
             $q->select(DB::raw('max(index_date)'))
                 ->from(with(new static)->getTable())
@@ -45,5 +46,85 @@ trait HasModelSaldoStock
                 ->on('journals.code_group', '=', 'sub_journals.code_group');
         })->sum('amount_saldo');
         return $journals ? $journals : 0;
+    }
+
+    public static function getSummaryProduction($year,$month)
+    {
+        $dateAwal = $year . '-' . $month . '-01 00:00:00';
+        $indexDateAwal = intval(createCarbon($dateAwal)->format('ymdHis000'));
+        $dateAkhir = $year . '-' . $month . '-' . dayInMonthQuantity($month, $year) . ' 23:59:59';
+        $indexDateAkhir = intval(createCarbon($dateAkhir)->format('ymdHis000'));
+
+        $saldoAkhir = static::query()->whereIn('index_date', function ($q) use ($indexDateAkhir) {
+            $q->from(with(new static)->getTable())
+                ->select(DB::raw('max(index_date)'))
+                ->where('book_journal_id', bookID())
+                ->where('index_date', '<', $indexDateAkhir)
+                ->groupBy('stock_id', 'production_number');
+        })->select('production_number', 'custom_stock_name', 'stock_id', 'saldo_qty_backend as saldo_qty_akhir', 'saldo_rupiah_total as saldo_rupiah_akhir', DB::raw('"0" as saldo_qty_awal'), DB::raw('"0" as saldo_rupiah_awal'))->get();
+        $summary = static::query()->whereIn(with(new static)->getTable().'.index_date', function ($q) use ($indexDateAwal) {
+            $q->from(with(new static)->getTable())
+                ->select(DB::raw('max(index_date)'))
+                ->where('book_journal_id', bookID())
+                ->where('index_date', '<', $indexDateAwal)
+                ->groupBy('stock_id', 'production_number');
+        })->select('production_number', 'custom_stock_name', 'stock_id', 'saldo_qty_backend as saldo_qty_awal', 'saldo_rupiah_total as saldo_rupiah_awal', DB::raw('"0" as saldo_qty_akhir'), DB::raw('"0" as saldo_rupiah_akhir'))->get();
+    
+        $summary= collect($summary)->merge(collect($saldoAkhir));
+        $dataStock = Stock::whereIn('stocks.id', $summary->pluck('stock_id')->all())->join('stock_categories', 'stocks.category_id', '=', 'stock_categories.id')
+            ->join('stock_units', function ($join) {
+                $join->on('stocks.id', '=', 'stock_units.stock_id')
+                    ->on('stocks.unit_default', '=', 'stock_units.unit');
+            })->select(
+                'stocks.*',
+                'stock_units.konversi as konversi',
+                'stock_categories.name as category_name',
+            )->get()->keyBy('id');
+        $summary = $summary->groupBy('production_number')
+            ->map(function ($dataspk) use ($dataStock) {
+                return collect($dataspk)->groupBy('stock_id')->map(function ($item, $stockid) use ($dataStock) {
+                    $data = []; //$dataStock[$stockid];
+                    $data['name'] = collect($item)->first()->custom_stock_name ? collect($item)->first()->custom_stock_name : $dataStock[$stockid]->name;
+                    $data['konversi'] = $dataStock[$stockid]->konversi;
+                    $data['category_name'] = $dataStock[$stockid]->category_name;
+                    $data['unit_default'] = $dataStock[$stockid]->unit_default;
+                    $data['id'] = $stockid;
+                    $data['saldo_qty_awal'] = collect($item)->sum('saldo_qty_awal');
+                    $data['saldo_rupiah_awal'] = collect($item)->sum('saldo_rupiah_awal');
+                    $data['saldo_qty_akhir'] = collect($item)->sum('saldo_qty_akhir');
+                    $data['saldo_rupiah_akhir'] = collect($item)->sum('saldo_rupiah_akhir');
+                    return $data;
+                })->values();
+            });
+        $mutasiMasuk = static::query()->whereBetween('created_at', [$dateAwal, $dateAkhir])
+            ->where('mutasi_qty_backend', '>', 0)
+            ->select(
+                DB::raw('sum(coalesce(mutasi_qty_backend,0)) as qty'),
+                DB::raw('sum(coalesce(mutasi_rupiah_on_unit,0)) as rupiah_unit'),
+                DB::raw('sum(coalesce(mutasi_rupiah_total,0)) as total'),
+                DB::raw('max(stock_id) as stock_id'),
+                'production_number'
+            )->groupBy('stock_id', 'production_number')
+            ->get()->groupBy('production_number')->map(function ($val) {
+                return $val->keyBy('stock_id');
+            });
+        $mutasiKeluar = static::query()->whereBetween('created_at', [$dateAwal, $dateAkhir])
+            ->where('mutasi_qty_backend', '<', 0)
+            ->select(
+                DB::raw('sum(mutasi_qty_backend) as qty'),
+                DB::raw('sum(mutasi_rupiah_on_unit) as rupiah_unit'),
+                DB::raw('sum(mutasi_rupiah_total) as total'),
+                DB::raw('max(stock_id) as stock_id'),
+                'production_number'
+            )->groupBy('stock_id', 'production_number')
+            ->get()->groupBy('production_number')->map(function ($val) {
+                return $val->keyBy('stock_id');
+            });
+        return [
+            'status' => 1,
+            'msg' => $summary,
+            'mutasi_masuk' => $mutasiMasuk,
+            'mutasi_keluar' => $mutasiKeluar,
+        ];
     }
 }
