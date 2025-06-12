@@ -34,6 +34,10 @@ class Journal extends Model
     {
         return $this->belongsTo(ChartAccount::class, 'lawan_code_group', 'code_group');
     }
+  public function lawanCode()
+    {
+        return $this->belongsTo(ChartAccount::class, 'lawan_code_group', 'code_group');
+    }
 
 
 

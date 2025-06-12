@@ -59,6 +59,7 @@
                 month = $('#month').val();
                 year = $('#year').val();
                 coa = $('#coa option:selected').val();
+
                 $.ajax({
                     url: '{{ url('admin/jurnal/get-buku-besar') }}?coa=' + coa + '&month=' + month + '&year=' + year,
                     method: 'get',
@@ -81,6 +82,7 @@
                                             <th>🔃 Debet</th>
                                             <th>🔃 Kredit</th>
                                             <th>💲saldo</th>
+                                            <th>status</th>
                                         </tr>
                                     </thead>
                                     <tbody id="body-mutasi-bukubesar">
@@ -92,17 +94,19 @@
                                         <td>0</td>
                                         <td>0</td>
                                         <td> ${formatRupiah(res.saldo_awal[codeKas])}</td>
+                                        <td> </td>
                                     </tr>
                                     `;
                                 data = res.msg[codeKas];
-                              if (data.length == 0) {
+                                if (data.length == 0) {
                                     html += `
                             <tr>
-                                <td colspan="8" class="text-center">🤷‍♂️ Tidak ada data</td>
+                                <td colspan="9" class="text-center">🤷‍♂️ Tidak ada data</td>
                             </tr>
                             `;
                                 }
                                 lastSaldo = res.saldo_awal[codeKas];
+                                flagNotValid = false;
                                 data.forEach((item, index) => {
                                     tanggal = formatNormalDateTime(new Date(item.created_at));
                                     lastSaldo = parseFloat(item.amount_saldo);
@@ -111,13 +115,16 @@
                                         <td>${index+1}</td>
                                         <td>${tanggal}</td>
                                         <td>${item.journal_number} </td>
-                                        <td>${item.lawan_code_group}</td>
+                                        <td>${item.lawan_code_group} - ${item.lawan_code.name}</td>
                                         <td>${item.description}</td>
                                         <td>${formatRupiah(item.amount_debet)}</td>
                                         <td>${formatRupiah(item.amount_kredit)}</td>
                                         <td>${formatRupiah(item.amount_saldo)}</td>
+                                        <td>${item.verified_by==1?`<span class="badge bg-success"> valid </span>`:`<span class="badge bg-danger" >not valid</span>`}</td>
                                     </tr>
                                     `;
+                                    if (item.verified_by != 1)
+                                        flagNotValid = true;
                                 });
                                 html += `
                                   </tbody>
@@ -127,6 +134,7 @@
                                           <td><strong>${formatRupiah(data.reduce((acc, item) => acc + parseFloat(item.amount_debet), 0))} </strong></td>
                                           <td><strong>${formatRupiah(data.reduce((acc, item) => acc + parseFloat(item.amount_kredit), 0))} </strong></td>
                                           <td><strong>${formatRupiah(lastSaldo)} </strong></td>
+                                          <td> ${flagNotValid==true?`<button onclick="updateNotValid(${codeKas})"> <i class="fa fa-refresh"></i> not valid </button >`:''}</td>
                                       </tr>
                                     </tfoot>
                                 </table>
@@ -140,6 +148,28 @@
                         }
                     },
                     error: function(res) {
+                        Swal.fire('opps', 'Gagal mendapatkan data', 'error');
+                    }
+                });
+            }
+
+            function updateNotValid(codeGroup) {
+                loading(1);
+                $.ajax({
+                    url: '{{ url('admin/jurnal/update-not-valid') }}?code_group=' + codeGroup,
+                    method: 'get',
+                    success: function(res) {
+                        loading(0);
+                        console.log(res);
+                        if (res.status == 1) {
+                            Swal.fire('Berhasil', res.msg, 'success');
+                            searchData();
+                        } else {
+                            Swal.fire('opps', res.msg, 'error');
+                        }
+                    },
+                    error: function(res) {
+                        loading(0);
                         Swal.fire('opps', 'Gagal mendapatkan data', 'error');
                     }
                 });

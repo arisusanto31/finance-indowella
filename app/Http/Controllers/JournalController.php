@@ -245,7 +245,7 @@ class JournalController extends Controller
                 ->on('journals.code_group', '=', 'sub_journals.code_group');
         })->pluck('journals.amount_saldo', 'journals.code_group')->all();
 
-        $journals = Journal::searchCOA($code)->whereMonth('created_at', $month)->whereYear('created_at', $year)
+        $journals = Journal::searchCOA($code)->whereMonth('created_at', $month)->whereYear('created_at', $year)->with(['lawanCode:name,code_group'])
             ->orderBy('index_date', 'asc')->get()->groupBy('code_group');
         $chartAccount = ChartAccount::aktif()->withAlias()->pluck('alias_name', 'code_group');
         foreach ($coas as $coa) {
@@ -265,6 +265,21 @@ class JournalController extends Controller
     }
 
 
+    public function updateNotValid()
+    {
+        try {
+            if (!getInput('code_group')) {
+                throw new \Exception('code_group tidak boleh kosong');
+            }
+            $journals = Journal::where('code_group', getInput('code_group'))->whereNull('verified_by')->get();
+            foreach ($journals as $journal) {
+                $journal->verifyJournal();
+            }
+            return ['status' => 1, 'msg' => $journals->count()];
+        } catch (\Exception $e) {
+            return ['status' => 0, 'msg' => $e->getMessage()];
+        }
+    }
 
     public static function createBaseJournal(Request $request, $useTransaction = true, ?LockManager $lockManager = null)
     {

@@ -39,7 +39,7 @@ class KartuKasController extends Controller
                 ->on('journals.code_group', '=', 'sub_journals.code_group');
         })->pluck('journals.amount_saldo', 'journals.code_group')->all();
 
-        $journals = Journal::searchCOA($kindCodeGroup)->whereMonth('created_at', $month)->whereYear('created_at', $year)
+        $journals = Journal::searchCOA($kindCodeGroup)->whereMonth('created_at', $month)->whereYear('created_at', $year)->with(['lawanCode:name,code_group'])
             ->orderBy('index_date', 'asc')->get()->groupBy('code_group');
 
         $chartAccount = ChartAccount::aktif()->withAlias()->pluck('alias_name', 'code_group');
