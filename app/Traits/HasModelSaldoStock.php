@@ -11,7 +11,7 @@ trait HasModelSaldoStock
 {
 
 
-    public static function getTotalSaldoRupiah($date, $withProduction = false,$productionNumber = null, )
+    public static function getTotalSaldoRupiah($date, $withProduction = false, $productionNumber = null,)
     {
 
         $indexDate = intval(createCarbon($date)->format('ymdHis000'));
@@ -48,7 +48,7 @@ trait HasModelSaldoStock
         return $journals ? $journals : 0;
     }
 
-    public static function getSummaryProduction($year,$month)
+    public static function getSummaryProduction($year, $month)
     {
         $dateAwal = $year . '-' . $month . '-01 00:00:00';
         $indexDateAwal = intval(createCarbon($dateAwal)->format('ymdHis000'));
@@ -62,15 +62,15 @@ trait HasModelSaldoStock
                 ->where('index_date', '<', $indexDateAkhir)
                 ->groupBy('stock_id', 'production_number');
         })->select('production_number', 'custom_stock_name', 'stock_id', 'saldo_qty_backend as saldo_qty_akhir', 'saldo_rupiah_total as saldo_rupiah_akhir', DB::raw('"0" as saldo_qty_awal'), DB::raw('"0" as saldo_rupiah_awal'))->get();
-        $summary = static::query()->whereIn(with(new static)->getTable().'.index_date', function ($q) use ($indexDateAwal) {
+        $summary = static::query()->whereIn(with(new static)->getTable() . '.index_date', function ($q) use ($indexDateAwal) {
             $q->from(with(new static)->getTable())
                 ->select(DB::raw('max(index_date)'))
                 ->where('book_journal_id', bookID())
                 ->where('index_date', '<', $indexDateAwal)
                 ->groupBy('stock_id', 'production_number');
         })->select('production_number', 'custom_stock_name', 'stock_id', 'saldo_qty_backend as saldo_qty_awal', 'saldo_rupiah_total as saldo_rupiah_awal', DB::raw('"0" as saldo_qty_akhir'), DB::raw('"0" as saldo_rupiah_akhir'))->get();
-    
-        $summary= collect($summary)->merge(collect($saldoAkhir));
+
+        $summary = collect($summary)->merge(collect($saldoAkhir));
         $dataStock = DB::table('stocks')->whereIn('stocks.id', $summary->pluck('stock_id')->all())->join('stock_categories', 'stocks.category_id', '=', 'stock_categories.id')
             ->join('stock_units', function ($join) {
                 $join->on('stocks.id', '=', 'stock_units.stock_id')
@@ -84,7 +84,10 @@ trait HasModelSaldoStock
             ->map(function ($dataspk) use ($dataStock) {
                 return collect($dataspk)->groupBy('stock_id')->map(function ($item, $stockid) use ($dataStock) {
                     $data = []; //$dataStock[$stockid];
-                    $data['name'] = collect($item)->first()->custom_stock_name ? collect($item)->first()->custom_stock_name : $dataStock[$stockid]->name;
+                    $name = $dataStock[$stockid]->name;
+                    $data['name'] = collect($item)->filter(function ($val) use ($name) {
+                        if ($val->custom_stock_name != $name) return true;
+                    })->first()->custom_stock_name ? collect($item)->first()->custom_stock_name : $dataStock[$stockid]->name;
                     $data['konversi'] = $dataStock[$stockid]->konversi;
                     $data['category_name'] = $dataStock[$stockid]->category_name;
                     $data['unit_default'] = $dataStock[$stockid]->unit_default;
