@@ -22,7 +22,7 @@
         </h5>
         <div class="card-body">
             <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
-             </div>
+            </div>
 
             <div class="row">
                 <div class="col-xl-12 col-md-12">
@@ -82,6 +82,28 @@
                                         </thead>
                                         <tbody id="body-summary">
                                         </tbody>
+                                    </table>
+
+                                </div>
+                                <div class="mt-3">
+                                    <table class="table table-bordered tables-striped">
+                                        <thead class="bg-white text-dark text-center">
+                                            <tr>
+                                                <th class="fs-5">total saldo Awal</th>
+                                                <th class="fs-5">total mutasi masuk </th>
+                                                <th class="fs-5">total mutasi keluar</th>
+                                                <th class="fs-5">total saldo akhir</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="fs-4 textright" id="total-saldo-awal">0</td>
+                                                <td class="fs-4 textright" id="total-masuk">0</td>
+                                                <td class="fs-4 textright" id="total-keluar">0</td>
+                                                <td class="fs-4 textright" id="total-saldo-akhir">0</td>
+                                            </tr>
+                                        </tbody>
+
                                     </table>
                                 </div>
                             </div>
@@ -294,6 +316,10 @@
                         console.log(res);
                         if (res.status == 1) {
                             html = "";
+                            totalSaldoAkhir = 0;
+                            totalSaldoAwal = 0;
+                            totalMasuk = 0;
+                            totalKeluar = 0;
                             res.msg.forEach(function(item, i) {
                                 rupiahUnitAwal = item.awal_qty > 0 ? item.awal_rupiah / item.awal_qty : 0;
                                 rupiahUnitAkhir = item.akhir_qty > 0 ? item.akhir_rupiah / item.akhir_qty :
@@ -329,6 +355,11 @@
                                 <td>${formatRupiah(item.akhir_rupiah)}</td>
                                 </tr>`;
 
+                                totalSaldoAwal += parseFloat(item.awal_rupiah);
+                                totalMasuk += parseFloat(masuk[2]);
+                                totalKeluar += parseFloat(keluar[2]);
+                                totalSaldoAkhir += parseFloat(item.akhir_rupiah);
+
                             });
                             $('#body-summary').html(html);
                             // $('#kartuKasTable').DataTable({
@@ -342,6 +373,10 @@
                             //         [10, 25, 50, "All"]
                             //     ],
                             // });
+                            $('#total-saldo-awal').html('<strong>' + formatRupiah(totalSaldoAwal) + '</strong>');
+                            $('#total-masuk').html('<strong>' + formatRupiah(totalMasuk) + '</strong>');
+                            $('#total-keluar').html('<strong>' + formatRupiah(totalKeluar) + '</strong>');
+                            $('#total-saldo-akhir').html('<strong>' + formatRupiah(totalSaldoAkhir) + '</strong>');
                         } else {
 
                         }

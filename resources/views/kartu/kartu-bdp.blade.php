@@ -63,6 +63,28 @@
                                     </div>
                                 </div>
                                 <div class="table-responsive mt-2" id="container-table">
+                                </div>
+
+                                <div class="mt-3">
+                                    <table class="table table-bordered tables-striped">
+                                        <thead class="bg-white text-dark text-center">
+                                            <tr>
+                                                <th class="fs-5">total saldo Awal</th>
+                                                <th class="fs-5">total mutasi masuk </th>
+                                                <th class="fs-5">total mutasi keluar</th>
+                                                <th class="fs-5">total saldo akhir</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="fs-4 textright" id="total-saldo-awal">0</td>
+                                                <td class="fs-4 textright" id="total-masuk">0</td>
+                                                <td class="fs-4 textright" id="total-keluar">0</td>
+                                                <td class="fs-4 textright" id="total-saldo-akhir">0</td>
+                                            </tr>
+                                        </tbody>
+
+                                    </table>
 
                                 </div>
                             </div>
@@ -248,6 +270,10 @@
                         console.log(res);
                         if (res.status == 1) {
                             html = "";
+                            totalSaldoAwal = 0;
+                            totalMasuk = 0;
+                            totalKeluar = 0;
+                            totalSaldoAkhir = 0;
                             Object.keys(res.msg).forEach(function eachTable(spknumber) {
                                 html += `
                             <p class="mt-3 mb-0"><strong>${spknumber}</strong></p>
@@ -324,6 +350,10 @@
                                 <td>${formatRupiah(rupiahUnitAkhir*item.konversi)}</td>
                                 <td>${formatRupiah(item.saldo_rupiah_akhir)}</td>
                                 </tr>`;
+                                    totalSaldoAwal += parseFloat(item.saldo_rupiah_awal);
+                                    totalMasuk += parseFloat(masuk[2]);
+                                    totalKeluar += parseFloat(keluar[2]);
+                                    totalSaldoAkhir += parseFloat(item.saldo_rupiah_akhir);
                                 });
                                 html += `
                                 </tbody>
@@ -332,6 +362,10 @@
                             });
 
                             $('#container-table').html(html);
+                            $('#total-saldo-awal').html('<strong>' + formatRupiah(totalSaldoAwal) + '</strong>');
+                            $('#total-masuk').html('<strong>' + formatRupiah(totalMasuk) + '</strong>');
+                            $('#total-keluar').html('<strong>' + formatRupiah(totalKeluar) + '</strong>');
+                            $('#total-saldo-akhir').html('<strong>' + formatRupiah(totalSaldoAkhir) + '</strong>');
                             // $('#kartuKasTable').DataTable({
                             //     "destroy": true,
                             //     "order": [
@@ -354,11 +388,13 @@
             }
 
             function showModalMasuk() {
-                showDetailOnModal("{{ route('kartu-bdp.create-mutasi-masuk') }}?month={{ $month }}&year={{ $year }}");
+                showDetailOnModal(
+                    "{{ route('kartu-bdp.create-mutasi-masuk') }}?month={{ $month }}&year={{ $year }}");
             }
 
             function showModalOut() {
-                showDetailOnModal("{{ route('kartu-bdp.create-mutasi-keluar') }}?month={{ $month }}&year={{ $year }}");
+                showDetailOnModal(
+                    "{{ route('kartu-bdp.create-mutasi-keluar') }}?month={{ $month }}&year={{ $year }}");
             }
 
             function getMutasiMasuk() {
