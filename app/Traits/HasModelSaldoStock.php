@@ -81,14 +81,14 @@ trait HasModelSaldoStock
                 'stock_categories.name as category_name',
             )->get()->keyBy('id');
         $summary = $summary->groupBy('production_number')
-            ->map(function ($dataspk) use ($dataStock) {
-                return collect($dataspk)->groupBy('stock_id')->map(function ($item, $stockid) use ($dataStock) {
+            ->map(function ($dataspk,$number) use ($dataStock) {
+                return collect($dataspk)->groupBy('stock_id')->map(function ($item, $stockid) use ($dataStock,$number) {
                     $data = []; //$dataStock[$stockid];
                     $name = $dataStock[$stockid]->name;
                     $customName= optional(collect($item)->filter(function ($val) use ($name) {
                         if ($val->custom_stock_name != $name) return true;
                     })->first())->custom_stock_name ?? "";
-                    info('custom name : ' . $customName);
+                    info($number.'-custom name : ' . $customName.' data :'.collect($item)->pluck('custom_stock_name')->toJson());
                     $data['name'] = $customName ?: $name;
                     $data['konversi'] = $dataStock[$stockid]->konversi;
                     $data['category_name'] = $dataStock[$stockid]->category_name;
