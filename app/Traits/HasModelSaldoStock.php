@@ -69,8 +69,18 @@ trait HasModelSaldoStock
                 ->where('index_date', '<', $indexDateAwal)
                 ->groupBy('stock_id', 'production_number');
         })->select('production_number', 'custom_stock_name', 'stock_id', 'saldo_qty_backend as saldo_qty_awal', 'saldo_rupiah_total as saldo_rupiah_awal', DB::raw('"0" as saldo_qty_akhir'), DB::raw('"0" as saldo_rupiah_akhir'))->get();
+        $mutasi = static::query()->whereBetween(with(new static)->getTable() . '.index_date', [$indexDateAwal, $indexDateAkhir])
+            ->select(
+                'production_number',
+                'custom_stock_name',
+                'stock_id',
+                DB::raw('coalesce(mutasi_qty_backend,0) as mutasi'),
+            )->get();
 
-        $summary = collect($summary)->merge(collect($saldoAkhir));
+        $summary = collect($summary)->merge(collect($saldoAkhir))->merge(collect($mutasi));
+
+
+
         $dataStock = DB::table('stocks')->whereIn('stocks.id', $summary->pluck('stock_id')->all())->join('stock_categories', 'stocks.category_id', '=', 'stock_categories.id')
             ->join('stock_units', function ($join) {
                 $join->on('stocks.id', '=', 'stock_units.stock_id')
@@ -81,25 +91,41 @@ trait HasModelSaldoStock
                 'stock_categories.name as category_name',
             )->get()->keyBy('id');
         $summary = $summary->groupBy('production_number')
-            ->map(function ($dataspk,$number) use ($dataStock) {
-                return collect($dataspk)->groupBy('stock_id')->map(function ($item, $stockid) use ($dataStock,$number) {
+            ->map(function ($dataspk, $number) use ($dataStock) {
+                $values = collect($dataspk)->groupBy('stock_id')->map(function ($item, $stockid) use ($dataStock, $number) {
                     $data = []; //$dataStock[$stockid];
                     $name = $dataStock[$stockid]->name;
-                    $customName= optional(collect($item)->filter(function ($val) use ($name) {
+                    $customName = optional(collect($item)->filter(function ($val) use ($name) {
                         if ($val->custom_stock_name != $name) return true;
                     })->first())->custom_stock_name ?? "";
-                    info($number.'-custom name : ' . $customName.' data :'.collect($item)->pluck('custom_stock_name')->toJson());
+                    info($number . '-custom name : ' . $customName . ' data :' . collect($item)->pluck('custom_stock_name')->toJson());
                     $data['name'] = $customName ?: $name;
                     $data['konversi'] = $dataStock[$stockid]->konversi;
                     $data['category_name'] = $dataStock[$stockid]->category_name;
                     $data['unit_default'] = $dataStock[$stockid]->unit_default;
                     $data['id'] = $stockid;
+                    $data['mutasi'] = collect($item)->map(function ($m) {
+                        return $m->mutasi != 0 ? 1 : 0;
+                    })->sum();
                     $data['saldo_qty_awal'] = collect($item)->sum('saldo_qty_awal');
                     $data['saldo_rupiah_awal'] = collect($item)->sum('saldo_rupiah_awal');
                     $data['saldo_qty_akhir'] = collect($item)->sum('saldo_qty_akhir');
                     $data['saldo_rupiah_akhir'] = collect($item)->sum('saldo_rupiah_akhir');
                     return $data;
                 })->values();
+                $isTampil = 1;
+                foreach ($values as $val) {
+                    if ($val['mutasi'] == 0 && $val['saldo_qty_awal'] == 0 && $val['saldo_rupiah_awal'] == 0 && $val['saldo_qty_akhir'] == 0 && $val['saldo_rupiah_akhir'] == 0) {
+                        $isTampil = 0;
+                        break;
+                    }
+                }
+                if ($isTampil == 1)
+                    return $values;
+                else
+                    return null;
+            })->filter(function ($val) {
+                if ($val) return true;
             });
         $mutasiMasuk = static::query()->whereBetween('created_at', [$dateAwal, $dateAkhir])
             ->where('mutasi_qty_backend', '>', 0)
