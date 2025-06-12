@@ -196,6 +196,7 @@ class KartuBDPController extends Controller
             ->whereBetween('kartu_bdps.created_at', [$dateAwal, $dateAkhir])
             ->where('mutasi_qty_backend', '>', 0)
             ->select('kartu_bdps.*', 'stocks.name as stock_name')
+            ->orderBy('index_date','asc')
             ->get();
         return [
             'status' => 1,
@@ -212,6 +213,7 @@ class KartuBDPController extends Controller
             ->whereBetween('kartu_bdps.created_at', [$dateAwal, $dateAkhir])
             ->where('mutasi_qty_backend', '<', 0)
             ->select('kartu_bdps.*', 'stocks.name as stock_name')
+            ->orderBy('index_date','asc')
             ->get();
         return [
             'status' => 1,

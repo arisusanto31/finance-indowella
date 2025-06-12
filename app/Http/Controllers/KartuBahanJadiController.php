@@ -275,6 +275,7 @@ class KartuBahanJadiController extends Controller
             ->whereBetween('kartu_bahan_jadis.created_at', [$dateAwal, $dateAkhir])
             ->where('mutasi_qty_backend', '>', 0)
             ->select('kartu_bahan_jadis.*', 'stocks.name as stock_name')
+            ->orderBy('index_date', 'asc')
             ->get();
         return [
             'status' => 1,
@@ -291,6 +292,7 @@ class KartuBahanJadiController extends Controller
             ->whereBetween('kartu_bahan_jadis.created_at', [$dateAwal, $dateAkhir])
             ->where('mutasi_qty_backend', '<', 0)
             ->select('kartu_bahan_jadis.*', 'stocks.name as stock_name')
+            ->orderBy('index_date', 'asc')
             ->get();
         return [
             'status' => 1,
