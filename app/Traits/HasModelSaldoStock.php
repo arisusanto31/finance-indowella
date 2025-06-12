@@ -71,7 +71,7 @@ trait HasModelSaldoStock
         })->select('production_number', 'custom_stock_name', 'stock_id', 'saldo_qty_backend as saldo_qty_awal', 'saldo_rupiah_total as saldo_rupiah_awal', DB::raw('"0" as saldo_qty_akhir'), DB::raw('"0" as saldo_rupiah_akhir'))->get();
     
         $summary= collect($summary)->merge(collect($saldoAkhir));
-        $dataStock = Stock::whereIn('stocks.id', $summary->pluck('stock_id')->all())->join('stock_categories', 'stocks.category_id', '=', 'stock_categories.id')
+        $dataStock = DB::table('stocks')->whereIn('stocks.id', $summary->pluck('stock_id')->all())->join('stock_categories', 'stocks.category_id', '=', 'stock_categories.id')
             ->join('stock_units', function ($join) {
                 $join->on('stocks.id', '=', 'stock_units.stock_id')
                     ->on('stocks.unit_default', '=', 'stock_units.unit');
