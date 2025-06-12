@@ -85,9 +85,11 @@ trait HasModelSaldoStock
                 return collect($dataspk)->groupBy('stock_id')->map(function ($item, $stockid) use ($dataStock) {
                     $data = []; //$dataStock[$stockid];
                     $name = $dataStock[$stockid]->name;
-                    $data['name'] = optional(collect($item)->filter(function ($val) use ($name) {
+                    $customName= optional(collect($item)->filter(function ($val) use ($name) {
                         if ($val->custom_stock_name != $name) return true;
-                    })->first())->custom_stock_name ?? $dataStock[$stockid]->name;
+                    })->first())->custom_stock_name ?? "";
+                    info('custom name : ' . $customName);
+                    $data['name'] = $customName ?: $name;
                     $data['konversi'] = $dataStock[$stockid]->konversi;
                     $data['category_name'] = $dataStock[$stockid]->category_name;
                     $data['unit_default'] = $dataStock[$stockid]->unit_default;
