@@ -26,8 +26,8 @@ function formatDB(angka, language = "id") {
         koma = parseFloat(strkoma);
 
         koma *= 100;
-        koma = Math.round(koma);
-        angka += '.' + koma;
+        koma = Math.round(koma)/100;
+        angka = parseFloat(angka) + koma;
     }
     if (angka == null || angka == "") angka = 0;
     angka = parseFloat(angka);
