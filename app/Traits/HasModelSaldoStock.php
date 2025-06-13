@@ -113,10 +113,13 @@ trait HasModelSaldoStock
                     $data['saldo_rupiah_akhir'] = collect($item)->sum('saldo_rupiah_akhir');
                     return $data;
                 })->values();
-                $isTampil = 1;
+                $isTampil = 0;
                 foreach ($values as $val) {
                     if ($val['mutasi'] == 0 && $val['saldo_qty_awal'] == 0 && $val['saldo_rupiah_awal'] == 0 && $val['saldo_qty_akhir'] == 0 && $val['saldo_rupiah_akhir'] == 0) {
-                        $isTampil = 0;
+                       
+                    }
+                    else{
+                        $isTampil = 1;
                         break;
                     }
                 }
