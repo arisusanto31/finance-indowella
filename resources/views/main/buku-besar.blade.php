@@ -115,7 +115,7 @@
                                         <td>${index+1}</td>
                                         <td>${tanggal}</td>
                                         <td>${item.journal_number} </td>
-                                        <td>${item.lawan_code_group} - ${item.lawan_code.name}</td>
+                                        <td>${item.lawan_code_group} - ${item.lawan_code?item.lawancode.name:"?"}</td>
                                         <td>${item.description}</td>
                                         <td>${formatRupiah(item.amount_debet)}</td>
                                         <td>${formatRupiah(item.amount_kredit)}</td>

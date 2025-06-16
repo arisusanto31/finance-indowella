@@ -6,7 +6,7 @@
 
 
             <div class="form-check form-switch ">
-                <input class="form-check-input" type="checkbox" id="is_otomatis_jurnal" checked />
+                <input class="form-check-input" name="is_otomatis_jurnal" type="checkbox" id="is_otomatis_jurnal" checked />
                 <label class="form-check-label" for="is_otomatis_jurnal">Buat Jurnal</label>
             </div>
 
