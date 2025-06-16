@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Http\Controllers\JournalController;
 use App\Traits\HasIndexDate;
+use App\Traits\HasModelSaldoAset;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -17,6 +18,7 @@ class KartuPrepaidExpense extends Model
     //
 
     use HasIndexDate;
+    use HasModelSaldoAset;
     protected $table = "kartu_prepaid_expenses";
     public $timestamps = true;
     public $fillable = [

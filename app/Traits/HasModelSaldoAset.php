@@ -6,10 +6,10 @@ use App\Models\ChartAccount;
 use App\Models\Journal;
 use Illuminate\Support\Facades\DB;
 
-trait HasModelSaldoUang
+trait HasModelSaldoAset
 {
 
-    public static function getTotalSaldoRupiah($date, $kolomGroup = 'invoice_pack_number')
+    public static function getTotalSaldoRupiah($date, $kolomGroup = 'inventory_id')
     {
         $indexDate = createCarbon($date)->format('ymdHis000');
         $saldo = static::query()->whereIn('index_date', function ($q) use ($indexDate, $kolomGroup) {
@@ -17,7 +17,7 @@ trait HasModelSaldoUang
                 ->from(with(new static)->getTable())
                 ->where('book_journal_id', bookID())
                 ->where('index_date', '<', $indexDate)
-                ->groupBy($kolomGroup, 'person_id', 'person_type');
+                ->groupBy($kolomGroup);
         })->get();
         $data = collect($saldo)->map(function ($item) use ($kolomGroup) {
             return collect($item)->only('nilai_buku', $kolomGroup, 'id');

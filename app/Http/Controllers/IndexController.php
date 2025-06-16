@@ -103,9 +103,10 @@ class IndexController extends Controller
         $kdp = KartuDPSales::getTotalSaldoRupiah(getInput('date'), 'sales_order_number');
         $jkdp = KartuDPSales::getTotalJournal(getInput('date'));
 
-        $kinv= KartuInventory::getTotalSaldoRupiah(getInput('date'));
+        $kinv= KartuInventory::getTotalSaldoRupiah(getInput('date'),'inventory_id');
         $jinv = KartuInventory::getTotalJournal(getInput('date'));
-        $kprepaid = KartuPrepaidExpense::getTotalSaldoRupiah(getInput('date'));
+
+        $kprepaid = KartuPrepaidExpense::getTotalSaldoRupiah(getInput('date'),'prepaid_expense_id');
         $jprepaid = KartuPrepaidExpense::getTotalJournal(getInput('date'));
 
         return [
