@@ -86,6 +86,7 @@ class InventoryController extends Controller
                 'type_mutasi' => 'pembelian',
                 'code_group' => $request['code_group'],
                 'lawan_code_group' => $request['lawan_code_group'],
+                'is_otomatis_jurnal' => $request['is_otomatis_jurnal'] ?? 0,
             ]));
 
             if ($st['status'] == 0) {
