@@ -8,13 +8,16 @@
                 <label class="form-check-label" for="is_otomatis_jurnal">Buat Jurnal</label>
             </div>
         </div>
-        <button
-            type="button"
-            class="btn-close position-absolute end-0 top-0 m-3"
-            data-bs-dismiss="modal"
+        <button type="button" class="btn-close position-absolute end-0 top-0 m-3" data-bs-dismiss="modal"
             aria-label="Close"></button>
     </div>
     <div class="modal-body">
+        <div class="row">
+            <div class="col mb-3">
+                <label class="form-label">Nama</label>
+                <input class="form-control" placeholder="name" name="name" />
+            </div>
+        </div>
 
         <div class="row">
             <div class="col mb-3">
@@ -57,20 +60,22 @@
 
             <div class="col mb-3">
                 <label for="unit" class="form-label">Keterangan QTY dan unit</label>
-                <input type="text" value="" class="form-control" name="keterangan_qty_unit" placeholder="contoh: 2 pcs" />
+                <input type="text" value="" class="form-control" name="keterangan_qty_unit"
+                    placeholder="contoh: 2 pcs" />
             </div>
         </div>
         <div class="row">
             <div class="col mb-3">
                 <label for="" class="form-label">Date</label>
-                <input class="form-control" type="date" value="{{Date('Y-m-d')}}" name="date" id="date-input" />
+                <input class="form-control" type="date" value="{{ Date('Y-m-d') }}" name="date" id="date-input" />
             </div>
         </div>
         <div class="row">
 
             <div class="col mb-3">
                 <label for="unit" class="form-label">Nilai perolehan</label>
-                <input type="text" value="" class="form-control currency-input" name="nilai_perolehan" placeholder="contoh: 17.000.000" />
+                <input type="text" value="" class="form-control currency-input" name="nilai_perolehan"
+                    placeholder="contoh: 17.000.000" />
             </div>
         </div>
         <div class="row">
@@ -94,14 +99,16 @@
 <script>
     console.log('masuk kok');
     initCurrencyInput('.currency-input');
-    initItemSelectManual('#code-group', '{{route("chart-account.get-item-keuangan")}}?kind=inventory', 'Pilih Akun Aset', '#global-modal');
-    initItemSelectManual('#lawan-code-group', '{{route("chart-account.get-item")}}', 'Pilih Akun Lawan', '#global-modal');
-    initItemSelectManual('.select-stock', '{{route("stock.get-item")}}', 'Pilih Stock', '#global-modal');
+    initItemSelectManual('#code-group', '{{ route('chart-account.get-item-keuangan') }}?kind=inventory',
+        'Pilih Akun Aset', '#global-modal');
+    initItemSelectManual('#lawan-code-group', '{{ route('chart-account.get-item') }}', 'Pilih Akun Lawan',
+        '#global-modal');
+    initItemSelectManual('.select-stock', '{{ route('stock.get-item') }}', 'Pilih Stock', '#global-modal');
 
 
     function submitInventory() {
         $.ajax({
-            url: '{{route("aset-tetap.store-inventory")}}',
+            url: '{{ route('aset-tetap.store-inventory') }}',
             method: 'post',
             data: $('#form-create').serialize(),
             success: function(res) {
