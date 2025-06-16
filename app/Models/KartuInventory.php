@@ -69,6 +69,8 @@ class KartuInventory extends Model
             $lock->block(15);
             $date = $request->input('date') ?? now();
             self::proteksiBackdate($date);
+            $inv= Inventory::find($invID);
+            $tokoID=$inv->toko_id;
             $indexDate = self::getNextIndexDate($date);
             $lastKartu = KartuInventory::where('inventory_id', $invID)->where('index_date', '<', $indexDate)->orderBy('index_date', 'desc')->first();
             $lastNilaiBuku = $lastKartu ? $lastKartu->nilai_buku : 0;
@@ -128,6 +130,7 @@ class KartuInventory extends Model
                         'amount' => $amount,
                         'reference_id' => null,
                         'reference_type' => null,
+                        'toko_id'=>$tokoID
                     ],
                 ];
                 $debets = [
@@ -137,6 +140,7 @@ class KartuInventory extends Model
                         'amount' => $amount,
                         'reference_id' => null,
                         'reference_type' => null,
+                        'toko_id'=>$tokoID
                     ],
                 ];
                 $st = JournalController::createBaseJournal(new Request([
