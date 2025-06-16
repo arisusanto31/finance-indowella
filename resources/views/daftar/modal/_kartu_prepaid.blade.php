@@ -63,7 +63,7 @@
         <div class="row">
             <div class="col mb-3">
                 <label for="" class="form-label">Date</label>
-                <input class="form-control" name="date" type="date" value="{{Date('Y-m-d')}}" id="date-input" />
+                <input class="form-control" name="datetime-local" type="date" value="{{now()}}" id="date-input" />
             </div>
         </div>
         <div class="row">

@@ -39,6 +39,7 @@ class Inventory extends Model
         'keterangan_qty_unit',
         'date',
         'nilai_perolehan',
-        'periode'
+        'periode',
+        'toko_id',
     ];
 }

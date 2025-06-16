@@ -49,15 +49,16 @@ class InventoryController extends Controller
     public function storeInventory(Request $request)
     {
 
-
+        // return $request->all();
         DB::beginTransaction();
         $inv = null;
         $st = null;
         try {
             $request['book_journal_id'] = bookID();
             $request['nilai_perolehan'] = format_db($request['nilai_perolehan']);
-            $request = $request->validate([
+            $validate = $request->validate([
                 'name' => 'required|string',
+                'description'=>'string',
                 'keterangan_qty_unit' => 'string',
                 'date' => 'required|date',
                 'nilai_perolehan' => 'required|numeric',
@@ -66,17 +67,21 @@ class InventoryController extends Controller
                 'type_aset' => 'required|string',
                 'code_group' => 'required|integer',
                 'lawan_code_group' => 'required|integer',
+                'toko_id' => 'required',
             ]);
 
 
-            $inv = Inventory::create($request);
+            $inv = Inventory::create($request->all());
             $inv->refresh();
+        
             if ($inv == null) {
                 throw new \Exception('Gagal menyimpan data');
             }
             $st = KartuInventory::createKartu(new Request([
                 'inventory_id' => $inv->id,
-                'date' => $inv->date,
+                'date' => $request['date'],
+                'description'=>$request['description'],
+                'toko_id' => $request['toko_id'],
                 'amount' => $request['nilai_perolehan'], // ini pake format indonesia
                 'type_mutasi' => 'pembelian',
                 'code_group' => $request['code_group'],

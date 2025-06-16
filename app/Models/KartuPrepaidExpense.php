@@ -35,6 +35,8 @@ class KartuPrepaidExpense extends Model
         'description',
         'toko_id',
         'code_group_name',
+        'index_date',
+        'index_date_group'
     ];
 
 
@@ -201,6 +203,5 @@ class KartuPrepaidExpense extends Model
             $kartu->save();
             $nilaiBuku = $kartu->nilai_buku;
         }
-        
     }
 }

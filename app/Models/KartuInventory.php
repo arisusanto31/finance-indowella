@@ -34,6 +34,8 @@ class KartuInventory extends Model
         'journal_number',
         'code_group_name',
         'toko_id',
+        'index_date',
+        'index_date_group'
     ];
 
 
@@ -76,8 +78,8 @@ class KartuInventory extends Model
             $isOtomatisJurnal = $request->input('is_otomatis_jurnal');
 
             $request->merge([
-                'index_date' => $indexDate,
-                'index_date_group' => createCarbon($date)->format('ymdHis'),
+                'index_date' => intval($indexDate),
+                'index_date_group' => intval(createCarbon($date)->format('ymdHis')),
                 'book_journal_id' => bookID(),
                 'amount'          => $formattedAmount,
                 // nilai_buku dihitung berdasarkan kartu terakhir dan amount yang sudah diformat
@@ -161,10 +163,11 @@ class KartuInventory extends Model
             }
 
 
-            $validated['journal_id'] = $journalID;
-            $validated['journal_number'] = $number;
+            $request['journal_id'] = $journalID;
+            $request['journal_number'] = $number;
+            // info(json_encode($request->all()));
 
-            $ki = KartuInventory::create($validated);
+            $ki = KartuInventory::create($request->all());
             if (self::isBackdate($date)) {
                 $ki->recalculateSaldo();
             }

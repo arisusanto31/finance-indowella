@@ -11,14 +11,11 @@
             </div>
 
         </div>
-        <button
-            type="button"
-            class="btn-close position-absolute end-0 top-0 m-3"
-            data-bs-dismiss="modal"
+        <button type="button" class="btn-close position-absolute end-0 top-0 m-3" data-bs-dismiss="modal"
             aria-label="Close"></button>
     </div>
     <div class="modal-body">
-        
+
         <div class="row">
             <div class="col mb-3">
                 <label for="nameBasic" class="form-label">Nama</label>
@@ -29,6 +26,13 @@
             <div class="col mb-3">
                 <label class="form-label">Deskripsi jurnal</label>
                 <input class="form-control" placeholder="description" name="description" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col mb-3">
+                <label class="form-label">TOKO</label>
+                <select type="text" name="toko_id" id="toko" class="form-control select-toko">
+                </select>
             </div>
         </div>
         <div class="row">
@@ -61,14 +65,16 @@
         <div class="row">
             <div class="col mb-3">
                 <label for="" class="form-label">Date</label>
-                <input class="form-control" type="date" value="{{Date('Y-m-d')}}" name="date" id="date-input" />
+                <input class="form-control" type="datetime-local" value="{{ now() }}" name="date"
+                    id="date-input" />
             </div>
         </div>
         <div class="row">
 
             <div class="col mb-3">
                 <label for="unit" class="form-label">Nilai perolehan</label>
-                <input type="text" value="" class="form-control currency-input" name="nilai_perolehan" placeholder="contoh: 17.000.000" />
+                <input type="text" value="" class="form-control currency-input" name="nilai_perolehan"
+                    placeholder="contoh: 17.000.000" />
             </div>
         </div>
         <div class="row">
@@ -91,13 +97,15 @@
 
 <script>
     initCurrencyInput('.currency-input');
-    initItemSelectManual('#code-group', '{{route("chart-account.get-item-keuangan")}}?kind=prepaid', 'Pilih Akun Bdd', '#global-modal');
-    initItemSelectManual('#lawan-code-group', '{{route("chart-account.get-item")}}?kind=prepaid', 'Pilih Akun Lawan', '#global-modal');
-
+    initItemSelectManual('#code-group', '{{ route('chart-account.get-item-keuangan') }}?kind=prepaid', 'Pilih Akun Bdd',
+        '#global-modal');
+    initItemSelectManual('#lawan-code-group', '{{ route('chart-account.get-item') }}?kind=prepaid', 'Pilih Akun Lawan',
+        '#global-modal');
+    initItemSelectManual('.select-toko', '{{ route('toko.get-item') }}', 'Pilih Toko', '#global-modal');
 
     function submitPrepaid() {
         $.ajax({
-            url: '{{route("bdd.store-prepaid")}}',
+            url: '{{ route('bdd.store-prepaid') }}',
             method: 'post',
             data: $('#form-create').serialize(),
             success: function(res) {

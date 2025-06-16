@@ -39,7 +39,7 @@ class BDDController extends Controller
         try {
             $request['book_journal_id'] = bookID();
             $request['nilai_perolehan'] = format_db($request['nilai_perolehan']);
-            $request = $request->validate([
+            $validate = $request->validate([
                 'name' => 'required|string',
                 'keterangan_qty_unit' => 'string',
                 'date' => 'required|date',
@@ -52,14 +52,16 @@ class BDDController extends Controller
             ]);
 
 
-            $inv = PrepaidExpense::create($request);
+            $inv = PrepaidExpense::create($request->all());
             $inv->refresh();
             if ($inv == null) {
                 throw new \Exception('Gagal menyimpan data');
             }
             $st = KartuPrepaidExpense::createKartu(new Request([
-                'prepaid_expense_id' => $inv->id,
-                'date' => $inv->date,
+                'description'=> $request['description'] ?? '',
+                'toko_id' => $request['toko_id'] ?? null,
+                'prepaid_expense_id' => $inv->id,   
+                'date' => $request['date'],
                 'amount' => $request['nilai_perolehan'], // ini pake format indonesia
                 'type_mutasi' => 'pembayaran',
                 'code_group'=>$request['code_group'],
