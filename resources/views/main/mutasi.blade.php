@@ -215,14 +215,10 @@
         <script>
             var iRowDebet = 1;
             var iRowKredit = 1;
-
-
             setTimeout(() => {
                 initItemSelectManual('.select-coa', '{{ url('admin/master/chart-account/get-item') }}',
                     'chart account');
-
             }, 100);
-
 
             function changeDateClosingJournal() {
                 date = new Date($('#date-closing-journal').val());

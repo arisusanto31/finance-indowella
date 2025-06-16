@@ -283,9 +283,18 @@
                         <h5 class="pb-0 mt-3 mb-0 text-primary"> <i class="fas fa-circle"></i> Kartu Hutang <span
                                 style="font-size:14px"> vs jurnal</span></h5>
                         <div id="cocok-kartu-hutang" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
-                        <h5 class="pb-0 mt-3 mb-0 text-primary"> <i class="fas fa-circle"></i> Kartu DP Sales <span
+                        <h5 class="pb-0 mt-3 mb-0 text-primary">
+                             <i class="fas fa-circle"></i> Kartu DP Sales <span
                                 style="font-size:14px"> vs jurnal</span> </h5>
                         <div id="cocok-kartu-dp" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
+                        <h5 class="pb-0 mt-3 mb-0 text-primary">
+                             <i class="fas fa-circle"></i> Inventaris <span
+                                style="font-size:14px"> vs jurnal</span> </h5>
+                        <div id="cocok-kartu-inventory" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
+                        <h5 class="pb-0 mt-3 mb-0 text-primary">
+                             <i class="fas fa-circle"></i> BDD<span
+                                style="font-size:14px"> vs jurnal</span> </h5>
+                        <div id="cocok-kartu-bdd" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
 
                     </div>
                 </div>
@@ -720,6 +729,12 @@
                                 formatRupiah(res.kartu_hutang.journal));
                             $('#cocok-kartu-dp').html("Rp " + formatRupiah(res.kartu_dp.saldo) + ' vs ' +
                                 formatRupiah(res.kartu_dp.journal));
+                            $('#cocok-kartu-inventory').html("Rp " + formatRupiah(res.kartu_inventory.saldo) +
+                                ' vs ' +
+                                formatRupiah(res.kartu_inventory.journal));
+                            $('#cocok-kartu-bdd').html("Rp " + formatRupiah(res.kartu_bdd.saldo) + ' vs ' +
+                                formatRupiah(res.kartu_bdd.journal));
+                                
                         } else {
                             swalInfo('opps', 'something error' + res.msg, 'error');
                         }
@@ -730,6 +745,7 @@
 
                 });
             }
+
         </script>
     @endpush
 </x-app-layout>

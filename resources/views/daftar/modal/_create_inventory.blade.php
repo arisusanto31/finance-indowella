@@ -1,16 +1,12 @@
 <form id="form-create">
     @csrf
     <div class="modal-header">
-
         <div class="flex-column align-items-start">
             <h5 class="modal-title" id="exampleModalLabel1">Buat Inventaris</h5>
-
-
             <div class="form-check form-switch ">
                 <input class="form-check-input" type="checkbox" id="is_otomatis_jurnal" checked />
                 <label class="form-check-label" for="is_otomatis_jurnal">Buat Jurnal</label>
             </div>
-
         </div>
         <button
             type="button"
@@ -19,12 +15,6 @@
             aria-label="Close"></button>
     </div>
     <div class="modal-body">
-        <div class="row">
-            <div class="col mb-3">
-                <label for="nameBasic" class="form-label">Nama</label>
-                <input name="name" class="form-control" placeholder="nama aset tetap" />
-            </div>
-        </div>
 
         <div class="row">
             <div class="col mb-3">
