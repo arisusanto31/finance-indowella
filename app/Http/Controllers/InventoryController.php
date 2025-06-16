@@ -58,7 +58,7 @@ class InventoryController extends Controller
             $request['nilai_perolehan'] = format_db($request['nilai_perolehan']);
             $validate = $request->validate([
                 'name' => 'required|string',
-                'description'=>'string',
+                'description' => 'string',
                 'keterangan_qty_unit' => 'string',
                 'date' => 'required|date',
                 'nilai_perolehan' => 'required|numeric',
@@ -73,14 +73,14 @@ class InventoryController extends Controller
 
             $inv = Inventory::create($request->all());
             $inv->refresh();
-        
+
             if ($inv == null) {
                 throw new \Exception('Gagal menyimpan data');
             }
             $st = KartuInventory::createKartu(new Request([
                 'inventory_id' => $inv->id,
                 'date' => $request['date'],
-                'description'=>$request['description'],
+                'description' => $request['description'],
                 'toko_id' => $request['toko_id'],
                 'amount' => $request['nilai_perolehan'], // ini pake format indonesia
                 'type_mutasi' => 'pembelian',
@@ -116,6 +116,7 @@ class InventoryController extends Controller
     public function storeKartuInventory(Request $request)
     {
 
+        
         try {
             $st = KartuInventory::createKartu($request);
             if ($st['status'] == 0) {
@@ -125,12 +126,12 @@ class InventoryController extends Controller
             DB::rollBack();
             return ['status' => 0, 'msg' => $th->getMessage()];
         } finally {
-            DB::commit();
-            return [
-                'status' => 1,
-                'msg' => $st['msg']
-            ];
         }
+        DB::commit();
+        return [
+            'status' => 1,
+            'msg' => $st['msg']
+        ];
     }
 
     public function getItem()

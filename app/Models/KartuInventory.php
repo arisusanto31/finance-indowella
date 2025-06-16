@@ -77,7 +77,7 @@ class KartuInventory extends Model
             // Format nilai amount terlebih dahulu
             //input amount harus pakai languange indonesia
             $formattedAmount = $request->input('type_mutasi') == 'penyusutan' ? format_db($request->input('amount')) * -1 : format_db($request->input('amount'));
-            $isOtomatisJurnal = $request->input('is_otomatis_jurnal');
+            $isOtomatisJurnal = $request->input('is_otomatis_jurnal')=="on"?true:false;
 
             $request->merge([
                 'index_date' => intval($indexDate),
@@ -105,7 +105,7 @@ class KartuInventory extends Model
                 'date'           => 'required|date',
                 'code_group'      => 'required|integer',
                 'lawan_code_group' => 'required|integer',
-                'toko_id' => 'required|integer',
+               
             ]);
 
 
@@ -169,7 +169,7 @@ class KartuInventory extends Model
 
             $request['journal_id'] = $journalID;
             $request['journal_number'] = $number;
-            // info(json_encode($request->all()));
+            info(json_encode($request->all()));
 
             $ki = KartuInventory::create($request->all());
             if (self::isBackdate($date)) {
