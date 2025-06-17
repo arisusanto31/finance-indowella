@@ -47,6 +47,8 @@ class KartuBahanJadiController extends Controller
 
     public function createMutations(Request $request)
     {
+
+        
         $stockIDs = $request->input('stock_id');
         $quantitys = $request->input('quantity');
         $units = $request->input('unit');

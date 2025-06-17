@@ -44,6 +44,8 @@ class KartuBDPController extends Controller
 
     public function createMutations(Request $request)
     {
+
+        
         $stockIDs = $request->input('stock_id');
         $quantitys = $request->input('quantity');
         $spkNumbers = $request->input('spk_number');

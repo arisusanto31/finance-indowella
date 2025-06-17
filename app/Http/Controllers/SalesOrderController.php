@@ -44,7 +44,7 @@ class SalesOrderController extends Controller
             ->orderBy('sds.created_at', 'asc')
             ->get()
             ->groupBy('sales_order_number');
-     
+
 
 
         $invPack = SalesOrder::whereIn('sales_order_number', $salesOrders->keys()->all())
@@ -241,8 +241,8 @@ class SalesOrderController extends Controller
     public function showDetail($number)
     {
         $data = SalesOrder::where('sales_order_number', $number)->first();
-        $reference= $data->reference;
-        $dateFinished=$reference->delivery_at??$data->created_at;
+        $reference = $data->reference;
+        $dateFinished = $reference->delivery_at ?? $data->created_at;
 
         $data->updateStatus();
         $invdetails = SalesOrderDetail::with('stock')->where('sales_order_number', $number)->get();
@@ -257,12 +257,23 @@ class SalesOrderController extends Controller
         $data['resume_total'] = $data->getTotalKartu();
         $view = view('invoice.modal._sale-detail');
         $view->data = $data;
-        $view->dateFinished= $dateFinished;
-        $view->dateUangMuka= $data->created_at;
-        $view->dateProses= createCarbon($data->created_at)->addDay()->format('Y-m-d H:i:s');
+        $view->dateFinished = $dateFinished;
+        $view->dateUangMuka = $data->created_at;
+        $view->dateProses = createCarbon($data->created_at)->addDay()->format('Y-m-d H:i:s');
 
 
         return $view;
+    }
+
+    public function getDataKartu($number)
+    {
+        $data = SalesOrder::where('sales_order_number', $number)->first();
+        $data['kartus'] = $data->getAllKartu();
+        $data['resume_total'] = $data->getTotalKartu();
+        return [
+            'status' => 1,
+            'msg' => $data
+        ];
     }
 
     function openImport()
@@ -317,7 +328,7 @@ class SalesOrderController extends Controller
 
             $sales = $sales->join('transactions as tr', 'tr.package_id', '=', 'pack.id');
             if (getInput('toko'))
-                $sales= $sales->where('tr.kind', getInput('toko'));
+                $sales = $sales->where('tr.kind', getInput('toko'));
             $sales = $sales->where(function ($q) {
                 $q->where('pack.is_ppn', 1)->orWhere('pack.is_wajib_lapor', 1);
             })->join('customers as c', 'c.id', '=', 'pack.customer_id');
@@ -325,7 +336,7 @@ class SalesOrderController extends Controller
                 $sales = $sales->where(function ($q) {
                     $q->where('c.name', 'like', '%' . getInput('customer') . '%')
                         ->orWhere('c.instance', 'like', '%' . getInput('customer') . '%')
-                        ->orWhere('tr.instance_name','like','%'.getInput('customer').'%');
+                        ->orWhere('tr.instance_name', 'like', '%' . getInput('customer') . '%');
                 });
             }
             $sales = $sales->select(
@@ -339,7 +350,7 @@ class SalesOrderController extends Controller
                 'pack.akun_cash_kind_name',
                 'c.instance as customer_name',
                 'pack.created_at',
-            );
+            )->distinct();
         }
 
         $sales = $sales->with('detailSales')->get()->map(function ($val) use ($modeBook) {

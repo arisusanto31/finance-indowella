@@ -318,6 +318,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::post('hitung-kisaran-biaya', [SalesOrderController::class, 'hitungKisaranBiaya'])->name('hitung-kisaran-biaya');
         Route::delete('sales-order-delete/{id}', [SalesOrderController::class, 'destroy']);
         Route::get('sales-update-status/{id}', [SalesOrderController::class, 'updateStatus']);
+        Route::get('get-data-kartu/{number}', [SalesOrderController::class, 'getDataKartu'])->name('get-data-kartu');
     });
 });
 

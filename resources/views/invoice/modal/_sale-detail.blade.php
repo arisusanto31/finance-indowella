@@ -56,19 +56,8 @@
             </table>
         </div>
 
-        <div class="col-xs-12 col-md-12">
-            <div class="card mt-4">
-                <div class="card-body">
-                    <h5 class="text-primary-dark mb-2"> <strong>Resume Total </strong>
-                        @if (count($data['resume_total']) > 0)
-                            @foreach ($data['resume_total'] as $key => $total)
-                                <p class="mb-0 mt-2 pb-2" style="font-size:15px; "> <i class="fas fa-circle"></i>
-                                    {{ $key }}</p>
-                                <p class="mb-0 pb-2 fs-7 ps-3"> {{ format_price($total) }}</p>
-                            @endforeach
-                        @endif
-                </div>
-            </div>
+        <div class="col-xs-12 col-md-12" id="div-resume-total">
+
         </div>
 
 
@@ -121,7 +110,7 @@
                             <div class="col-md-12 col-xs-12">
                                 @php $index=1; @endphp
                                 @foreach ($data['details'] as $key => $item)
-                                    <form id="form-bdp{{ $index }}">
+                                    <form id="form-bdp{{ $index }}" class="form-bdp">
                                         {{ csrf_field() }}
                                         <input type="hidden" name="production_number"
                                             value="{{ $data->sales_order_number }}-{{ toDigit($index, 2) }}" />
@@ -190,16 +179,20 @@
                                             </div>
                                             <div class="col-md-2">
                                                 <label>Aksi</label><br>
-                                                <button type="button" onclick="submitBDP('{{ $index }}')"
+                                                <button id="bdp-submit{{ $index }}" type="button"
+                                                    onclick="submitBDP('{{ $index }}')"
                                                     class="mb-3 btn btn-primary">submit</button>
                                             </div>
 
                                         </div>
                                     </form>
-                                    <hr>
+                                    <hr class="text-primary-dark">
+                                    </hr>
                                     @php $index++; @endphp
                                 @endforeach
-
+                                <button class="btn btn-primary" id="bdp-submit-all" onclick="submitBDPAll()">
+                                    <i class="bx bx-check"></i> submit semua
+                                </button>
 
                             </div>
                             <div class="col-md-2 col-xs-12">
@@ -218,7 +211,7 @@
                             <div class="col-md-12 col-xs-12">
                                 @php $index=1; @endphp
                                 @foreach ($data['details'] as $key => $item)
-                                    <form id="form-bahan-jadi{{ $index }}">
+                                    <form id="form-bahan-jadi{{ $index }}" class="form-bahan-jadi">
                                         {{ csrf_field() }}
                                         <input type="hidden" name="sales_order_number"
                                             value="{{ $data->sales_order_number }}" />
@@ -292,17 +285,20 @@
                                             </div>
                                             <div class="col-md-2 col-xs-12">
                                                 <label>Aksi</label> <br>
-                                                <button type="button"
+                                                <button type="button" id="bahan-jadi-submit{{ $index }}"
                                                     onclick="submitBahanJadi('{{ $index }}')"
                                                     class="btn btn-primary">submit</button>
                                             </div>
 
                                     </form>
                             </div>
-                            <hr>
+                            <hr class="text-primary-dark"></hr>
                             @php $index++; @endphp
                             @endforeach
-
+                            <button class="btn btn-primary" id="bahan-jadi-submit-all"
+                                onclick="submitBahanJadiAll()">
+                                <i class="bx bx-check"></i> submit semua
+                            </button>
 
                         </div>
                     </div>
@@ -339,8 +335,7 @@
                                         </div>
                                         <div class="col-md-2 col-xs-12">
                                             <label>Jumlah</label>
-                                            <input type="text" 
-                                                class="form-control qty-invoice" name="quantity[]"
+                                            <input type="text" class="form-control qty-invoice" name="quantity[]"
                                                 placeholder="qty: {{ $item->qtyjadi }}"
                                                 id="invoice-quantity{{ $item->id }}"
                                                 value="{{ $item->qtyjadi }}" />
@@ -443,65 +438,15 @@
                 </div>
 
 
-                <div class="row">
-
-                    <h6>Kartu Kartu </h6>
-                    @if (count($data['kartus']) > 0)
-                        @foreach ($data['kartus'] as $key => $itemsType)
-                            <div class="col-xs-12">
-                                <span class="text-white bg-primary-dark ps-2">{{ $key }}</span>
-                                <div class="row bg-primary-light p-2 mb-2">
-                                    <div class="col-xs-12 col-md-6 p-2">
-                                        <h6 class="text-white">Debet</h6>
-                                        <div class="row text-white">
-                                            @if (array_key_exists('debet', $itemsType))
-                                                @foreach ($itemsType['debet'] as $item)
-                                                    <div class="col-xs-12 col-md-6 ">
-                                                        <div class="bg-primary-dark p-2 ">
-                                                            <p>{{ $item->date }}
-                                                                <strong>{{ $item->code_group_name }}</strong> :
-                                                                {{ format_price(abs($item->amount_journal)) }} <span
-                                                                    class="fs-8">[journal_id :
-                                                                    {{ $item->journal_id }}, kartu_id=
-                                                                    {{ $item->kartu_id }}]</span>
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                @endforeach
-                                            @endif
-                                        </div>
-                                    </div>
-
-                                    <div class="col-xs-12 col-md-6 p-2 ">
-                                        <h6 class="text-white">Kredit</h6>
-                                        <div class="row text-white">
-                                            @if (array_key_exists('kredit', $itemsType))
-                                                @foreach ($itemsType['kredit'] as $item)
-                                                    <div class="col-xs-12 col-md-6">
-                                                        <div class="bg-primary-dark p-2">
-                                                            <p>{{ $item->date }}
-                                                                <strong>{{ $item->code_group_name }}</strong> :
-                                                                {{ format_price(abs($item->amount_journal)) }} <span
-                                                                    class="fs-8">[journal_id :
-                                                                    {{ $item->journal_id }}, kartu_id=
-                                                                    {{ $item->kartu_id }}]</span>
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                @endforeach
-                                            @endif
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
-
-                    @endif
-
-
-                </div>
             </div>
         </div>
+
+        <div class="col-xs-12 col-md-12" id="div-resume-kartu">
+
+
+        </div>
+
+
 
     </div>
 </div>
@@ -512,6 +457,127 @@
 </div>
 
 <script>
+    var data = @json($data);
+    setTimeout(function() {
+        renderResumeKartu(data);
+        renderResumeTotal(data);
+    }, 100);
+
+    function renderResumeKartu(data) {
+
+
+        console.log('data kartu', data);
+        html = `
+        <div class="card mt-4">
+         <div class="card-body">
+         <div class="row">
+            <h6>Kartu Kartu </h6>
+                ${count(data['kartus'])> 0?`
+                ${collect(data['kartus']).map((itemsType,key)=> `
+                        <div class="col-xs-12">
+                            <span class="text-white bg-primary-dark ps-2">${key}</span>
+                            <div class="row bg-primary-light p-2 mb-2">
+                                <div class="col-xs-12 col-md-6 p-2">
+                                    <h6 class="text-white">Debet</h6>
+                                    <div class="row text-white">
+                                       ${array_key_exists('debet', itemsType)?`
+                                              ${collect(itemsType['debet']).map((item)=>`
+                                                  <div class="col-xs-12 col-md-6 ">
+                                                        <div class="bg-primary-dark p-2 ">
+                                                            <p>${item.date}
+                                                                <strong>${item.code_group_name}</strong> :
+                                                                ${formatRupiah(Math.abs(item.amount_journal))} <span
+                                                                    class="fs-8">[journal_id :
+                                                                    ${item.journal_id}, kartu_id=
+                                                                    ${item.kartu_id}]</span>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                              
+                                              `).join('')}
+                                               
+                                            `:''
+                                         }
+                                    </div>
+                                </div>
+
+                                <div class="col-xs-12 col-md-6 p-2 ">
+                                    <h6 class="text-white">Kredit</h6>
+                                    <div class="row text-white">
+                                        ${array_key_exists('kredit', itemsType)?`
+                                              ${collect(itemsType['kredit']).map((item)=>`
+                                                  <div class="col-xs-12 col-md-6 ">
+                                                        <div class="bg-primary-dark p-2 ">
+                                                            <p>${item.date}
+                                                                <strong>${item.code_group_name}</strong> :
+                                                                ${formatRupiah(Math.abs(item.amount_journal))} <span
+                                                                    class="fs-8">[journal_id :
+                                                                    ${item.journal_id}, kartu_id=
+                                                                    ${item.kartu_id}]</span>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                              
+                                              `).join('')}
+                                               
+                                            `:''
+                                         }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                
+                
+                `).join('')}
+                `:``}
+            </div>
+            </div>
+            </div>
+        `;
+        $('#div-resume-kartu').html(html);
+    }
+
+
+
+    function renderResumeTotal(data) {
+        console.log('data total', data['resume_total']);
+        html = `
+          <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="text-primary-dark mb-2"> <strong>Resume Total </strong>
+                        ${count(data['resume_total'])>0 ?`
+                    
+                            ${collect(data['resume_total']).map((total,key)=>`
+                                <p class="mb-0 mt-2 pb-2" style="font-size:15px; "> <i class="fas fa-circle"></i>
+                                    ${key}</p>
+                                <p class="mb-0 pb-2 fs-7 ps-3"> ${formatRupiah(total)}</p>`
+                            ).join('')}
+                        `:''}
+                </div>
+            </div>
+        `;
+        $('#div-resume-total').html(html);
+    }
+
+    function getDataKartu() {
+        $.ajax({
+            url: '{{ url('admin/invoice/get-data-kartu') }}/{{ $data->sales_order_number }}',
+            method: 'get',
+            success: function(res) {
+                console.log(res);
+                if (res.status == 1) {
+                    renderResumeKartu(res.msg);
+                    renderResumeTotal(res.msg);
+                } else {
+                    Swal.fire('ops', 'something error ' + res.msg, 'error');
+                }
+            },
+            error: function(res) {
+                Swal.fire('ops', 'something error get data kartu', 'error');
+            }
+        });
+    }
+
     function initAllItem() {
         setTimeout(function() {
             initItemSelectManual('#select-pcoa-persediaan',
@@ -548,7 +614,7 @@
     }
     initAllItem();
 
-    
+
 
 
     function gantiBahanBDP(id) {
@@ -706,8 +772,9 @@
             success: function(res) {
                 console.log(res);
                 if (res.status == 1) {
-                    res.msg.forEach(function eachItem(item,i) {
-                        bahanJadi = res.bahan_jadi[item.sales_order_number+'-'+toDigit(i+1,2)];
+                    res.msg.forEach(function eachItem(item, i) {
+                        bahanJadi = res.bahan_jadi[item.sales_order_number + '-' + toDigit(i + 1,
+                            2)];
                         if (bahanJadi != undefined) {
                             dataBahanJadi[item.id] = bahanJadi;
                             html =
@@ -757,7 +824,7 @@
             },
             onSuccess: (res) => {
                 console.log(res);
-                refreshIsiModal();
+                getDataKartu();
                 setTimeout(function() {
                     updateStatusRow('{{ $data->id }}');
                 }, 1000);
@@ -770,28 +837,115 @@
     }
 
     function submitBDP(i) {
+        console.log($('#form-bdp' + i).serialize());
+        $('#bdp-submit' + i).prop('disabled', true);
+        $('#bdp-submit' + i).html('<i class="bx bx-loader bx-spin"></i> loading...');
         swalConfirmAndSubmit({
             url: '{{ url('admin/kartu/kartu-bdp/create-mutations') }}',
             data: $('#form-bdp' + i).serialize(),
             onSuccess: function(res) {
                 console.log(res);
-                refreshIsiModal();
+                getDataKartu();
+                $('#bdp-submit' + i).html('<i class="fas fa-check"></i> berhasil');
+                $('#bdp-submit' + i).removeClass('btn-primary').addClass('btn-success');
+
                 setTimeout(function() {
                     updateStatusRow('{{ $data->id }}');
                 }, 1000);
-
-
             },
         });
     }
 
+    var iBDP = 1;
+
+    function submitBDPAll() {
+        iBDP = 1;
+        prosesStateBDP();
+    }
+
+    function prosesStateBDP() {
+        $('#bdp-submit' + iBDP).prop('disabled', true);
+        $('#bdp-submit' + iBDP).html('<i class="bx bx-loader bx-spin"></i> loading...');
+        $.ajax({
+            url: '{{ url('admin/kartu/kartu-bdp/create-mutations') }}',
+            method: 'post',
+            data: $('#form-bdp' + iBDP).serialize(),
+            success: function(res) {
+                console.log(res);
+                if (res.status == 1) {
+                    $('#bdp-submit' + iBDP).html('<i class="fas fa-check"></i> berhasil');
+                    $('#bdp-submit' + iBDP).removeClass('btn-primary').addClass('btn-success');
+                    iBDP++;
+                    if (iBDP <= $('.form-bdp').length) {
+                        setTimeout(prosesStateBDP, 50);
+
+                    } else {
+                        $('#bdp-submit-all').prop('disabled', true);
+                        $('#bdp-submit-all').html('<i class="fas fa-check"></i> selesai');
+                        $('#bdp-submit-all').removeClass('btn-primary').addClass('btn-success');
+                        getDataKartu();
+                        setTimeout(function() {
+                            updateStatusRow('{{ $data->id }}');
+                        }, 300);
+                    }
+                } else {
+                    Swal.fire('ops', 'something error ' + res.msg, 'error');
+                    $('#bdp-submit' + iBDP).prop('disabled', false);
+                    $('#bdp-submit' + iBDP).html('submit');
+                }
+            },
+            error: function(res) {}
+        });
+    }
+
+
+    var iBahanJadi=1;
+    function submitBahanJadiAll() {
+        iBahanJadi = 1;
+        prosesStateBahanJadi();
+    }
+
+    function prosesStateBahanJadi() {
+        $('#bahan-jadi-submit' + iBahanJadi).prop('disabled', true);
+        $('#bahan-jadi-submit' + iBahanJadi).html('<i class="bx bx-loader bx-spin"></i> loading...');
+        $.ajax({
+            url: '{{ url('admin/kartu/kartu-bahan-jadi/create-mutations') }}',
+            method: 'post',
+            data: $('#form-bahan-jadi' + iBahanJadi).serialize(),
+            success: function(res) {
+                console.log(res);
+                if (res.status == 1) {
+                    $('#bahan-jadi-submit' + iBahanJadi).html('<i class="fas fa-check"></i> berhasil');
+                    $('#bahan-jadi-submit' + iBahanJadi).removeClass('btn-primary').addClass('btn-success');
+                    iBahanJadi++;
+                    if (iBahanJadi <= $('.form-bahan-jadi').length) {
+                        setTimeout(prosesStateBahanJadi, 50);
+
+                    } else {
+                        $('#bahan-jadi-submit-all').prop('disabled', true);
+                        $('#bahan-jadi-submit-all').html('<i class="fas fa-check"></i> selesai');
+                        $('#bahan-jadi-submit-all').removeClass('btn-primary').addClass('btn-success');
+                        getDataKartu();
+                        setTimeout(function() {
+                            updateStatusRow('{{ $data->id }}');
+                        }, 300);
+                    }
+                } else {
+                    Swal.fire('ops', 'something error ' + res.msg, 'error');
+                    $('#bahan-jadi-submit' + iBahanJadi).prop('disabled', false);
+                    $('#bahan-jadi-submit' + iBahanJadi).html('submit');
+                }
+            },
+            error: function(res) {}
+        });
+    }
     function submitBahanJadi(i) {
         swalConfirmAndSubmit({
             url: '{{ url('admin/kartu/kartu-bahan-jadi/create-mutations') }}',
             data: $('#form-bahan-jadi' + i).serialize(),
             onSuccess: function(res) {
                 console.log(res);
-                refreshIsiModal();
+                getDataKartu();
                 setTimeout(function() {
                     updateStatusRow('{{ $data->id }}');
                 }, 1000);
@@ -810,7 +964,7 @@
             url: '{{ url('admin/invoice/create-invoices') }}',
             data: $('#form-invoice-so').serialize(),
             onSuccess: function(res) {
-                refreshIsiModal();
+                getDataKartu();
                 setTimeout(function() {
                     updateStatusRow('{{ $data->id }}');
                 }, 1000);
@@ -826,7 +980,7 @@
             data: $('#form-bayar-invoice').serialize(),
             onSuccess: function(res) {
                 console.log(res);
-                refreshIsiModal();
+                getDataKartu();
                 setTimeout(function() {
                     updateStatusRow('{{ $data->id }}');
                 }, 1000);

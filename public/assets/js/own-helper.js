@@ -1,4 +1,4 @@
-console.log("own-helper.js loaded");
+//console.log("own-helper.js loaded");
 
 
 
@@ -72,7 +72,7 @@ function formatDB(angka, language = "id") {
 //         }
 //         return prefix == undefined ? rupiah : (rupiah ? rupiah : '');
 //     } catch (err) {
-//         console.log(err);
+//         //console.log(err);
 //         return angkaString;
 //     }
 
@@ -81,7 +81,7 @@ function formatDB(angka, language = "id") {
 
 function detectFormat(input) {
     // 1. Format database: angka murni dengan titik desimal
-    console.log(input);
+    //console.log(input);
     const dbPattern = /^-?\d+(\.\d+)?$/;
 
     // 2. Format rupiah: bisa mengandung Rp, titik ribuan, koma desimal
@@ -104,7 +104,7 @@ function formatRupiah(number, language = "id") {
     let isTyping = false;
     if (number == null || number == undefined || number == "") return 0;
     awal = number;
-    console.log(detectFormat(number));
+    //console.log(detectFormat(number));
     if (detectFormat(number) != 'database') {
         //kalo inputnya ternyata format rupiah
         if (language == "eng") {
@@ -124,11 +124,11 @@ function formatRupiah(number, language = "id") {
     number = parseFloat(number).toString();
 
     if (isTyping) return awal;
-    console.log("number=" + number);
+    //console.log("number=" + number);
     decPoint = language == "eng" ? '.' : ',';
     thousandsSep = language == "eng" ? ',' : '.';
     parts = number.toString().split('.');
-    console.log(parts);
+    //console.log(parts);
     if (parts.length > 1) {
         if (parts[1].length > 2) {
             numberKoma = parseFloat("0." + parts[1]);
@@ -185,7 +185,7 @@ function formatRupiahSimple(number, language = "id") {
         parts = number.toString().split('.');
     else
         parts = number.toString().split(',');
-    console.log(parts);
+    //console.log(parts);
     if (parts.length > 1) {
         if (parts[1].length > 2) {
             numberKoma = parseFloat("0." + parts[1]);
@@ -237,10 +237,10 @@ function initItemSelectManual(el, url, placeholder = "", parent = null) {
                 };
             },
             success: function (result) {
-                console.log(result.responseText);
+                //console.log(result.responseText);
             },
             error: function (result) {
-                console.log(result.responseText);
+                //console.log(result.responseText);
             }
         }
     });
@@ -309,7 +309,7 @@ function getProsen($data, $total) {
 function initCurrencyInput(elem) {
     $(elem).on('input', function () {
         let value = $(this).val().replace(/[^\d,]/g, '');
-        console.log('value:' + value);
+        //console.log('value:' + value);
         // Cek apakah input adalah format database atau format rupiah
         // Format angka dengan locale 'id-ID' → hasilnya: 50.000
         let formatted = formatRupiah(value);
@@ -319,6 +319,10 @@ function initCurrencyInput(elem) {
 
 function array_key_exists(key, obj) {
     return Object.prototype.hasOwnProperty.call(obj, key);
+}
+
+function count(obj){
+    return Object.keys(obj).length;
 }
 
 
@@ -399,7 +403,7 @@ function swalConfirmAndSubmit({ url, data, onSuccess = null, successText = "Berh
                     return Promise.reject(res.msg || "hehe error ini lur");
                 }
             }).catch(err => {
-                console.log("something error");
+                //console.log("something error");
                 if (typeof err == "object") {
                     err = "error di server";
                 }
