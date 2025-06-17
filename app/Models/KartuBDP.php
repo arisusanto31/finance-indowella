@@ -286,10 +286,7 @@ class KartuBDP extends Model
             $number = null;
             if ($isOtomatisJurnal) {
                 //buat kartu lawan yaa
-
-
                 $amount = abs($ks->mutasi_rupiah_total);
-
                 if ($flow == 1) {
                     //keluar
                     $codeDebet = $lawanCodeGroup;
@@ -331,7 +328,7 @@ class KartuBDP extends Model
                     'url_try_again' => 'try_again'
 
                 ]), false, $lockManager);
-                if ($st['status'] != 1) return $st;
+                if ($st['status'] != 1) throw new \Exception($st['msg']);
                 $number = $st['journal_number'];
                 $journal = Journal::where('journal_number', $number)->where('code_group', 140003)->first();
                 $ks->journal_id = $journal->id;
@@ -339,54 +336,7 @@ class KartuBDP extends Model
                 $ks->save();
                 $ks->createDetailKartuInvoice();
 
-                // if ($lawanCodeGroup == 140001 || $lawanCodeGroup == 140002) {
-                //     //kalo bahan baku atau barang dagang
-                //     $stStock = KartuStock::mutationStore(new Request([
-                //         'stock_id' => $stockid,
-                //         'mutasi_qty_backend' => $qty,
-                //         'unit_backend' => $unit,
-                //         'mutasi_quantity' => $qty,
-                //         'unit' => $unit,
-                //         'flow' => $flow == 1 ? 0 : 1,
-                //         'sales_order_number' =>  $SONumber,
-                //         'production_number' => $productionNumber,
-                //         'sales_order_id' => $SOID,
-                //         'code_group' => $lawanCodeGroup,
-                //         'lawan_code_group' => $codeGroup,
-                //         'is_otomatis_jurnal' => 0,
-                //         'is_custom_rupiah' => $isCustom,
-                //         'mutasi_rupiah_total' => $mutasiRupiahTotal,
-
-                //     ]), false);
-                //     if ($stStock['status'] == 0) {
-                //         throw new \Exception($stStock['msg']);
-                //     }
-                // } else if ($lawanCodeGroup == 140004) {
-                //     //kalo barang jadi
-                //     $stStock = KartuBahanJadi::mutationStore(new Request([
-                //         'stock_id' => $stockid,
-                //         'mutasi_qty_backend' => $qty,
-                //         'unit_backend' => $unit,
-                //         'mutasi_quantity' => $qty,
-                //         'unit' => $unit,
-                //         'flow' => $flow == 1 ? 0 : 1,
-                //         'sales_order_number' => $SONumber,
-                //         'production_number' => $productionNumber,
-                //         'sales_order_id' => $SOID,
-                //         'code_group' => $lawanCodeGroup,
-                //         'lawan_code_group' => $codeGroup,
-                //         'is_otomatis_jurnal' => 0,
-                //         'is_custom_rupiah' => $isCustom,
-                //         'mutasi_rupiah_total' => $mutasiRupiahTotal,
-                //     ]), false);
-                //     if ($stStock['status'] == 0) {
-                //         throw new \Exception($stStock['msg']);
-                //     }
-                // }
-                // $stStock->journal_id = $journal->id;
-                // $stStock->journal_number = $number;
-                // $stStock->save();
-                // $stStock->createDetailKartuInvoice();
+              
             }
         } catch (Throwable $th) {
             if ($useTransaction)

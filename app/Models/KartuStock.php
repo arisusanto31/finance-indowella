@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Http\Controllers\JournalController;
 use App\Traits\HasIndexDate;
 use App\Traits\HasModelDetailKartuInvoice;
 use App\Traits\HasModelSaldoStock;
@@ -182,6 +183,10 @@ class KartuStock extends Model
             $PONumber = $request->input('purchase_order_number');
             $SONumber = $request->input('sales_order_number');
             $invoiceNumber = $request->input('invoice_pack_number');
+            $isOtomatisJurnal = $request->input('is_otomatis_jurnal') == 'on' ? true : false;
+            $desc= $request->input('description') ;
+            $lawanCodeGroup = $request->input('lawan_code_group');
+
             $POID = $SOID = $invID = null;
             if ($PONumber) {
                 $PO = PurchaseOrder::where('purchase_order_number', $PONumber)->first();
@@ -202,6 +207,9 @@ class KartuStock extends Model
                     'status' => 0,
                     'msg' => 'code group tidak ditemukan'
                 ];
+            }
+            if(!$desc){
+                throw new \Exception('deskripsi tidak boleh kosong');
             }
             $codeGroupName = $chart->name;
             if ($request->input('mutasi_rupiah_total'))
@@ -250,6 +258,59 @@ class KartuStock extends Model
 
             if ($st['status'] == 0) {
                 throw new \Exception($st['msg']);
+            }
+            $ks= $st['msg'];
+            $number=null;
+            if ($isOtomatisJurnal) {
+                //buat kartu lawan yaa
+                $amount = abs($ks->mutasi_rupiah_total);
+                if ($flow == 1) {
+                    //keluar
+                    $codeDebet = $lawanCodeGroup;
+                    $codeKredit = $codeGroup;
+                    
+                } else {
+                    $codeDebet = $codeGroup;
+                    $codeKredit = $lawanCodeGroup;
+                }
+                $kredits = [
+                    [
+                        'code_group' => $codeKredit,
+                        'description' => $desc,
+                        'amount' => $amount,
+                        'reference_id' => null,
+                        'reference_type' => null,
+                    ],
+                ];
+                $debets = [
+                    [
+                        'code_group' => $codeDebet,
+                        'description' => $desc,
+                        'amount' => $amount,
+                        'reference_id' => null,
+                        'reference_type' => null,
+                    ],
+                ];
+                $st = JournalController::createBaseJournal(new Request([
+                    'kredits' => $kredits,
+                    'debets' => $debets,
+                    'type' => 'transaction',
+                    'date' => $date,
+                    'is_backdate' => self::isBackdate($date),
+                    'is_auto_generated' => 1,
+                    'title' => 'create mutation transaction',
+                    'url_try_again' => 'try_again'
+
+                ]), false);
+                if ($st['status'] != 1) throw new \Exception($st['msg']);
+                $number = $st['journal_number'];
+                $journal = Journal::where('journal_number', $number)->where('code_group', 140003)->first();
+                $ks->journal_id = $journal->id;
+                $ks->journal_number = $number;
+                $ks->save();
+                $ks->createDetailKartuInvoice();
+
+              
             }
         } catch (Throwable $th) {
             if ($useTransaction)

@@ -1,8 +1,15 @@
 <form id="mutasi-keluar">
     @csrf
     <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Buat Mutasi Stock Keluar</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="flex-column align-items-start">
+            <h5 class="modal-title" id="exampleModalLabel1">Buat Mutasi Stock Keluar</h5>
+            <div class="form-check form-switch ">
+                <input class="form-check-input" type="checkbox" name="is_otomatis_jurnal" id="is_otomatis_jurnal" />
+                <label class="form-check-label" for="is_otomatis_jurnal">Buat Jurnal</label>
+            </div>
+        </div>
+        <button type="button" class="btn-close position-absolute end-0 top-0 m-3" data-bs-dismiss="modal"
+            aria-label="Close"></button>
     </div>
     <div class="modal-body">
 
@@ -43,12 +50,28 @@
         </div>
         <div class="row">
             <div class="col mb-3">
+                <label for="akun" class="form-label">Deskripsi jurnal</label>
+                <input type="text" name="description" id="deskripsi-jurnal" class="form-control" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col mb-3">
                 <label for="akun" class="form-label">Akun Persediaan</label>
                 <select type="text" name="code_group" id="code-group" class="form-control select-coa">
 
                 </select>
             </div>
         </div>
+        <div class="row">
+            <div class="col mb-3">
+                <label for="akun" class="form-label">Lawan Akun</label>
+                <select type="text" name="lawan_code_group" id="lawan-code-group"
+                    class="form-control select-coa-beban">
+
+                </select>
+            </div>
+        </div>
+
         <div class="row">
             <div class="col mb-3">
                 <label for="quantity" class="form-label">Jumlah Mutasi</label>
@@ -87,6 +110,9 @@
     initItemSelectManual('.select-stock', '{{ route('stock.get-item') }}', 'Pilih Stock', '#global-modal');
     initItemSelectManual('.select-coa', '{{ route('chart-account.get-item-keuangan') }}?kind=persediaan',
         'Pilih Akun Persediaan', '#global-modal');
+    initItemSelectManual('.select-coa-beban', '{{ route('chart-account.get-item-keuangan') }}?kind=persediaan|beban',
+        'Pilih Lawan Akun', '#global-modal');
+
     initCurrencyInput('.currency-input');
 
     function getTotalMutasiRupiah() {
