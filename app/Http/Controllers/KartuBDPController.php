@@ -225,7 +225,7 @@ class KartuBDPController extends Controller
     {
 
         // return ['status' => 0, 'msg' => $request->all()];
-        return KartuBDP::mutationStore($request);
+        return KartuBDP::mutationStore($request,true);
     }
     public function refreshKartu(Request $request)
     {

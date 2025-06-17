@@ -202,7 +202,7 @@ class ChartAccount extends Model
                     $join->on('j.code_group', '=', 'subquery.code_group')
                         ->on('j.index_date', '=', 'subquery.max_index_date');
                 })->rightJoin('chart_accounts as ca', 'ca.id', '=', 'j.chart_account_id')
-                ->where('ca.code_group', '>=', 400000)
+                ->where('ca.code_group', '>=', 400000)->where('ca.is_child',1)
                 ->select(
                     'ca.name',
                     'ca.id',
@@ -229,7 +229,8 @@ class ChartAccount extends Model
             $journals = Journal::from('journals as j')->where('j.code_group', '>', 400000)
                 ->where('j.toko_id', $tokoid)->whereBetween('j.index_date', [$indexAwal, $indexAkhir]);
 
-            $saldo = ChartAccount::from('chart_accounts as ca')->where('ca.code_group', '>', 400000)->leftJoinSub($journals, 'j', function ($join) {
+            $saldo = ChartAccount::from('chart_accounts as ca')->where('ca.code_group', '>', 400000)
+                ->where('ca.is_child',1)->leftJoinSub($journals, 'j', function ($join) {
                 $join->on('j.code_group', '=', 'ca.code_group');
             })->select(
                 DB::raw('coalesce(sum(j.amount_kredit- j.amount_debet),0) as saldo_akhir'),
