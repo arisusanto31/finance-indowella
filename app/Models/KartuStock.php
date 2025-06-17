@@ -184,7 +184,7 @@ class KartuStock extends Model
             $SONumber = $request->input('sales_order_number');
             $invoiceNumber = $request->input('invoice_pack_number');
             $isOtomatisJurnal = $request->input('is_otomatis_jurnal') == 'on' ? true : false;
-            $desc= $request->input('description') ;
+            $desc = $request->input('description');
             $lawanCodeGroup = $request->input('lawan_code_group');
 
             $POID = $SOID = $invID = null;
@@ -208,9 +208,7 @@ class KartuStock extends Model
                     'msg' => 'code group tidak ditemukan'
                 ];
             }
-            if(!$desc){
-                throw new \Exception('deskripsi tidak boleh kosong');
-            }
+
             $codeGroupName = $chart->name;
             if ($request->input('mutasi_rupiah_total'))
                 $mutasiRupiahTotal = format_db($request->input('mutasi_rupiah_total'));
@@ -259,16 +257,18 @@ class KartuStock extends Model
             if ($st['status'] == 0) {
                 throw new \Exception($st['msg']);
             }
-            $ks= $st['msg'];
-            $number=null;
+            $ks = $st['msg'];
+            $number = null;
             if ($isOtomatisJurnal) {
+                if (!$desc) {
+                    throw new \Exception('deskripsi tidak boleh kosong');
+                }
                 //buat kartu lawan yaa
                 $amount = abs($ks->mutasi_rupiah_total);
                 if ($flow == 1) {
                     //keluar
                     $codeDebet = $lawanCodeGroup;
                     $codeKredit = $codeGroup;
-                    
                 } else {
                     $codeDebet = $codeGroup;
                     $codeKredit = $lawanCodeGroup;
@@ -304,13 +304,11 @@ class KartuStock extends Model
                 ]), false);
                 if ($st['status'] != 1) throw new \Exception($st['msg']);
                 $number = $st['journal_number'];
-                $journal = Journal::where('journal_number', $number)->whereIn('code_group', [140001,140002])->first();
+                $journal = Journal::where('journal_number', $number)->whereIn('code_group', [140001, 140002])->first();
                 $ks->journal_id = $journal->id;
                 $ks->journal_number = $number;
                 $ks->save();
                 $ks->createDetailKartuInvoice();
-
-              
             }
         } catch (Throwable $th) {
             if ($useTransaction)
