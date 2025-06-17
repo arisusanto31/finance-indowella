@@ -689,8 +689,8 @@
                 console.log(res);
                 if (res.status == 1) {
                     res.msg.forEach(function eachItem(item) {
-                        item.hpp = item.hpp == 0 ? '??' : item.hpp;
-                        item.subkon = item.subkon == 0 ? '??' : item.subkon;
+                        item.hpp = item.hpp == 0 ? 0 : item.hpp;
+                        item.subkon = item.subkon == 0 ? 0 : item.subkon;
                         $('#biaya-bahan' + item.id).html(formatRupiah(item.hpp));
                         $('#biaya-lain' + item.id).html(formatRupiah(item.subkon));
                     });
