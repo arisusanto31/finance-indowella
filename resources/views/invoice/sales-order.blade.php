@@ -360,6 +360,7 @@
             }
 
             function updateStatusRow(id) {
+                console.log('updating status for id: ' + id);
                 $.ajax({
                     url: '{{ url('admin/invoice/sales-update-status') }}/' + id,
                     method: 'get',
@@ -377,11 +378,12 @@
                             `;
                             $('#status-' + id).html(html);
                         } else {
-
+                            console.error('Error updating status:', res.msg);
                         }
                     },
                     error: function(res) {
-
+                        console.error('Error updating status:something went wrong');
+                    
                     }
                 });
             }
