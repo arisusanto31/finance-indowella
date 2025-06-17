@@ -292,7 +292,8 @@
 
                                     </form>
                             </div>
-                            <hr class="text-primary-dark"></hr>
+                            <hr class="text-primary-dark">
+                            </hr>
                             @php $index++; @endphp
                             @endforeach
                             <button class="btn btn-primary" id="bahan-jadi-submit-all"
@@ -381,7 +382,8 @@
                                 @endforeach
                             </form>
                             <div class="col-md-2 col-xs-12">
-                                <button onclick="submitInvoice()" class="btn btn-primary">submit</button>
+                                <button id="invoice-submit" onclick="submitInvoice()"
+                                    class="btn btn-primary">submit</button>
                             </div>
                         </div>
                     </div>
@@ -429,7 +431,7 @@
                             <div class="col-md-1 col-xs-12">
                                 <label>Aksi</label>
                                 <br>
-                                <button type="button" onclick="submitBayarInvoice()"
+                                <button id="bayar-invoice-submit" type="button" onclick="submitBayarInvoice()"
                                     class="btn btn-primary">submit</button>
                             </div>
                         </div>
@@ -899,7 +901,8 @@
     }
 
 
-    var iBahanJadi=1;
+    var iBahanJadi = 1;
+
     function submitBahanJadiAll() {
         iBahanJadi = 1;
         prosesStateBahanJadi();
@@ -939,6 +942,7 @@
             error: function(res) {}
         });
     }
+
     function submitBahanJadi(i) {
         swalConfirmAndSubmit({
             url: '{{ url('admin/kartu/kartu-bahan-jadi/create-mutations') }}',
@@ -960,31 +964,47 @@
 
     function submitInvoice() {
 
+        $('#invoice-submit').prop('disabled', true);
+        $('#invoice-submit').html('<i class="bx bx-loader bx-spin"></i> loading...');
         swalConfirmAndSubmit({
             url: '{{ url('admin/invoice/create-invoices') }}',
             data: $('#form-invoice-so').serialize(),
             onSuccess: function(res) {
                 getDataKartu();
+                $('#invoice-submit').html('<i class="fas fa-check"></i> berhasil');
+                $('#invoice-submit').removeClass('btn-primary').addClass('btn-success');
+
                 setTimeout(function() {
                     updateStatusRow('{{ $data->id }}');
                 }, 1000);
 
             },
-            error: function(res) {}
+            onError: function(res) {
+                $('#invoice-submit').prop('disabled', false);
+                $('#invoice-submit').html('submit');
+            }
         });
     }
 
     function submitBayarInvoice() {
+        $('#bayar-invoice-submit').prop('disabled', true);
+        $('#bayar-invoice-submit').html('<i class="bx bx-loader bx-spin"></i> loading...');
         swalConfirmAndSubmit({
             url: '{{ url('admin/invoice/submit-bayar-sales-invoice') }}',
             data: $('#form-bayar-invoice').serialize(),
             onSuccess: function(res) {
                 console.log(res);
                 getDataKartu();
+                $('#bayar-invoice-submit').html('<i class="fas fa-check"></i> berhasil');
+                $('#bayar-invoice-submit').removeClass('btn-primary').addClass('btn-success');
                 setTimeout(function() {
                     updateStatusRow('{{ $data->id }}');
                 }, 1000);
             },
+            onError: function(res) {
+                $('#bayar-invoice-submit').prop('disabled', false);
+                $('#bayar-invoice-submit').html('submit');
+            }
         });
     }
 </script>

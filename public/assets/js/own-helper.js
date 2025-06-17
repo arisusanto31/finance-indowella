@@ -368,7 +368,7 @@ function toDigit(number, digit) {
 }
 
 
-function swalConfirmAndSubmit({ url, data, onSuccess = null, successText = "Berhasil!", confirmText = "Yes", cancelText = "No" }) {
+function swalConfirmAndSubmit({ url, data, onSuccess = null,  successText = "Berhasil!", confirmText = "Yes", cancelText = "No" ,onError=null}) {
     Swal.fire({
         title: "Apakah kamu yakin?",
         text: "Data akan diproses!",
