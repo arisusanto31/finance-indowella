@@ -51,7 +51,7 @@
         <div class="row">
             <div class="col mb-3">
                 <label for="akun" class="form-label">Deskripsi jurnal</label>
-                <input type="text" name="description" id="deskripsi-jurnal" class="form-control" />
+                <input type="text" name="description" id="deskripsi-jurnal" class="form-control" placeholder="deskripsi jurnal" />
             </div>
         </div>
         <div class="row">

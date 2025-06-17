@@ -304,7 +304,7 @@ class KartuStock extends Model
                 ]), false);
                 if ($st['status'] != 1) throw new \Exception($st['msg']);
                 $number = $st['journal_number'];
-                $journal = Journal::where('journal_number', $number)->where('code_group', 140003)->first();
+                $journal = Journal::where('journal_number', $number)->whereIn('code_group', [140001,140002])->first();
                 $ks->journal_id = $journal->id;
                 $ks->journal_number = $number;
                 $ks->save();
