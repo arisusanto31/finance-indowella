@@ -550,7 +550,7 @@
                             ${collect(data['resume_total']).map((total,key)=>`
                                 <p class="mb-0 mt-2 pb-2" style="font-size:15px; "> <i class="fas fa-circle"></i>
                                     ${key}</p>
-                                <p class="mb-0 pb-2 fs-7 ps-3"> ${formatRupiah(total)}</p>`
+                                <p class="mb-0 pb-2 fs-7 ps-3"> ${formatRupiah(Math.round(total*100)/100)}</p>`
                             ).join('')}
                         `:''}
                 </div>
