@@ -26,7 +26,7 @@ function formatDB(angka, language = "id") {
         koma = parseFloat(strkoma);
 
         koma *= 100;
-        koma = Math.round(koma)/100;
+        koma = Math.round(koma) / 100;
         angka = parseFloat(angka) + koma;
     }
     if (angka == null || angka == "") angka = 0;
@@ -321,7 +321,7 @@ function array_key_exists(key, obj) {
     return Object.prototype.hasOwnProperty.call(obj, key);
 }
 
-function count(obj){
+function count(obj) {
     return Object.keys(obj).length;
 }
 
@@ -378,6 +378,8 @@ function swalConfirmAndSubmit({ url, data, onSuccess = null, successText = "Berh
         cancelButtonText: cancelText,
         allowOutsideClick: false,
         showLoaderOnConfirm: true,
+        scrollbarPadding: false,
+        focusConfirm: false,
         didOpen: () => {
             $('.swal2-container').css('z-index', 2000);
         },
