@@ -244,7 +244,6 @@ class SalesOrderController extends Controller
         $reference = $data->reference;
         $dateFinished = $reference->delivery_at ?? $data->created_at;
 
-        $data->updateStatus();
         $invdetails = SalesOrderDetail::with('stock')->where('sales_order_number', $number)->get();
         foreach ($invdetails as $detail) {
             if ($detail->unitjadi == '??') {
@@ -451,6 +450,9 @@ class SalesOrderController extends Controller
     function updateStatus($id)
     {
         $sales = SalesOrder::find($id);
+        $sales->updateStatus();
+
+
         return [
             'status' => 1,
             'msg' => $sales
