@@ -356,11 +356,11 @@ class SalesOrderController extends Controller
             $val['details'] = collect($val['detailSales'])->map(function ($detailVal) use ($modeBook) {
                 $data = [];
 
-                $insheet = array_key_exists('insheet', $detailVal) ? $detailVal['insheet'] : 0;
-                $qtyjadi = array_key_exists('qtyjadi', $detailVal) ? $detailVal['qtyjadi'] : $detailVal['quantity'];
-                $pricejadi = array_key_exists('pricejadi', $detailVal) ? $detailVal['pricejadi'] : $detailVal['recent_selling_price'];
-                $unitjadi = array_key_exists('unitjadi', $detailVal) ? $detailVal['unitjadi'] :
-                    $data['stock_id'] = $detailVal['stock_id'];
+                $insheet = array_key_exists('insheet', $detailVal->all()) ? $detailVal['insheet'] : 0;
+                $qtyjadi = array_key_exists('qtyjadi', $detailVal->all()) ? $detailVal['qtyjadi'] : $detailVal['quantity'];
+                $pricejadi = array_key_exists('pricejadi', $detailVal->all()) ? $detailVal['pricejadi'] : $detailVal['recent_selling_price'];
+                $unitjadi = array_key_exists('unitjadi', $detailVal->all()) ? $detailVal['unitjadi'] : $detailVal['unit_info'];
+                $data['stock_id'] = $detailVal['stock_id'];
                 $data['quantity'] = $detailVal['quantity'] + $insheet;
                 $data['unit'] = $modeBook == 'toko' ? $detailVal['unit'] : $detailVal['unit_info'];
                 $data['price'] = $detailVal['recent_selling_price'];
