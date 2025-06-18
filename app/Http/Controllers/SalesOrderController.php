@@ -355,13 +355,18 @@ class SalesOrderController extends Controller
         $sales = $sales->with('detailSales')->get()->map(function ($val) use ($modeBook) {
             $val['details'] = collect($val['detailSales'])->map(function ($detailVal) use ($modeBook) {
                 $data = [];
-                $data['stock_id'] = $detailVal['stock_id'];
-                $data['quantity'] = $detailVal['quantity'];
+
+                $insheet = array_key_exists('insheet', $detailVal) ? $detailVal['insheet'] : 0;
+                $qtyjadi = array_key_exists('qtyjadi', $detailVal) ? $detailVal['qtyjadi'] : $detailVal['quantity'];
+                $pricejadi = array_key_exists('pricejadi', $detailVal) ? $detailVal['pricejadi'] : $detailVal['recent_selling_price'];
+                $unitjadi = array_key_exists('unitjadi', $detailVal) ? $detailVal['unitjadi'] :
+                    $data['stock_id'] = $detailVal['stock_id'];
+                $data['quantity'] = $detailVal['quantity'] + $insheet;
                 $data['unit'] = $modeBook == 'toko' ? $detailVal['unit'] : $detailVal['unit_info'];
                 $data['price'] = $detailVal['recent_selling_price'];
-                $data['qtyjadi'] = $detailVal['qtyjadi'] ?? $detailVal['quantity'];
-                $data['pricejadi'] = $detailVal['pricejadi'] ?? $detailVal['recent_selling_price'];
-                $data['unitjadi'] = $detailVal['unitjadi'] ?? $data['unit'];
+                $data['qtyjadi'] = $qtyjadi ?? $detailVal['quantity'];
+                $data['pricejadi'] = $pricejadi ?? $detailVal['recent_selling_price'];
+                $data['unitjadi'] = $unitjadi ?? $data['unit'];
                 $data['total_price'] = $detailVal['total'];
                 $data['discount'] = $detailVal['discount'];
                 $data['customer_id'] = $detailVal['customer_id'];
