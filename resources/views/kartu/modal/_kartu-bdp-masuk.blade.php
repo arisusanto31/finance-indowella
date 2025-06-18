@@ -111,7 +111,7 @@
     function kosongkanStockID() {
         if ('#custom-stock-name' != '') {
             $('#select-stock').val('').change();
-            initItemSelectManual('.select-coa', '{{ route('chart-account.get-item-keuangan') }}?kind=hutang|kas',
+            initItemSelectManual('.select-coa', '{{ route('chart-account.get-item-keuangan') }}?kind=hutang|kas|pendapatan|beban',
                 'Pilih Akun Hutang / Kas', '#global-modal');
             changeUnitDiv('manual');
         } else {
