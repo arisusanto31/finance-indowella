@@ -202,4 +202,31 @@ class KartuStockController extends Controller
         }
         return ['status' => 1, 'msg' => $kartu];
     }
+
+    public function kartuMutasi($stockid)
+    {
+        $view = view('kartu.modal._kartu-mutasi-stock');
+        $kartuStocks = KartuStock::from('kartu_stocks as ks')->where('ks.stock_id', $stockid)
+            ->join('journals as j', 'j.id', '=', 'ks.journal_id')
+            ->join('stocks as st', 'st.id', '=', 'ks.stock_id')
+            ->join('stock_units as su', function ($join) {
+                $join->on('ks.stock_id', '=', 'su.stock_id')
+                    ->on('su.unit', '=', 'st.unit_default');
+            })
+            
+            ->select(
+                'ks.created_at',
+                'ks.id as uid',
+                'j.description',
+                'j.journal_number',
+                'st.unit_default as unit',
+                DB::raw('(ks.mutasi_qty_backend/su.konversi) as mutasi'),
+                DB::raw('(ks.saldo_qty_backend/su.konversi) as saldo'),
+                DB::raw('(ks.saldo_rupiah_total) as saldo_rupiah')
+            )->orderBy('ks.index_date','asc')->get();
+        $stock= Stock::find($stockid);
+        $view->data = $kartuStocks;
+        $view->stock= $stock;
+        return $view;
+    }
 }

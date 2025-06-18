@@ -58,8 +58,9 @@
                                         <thead class="bg-white text-dark text-center">
                                             <tr>
                                                 <th rowspan=2>No</th>
-                                                <th rowspan=2> Nama Barang</th>
-                                                <th rowspan=2> Kategori</th>
+                                                <th rowspan=2>aksi</th>
+                                                <th rowspan=2>Nama Barang</th>
+                                                <th rowspan=2>Kategori</th>
                                                 <th colspan=3>Saldo Awal</th>
                                                 <th colspan=3>Masuk</th>
                                                 <th colspan=3>Keluar</th>
@@ -339,6 +340,11 @@
                                 html += `
                                 <tr>
                                 <td>${i+1}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="showDetailOnModal('{{url("admin/kartu/kartu-stock/kartu-mutasi")}}/${item.id}','xl')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
                                 <td>${item.name} [${item.id}]</td>
                                 <td>${item.category_name}</td>
                                 <td>${formatRupiah(item.awal_qty/item.konversi)} ${item.unit_default}</td>
