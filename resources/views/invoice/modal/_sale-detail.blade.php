@@ -966,10 +966,11 @@
 
         $('#invoice-submit').prop('disabled', true);
         $('#invoice-submit').html('<i class="bx bx-loader bx-spin"></i> loading...');
-        swalConfirmAndSubmit({
+        $.ajax({
             url: '{{ url('admin/invoice/create-invoices') }}',
             data: $('#form-invoice-so').serialize(),
-            onSuccess: function(res) {
+            method: 'post',
+            success: function(res) {
                 getDataKartu();
                 $('#invoice-submit').html('<i class="fas fa-check"></i> berhasil');
                 $('#invoice-submit').removeClass('btn-primary').addClass('btn-success');
@@ -979,7 +980,7 @@
                 }, 1000);
 
             },
-            onError: function(res) {
+            error: function(res) {
                 $('#invoice-submit').prop('disabled', false);
                 $('#invoice-submit').html('submit');
             }
@@ -989,10 +990,11 @@
     function submitBayarInvoice() {
         $('#bayar-invoice-submit').prop('disabled', true);
         $('#bayar-invoice-submit').html('<i class="bx bx-loader bx-spin"></i> loading...');
-        swalConfirmAndSubmit({
+        $.ajax({
             url: '{{ url('admin/invoice/submit-bayar-sales-invoice') }}',
             data: $('#form-bayar-invoice').serialize(),
-            onSuccess: function(res) {
+            method: 'post',
+            success: function(res) {
                 console.log(res);
                 getDataKartu();
                 $('#bayar-invoice-submit').html('<i class="fas fa-check"></i> berhasil');
@@ -1001,7 +1003,7 @@
                     updateStatusRow('{{ $data->id }}');
                 }, 1000);
             },
-            onError: function(res) {
+            error: function(res) {
                 $('#bayar-invoice-submit').prop('disabled', false);
                 $('#bayar-invoice-submit').html('submit');
             }
