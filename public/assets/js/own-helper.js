@@ -410,6 +410,7 @@ function swalConfirmAndSubmit({ url, data, onSuccess = null,  successText = "Ber
                     err = "error di server";
                 }
                 Swal.showValidationMessage(err || "Terjadi kesalahan!");
+                 if (typeof onError === "function") onError(err);
             });
         }
     });
