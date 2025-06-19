@@ -1,10 +1,7 @@
 <div class="modal-header">
     <h5 class="modal-title" id="exampleModalLabel">Import sales order </h5>
 
-    <button
-        type="button"
-        class="btn-close position-absolute end-0 top-0 m-3"
-        data-bs-dismiss="modal"
+    <button type="button" class="btn-close position-absolute end-0 top-0 m-3" data-bs-dismiss="modal"
         aria-label="Close"></button>
 </div>
 <div class="modal-body">
@@ -25,10 +22,18 @@
         <div class="row">
             <div class="col-xs-12 col-md-12 ">
                 <div class="d-flex  justify-content-end gap-2 " style="width: 100%;">
+
+                    <div class="p-2" style="width:8%;" >
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="is-ppn" checked />
+                            <label class="form-check-label" for="is-ppn">PPN</label>
+                        </div>
+                    </div>
+
                     <div class="" style="width:20%">
                         <input class="form-control" id="customer" placeholder="customer" />
                     </div>
-                    <div class="" style="width:20%">
+                    <div class="" style="width:15%">
                         <select class="select-toko form-control" id="select-search-toko">
                         </select>
                     </div>
@@ -39,8 +44,8 @@
                     <div class="" style="width:15%">
                         <select class="form-control" id="select-search-date">
                             <option value="" disabled> pilih bulan </option>
-                            @foreach(getListMonthYear() as $monthYear)
-                            <option value="{{$monthYear}}">{{$monthYear}}</option>
+                            @foreach (getListMonthYear() as $monthYear)
+                                <option value="{{ $monthYear }}">{{ $monthYear }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -85,11 +90,11 @@
 
 <script>
     console.log('masuk kok ini sale order import');
-    initItemSelectManual('#select-toko', '{{route("toko.get-item")}}', 'pilih toko', '#global-modal');
-    initItemSelectManual('.select-coa-kas', '{{route("chart-account.get-item-keuangan")}}?kind=kas', 'Pilih Akun Kas', '#global-modal');
+    initItemSelectManual('#select-toko', '{{ route('toko.get-item') }}', 'pilih toko', '#global-modal');
+    initItemSelectManual('.select-coa-kas', '{{ route('chart-account.get-item-keuangan') }}?kind=kas', 'Pilih Akun Kas',
+        '#global-modal');
     var allTrans = [];
-    getImportData();
-
+   
     function updateSelectToko(data) {
         allToko = collect(data).map((itema) => {
             return collect(itema.details).pluck('toko').unique().all();
@@ -110,14 +115,17 @@
     }
 
     function getImportData() {
-        id = "{{book()->id}}";
+        loading(1);
+        id = "{{ book()->id }}";
         let monthyear = $('#select-search-date option:selected').val();
         let customer = $('#customer').val();
         let toko = $('#select-search-toko option:selected').val();
+        let isPPN= $('#is-ppn').is(':checked') ? 1 : 0;
         if (toko == undefined) toko = "";
         $('#table-body').html("");
         $.ajax({
-            url: '{{url("admin/invoice/sales-get-data-import")}}/' + id + '?monthyear=' + monthyear + '&toko=' + toko + '&customer=' + customer,
+            url: '{{ url('admin/invoice/sales-get-data-import') }}/' + id + '?monthyear=' + monthyear +
+                '&toko=' + toko + '&customer=' + customer+&'is_ppn=' + isPPN,
             method: 'get',
             success: function(res) {
                 console.log(res);
@@ -185,11 +193,11 @@
             reference_stock_id: data.details.map(item => item.stock_id),
             reference_stock_type: data.stock_type,
             quantity: data.details.map(item => item.quantity),
-            qtyjadi:data.details.map(item => item.qtyjadi),
+            qtyjadi: data.details.map(item => item.qtyjadi),
             price_unit: data.details.map(item => item.price),
             pricejadi: data.details.map(item => item.pricejadi),
             unit: data.details.map(item => item.unit),
-            unitjadi:data.details.map(item => item.unitjadi),
+            unitjadi: data.details.map(item => item.unitjadi),
             total_price: data.details.map(item => item.total_price),
             akun_cash_kind_name: data.akun_cash_kind_name,
             toko_id: tokoid,
@@ -197,11 +205,11 @@
             detail_reference_type: data.details.map(item => item.reference_type),
             reference_id: data.id,
             reference_type: data.reference_type,
-            _token: '{{csrf_token()}}'
+            _token: '{{ csrf_token() }}'
         };
         console.log(dataPost);
         swalConfirmAndSubmit({
-            url: '{{route("invoice.sales-order.store") }}',
+            url: '{{ route('invoice.sales-order.store') }}',
             data: dataPost,
             onSuccess: function(res) {
                 if (res.status == 1) {

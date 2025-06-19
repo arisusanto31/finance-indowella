@@ -310,9 +310,14 @@ class SalesOrderController extends Controller
             if (getInput('toko'))
                 $sales = $sales->join('tokoes as t', 't.id', '=', 'pack.toko_id')
                     ->where('t.name', getInput('toko'));
-            $sales = $sales->where(function ($q) {
-                $q->where('pack.is_ppn', 1)->orWhere('pack.is_wajib_lapor', 1);
-            })->select(
+
+            if (getInput('is_ppn') == 1) {
+                $sales = $sales->where(function ($q) {
+                    $q->where('pack.is_ppn', 1)->orWhere('pack.is_wajib_lapor', 1);
+                });
+            }
+
+            $sales = $sales->select(
                 'pack.id',
                 DB::raw('"App\\\Models\\\RetailSalesPackage" as reference_type'),
                 DB::raw('"App\\\Models\\\RetailStock" as stock_type'),
@@ -328,9 +333,15 @@ class SalesOrderController extends Controller
             $sales = $sales->join('transactions as tr', 'tr.package_id', '=', 'pack.id');
             if (getInput('toko'))
                 $sales = $sales->where('tr.kind', getInput('toko'));
-            $sales = $sales->where(function ($q) {
-                $q->where('pack.is_ppn', 1)->orWhere('pack.is_wajib_lapor', 1);
-            })->join('customers as c', 'c.id', '=', 'pack.customer_id');
+
+            if (getInput('is_ppn') == 1) {
+                $sales = $sales->where(function ($q) {
+                    $q->where('pack.is_ppn', 1)->orWhere('pack.is_wajib_lapor', 1);
+                });
+            }
+
+            $sales = $sales->join('customers as c', 'c.id', '=', 'pack.customer_id');
+
             if (getInput('customer')) {
                 $sales = $sales->where(function ($q) {
                     $q->where('c.name', 'like', '%' . getInput('customer') . '%')
@@ -357,7 +368,7 @@ class SalesOrderController extends Controller
                 $data = [];
 
                 $insheet =  $detailVal['insheet'] ?? 0;
-                $qtyjadi =$detailVal['qtyjadi'] ??$detailVal['quantity'];
+                $qtyjadi = $detailVal['qtyjadi'] ?? $detailVal['quantity'];
                 $pricejadi = $detailVal['pricejadi'] ?? $detailVal['recent_selling_price'];
                 $unitjadi = $detailVal['unitjadi'] ?? $detailVal['unit_info'];
                 $data['stock_id'] = $detailVal['stock_id'];
