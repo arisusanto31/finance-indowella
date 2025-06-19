@@ -96,7 +96,7 @@ class KartuBahanJadiController extends Controller
                     //kalo bahan baku atau barang dagang
                     if ($flow == 0) {
                         $typeKartuLawan = "stock";
-                        $hpp = Stock::find($stock_id)->getLastHPP($unit, $typeKartuLawan, $spkNumbers[$row]);
+                        $hpp = Stock::find($stock_id)->getLastHPP($unit, $typeKartuLawan, $spkNumbers[$row],$date);
                         $mutasiRupiahTotal = $hpp * $qty;
                         $isCustomRupiah = 1;
                     }

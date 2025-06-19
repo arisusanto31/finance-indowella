@@ -108,21 +108,24 @@ class Stock extends Model
         return ['results' => $stocks];
     }
 
-    public function getLastHPP($unit, $kartu = "stock", $number = "")
+    public function getLastHPP($unit, $kartu = "stock", $number = "",$date=null)
     {
+        if(!$date){
+            $date = date('Y-m-d H:i:s');
+        }
         if ($kartu == "stock") {
 
-            $lastCard = KartuStock::where('stock_id', $this->id)->orderBy('id', 'desc')->first();
+            $lastCard = KartuStock::where('created_at','<',$date)->where('stock_id', $this->id)->orderBy('index_date', 'desc')->first();
             if (!$lastCard) {
                 return 0;
             }
         } else if ($kartu == 'barang jadi') {
-            $lastCard = KartuBahanJadi::where('stock_id', $this->id)->where('production_number', $number)->orderBy('id', 'desc')->first();
+            $lastCard = KartuBahanJadi::where('created_at','<',$date)->where('stock_id', $this->id)->where('production_number', $number)->orderBy('index_date', 'desc')->first();
             if (!$lastCard) {
                 return 0;
             }
         } else if ($kartu == 'bdp') {
-            $lastCard = KartuBDP::where('stock_id', $this->id)->where('production_number', $number)->orderBy('id', 'desc')->first();
+            $lastCard = KartuBDP::where('created_at','<',$date)->where('stock_id', $this->id)->where('production_number', $number)->orderBy('index_date', 'desc')->first();
             if (!$lastCard) {
                 return 0;
             }

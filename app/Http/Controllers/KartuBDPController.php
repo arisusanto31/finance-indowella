@@ -86,7 +86,7 @@ class KartuBDPController extends Controller
                     if ($lawanCodeGroup == 140004) {
                         $typekartulawan = "barang jadi";
                     }
-                    $hpp = Stock::find($stock_id)->getLastHPP($unit, $typekartulawan, $spkNumbers[$row]);
+                    $hpp = Stock::find($stock_id)->getLastHPP($unit, $typekartulawan, $spkNumbers[$row],$date);
 
                     $mutasiRupiahTotal = $hpp * $qty;
                     $isCustomRupiah = 1;
