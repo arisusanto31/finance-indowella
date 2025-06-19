@@ -119,7 +119,8 @@ class KartuBahanJadi extends Model
             if ($kartu->saldo_rupiah_total < 0 || $kartu->saldo_qty_backend < 0) {
                 return [
                     'status' => 0,
-                    'msg' => 'invalid input, saldo minus jika diinput!'
+                    'msg' => 'kartu barang jadi, invalid input, saldo minus jika diinput!',
+                    'detail'=>$kartu
                 ];
             }
             $kartu->save();
