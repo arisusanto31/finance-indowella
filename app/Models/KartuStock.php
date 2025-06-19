@@ -119,6 +119,7 @@ class KartuStock extends Model
             $kartu->saldo_qty_backend = moneyAdd($lastCard->saldo_qty_backend, $kartu->mutasi_qty_backend);
             $kartu->saldo_rupiah_total = moneyAdd($lastCard->saldo_rupiah_total, $kartu->mutasi_rupiah_total);
             if ($kartu->saldo_rupiah_total < 0 || $kartu->saldo_qty_backend < 0) {
+                info('kartu stock invalid input, saldo minus jika diinput! '.json_encode($kartu));
                 return [
                     'status' => 0,
                     'msg' => 'kartu stock invalid input, saldo minus jika diinput!',
