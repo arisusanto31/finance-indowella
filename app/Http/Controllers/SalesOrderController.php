@@ -349,8 +349,7 @@ class SalesOrderController extends Controller
                 'pack.akun_cash_kind_name',
                 'c.instance as customer_name',
                 'pack.created_at',
-            );
-            // ->distinct();
+            )->distinct();
         }
 
         $sales = $sales->with('detailSales')->get()->map(function ($val) use ($modeBook) {
