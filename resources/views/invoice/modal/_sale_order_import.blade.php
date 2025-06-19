@@ -125,9 +125,10 @@
         $('#table-body').html("");
         $.ajax({
             url: '{{ url('admin/invoice/sales-get-data-import') }}/' + id + '?monthyear=' + monthyear +
-                '&toko=' + toko + '&customer=' + customer+&'is_ppn=' + isPPN,
+                '&toko=' + toko + '&customer=' + customer+'&is_ppn=' + isPPN,
             method: 'get',
             success: function(res) {
+                loading(0);
                 console.log(res);
                 html = "";
                 if (toko == "") {
@@ -167,6 +168,7 @@
 
             },
             error: function(res) {
+                loading(0);
 
             }
         });
