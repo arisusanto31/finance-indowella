@@ -1,24 +1,66 @@
 <x-app-layout>
 
     <div class="card mt-3 rounded-3 mb-3">
-        <h5 class="text-primary-dark card-header"> 📥 <strong>IMPORT AWAL DATA </strong> </h5>
-        <div class="card-body">
-            <form action="{{ route('jurnal.get-import-saldo') }}" method="POST" enctype="multipart/form-data">
-                @csrf
+        <a href="javascript:void(openCardImport())">
+            <h5 class="text-primary-dark card-header"> 📥 <strong>IMPORT AWAL DATA </strong>
+                <i id="icon-import" class="bx bx-caret-down toggle-icon"></i>
+            </h5>
+        </a>
+
+        <div id="card-import" class="tree-toggle">
+            <div class="card-body">
+                <form action="{{ route('jurnal.get-import-saldo') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="row">
+                        <div class="col-md-2">
+                            <input type="date" class="form-control" name="date">
+                        </div>
+                        <div class="col-md-6">
+                            <input type="file" class="form-control" name="file">
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-primary" type="submit">Import</button>
+                        </div>
+                    </div>
+                </form>
                 <div class="row">
-                    <div class="col-md-2">
-                        <input type="date" class="form-control" name="date">
-                    </div>
-                    <div class="col-md-6">
-                        <input type="file" class="form-control" name="file">
-                    </div>
-                    <div class="col-md-2">
-                        <button class="btn btn-primary" type="submit">Import</button>
+                    <div class="col-xs-12" id="container-task">
                     </div>
                 </div>
-            </form>
-            <div class="row">
-                <div class="col-xs-12" id="container-task">
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-3 rounded-3 mb-3">
+        <a href="javascript:void(openCardExport())">
+            <h5 class="text-primary-dark card-header"> 📤 <strong>EXPORT DATA </strong>
+                <i id="icon-export" class="bx bx-caret-down toggle-icon"></i>
+            </h5>
+        </a>
+
+        <div id="card-export" class="tree-toggle">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-2 col-xs-4">
+                        <select class="form-control" id="month-export">
+                            @foreach (getListMonth() as $key => $value)
+                                <option value="{{ $key }}" {{ $key == $month ? 'selected' : '' }}>
+                                    {{ $value }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-2 col-xs-2">
+                        <select class="form-control" id="year-export">
+                            @foreach (getListYear() as $value)
+                                <option value="{{ $value }}" {{ $value == $year ? 'selected' : '' }}>
+                                    {{ $value }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-3 col-xs-3">
+                        <button class="btn btn-primary w-100" id="btn-export" onclick="exportData()">Export
+                            Data</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -47,7 +89,8 @@
 
                 <div id="div-backdate" class="d-backdate">
                     Tanggal Backdate
-                    <input type="datetime-local" value="{{now()}}" class="form-control" placeholder="tanggal" id="date-mutasi-journal" />
+                    <input type="datetime-local" value="{{ now() }}" class="form-control" placeholder="tanggal"
+                        id="date-mutasi-journal" />
                 </div>
                 <hr class="d-backdate">
                 <div>
@@ -337,6 +380,16 @@
                 $('#icon-create').toggleClass('open');
             }
 
+            function openCardImport() {
+                $('#card-import').toggleClass('open');
+                $('#icon-import').toggleClass('open');
+            }
+
+            function openCardExport() {
+                $('#card-export').toggleClass('open');
+                $('#icon-export').toggleClass('open');
+            }
+
             function openCardClosing() {
                 $('#card-closing').toggleClass('open');
                 $('#icon-closing').toggleClass('open');
@@ -595,6 +648,13 @@
 
             setTimeout(getTaskImport, 100);
 
+            function exportData(){
+                month = $('#month-export').val();
+                year = $('#year-export').val();
+              
+                url = '{{ url('admin/export-data') }}?month=' + month + '&year=' + year;
+                window.location.href=url;
+            }
 
             function trySearch() {
                 getListMutasiJurnal();

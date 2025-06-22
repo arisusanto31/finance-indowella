@@ -47,8 +47,8 @@ class BDDController extends Controller
                 'periode' => 'required|integer',
                 'book_journal_id' => 'required|integer',
                 'type_bdd' => 'required|string',
-                'code_group'=> 'required|numeric',
-                'lawan_code_group'=> 'required|numeric',
+                'code_group' => 'required|numeric',
+                'lawan_code_group' => 'required|numeric',
             ]);
 
 
@@ -58,14 +58,14 @@ class BDDController extends Controller
                 throw new \Exception('Gagal menyimpan data');
             }
             $st = KartuPrepaidExpense::createKartu(new Request([
-                'description'=> $request['description'] ?? '',
-                'toko_id' => $request['toko_id'] ?? null,
-                'prepaid_expense_id' => $inv->id,   
+                'description' => $request['description'] ?? '',
+               
+                'prepaid_expense_id' => $inv->id,
                 'date' => $request['date'],
                 'amount' => $request['nilai_perolehan'], // ini pake format indonesia
                 'type_mutasi' => 'pembayaran',
-                'code_group'=>$request['code_group'],
-                'lawan_code_group'=>$request['lawan_code_group'],
+                'code_group' => $request['code_group'],
+                'lawan_code_group' => $request['lawan_code_group'],
                 'is_otomatis_jurnal' => $request['is_otomatis_jurnal'] ?? 0,
 
             ]));
@@ -104,12 +104,12 @@ class BDDController extends Controller
             DB::rollBack();
             return ['status' => 0, 'msg' => $th->getMessage()];
         } finally {
-            DB::commit();
-            return [
-                'status' => 1,
-                'msg' => $st['msg']
-            ];
         }
+        DB::commit();
+        return [
+            'status' => 1,
+            'msg' => $st['msg']
+        ];
     }
 
     public function getItem()
@@ -120,9 +120,10 @@ class BDDController extends Controller
         ];
     }
 
-    public function getSummary()
+    public static function getSummary($year = null)
     {
-        $year = getInput('year') ? getInput('year') : date('Y');
+        if (!$year)
+            $year = getInput('year') ? getInput('year') : date('Y');
         $inv = PrepaidExpense::from('prepaid_expenses as inv')->leftJoin('kartu_prepaid_expenses as ki', 'ki.prepaid_expense_id', '=', 'inv.id')
             ->where('ki.book_journal_id', bookID())
             ->whereYear('ki.date', $year)
@@ -137,7 +138,7 @@ class BDDController extends Controller
                 DB::raw('SUM( case when ki.amount<0 then ki.amount else 0 end) as total_penyusutan'),
                 DB::raw('date_format(ki.date, "%Y-%m") as bulan_susut'),
             )
-            ->groupBy(DB::raw('date_format(ki.date,"%Y-%m")'), 'inv.id')->get()->groupBy('type_aset')
+            ->groupBy(DB::raw('date_format(ki.date,"%Y-%m")'), 'inv.id')->get()->groupBy('type_bdd')
             ->map(function ($val) {
                 return collect($val)->groupBy('id')->map(function ($theval) {
                     return [
@@ -150,7 +151,7 @@ class BDDController extends Controller
                         'total_pembelian' => $theval[0]->total_pembelian,
                         'periode' => $theval[0]->periode,
                         'total_penyusutan' => $theval[0]->total_penyusutan,
-                        'penyusutan' => collect($theval)->keyBy('bulan_susut')
+                        'penyusutan' => collect($theval)->pluck('total_penyusutan', 'bulan_susut')
                     ];
                 });
             });
@@ -162,7 +163,8 @@ class BDDController extends Controller
         return [
             'status' => 1,
             'msg' => $inv,
-            'saldo_buku_akhir' => $saldoBukuAkhir
+            'saldo_buku_akhir' => $saldoBukuAkhir,
+            'year' => $year
         ];
     }
     public function getMutasiMasuk()

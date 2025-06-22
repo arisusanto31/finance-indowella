@@ -342,18 +342,18 @@
                   <td class="sticky-col-3">${dataInv.periode} tahun</td>
                   <td class="sticky-col-4">${formatRupiah(dataInv.nilai_perolehan)}</td>
                   <td>${formatRupiah(dataInv.total_pembelian)}</td>
-                  <td>${array_key_exists(year+'-01',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-01'].total_penyusutan) : '-'}</td>
-                  <td>${array_key_exists(year+'-02',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-02'].total_penyusutan) : '-'}</td>
-                  <td>${array_key_exists(year+'-03',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-03'].total_penyusutan) : '-'}</td>
-                  <td>${array_key_exists(year+'-04',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-04'].total_penyusutan) : '-'}</td>
-                  <td>${array_key_exists(year+'-05',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-05'].total_penyusutan) : '-'}</td>
-                  <td>${array_key_exists(year+'-06',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-06'].total_penyusutan) : '-'}</td>
-                  <td>${array_key_exists(year+'-07',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-07'].total_penyusutan) : '-'}</td>
-                  <td>${array_key_exists(year+'-08',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-08'].total_penyusutan) : '-'}</td>
-                  <td>${array_key_exists(year+'-09',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-09'].total_penyusutan) : '-'}</td>
-                  <td>${array_key_exists(year+'-10',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-10'].total_penyusutan) : '-'}</td>
-                  <td>${array_key_exists(year+'-11',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-11'].total_penyusutan) : '-'}</td>
-                  <td>${array_key_exists(year+'-12',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-12'].total_penyusutan) : '-'}</td>
+                  <td>${array_key_exists(year+'-01',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-01']) : '-'}</td>
+                  <td>${array_key_exists(year+'-02',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-02']) : '-'}</td>
+                  <td>${array_key_exists(year+'-03',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-03']) : '-'}</td>
+                  <td>${array_key_exists(year+'-04',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-04']) : '-'}</td>
+                  <td>${array_key_exists(year+'-05',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-05']) : '-'}</td>
+                  <td>${array_key_exists(year+'-06',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-06']) : '-'}</td>
+                  <td>${array_key_exists(year+'-07',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-07']) : '-'}</td>
+                  <td>${array_key_exists(year+'-08',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-08']) : '-'}</td>
+                  <td>${array_key_exists(year+'-09',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-09']) : '-'}</td>
+                  <td>${array_key_exists(year+'-10',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-10']) : '-'}</td>
+                  <td>${array_key_exists(year+'-11',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-11']) : '-'}</td>
+                  <td>${array_key_exists(year+'-12',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-12']) : '-'}</td>
                   <td>${formatRupiah(dataInv.total_penyusutan)}</td>
                   <td>${array_key_exists(invID,res.saldo_buku_akhir)?formatRupiah(res.saldo_buku_akhir[invID].nilai_buku):0}</td>
                 </tr>`;

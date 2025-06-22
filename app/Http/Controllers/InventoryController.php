@@ -116,7 +116,7 @@ class InventoryController extends Controller
     public function storeKartuInventory(Request $request)
     {
 
-        
+
         try {
             $st = KartuInventory::createKartu($request);
             if ($st['status'] == 0) {
@@ -142,9 +142,10 @@ class InventoryController extends Controller
         ];
     }
 
-    public function getSummary()
+    public static function getSummary($year = null)
     {
-        $year = getInput('year') ? getInput('year') : date('Y');
+        if (!$year)
+            $year = getInput('year') ? getInput('year') : date('Y');
         $inv = Inventory::from('inventories as inv')->leftJoin('kartu_inventories as ki', 'ki.inventory_id', '=', 'inv.id')
             ->where('ki.book_journal_id', bookID())
             ->whereYear('ki.date', $year)
@@ -173,7 +174,7 @@ class InventoryController extends Controller
                         'total_pembelian' => $theval[0]->total_pembelian,
                         'periode' => $theval[0]->periode,
                         'total_penyusutan' => $theval[0]->total_penyusutan,
-                        'penyusutan' => collect($theval)->keyBy('bulan_susut')
+                        'penyusutan' => collect($theval)->pluck('total_penyusutan','bulan_susut')
                     ];
                 });
             });
@@ -185,7 +186,8 @@ class InventoryController extends Controller
         return [
             'status' => 1,
             'msg' => $inv,
-            'saldo_buku_akhir' => $saldoBukuAkhir
+            'saldo_buku_akhir' => $saldoBukuAkhir,
+            'year' => $year
         ];
     }
     public function getMutasiMasuk()

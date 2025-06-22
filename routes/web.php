@@ -16,6 +16,7 @@ use App\Http\Controllers\{
     KartuPiutangController,
     ChartAccountController,
     CustomerController,
+    ExcelExportController,
     OtherPersonController,
     StockController,
     SupplierController,
@@ -31,12 +32,12 @@ use App\Http\Controllers\{
 use App\Models\Journal;
 use App\Models\KartuBahanJadi;
 use App\Models\SalesOrder;
+use PhpOffice\PhpSpreadsheet\Calculation\MathTrig\Exp;
 
 Route::get('/', fn() => redirect('/login'));
 Route::get('/phpinfo', fn() => phpinfo());
 
 Route::middleware('auth')->group(function () {
-
     Route::prefix('profile')->name('profile.')->group(function () {
         Route::post('/create-permission', [ProfileController::class, 'createPermission'])->name('create-permission');
         Route::post('/create-role', [ProfileController::class, 'createRole'])->name('create-role');
@@ -51,7 +52,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/get-item-user', [ProfileController::class, 'getItemUser'])->name('get-item-user');
         Route::post('update-password', [ProfileController::class, 'updatePassword'])->name('update-password');
     });
-
     Route::prefix('permission')->group(function () {
         Route::get('/give-to-role', [ProfileController::class, 'getGivePermissionRole'])->name('give-to-role');
     });
@@ -77,6 +77,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
     Route::get('/neraca-lajur', [JournalController::class, 'neracalajur']);
     Route::get('/get-mutasi-neraca-lajur', [JournalController::class, 'getMutasiNeracaLajur']);
     Route::get('/laba-rugi', [JournalController::class, 'labarugi']);
+    Route::get('/export-data', [ExcelExportController::class, 'exportData'])->name('export-data');
+
     Route::prefix('jurnal')->name('jurnal.')->group(function () {
         Route::get('/buku-besar', [JournalController::class, 'bukuBesar'])->name('main.buku-besar');
         Route::get('/mutasi', [JournalController::class, 'mutasi'])->name('main.mutasi');

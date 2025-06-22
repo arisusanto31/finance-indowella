@@ -20,10 +20,12 @@ class KartuStockController extends Controller
         return $view;
     }
 
-    public function getSummary()
+    public static function getSummary($month = null, $year = null)
     {
-        $month = getInput('month') ?? date('m');
-        $year = getInput('year') ?? date('Y');
+        if (!$month)
+            $month = getInput('month') ?? date('m');
+        if (!$year)
+            $year = getInput('year') ?? date('Y');
         $dateAwal = $year . '-' . $month . '-01 00:00:00';
         $dateAkhir = $year . '-' . $month . '-' . dayInMonthQuantity($month, $year) . ' 23:59:59';
         $saldoAwal = kartuStock::whereIn('index_date', function ($q) use ($dateAwal) {
@@ -91,6 +93,8 @@ class KartuStockController extends Controller
             'msg' => $stock,
             'mutasi_masuk' => $mutasiMasuk,
             'mutasi_keluar' => $mutasiKeluar,
+            'month' => $month,
+            'year' => $year
         ];
     }
 
@@ -213,7 +217,7 @@ class KartuStockController extends Controller
                 $join->on('ks.stock_id', '=', 'su.stock_id')
                     ->on('su.unit', '=', 'st.unit_default');
             })
-            
+
             ->select(
                 'ks.created_at',
                 'ks.id as uid',
@@ -223,10 +227,10 @@ class KartuStockController extends Controller
                 DB::raw('(ks.mutasi_qty_backend/su.konversi) as mutasi'),
                 DB::raw('(ks.saldo_qty_backend/su.konversi) as saldo'),
                 DB::raw('(ks.saldo_rupiah_total) as saldo_rupiah')
-            )->orderBy('ks.index_date','asc')->get();
-        $stock= Stock::find($stockid);
+            )->orderBy('ks.index_date', 'asc')->get();
+        $stock = Stock::find($stockid);
         $view->data = $kartuStocks;
-        $view->stock= $stock;
+        $view->stock = $stock;
         return $view;
     }
 }

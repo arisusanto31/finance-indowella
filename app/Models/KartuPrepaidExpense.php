@@ -74,11 +74,13 @@ class KartuPrepaidExpense extends Model
             // Format nilai amount terlebih dahulu
             //input amount harus pakai languange indonesia
             $formattedAmount = $request->input('type_mutasi') == 'amortisasi' ? format_db($request->input('amount')) * -1 : format_db($request->input('amount'));
-            $isOtomatisJurnal = $request->input('is_otomatis_jurnal');
+            $isOtomatisJurnal = $request->input('is_otomatis_jurnal') == 'on' ? 1 : 0;
+            $prepaid= PrepaidExpense::find($invID);
             $request->merge([
                 'index_date' => $indexDate,
                 'index_date_group' => createCarbon($date)->format('ymdHis'),
                 'book_journal_id' => bookID(),
+                'toko_id'=>$prepaid->toko_id,
                 'amount'          => $formattedAmount,
                 // nilai_buku dihitung berdasarkan kartu terakhir dan amount yang sudah diformat
                 'nilai_buku'      => bcadd($lastNilaiBuku, $formattedAmount),

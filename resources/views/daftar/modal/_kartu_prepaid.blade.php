@@ -6,7 +6,7 @@
 
 
             <div class="form-check form-switch ">
-                <input class="form-check-input" type="checkbox" id="is_otomatis_jurnal" checked />
+                <input class="form-check-input" type="checkbox" name="is_otomatis_jurnal" id="is_otomatis_jurnal" checked />
                 <label class="form-check-label" for="is_otomatis_jurnal">Buat Jurnal</label>
             </div>
 
@@ -63,13 +63,13 @@
         <div class="row">
             <div class="col mb-3">
                 <label for="" class="form-label">Date</label>
-                <input class="form-control" name="datetime-local" type="date" value="{{now()}}" id="date-input" />
+                <input class="form-control" name="date" type="datetime-local" value="{{now()}}" id="date-input" />
             </div>
         </div>
         <div class="row">
             <div class="col mb-3">
                 <label for="unit" class="form-label">Amount</label>
-                <input type="text" value="" class="form-control currency-input" name="amount" placeholder="contoh: 17.000.000" />
+                <input type="text" value="" class="form-control currency-input" name="amount" placeholder="contoh: 16.000.000" />
             </div>
         </div>
 

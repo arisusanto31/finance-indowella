@@ -159,6 +159,8 @@ trait HasModelSaldoStock
             'msg' => $summary,
             'mutasi_masuk' => $mutasiMasuk,
             'mutasi_keluar' => $mutasiKeluar,
+            'month' => $month,
+            'year' => $year
         ];
     }
 }

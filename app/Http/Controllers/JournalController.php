@@ -205,8 +205,6 @@ class JournalController extends Controller
         }
     }
 
-
-
     public function logoutJurnal()
     {
         session()->forget('book_journal_id');

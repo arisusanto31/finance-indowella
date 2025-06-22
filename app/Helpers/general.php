@@ -108,6 +108,18 @@ function getListMonthYear()
     return $listMonthYear;
 }
 
+function getListYear(){
+    $date = carbonDate()->format('Y');
+    $listYear = [];
+    for ($i = 0; $i < 5; $i++) {
+        $thedate = $date - $i;
+        $listYear[] = $thedate;
+    }
+    return $listYear;
+}
+
+
+
 function getProsen($data, $total)
 {
     if ($total == 0) {
