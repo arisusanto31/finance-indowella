@@ -269,7 +269,7 @@ class SalesOrderController extends Controller
         $data['details'] = $invdetails;
         $data['kartus'] = $data->getAllKartu();
         $data['resume_total'] = $data->getTotalKartu();
-        $data['total_kartu'] = collect($data)->detailKartuInvoices()->count();
+        $data['total_kartu'] = collect($data->detailKartuInvoices)->count();
         $view = view('invoice.modal._sale-detail');
 
         $view->data = $data;
