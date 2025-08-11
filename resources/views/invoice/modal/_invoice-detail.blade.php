@@ -6,7 +6,7 @@
 <div class="modal-body">
     <div class="row">
         <div class="col-xs-12 col-md-12">
-            @if ($totalKartu == 0)
+            @if ($total_kartu == 0)
                 <p>invoice ini bisa dibatalkan finalnya karena belum ada kartu</p>
                 <button class="btn btn-danger" onclick="batalkanFinal('{{ $data->id }}')">Batalkan Final</button>
             @endif
