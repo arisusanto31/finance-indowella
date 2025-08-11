@@ -6,6 +6,12 @@
 <div class="modal-body">
     <div class="row">
         <div class="col-xs-12 col-md-12">
+            @if ($totalKartu == 0)
+                <p>invoice ini bisa dibatalkan finalnya karena belum ada kartu</p>
+                <button class="btn btn-danger" onclick="batalkanFinal('{{ $data->id }}')">Batalkan Final</button>
+            @endif
+        </div>
+        <div class="col-xs-12 col-md-12">
             <h5>List Detail</h5>
             <table class="table table-bordered table-striped table-hover align-middle">
                 <thead class="bg-white text-dark text-center">
@@ -251,6 +257,24 @@
             '{{ route('chart-account.get-item-keuangan') }}?kind=hutang|kas', 'chart account',
             '#global-modal  #div-input');
     });
+
+
+    function batalkanFinal(id) {
+        swalConfirmAndSubmit({
+            url: '{{ url('admin/invoice/invoice-cancel-final') }}',
+            data: {
+                _token: '{{ csrf_token() }}',
+                id: id
+            },
+            onSuccess: function(res) {
+                if (res.status == 1) {
+                    hideModal();
+                } else {
+                    Swal.fire('Opss', res.msg, 'warning');
+                }
+            },
+        });
+    }
 
     function refresh(id, model) {
         console.log(id, model);

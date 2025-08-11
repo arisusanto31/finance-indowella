@@ -233,4 +233,45 @@ class KartuStockController extends Controller
         $view->stock = $stock;
         return $view;
     }
+
+
+    public function showHistoryStock($id)
+    {
+        $view = view('kartu.modal._kartu-history-stock');
+        $year = Date('Y');
+        $stock= Stock::find($id);
+        $kartuStock = KartuStock::where('stock_id', $id)->whereYear('created_at', $year)
+            ->select(
+                DB::raw('count(*) as total'),
+                'unit'
+            )
+            ->groupBy('unit')->orderBy(DB::raw('count(*)'), 'desc')->first();
+        $unit = $kartuStock ? $kartuStock->unit : $stock->unit_default;
+
+
+        $dataHistory = KartuStock::from('kartu_stocks as ks')
+            ->leftJoin('stock_units as u', function ($join) use ($unit) {
+                $join->on('u.unit', '=', DB::raw("'" . $unit . "'"))
+                    ->on('u.stock_id', '=', 'ks.stock_id');
+            })
+            ->leftJoin('journals as j', 'j.id', '=', 'ks.journal_id')
+            ->where('ks.stock_id', $id)
+            ->select(
+                'ks.id',
+                'ks.created_at',
+                'j.description',
+                DB::raw('case when ks.mutasi_qty_backend > 0 then ks.mutasi_qty_backend/u.konversi else 0 end as qty_debet'),
+                DB::raw('case when ks.mutasi_qty_backend < 0 then abs(ks.mutasi_qty_backend)/u.konversi else 0 end as qty_kredit'),
+                DB::raw("'" . $unit . "' as unit"),
+                DB::raw('case when mutasi_rupiah_total >0 then mutasi_rupiah_total else 0 end as rupiah_debet'),
+                DB::raw('case when mutasi_rupiah_total <0 then abs(mutasi_rupiah_total) else 0 end as rupiah_kredit'),
+                DB::raw('saldo_qty_backend/u.konversi as qty_saldo'),
+                'saldo_rupiah_total as rupiah_saldo',
+                'ks.journal_number',
+
+            )->get();
+        $view->title= $stock->name . ' [' . $stock->id . ']';
+        $view->datas = $dataHistory;
+        return $view;
+    }
 }

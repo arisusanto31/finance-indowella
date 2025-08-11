@@ -8,6 +8,12 @@
 <div class="modal-body">
     <div class="row">
         <div class="col-xs-12 col-md-12">
+            @if ($data['total_kartu'] == 0)
+                <p>sales ini belum ada jurnal maupun kartu, kamu bisa batalkan finalnya </p>
+                <button class="btn btn-danger" onclick="batalkanFinal('{{ $data->id }}')">Batalkan Final</button>
+            @endif
+        </div>
+        <div class="col-xs-12 col-md-12">
             <h5>List Detail</h5>
             <table class="table table-bordered table-striped table-hover align-middle">
                 <thead class="bg-white text-dark text-center">
@@ -464,6 +470,16 @@
         renderResumeKartu(data);
         renderResumeTotal(data);
     }, 100);
+
+    function batalkanFinal(id) {
+        swalConfirmAndSubmit({
+            url: '{{ url('admin/invoice/sales-cancel-final') }}',
+            data: {
+                _token: '{{ csrf_token() }}',
+                id: id
+            },
+        });
+    }
 
     function renderResumeKartu(data) {
 

@@ -294,7 +294,7 @@ class InvoiceSaleController extends Controller
                     'toko_id' => $request->toko_id,
                     'custom_stock_name' => $request->custom_stock_name[$i] ?? null,
                     'created_at' => $request->input('created_at') ?? now(),
-                    'row_index' => $i+1,
+                    'row_index' => $i + 1,
 
                 ];
             }
@@ -343,6 +343,21 @@ class InvoiceSaleController extends Controller
         $inv->updateStatus();
         return ['status' => 1, 'msg' => $inv];
     }
+    public function cancelFinal(Request $request)
+    {
+        $id = $request->input('id');
+        $inv = InvoicePack::find($id);
+        $totalKartu = collect($inv->detailKartuInvoices)->count();
+        if ($totalKartu > 0) {
+            return ['status' => 0, 'msg' => 'Tidak bisa membatalkan final invoice, karena sudah ada ' . $totalKartu . ' kartu '];
+        }
+        $inv->is_final = 0;
+        $inv->save();
+        return [
+            'status' => 1,
+            'msg' => $inv
+        ];
+    }
 
     //fungsi ini untuk create invoice dari Sales Order
     public function createInvoices(Request $request)
@@ -387,7 +402,7 @@ class InvoiceSaleController extends Controller
                     'toko_id' => $dataDetailSale->toko_id,
                     'custom_stock_name' => $customStockNames[$i] ?? null,
                     'created_at' => $date,
-                    'row_index'=> $i+1,
+                    'row_index' => $i + 1,
 
                 ];
             }
@@ -441,7 +456,7 @@ class InvoiceSaleController extends Controller
                 $journalNumber = $kartu['msg']->journal_number;
                 $journal = Journal::where('journal_number', $journalNumber)->where('code_group', $codeGroupPenjualans[$i])->first();
                 $journalID = $journal ? $journal->id : null;
-                $dataSaleDetail = InvoiceSaleDetail::where('row_index',$i+1)->where('custom_stock_name', $customStockNames[$i])->where('invoice_pack_number', $invoicePack->invoice_number)->first();
+                $dataSaleDetail = InvoiceSaleDetail::where('row_index', $i + 1)->where('custom_stock_name', $customStockNames[$i])->where('invoice_pack_number', $invoicePack->invoice_number)->first();
                 if (!$dataSaleDetail) {
                     throw new \Exception('Data detail penjualan tidak ditemukan, index mungkin bermasalah');
                 }

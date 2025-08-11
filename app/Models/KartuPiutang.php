@@ -154,10 +154,8 @@ class KartuPiutang extends Model
         ];
     }
 
-
     public static function createMutation(Request $request, $useTransaction = true, ?LockManager $lockManager = null)
     {
-
         if ($useTransaction)
             DB::beginTransaction();
         try {

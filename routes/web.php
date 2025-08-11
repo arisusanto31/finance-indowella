@@ -160,6 +160,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::post('refresh-kartu', [KartuStockController::class, 'refreshKartu'])->name('refresh-kartu');
             Route::get('get-hpp', [KartuStockController::class, 'getHPP'])->name('get-hpp');
             Route::get('kartu-mutasi/{id}', [KartuStockController::class, 'kartuMutasi'])->name('kartu-mutasi');
+            Route::get('show-history-stock/{id}', [KartuStockController::class, 'showHistoryStock'])->name('show-history-stock');
         });
 
         Route::prefix('kartu-bdp')->name('kartu-bdp.')->group(function () {
@@ -184,6 +185,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('get-mutasi-keluar', [KartuBahanJadiController::class, 'getMutasiKeluar'])->name('get-mutasi-keluar');
             Route::post('create-mutations', [KartuBahanJadiController::class, 'createMutations'])->name('create-mutations');
             Route::post('refresh-kartu', [KartuBahanJadiController::class, 'refreshKartu'])->name('refresh-kartu');
+            Route::get('show-history-stock/{id}', [KartuBahanJadiController::class, 'showHistoryStock'])->name('show-history-stock');
         });
         Route::prefix('kartu-hutang')->name('kartu-hutang.')->group(function () {
             Route::resource('main', KartuHutangController::class);
@@ -299,6 +301,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::post('submit-bayar-sales-invoice', [InvoiceSaleController::class, 'submitBayarSalesInvoice']);
         Route::get('invoice-get-data-import/{id}', [InvoiceSaleController::class, 'getDataImport']);
         Route::post('invoice-make-final', [InvoiceSaleController::class, 'makeFinal'])->name('invoice-make-final');
+        Route::post('invoice-cancel-final', [InvoiceSaleController::class, 'cancelFinal'])->name('invoice-cancel-final');
         Route::post('invoice-mark', [InvoicePackController::class, 'mark'])->name('invoice-mark');
 
         Route::get('sales-order', [SalesOrderController::class, 'index'])->name('sales-order.index');
@@ -308,6 +311,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::get('show-sales-detail/{id}', [SalesOrderController::class, 'showDetail'])->name('sale-order-detail');
         Route::get('update-input-invoice/{id}', [SalesOrderController::class, 'updateInputInvoice'])->name('update-input-invoice');
         Route::post('sales-make-final', [SalesOrderController::class, 'makeFinal'])->name('sales-make-final');
+        Route::post('sales-cancel-final', [SalesOrderController::class, 'cancelFinal'])->name('sales-cancel-final');
         Route::post('sales-mark', [SalesOrderController::class, 'mark'])->name('sales-mark');
 
         Route::get('invoice-sales-refresh/{id}', [InvoiceSaleController::class, 'refresh'])->name('invoice-sales-refresh');

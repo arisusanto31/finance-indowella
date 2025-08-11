@@ -87,24 +87,28 @@ class InvoicePack extends Model
     public function getCodeFix()
     {
         $data = $this;
-        $personType = $data->person_type;
-        $personID = $data->person_id;
-        $inv = InvoicePack::where('is_final', 1)->where('person_id', $personID)
-            ->where('person_type', $personType)
-            ->orderBy('index', 'desc')->first();
-        if ($inv) {
-            $count = $inv->index + 1;
-        } else {
-            $count = 1;
+        if ($data->index == null) {
+            //menandakan bahwa invoice ini belum pernah dapat fix code
+            $personType = $data->person_type;
+            $personID = $data->person_id;
+            $inv = InvoicePack::where('is_final', 1)->where('person_id', $personID)
+                ->where('person_type', $personType)
+                ->orderBy('index', 'desc')->first();
+            if ($inv) {
+                $count = $inv->index + 1;
+            } else {
+                $count = 1;
+            }
+            $this->index = $count;
+            if ($data->reference_model == InvoiceSaleDetail::class)
+                $code = 'INV-S' . date('y') . '-' . toDigit($personID, 4) . '-' . toDigit($count, 4);
+            else if ($data->reference_model == InvoicePurchaseDetail::class)
+                $code = 'INV-P' . date('y') . '-' . toDigit($personID, 4) . '-' . toDigit($count, 4);
+            else
+                $code = 'INV-' . date('y') . '-' . toDigit($personID, 4) . '-' . toDigit($count, 4);
+            return $code;
         }
-        $this->index = $count;
-        if ($data->reference_model == InvoiceSaleDetail::class)
-            $code = 'INV-S' . date('y') . '-' . toDigit($personID, 4) . '-' . toDigit($count, 4);
-        else if ($data->reference_model == InvoicePurchaseDetail::class)
-            $code = 'INV-P' . date('y') . '-' . toDigit($personID, 4) . '-' . toDigit($count, 4);
-        else
-            $code = 'INV-' . date('y') . '-' . toDigit($personID, 4) . '-' . toDigit($count, 4);
-        return $code;
+        return $data->invoice_number;
     }
 
     public function updateStatus()

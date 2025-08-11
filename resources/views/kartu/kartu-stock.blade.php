@@ -341,11 +341,13 @@
                                 <tr>
                                 <td>${i+1}</td>
                                 <td>
-                                    <button class="btn btn-sm btn-outline-primary" onclick="showDetailOnModal('{{url("admin/kartu/kartu-stock/kartu-mutasi")}}/${item.id}','xl')">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="showDetailOnModal('{{ url('admin/kartu/kartu-stock/show-history-stock') }}/${item.id}','xl')">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                 </td>
-                                <td>${item.name} [${item.id}]</td>
+                                <td>${item.name} [${item.id}]
+                                  
+                                </td>
                                 <td>${item.category_name}</td>
                                 <td>${formatRupiah(item.awal_qty/item.konversi)} ${item.unit_default}</td>
                                 <td>${formatRupiah(rupiahUnitAwal*item.konversi)}</td>

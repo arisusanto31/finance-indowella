@@ -9,11 +9,8 @@ use Illuminate\Support\Facades\DB;
 
 trait HasModelSaldoStock
 {
-
-
     public static function getTotalSaldoRupiah($date, $withProduction = false, $productionNumber = null,)
     {
-
         $indexDate = intval(createCarbon($date)->format('ymdHis000'));
         info('index date : ' . $indexDate);
         $saldo = static::query()->whereIn('index_date', function ($q) use ($indexDate, $withProduction, $productionNumber) {
@@ -54,7 +51,6 @@ trait HasModelSaldoStock
         $indexDateAwal = intval(createCarbon($dateAwal)->format('ymdHis000'));
         $dateAkhir = $year . '-' . $month . '-' . dayInMonthQuantity($month, $year) . ' 23:59:59';
         $indexDateAkhir = intval(createCarbon($dateAkhir)->format('ymdHis000'));
-
         $saldoAkhir = static::query()->whereIn('index_date', function ($q) use ($indexDateAkhir) {
             $q->from(with(new static)->getTable())
                 ->select(DB::raw('max(index_date)'))
@@ -76,10 +72,7 @@ trait HasModelSaldoStock
                 'stock_id',
                 DB::raw('coalesce(mutasi_qty_backend,0) as mutasi'),
             )->get();
-
         $summary = collect($summary)->merge(collect($saldoAkhir))->merge(collect($mutasi));
-
-
 
         $dataStock = DB::table('stocks')->whereIn('stocks.id', $summary->pluck('stock_id')->all())->join('stock_categories', 'stocks.category_id', '=', 'stock_categories.id')
             ->join('stock_units', function ($join) {
@@ -116,9 +109,7 @@ trait HasModelSaldoStock
                 $isTampil = 0;
                 foreach ($values as $val) {
                     if ($val['mutasi'] == 0 && $val['saldo_qty_awal'] == 0 && $val['saldo_rupiah_awal'] == 0 && $val['saldo_qty_akhir'] == 0 && $val['saldo_rupiah_akhir'] == 0) {
-                       
-                    }
-                    else{
+                    } else {
                         $isTampil = 1;
                         break;
                     }

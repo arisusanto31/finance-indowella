@@ -172,10 +172,14 @@ class SalesOrder extends Model
 
     public function getCodeFix()
     {
-        $salesOrder = SalesOrder::where('is_final', 1)->where('customer_id', $this->customer_id)->orderBy('index', 'desc')->first();
-        $count = $salesOrder ? $salesOrder->index + 1 : 1;
-        $this->index = $count;
-        $number = 'SO-' . date('Y') . '-' . toDigit($this->customer_id, 4) . '-' . toDigit($count, 4);
-        return $number;
+        if ($this->index == null) {
+            //menandakan bahwa sales order ini belum pernah dapat fix code
+            $salesOrder = SalesOrder::where('is_final', 1)->where('customer_id', $this->customer_id)->orderBy('index', 'desc')->first();
+            $count = $salesOrder ? $salesOrder->index + 1 : 1;
+            $this->index = $count;
+            $number = 'SO-' . date('Y') . '-' . toDigit($this->customer_id, 4) . '-' . toDigit($count, 4);
+            return $number;
+        }
+        return $this->sales_order_number;
     }
 }

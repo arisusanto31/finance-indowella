@@ -230,6 +230,21 @@ class SalesOrderController extends Controller
         return ['status' => 1, 'msg' => $salesOrder];
     }
 
+
+    public function cancelFinal(Request $request)
+    {
+        $id = $request->input('id');
+        $salesOrder = SalesOrder::find($id);
+        //pastikan dulu ga ada sama sekali jurnal maupun kartu yang terhubung
+        if (collect($salesOrder->detailKartuInvoices)->count() > 0) {
+            return ['status' => 0, 'msg' => 'Tidak bisa membatalkan invoice yang sudah terhubung dengan kartu'];
+        }
+
+        $salesOrder->is_final = 0;
+        $salesOrder->save();
+        return ['status' => 1, 'msg' => $salesOrder];
+    }
+
     public function mark(Request $request)
     {
         $id = $request->input('id');
@@ -254,7 +269,9 @@ class SalesOrderController extends Controller
         $data['details'] = $invdetails;
         $data['kartus'] = $data->getAllKartu();
         $data['resume_total'] = $data->getTotalKartu();
+        $data['total_kartu'] = collect($data)->detailKartuInvoices()->count();
         $view = view('invoice.modal._sale-detail');
+
         $view->data = $data;
         $view->dateFinished = $dateFinished;
         $view->dateUangMuka = $data->created_at;

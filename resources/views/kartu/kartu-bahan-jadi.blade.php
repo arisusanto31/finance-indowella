@@ -67,7 +67,7 @@
 
                                 </div>
                                 <div class="mt-3">
-                                    <table class="table table-bordered tables-striped" >
+                                    <table class="table table-bordered tables-striped">
                                         <thead class="bg-white text-dark text-center">
                                             <tr>
                                                 <th class="fs-5">total saldo Awal</th>
@@ -86,7 +86,7 @@
                                         </tbody>
 
                                     </table>
-                                   
+
                                 </div>
                             </div>
                             <div class="tab-pane fade" id="navs-pills-top-profile" role="tabpanel">
@@ -304,7 +304,7 @@
                                 <thead class="bg-white text-dark text-center">
                                     <tr>
                                         <th rowspan=2>No</th>
-                                    
+                                        <th rowspan=2>Aksi</th>
                                         <th rowspan=2>Nama Barang</th>
                                         <th colspan=3>Saldo Awal</th>
                                         <th colspan=3>Masuk</th>
@@ -358,7 +358,11 @@
                                     html += `
                                 <tr>
                                 <td>${i+1}</td>
-                
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="showDetailOnModal('{{ url('admin/kartu/kartu-bahan-jadi/show-history-stock') }}/${item.id}?production_number=${spknumber}','xl')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
                                 <td>${item.name} [${item.id}]</td>
                                 <td>${formatRupiah(item.saldo_qty_awal/item.konversi)} ${item.unit_default}</td>
                                 <td>${formatRupiah(rupiahUnitAwal*item.konversi)}</td>
@@ -396,10 +400,10 @@
                             //         [10, 25, 50, "All"]
                             //     ],
                             // });
-                            $('#total-saldo-awal').html('<strong>'+formatRupiah(totalSaldoAwal)+'</strong>');
-                            $('#total-masuk').html( '<strong>'+formatRupiah(totalMasuk)+'</strong>');
-                            $('#total-keluar').html('<strong>'+formatRupiah(totalKeluar)+'</strong>');
-                            $('#total-saldo-akhir').html('<strong>'+formatRupiah(totalNilai)+'</strong>');
+                            $('#total-saldo-awal').html('<strong>' + formatRupiah(totalSaldoAwal) + '</strong>');
+                            $('#total-masuk').html('<strong>' + formatRupiah(totalMasuk) + '</strong>');
+                            $('#total-keluar').html('<strong>' + formatRupiah(totalKeluar) + '</strong>');
+                            $('#total-saldo-akhir').html('<strong>' + formatRupiah(totalNilai) + '</strong>');
                         } else {
 
                         }

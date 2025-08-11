@@ -35,8 +35,9 @@ class InvoicePackController extends Controller
         $invdetails = $data->reference_model::with('stock')->where('invoice_pack_number', $number)->get();
         $data['details'] = $invdetails;
         $data['kartus'] = $data->getAllKartu();
-
+        $totalKartu = collect($data->detailKartuInvoices)->count();
         $view = view('invoice.modal._invoice-detail');
+        $view->total_kartu = $totalKartu;
         $view->data = $data;
         return $view;
     }
@@ -430,4 +431,6 @@ class InvoicePackController extends Controller
 
         return ['results' => $invoices];
     }
+
+    
 }

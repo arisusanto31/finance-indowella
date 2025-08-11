@@ -47,8 +47,6 @@ trait HasModelSaldoUang
 
     public static function getSummary($year, $month, $kolomGroup = 'invoice_pack_number')
     {
-
-
         $date = $year . '-' . $month . '-01 00:00:00';
         $indexDate = intval(createCarbon($date)->format('ymdHis000'));
         $kartuPiutangAwal = static::query()->whereIn('index_date', function ($q) use ($indexDate, $kolomGroup) {

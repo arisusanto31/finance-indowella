@@ -294,7 +294,7 @@ class Journal extends Model
                 if (abs(collect($ks)->sum('amount')) == abs($this->amount_debet - $this->amount_kredit)) {
                     $this->verified_by = 1;
                 }
-            } else if ($this->reference_model == 'App\Models\KartuDPSales') {
+            } else if ($this->reference_model == 'App\\Models\\KartuDPSales') {
                 $ks = KartuDPSales::where('journal_id', $this->id)->get();
                 info(abs(collect($ks)->sum('amount_debet') - collect($ks)->sum('amount_kredit')) . '==' . abs($this->amount_debet - $this->amount_kredit));
                 if (abs(collect($ks)->sum('amount_debet') - collect($ks)->sum('amount_kredit')) == abs($this->amount_debet - $this->amount_kredit)) {
