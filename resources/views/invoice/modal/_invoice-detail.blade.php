@@ -68,7 +68,7 @@
                                                 <p>{{ $item->date }} -
                                                     <strong>{{ $item->code_group_name }}</strong> :
                                                     {{ format_price($item->amount_journal) }} <span
-                                                        class="fs-8">[journal_id : {{ $item->journal_id }}, journal_number= {{$item['journal_number']}}
+                                                        class="fs-8">[journal_id : {{ $item->journal_id }}, journal_number= {{$item['journal_number']}},
                                                         kartu_id= {{ $item->kartu_id }}]
                                                     
                                                     </span>
