@@ -315,11 +315,13 @@ class SalesOrderController extends Controller
         $sales = $saleModel::from('packages as pack')
             ->leftJoin($defaultDB . '.invoice_packs as inv', function ($join) use ($saleModel) {
                 $join->on('pack.id', '=', 'inv.reference_id')
-                    ->where('inv.reference_type', $saleModel);
+                    ->where('inv.reference_type', $saleModel)
+                    ->where('inv.book_journal_id', bookID());
             })
             ->leftJoin($defaultDB . '.sales_orders as so', function ($join) use ($saleModel) {
                 $join->on('pack.id', '=', 'so.reference_id')
-                    ->where('so.reference_type', $saleModel);
+                    ->where('so.reference_type', $saleModel)
+                    ->where('so.book_journal_id', bookID());
             })
             ->whereNull('inv.id')->whereNull('so.id')->whereMonth('pack.created_at', $month)->whereYear('pack.created_at', $year);
         if ($book->name == 'Buku Toko') {

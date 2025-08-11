@@ -55,7 +55,6 @@
                     <p>status : {{ $data->status }}</p>
 
                     <div class="row">
-
                         <h6>Kartu Kartu </h6>
 
                         @foreach ($data['kartus'] as $key => $items)
