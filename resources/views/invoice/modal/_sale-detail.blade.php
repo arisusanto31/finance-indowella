@@ -504,6 +504,7 @@
                                                         <div class="bg-primary-dark p-2 ">
                                                             <p>${item.date}
                                                                 <strong>${item.code_group_name}</strong> :
+                                                                ${item.journal_number} -
                                                                 ${formatRupiah(Math.abs(item.amount_journal))} <span
                                                                     class="fs-8">[journal_id :
                                                                     ${item.journal_id}, kartu_id=
@@ -528,6 +529,7 @@
                                                         <div class="bg-primary-dark p-2 ">
                                                             <p>${item.date}
                                                                 <strong>${item.code_group_name}</strong> :
+                                                                ${item.journal_number} -
                                                                 ${formatRupiah(Math.abs(item.amount_journal))} <span
                                                                     class="fs-8">[journal_id :
                                                                     ${item.journal_id}, kartu_id=

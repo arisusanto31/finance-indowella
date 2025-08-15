@@ -80,6 +80,7 @@ class SalesOrder extends Model
             $val['code_group_name'] = $val->journal->chartAccount->name;
             $val['type_flow'] = $val->journal->amount_debet > 0 ? 'debet' : 'kredit';
             $val['date'] = $val->journal->created_at->format('Y-m-d H:i:s');
+            $val['journal_number']= $val->journal->journal_number;
             return $val;
         })->groupBy('type_kartu')->map(function ($vals) {
             return $vals->groupBy('type_flow')->all();
