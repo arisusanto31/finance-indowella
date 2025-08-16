@@ -330,18 +330,25 @@ class InvoiceSaleController extends Controller
 
     public function makeFinal(Request $request)
     {
-        $id = $request->input('id');
-        $inv = InvoicePack::find($id);
-        // return ['status' => 0, 'msg' => $inv];
-        $details = $inv->reference_model::where('invoice_pack_number', $inv->invoice_number)->get();
-        $inv->is_final = 1;
-        $inv->invoice_number = $inv->getCodeFix();
-        foreach ($details as $detail) {
-            $detail->invoice_pack_number = $inv->invoice_number;
-            $detail->save();
+        try {
+            DB::beginTransaction();
+            $id = $request->input('id');
+            $inv = InvoicePack::find($id);
+            // return ['status' => 0, 'msg' => $inv];
+            $details = $inv->reference_model::where('invoice_pack_number', $inv->invoice_number)->get();
+            $inv->is_final = 1;
+            $inv->invoice_number = $inv->getCodeFix();
+            foreach ($details as $detail) {
+                $detail->invoice_pack_number = $inv->invoice_number;
+                $detail->save();
+            }
+            $inv->updateStatus();
+            DB::commit();
+            return ['status' => 1, 'msg' => $inv];
+        } catch (Throwable $e) {
+            DB::rollBack();
+            return ['status' => 0, 'msg' => $e->getMessage()];
         }
-        $inv->updateStatus();
-        return ['status' => 1, 'msg' => $inv];
     }
     public function cancelFinal(Request $request)
     {
