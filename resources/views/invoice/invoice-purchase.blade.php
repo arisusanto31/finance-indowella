@@ -100,8 +100,9 @@
                         @endphp
                         @foreach ($invoices as $invoiceNumber => $items)
                             @php
-                                $theparent = $items->first()->parent;
-                                $parent[$theparent->id] = $theparent;
+                                // $theparent = $items->first()->parent;
+
+                                // $parent[$theparent->id] = $theparent;
                                 $rowspan = $items->count();
                                 $invoiceSubtotal = $items->sum(
                                     fn($item) => $item->quantity * $item->price - $item->discount,
