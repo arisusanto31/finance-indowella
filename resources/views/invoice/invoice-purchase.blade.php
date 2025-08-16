@@ -109,7 +109,7 @@
                             @endphp
 
                             @foreach ($items as $index => $item)
-                                <tr
+                                <tr id="TR{{$item->invoice_pack_id}}"
                                     class="parent{{ $item->parent->id }} @if ($item->parent->is_mark == 1) bg-primary-lightest @endif">
                                     @if ($index === 0)
                                         <td rowspan="{{ $rowspan }}">{{ $no++ }}</td>
@@ -152,6 +152,10 @@
                                                     <a href="javascript:void(editInvoicePurchase('{{ $item->invoice_pack_number }}'))"
                                                         class="btn btn-sm btn-outline-primary">
                                                         <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <a href="javascript:void(deleteInvoicePurchase('{{ $item->invoice_pack_id }}'))"
+                                                        class="btn btn-sm btn-outline-danger" title="Hapus Invoice">
+                                                        <i class="fas fa-trash"></i>
                                                     </a>
                                                 @endif
                                                 <a href="javascript:void(makeMark('{{ $item->parent->id }}'))"
@@ -222,6 +226,10 @@
             function editInvoicePurchase(invoiceNumber) {
                 console.log("Edit Purchase Invoice:", invoiceNumber);
                 showDetailOnModal('{{ url('/admin/invoice/invoice-purchase/edit') }}/' + invoiceNumber, 'xl');
+            }
+
+            function deleteInvoicePurchase(id) {
+                swalDelete({url: '{{ url('admin/invoice/delete-invoice-purchase') }}/' + id,elem:'#TR' + id });
             }
 
 

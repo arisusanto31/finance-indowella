@@ -151,7 +151,7 @@ class InvoicePurchaseController extends Controller
                     'unit' => $unit,
                     'flow' => 0,
                     'code_group' => $coaDebet,
-                    'invoice_pack_number'=>$invoicePackNumber,
+                    'invoice_pack_number' => $invoicePackNumber,
                     'invoice_pack_id' => $invoicePackID,
                     'is_custom_rupiah' => 1,
                     'mutasi_rupiah_total' => $nilaiMutasi,
@@ -331,5 +331,30 @@ class InvoicePurchaseController extends Controller
         }
 
         return ['status' => 1, 'msg' => 'Data berhasil disimpan'];
+    }
+
+
+    public function destroy($id)
+    {
+        $invoicePurchase = InvoicePack::find($id);
+        $details = InvoicePurchaseDetail::where('invoice_pack_id', $id)->get();
+        if (!$invoicePurchase) {
+            return ['status' => 0, 'msg' => 'Invoice tidak ditemukan'];
+        }
+        if ($invoicePurchase->is_final) {
+            return ['status' => 0, 'msg' => 'Invoice sudah final, tidak bisa dihapus'];
+        }
+        DB::beginTransaction();
+        try {
+            foreach ($details as $detail) {
+                $detail->delete();
+            }
+            $invoicePurchase->delete();
+            DB::commit();
+            return ['status' => 1, 'msg' => 'Invoice berhasil dihapus'];
+        } catch (Throwable $e) {
+            DB::rollBack();
+            return ['status' => 0, 'msg' => $e->getMessage()];
+        }
     }
 }

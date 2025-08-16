@@ -318,6 +318,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::get('invoice-sales/edit/{id}', [InvoiceSaleController::class, 'editInvoiceSales']);
         Route::get('invoice-purchase/edit/{id}', [InvoicePurchaseController::class, 'editInvoicePurchase']);
         Route::post('invoice-purchase-update', [InvoicePurchaseController::class, 'updateInvoicePurchase']);
+        Route::delete('delete-invoice-purchase/{id}', [InvoicePurchaseController::class, 'destroy']);
         Route::post('invoice/sales-get-info-reference-finish', [SalesOrderController::class, 'getInfoReferenceFinish'])->name('sales-get-info-reference-finish');
 
         Route::get('kebutuhan-produksi-marked/{data}', [SalesOrderController::class, 'kebutuhanProduksiMarked'])->name('kebutuhan-produksi-marked');

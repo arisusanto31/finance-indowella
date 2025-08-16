@@ -416,7 +416,7 @@ function swalConfirmAndSubmit({ url, data, onSuccess = null,  successText = "Ber
     });
 }
 
-function swalDelete({ url, onSuccess = null, successText = "Berhasil!", confirmText = "Dihapus", cancelText = "Cancel" }) {
+function swalDelete({ url,elem=null, onSuccess = null, successText = "Berhasil!", confirmText = "Dihapus", cancelText = "Cancel" }) {
     Swal.fire({
         title: "Apakah kamu yakin?",
         text: "Data akan dihapus!",
@@ -437,6 +437,9 @@ function swalDelete({ url, onSuccess = null, successText = "Berhasil!", confirmT
             }).then(res => {
                 console.log(res);
                 if (res.status == 1) {
+                    if (elem) {
+                        $(elem).remove();
+                    }
                     return Swal.fire({
                         title: "Sukses!",
                         text: successText,
