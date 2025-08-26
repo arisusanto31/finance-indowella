@@ -120,9 +120,11 @@ trait HasModelSaldoUang
             $lastKartu ? $lastKartu->amount_saldo_factur : 0;
         $this->amount_saldo_factur = $saldo + $this->amount_debet - $this->amount_kredit;
         $this->save();
+        info('recalculate kartu ' . $this->id . ' saldo ' . $this->amount_saldo_factur);
         return [
             'status' => 1,
-            'msg' => 'Saldo berhasil diperbarui'
+            'msg' => 'Saldo berhasil diperbarui',
+            'kartu' => $this
         ];
     }
     public function recalculateListSaldo($kolomGroup = 'invoice_pack_number')
@@ -134,6 +136,7 @@ trait HasModelSaldoUang
         foreach ($kartus as $kartu) {
             $saldo = $saldo + $kartu->amount_debet - $kartu->amount_kredit;
             $kartu->amount_saldo_factur = $saldo;
+            info('recalculate kartu ' . $kartu->id . ' saldo ' . $kartu->amount_saldo_factur);
             $kartu->save();
         }
 
