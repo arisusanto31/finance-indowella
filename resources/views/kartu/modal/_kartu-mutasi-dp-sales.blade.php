@@ -1,12 +1,8 @@
 <div class="modal-header">
-    <h5 class="modal-title" id="exampleModalLabel">Mutasi Kartu DP {{$factur}} - {{$person->name}}
-        <span class="rounded-1 px-2 bg-primary fs-8 text-white">{{getModel(get_class($person))}}</span>
+    <h5 class="modal-title" id="exampleModalLabel">Mutasi Kartu DP {{ $factur }} - {{ $person->name }}
+        <span class="rounded-1 px-2 bg-primary fs-8 text-white">{{ getModel(get_class($person)) }}</span>
     </h5>
-    <button
-        type="button"
-        class="btn-close"
-        data-bs-dismiss="modal"
-        aria-label="Close"></button>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
 <div class="modal-body">
 
@@ -24,33 +20,38 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($data as $row =>$item)
-                <tr>
-                    <td>{{$item->created_at}}</td>
-                    <td>{{$item->description}}</td>
-                    <td id="kolom-journal{{$item->id}}">
-                        @if($item->journal_number)
-                        {{$item->journal_number}}
-                        @else
-                        <button onclick="searchJournal('{{$item->id}}')"><i class="fas fa-search"></i>search link </button>
-                        <div id="container-journal{{$item->id}}"></div>
-                        @endif
-                    </td>
-                    <td>
-                        {{format_price($item->amount_debet)}}
-                    </td>
-                    <td>
-                        {{format_price($item->amount_kredit)}}
-                    </td>
-                    <td>
-                        {{format_price($item->amount_saldo_factur)}}
-                    </td>
-                    <td>
-                        <button class="btn btn-primary btn-sm" onclick="refreshKartuDP('{{$item->id}}')">
-                            <i class="fas fa-refresh"></i>
-                        </button>
-                    </td>
-                </tr>
+                @foreach ($data as $row => $item)
+                    <tr>
+                        <td>{{ $item->created_at }}</td>
+                        <td>{{ $item->description }}</td>
+                        <td id="kolom-journal{{ $item->id }}">
+                            @if ($item->journal_number)
+                                {{ $item->journal_number }}
+                            @else
+                                <button onclick="searchJournal('{{ $item->id }}')"><i
+                                        class="fas fa-search"></i>search link </button>
+                                <div id="container-journal{{ $item->id }}"></div>
+                            @endif
+                        </td>
+                        <td>
+                            {{ format_price($item->amount_debet) }}
+                        </td>
+                        <td>
+                            {{ format_price($item->amount_kredit) }}
+                        </td>
+                        <td>
+                            {{ format_price($item->amount_saldo_factur) }}
+                        </td>
+                        <td>
+                            <button class="btn btn-primary btn-sm" onclick="refreshKartuDP('{{ $item->id }}')">
+                                <i class="fas fa-link"></i>
+                            </button>
+                            <button class="btn btn-primary btn-sm"
+                                onclick = "recalculateKartuDP('{{ $item->id }}')"> <i
+                                    class="fas fa-calculator"></i>
+                            </button>
+                        </td>
+                    </tr>
                 @endforeach
             </tbody>
         </table>
@@ -66,7 +67,7 @@
 <script>
     function refreshKartuDP(id) {
         $.ajax({
-            url: '{{url("admin/kartu/kartu-dp-sales/refresh")}}/' + id,
+            url: '{{ url('admin/kartu/kartu-dp-sales/refresh') }}/' + id,
             method: 'get',
 
             success: function(res) {
@@ -85,9 +86,26 @@
         });
     }
 
+    function recalculateKartuDP(id) {
+        $.ajax({
+            url: '{{ url('admin/kartu/kartu-dp-sales/recalculate') }}/' + id
+            method: 'get',
+            success: function(res) {
+                if (res.status == 1) {
+                    Swal.fire('success', res.msg, 'success');
+                } else {
+                    Swal.fire('error', 'something error : ' + res.msg, 'error');
+                }
+            },
+            error: function(res) {
+                Swal.fire('error', 'something error : ' + res.msg, 'error');
+            }
+        });
+    }
+
     function searchJournal(id) {
         $.ajax({
-            url: '{{route("kartu-dp-sales.search-link-journal")}}',
+            url: '{{ route('kartu-dp-sales.search-link-journal') }}',
             method: 'get',
             success: function(res) {
                 console.log(res);
@@ -119,7 +137,7 @@
 
     function linkJournal(journalId, kartuID) {
         swalConfirmAndSubmit({
-            url: '{{route("jurnal.link-journal")}}',
+            url: '{{ route('jurnal.link-journal') }}',
             data: {
                 _token: "{{ csrf_token() }}",
                 model_id: kartuID,

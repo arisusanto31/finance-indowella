@@ -34,7 +34,7 @@ class KartuDPSalesController extends Controller
     {
         $month = getInput('month') ?? Date('m');
         $year = getInput('year') ?? Date('Y');
-        return KartuDPSales::getSummary($year,$month,'sales_order_number');
+        return KartuDPSales::getSummary($year, $month, 'sales_order_number');
     }
 
     public function refresh($id)
@@ -70,6 +70,16 @@ class KartuDPSalesController extends Controller
         return [
             'status' => 1,
             'msg' => $journals
+        ];
+    }
+
+    public function recalculateKartuDP($id)
+    {
+        $kartuDP = KartuDPSales::find($id);
+        $kartuDP->recalculateSaldo();
+        return [
+            'status' => 1,
+            'msg' => 'Recalculation successful'
         ];
     }
 }

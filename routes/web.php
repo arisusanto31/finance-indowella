@@ -215,6 +215,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('show-detail/{id}', [KartuDPSalesController::class, 'showDetail'])->name('show-detail');
             Route::get('search-link-journal', [KartuDPSalesController::class, 'searchLinkJournal'])->name('search-link-journal');
             Route::get('refresh/{id}', [KartuDPSalesController::class, 'refresh'])->name('refresh');
+            Route::get('recalculate/{id}', [KartuDPSalesController::class, 'recalculateKartuDP'])->name('recalculate');
         });
     });
 
