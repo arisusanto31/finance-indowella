@@ -88,7 +88,7 @@
 
     function recalculateKartuDP(id) {
         $.ajax({
-            url: '{{ url('admin/kartu/kartu-dp-sales/recalculate') }}/' + id
+            url: '{{ url('admin/kartu/kartu-dp-sales/recalculate') }}/' + id,
             method: 'get',
             success: function(res) {
                 if (res.status == 1) {
