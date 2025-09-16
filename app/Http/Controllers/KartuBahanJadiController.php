@@ -302,6 +302,19 @@ class KartuBahanJadiController extends Controller
         ];
     }
 
+
+    public function recalculate(Request $request){
+        $id= $request->input('id');
+        try{
+        $kartu= KartuBahanJadi::find($id);
+        $kartu->recalculateSaldo();
+
+        return ['status' => 1, 'msg' => $kartu];
+        }
+        catch(\Exception $e){
+            return ['status' => 0, 'msg' => $e->getMessage()];
+        }
+    }
     public function mutasiStore(Request $request)
     {
         return KartuBahanJadi::mutationStore($request);
@@ -351,6 +364,7 @@ class KartuBahanJadiController extends Controller
             )->get();
         $view->title = $name . ' [' . $stock->id . ']';
         $view->datas = $dataHistory;
+        $view->model = 'kartu-bahan-jadi';
         return $view;
     }
 }

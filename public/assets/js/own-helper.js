@@ -326,18 +326,7 @@ function count(obj) {
 }
 
 
-function swalInfo(title, text, icon = "info") {
-    Swal.fire({
-        title: title,
-        text: text,
-        icon: icon,
-        allowOutsideClick: false,
-        showLoaderOnConfirm: true,
-        didOpen: () => {
-            $('.swal2-container').css('z-index', 2000);
-        }
-    });
-}
+
 
 function safeBtoa(obj) {
     try {
@@ -367,6 +356,19 @@ function toDigit(number, digit) {
     return number.toString().padStart(digit, '0');
 }
 
+
+function swalInfo(title, text, icon = "info") {
+    Swal.fire({
+        title: title,
+        text: text,
+        icon: icon,
+        allowOutsideClick: false,
+        showLoaderOnConfirm: true,
+        didOpen: () => {
+            $('.swal2-container').css('z-index', 2000);
+        }
+    });
+}
 
 function swalConfirmAndSubmit({ url, data, onSuccess = null,  successText = "Berhasil!", confirmText = "Yes", cancelText = "No" ,onError=null}) {
     Swal.fire({

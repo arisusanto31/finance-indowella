@@ -62,11 +62,12 @@
 
 
 <script>
+  
     function recalculate(id) {
         // Call your API or perform your calculation logic here
         console.log("Recalculating for ID:", id);
         swalConfirmAndSubmit({
-            url: '{{ url('admin/kartu/recalculate-stock') }}',
+            url: '{{ url('admin/kartu/$model/recalculate') }}',
             data: {
                 _token: '{{ csrf_token() }}',
                 id: id

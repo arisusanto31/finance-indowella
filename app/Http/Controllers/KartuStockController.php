@@ -207,6 +207,19 @@ class KartuStockController extends Controller
         return ['status' => 1, 'msg' => $kartu];
     }
 
+    public function recalculate(Request $request){
+        $id= $request->input('id');
+        try{
+        $kartu= KartuStock::find($id);
+        $kartu->recalculateSaldo();
+
+        return ['status' => 1, 'msg' => $kartu];
+        }
+        catch(\Exception $e){
+            return ['status' => 0, 'msg' => $e->getMessage()];
+        }
+    }
+
     public function kartuMutasi($stockid)
     {
         $view = view('kartu.modal._kartu-mutasi-stock');
@@ -239,7 +252,7 @@ class KartuStockController extends Controller
     {
         $view = view('kartu.modal._kartu-history-stock');
         $year = Date('Y');
-        $stock= Stock::find($id);
+        $stock = Stock::find($id);
         $kartuStock = KartuStock::where('stock_id', $id)->whereYear('created_at', $year)
             ->select(
                 DB::raw('count(*) as total'),
@@ -270,8 +283,9 @@ class KartuStockController extends Controller
                 'ks.journal_number',
 
             )->get();
-        $view->title= $stock->name . ' [' . $stock->id . ']';
+        $view->title = $stock->name . ' [' . $stock->id . ']';
         $view->datas = $dataHistory;
+        $view->model = 'kartu-stock';
         return $view;
     }
 }

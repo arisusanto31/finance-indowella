@@ -161,6 +161,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('get-hpp', [KartuStockController::class, 'getHPP'])->name('get-hpp');
             Route::get('kartu-mutasi/{id}', [KartuStockController::class, 'kartuMutasi'])->name('kartu-mutasi');
             Route::get('show-history-stock/{id}', [KartuStockController::class, 'showHistoryStock'])->name('show-history-stock');
+            Route::post('recalculate', [KartuStockController::class, 'recalculate'])->name('recalculate');
         });
 
         Route::prefix('kartu-bdp')->name('kartu-bdp.')->group(function () {
@@ -186,6 +187,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::post('create-mutations', [KartuBahanJadiController::class, 'createMutations'])->name('create-mutations');
             Route::post('refresh-kartu', [KartuBahanJadiController::class, 'refreshKartu'])->name('refresh-kartu');
             Route::get('show-history-stock/{id}', [KartuBahanJadiController::class, 'showHistoryStock'])->name('show-history-stock');
+            Route::post('recalculate', [KartuBahanJadiController::class, 'recalculate'])->name('recalculate');
         });
         Route::prefix('kartu-hutang')->name('kartu-hutang.')->group(function () {
             Route::resource('main', KartuHutangController::class);
