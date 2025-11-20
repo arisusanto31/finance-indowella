@@ -174,6 +174,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('get-mutasi-keluar', [KartuBDPController::class, 'getMutasiKeluar'])->name('get-mutasi-keluar');
             Route::post('create-mutations', [KartuBDPController::class, 'createMutations'])->name('create-mutations');
             Route::post('refresh-kartu', [KartuBDPController::class, 'refreshKartu'])->name('refresh-kartu');
+            Route::get('show-history-stock/{id}', [KartuBDPController::class, 'showHistoryStock'])->name('show-history-stock');
+            Route::post('recalculate', [KartuBDPController::class, 'recalculate'])->name('recalculate');
         });
 
         Route::prefix('kartu-bahan-jadi')->name('kartu-bahan-jadi.')->group(function () {

@@ -223,6 +223,64 @@ class KartuBDPController extends Controller
         ];
     }
 
+     public function showHistoryStock($id)
+    {
+        $productionNumber = getInput('production_number');
+        if (!$productionNumber) {
+            throw new \Exception('Production number is required');
+        }
+        $view = view('kartu.modal._kartu-history-stock');
+        $year = Date('Y');
+        $stock = Stock::find($id);
+        $kartuStock = KartuBDP::where('stock_id', $id)->where('production_number', $productionNumber)->whereYear('created_at', $year)
+            ->select(
+                DB::raw('count(*) as total'),
+                'unit',
+                'custom_stock_name'
+            )
+            ->groupBy('unit')->orderBy(DB::raw('count(*)'), 'desc')->first();
+        $unit = $kartuStock ? $kartuStock->unit : $stock->unit_default;
+        $name = $kartuStock? $kartuStock->custom_stock_name: $stock->name;
+        $dataHistory = KartuBDP::from('kartu_bdps as ks')
+            ->leftJoin('stock_units as u', function ($join) use ($unit) {
+                $join->on('u.unit', '=', DB::raw("'" . $unit . "'"))
+                    ->on('u.stock_id', '=', 'ks.stock_id');
+            })
+            ->leftJoin('journals as j', 'j.id', '=', 'ks.journal_id')
+            ->where('ks.stock_id', $id)
+            ->where('ks.production_number',$productionNumber)
+            ->select(
+                'ks.id',
+                'ks.created_at',
+                'j.description',
+                DB::raw('case when ks.mutasi_qty_backend > 0 then ks.mutasi_qty_backend/u.konversi else 0 end as qty_debet'),
+                DB::raw('case when ks.mutasi_qty_backend < 0 then abs(ks.mutasi_qty_backend)/u.konversi else 0 end as qty_kredit'),
+                DB::raw("'" . $unit . "' as unit"),
+                DB::raw('case when mutasi_rupiah_total >0 then mutasi_rupiah_total else 0 end as rupiah_debet'),
+                DB::raw('case when mutasi_rupiah_total <0 then abs(mutasi_rupiah_total) else 0 end as rupiah_kredit'),
+                DB::raw('saldo_qty_backend/u.konversi as qty_saldo'),
+                'saldo_rupiah_total as rupiah_saldo',
+                'ks.journal_number',
+
+            )->get();
+        $view->title = $name . ' [' . $stock->id . ']';
+        $view->datas = $dataHistory;
+        $view->model = 'kartu-bdp';
+        return $view;
+    }
+
+      public function recalculate(Request $request){
+        $id= $request->input('id');
+        try{
+        $kartu= KartuBDP::find($id);
+        $kartu->recalculateSaldo();
+
+        return ['status' => 1, 'msg' => $kartu];
+        }
+        catch(\Exception $e){
+            return ['status' => 0, 'msg' => $e->getMessage()];
+        }
+    }
     public function mutasiStore(Request $request)
     {
 

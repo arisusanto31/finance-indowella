@@ -281,6 +281,7 @@
                                 <thead class="bg-white text-dark text-center">
                                     <tr>
                                         <th rowspan=2>No</th>
+                                        <th rowspan=2>Aksi </th>
                                         <th rowspan=2>NO SPK</th>
                                         <th rowspan=2>Nama Barang</th>
                                         <th colspan=3>Saldo Awal</th>
@@ -335,6 +336,11 @@
                                     html += `
                                 <tr>
                                 <td>${i+1}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="showDetailOnModal('{{ url('admin/kartu/kartu-bdp/show-history-stock') }}/${item.id}?production_number=${spknumber}','xl')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
                                 <td>${spknumber}</td>
                                 <td>${item.name} [${item.id}]</td>
                                 <td>${formatRupiah(item.saldo_qty_awal/item.konversi)} ${item.unit_default}</td>

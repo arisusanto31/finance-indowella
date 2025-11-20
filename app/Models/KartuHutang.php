@@ -33,7 +33,7 @@ class KartuHutang extends Model
 
     public function reference()
     {
-        return $this->mrophTo();
+        return $this->morphTo();
     }
 
     public function codeGroup()
