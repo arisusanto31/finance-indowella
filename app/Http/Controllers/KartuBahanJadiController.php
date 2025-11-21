@@ -187,7 +187,8 @@ class KartuBahanJadiController extends Controller
                             'is_custom_rupiah' => $isCustomRupiah,
                             'mutasi_rupiah_total' => $rupiahCustom,
                             'date' => $date,
-                            'description' => $desc
+                            'description' => $desc,
+                            'prosen_qty'=>$prosenQty
                         ]), false, $lockManager);
                         if ($stStock['status'] == 0) {
                             throw new \Exception($stStock['msg']);
