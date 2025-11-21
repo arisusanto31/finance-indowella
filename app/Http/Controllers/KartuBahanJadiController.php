@@ -168,6 +168,9 @@ class KartuBahanJadiController extends Controller
                         if($lastCustomCard->mutasi_qty_backend==0){
                             throw new \Exception('mutasi qty backend pada kartu bdp tidak boleh nol untuk stock id ' . $customID . ' pada nomer produksi ' . $spkNumbers[$row]);
                         }
+                        if($lastCustomCard->saldo_qty_backend==0){
+                            throw new \Exception('saldo qty backend pada kartu bdp tidak boleh nol untuk stock id ' . $customID . ' pada nomer produksi ' . $spkNumbers[$row]);
+                        }
                         $qtyCustom = ($lastCustomCard->saldo_qty_backend * $lastCustomCard->mutasi_quantity / $lastCustomCard->mutasi_qty_backend)  * $prosenQty; //ini jadikan unit normal aja
                         info('name: ' . $lastCustomCard->custom_stock_name);
                         $rupiahCustom = $lastCustomCard->saldo_rupiah_total * $prosenQty;
