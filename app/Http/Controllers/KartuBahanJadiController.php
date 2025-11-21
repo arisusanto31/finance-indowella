@@ -162,6 +162,12 @@ class KartuBahanJadiController extends Controller
                     foreach ($stockIDCustom as $customID) {
                         $lastCustomCard = KartuBDP::where('production_number', $spkNumbers[$row])
                             ->where('stock_id', $customID)->orderBy('id', 'desc')->first();
+                        if($lastCustomCard==null){
+                            throw new \Exception('tidak ada saldo stock pada nomer produksi ' . $spkNumbers[$row] . ' untuk stock id ' . $customID);
+                        }
+                        if($lastCustomCard->mutasi_qty_backend==0){
+                            throw new \Exception('mutasi qty backend pada kartu bdp tidak boleh nol untuk stock id ' . $customID . ' pada nomer produksi ' . $spkNumbers[$row]);
+                        }
                         $qtyCustom = ($lastCustomCard->saldo_qty_backend * $lastCustomCard->mutasi_quantity / $lastCustomCard->mutasi_qty_backend)  * $prosenQty; //ini jadikan unit normal aja
                         info('name: ' . $lastCustomCard->custom_stock_name);
                         $rupiahCustom = $lastCustomCard->saldo_rupiah_total * $prosenQty;

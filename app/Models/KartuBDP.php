@@ -258,6 +258,9 @@ class KartuBDP extends Model
             if (!$customStockName) {
                 $customStockName = $stock->name;
             }
+            if($qtybackend==0){
+                throw new \Exception('qty backend tidak boleh nol');
+            }
             $mutasiRupiahUnit = money($mutasiRupiahTotal / $qtybackend);
             $st = self::create(new Request([
                 'stock_id' => $stockid,
