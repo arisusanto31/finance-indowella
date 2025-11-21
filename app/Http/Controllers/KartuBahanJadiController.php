@@ -162,7 +162,7 @@ class KartuBahanJadiController extends Controller
                     foreach ($stockIDCustom as $customID) {
                         $lastCustomCard = KartuBDP::where('production_number', $spkNumbers[$row])
                             ->where('stock_id', $customID)->orderBy('id', 'desc')->first();
-                        throw new \Exception('customID: ' . $lastCustomCard->saldo_qty_backend);
+                        $lastCustomCard->saldo_qty_backend= floatval($lastCustomCard->saldo_qty_backend);
                         if ($lastCustomCard == null) {
                             throw new \Exception('tidak ada saldo stock pada nomer produksi ' . $spkNumbers[$row] . ' untuk stock id ' . $customID);
                         }
