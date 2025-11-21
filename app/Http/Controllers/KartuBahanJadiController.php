@@ -170,7 +170,7 @@ class KartuBahanJadiController extends Controller
                             'is_numeric' => is_numeric($lastCustomCard->saldo_qty_backend),
                             'ord_values' => array_map('ord', str_split($lastCustomCard->saldo_qty_backend)),
                         ];
-                        info('debug saldo qty backend: ' . json_encode($debug));
+                        throw new \Exception('debug saldo qty backend: ' . json_encode($debug));
                         $lastCustomCard->saldo_qty_backend = floatval($lastCustomCard->saldo_qty_backend);
                         if ($lastCustomCard == null) {
                             throw new \Exception('tidak ada saldo stock pada nomer produksi ' . $spkNumbers[$row] . ' untuk stock id ' . $customID);
