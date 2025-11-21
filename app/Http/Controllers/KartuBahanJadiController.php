@@ -124,7 +124,7 @@ class KartuBahanJadiController extends Controller
                     //kalo dari barang dalam proses
                     //nah disini lo lu memungkinkan ada lebih dari satu kartu bdp
 
-                    $stockIDCustom = KartuBDP::where('production_number', $spkNumbers[$row])->pluck('stock_id')->all();
+                    $stockIDCustom = KartuBDP::where('production_number', $spkNumbers[$row])->pluck('stock_id')->unique()->all();
 
                     //kalo bukan custom, berarti harus ada kartu bdp
                     // $lastCard = KartuBDP::where('stock_id', $stock_id)->where('production_number', $spkNumbers[$row])->orderBy('id', 'desc')->first();
