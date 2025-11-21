@@ -162,13 +162,14 @@ class KartuBahanJadiController extends Controller
                     foreach ($stockIDCustom as $customID) {
                         $lastCustomCard = KartuBDP::where('production_number', $spkNumbers[$row])
                             ->where('stock_id', $customID)->orderBy('id', 'desc')->first();
-                        if($lastCustomCard==null){
+                        throw new \Exception('customID: ' . json_encode($lastCustomCard));
+                        if ($lastCustomCard == null) {
                             throw new \Exception('tidak ada saldo stock pada nomer produksi ' . $spkNumbers[$row] . ' untuk stock id ' . $customID);
                         }
-                        if($lastCustomCard->mutasi_qty_backend==0){
+                        if ($lastCustomCard->mutasi_qty_backend == 0) {
                             throw new \Exception('mutasi qty backend pada kartu bdp tidak boleh nol untuk stock id ' . $customID . ' pada nomer produksi ' . $spkNumbers[$row]);
                         }
-                        if($lastCustomCard->saldo_qty_backend==0){
+                        if ($lastCustomCard->saldo_qty_backend == 0) {
                             throw new \Exception('saldo qty backend pada kartu bdp tidak boleh nol untuk stock id ' . $customID . ' pada nomer produksi ' . $spkNumbers[$row]);
                         }
                         $qtyCustom = ($lastCustomCard->saldo_qty_backend * $lastCustomCard->mutasi_quantity / $lastCustomCard->mutasi_qty_backend)  * $prosenQty; //ini jadikan unit normal aja
@@ -191,7 +192,7 @@ class KartuBahanJadiController extends Controller
                             'mutasi_rupiah_total' => $rupiahCustom,
                             'date' => $date,
                             'description' => $desc,
-                            'prosen_qty'=>$prosenQty
+                            'prosen_qty' => $prosenQty
                         ]), false, $lockManager);
                         if ($stStock['status'] == 0) {
                             throw new \Exception($stStock['msg']);
@@ -313,15 +314,15 @@ class KartuBahanJadiController extends Controller
     }
 
 
-    public function recalculate(Request $request){
-        $id= $request->input('id');
-        try{
-        $kartu= KartuBahanJadi::find($id);
-        $kartu->recalculateSaldo();
+    public function recalculate(Request $request)
+    {
+        $id = $request->input('id');
+        try {
+            $kartu = KartuBahanJadi::find($id);
+            $kartu->recalculateSaldo();
 
-        return ['status' => 1, 'msg' => $kartu];
-        }
-        catch(\Exception $e){
+            return ['status' => 1, 'msg' => $kartu];
+        } catch (\Exception $e) {
             return ['status' => 0, 'msg' => $e->getMessage()];
         }
     }
@@ -348,7 +349,7 @@ class KartuBahanJadiController extends Controller
             )
             ->groupBy('unit')->orderBy(DB::raw('count(*)'), 'desc')->first();
         $unit = $kartuStock ? $kartuStock->unit : $stock->unit_default;
-        $name = $kartuStock? $kartuStock->custom_stock_name: $stock->name;
+        $name = $kartuStock ? $kartuStock->custom_stock_name : $stock->name;
 
         $dataHistory = KartuBahanJadi::from('kartu_bahan_jadis as ks')
             ->leftJoin('stock_units as u', function ($join) use ($unit) {
@@ -357,7 +358,7 @@ class KartuBahanJadiController extends Controller
             })
             ->leftJoin('journals as j', 'j.id', '=', 'ks.journal_id')
             ->where('ks.stock_id', $id)
-            ->where('ks.production_number',$productionNumber)
+            ->where('ks.production_number', $productionNumber)
             ->select(
                 'ks.id',
                 'ks.created_at',
