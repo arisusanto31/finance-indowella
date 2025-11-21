@@ -109,7 +109,7 @@ class KartuBDP extends Model
                     ];
                 }
             }
-            info('BDP KARTU -perhitutngan mutasi berhasil') ;
+            info('BDP KARTU -perhitutngan mutasi berhasil');
             if ($flow == 1) {
                 $kartu->mutasi_qty_backend = moneyMul($kartu->mutasi_qty_backend, -1);
                 $kartu->mutasi_quantity = moneyMul($kartu->mutasi_quantity, -1);
@@ -125,7 +125,7 @@ class KartuBDP extends Model
                 return [
                     'status' => 0,
                     'msg' => 'kartu bdp invalid input, saldo minus jika diinput!',
-                    'detail'=>$kartu
+                    'detail' => $kartu
                 ];
             }
             $kartu->save();
@@ -250,6 +250,9 @@ class KartuBDP extends Model
                     'msg' => 'unit tidak ditemukan'
                 ];
             }
+            if ($dataunit->konversi == 0) {
+                throw new \Exception('konversi unit bdp tidak boleh nol . detail:' . json_encode($dataunit));
+            }
             $qtybackend = $qty * $dataunit->konversi;
             $unitbackend = $stock->unit_backend;
             if (!$productionNumber) {
@@ -258,8 +261,8 @@ class KartuBDP extends Model
             if (!$customStockName) {
                 $customStockName = $stock->name;
             }
-            if($qtybackend==0){
-                throw new \Exception('qty backend tidak boleh nol');
+            if ($qtybackend == 0) {
+                throw new \Exception('qtybackend kartu BDP tidak boleh nol');
             }
             $mutasiRupiahUnit = money($mutasiRupiahTotal / $qtybackend);
             $st = self::create(new Request([
@@ -339,8 +342,6 @@ class KartuBDP extends Model
                 $ks->journal_number = $number;
                 $ks->save();
                 $ks->createDetailKartuInvoice();
-
-              
             }
         } catch (Throwable $th) {
             if ($useTransaction)
