@@ -164,6 +164,9 @@ class KartuBDP extends Model
             $desc = $request->input('description');
             $stockid = $request->input('stock_id');
             $qty = format_db($request->input('mutasi_quantity'));
+            if($qty==0){
+                throw new \Exception('qty kartu BDP tidak boleh nol');
+            }
             $unit = $request->input('unit');
             $flow = $request->input('flow');
             $codeGroup = $request->input('code_group');
