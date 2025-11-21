@@ -163,15 +163,15 @@ class KartuBahanJadiController extends Controller
                         $lastCustomCard = KartuBDP::where('production_number', $spkNumbers[$row])
                             ->where('stock_id', $customID)->orderBy('id', 'desc')->first();
 
-                        $debug = [
-                            'raw' => $lastCustomCard->saldo_qty_backend,
-                            'dumped' => var_export($lastCustomCard->saldo_qty_backend, true),
-                            'float' => floatval($lastCustomCard->saldo_qty_backend),
-                            'is_numeric' => is_numeric($lastCustomCard->saldo_qty_backend),
-                            'ord_values' => array_map('ord', str_split($lastCustomCard->saldo_qty_backend)),
-                        ];
-                        throw new \Exception('debug saldo qty backend: ' . json_encode($debug));
-                        $lastCustomCard->saldo_qty_backend = floatval($lastCustomCard->saldo_qty_backend);
+                        // $debug = [
+                        //     'raw' => $lastCustomCard->saldo_qty_backend,
+                        //     'dumped' => var_export($lastCustomCard->saldo_qty_backend, true),
+                        //     'float' => floatval($lastCustomCard->saldo_qty_backend),
+                        //     'is_numeric' => is_numeric($lastCustomCard->saldo_qty_backend),
+                        //     'ord_values' => array_map('ord', str_split($lastCustomCard->saldo_qty_backend)),
+                        // ];
+                        // throw new \Exception('debug saldo qty backend: ' . json_encode($debug));
+                       
                         if ($lastCustomCard == null) {
                             throw new \Exception('tidak ada saldo stock pada nomer produksi ' . $spkNumbers[$row] . ' untuk stock id ' . $customID);
                         }
@@ -179,7 +179,7 @@ class KartuBahanJadiController extends Controller
                             throw new \Exception('mutasi qty backend pada kartu bdp tidak boleh nol untuk stock id ' . $customID . ' pada nomer produksi ' . $spkNumbers[$row]);
                         }
                         if ($lastCustomCard->saldo_qty_backend == 0) {
-                            throw new \Exception('saldo qty backend pada kartu bdp tidak boleh nol untuk stock id ' . $customID . ' pada nomer produksi ' . $spkNumbers[$row]);
+                            throw new \Exception('saldo qty backend pada kartu bdp tidak boleh nol untuk stock id ' . $customID . ' pada nomer produksi ' . $spkNumbers[$row].' detail'.json_encode($lastCustomCard));
                         }
                         $qtyCustom = ($lastCustomCard->saldo_qty_backend * $lastCustomCard->mutasi_quantity / $lastCustomCard->mutasi_qty_backend)  * $prosenQty; //ini jadikan unit normal aja
                         info('name: ' . $lastCustomCard->custom_stock_name);
