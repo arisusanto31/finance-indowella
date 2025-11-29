@@ -20,6 +20,7 @@
                     <th>Amount Debet</th>
                     <th>Amount kredit</th>
                     <th>Saldo </th>
+                    <th>Aksi </th>
                 </tr>
             </thead>
             <tbody>
@@ -44,6 +45,8 @@
                     <td>
                         {{format_price($item->amount_saldo_factur)}}
                     </td>
+                    <td>
+                        <button title="refresh" onclick="refresh('{{$item->id}}')"><i class="fas fa-refresh"></i></button>
                 </tr>
                 @endforeach
             </tbody>
@@ -85,6 +88,27 @@
             error: function(res) {
                 console.log(res);
                 Swal.fire('ops', 'something error ' + res.msg, 'error');
+            }
+        });
+    }
+
+
+     function refresh(id) {
+        $.ajax({
+            url: '{{url("admin/kartu/kartu-hutang/refresh")}}/' + id,
+            method: 'get',
+            success: function(res) {
+                console.log(res);
+                if (res.status == 1) {
+                    Swal.fire('success', 'berhasil refresh', 'success');
+
+                } else {
+                    Swal.fire('ops', 'something error ' + res.msg, 'error');
+                }
+            },
+            error: function(res) {
+                console.log(res);
+                Swal.fire("opps", "something error", 'error');
             }
         });
     }

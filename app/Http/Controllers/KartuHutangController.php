@@ -34,7 +34,7 @@ class KartuHutangController extends Controller
     {
         $month = getInput('month') ?? Date('m');
         $year = getInput('year') ?? Date('Y');
-  
+
         return KartuHutang::getSummary($year, $month, 'invoice_pack_number');
     }
 
@@ -70,6 +70,20 @@ class KartuHutangController extends Controller
         return [
             'status' => 1,
             'msg' => $journals
+        ];
+    }
+
+    public function refresh($id)
+    {
+        $kartu = KartuHutang::find($id);
+        $detail = $kartu->createDetailKartuInvoice();
+        if ($detail['status'] == 0) {
+            return $detail;
+        }
+        $kartu->recalculateSaldo();
+        return [
+            'status' => 1,
+            'msg' => $kartu
         ];
     }
 }

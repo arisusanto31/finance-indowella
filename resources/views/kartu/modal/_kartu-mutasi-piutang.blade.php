@@ -46,7 +46,7 @@
                         {{format_price($item->amount_saldo_factur)}}
                     </td>
                     <td>
-                        <button onclick="refresh('{{$item->id}}')"><i class="fas fa-refresh"></i></button>
+                        <button title="refresh" onclick="refresh('{{$item->id}}')"><i class="fas fa-refresh"></i></button>
                     </td>
                 </tr>
                 @endforeach
