@@ -396,6 +396,21 @@ class KartuPiutang extends Model
     }
 
 
+    public function refreshSaldo()
+    {
+        $last = KartuPiutang::where('person_id', $this->person_id)->where('person_type', $this->person_type)
+            ->where('invoice_pack_number', $this->invoice_pack_number)->where('index_date', '<', $this->index_date)->orderBy('index_date', 'desc')->first();
+        $saldoFactur = $last ? $last->amount_saldo_factur : 0;
+        $this->amount_saldo_factur = $saldoFactur + $this->amount_debet - $this->amount_kredit;
+        $lastSaldoPerson = KartuPiutang::where('person_id', $this->person_id)->where('person_type', $this->person_type)
+            ->where('index_date', '<', $this->index_date)->orderBy('index_date', 'desc')->first();
+        $saldoPerson = $lastSaldoPerson ? $lastSaldoPerson->amount_saldo_person : 0;
+        $this->amount_saldo_person = $saldoPerson + $this->amount_debet - $this->amount_kredit;
+        $this->save();
+        return $this;
+    }
+
+
     public function recalculateSaldo()
     {
         $kartus = KartuPiutang::where('person_id', $this->person_id)->where('person_type', $this->person_type)

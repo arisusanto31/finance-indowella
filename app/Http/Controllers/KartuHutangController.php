@@ -80,6 +80,7 @@ class KartuHutangController extends Controller
         if ($detail['status'] == 0) {
             return $detail;
         }
+        $kartu->refreshSaldo();
         $kartu->recalculateSaldo();
         return [
             'status' => 1,

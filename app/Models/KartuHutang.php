@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Throwable;
 
-use function PHPUnit\Framework\throwException;
+
 
 class KartuHutang extends Model
 {
@@ -393,6 +393,19 @@ class KartuHutang extends Model
                 'msg' => $th->getMessage()
             ];
         }
+    }
+
+    public function refreshSaldo(){
+         $last=KartuHutang::where('person_id', $this->person_id)->where('person_type', $this->person_type)
+            ->where('invoice_pack_number', $this->invoice_pack_number)->where('index_date', '<', $this->index_date)->orderBy('index_date','desc')->first();
+        $saldoFactur= $last ? $last->amount_saldo_factur : 0;
+        $this->amount_saldo_factur=$saldoFactur + $this->amount_debet - $this->amount_kredit;
+        $lastSaldoPerson = KartuHutang::where('person_id',$this->person_id)->where('person_type',$this->person_type)
+            ->where('index_date', '<', $this->index_date)->orderBy('index_date','desc')->first();
+        $saldoPerson= $lastSaldoPerson ? $lastSaldoPerson->amount_saldo_person : 0;
+        $this->amount_saldo_person=$saldoPerson + $this->amount_debet - $this->amount_kredit;
+        $this->save();
+        return $this;
     }
 
 
