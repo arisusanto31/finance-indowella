@@ -76,6 +76,10 @@
   z-index: 2000 !important;
 }
 
+div.fixed{
+  position:fixed;
+}
+
 .fixed-center {
   position: fixed;
   left: 50%;
@@ -119,4 +123,24 @@
 
 .pull-left {
   float: left;
+}
+
+.progress-modern {
+  height: 18px;
+  background: #f2f4f8;
+  border-radius: 999px;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05);
+}
+
+.progress-modern .progress-bar {
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-image: linear-gradient(90deg, #ff7b54, #ffb26b);
+  border-radius: 999px;
+  transition: width 0.4s ease;
 }

@@ -16,7 +16,14 @@ class ChartAccountController extends Controller
     public function index()
     {
         $view = view('master.chart-account');
+        $charts = ChartAccount::withAlias()->get();
 
+        foreach ($charts as $ca) {
+            if ($ca->alias_id == null) {
+                //belum ada alias. langsug create kan
+                $ca->makeAlias();
+            }
+        }
         return $view;
     }
 
@@ -33,10 +40,10 @@ class ChartAccountController extends Controller
         }
         $charts = ChartAccount::aktif()->child()->withAlias();
         foreach ($searchs as $search) {
-            $charts = $charts->whereRaw('coalesce(ca.name,chart_accounts.name) like?', ['%'.$search.'%']);
+            $charts = $charts->whereRaw('coalesce(ca.name,chart_accounts.name) like?', ['%' . $search . '%']);
         }
         $charts = $charts->select(DB::raw('chart_accounts.code_group as id'), DB::raw('coalesce(ca.name,chart_accounts.name) as text'))->get();
-          return [
+        return [
             'results' => $charts
         ];
     }
@@ -66,7 +73,7 @@ class ChartAccountController extends Controller
     public function getChartAccounts()
     {
         $charts = ChartAccount::aktif()->orderBy('code_group')->get()->groupBy('parent_id');
-        $alias = ChartAccountAlias::pluck('name', 'code_group')->all();
+        $alias = ChartAccountAlias::get()->keyBy('code_group')->all();
         return [
             'status' => 1,
             'msg' => $charts,
@@ -361,6 +368,17 @@ class ChartAccountController extends Controller
         return [
             'status' => 1,
             'msg' => $chart
+        ];
+    }
+
+    public function deleteAccount($id)
+    {
+        $chartAlias = ChartAccountAlias::find($id);
+        $chartAlias->is_deleted = 1;
+        $chartAlias->save();
+        return [
+            'status' => 1,
+            'msg' => $chartAlias
         ];
     }
 }

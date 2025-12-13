@@ -38,7 +38,14 @@ class ChartAccount extends Model
 
     public function scopeAktif($q)
     {
-        $q->where('chart_accounts.is_deleted', null);
+        $caids = ChartAccount::join('chart_account_aliases as ca', function ($join) {
+            $join->on('ca.code_group', '=', 'chart_accounts.code_group')
+                ->on('ca.book_journal_id', '=', DB::raw(bookID()));
+        })->where('chart_accounts.is_deleted', null)
+            ->where('ca.is_deleted', false)
+            ->pluck('chart_accounts.id')->toArray();
+
+        $q->whereIn('chart_accounts.id', $caids);
     }
 
     public function aktifOn($q, $date)
@@ -56,8 +63,8 @@ class ChartAccount extends Model
 
     public static function createOrUpdate(Request $request)
     {
-        try {
 
+        try {
             $id = $request->input('id');
             $allAccounts = ['Aset', 'Kewajiban', 'Ekuitas', 'Pendapatan', 'Beban'];
             $chart = $id ? ChartAccount::find($id) : new ChartAccount;
@@ -77,6 +84,7 @@ class ChartAccount extends Model
             }
             $chart->save();
             $chart->updateLevel();
+            $chart->makeAlias();
             return [
                 'status' => 1,
                 'msg' => $chart
@@ -89,6 +97,24 @@ class ChartAccount extends Model
         }
     }
 
+    public function makeAlias()
+    {
+        $alias = ChartAccountAlias::where('chart_account_id', $this->id)->where('book_journal_id', bookID())->first();
+        if (!$alias) {
+            $alias = new ChartAccountAlias();
+            $alias->book_journal_id = bookID();
+            $alias->chart_account_id = $this->id;
+            $alias->code_group = $this->code_group;
+            $alias->name = $this->name;
+            $alias->is_child = $this->is_child;
+            $alias->level = $this->level;
+            $alias->reference_model = $this->reference_model;
+            $alias->account_type = $this->account_type;
+            $alias->save();
+        }
+        return $alias;
+    }
+
     public function scopeWithAlias($q)
     {
         $q->leftJoin('chart_account_aliases as ca', function ($join) {
@@ -98,7 +124,7 @@ class ChartAccount extends Model
             $q->where('ca.book_journal_id', bookID())
                 ->orWhereNull('ca.id');
         })
-            ->select('chart_accounts.*', DB::raw('coalesce(ca.name,chart_accounts.name) as alias_name'));
+            ->select('chart_accounts.*', DB::raw('coalesce(ca.name,chart_accounts.name) as alias_name'), 'ca.id as alias_id');
         return $q;
     }
 
@@ -192,20 +218,25 @@ class ChartAccount extends Model
         if ($tokoid == null) {
             //langsung ambil dari saldo terakhir yang tertulis di database
             $theLastDate = createCarbon($date)->format('ymdHis') . '00';
-
             $subquery = Journal::where('index_date', '<', (float)$theLastDate)->whereRaw('CONVERT(code_group, UNSIGNED) > ?', [400000])
-                ->select('code_group', DB::raw('MAX(index_date) as max_index_date'))
+                ->select('code_group as subquery_code_group', DB::raw('MAX(index_date) as max_index_date'))
                 ->groupBy('code_group');
-
-            $saldo = Journal::from('journals as j')
+            $thejournal = Journal::from('journals as j')
                 ->joinSub($subquery, 'subquery', function ($join) {
-                    $join->on('j.code_group', '=', 'subquery.code_group')
+                    $join->on('j.code_group', '=', 'subquery.subquery_code_group')
                         ->on('j.index_date', '=', 'subquery.max_index_date');
-                })->rightJoin('chart_accounts as ca', 'ca.id', '=', 'j.chart_account_id')
-                ->where('ca.code_group', '>=', 400000)->where('ca.is_child',1)
+                });
+            $saldo =
+                ChartAccountAlias::from('chart_account_aliases as ca')
+                ->leftJoinSub($thejournal, 'j', function ($join) {
+                    $join->on('j.code_group', '=', 'ca.code_group');
+                })
+                ->where('ca.code_group', '>=', 400000)
+                ->where('ca.is_child', 1)
                 ->select(
                     'ca.name',
                     'ca.id',
+                    'ca.is_deleted',
                     'ca.code_group',
                     DB::raw('coalesce(j.amount_saldo,0) as saldo_akhir'),
                     'ca.is_child',
@@ -216,11 +247,12 @@ class ChartAccount extends Model
                 ->map(function ($val) use ($saldo) {
                     if ($val->is_child == 0) {
                         $code = Journal::getPrimaryCode($val->code_group);
-                        $idchilds = ChartAccount::where('code_group', 'like', $code . '%')->pluck('id');
-                        $val->saldo_akhir = $saldo->whereIn('id', $idchilds)->sum('saldo_akhir');
+                        $idchilds = ChartAccountAlias::where('code_group', 'like', $code . '%')->pluck('code_group');
+                        $val->saldo_akhir = $saldo->whereIn('code_group', $idchilds)->sum('saldo_akhir');
                     }
                     return $val;
                 });
+
             return $revisiSaldo;
         } else {
             $indexAwal = createCarbon($date)->format('ym01His') . '00';
@@ -229,25 +261,27 @@ class ChartAccount extends Model
             $journals = Journal::from('journals as j')->where('j.code_group', '>', 400000)
                 ->where('j.toko_id', $tokoid)->whereBetween('j.index_date', [$indexAwal, $indexAkhir]);
 
-            $saldo = ChartAccount::from('chart_accounts as ca')->where('ca.code_group', '>', 400000)
-                ->where('ca.is_child',1)->leftJoinSub($journals, 'j', function ($join) {
-                $join->on('j.code_group', '=', 'ca.code_group');
-            })->select(
-                DB::raw('coalesce(sum(j.amount_kredit- j.amount_debet),0) as saldo_akhir'),
-                'ca.code_group',
-                'ca.name',
-                'ca.id',
-                'ca.is_child',
-            )->groupBy('code_group')->get();
+            $saldo = ChartAccountAlias::from('chart_account_aliases as ca')->where('ca.code_group', '>', 400000)
+                ->where('ca.is_deleted', false)
+                ->where('ca.is_child', 1)->leftJoinSub($journals, 'j', function ($join) {
+                    $join->on('j.code_group', '=', 'ca.code_group');
+                })->select(
+                    DB::raw('coalesce(sum(j.amount_kredit- j.amount_debet),0) as saldo_akhir'),
+                    'ca.code_group',
+                    'ca.name',
+                    'ca.id',
+                    'ca.is_child',
+                )->groupBy('code_group')->get();
             $revisiSaldo = collect($saldo)
                 ->map(function ($val) use ($saldo) {
                     if ($val->is_child == 0) {
                         $code = Journal::getPrimaryCode($val->code_group);
-                        $idchilds = ChartAccount::where('code_group', 'like', $code . '%')->pluck('id');
-                        $val->saldo_akhir = $saldo->whereIn('id', $idchilds)->sum('saldo_akhir');
+                        $idchilds = ChartAccountAlias::where('code_group', 'like', $code . '%')->pluck('code_group');
+                        $val->saldo_akhir = $saldo->whereIn('code_group', $idchilds)->sum('saldo_akhir');
                     }
                     return $val;
                 });
+            return [];
             return $revisiSaldo;
         }
     }
@@ -259,14 +293,19 @@ class ChartAccount extends Model
             $theLastDate = createCarbon($date)->format('ymdHis') . '00';
 
             $subquery = Journal::where('index_date', '<', (float)$theLastDate)->whereRaw('CONVERT(code_group, UNSIGNED) < ?', [400000])
-                ->select('code_group', DB::raw('MAX(index_date) as max_index_date'))
+                ->select('code_group as scode_group', DB::raw('MAX(index_date) as max_index_date'))
                 ->groupBy('code_group');
 
-            $saldo = Journal::from('journals as j')
+            $thejournal = Journal::from('journals as j')
                 ->joinSub($subquery, 'subquery', function ($join) {
-                    $join->on('j.code_group', '=', 'subquery.code_group')
+                    $join->on('j.code_group', '=', 'subquery.scode_group')
                         ->on('j.index_date', '=', 'subquery.max_index_date');
-                })->rightJoin('chart_accounts as ca', 'ca.id', '=', 'j.chart_account_id')
+                });
+
+            $saldo =  ChartAccountAlias::from('chart_account_aliases as ca')
+                ->leftJoinSub($thejournal, 'j', function ($join) {
+                    $join->on('j.code_group', '=', 'ca.code_group');
+                })
                 ->where('ca.code_group', '<', 400000)
                 ->select(
                     'ca.name',
@@ -281,10 +320,10 @@ class ChartAccount extends Model
 
             $revisiSaldo = collect($saldo)
                 ->map(function ($val) use ($saldo) {
-                    if ($val->is_child == 0) {
+                    if ($val->is_child == 0 && $val->level == 1) {
                         $code = Journal::getPrimaryCode($val->code_group);
-                        $idchilds = ChartAccount::where('code_group', 'like', $code . '%')->pluck('id');
-                        $val->saldo = round($saldo->whereIn('id', $idchilds)->sum('saldo'), 2);
+                        $idchilds = ChartAccountAlias::where('code_group', 'like', $code . '%')->pluck('code_group');
+                        $val->saldo = round($saldo->whereIn('code_group', $idchilds)->sum('saldo'), 2);
                     }
                     return $val;
                 })
@@ -312,14 +351,19 @@ class ChartAccount extends Model
         $firstdate = $date->format('ymdHis') . '00';
         $lastdate = $date->addMonth()->format('ymdHis') . '00';
         $subquery = Journal::where('index_date', '<', (float)$firstdate)
-            ->select('code_group', DB::raw('MAX(index_date) as max_index_date'))
+            ->select('code_group as scode_group', DB::raw('MAX(index_date) as max_index_date'))
             ->groupBy('code_group');
 
-        $saldo = Journal::from('journals as j')
+        $thejournal = Journal::from('journals as j')
             ->joinSub($subquery, 'subquery', function ($join) {
-                $join->on('j.code_group', '=', 'subquery.code_group')
+                $join->on('j.code_group', '=', 'subquery.scode_group')
                     ->on('j.index_date', '=', 'subquery.max_index_date');
-            })->rightJoin('chart_accounts as ca', 'ca.id', '=', 'j.chart_account_id')
+            });
+
+        $saldo =  ChartAccountAlias::from('chart_account_aliases as ca')
+            ->leftJoinSub($thejournal, 'j', function ($join) {
+                $join->on('j.code_group', '=', 'ca.code_group');
+            })
             ->select(
                 'ca.name',
                 'ca.id',
@@ -328,28 +372,31 @@ class ChartAccount extends Model
                 'ca.is_child',
             )
             ->orderBy('ca.code_group')->get();
-
-
         $saldoAwal = collect($saldo)
             ->map(function ($val) use ($saldo) {
                 if ($val->is_child == 0) {
                     $code = Journal::getPrimaryCode($val->code_group);
-                    $idchilds = ChartAccount::where('code_group', 'like', $code . '%')->pluck('id');
-                    $val->saldo_akhir = $saldo->whereIn('id', $idchilds)->sum('saldo_akhir');
+                    $idchilds = ChartAccountAlias::where('code_group', 'like', $code . '%')->pluck('code_group');
+                    $val->saldo_akhir = $saldo->whereIn('code_group', $idchilds)->sum('saldo_akhir');
                 }
                 return $val;
-            })->keyBy('id');
+            })->keyBy('code_group');
 
         $subquery = Journal::from('journals as j')
             ->where('index_date', '<', (float)$lastdate)
-            ->select('code_group', DB::raw('MAX(index_date) as max_index_date'))
+            ->select('code_group as scode_group', DB::raw('MAX(index_date) as max_index_date'))
             ->groupBy('code_group');
 
-        $saldo_akhir = Journal::from('journals as j')
+        $thejournal = Journal::from('journals as j')
             ->joinSub($subquery, 'subquery', function ($join) {
-                $join->on('j.code_group', '=', 'subquery.code_group')
+                $join->on('j.code_group', '=', 'subquery.scode_group')
                     ->on('j.index_date', '=', 'subquery.max_index_date');
-            })->rightJoin('chart_accounts as ca', 'ca.id', '=', 'j.chart_account_id')
+            });
+
+        $saldo_akhir =  ChartAccountAlias::from('chart_account_aliases as ca')
+            ->leftJoinSub($thejournal, 'j', function ($join) {
+                $join->on('j.code_group', '=', 'ca.code_group');
+            })
             ->select(
                 'ca.name',
                 'ca.id',
@@ -363,18 +410,17 @@ class ChartAccount extends Model
             ->map(function ($val) use ($saldo_akhir) {
                 if ($val->is_child == 0) {
                     $code = Journal::getPrimaryCode($val->code_group);
-                    $idchilds = ChartAccount::where('code_group', 'like', $code . '%')->pluck('id');
-                    $val->saldo_akhir = round($saldo_akhir->whereIn('id', $idchilds)->sum('saldo_akhir'), 2);
+                    $idchilds = ChartAccountAlias::where('code_group', 'like', $code . '%')->pluck('code_group');
+                    $val->saldo_akhir = round($saldo_akhir->whereIn('code_group', $idchilds)->sum('saldo_akhir'), 2);
                 }
                 return $val;
-            })->keyBy('id');
+            })->keyBy('code_group');
 
 
-        $fixdatas = ChartAccount::select('name', 'account_type', 'id', 'code_group', 'level')->orderBy('code_group')->get()
+        $fixdatas = ChartAccountAlias::where('is_deleted', false)->select('name', 'account_type', 'id', 'code_group', 'level')->orderBy('code_group')->get()
             ->map(function ($val) use ($saldoAkhir, $saldoAwal) {
-
-                $val['saldo_awal'] = array_key_exists($val->id, $saldoAwal->all()) ? money($saldoAwal[$val->id]->saldo_akhir) : 0;
-                $val['saldo_akhir'] = array_key_exists($val->id, $saldoAkhir->all()) ? money($saldoAkhir[$val->id]->saldo_akhir) : 0;
+                $val['saldo_awal'] = array_key_exists($val->code_group, $saldoAwal->all()) ? money($saldoAwal[$val->code_group]->saldo_akhir) : 0;
+                $val['saldo_akhir'] = array_key_exists($val->code_group, $saldoAkhir->all()) ? money($saldoAkhir[$val->code_group]->saldo_akhir) : 0;
                 return $val;
             });
         return [
@@ -393,9 +439,12 @@ class ChartAccount extends Model
         $date = createCarbon($year . '-' . $month . '-01 00:00:00');
         $firstdate = $date->format('ymdHis') . '00';
         $lastdate = $date->addMonth()->format('ymdHis') . '00';
-        $chartAccount = ChartAccount::select('id', 'code_group', 'is_child', 'level')->get();
-        $mutasi_ = Journal::from('journals as j')->whereBetween('j.index_date', [(float)$firstdate, (float)$lastdate])
-            ->rightJoin('chart_accounts as c', 'c.id', '=', 'j.chart_account_id')
+        $chartAccount = ChartAccountAlias::select('id', 'code_group', 'is_child', 'level')->get();
+        $subquery = Journal::from('journals as j')->whereBetween('j.index_date', [(float)$firstdate, (float)$lastdate]);
+        $mutasi_= ChartAccountAlias::from('chart_account_aliases as c')
+            ->leftJoinSub($subquery, 'j', function ($join) {
+                $join->on('j.code_group', '=', 'c.code_group');
+            })
             ->select(
                 DB::raw('sum(j.amount_kredit) as total_kredit'),
                 DB::raw('sum(j.amount_debet) as total_debet'),
@@ -410,14 +459,14 @@ class ChartAccount extends Model
 
             if ($data->is_child == 0) {
                 $code = Journal::getPrimaryCode($data->code_group);
-                $idchilds = ChartAccount::where('code_group', 'like', $code . '%')->pluck('id');
+                $idchilds = ChartAccountAlias::where('code_group', 'like', $code . '%')->pluck('code_group');
             } else {
-                $idchilds = [$data->id];
+                $idchilds = [$data->code_group];
             }
-            $newdata['id'] = $data->id;
-            $newdata['total_debet'] = money(round($mutasi_->whereIn('id', $idchilds)->sum('total_debet'), 2));
-            $newdata['total_kredit'] = money(round($mutasi_->whereIn('id', $idchilds)->sum('total_kredit'), 2));
-            $fixMutasi[$data->id] = $newdata;
+            $newdata['code_group'] = $data->code_group;
+            $newdata['total_debet'] = money(round($mutasi_->whereIn('code_group', $idchilds)->sum('total_debet'), 2));
+            $newdata['total_kredit'] = money(round($mutasi_->whereIn('code_group', $idchilds)->sum('total_kredit'), 2));
+            $fixMutasi[$data->code_group] = $newdata;
         }
 
 

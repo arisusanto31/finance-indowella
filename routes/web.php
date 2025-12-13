@@ -176,6 +176,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::post('refresh-kartu', [KartuBDPController::class, 'refreshKartu'])->name('refresh-kartu');
             Route::get('show-history-stock/{id}', [KartuBDPController::class, 'showHistoryStock'])->name('show-history-stock');
             Route::post('recalculate', [KartuBDPController::class, 'recalculate'])->name('recalculate');
+            Route::post('delete-mutation', [KartuBDPController::class, 'deleteMutation'])->name('delete-mutation');
         });
 
         Route::prefix('kartu-bahan-jadi')->name('kartu-bahan-jadi.')->group(function () {
@@ -190,6 +191,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::post('refresh-kartu', [KartuBahanJadiController::class, 'refreshKartu'])->name('refresh-kartu');
             Route::get('show-history-stock/{id}', [KartuBahanJadiController::class, 'showHistoryStock'])->name('show-history-stock');
             Route::post('recalculate', [KartuBahanJadiController::class, 'recalculate'])->name('recalculate');
+            Route::post('delete-mutation', [KartuBahanJadiController::class, 'deleteMutation'])->name('delete-mutation');
         });
         Route::prefix('kartu-hutang')->name('kartu-hutang.')->group(function () {
             Route::resource('main', KartuHutangController::class);
@@ -235,6 +237,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('/get-code-group/{id}', [ChartAccountController::class, 'getCodeGroupAccount']);
             Route::get('/master-suplier', [SupplierController::class, 'master.supplier']);
             Route::post('/make-alias', [ChartAccountController::class, 'makeAlias']);
+            Route::delete('/delete-account/{id}', [ChartAccountController::class, 'deleteAccount'])->name('delete');
             Route::get('/category-json', function () {
                 return \App\Models\StockCategory::select('id', 'name as text')->get();
             });
@@ -252,6 +255,9 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::resource('main', TokoController::class)->except(['show']);
             Route::get('/get-item', [TokoController::class, 'getItem'])->name('get-item');
             Route::post('{id}/restore', [TokoController::class, 'restore'])->name('restore');
+            Route::get('/get-parent-option', [TokoController::class, 'getParentOption'])->name('get-parent-option');
+            Route::post('/make-link-parent', [TokoController::class, 'makeLinkParent'])->name('make-link-parent');
+            Route::post('/change-code-kas', [TokoController::class, 'changeCodeKas'])->name('change-code-kas');
         });
 
 
@@ -319,6 +325,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::post('sales-make-final', [SalesOrderController::class, 'makeFinal'])->name('sales-make-final');
         Route::post('sales-cancel-final', [SalesOrderController::class, 'cancelFinal'])->name('sales-cancel-final');
         Route::post('sales-mark', [SalesOrderController::class, 'mark'])->name('sales-mark');
+        Route::post('sales-process-dagang', [SalesOrderController::class, 'processDagang'])->name('sales-process-dagang');
 
         Route::get('invoice-sales-refresh/{id}', [InvoiceSaleController::class, 'refresh'])->name('invoice-sales-refresh');
         Route::get('invoice-sales/edit/{id}', [InvoiceSaleController::class, 'editInvoiceSales']);

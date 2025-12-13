@@ -112,6 +112,7 @@
                                                 <th>Rp/Unit</th>
                                                 <th>Total</th>
                                                 <th>Nomer Jurnal</th>
+                                                <th>Aksi </th>
                                             </tr>
 
                                         </thead>
@@ -140,6 +141,7 @@
                                                 <th>Rp/Unit</th>
                                                 <th>Total</th>
                                                 <th>Nomer Jurnal</th>
+                                                <th>Aksi </th>
                                             </tr>
 
                                         </thead>
@@ -447,6 +449,7 @@
                                 <td>${formatRupiah(item.mutasi_rupiah_on_unit*(item.mutasi_qty_backend/item.mutasi_quantity))}</td>
                                 <td>${formatRupiah(item.mutasi_rupiah_total)}</td>
                                 <td>${(!item.journal_number?'<span> belum ada jurnal</span> <button onclick="openLinkJournal('+item.id+')"> <i class="fas fa-link"></i> jurnal</button>':item.journal_number)}</td>
+                                <td><button class="btn btn-sm btn-danger" onclick="deleteMutation(${item.id})"> <i class="fas fa-trash"></i></button></td>
                                 </tr>`;
                             });
                             $('#body-mutasi-masuk').html(html);
@@ -522,6 +525,7 @@
                                 <td>${formatRupiah(item.mutasi_rupiah_on_unit*(item.mutasi_qty_backend/item.mutasi_quantity))}</td>
                                 <td>${formatRupiah(item.mutasi_rupiah_total)}</td>
                                 <td>${(!item.journal_number?'<span> belum ada jurnal</span> <button onclick="openLinkJournal('+item.id+')"> <i class="fas fa-link"></i> jurnal</button>':item.journal_number)}</td>
+                                <td><button class="btn btn-sm btn-danger" onclick="deleteMutation(${item.id})"> <i class="fas fa-trash"></i></button></td>
                                 </tr>`;
                             });
                             $('#body-mutasi-keluar').html(html);
@@ -531,6 +535,25 @@
                     },
                     error: function(err) {
                         console.log(err);
+                    }
+                });
+            }
+
+            function deleteMutation(id){
+                swalConfirmAndSubmit({
+                    url:'{{ route('kartu-bahan-jadi.delete-mutation') }}',
+                    data:{
+                        _token:'{{ csrf_token() }}',
+                        id:id
+                    },
+                    onSuccess:function(res){
+                        if(page=="kartu"){
+                            getSummary();
+                        }else if(page=="masuk"){
+                            getMutasiMasuk();
+                        }else{
+                            getMutasiKeluar();
+                        }
                     }
                 });
             }

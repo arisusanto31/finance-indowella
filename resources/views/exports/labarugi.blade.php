@@ -86,9 +86,7 @@
     @foreach (collect($data['all_charts'])->where('code_group', '>', 600000)->where('code_group', '<', 700000) as $chart)
         <tr>
             <td>{{ $chart->code_group }}</td>
-
             <td>{{ $chart->alias_name }}</td>
-
             <?php $t = 0; ?>
             @foreach ($data['year_month'] as $yearmonth)
                 <?php

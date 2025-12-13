@@ -171,7 +171,7 @@ class KartuBahanJadiController extends Controller
                         //     'ord_values' => array_map('ord', str_split($lastCustomCard->saldo_qty_backend)),
                         // ];
                         // throw new \Exception('debug saldo qty backend: ' . json_encode($debug));
-                       
+
                         if ($lastCustomCard == null) {
                             throw new \Exception('tidak ada saldo stock pada nomer produksi ' . $spkNumbers[$row] . ' untuk stock id ' . $customID);
                         }
@@ -179,7 +179,7 @@ class KartuBahanJadiController extends Controller
                             throw new \Exception('mutasi qty backend pada kartu bdp tidak boleh nol untuk stock id ' . $customID . ' pada nomer produksi ' . $spkNumbers[$row]);
                         }
                         if ($lastCustomCard->saldo_qty_backend == 0) {
-                            throw new \Exception('saldo qty backend pada kartu bdp tidak boleh nol untuk stock id ' . $customID . ' pada nomer produksi ' . $spkNumbers[$row].' detail'.json_encode($lastCustomCard));
+                            throw new \Exception('saldo qty backend pada kartu bdp tidak boleh nol untuk stock id ' . $customID . ' pada nomer produksi ' . $spkNumbers[$row] . ' detail' . json_encode($lastCustomCard));
                         }
                         $qtyCustom = ($lastCustomCard->saldo_qty_backend * $lastCustomCard->mutasi_quantity / $lastCustomCard->mutasi_qty_backend)  * $prosenQty; //ini jadikan unit normal aja
                         info('name: ' . $lastCustomCard->custom_stock_name);
@@ -386,5 +386,30 @@ class KartuBahanJadiController extends Controller
         $view->datas = $dataHistory;
         $view->model = 'kartu-bahan-jadi';
         return $view;
+    }
+
+    public function deleteMutation(Request $request)
+    {
+        $id = $request->input('id');
+        $kartu = KartuBahanJadi::find($id);
+        if (!$kartu) {
+            return ['status' => 0, 'msg' => 'Mutasi tidak ditemukan'];
+        }
+        if ($kartu->journal_id) {
+            return ['status' => 0, 'msg' => 'Mutasi sudah memiliki jurnal, hapus dari jurnalnya'];
+        }
+        $blokirJurnal = false;
+        $details = $kartu->getDetailKartus();
+        foreach ($details as $detail) {
+            if ($detail->journal_id || $detail->journal_number) {
+                $blokirJurnal = true;
+                break;
+            }
+        }
+        if ($blokirJurnal) {
+            return ['status' => 0, 'msg' => 'Mutasi memiliki jurnal, hapus dari jurnalnya'];
+        }
+        return $kartu->makeDelete();
+
     }
 }

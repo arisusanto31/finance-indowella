@@ -17,6 +17,9 @@ class DetailKartuInvoice extends Model
         'kartu_type',
         'kartu_id',
         'journal_id',
+        'journal_number',
+        'account_code_group',
+        'account_name',
         'amount_journal',
         'sales_order_id',
         'sales_order_number',
@@ -40,6 +43,7 @@ class DetailKartuInvoice extends Model
     public static function storeData(Request $request)
     {
         try {
+
             $kartuType = $request->input('kartu_type');
             $kartuId = $request->input('kartu_id');
             $invoicePackID = $request->input('invoice_pack_id');
@@ -61,6 +65,7 @@ class DetailKartuInvoice extends Model
                 }
             } else {
                 //harus ada journal nya berati
+
                 $journal = Journal::find($request->input('journal_id'));
                 if (!$journal) {
                     return ['status' => 0, 'msg' => 'Journal not found'];
@@ -77,16 +82,29 @@ class DetailKartuInvoice extends Model
                 'purchase_order_id' => $purchaseOrderID,
                 'purchase_order_number' => $purchaseOrderNumber,
                 'journal_id' => $journal->id,
+                'journal_number' => $journal->journal_number,
+                'account_code_group' => $journal->code_group,
+                'account_name' => $journal->chartAccountAlias ? $journal->chartAccountAlias->name : '',
                 'amount_journal' => $journal->amount_debet - $journal->amount_kredit,
             ];
+
             //oke dari sini sudah ada jurnal dan invoice pack, dan bisa jadi ada kartu
-            $dt = DetailKartuInvoice::where('kartu_type', $kartuType)
-                ->where('kartu_id', $kartuId)
-                ->first();
-            if ($dt) {
-                $dt->update($dataUpdate);
-            } else
-                $dt = DetailKartuInvoice::create($dataUpdate);
+             $dt=null; 
+            if ($kartuType != null && $kartuId != null) {
+                $dt = DetailKartuInvoice::where('kartu_type', $kartuType)
+                    ->where('kartu_id', $kartuId)
+                    ->first();
+                if ($dt)
+                    $dt->updateData($dataUpdate);
+            }
+
+            if (!$dt) {
+                $dt = DetailKartuInvoice::where('journal_id', $journal->id)->first();
+                if ($dt) {
+                    $dt->updateData($dataUpdate);
+                } else
+                    $dt = DetailKartuInvoice::create($dataUpdate);
+            }
 
             return [
                 'status' => 1,
@@ -98,5 +116,52 @@ class DetailKartuInvoice extends Model
                 'msg' => $e->getMessage()
             ];
         }
+    }
+
+    public function updateData($data)
+    {
+
+        //hanya update yang ada datanya saja.
+        if ($data['kartu_type']) {
+            $this->kartu_type = $data['kartu_type'];
+        }
+        if ($data['kartu_id']) {
+            $this->kartu_id = $data['kartu_id'];
+        }
+        if ($data['invoice_pack_id']) {
+            $this->invoice_pack_id = $data['invoice_pack_id'];
+        }
+        if ($data['invoice_pack_number']) {
+            $this->invoice_pack_number = $data['invoice_pack_number'];
+        }
+        if ($data['sales_order_id']) {
+            $this->sales_order_id = $data['sales_order_id'];
+        }
+        if ($data['sales_order_number']) {
+            $this->sales_order_number = $data['sales_order_number'];
+        }
+        if ($data['purchase_order_id']) {
+            $this->purchase_order_id = $data['purchase_order_id'];
+        }
+        if ($data['purchase_order_number']) {
+            $this->purchase_order_number = $data['purchase_order_number'];
+        }
+        if ($data['journal_id']) {
+            $this->journal_id = $data['journal_id'];
+        }
+        if ($data['journal_number']) {
+            $this->journal_number = $data['journal_number'];
+        }
+        if ($data['account_code_group']) {
+            $this->account_code_group = $data['account_code_group'];
+        }
+        if ($data['account_name']) {
+            $this->account_name = $data['account_name'];
+        }
+        if ($data['amount_journal']) {
+            $this->amount_journal = $data['amount_journal'];
+        }
+        $this->save();
+        return $this;
     }
 }

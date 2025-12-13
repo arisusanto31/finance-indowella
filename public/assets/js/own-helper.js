@@ -368,55 +368,84 @@ function swalInfo(title, text, icon = "info") {
     });
 }
 
-function swalConfirmAndSubmit({ url, data, onSuccess = null,  successText = "Berhasil!", confirmText = "Yes", cancelText = "No" ,onError=null}) {
-    Swal.fire({
-        title: "Apakah kamu yakin?",
-        text: "Data akan diproses!",
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonText: confirmText,
-        cancelButtonText: cancelText,
-        allowOutsideClick: false,
-        showLoaderOnConfirm: true,
-        scrollbarPadding: false,
-        focusConfirm: false,
-        didOpen: () => {
-            $('.swal2-container').css('z-index', 2000);
-        },
-        preConfirm: () => {
-            return $.ajax({
-                url: url,
-                method: 'post',
-                data: data,
+function swalConfirmAndSubmit({ url, data, aktif_konfirm = true, onSuccess = null, successText = "Berhasil!", confirmText = "Yes", cancelText = "No", onError = null }) {
 
-            }).then(res => {
-                console.log(res);
-                if (res.status == 1) {
-                    return Swal.fire({
-                        title: "Sukses!",
-                        text: successText,
-                        icon: 'success',
-                        allowOutsideClick: false
-                    }).then(() => {
-                        if (typeof onSuccess === "function") onSuccess(res);
-                    });
-                } else {
 
-                    return Promise.reject(res.msg || "hehe error ini lur");
-                }
-            }).catch(err => {
-                //console.log("something error");
-                if (typeof err == "object") {
-                    err = "error di server";
-                }
-                Swal.showValidationMessage(err || "Terjadi kesalahan!");
-                 if (typeof onError === "function") onError(err);
-            });
-        }
-    });
+    if (aktif_konfirm == false) {
+        return $.ajax({
+            url: url,
+            method: 'post',
+            data: data,
+
+        }).then(res => {
+            console.log(res);
+            if (res.status == 1) {
+
+                if (typeof onSuccess === "function") onSuccess(res);
+
+            } else {
+                if (typeof onError === "function") onError(res.msg || "hehe error ini lur");
+
+            }
+        }).catch(err => {
+            //console.log("something error");
+            if (typeof err == "object") {
+                err = "error di server";
+            }
+            Swal.showValidationMessage(err || "Terjadi kesalahan!");
+            if (typeof onError === "function") onError(err);
+        });
+    } else {
+        Swal.fire({
+            title: "Apakah kamu yakin?",
+            text: "Data akan diproses!",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: confirmText,
+            cancelButtonText: cancelText,
+            allowOutsideClick: false,
+            showLoaderOnConfirm: true,
+            scrollbarPadding: false,
+            focusConfirm: false,
+            didOpen: () => {
+                $('.swal2-container').css('z-index', 2000);
+            },
+            preConfirm: () => {
+                return $.ajax({
+                    url: url,
+                    method: 'post',
+                    data: data,
+
+                }).then(res => {
+                    console.log(res);
+                    if (res.status == 1) {
+                        return Swal.fire({
+                            title: "Sukses!",
+                            text: successText,
+                            icon: 'success',
+                            allowOutsideClick: false
+                        }).then(() => {
+                            if (typeof onSuccess === "function") onSuccess(res);
+                        });
+                    } else {
+                        if (typeof onError === "function") onError(res.msg || "hehe error ini lur");
+                        return Promise.reject(res.msg || "hehe error ini lur");
+                    }
+                }).catch(err => {
+                    //console.log("something error");
+                    if (typeof err == "object") {
+                        err = "error di server";
+                    }
+                    Swal.showValidationMessage(err || "Terjadi kesalahan!");
+                    if (typeof onError === "function") onError(err);
+                });
+            }
+        });
+    }
 }
 
-function swalDelete({ url,elem=null, onSuccess = null, successText = "Berhasil!", confirmText = "Dihapus", cancelText = "Cancel" }) {
+function swalDelete({ url, elem = null, onSuccess = null, successText = "Berhasil!", confirmText = "Dihapus", cancelText = "Cancel" }) {
+    console.log('trying delete on url ' + url);
     Swal.fire({
         title: "Apakah kamu yakin?",
         text: "Data akan dihapus!",

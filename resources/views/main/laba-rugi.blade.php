@@ -68,17 +68,17 @@
                         <div class ="row"> 
                         ${
                                  kodePerk?
-                                         `<div class="col-xs-3 col-md-3">
-                                                                 ${stringStrong} ${kodePerk} ${stringPenutupStrong}
-                                                           </div>
-                                                           <div class="col-xs-9 col-md-9">
-                                                                ${stringStrong} ${string} ${stringPenutupStrong}
-                                                           </div>`
+                                `<div class="col-xs-3 col-md-3">
+                                                        ${stringStrong} ${kodePerk} ${stringPenutupStrong}
+                                                </div>
+                                                <div class="col-xs-9 col-md-9">
+                                                    ${stringStrong} ${string} ${stringPenutupStrong}
+                                                </div>`
                                    :
                                  `
-                                                           <div class="col-xs-12 col-md-12">
-                                                                 ${stringStrong} ${string} ${stringPenutupStrong}
-                                                           </div>`
+                                    <div class="col-xs-12 col-md-12">
+                                            ${stringStrong} ${string} ${stringPenutupStrong}
+                                    </div>`
                             
                         }
                         </div>

@@ -60,9 +60,9 @@
                 res.msg.forEach(function eachNeraca(lajur) {
                     // mutasiDebet = lajur.mutation ? lajur.mutation['total_debet'] > 0 ? lajur.mutation['total_debet'] : 0 : 0;
                     // mutasiKredit = lajur.mutation ? lajur.mutation['total_kredit'] > 0 ? lajur.mutation['total_kredit'] : 0 : 0;
-                    mutasiDebet = '<span id="mutasi-debet' + lajur.id +
+                    mutasiDebet = '<span id="mutasi-debet' + lajur.code_group +
                         '"> menghitung <i class="fa fa-spinner fa-spin"></i> </span>';
-                    mutasiKredit = '<span id="mutasi-kredit' + lajur.id +
+                    mutasiKredit = '<span id="mutasi-kredit' + lajur.code_group +
                         '"> menghitung <i class="fa fa-spinner fa-spin"></i> </span>';
                     if (lajur.level < 2) {
                         stringStrong = "<strong>";

@@ -110,6 +110,7 @@
                                                 <th>Rp/Unit</th>
                                                 <th>Total</th>
                                                 <th>Nomer Jurnal</th>
+                                                <th>Aksi </th>
                                             </tr>
 
                                         </thead>
@@ -137,6 +138,7 @@
                                                 <th>Rp/Unit</th>
                                                 <th>Total</th>
                                                 <th>Nomer Jurnal</th>
+                                                <th>Aksi </th>
                                             </tr>
 
                                         </thead>
@@ -426,6 +428,8 @@
                                 <td>${(!item.journal_number?'<span> belum ada jurnal</span> <button onclick="openLinkJournal('+item.id+')"> <i class="fas fa-link"></i> jurnal</button>':item.journal_number)}
                                        <button onclick="refreshKartu(${item.id})"> <i class="fas fa-sync"></i> </button>
                                 </td>
+                                   <td><button class="btn btn-sm btn-danger" onclick="deleteMutation(${item.id})"> <i class="fas fa-trash"></i></button></td>
+                           
                                 </tr>`;
                             });
                             $('#body-mutasi-masuk').html(html);
@@ -504,6 +508,8 @@
                                 <td>${(!item.journal_number?'<span> belum ada jurnal</span> <button onclick="openLinkJournal('+item.id+')"> <i class="fas fa-link"></i> jurnal</button>':item.journal_number)}
                                     <button onclick="refreshKartu(${item.id})"> <i class="fas fa-sync"></i> </button>
                                 </td>
+                                <td><button class="btn btn-sm btn-danger" onclick="deleteMutation(${item.id})"> <i class="fas fa-trash"></i></button></td>
+                           
                                 </tr>`;
                             });
                             $('#body-mutasi-keluar').html(html);
@@ -564,6 +570,25 @@
                     },
                     error: function(err) {
                         console.log(err);
+                    }
+                });
+            }
+
+            function deleteMutation(id) {
+                swalConfirmAndSubmit({
+                    url: '{{ route('kartu-bdp.delete-mutation') }}',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        id: id
+                    },
+                    onSuccess: function(res) {
+                        if (page == "kartu") {
+                            getSummary();
+                        } else if (page == "masuk") {
+                            getMutasiMasuk();
+                        } else {
+                            getMutasiKeluar();
+                        }
                     }
                 });
             }

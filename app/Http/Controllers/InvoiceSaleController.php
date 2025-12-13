@@ -22,6 +22,7 @@ use App\Services\LockManager;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 use App\Models\InvoiceSale;
+use App\Models\KartuStock;
 use Illuminate\Support\Facades\Log;
 
 
@@ -367,7 +368,7 @@ class InvoiceSaleController extends Controller
     }
 
     //fungsi ini untuk create invoice dari Sales Order
-    public function createInvoices(Request $request)
+    public static function createInvoices(Request $request)
     {
         $lockManager = new LockManager();
         // return ['status' => 0, 'msg' => $request->all()];
@@ -375,8 +376,8 @@ class InvoiceSaleController extends Controller
         $customStockNames = $request->input('custom_stock_name');
         $salesOrderID = $request->input('sales_order_id');
         $salesOrderNumber = $request->input('sales_order_number');
-        $hpps = $request->input('hpp');
         $codeGroupPiutangs = $request->input('code_group_piutang');
+        $codeGroupPersediaan = $request->input('code_group_persediaan');
         $quantities = $request->input('quantity');
         $units = $request->input('unit');
         $date = $request->input('date');
@@ -384,6 +385,7 @@ class InvoiceSaleController extends Controller
         $productionNumbers = $request->input('production_number');
         $sales = SalesOrder::find($salesOrderID);
         $salesDetailIDs = $request->input('sales_detail_id');
+        // return $request->all();
         DB::beginTransaction();
         try {
             $lastInv = InvoicePack::where('person_id', $sales->customer_id)
@@ -475,23 +477,46 @@ class InvoiceSaleController extends Controller
 
                 //disini harusnya udah jadi jurnal piutang dan penjualannya
                 //tinggal hubungkan jurnal penjualannya ke kartu penjualannya
+                $codePersediaan = $codeGroupPersediaan[$i];
+                if ($codePersediaan == 140003) {
+                    throw new \Exception('Akun persediaan tidak boleh dari akun BDP');
+                }
 
-                $st = KartuBahanJadi::mutationStore(new Request([
-                    'stock_id' => $stockIDs[$i],
-                    'mutasi_quantity' => $quantities[$i],
-                    'unit' => $units[$i],
-                    'flow' => 1, //keluar
-                    'sales_order_number' => $salesOrderNumber,
-                    'production_number' => $productionNumbers[$i],
-                    'sales_order_id' => $salesOrderID,
-                    'code_group' => 140004,
-                    'custom_stock_name' => $customStockNames[$i],
-                    'lawan_code_group' => 601000, //hpp
-                    'is_otomatis_jurnal' => 1,
-                    'date' => $date
-                ]), false, $lockManager);
-                if ($st['status'] == 0) {
-                    throw new \Exception($st['msg']);
+                if ($codePersediaan == 140004) {
+                    $st = KartuBahanJadi::mutationStore(new Request([
+                        'stock_id' => $stockIDs[$i],
+                        'mutasi_quantity' => $quantities[$i],
+                        'unit' => $units[$i],
+                        'flow' => 1, //keluar
+                        'sales_order_number' => $salesOrderNumber,
+                        'production_number' => $productionNumbers[$i],
+                        'sales_order_id' => $salesOrderID,
+                        'code_group' => 140004,
+                        'custom_stock_name' => $customStockNames[$i],
+                        'lawan_code_group' => 601000, //hpp
+                        'is_otomatis_jurnal' => 1,
+                        'date' => $date
+                    ]), false, $lockManager);
+                    if ($st['status'] == 0) {
+                        throw new \Exception($st['msg']);
+                    }
+                } else {
+                    $stStock = KartuStock::mutationStore(new Request([
+                        'stock_id' => $stockIDs[$i],
+                        'mutasi_quantity' => $quantities[$i],
+                        'unit' => $units[$i],
+                        'flow' => 1,
+                        'sales_order_number' =>  $salesOrderNumber,
+                        'sales_order_id' => $salesOrderID,
+                        'code_group' => $codePersediaan,
+                        'lawan_code_group' => 601000,
+                        'is_otomatis_jurnal' => 'on',
+                        'date' => $date,
+                        'description' => 'penjualan persediaan ' . $person->name . ' ' . $invoicePack->invoice_number . ' item-' . ($i + 1),
+                    ]), false, $lockManager);
+                    if ($stStock['status'] == 0) {
+                        throw new \Exception($stStock['msg']);
+                    }
                 }
             }
 
@@ -506,7 +531,7 @@ class InvoiceSaleController extends Controller
         }
     }
 
-    function submitBayarSalesInvoice(Request $request)
+    public static function submitBayarSalesInvoice(Request $request)
     {
         $lockManager = new LockManager();
         $codeGroupPiutang = $request->input('codegroup_piutang');
@@ -680,4 +705,7 @@ class InvoiceSaleController extends Controller
             return ['status' => 0, 'msg' => $e->getMessage()];
         }
     }
+
+
+  
 }

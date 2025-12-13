@@ -10,6 +10,7 @@ use App\Jobs\UpdateLawanCodeJournalJob;
 use App\Models\BookJournal;
 use App\Models\ChartAccount;
 use App\Models\DetailKartuInvoice;
+use App\Models\InvoiceSaleDetail;
 use App\Models\Journal;
 use App\Models\JournalJobFailed;
 use App\Models\JournalKey;
@@ -133,6 +134,7 @@ class JournalController extends Controller
     public function labarugi()
     {
         $view = view('main.laba-rugi');
+
         $date = getInput('date') ?? null;
         if (!$date) {
             //breati ga ada permintaan date, kita cari di month dan year ya
@@ -338,9 +340,7 @@ class JournalController extends Controller
 
             $allLocks = [];
             $allJournals = [];
-
             foreach ($debets as $debet) {
-
                 $st = Journal::generateJournal(new Request([
                     'journal_number' => $theJournalNumber,
                     'code_group' => $debet['code_group'],
@@ -390,6 +390,7 @@ class JournalController extends Controller
 
                 ]), $lockManager);
                 // $allLocks[] = ['lock' => $st['lock'], 'name' => $st['lock_name']];
+
                 if ($st['status'] == 0) {
                     // self::releaseLocks($allLocks);
                     JournalJobFailed::create(new Request([
@@ -554,6 +555,7 @@ class JournalController extends Controller
                 }
                 $details = DetailKartuInvoice::where('journal_id', $j->id)->get();
                 foreach ($details as $detail) {
+
                     $detail->delete();
                 }
                 $j->delete();

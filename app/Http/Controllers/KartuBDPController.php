@@ -28,7 +28,7 @@ class KartuBDPController extends Controller
     {
         $month = getInput('month') ?? date('m');
         $year = getInput('year') ?? date('Y');
-       return KartuBDP::getSummaryProduction($year, $month);
+        return KartuBDP::getSummaryProduction($year, $month);
     }
 
     public function createMutasiMasuk()
@@ -45,7 +45,7 @@ class KartuBDPController extends Controller
     public function createMutations(Request $request)
     {
 
-        
+
         $stockIDs = $request->input('stock_id');
         $quantitys = $request->input('quantity');
         $spkNumbers = $request->input('spk_number');
@@ -86,7 +86,7 @@ class KartuBDPController extends Controller
                     if ($lawanCodeGroup == 140004) {
                         $typekartulawan = "barang jadi";
                     }
-                    $hpp = Stock::find($stock_id)->getLastHPP($unit, $typekartulawan, $spkNumbers[$row],$date);
+                    $hpp = Stock::find($stock_id)->getLastHPP($unit, $typekartulawan, $spkNumbers[$row], $date);
 
                     $mutasiRupiahTotal = $hpp * $qty;
                     $isCustomRupiah = 1;
@@ -198,7 +198,7 @@ class KartuBDPController extends Controller
             ->whereBetween('kartu_bdps.created_at', [$dateAwal, $dateAkhir])
             ->where('mutasi_qty_backend', '>', 0)
             ->select('kartu_bdps.*', 'stocks.name as stock_name')
-            ->orderBy('index_date','asc')
+            ->orderBy('index_date', 'asc')
             ->get();
         return [
             'status' => 1,
@@ -215,7 +215,7 @@ class KartuBDPController extends Controller
             ->whereBetween('kartu_bdps.created_at', [$dateAwal, $dateAkhir])
             ->where('mutasi_qty_backend', '<', 0)
             ->select('kartu_bdps.*', 'stocks.name as stock_name')
-            ->orderBy('index_date','asc')
+            ->orderBy('index_date', 'asc')
             ->get();
         return [
             'status' => 1,
@@ -223,7 +223,7 @@ class KartuBDPController extends Controller
         ];
     }
 
-     public function showHistoryStock($id)
+    public function showHistoryStock($id)
     {
         $productionNumber = getInput('production_number');
         if (!$productionNumber) {
@@ -240,7 +240,7 @@ class KartuBDPController extends Controller
             )
             ->groupBy('unit')->orderBy(DB::raw('count(*)'), 'desc')->first();
         $unit = $kartuStock ? $kartuStock->unit : $stock->unit_default;
-        $name = $kartuStock? $kartuStock->custom_stock_name: $stock->name;
+        $name = $kartuStock ? $kartuStock->custom_stock_name : $stock->name;
         $dataHistory = KartuBDP::from('kartu_bdps as ks')
             ->leftJoin('stock_units as u', function ($join) use ($unit) {
                 $join->on('u.unit', '=', DB::raw("'" . $unit . "'"))
@@ -248,7 +248,7 @@ class KartuBDPController extends Controller
             })
             ->leftJoin('journals as j', 'j.id', '=', 'ks.journal_id')
             ->where('ks.stock_id', $id)
-            ->where('ks.production_number',$productionNumber)
+            ->where('ks.production_number', $productionNumber)
             ->select(
                 'ks.id',
                 'ks.created_at',
@@ -269,15 +269,15 @@ class KartuBDPController extends Controller
         return $view;
     }
 
-      public function recalculate(Request $request){
-        $id= $request->input('id');
-        try{
-        $kartu= KartuBDP::find($id);
-        $kartu->recalculateSaldo();
+    public function recalculate(Request $request)
+    {
+        $id = $request->input('id');
+        try {
+            $kartu = KartuBDP::find($id);
+            $kartu->recalculateSaldo();
 
-        return ['status' => 1, 'msg' => $kartu];
-        }
-        catch(\Exception $e){
+            return ['status' => 1, 'msg' => $kartu];
+        } catch (\Exception $e) {
             return ['status' => 0, 'msg' => $e->getMessage()];
         }
     }
@@ -285,7 +285,7 @@ class KartuBDPController extends Controller
     {
 
         // return ['status' => 0, 'msg' => $request->all()];
-        return KartuBDP::mutationStore($request,true);
+        return KartuBDP::mutationStore($request, true);
     }
     public function refreshKartu(Request $request)
     {
@@ -295,14 +295,37 @@ class KartuBDPController extends Controller
             $journal = Journal::find($kartu->journal_id);
             $kartu->journal_number = $journal->journal_number;
         }
-
         $kartu->save();
-
         $St = $kartu->createDetailKartuInvoice();
         if ($St['status'] == 0) {
             return ['status' => 0, 'msg' => $St['msg']];
         }
 
         return ['status' => 1, 'msg' => $kartu];
+    }
+
+
+    public function deleteMutation(Request $request)
+    {
+        $id = $request->input('id');
+        $kartu = KartuBDP::find($id);
+        if (!$kartu) {
+            return ['status' => 0, 'msg' => 'Mutasi tidak ditemukan'];
+        }
+        if ($kartu->journal_id) {
+            return ['status' => 0, 'msg' => 'Mutasi sudah memiliki jurnal, hapus dari jurnalnya'];
+        }
+        $blokirJurnal = false;
+        $details = $kartu->getDetailKartus();
+        foreach ($details as $detail) {
+            if ($detail->journal_id || $detail->journal_number) {
+                $blokirJurnal = true;
+                break;
+            }
+        }
+        if ($blokirJurnal) {
+            return ['status' => 0, 'msg' => 'Mutasi memiliki jurnal, hapus dari jurnalnya'];
+        }
+        return $kartu->makeDelete();
     }
 }

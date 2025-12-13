@@ -10,7 +10,7 @@
         <div class="col-xs-12 col-md-12">
             @if ($data['total_kartu'] == 0)
                 <p>sales ini belum ada jurnal maupun kartu, kamu bisa batalkan finalnya </p>
-                <button class="btn btn-danger" onclick="batalkanFinal('{{ $data->id }}')">Batalkan Final</button>
+                <button class="btn btn-danger mb-5" onclick="batalkanFinal('{{ $data->id }}')">Batalkan Final</button>
             @endif
         </div>
         <div class="col-xs-12 col-md-12">
@@ -331,7 +331,7 @@
                                             <input class="form-control" type="datetime-local" name="date"
                                                 value="{{ $dateFinished }}" />
                                         </div>
-                                        <div class="col-md-3 col-xs-12">
+                                        <div class="col-md-5 col-xs-12">
                                             <label>Nama Barang</label>
                                             <input type="text" class="form-control" id="invoice-stock_name"
                                                 value="{{ $item->stock->name }}" readonly />
@@ -348,17 +348,18 @@
                                                 value="{{ $item->qtyjadi }}" />
                                         </div>
 
-                                        <div class="col-md-1 col-xs-12">
+                                        <div class="col-md-2 col-xs-12">
                                             <label>Satuan</label>
                                             <input class="form-control" type="text" name="unit[]" readonly
                                                 id="invoice-unit" value="{{ $item->unitjadi }}" />
                                         </div>
-                                        <div class="col-md-3 col-xs-12">
+                                        <div class="clearfix"></div>
+                                        <div class="col-md-4 col-xs-12">
                                             <label>Akun Penjualan</label>
                                             <select class="form-control select-coa-penjualan" type="text"
                                                 name="code_group_penjualan[]"></select>
                                         </div>
-                                        <div class="col-md-3 col-xs-12">
+                                        <div class="col-md-4 col-xs-12">
                                             <label>Akun Piutang</label>
                                             <select class="form-control select-coa-piutang" type="text"
                                                 name="code_group_piutang[]">
@@ -366,8 +367,13 @@
 
                                             </select>
                                         </div>
-
-                                        <div class="col-md-9 col-xs-12">
+                                        <div class="col-md-4">
+                                            <label>Akun Persediaan</label>
+                                            <select class="form-control select-coa-persediaan" type="text"
+                                                name="code_group_persediaan[]"></select>
+                                        </div>
+                                        <div class="clearfix" ></div>
+                                        <div class="col-md-12 col-xs-12">
                                             <label>Barang jadi</label>
                                             <input type="text" class="form-control"
                                                 id="invoice-ket-barang-jadi{{ $item->id }}" value=""

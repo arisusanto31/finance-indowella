@@ -10,6 +10,12 @@ use Illuminate\Http\Request;
 trait HasModelDetailKartuInvoice
 {
 
+
+    public function getDetailKartus(){
+        return DetailKartuInvoice::where('kartu_type', get_class($this))
+            ->where('kartu_id', $this->id)
+            ->get();
+    }
     public function createDetailKartuInvoice()
     {
         $kartu = $this;

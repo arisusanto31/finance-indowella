@@ -71,7 +71,7 @@ class ExcelExportController extends Controller
         $data = [];
         $totalPenjualan = 0;
         for ($i = $month; $i > 0; $i--) {
-            $date = createCarbon($year . '-' . ($i + 1) . '-01');
+            $date = createCarbon($year . '-' . ($i) . '-01')->addMonth();
             $lr = ChartAccount::getRincianLabaBulanAt($date)->keyBy('code_group');
             $penjualan = collect($lr)->where('code_group', '<', 500000)->sum('saldo_akhir');
             $totalPenjualan += $penjualan;

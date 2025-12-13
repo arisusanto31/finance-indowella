@@ -21,7 +21,9 @@ use Throwable;
 use App\Models\InvoiceSaleDetail;
 use App\Models\KartuBDP;
 use App\Models\KartuStock;
+use App\Models\LinkTokoParent;
 use App\Models\StockUnit;
+use App\Models\Toko;
 use Illuminate\Support\Facades\Log;
 
 
@@ -203,6 +205,10 @@ class SalesOrderController extends Controller
     {
         $id = $request->id;
         $salesOrder = SalesOrder::find($id);
+        if ($salesOrder->is_final == 1) {
+            return ['status' => 0, 'msg' => 'Sales Order ' . $salesOrder->sales_order_number . ' sudah dalam status final'];
+        }
+
         $details = SalesOrderDetail::where('sales_order_number', $salesOrder->sales_order_number)->get();
         $salesOrder->is_final = 1;
         $salesOrder->sales_order_number = $salesOrder->getCodeFix();
@@ -227,6 +233,7 @@ class SalesOrderController extends Controller
             $detail->save();
         }
         $salesOrder->save();
+        $salesOrder->updateStatus();
         return ['status' => 1, 'msg' => $salesOrder];
     }
 
@@ -235,6 +242,9 @@ class SalesOrderController extends Controller
     {
         $id = $request->input('id');
         $salesOrder = SalesOrder::find($id);
+        if ($salesOrder->is_final == 0) {
+            return ['status' => 0, 'msg' => 'Sales Order ' . $salesOrder->sales_order_number . ' belum dalam status final'];
+        }
         //pastikan dulu ga ada sama sekali jurnal maupun kartu yang terhubung
         if (collect($salesOrder->detailKartuInvoices)->count() > 0) {
             return ['status' => 0, 'msg' => 'Tidak bisa membatalkan invoice yang sudah terhubung dengan kartu'];
@@ -242,6 +252,7 @@ class SalesOrderController extends Controller
 
         $salesOrder->is_final = 0;
         $salesOrder->save();
+        $salesOrder->updateStatus();
         return ['status' => 1, 'msg' => $salesOrder];
     }
 
@@ -295,6 +306,7 @@ class SalesOrderController extends Controller
     function openImport()
     {
         $view = view('invoice.modal._sale_order_import');
+        $view->toko_parents = LinkTokoParent::pluck('toko_id', 'parent_id')->all();
         return $view;
     }
 
@@ -346,6 +358,7 @@ class SalesOrderController extends Controller
                 'pack.akun_cash_kind_name',
                 DB::raw('"anonim" as customer_name'),
                 'pack.created_at',
+                'pack.toko_id',
             );
         } else {
 
@@ -379,7 +392,8 @@ class SalesOrderController extends Controller
                 'pack.akun_cash_kind_name',
                 'c.instance as customer_name',
                 'pack.created_at',
-            )->distinct();
+                DB::raw('0 as toko_id')
+            );
         }
 
         $sales = $sales->with('detailSales')->get()->map(function ($val) use ($modeBook) {
@@ -402,11 +416,12 @@ class SalesOrderController extends Controller
                 $data['customer_id'] = $detailVal['customer_id'];
                 $data['stock_name'] = $detailVal['stock_name'];
                 $data['reference_id'] = $detailVal['id'] ?? null;
+                $data['toko_id'] = $detailVal['toko_id'] ?? null;
                 $data['reference_type'] = $modeBook == 'toko' ? 'App\Models\RetailSales' : 'App\Models\ManufSales';
                 $data['toko'] = $modeBook == 'toko' ? $detailVal->toko->name : $detailVal->kind;
                 return $data;
             });
-            return collect($val)->only('id', 'reference_type', 'is_ppn', 'customer_name', 'is_wajib_lapor', 'details', 'package_number', 'stock_type', 'akun_cash_kind_name', 'created_at');
+            return collect($val)->only('id', 'reference_type', 'is_ppn', 'customer_name', 'is_wajib_lapor', 'details', 'package_number', 'stock_type', 'akun_cash_kind_name', 'created_at', 'toko_id');
         });
 
         return ['status' => 1, 'msg' => $sales];
@@ -700,6 +715,97 @@ class SalesOrderController extends Controller
             'status' => 1,
             'msg' => $details,
             'bahan_jadi' => $bahanJadi,
+        ];
+    }
+
+
+    public function processDagang(Request $request)
+    {
+
+
+        //tanpa BDP, bahan jadi, langsung invoice dari barang dagang
+        $id = $request->input('id');
+        $salesOrder = SalesOrder::find($id);
+        $salesOrderNumber = $salesOrder->sales_order_number;
+        if (!$salesOrder) {
+            return [
+                'status' => 0,
+                'msg' => 'sales order ' . $salesOrderNumber . ' tidak ditemukan'
+            ];
+        }
+        //cek dulu aja jangan jangan udah difinalkan
+        $existingInv = InvoiceSaleDetail::where('sales_order_number', $salesOrderNumber)->count();
+        if ($existingInv > 0) {
+            return [
+                'status' => 0,
+                'msg' => 'sales order ' . $salesOrderNumber . ' sudah memiliki invoice. proses secara manual jika ingin memprosesnya'
+            ];
+        }
+        $data = [];
+
+        $details = $salesOrder->details;
+        foreach ($details as $detail) {
+            $data[] = [
+                'stock_id' => $detail->stock_id,
+                'quantity' => $detail->quantity,
+                'unit' => $detail->unit,
+                'sales_detail_id' => $detail->id,
+                'sales_order_number' => $salesOrderNumber,
+                'sales_order_id' => $salesOrder->id,
+                'code_group_penjualan' => 401000,
+                'code_group_persediaan' => 140001,
+                'code_group_piutang' => 120001,
+                'date' => $detail->date,
+                'custom_stock_name' => null
+            ];
+        }
+        $dataFix = [
+            'sales_order_number' => $salesOrderNumber,
+            'sales_order_id' => $salesOrder->id,
+            'stock_id' => collect($data)->pluck('stock_id')->all(),
+            'quantity' => collect($data)->pluck('quantity')->all(),
+            'unit' => collect($data)->pluck('unit')->all(),
+            'sales_detail_id' => collect($data)->pluck('sales_detail_id')->all(),
+            'code_group_penjualan' => collect($data)->pluck('code_group_penjualan')->all(),
+            'code_group_persediaan' => collect($data)->pluck('code_group_persediaan')->all(),
+            'code_group_piutang' => collect($data)->pluck('code_group_piutang')->all(),
+            'date' => $salesOrder->created_at,
+            'custom_stock_name' => collect($data)->pluck('custom_stock_name')->all()
+        ];
+
+        $st = InvoiceSaleController::createInvoices(new Request($dataFix));
+        if ($st['status'] == 0) {
+            return $st;
+        }
+        $invoiceNumber = $st['pack']->invoice_number;
+        $amount = $st['pack']->total_price;
+        $date = $salesOrder->created_at;
+        $toko = Toko::find($salesOrder->toko_id);
+        if (!$toko) {
+            return [
+                'status' => 0,
+                'msg' => 'Toko tidak ditemukan'
+            ];
+        }
+        $codeBayar = $toko->default_code_group_kas;
+        $codeGroupPiutang = 120001;
+
+        $st = InvoiceSaleController::submitBayarSalesInvoice(new Request([
+            'invoice_number' => $invoiceNumber,
+            'amount' => $amount,
+            'date' => $date,
+            'codegroup_bayar' => $codeBayar,
+            'codegroup_piutang' => $codeGroupPiutang,
+
+        ]));
+
+        if ($st['status'] == 0) {
+            return $st;
+        }
+        $salesOrder->updateStatus();
+        return [
+            'status' => 1,
+            'msg' => $salesOrder
         ];
     }
 

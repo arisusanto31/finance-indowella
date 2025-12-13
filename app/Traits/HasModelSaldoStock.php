@@ -4,6 +4,8 @@ namespace App\Traits;
 
 use App\Models\ChartAccount;
 use App\Models\Journal;
+use App\Models\KartuBahanJadi;
+use App\Models\KartuBDP;
 use App\Models\Stock;
 use Illuminate\Support\Facades\DB;
 
@@ -153,5 +155,35 @@ trait HasModelSaldoStock
             'month' => $month,
             'year' => $year
         ];
+    }
+
+    public function makeDelete()
+    {
+        try {
+            DB::beginTransaction();
+            // cari saldo dulu yang lama
+            $class = get_class($this);
+            if ($class == KartuBahanJadi::class || $class == KartuBDP::class) {
+                $lastSaldo = $class::where('stock_id', $this->stock_id)->where('index_date', '<', $this->index_date)
+                    ->where('production_number', $this->production_number)->orderBy('index_date', 'desc')->first();
+            } else {
+                $lastSaldo = $class::where('stock_id', $this->stock_id)->where('index_date', '<', $this->index_date)
+                    ->orderBy('index_date', 'desc')->first();
+            }
+            if ($lastSaldo)
+                $lastSaldo->recalculateSaldo();
+            $this->delete();
+            DB::commit();
+            return [
+                'status' => 1,
+                'msg' => 'Mutasi berhasil dihapus'
+            ];
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return [
+                'status' => 0,
+                'msg' => $e->getMessage()
+            ];
+        }
     }
 }

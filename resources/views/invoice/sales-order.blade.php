@@ -15,17 +15,21 @@
             <div id="card-create" class="container tree-toggle">
                 <div class="mb-3 mt-2">
                     <button type="button" class="btn btn-primary" onclick="addrow()" id="addDebit">+Tambah</button>
-                    @if (book()->name == 'Buku Toko')
-                        <button type="button" class="btn btn-primary" onclick="openImportData('{{ book()->id }}')"
-                            id="btn-import">Import dari Toko</button>
-                    @else
-                        <button type="button" class="btn btn-primary" onclick="openImportData('{{ book()->id }}')"
-                            id="btn-import">Import dari Manuf</button>
+                    @if (user()->can('edit_data_journal'))
+                        @if (book()->name == 'Buku Toko')
+                            <button type="button" class="btn btn-primary"
+                                onclick="openImportData('{{ book()->id }}')" id="btn-import">Import dari
+                                Toko</button>
+                        @else
+                            <button type="button" class="btn btn-primary"
+                                onclick="openImportData('{{ book()->id }}')" id="btn-import">Import dari
+                                Manuf</button>
+                        @endif
                     @endif
                 </div>
                 <div class="row g-2 mb-3">
 
-                   
+
                     <div class="col-md-3">
                         <label class="form-label">Pilih Customer</label>
                         <select name="customer_id" class="form-control select2-customer" required></select>
@@ -85,11 +89,12 @@
             </p>
         </div>
 
-        <div class="row">
-            <div class="col-md-4">
-                <button type="button" class="btn btn-primary mt-2 text-white" onclick="produksiMarked()">kebutuhan
-                    produksi
-                    marked!</button>
+        <div class="fixed" style="top:100px; right:20px; z-index:1000; width:500px;">
+            <div class="row">
+                <div class="col-md-12 col-xs-12 ">
+                    <div class="bglevel1 p-2 mb-2 hidden" id="div-selected">
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -98,6 +103,7 @@
                 <table class="table table-bordered">
                     <thead class="table-primary text-center">
                         <tr>
+
                             <th>No</th>
                             <th>TGL</th>
                             <th>Nomer SO</th>
@@ -111,6 +117,7 @@
                             <th>Total</th>
                             <th>Status</th>
                             <th>Aksi</th>
+                            <th> <input type="checkbox" id="select-all" onchange="selectCheckToggleAll()"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -155,6 +162,8 @@
                                                         class="fas fa-wallet"></i>
                                                     {{ $item->parent->ref_akun_cash_kind_name }}</div>
                                             @endif
+                                            <input type="hidden" id="total-{{ $item->parent->id }}"
+                                                value="{{ $item->parent->total_price }}">
 
                                         </td>
                                         <td rowspan="{{ $rowspan }}" id="status-{{ $item->parent->id }}">
@@ -202,8 +211,18 @@
 
                                             @if ($item->parent->is_final == 1)
                                                 <a href="javascript:void(lihatDetailInvoice('{{ $item->sales_order_number }}'))"
-                                                    class="btn btn-sm btn-outline-primary" title="Lihat ">
+                                                    class="btn btn-sm btn-outline-primary" title="Lihat invoice ">
                                                     <i class="fas fa-eye"></i>
+                                                </a>
+
+                                                <a href="javascript:void(makeMark('{{ $item->parent->id }}'))"
+                                                    class="btn btn-sm btn-outline-primary" title="tandai invoice">
+                                                    <i class="fas fa-paw"></i>
+                                                </a>
+
+                                                <a href="javascript:void(processInvoice('{{ $item->parent->id }}'))"
+                                                    class="btn btn-sm btn-outline-primary" title="Proses Invoice">
+                                                    <i class="fas fa-file-invoice-dollar"></i>
                                                 </a>
                                             @endif
                                             @if ($item->parent->is_final == 0)
@@ -211,6 +230,11 @@
                                                     class="btn btn-sm btn-outline-primary" title="make final"
                                                     id="btn-final{{ $item->sales_order_id }}">
                                                     <i class="fas fa-upload"></i>
+                                                </a>
+
+                                                <a href="javascript:void(makeMark('{{ $item->parent->id }}'))"
+                                                    class="btn btn-sm btn-outline-primary" title="tandai invoice">
+                                                    <i class="fas fa-paw"></i>
                                                 </a>
 
                                                 <a href="javascript:void(editInvoice('{{ $item->sales_order_number }}'))"
@@ -222,11 +246,11 @@
                                                     <i class="fas fa-trash"></i>
                                                 </a>
                                             @endif
-                                            <a href="javascript:void(makeMark('{{ $item->parent->id }}'))"
-                                                class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-paw"></i>
-                                            </a>
+
                                         </td>
+                                        <td rowspan="{{ $rowspan }}"> <input onchange="updateTotalSelected()"
+                                                type="checkbox" class="select-item"
+                                                data-parent-id="{{ $item->parent->id }}"> </td>
                                     @endif
                                 </tr>
                             @endforeach
@@ -385,13 +409,18 @@
                     },
                     error: function(res) {
                         console.error('Error updating status:something went wrong');
-                    
+
                     }
                 });
             }
 
-            function produksiMarked() {
-                parentsMarked = collect(parents).where('is_mark', 1).pluck('id').all();
+            function kebutuhanStock() {
+                parentsMarked = [];
+                $('.select-item:checked').each(function(i, elem) {
+                    id = $(elem).data('parent-id');
+                    parentsMarked.push(id);
+                });
+                console.log(parentsMarked);
                 if (parentsMarked.length == 0) {
                     swal('Oops!', 'Tidak ada invoice yang ditandai untuk produksi!', 'warning');
                     return;
@@ -401,6 +430,152 @@
                 console.log(data);
                 url = '{{ url('admin/invoice/kebutuhan-produksi-marked') }}/' + data
                 var win = window.open(url, '_blank');
+            }
+
+
+            async function cancelFinalAll() {
+                parentsMarked = [];
+                $('.select-item:checked').each(function(i, elem) {
+                    id = $(elem).data('parent-id');
+                    parentsMarked.push(id);
+                });
+                console.log(parentsMarked);
+                if (parentsMarked.length == 0) {
+                    swal('Oops!', 'Tidak ada invoice yang ditandai untuk produksi!', 'warning');
+                    return;
+                }
+                $('#progress-selected').css('width', '0%').html('0%');
+                $('#div-progressbar-selected').removeClass('hidden');
+                totalItems = parentsMarked.length;
+                i = 0;
+                for (const id of parentsMarked) {
+                    res = await cancelFinal(id, false);
+                    if (res.status == 0) {
+                        await new Promise((resolve) => {
+                            Swal.fire('Oops!', 'Gagal cancel final untuk SO: ' +
+                                ': ' + res.msg,
+                                'error').then(() => {
+                                resolve();
+                            });
+                        })
+                    }
+                    i++;
+                    percent = Math.round((i / totalItems) * 100);
+                    $('#progress-selected').css('width', percent + '%').html(percent + '%');
+                }
+                setTimeout(() => {
+                    $('#div-progressbar-selected').addClass('hidden');
+                }, 2000);
+            }
+
+            async function makeFinalAll() {
+                parentsMarked = [];
+                $('.select-item:checked').each(function(i, elem) {
+                    id = $(elem).data('parent-id');
+                    parentsMarked.push(id);
+                });
+                console.log(parentsMarked);
+                if (parentsMarked.length == 0) {
+                    swal('Oops!', 'Tidak ada invoice yang ditandai untuk produksi!', 'warning');
+                    return;
+                }
+                $('#progress-selected').css('width', '0%').html('0%');
+                $('#div-progressbar-selected').removeClass('hidden');
+                totalItems = parentsMarked.length;
+                i = 0;
+                for (const id of parentsMarked) {
+                    res = await makeFinal(id, false);
+                    if (res.status == 0) {
+                        await new Promise((resolve) => {
+                            Swal.fire('Oops!', 'Gagal membuat final untuk SO: ' +
+                                ': ' + res.msg,
+                                'error').then(() => {
+                                resolve();
+                            });
+                        })
+                    }
+                    i++;
+                    percent = Math.round((i / totalItems) * 100);
+                    $('#progress-selected').css('width', percent + '%').html(percent + '%');
+                }
+                setTimeout(() => {
+                    $('#div-progressbar-selected').addClass('hidden');
+                }, 2000);
+            }
+
+             async function invoicingAll() {
+                parentsMarked = [];
+                $('.select-item:checked').each(function(i, elem) {
+                    id = $(elem).data('parent-id');
+                    parentsMarked.push(id);
+                });
+                console.log(parentsMarked);
+                if (parentsMarked.length == 0) {
+                    swal('Oops!', 'Tidak ada invoice yang ditandai untuk produksi!', 'warning');
+                    return;
+                }
+                $('#progress-selected').css('width', '0%').html('0%');
+                $('#div-progressbar-selected').removeClass('hidden');
+                totalItems = parentsMarked.length;
+                i = 0;
+                for (const id of parentsMarked) {
+                    res = await processInvoice(id, false);
+                    if (res.status == 0) {
+                        await new Promise((resolve) => {
+                            Swal.fire('Oops!', 'Gagal membuat final untuk SO: ' +
+                                ': ' + res.msg,
+                                'error').then(() => {
+                                resolve();
+                            });
+                        })
+                    }
+                    i++;
+                    percent = Math.round((i / totalItems) * 100);
+                    $('#progress-selected').css('width', percent + '%').html(percent + '%');
+                }
+                setTimeout(() => {
+                    $('#div-progressbar-selected').addClass('hidden');
+                }, 2000);
+            }
+
+            function selectCheckToggleAll() {
+                $('.select-item').prop('checked', $('#select-all').is(':checked'));
+
+                updateTotalSelected();
+            }
+
+
+            function updateTotalSelected() {
+                let total = 0;
+                let html = '';
+                selectedCount = $('.select-item:checked').length;
+                totalSelected = $('.select-item:checked').each(function() {
+                    const parentId = $(this).data('parent-id');
+                    total += parseFloat($('#total-' + parentId).val());
+                });
+                html = `
+                       Selected ${selectedCount} items, Total: <strong>Rp${formatRupiah(total)}</strong>
+                       <div>
+                          <button class="btn btn-sm btn-warning mt-2" onclick="kebutuhanStock()"><i class="fas fa-boxes"></i> kebutuhan stock?</button>
+                          <button class="btn btn-sm btn-success mt-2" onclick="makeFinalAll()"> <i class="fas fa-upload"></i> make final</button>
+                          <button class="btn btn-sm btn-danger mt-2" onclick="cancelFinalAll()"> <i class="fas fa-close"></i> batal final</button>
+                          <button class="btn btn-sm btn-success mt-2" onclick="invoicingAll()"> <i class="fas fa-file-invoice-dollar"></i> invoicing</button>
+
+                       </div>
+                        <div style="max-width:300px; width:100%;" class="mt-2 hidden" id="div-progressbar-selected">
+                            <div class="progress progress-modern mb-3">
+                                <div class="progress-bar" id="progress-selected" role="progressbar" style="width: 65%;">
+                                    65%
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                if (selectedCount > 0) {
+                    $('#div-selected').removeClass('hidden');
+                    $('#div-selected').html(html);
+                } else {
+                    $('#div-selected').addClass('hidden');
+                }
             }
 
             function destroySO(SONumber) {
@@ -419,27 +594,99 @@
                 $('#icon-create').toggleClass('open');
             }
 
-            function makeFinal(id) {
-                swalConfirmAndSubmit({
-                    url: '{{ url('admin/invoice/sales-make-final') }}',
-                    data: {
-                        id: id,
-                        _token: '{{ csrf_token() }}'
-                    },
-                    onSuccess: function(res) {
-                        html = ` <a href="javascript:void(lihatDetailInvoice('${res.msg.sales_order_number}'))"
+            function cancelFinal(id, aktifConfirm = true) {
+                return new Promise((resolve, reject) => {
+                    swalConfirmAndSubmit({
+                        aktif_konfirm: aktifConfirm,
+                        url: '{{ url('admin/invoice/sales-cancel-final') }}',
+                        data: {
+                            _token: '{{ csrf_token() }}',
+                            id: id
+                        },
+                        onSuccess: function(res) {
+                            if (res.status == 1) {
+                                setTimeout(() => {
+                                    updateStatusRow(id);
+                                }, 100);
+                                parents[id].is_final = 0;
+                                updateTotalMarked();
+                            }
+                            resolve(res);
+
+                        },
+                        onError: function(err) {
+                            resolve({
+                                'status': 0,
+                                'msg': err
+                            });
+                        }
+                    });
+                });
+            }
+
+            function makeFinal(id, aktifConfirm = true) {
+                return new Promise((resolve, reject) => {
+                    swalConfirmAndSubmit({
+                        aktif_konfirm: aktifConfirm,
+                        url: '{{ url('admin/invoice/sales-make-final') }}',
+                        data: {
+                            id: id,
+                            _token: '{{ csrf_token() }}'
+                        },
+                        onSuccess: function(res) {
+                            html = ` <a href="javascript:void(lihatDetailInvoice('${res.msg.sales_order_number}'))"
                                     class="btn btn-sm btn-outline-primary" title="Lihat Invoice">
                                     <i class="fas fa-eye"></i>
                                 </a>
                                   <a href="javascript:void(makeMark('${res.msg.id}'))"
-                                    class="btn btn-sm btn-outline-primary">
+                                    class="btn btn-sm btn-outline-primary" title="tandai invoice">
                                     <i class="fas fa-paw"></i>
-                                </a>
+                                  </a>
+                                  <a href="javascript:void(processInvoice('${res.msg.id}'))"
+                                    class="btn btn-sm btn-outline-primary" title="Proses Invoice">
+                                    <i class="fas fa-file-invoice-dollar"></i>
+                                 </a>
                                 `;
-                        $('#action' + id).html(html);
-                        parents[id].is_final = 1;
-                        updateTotalMarked();
-                    },
+                            $('#action' + id).html(html);
+
+                            parents[id].is_final = 1;
+                            updateTotalMarked();
+                            setTimeout(() => {
+                                updateStatusRow(id);
+                            }, 100);
+                            resolve(res);
+                        },
+                        onError: function(err) {
+                            resolve({
+                                'status': 0,
+                                'msg': err
+                            });
+                        }
+                    });
+
+                });
+            }
+
+
+            function processInvoice(id, aktifConfirm = true) {
+                return new Promise((resolve) => {
+                    swalConfirmAndSubmit({
+                        aktif_konfirm: aktifConfirm,
+                        url: '{{ url('admin/invoice/sales-process-dagang') }}',
+                        data: {
+                            id: id,
+                            _token: '{{ csrf_token() }}'
+                        },
+                        onSuccess: function(res) {
+                            resolve(res);
+                        },
+                        onError: function(err) {
+                            resolve({
+                                'status': 0,
+                                'msg': err
+                            });
+                        }
+                    });
                 });
             }
 
@@ -477,6 +724,9 @@
             setTimeout(() => {
                 getInfoReferenceFinish();
             }, 1000);
+
+
+
 
             function makeMark(id) {
                 $.ajax({
@@ -635,7 +885,8 @@
                 </div>
                     `;
                 $('#invoice-wrapper').append(newRow);
-                initItemSelectManual('.select2-stock', '{{ url('admin/master/stock/get-item') }}', '-- Pilih Produk --');
+                initItemSelectManual('.select2-stock', '{{ url('admin/master/stock/get-item') }}',
+                    '-- Pilih Produk --');
 
 
             }
@@ -644,6 +895,7 @@
                 addrow();
                 parents = {!! json_encode($parent) !!};
                 console.log(parents);
+                updateTotalSelected();
 
 
             });

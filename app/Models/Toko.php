@@ -29,4 +29,13 @@ class Toko extends Model
             $query->whereNull("{$from}.is_deleted");
         });
     }
+    public function linkTokoParents(){
+        return $this->hasMany(LinkTokoParent::class, 'toko_id', 'id');
+    }
+    public function getParents(){
+        return $this->linkTokoParents->map(function($val){
+            return $val->parent;
+        });
+    }
+    
 }

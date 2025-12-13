@@ -26,6 +26,16 @@ class Journal extends Model
         return $this->morphTo();
     }
 
+    public function chartAccount()
+    {
+        return $this->belongsTo(ChartAccount::class, 'code_group', 'code_group');
+    }
+
+    public function chartAccountAlias()
+    {
+        return $this->belongsTo(ChartAccountAlias::class, 'code_group', 'code_group');
+    }
+
     public function codeGroupData()
     {
         return $this->belongsTo(ChartAccount::class, 'code_group', 'code_group');
@@ -34,7 +44,7 @@ class Journal extends Model
     {
         return $this->belongsTo(ChartAccount::class, 'lawan_code_group', 'code_group');
     }
-  public function lawanCode()
+    public function lawanCode()
     {
         return $this->belongsTo(ChartAccount::class, 'lawan_code_group', 'code_group');
     }
@@ -60,10 +70,7 @@ class Journal extends Model
         });
     }
 
-    public function chartAccount()
-    {
-        return $this->belongsTo('App\Models\ChartAccount', 'chart_account_id');
-    }
+
     public static function createOrUpdate(Request $request)
     {
         $id = $request->input('id');
@@ -118,7 +125,7 @@ class Journal extends Model
         $tokoID = $request->input('toko_id');
         $tag = $request->input('tag');
         if (!$tokoID) {
-            $tokoID = Toko::first()->id;
+            $tokoID = Toko::first()->id ?? throw new \Exception('tidak ada data toko. silakan buat dulu data toko');
         }
         if ($codeGroup > 400000) {
             if (!$tokoID) {
@@ -212,6 +219,7 @@ class Journal extends Model
                     }
                 }
                 info('success creating journal' . $codeGroup);
+                $journal->createKartuLink();
                 $journal->verifyJournal();
             } catch (Throwable $e) {
                 info('failed creating journal: ' . $e->getMessage());
@@ -418,5 +426,13 @@ class Journal extends Model
             dd($code);
         }
         return $theFixCode;
+    }
+
+    public function createKartuLink($isForce=false)
+    {
+       return DetailKartuInvoice::storeData(new Request([
+            'journal_id' => $this->id,
+            'is_force' => $isForce
+        ]));
     }
 }
