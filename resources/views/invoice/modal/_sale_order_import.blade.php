@@ -316,14 +316,16 @@
 
         return new Promise((resolve, reject) => {
             let data = allTrans[id];
-            let isCustomImport = $('#is-custom-import').is(':checked');
+            var date = null;
+            var tokoid = null;
+            isCustomImport = $('#is-custom-import').is(':checked');
             if (isCustomImport) {
-                let tokoid = $('#select-toko option:selected').val();
+                 tokoid = $('#select-toko option:selected').val();
                 if (!tokoid) {
                     swalInfo('opps', 'tolong pilih toko', 'info');
                     return reject(new Error('Toko belum dipilih'));
                 }
-                let date = $('#select-date').val();
+                date = $('#select-date').val();
                 if (!date) {
                     swalInfo('opps', 'tolong pilih tanggal import', 'info');
                     return reject(new Error('Tanggal belum dipilih'));

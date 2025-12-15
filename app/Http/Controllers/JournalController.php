@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\excel_kartu_stock\ExcelKartuStockImport;
 use App\Imports\MultiSheetImport;
 use App\Jobs\ImportKartuStockJob;
 use App\Jobs\ImportSaldoNLJob;
@@ -711,6 +712,33 @@ class JournalController extends Controller
 
         // Kirim ke view konfirmasi
         return view('main.import-saldo', compact('data', 'coas', 'stocks', 'date', 'stockRefs'));
+    }
+
+
+
+    function getImportData(){
+     $view = view('main.import.import-data');
+     return $view;
+    }
+
+
+    function importData(){
+
+        // yang perlu di import
+        // - kartu stock keluar - ini nanti jadi sales order dan jadi invoice pembayaran dkk
+        // - kartu stock masuk - ini nanti jadi purchase order 
+        // - kartu keuangan bank - ini yang bener bener ga bisa diutak atik harus sama persis. trus dilink
+        //                      sama pembayarannya invoice ,/ atau pembayaran dari customer.
+
+        //paling enak itu kalo gathering informasi dulu .pas sudah baru input bersmanaan, import bersamaan
+        //finalkan bersamaan, lunaskan bersamaan, proses bersamaan.  sesuai tanggal yang sudah ada, itu cakep
+       
+        //kasih waktu timeout 300 detik
+        ini_set('max_execution_time', 300); // 5 minutes
+        $import =new ExcelKartuStockImport;
+        Excel::import($import, request()->file('file'));
+        return $import->data;
+
     }
 
     public function importSaldo(Request $request)
