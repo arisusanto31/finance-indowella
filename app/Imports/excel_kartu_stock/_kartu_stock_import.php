@@ -35,6 +35,6 @@ class _kartu_stock_import implements ToArray
         ];
         $array= $this->extractData($headers,true);
         
-        $this->parent->data['Kartu Stok']= $array;
+        $this->parent->data['kartu_stock']= $array;
     }
 }

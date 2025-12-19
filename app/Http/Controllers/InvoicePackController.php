@@ -12,6 +12,7 @@ use App\Models\KartuHutang;
 use App\Models\KartuPiutang;
 use App\Models\KartuStock;
 use App\Models\SalesOrder;
+use App\Models\Toko;
 use App\Services\LockManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -44,6 +45,10 @@ class InvoicePackController extends Controller
 
     public function createClaimPenjualan(Request $request)
     {
+        return [
+            'status' => 0,
+            'msg' => 'lakukan proses jurnal pada panel sales order'
+        ];
         $lockManager = new LockManager();
         $coaPenjualan = $request->input('coa_penjualan');
         $coaBeban = 601000;
@@ -246,6 +251,7 @@ class InvoicePackController extends Controller
     }
     public function createClaimPembelian(Request $request)
     {
+        $toko = Toko::first();
         $coaPersediaan = $request->input('coa_persediaan');
         $coaHutangKas = $request->input('coa_hutang_kas');
         $invoicePackID = $request->input('invoice_pack_id');
@@ -384,6 +390,20 @@ class InvoicePackController extends Controller
                     throw new \Exception($dks['msg']);
                 }
             }
+
+            if ($invoicePack->is_ppn) {
+                $nilaiPPNM =  $invoicePack->total_ppn_m;
+                //buat jurnal ppn masukan
+                InvoicePurchaseController::createPPNMasukan(new Request([
+                    'code_group_debet' => 150500, //ppn masukan
+                    'code_group_kredit' => $coaHutangKas,
+                    'nilai_mutasi' => $nilaiPPNM,
+                    'toko_id' => $toko->id,
+                    'description' => 'PPN Masukan pembelian ' . $invoicePack->invoice_number,
+                    'invoice_pack_id' => $invoicePackID,
+                    'date' => $date
+                ]));
+            }
             DB::commit();
             return [
                 'status' => 1,
@@ -431,6 +451,4 @@ class InvoicePackController extends Controller
 
         return ['results' => $invoices];
     }
-
-    
 }

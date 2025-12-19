@@ -25,6 +25,8 @@
                                 onclick="openImportData('{{ book()->id }}')" id="btn-import">Import dari
                                 Manuf</button>
                         @endif
+                        <button type="button" class="btn btn-primary" onclick="openImportDataExcel('{{ book()->id }}')"
+                            id="btn-import">Import Excel</button>
                     @endif
                 </div>
                 <div class="row g-2 mb-3">
@@ -51,11 +53,38 @@
                 <div id="invoice-wrapper" class="debet-wrapper">
                 </div>
                 <hr>
+                <div class="d-flex justify-content-end pe-4" style="margin-right:30px;">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" name ="is_ppn" type="checkbox" id="is-ppn" checked />
+                        <label class="form-check-label" for="is-ppn"> <i class="fas fa-hand-holding-usd"></i>
+                            Penjualan PPN </label>
+                    </div>
+                </div>
+
                 <div class="d-flex justify-content-end pe-4">
-                    <div class="d-flex align-items-center gap-2">
+
+                    <div class="d-flex  gap-2">
                         <label for="total_invoice" class="me-2 fw-bold">TOTAL SO</label>
-                        <input type="text" class="form-control text-end" autocomplete="off" readonly
-                            style="width: 200px;" id="total-invoice" readonly>
+                        <div class="d-flex flex-column">
+                            <div class="relative-pos">
+                                <div class="absolute-pos" style="left:10px;top:5px;"> net </div>
+                                <input type="text" class="form-control text-end" autocomplete="off" readonly
+                                    style="width: 200px;" id="total-invoice" readonly>
+                            </div>
+
+                            <div class="relative-pos div-ppn">
+                                <div class="absolute-pos" style="left:10px;top:5px;"> PPN </div>
+                                <input type="text" class="form-control text-end" autocomplete="off" readonly
+                                    style="width: 200px;" id="total-ppn-k" readonly>
+                            </div>
+                            <div class="relative-pos div-ppn">
+                                <div class="absolute-pos" style="left:10px;top:5px;"> gross </div>
+                                <input type="text" class="form-control text-end" autocomplete="off" readonly
+                                    style="width: 200px;" id="total-gross" readonly>
+                            </div>
+
+
+                        </div>
                     </div>
                 </div>
                 <div class="mt-4">
@@ -152,10 +181,27 @@
                                     <td>{{ $item->unitjadi }}</td>
                                     <td class="text-end">Rp{{ format_price($item->pricejadi) }}</td>
                                     <td class="text-end">Rp{{ format_price($item->discount) }}</td>
-                                    <td class="text-end">Rp{{ format_price($item->total_price) }}</td>
+                                    <td class="text-end">Rp{{ format_price($item->total_price) }}
+                                        @if ($item->total_ppn_k > 0)
+                                            <br>
+                                            <div class="bg-danger p-2 rounded-2 text-white " style="font-size:11px;">
+                                                <i
+                                                    class="fas fa-hand-holding-usd"></i>{{ format_price($item->total_ppn_k) }}
+                                            </div>
+                                        @endif
+
+                                    </td>
                                     @if ($index === 0)
-                                        <td rowspan="{{ $rowspan }}">
+                                        <td class="" rowspan="{{ $rowspan }}">
                                             <strong>Rp{{ format_price($item->parent->total_price) }}</strong>
+                                            @if ($item->parent->total_ppn_k > 0)
+                                                <br>
+                                                <div class="bg-danger text-end p-2 rounded-2 text-white"
+                                                    style="font-size:11px;">
+                                                    <i
+                                                        class="fas fa-hand-holding-usd"></i>{{ format_price($item->parent->total_ppn_k) }}
+                                                </div>
+                                            @endif
                                             @if ($item->parent->ref_akun_cash_kind_name)
                                                 <br>
                                                 <div class="bg-primary p-2 rounded-2 text-white"><i
@@ -347,6 +393,10 @@
                 showDetailOnModal('{{ url('admin/invoice/sales-open-import') }}/' + bookID, 'xl');
             }
 
+            function openImportDataExcel(bookID) {
+                showDetailOnModal('{{ url('admin/invoice/sales-open-import-excel') }}/' + bookID, 'xl');
+            }
+
             function getBgPayment(statusPayment) {
                 let bgPayment = 'bglevel3';
 
@@ -503,7 +553,7 @@
                 }, 2000);
             }
 
-             async function invoicingAll() {
+            async function invoicingAll() {
                 parentsMarked = [];
                 $('.select-item:checked').each(function(i, elem) {
                     id = $(elem).data('parent-id');
@@ -820,7 +870,23 @@
                     }
                 });
                 $('#total-invoice').val(formatRupiah(totalInvoice.toFixed(2)));
+                isPPN = $('#is-ppn').is(':checked');
+                if (isPPN) {
+                    PPN = totalInvoice * 0.11;
+                    gross = totalInvoice + PPN;
+                    $('#total-ppn-k').val(formatRupiah(PPN.toFixed(2)));
+                    $('#total-gross').val(formatRupiah(gross.toFixed(2)));
+                    $('.div-ppn').removeClass('hidden');
+                } else {
+                    $('#total-ppn-k').val(formatRupiah('0'));
+                    $('#total-gross').val(formatRupiah(totalInvoice.toFixed(2)));
+                    $('.div-ppn').addClass('hidden');
+                }
             }
+
+            $('#is-ppn').change(function() {
+                updateTotalInvoice();
+            });
 
             function updateStockUnit(el) {
                 const card = el.closest('.rowdebet');

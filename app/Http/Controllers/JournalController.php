@@ -285,8 +285,15 @@ class JournalController extends Controller
     public static function createBaseJournal(Request $request, $useTransaction = true, ?LockManager $lockManager = null)
     {
         $urlTryAgain = $request->input('url_try_again');
-        $isBackDate = $request->input('is_backdate');
-        $date = $isBackDate == 1 ? $request->input('date') : Date('Y-m-d H:i:s');
+
+        $date = $request->input('date') ?? Date('Y-m-d H:i:s');
+        //kalo lebih dari 30 menit yang lalu , brati backdate
+        $dateDiff =  intdiv(carbonDate()->getTimestamp() - createCarbon($date)->getTimestamp(), 60);
+        //apakah ini mewakili juga kalo ganti hari ?
+        $isBackDate = $request->input('is_backdate') ?? null;
+        if ($isBackDate === null)
+            $isBackDate = $dateDiff > 30 ? 1 : 0;
+
         $key = JournalKey::orderBy('id', 'desc')->first();
         $isLockIntern = 0;
         if ($lockManager == null) {
@@ -716,13 +723,15 @@ class JournalController extends Controller
 
 
 
-    function getImportData(){
-     $view = view('main.import.import-data');
-     return $view;
+    function getImportData()
+    {
+        $view = view('main.import.import-data');
+        return $view;
     }
 
 
-    function importData(){
+    function importData()
+    {
 
         // yang perlu di import
         // - kartu stock keluar - ini nanti jadi sales order dan jadi invoice pembayaran dkk
@@ -732,13 +741,15 @@ class JournalController extends Controller
 
         //paling enak itu kalo gathering informasi dulu .pas sudah baru input bersmanaan, import bersamaan
         //finalkan bersamaan, lunaskan bersamaan, proses bersamaan.  sesuai tanggal yang sudah ada, itu cakep
-       
+
         //kasih waktu timeout 300 detik
         ini_set('max_execution_time', 300); // 5 minutes
-        $import =new ExcelKartuStockImport;
+        $import = new ExcelKartuStockImport;
         Excel::import($import, request()->file('file'));
-        return $import->data;
-
+        return [
+            'status' => 1,
+            'msg' => $import->data
+        ];
     }
 
     public function importSaldo(Request $request)
@@ -993,7 +1004,7 @@ class JournalController extends Controller
 
             if ($aksi == 1) {
                 if (count($debets) > 0 && count($kredits) > 0) {
-                    $st = JournalController::createBaseJournal(new Request([
+                    $st = JournalController::Journal(new Request([
                         'debets' => $debets,
                         'kredits' => $kredits,
                         'type' => 'umum',

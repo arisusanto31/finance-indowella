@@ -144,3 +144,11 @@ div.fixed{
   border-radius: 999px;
   transition: width 0.4s ease;
 }
+
+div.relative-pos {
+  position: relative;
+}
+
+div.absolute-pos{
+  position: absolute;
+}

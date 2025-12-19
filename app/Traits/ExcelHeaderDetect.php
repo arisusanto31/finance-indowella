@@ -25,11 +25,12 @@ trait ExcelHeaderDetect
             foreach ($row as $colIndex => $cell) {
                 // $h = $this->normHeader($cell);
                 // if ($h === '') continue;
-                $h= $cell;
+                $h = $this->normHeader($cell);
                 // cocokkan dengan expected (bisa exact / contains)
                 foreach ($expected as $exp) {
+                    $exp = $this->normHeader($exp);
                     if ($h === $exp || str_contains($h, $exp)) {
-                        $exp= $this->normHeader($exp);
+
                         if (!isset($map[$exp])) {
                             $map[$exp] = $colIndex;
                             $score++;
@@ -43,7 +44,7 @@ trait ExcelHeaderDetect
                 $bestRow = $i;
                 $bestMap = $map;
             }
-            if( $bestScore === count($expected)) {
+            if ($bestScore === count($expected)) {
                 // sudah maksimal, gak usah dilanjut
                 break;
             }
@@ -61,10 +62,12 @@ trait ExcelHeaderDetect
 
         // alias biar fleksibel
         $aliases = [
-            'harga pcs' => 'harga/pcs',
-            'harga per pcs' => 'harga/pcs',
+            'harga pcs' => 'harga_pcs',
+            'harga per pcs' => 'harga_pcs',
+            'harga/pcs' => 'harga_pcs',
             'qty' => 'quantity',
             'kode' => 'kode barang',
+            'rp / unit' => 'hpp'
         ];
 
         return $aliases[$s] ?? $s;
@@ -137,22 +140,22 @@ trait ExcelHeaderDetect
         return $headers;
     }
 
-    public function extractData($headers, $isTwoHeader = false)
+    public function extractData($headers, $isTwoHeader = false, $fillHeaders = [])
     {
         [$rowHeader, $mapHeader] = $this->detectHeader($this->array, $headers);
         $dataArray = $this->array;
         $maxColumn = count($dataArray[$rowHeader]);
-        $fixRow= $rowHeader;
-      
+        $fixRow = $rowHeader;
+
         // return $mapHeader;
         if ($isTwoHeader == true) {
             $fixHeader = [];
             foreach ($mapHeader as $key => $index) {
                 $rowSubHeader = $rowHeader + 1;
                 for ($i = $index; $i < $maxColumn; $i++) {
-                    $thiscell= $this->normHeader($dataArray[$rowHeader][$i]);
+                    $thiscell = $this->normHeader($dataArray[$rowHeader][$i]);
                     if ($thiscell != "" && $thiscell != $key) {
-                        $i= $maxColumn+1; // break loop
+                        $i = $maxColumn + 1; // break loop
                     } else {
                         $subKey = $this->normHeader($dataArray[$rowSubHeader][$i]);
                         $finalKey = $subKey != "" ? $key . '_' . $subKey : $key;
@@ -160,12 +163,24 @@ trait ExcelHeaderDetect
                     }
                 }
             }
-            $fixRow= $rowHeader+1;
+            $fixRow = $rowHeader + 1;
         } else {
             $fixHeader = $mapHeader;
         }
 
-        $allData=[];
+        foreach ($fillHeaders as $fh) {
+            $fh = $this->normHeader($fh);
+            if (array_key_exists($fh, $fixHeader)) {
+                for ($i = $fixRow + 1; $i < count($dataArray); $i++) {
+                    $cell = $dataArray[$i][$fixHeader[$fh]] ?? null;
+                    if ($cell == null || $cell == "") {
+                        $dataArray[$i][$fixHeader[$fh]] = $dataArray[$i - 1][$fixHeader[$fh]] ?? null;
+                    }
+                }
+            }
+        }
+
+        $allData = [];
         for ($i = $fixRow + 1; $i < count($dataArray); $i++) {
             $row = $dataArray[$i];
             if ($this->isRowEmpty($row)) continue;

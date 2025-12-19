@@ -9,42 +9,78 @@
     <form id="form-invoice">
         @csrf
 
-        <div class="container py-4 p-3 mb-4 card shadow-sm">
-            <h2>Create Invoice Purchase</h2>
+        <div class=" mb-4 card shadow-sm">
+            <h5 class="text-primary-dark card-header"> <a href="javascript:void(openCardCreate())">⚒️ <strong>BUAT
+                        PURCHASE
+                        ORDER</strong>
+                    <i id="icon-create" class="bx bx-caret-down toggle-icon"></i> </a>
+            </h5>
 
-            <div class="mb-3 mt-2">
-                <button type="button" class="btn btn-primary" onclick="addrow()" id="addDebit">+Tambah</button>
-            </div>
+            <div id="card-create" class="container tree-toggle">
 
-            <div class="row g-2 mb-3">
-                <div class="col-md-4">
-                    <label class="form-label">Pilih Supplier</label>
-                    <select name="supplier_id" class="form-control select2-supplier" required></select>
+                <div class="mb-3 mt-2">
+                    <button type="button" class="btn btn-primary" onclick="addrow()" id="addDebit">+Tambah</button>
+                    <button type="button" class="btn btn-primary" onclick="openImportDataExcel('{{ book()->id }}')"
+                        id="btn-import">Import Excel</button>
                 </div>
-                <div class="col-md-4">
-                    <label class="form-label">Nomor Invoice</label>
-                    <input name="invoice_pack_number" type="text" class="form-control" required
-                        placeholder="Nomor Invoice">
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Tanggal Invoice</label>
-                    <input type="datetime-local" name="date" class="form-control" value="{{ now() }}" />
-                </div>
-            </div>
 
-            <div id="invoice-wrapper" class="debet-wrapper">
-            </div>
-
-            <hr>
-            <div class="d-flex justify-content-end pe-4">
-                <div class="d-flex align-items-center gap-2">
-                    <label for="total_invoice" class="me-2 fw-bold">TOTAL INVOICE</label>
-                    <input type="text" class="form-control text-end" autocomplete="off" readonly
-                        style="width: 200px;" id="total-invoice" readonly>
+                <div class="row g-2 mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Pilih Supplier</label>
+                        <select name="supplier_id" class="form-control select2-supplier" required></select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Nomor Invoice</label>
+                        <input name="invoice_pack_number" type="text" class="form-control" required
+                            placeholder="Nomor Invoice">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Tanggal Invoice</label>
+                        <input type="datetime-local" name="date" class="form-control" value="{{ now() }}" />
+                    </div>
                 </div>
-            </div>
-            <div class="mt-4">
-                <button type="button" onclick="submitInvoice()" class="btn btn-primary w-100">Submit Invoice</button>
+
+                <div id="invoice-wrapper" class="debet-wrapper">
+                </div>
+
+                <hr>
+                <div class="d-flex justify-content-end pe-4" style="margin-right:30px;">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" name ="is_ppn" type="checkbox" id="is-ppn" checked />
+                        <label class="form-check-label" for="is-ppn"><i class="fas fa-hand-holding-usd"></i> Pembelian
+                            PPN
+                        </label>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end pe-4">
+                    <div class="d-flex gap-2">
+                        <label for="total_invoice" class="me-2 mt-1 fw-bold">TOTAL INVOICE</label>
+                        <div class="d-flex flex-column">
+                            <div class="relative-pos">
+                                <div class="absolute-pos" style="left:10px;top:5px;"> net </div>
+                                <input type="text" class="form-control text-end" autocomplete="off" readonly
+                                    style="width: 200px;" id="total-invoice" readonly>
+                            </div>
+
+                            <div class="relative-pos div-ppn">
+                                <div class="absolute-pos" style="left:10px;top:5px;"> PPN </div>
+                                <input type="text" class="form-control text-end" autocomplete="off" readonly
+                                    style="width: 200px;" id="total-ppn-m" readonly>
+                            </div>
+                            <div class="relative-pos div-ppn">
+                                <div class="absolute-pos" style="left:10px;top:5px;"> gross </div>
+                                <input type="text" class="form-control text-end" autocomplete="off" readonly
+                                    style="width: 200px;" id="total-gross" readonly>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <button type="button" onclick="submitInvoice()" class="btn btn-primary mb-3 w-100">Submit
+                        Invoice</button>
+                </div>
             </div>
         </div>
     </form>
@@ -90,7 +126,7 @@
                             <th>Diskon</th>
                             <th>Sub-Total</th>
                             <th>Total</th>
-                            <th> Aksi nya say</th>
+                            <th> Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -110,7 +146,7 @@
                             @endphp
 
                             @foreach ($items as $index => $item)
-                                <tr id="TR{{$item->invoice_pack_id}}"
+                                <tr id="TR{{ $item->invoice_pack_id }}"
                                     class="parent{{ $item->parent->id }} @if ($item->parent->is_mark == 1) bg-primary-lightest @endif">
                                     @if ($index === 0)
                                         <td rowspan="{{ $rowspan }}">{{ $no++ }}</td>
@@ -126,15 +162,27 @@
                                     <td>{{ $item->unit }}</td>
                                     <td class="text-end">Rp{{ number_format($item->price) }}</td>
                                     <td class="text-end">Rp{{ number_format($item->discount) }}</td>
-
-                                    @php
-                                        $subtotal = $item->quantity * $item->price - $item->discount;
-                                    @endphp
-                                    <td class="text-end">Rp{{ number_format($subtotal) }}</td>
-
+                                    <td class="text-end">Rp{{ number_format($item->total_price) }}
+                                        @if ($item->total_ppn_m > 0)
+                                            <br>
+                                            <div class="bg-success p-2 rounded-2 text-white " style="font-size:11px;">
+                                                <i
+                                                    class="fas fa-hand-holding-usd"></i>{{ format_price($item->total_ppn_m) }}
+                                            </div>
+                                        @endif
+                                    </td>
                                     @if ($index === 0)
                                         <td rowspan="{{ $rowspan }}">
-                                            <strong>Rp{{ number_format($invoiceSubtotal) }}</strong>
+                                            <strong>Rp{{ number_format($item->parent->total_price) }}</strong>
+                                            @if ($item->total_ppn_m > 0)
+                                                <br>
+                                                <div class="bg-success p-2 text-end rounded-2 text-white "
+                                                    style="font-size:11px;">
+                                                    <i
+                                                        class="fas fa-hand-holding-usd"></i>{{ format_price($item->parent->total_ppn_m) }}
+                                                </div>
+                                            @endif
+
                                         </td>
                                         @if ($index === 0)
                                             <td id="action{{ $item->parent->id }}" rowspan="{{ $rowspan }}">
@@ -163,7 +211,6 @@
                                                     class="btn btn-sm btn-outline-primary">
                                                     <i class="fas fa-paw"></i>
                                                 </a>
-
                                             </td>
                                         @endif
                                     @endif
@@ -223,6 +270,10 @@
             }
 
 
+             function openImportDataExcel(bookID) {
+                showDetailOnModal('{{ url('admin/invoice/purchase-open-import-excel') }}/' + bookID, 'xl');
+            }
+
 
             function editInvoicePurchase(invoiceNumber) {
                 console.log("Edit Purchase Invoice:", invoiceNumber);
@@ -230,10 +281,17 @@
             }
 
             function deleteInvoicePurchase(id) {
-                swalDelete({url: '{{ url('admin/invoice/delete-invoice-purchase') }}/' + id,elem:'#TR' + id });
+                swalDelete({
+                    url: '{{ url('admin/invoice/delete-invoice-purchase') }}/' + id,
+                    elem: '#TR' + id
+                });
             }
 
 
+            function openCardCreate() {
+                $('#card-create').toggleClass('open');
+                $('#icon-create').toggleClass('open');
+            }
 
             function removeDebetRow(btn) {
                 const card = btn.closest('.rowdebet');
@@ -357,7 +415,23 @@
                     }
                 });
                 $('#total-invoice').val(formatRupiah(totalInvoice.toFixed(2)));
+                isPPN = $('#is-ppn').is(':checked');
+                if (isPPN) {
+                    PPN = totalInvoice * 0.11;
+                    gross = totalInvoice + PPN;
+                    $('#total-ppn-m').val(formatRupiah(PPN.toFixed(2)));
+                    $('#total-gross').val(formatRupiah(gross.toFixed(2)));
+                    $('.div-ppn').removeClass('hidden');
+                } else {
+                    $('#total-ppn-m').val(formatRupiah('0'));
+                    $('#total-gross').val(formatRupiah(totalInvoice.toFixed(2)));
+                    $('.div-ppn').addClass('hidden');
+                }
             }
+
+            $('#is-ppn').change(function() {
+                updateTotalInvoice();
+            });
 
             function updateStockUnit(el) {
                 const card = el.closest('.rowdebet');

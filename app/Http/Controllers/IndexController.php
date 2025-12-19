@@ -103,10 +103,10 @@ class IndexController extends Controller
         $kdp = KartuDPSales::getTotalSaldoRupiah(getInput('date'), 'sales_order_number');
         $jkdp = KartuDPSales::getTotalJournal(getInput('date'));
 
-        $kinv= KartuInventory::getTotalSaldoRupiah(getInput('date'),'inventory_id');
+        $kinv = KartuInventory::getTotalSaldoRupiah(getInput('date'), 'inventory_id');
         $jinv = KartuInventory::getTotalJournal(getInput('date'));
 
-        $kprepaid = KartuPrepaidExpense::getTotalSaldoRupiah(getInput('date'),'prepaid_expense_id');
+        $kprepaid = KartuPrepaidExpense::getTotalSaldoRupiah(getInput('date'), 'prepaid_expense_id');
         $jprepaid = KartuPrepaidExpense::getTotalJournal(getInput('date'));
 
         return [
@@ -153,6 +153,21 @@ class IndexController extends Controller
         }
         if (getInput('type') == 'format_db') {
             return format_db(getInput('nilai'));
+        }
+
+        if (getInput('type') == 'create-ppn-keluaran') {
+            $id = getInput('id');
+            $invoicePack = InvoicePack::find($id);
+
+            return InvoiceSaleController::createPPNKeluaran(new Request([
+                'code_group_debet' =>  120001, //piutang usaha
+                'code_group_kredit' => 212500, //ppn keluaran
+                'nilai_mutasi' => $invoicePack->total_ppn_k,
+                'toko_id' => $invoicePack->toko_id,
+                'description' => 'PPN Keluaran penjualan ' . $invoicePack->invoice_number,
+                'invoice_pack_id' => $invoicePack->id,
+                'date' => Date('Y-m-d H:i:s'),
+            ]));
         }
 
 

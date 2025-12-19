@@ -20,6 +20,8 @@ class SalesOrder extends Model
         'reference_type',
         'ref_akun_cash_kind_name',
         'created_at',
+        'is_ppn',
+        'total_ppn_k',
     ];
 
     public function reference()

@@ -46,6 +46,35 @@ if (!function_exists('bookID')) {
     }
 }
 
+if (!function_exists('db_date_from_dmy')) {
+    function db_date_from_dmy(?string $dmy): ?string
+    {
+        if (!$dmy) return null;
+
+        $dmy = trim($dmy);
+
+        $dt = \DateTime::createFromFormat('d/m/Y', $dmy);
+        $errors = \DateTime::getLastErrors();
+
+        if (!$dt || ($errors['warning_count'] ?? 0) > 0 || ($errors['error_count'] ?? 0) > 0) {
+            return null; // atau throw exception kalau kamu mau strict
+        }
+
+        return $dt->format('Y-m-d');
+    }
+}
+
+if (!function_exists('norm_string')) {
+
+    function norm_string($value)
+    {
+        $s = strtolower(trim((string)$value));
+        $s = preg_replace('/\s+/', ' ', $s);     // spasi ganda jadi 1
+        $s = str_replace(['.', ':'], '', $s);
+        $s = str_replace(['/', ' '], '_', $s);
+        return $s;
+    }
+}
 
 class CustomLogger
 {
@@ -108,7 +137,8 @@ function getListMonthYear()
     return $listMonthYear;
 }
 
-function getListYear(){
+function getListYear()
+{
     $date = carbonDate()->format('Y');
     $listYear = [];
     for ($i = 0; $i < 5; $i++) {

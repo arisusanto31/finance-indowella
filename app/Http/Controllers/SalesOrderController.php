@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\excel_kartu_stock\_stock_keluar_import;
+use App\Imports\ExcelPenjualanImport;
 use App\Models\BookJournal;
 use App\Models\Customer;
 use App\Models\InvoicePack;
@@ -22,10 +24,14 @@ use App\Models\InvoiceSaleDetail;
 use App\Models\KartuBDP;
 use App\Models\KartuStock;
 use App\Models\LinkTokoParent;
+use App\Models\ManufStock;
+use App\Models\ManufToko;
+use App\Models\RetailStock;
+use App\Models\RetailToko;
 use App\Models\StockUnit;
 use App\Models\Toko;
 use Illuminate\Support\Facades\Log;
-
+use Maatwebsite\Excel\Facades\Excel;
 
 class SalesOrderController extends Controller
 {
@@ -42,13 +48,10 @@ class SalesOrderController extends Controller
                 });
             })
             ->select('sds.*')
-            ->with('customer:name,id', 'stock:name,id', 'parent:sales_order_number,id,is_final,is_mark,total_price,ref_akun_cash_kind_name,status,status_payment,status_delivery')
+            ->with('customer:name,id', 'stock:name,id', 'parent:sales_order_number,id,is_final,total_ppn_k,is_mark,total_price,ref_akun_cash_kind_name,status,status_payment,status_delivery')
             ->orderBy('sds.created_at', 'asc')
             ->get()
             ->groupBy('sales_order_number');
-
-
-
         $invPack = SalesOrder::whereIn('sales_order_number', $salesOrders->keys()->all())
             ->select('is_final', 'is_mark', 'total_price')->get();
         $totalInvoice = collect($invPack)->sum('total_price');
@@ -90,7 +93,15 @@ class SalesOrderController extends Controller
                 'custom_stock_name' => 'nullable|array',
                 'custom_stock_name.*' => 'nullable|string',
                 'akun_cash_kind_name' => 'nullable|string',
+
             ]);
+            if ($request->input('is_ppn') == 'on') {
+                $isPPN = 1;
+            } else if ($request->input('is_ppn') == 1) {
+                $isPPN = 1;
+            } else {
+                $isPPN = 0;
+            }
             $customerID = null;
             $arrayStockID = [];
             $detailReferenceID = $request->detail_reference_id ?? null;
@@ -136,6 +147,7 @@ class SalesOrderController extends Controller
                 $arrayStockID = $request->stock_id;
             }
 
+
             if (!$request->customer_id) {
                 if ($request->customer_name) {
                     $customer = Customer::where('name', $request->customer_name)->first();
@@ -151,19 +163,23 @@ class SalesOrderController extends Controller
             } else {
                 $customerID = $request->customer_id;
             }
+
             $sales_order_number = $request->sales_order_number . '-draft';
             $grouped = [];
             foreach ($arrayStockID as $i => $stockId) {
+                $nilaiPPN = $isPPN == 1 ? format_db($request->total_price[$i]) * 0.11 : 0;
                 $grouped[] = [
                     'sales_order_number' => $sales_order_number,
                     'stock_id' => $stockId,
                     'quantity' => $request->quantity[$i],
                     'unit' => $request->unit[$i],
                     'price' => $request->price_unit[$i],
-                    'qtyjadi' => $request->qtyjadi[$i],
-                    'unitjadi' => $request->unitjadi[$i],
-                    'pricejadi' => $request->pricejadi[$i],
+                    'qtyjadi' => $request->qtyjadi[$i] ?? $request->quantity[$i],
+                    'unitjadi' => $request->unitjadi[$i] ?? $request->unit[$i],
+                    'pricejadi' => $request->pricejadi[$i] ?? $request->price_unit[$i],
                     'discount' => $request->discount[$i] ?? 0,
+                    'is_ppn' => $isPPN,
+                    'total_ppn_k' => $nilaiPPN,
                     'customer_id' => $customerID,
                     'book_journal_id' => bookID(),
                     'total_price' => format_db($request->total_price[$i]) ?? 0,
@@ -175,12 +191,15 @@ class SalesOrderController extends Controller
                 ];
             }
             //create pack ya
+
             $invoicePack = SalesOrder::create([
                 'sales_order_number' => $sales_order_number,
                 'book_journal_id' => bookID(),
                 'customer_id' => $customerID,
+                'total_ppn_k' => collect($grouped)->sum('total_ppn_k'),
                 'total_price' => collect($grouped)->sum('total_price'),
                 'status' => 'draft',
+                'is_ppn' => $isPPN,
                 'toko_id' => $request->toko_id,
                 'reference_id' => $request->input('reference_id'),
                 'reference_type' => $request->input('reference_type'),
@@ -199,6 +218,8 @@ class SalesOrderController extends Controller
             return ['status' => 0, 'msg' => $e->getMessage()];
         }
     }
+
+
 
 
     public function makeFinal(Request $request)
@@ -308,6 +329,78 @@ class SalesOrderController extends Controller
         $view = view('invoice.modal._sale_order_import');
         $view->toko_parents = LinkTokoParent::pluck('toko_id', 'parent_id')->all();
         return $view;
+    }
+
+
+    function openImportExcel()
+    {
+        $view = view('invoice.modal._sale_order_import_excel');
+        $view->toko_parents = LinkTokoParent::pluck('toko_id', 'parent_id')->all();
+        return $view;
+    }
+
+    public function getDataImportExcel(Request $request)
+    {
+
+        $file = $request->file('file');
+        $bookID = $request->input('book_journal_id');
+        $importer = new ExcelPenjualanImport();
+        Excel::import($importer, $file);
+        $stockType = null;
+        if ($bookID == 2) {
+            $class = RetailToko::class;
+            $stockType = RetailStock::class;
+        } else {
+            $class = ManufToko::class;
+            $stockType = ManufStock::class;
+        }
+        $refToko = $class::select('name', 'id')->get()->map(function ($item) {
+            return [
+                'name' => norm_string($item->name),
+                'id' => $item->id,
+            ];
+        })->pluck('id', 'name')->all();
+
+
+        $data = $importer->result;
+        $idBuatan = 1;
+        $data = collect($data)->groupBy('no_transaksi')->map(function ($item, $key) use ($refToko, &$idBuatan, $stockType) {
+            $tokoname = norm_string(collect($item)->first()['nama_toko'] ?? null);
+            $tanggal = collect($item)->first()['tanggal'];
+            $akunCash = collect($item)->first()['payment'];
+            return [
+                'package_number' => $key,
+                'payment' => collect($item)->first()['payment'],
+                'details' => collect($item)->map(function ($val) {
+                    return [
+                        'created_at' => db_date_from_dmy($val['tanggal']),
+                        'stock_id' => $val['kode_barang'],
+                        'stock_name' => $val['nama_barang'],
+                        'quantity' => $val['quantity'],
+                        'unit' => $val['satuan'],
+                        'price' => $val['harga_pcs'],
+                        'total_price' => $val['sub_total'],
+                        'akun_cash_kind_name' => $val['payment'],
+                        'reference_id' => null,
+                        'reference_type' => null,
+                        'toko' => $val['nama_toko'] ?? null,
+
+                    ];
+                }),
+                'stock_type' => $stockType,
+                'created_at' => db_date_from_dmy($tanggal),
+                'akun_cash_kind_name' => $akunCash,
+                'total_nota' => collect($item)->first()['total_nota'],
+                'customer_name' => collect($item)->first()['nama_customer'] ?? 'Anonim',
+                'toko_id' => $refToko[$tokoname] ?? null,
+                'toko' => collect($item)->first()['nama_toko'] ?? null,
+                'id' => $idBuatan++,
+            ];
+        })->values()->all();
+        return [
+            'status' => 1,
+            'data'   => $data,
+        ];
     }
 
     public function getDataImport($book_journal_id)
@@ -693,7 +786,6 @@ class SalesOrderController extends Controller
         $view = view('invoice.kebutuhan-produksi');
         $view->kebutuhanProduksi = $sales->values()->all();
         $view->sisaStock = $sisaStock;
-
         return $view;
         // ->groupBy('stock_id')->map(function ($val) {
         //disini itung jumlah. tapi pastikan satuannya sama ya lur.
@@ -725,14 +817,22 @@ class SalesOrderController extends Controller
 
         //tanpa BDP, bahan jadi, langsung invoice dari barang dagang
         $id = $request->input('id');
+
         $salesOrder = SalesOrder::find($id);
-        $salesOrderNumber = $salesOrder->sales_order_number;
         if (!$salesOrder) {
             return [
                 'status' => 0,
-                'msg' => 'sales order ' . $salesOrderNumber . ' tidak ditemukan'
+                'msg' => 'sales order ' . $id . ' tidak ditemukan'
             ];
         }
+        if (!$salesOrder->is_final) {
+            return [
+                'status' => 0,
+                'msg' => 'Sales order ' . $id . ' belum dalam status final'
+            ];
+        }
+        $salesOrderNumber = $salesOrder->sales_order_number;
+
         //cek dulu aja jangan jangan udah difinalkan
         $existingInv = InvoiceSaleDetail::where('sales_order_number', $salesOrderNumber)->count();
         if ($existingInv > 0) {
@@ -789,14 +889,12 @@ class SalesOrderController extends Controller
         }
         $codeBayar = $toko->default_code_group_kas;
         $codeGroupPiutang = 120001;
-
         $st = InvoiceSaleController::submitBayarSalesInvoice(new Request([
             'invoice_number' => $invoiceNumber,
             'amount' => $amount,
             'date' => $date,
             'codegroup_bayar' => $codeBayar,
             'codegroup_piutang' => $codeGroupPiutang,
-
         ]));
 
         if ($st['status'] == 0) {

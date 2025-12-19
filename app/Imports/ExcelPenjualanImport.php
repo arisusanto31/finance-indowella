@@ -1,25 +1,18 @@
 <?php
 
-namespace App\Imports\excel_kartu_stock;
+namespace App\Imports;
 
 use App\Traits\ExcelHeaderDetect;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToArray;
 use Maatwebsite\Excel\Concerns\ToCollection;
-use Maatwebsite\Excel\Concerns\WithCalculatedFormulas;
 
-class _stock_keluar_import implements ToArray
+class ExcelPenjualanImport implements ToArray
 {
-    /**
-     * @param Collection $collection
-     */
     use ExcelHeaderDetect;
-    protected $parent;
+
+    public $result;
     protected $array;
-    public function __construct($parent)
-    {
-        $this->parent = $parent;
-    }
     public function array(array $array)
     {
         //
@@ -31,11 +24,22 @@ class _stock_keluar_import implements ToArray
             'Quantity',
             'Satuan',
             'Harga/Pcs',
-            'Total'
-
+            'Sub Total',
+            'Total Nota',
+            'No Transaksi',
+            'Payment',
+            'Nama Toko',
+            'Nama Customer'
         ];
-        $array = $this->extractData($headers);
 
-        $this->parent->data['stock_keluar'] = $array;
+        $fillHeaders=[
+            'No Transaksi',
+            'Total Nota',
+            'Nama Toko',
+            'Nama Customer'
+        ];
+        $array = $this->extractData($headers,false,$fillHeaders);
+
+        $this->result = $array;
     }
 }

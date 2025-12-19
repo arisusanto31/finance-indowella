@@ -29,6 +29,8 @@ class InvoiceSaleDetail extends Model
         'reference_id',
         'reference_type',
         'created_at',
+        'is_ppn',
+        'total_ppn_k',
     ];
 
     protected static function booted()

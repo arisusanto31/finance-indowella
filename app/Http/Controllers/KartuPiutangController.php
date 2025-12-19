@@ -74,4 +74,10 @@ class KartuPiutangController extends Controller
             'msg' => $kartu
         ];
     }
+
+    public function deleteMutation($id)
+    {
+        $kp = KartuPiutang::find($id);
+        return $kp->makeDelete();
+    }
 }

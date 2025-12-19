@@ -29,7 +29,9 @@ class SalesOrderDetail extends Model
         'toko_id',
         'reference_id',
         'reference_type',
-        'created_at'
+        'created_at',
+        'is_ppn',
+        'total_ppn_k',
     ];
 
     public function parent()

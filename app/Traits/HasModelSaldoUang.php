@@ -149,4 +149,35 @@ trait HasModelSaldoUang
             $kartu->save();
         }
     }
+
+    public function makeDelete($kolomGroup = 'invoice_pack_number')
+    {
+        try {
+            DB::beginTransaction();
+            // cari saldo dulu yang lama
+            $class = get_class($this);
+
+            $lastSaldoFactur = static::query()->where('person_id', $this->person_id)->where('person_type', $this->person_type)
+                ->where($kolomGroup, $this->$kolomGroup)->where('index_date', '<', $this->index_date)->first();
+
+            $lastSaldoPerson =   static::query()->where('person_id', $this->person_id)->where('person_type', $this->person_type)
+                ->where('index_date', '<', $this->index_date)->first();
+            $this->delete();
+            if ($lastSaldoFactur)
+                $lastSaldoFactur->recalculateSaldo();
+            if ($lastSaldoPerson)
+                $lastSaldoPerson->recalculateSaldo();
+            DB::commit();
+            return [
+                'status' => 1,
+                'msg' => 'Mutasi berhasil dihapus'
+            ];
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return [
+                'status' => 0,
+                'msg' => $e->getMessage()
+            ];
+        }
+    }
 }

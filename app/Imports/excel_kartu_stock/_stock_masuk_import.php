@@ -39,6 +39,6 @@ class _stock_masuk_import implements ToArray
         ];
         $array = $this->extractData($headers);
 
-        $this->parent->data['Stok Masuk'] = $array;
+        $this->parent->data['stock_masuk'] = $array;
     }
 }

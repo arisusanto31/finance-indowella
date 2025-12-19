@@ -20,7 +20,9 @@ class InvoicePurchaseDetail extends Model
         'discount',
         'supplier_id',
         'custom_stock_name',
-        'created_at'
+        'created_at',
+        'is_ppn',
+        'total_ppn_m',
 
     ];
 

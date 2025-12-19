@@ -216,6 +216,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('show-detail/{id}', [KartuPiutangController::class, 'showDetail'])->name('show-detail');
             Route::get('search-link-journal', [KartuPiutangController::class, 'searchLinkJournal'])->name('search-link-journal');
             Route::get('refresh/{id}', [KartuPiutangController::class, 'refresh'])->name('refresh');
+            Route::delete('delete-mutation/{id}', [KartuPiutangController::class, 'deleteMutation'])->name('delete-mutasi');
         });
         Route::prefix('kartu-dp-sales')->name('kartu-dp-sales.')->group(function () {
             Route::resource('main', KartuDPSalesController::class);
@@ -323,12 +324,18 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::post('sales-order-store', [SalesOrderController::class, 'store'])->name('sales-order.store');
         Route::get('sales-open-import/{id}', [SalesOrderController::class, 'openImport'])->name('sales-open-import');
         Route::get('sales-get-data-import/{id}', [SalesOrderController::class, 'getDataImport'])->name('sales-get-data-import');
+        Route::post('sales-get-data-import-excel', [SalesOrderController::class, 'getDataImportExcel'])->name('sales-get-data-import-excel');
+        Route::get('sales-open-import-excel/{id}',[SalesOrderController::class, 'openImportExcel'])->name('sales-open-import-excel');
         Route::get('show-sales-detail/{id}', [SalesOrderController::class, 'showDetail'])->name('sale-order-detail');
         Route::get('update-input-invoice/{id}', [SalesOrderController::class, 'updateInputInvoice'])->name('update-input-invoice');
         Route::post('sales-make-final', [SalesOrderController::class, 'makeFinal'])->name('sales-make-final');
         Route::post('sales-cancel-final', [SalesOrderController::class, 'cancelFinal'])->name('sales-cancel-final');
         Route::post('sales-mark', [SalesOrderController::class, 'mark'])->name('sales-mark');
         Route::post('sales-process-dagang', [SalesOrderController::class, 'processDagang'])->name('sales-process-dagang');
+
+        Route::get('purchase-open-import-excel/{id}',[InvoicePurchaseController::class, 'openImportExcel'])->name('purchase-open-import-excel');
+        Route::post('purchase-get-data-import-excel', [InvoicePurchaseController::class, 'getDataImportExcel'])->name('purchase-get-data-import-excel');
+        
 
         Route::get('invoice-sales-refresh/{id}', [InvoiceSaleController::class, 'refresh'])->name('invoice-sales-refresh');
         Route::get('invoice-sales/edit/{id}', [InvoiceSaleController::class, 'editInvoiceSales']);

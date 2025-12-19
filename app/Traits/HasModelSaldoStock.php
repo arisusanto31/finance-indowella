@@ -170,9 +170,10 @@ trait HasModelSaldoStock
                 $lastSaldo = $class::where('stock_id', $this->stock_id)->where('index_date', '<', $this->index_date)
                     ->orderBy('index_date', 'desc')->first();
             }
+
+            $this->delete();
             if ($lastSaldo)
                 $lastSaldo->recalculateSaldo();
-            $this->delete();
             DB::commit();
             return [
                 'status' => 1,

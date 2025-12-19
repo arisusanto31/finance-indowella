@@ -23,10 +23,16 @@ class InvoicePack extends Model
         'invoice_date',
         'total_price',
         'status',
+        'total_ppn_k',
+        'total_ppn_m',
+
         'toko_id',
         'reference_id',
         'reference_type',
         'created_at',
+        'is_ppn',
+        'total_ppn_k',
+        'total_ppn_m',
     ];
 
     protected static function booted()

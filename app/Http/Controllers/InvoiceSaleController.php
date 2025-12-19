@@ -217,7 +217,9 @@ class InvoiceSaleController extends Controller
                 'reference_type' => 'nullable|string',
                 'custom_stock_name' => 'nullable|array',
                 'custom_stock_name.*' => 'nullable|string|max:255',
+                'is_ppn' => 'nullable|boolean',
             ]);
+            $isPPN = $request->input('is_ppn', 0);
             $customerID = null;
             $arrayStockID = [];
             if (!$request->stock_id) {
@@ -291,6 +293,8 @@ class InvoiceSaleController extends Controller
                     'discount' => $request->discount[$i] ?? 0,
                     'customer_id' => $customerID,
                     'book_journal_id' => bookID(),
+                    'is_ppn' => $isPPN,
+                    'total_ppn_k' => $isPPN ? (format_db($request->total_price[$i]) * 0.1) : 0,
                     'total_price' => format_db($request->total_price[$i]) ?? 0,
                     'toko_id' => $request->toko_id,
                     'custom_stock_name' => $request->custom_stock_name[$i] ?? null,
@@ -310,6 +314,8 @@ class InvoiceSaleController extends Controller
                 'status' => 'draft',
                 'toko_id' => $request->toko_id,
                 'reference_id' => $request->input('reference_id'),
+                'is_ppn' => $isPPN,
+                'total_ppn_k' => collect($grouped)->sum('total_ppn_k'),
                 'reference_type' => $request->input('reference_type'),
                 'reference_model' => InvoiceSaleDetail::class,
                 'created_at' => $request->input('created_at') ?? now(),
@@ -385,6 +391,7 @@ class InvoiceSaleController extends Controller
         $productionNumbers = $request->input('production_number');
         $sales = SalesOrder::find($salesOrderID);
         $salesDetailIDs = $request->input('sales_detail_id');
+        $isPPN = $sales->is_ppn;
         // return $request->all();
         DB::beginTransaction();
         try {
@@ -395,7 +402,9 @@ class InvoiceSaleController extends Controller
             $realDataSales = $sales->details->keyBy('id')->all();
             foreach ($salesDetailIDs as $i => $saleDetailID) {
                 $dataDetailSale = $realDataSales[$saleDetailID];
+                $prosen = $quantities[$i] / $dataDetailSale->quantity;
                 $discount = $quantities[$i] * $dataDetailSale->discount / $dataDetailSale->quantity;
+                $totalPrice = $prosen * $dataDetailSale->total_price;
                 $grouped[] = [
                     'invoice_pack_number' => $invoiceNumber,
                     'stock_id' => $stockIDs[$i],
@@ -407,11 +416,13 @@ class InvoiceSaleController extends Controller
                     'sales_order_id' => $saleDetailID,
                     'sales_order_number' => $salesOrderNumber,
                     'book_journal_id' => bookID(),
-                    'total_price' => $dataDetailSale->total_price,
+                    'total_price' => $totalPrice,
                     'toko_id' => $dataDetailSale->toko_id,
                     'custom_stock_name' => $customStockNames[$i] ?? null,
                     'created_at' => $date,
                     'row_index' => $i + 1,
+                    'is_ppn' => $isPPN,
+                    'total_ppn_k' => $dataDetailSale->total_ppn_k * $prosen,
 
                 ];
             }
@@ -428,7 +439,9 @@ class InvoiceSaleController extends Controller
                 'reference_type' => null,
                 'reference_model' => InvoiceSaleDetail::class,
                 'created_at' => $date,
-                'invoice_date' => $date
+                'invoice_date' => $date,
+                'is_ppn' => $isPPN,
+                'total_ppn_k' => collect($grouped)->sum('total_ppn_k'),
             ]);
             $invoicePack->invoice_number = $invoicePack->getCodeFix();
             $invoicePack->is_final = 1;
@@ -441,9 +454,6 @@ class InvoiceSaleController extends Controller
                 $data['invoice_pack_id'] = $invoicePack->id;
                 $details[] = InvoiceSaleDetail::create($data);
             }
-
-
-
             foreach ($salesDetailIDs as $i => $saleDetailID) {
                 $dataDetailSale = $realDataSales[$saleDetailID];
                 $person = $invoicePack->person;
@@ -520,6 +530,21 @@ class InvoiceSaleController extends Controller
                 }
             }
 
+
+            if($isPPN){
+              
+                self::createPPNKeluaran(new Request([
+                    'code_group_debet' =>  $codeGroupPiutangs[0], //piutang usaha
+                    'code_group_kredit' => 212500, //ppn keluaran
+                    'nilai_mutasi' => $invoicePack->total_ppn_k,
+                    'toko_id' => $invoicePack->toko_id,
+                    'description' => 'PPN Keluaran penjualan ' . $invoicePack->invoice_number,
+                    'invoice_pack_id' => $invoicePack->id,
+                    'date' => $date
+                ]));
+
+            }
+
             DB::commit();
             $lockManager->releaseAll();
             //buat jurnal penjualan
@@ -529,6 +554,78 @@ class InvoiceSaleController extends Controller
             $lockManager->releaseAll();
             return ['status' => 0, 'msg' => $th->getMessage()];
         }
+    }
+
+     public static function createPPNKeluaran(Request $request)
+    {
+        $coaDebet = $request->input('code_group_debet');
+        $coaKredit = $request->input('code_group_kredit');
+        $nilaiMutasi = format_db($request->input('nilai_mutasi'));
+        $tokoID = $request->input('toko_id');
+        $description = $request->input('description');
+        $invoicePackID = $request->input('invoice_pack_id');
+        $date = $request->input('date');
+        $invoicePack = InvoicePack::find($invoicePackID);
+        $invoicePackNumber = $invoicePack ? $invoicePack->invoice_number : '';
+
+
+        if ($coaDebet > 120000) {
+            //brati hutang, buat kartu hutang ya lur
+            $kartu = KartuPiutang::createMutation(new Request([
+                'invoice_pack_number' => $invoicePackNumber,
+                'invoice_pack_id' => $invoicePackID,
+                'amount_mutasi' => $nilaiMutasi,
+                'person_id' => $invoicePack->person_id ?? null,
+                'person_type' => $invoicePack->person_type ?? null,
+                'code_group' => $coaDebet,
+                'lawan_code_group' => $coaKredit,
+                'is_otomatis_jurnal' => 1,
+                'date' => $date,
+                'toko_id' => $tokoID,
+                'description' => $description,
+            ]), false);
+            if ($kartu['status'] == 0) {
+                throw new \Exception($kartu['msg']);
+            }
+            $kartuPiutang = $kartu['msg'];
+            $journalNumber = $kartuPiutang->journal_number;
+        } else {
+            $kredits = [
+                [
+                    'code_group' => 212500, //ppn keluaran
+                    'description' => $description,
+                    'amount' => $nilaiMutasi,
+                    'reference_id' => null,
+                    'reference_type' => null,
+                    'toko_id' => $tokoID
+                ],
+            ];
+            $debets = [
+                [
+                    'code_group' => $coaDebet,
+                    'description' => $description,
+                    'amount' => $nilaiMutasi,
+                    'reference_id' => null,
+                    'reference_type' => null,
+                    'toko_id' => $tokoID
+                ],
+            ];
+            $st = JournalController::createBaseJournal(new Request([
+                'kredits' => $kredits,
+                'debets' => $debets,
+                'type' => 'purchasing',
+                'date' => $date,
+                'is_auto_generated' => 1,
+                'title' => 'create mutation purchase',
+                'url_try_again' => null
+
+            ]), false);
+            if ($st['status'] == 0) {
+                throw new \Exception($st['msg']);
+            }
+            $journalNumber = $st['journal_number'];
+        }
+        return $journalNumber;
     }
 
     public static function submitBayarSalesInvoice(Request $request)
@@ -610,6 +707,7 @@ class InvoiceSaleController extends Controller
 
         return $view;
     }
+    
 
     public function getDataImport($book_journal_id)
     {
@@ -705,7 +803,4 @@ class InvoiceSaleController extends Controller
             return ['status' => 0, 'msg' => $e->getMessage()];
         }
     }
-
-
-  
 }
