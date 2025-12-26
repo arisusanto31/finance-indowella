@@ -104,7 +104,7 @@ class KartuHutang extends Model
                     $q->from('kartu_hutangs')->where('person_id', $personID)->where('person_type', $personType)
                         ->where('index_date', '<', $indexDate)
                         ->select(
-                            DB::raw('max(id) as maxid'),
+                            DB::raw('max(index_date) as maxid'),
                         )->groupBy('invoice_pack_number');
                 })->sum('amount_saldo_factur');
                 $kartu = new KartuHutang();

@@ -1,45 +1,43 @@
 <?php
 
-namespace App\Imports\excel_kartu_stock;
+namespace App\Imports;
 
 use App\Traits\ExcelHeaderDetect;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToArray;
 use Maatwebsite\Excel\Concerns\ToCollection;
-use Maatwebsite\Excel\Concerns\WithCalculatedFormulas;
 
-class _stock_masuk_import implements ToArray
+class ExcelPembelianImport implements ToArray
 {
-    /**
-     * @param Collection $collection
-     */
     use ExcelHeaderDetect;
-    protected $parent;
-    protected $array;
-    public function __construct($parent)
-    {
-        $this->parent = $parent;
-    }
 
+    public $result;
+    protected $array;
     public function array(array $array)
     {
         //
         $this->array = $array;
         $headers = [
             'Tanggal',
-            'Supplier',
-            'No PO',
             'Kode Barang',
             'Nama Barang',
             'Quantity',
             'Satuan',
             'Harga/Pcs',
             'Sub Total',
-            'Total Nota'
-
+            'Total Nota',
+            'No Invoice',
+            'Payment',
+            'Supplier'
         ];
-        $array = $this->extractData($headers);
 
-        $this->parent->data['stock_masuk'] = $array;
+        $fillHeaders = [
+            'No Invoice',
+            'Total Nota',
+            'Supplier'
+        ];
+        $array = $this->extractData($headers, false, $fillHeaders);
+
+        $this->result = $array;
     }
 }

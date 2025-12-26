@@ -7,7 +7,7 @@
 <div class="modal-body">
 
     <div class="bglevel1 p-2 mb-2">
-        <b>Import file </b> <span style="font-size:12px"> (kolom: Tanggal, Kode Barang, Nama Barang , Quantity, Satuan, Harga/Pcs, Sub Total, Total Nota, No Transaksi, Payment, Nama Toko, Nama Customer)</span>
+        <b>Import file </b> <span style="font-size:12px"> (kolom: Tanggal, Kode Barang, Nama Barang , Quantity, Satuan, Harga/Pcs, Sub Total, Total Nota, No Invoice, Nama Toko, Supplier)</span>
         <input type="file" id="import-file-input" class="form-control" />
         <button class="btn btn-primary mt-2" onclick="getImportData()">Load Data</button>
     </div>
@@ -121,7 +121,7 @@
             processData: false,
             contentType: false,
             success: function(res) {
-
+                console.log(res);
                 if (res.status == 0) {
                     swalInfo('opps', res.message, 'error');
                     loading(0);
@@ -142,16 +142,16 @@
                                     </td>
                                     <td rowspan="${jumlah}">${i+1}</td>
                                     <td rowspan="${jumlah}">${formatNormalDate(new Date(item.created_at))}</td>
-                                    <td rowspan="${jumlah}">${item.package_number} (${item.customer_name})</td>
+                                    <td rowspan="${jumlah}">${item.package_number} (${item.supplier})</td>
                                     <td rowspan="${jumlah}">${detail.toko}</td>
                                     `:''}
                                     <td>${detail.stock_name}</td>
                                     <td>${detail['quantity']}</td>
                                     <td>${detail['unit']}</td>
-                                    <td>${detail['price']}</td>
-                                    <td>${detail['total_price']}</td>
+                                    <td>${formatRupiah(detail['price'])}</td>
+                                    <td>${formatRupiah(detail['total_price'])}</td>
                                     ${j==0?`
-                                    <td rowspan="${jumlah}"> ${formatRupiah(collect(item.details).sum('total_price'))}<br>${item.akun_cash_kind_name}</td>
+                                    <td rowspan="${jumlah}"> ${formatRupiah(collect(item.details).sum('total_price'))}</td>
                                     <td rowspan="${jumlah}" id="status${item.id}">
                                         <button class="btn btn-success btn-sm" onclick="importDataSingle('${item.id}')">
                                             import NON
@@ -281,11 +281,10 @@
             }
 
             let dataPost = {
-                created_at: date ? date : data.created_at,
-                customer_name: data.customer_name,
+                date: date ? date : data.created_at,
+                supplier_name: data.supplier,
                 is_ppn: isPPN,
-                sales_order_number: data.package_number,
-                custom_stock_name: data.details.map(item => item.stock_name),
+                invoice_pack_number: data.package_number,
                 reference_stock_id: data.details.map(item => item.stock_id),
                 reference_stock_type: data.stock_type,
                 quantity: data.details.map(item => item.quantity),
@@ -295,7 +294,6 @@
                 unit: data.details.map(item => item.unit),
                 unitjadi: data.details.map(item => item.unitjadi),
                 total_price: data.details.map(item => isPPN ? item.total_price / 1.11 : item.total_price),
-                akun_cash_kind_name: data.akun_cash_kind_name,
                 toko_id: tokoid ? tokoid : tokoParents[data.toko_id],
                 detail_reference_id: data.details.map(item => item.reference_id),
                 detail_reference_type: data.details.map(item => item.reference_type),
@@ -306,7 +304,7 @@
 
             console.log(dataPost);
             $.ajax({
-                url: '{{ route('invoice.sales-order.store') }}',
+                url: '{{ route('invoice.purchase.store') }}',
                 data: dataPost,
                 method: 'post',
                 success: function(res) {

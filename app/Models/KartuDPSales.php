@@ -90,10 +90,10 @@ class KartuDPSales extends Model
 
 
                 $lastSaldoPerson = KartuDPSales::whereIn('index_date', function ($q) use ($personID, $personType, $indexDate) {
-                    $q->from('kartu_piutangs')->where('person_id', $personID)->where('person_type', $personType)
+                    $q->from('kartu_dp_sales')->where('person_id', $personID)->where('person_type', $personType)
                         ->where('index_date', '<', $indexDate)
                         ->select(
-                            DB::raw('max(id) as maxid'),
+                            DB::raw('max(index_date) as maxid'),
                         )->groupBy('sales_order_number');
                 })->sum('amount_saldo_factur');
                 $kartu = new KartuDPSales();
@@ -266,7 +266,7 @@ class KartuDPSales extends Model
                 'code_group' => $codeGroup,
                 'lawan_code_group' => $lawanCodeGroup,
                 'code_group_name' => $codeName,
-                'date'=>$date
+                'date' => $date
             ]));
 
             if ($st['status'] == 1) {
@@ -399,7 +399,7 @@ class KartuDPSales extends Model
                 'code_group' => $codeGroup,
                 'lawan_code_group' => $lawanCodeGroup,
                 'code_group_name' => $codeName,
-                'date'=>$date
+                'date' => $date
             ]));
 
             if ($st['status'] == 1) {
@@ -418,10 +418,9 @@ class KartuDPSales extends Model
         }
     }
 
-    public function recalculateSaldo(){
+    public function recalculateSaldo()
+    {
         $this->refreshCurrentSaldo('sales_order_number');
         $this->recalculateListSaldo('sales_order_number');
     }
-
-  
 }

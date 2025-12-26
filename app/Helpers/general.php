@@ -50,9 +50,7 @@ if (!function_exists('db_date_from_dmy')) {
     function db_date_from_dmy(?string $dmy): ?string
     {
         if (!$dmy) return null;
-
         $dmy = trim($dmy);
-
         $dt = \DateTime::createFromFormat('d/m/Y', $dmy);
         $errors = \DateTime::getLastErrors();
 

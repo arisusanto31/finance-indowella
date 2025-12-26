@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\ExcelPembelianImport;
 use App\Imports\ExcelPenjualanImport;
 use App\Models\ChartAccount;
 use App\Models\DetailKartuInvoice;
@@ -61,7 +62,7 @@ class InvoicePurchaseController extends Controller
 
         $file = $request->file('file');
         $bookID = $request->input('book_journal_id');
-        $importer = new ExcelPenjualanImport();
+        $importer = new ExcelPembelianImport();
         Excel::import($importer, $file);
         $stockType = null;
         if ($bookID == 2) {
@@ -79,16 +80,16 @@ class InvoicePurchaseController extends Controller
         })->pluck('id', 'name')->all();
 
 
+        $defaultToko = Toko::first();
         $data = $importer->result;
         $idBuatan = 1;
-        $data = collect($data)->groupBy('no_transaksi')->map(function ($item, $key) use ($refToko, &$idBuatan, $stockType) {
+        $data = collect($data)->groupBy('no_invoice')->map(function ($item, $key) use ($refToko, &$idBuatan, $stockType, $defaultToko) {
             $tokoname = norm_string(collect($item)->first()['nama_toko'] ?? null);
             $tanggal = collect($item)->first()['tanggal'];
-            $akunCash = collect($item)->first()['payment'];
+
             return [
                 'package_number' => $key,
-                'payment' => collect($item)->first()['payment'],
-                'details' => collect($item)->map(function ($val) {
+                'details' => collect($item)->map(function ($val) use ($defaultToko) {
                     return [
                         'created_at' => db_date_from_dmy($val['tanggal']),
                         'stock_id' => $val['kode_barang'],
@@ -97,20 +98,18 @@ class InvoicePurchaseController extends Controller
                         'unit' => $val['satuan'],
                         'price' => $val['harga_pcs'],
                         'total_price' => $val['sub_total'],
-                        'akun_cash_kind_name' => $val['payment'],
                         'reference_id' => null,
                         'reference_type' => null,
-                        'toko' => $val['nama_toko'] ?? null,
+                        'toko' => $val['nama_toko'] ?? $defaultToko->name,
 
                     ];
                 }),
                 'stock_type' => $stockType,
                 'created_at' => db_date_from_dmy($tanggal),
-                'akun_cash_kind_name' => $akunCash,
                 'total_nota' => collect($item)->first()['total_nota'],
-                'customer_name' => collect($item)->first()['nama_customer'] ?? 'Anonim',
-                'toko_id' => $refToko[$tokoname] ?? null,
-                'toko' => collect($item)->first()['nama_toko'] ?? null,
+                'supplier' => collect($item)->first()['supplier'] ?? 'Anonim',
+                'toko_id' => $refToko[$tokoname] ?? $defaultToko->id,
+                'toko' => collect($item)->first()['nama_toko'] ?? $defaultToko->name,
                 'id' => $idBuatan++,
             ];
         })->values()->all();
@@ -429,9 +428,13 @@ class InvoicePurchaseController extends Controller
     {
         $request->validate([
             'invoice_pack_number' => 'required|string|max:255',
-            'supplier_id' => 'required|integer',
-            'stock_id' => 'required|array',
-            'stock_id.*' => 'required|integer',
+            'supplier_id' => 'nullable|integer',
+            'supplier_name' => 'nullable|string|max:255',
+            'reference_stock_id' => 'nullable|array',
+            'reference_stock_id.*' => 'nullable|integer',
+            'reference_stock_type' => 'nullable|string',
+            'stock_id' => 'nullable|array',
+            'stock_id.*' => 'nullable|integer',
             'quantity' => 'required|array',
             'quantity.*' => 'required|numeric',
             'price_unit' => 'required|array',
@@ -442,15 +445,77 @@ class InvoicePurchaseController extends Controller
             'total_price.*' => 'required|string',
             'discount' => 'nullable|array',
             'discount.*' => 'nullable|numeric',
-
+            'is_ppn' => 'nullable'
         ]);
+
+
         $isPPN = $request->is_ppn == 1 ? 1 : null;
         if (!$isPPN)
             $isPPN = $request->is_ppn == 'on' ? 1 : 0;
+
+        $supplierID = null;
+        $arrayStockID = [];
+        if (!$request->stock_id) {
+            if ($request->reference_stock_id) {
+                foreach ($request->reference_stock_id as $row => $refStockID) {
+                    $refType = $request->reference_stock_type;
+                    $stock = Stock::where('reference_stock_type', $refType)->where('reference_stock_id', $refStockID)->first();
+                    if (!$stock) {
+                        $refStock = $refType::find($refStockID);
+                        if ($refStock) {
+                            $stat = StockController::sync(new Request([
+                                'data' => [
+                                    'id' => $refStock->id,
+                                    'name' => $refStock->name,
+                                    'unit_backend' => $refStock->unit_backend,
+                                    'unit_default' => $refStock->unit_info,
+                                    'units_manual' => $refStock->getUnits(),
+                                    'category_id' => $refStock->category_id,
+                                    'category' => collect($refStock->category)->only('id', 'name'),
+                                    'parent_category_id' => $refStock->parent_category_id,
+                                    'parent_category' => collect($refStock->parentCategory)->only('id', 'name'),
+                                    'master_stock_id' => null,
+                                ],
+                                'stock_id' => $refStock->id,
+                            ]));
+                            if ($stat['status'] == 1) {
+                                $stock = $stat['msg'];
+                            } else {
+                                return ['status' => 0, 'msg' => 'pembuatan stock ' . $refStock->name . ' gagal,' . $stat['msg']];
+                            }
+                        } else {
+                            return ['status' => 0, 'msg' => 'Stock tidak ditemukan'];
+                        }
+                    }
+                    $arrayStockID[] = $stock->id;
+                }
+            } else {
+                return ['status' => 0, 'msg' => 'Stock harus diisi'];
+            }
+        } else {
+            $arrayStockID = $request->stock_id;
+        }
+
+        if (!$request->supplier_id) {
+            if ($request->supplier_name) {
+                $supplier = Supplier::where('name', $request->supplier_name)->first();
+                if (!$supplier) {
+                    $supplier = Supplier::create([
+                        'name' => $request->supplier_name,
+                        'book_journal_id' => bookID(),
+                    ]);
+                }
+                $supplierID = $supplier->id;
+            } else {
+                return ['status' => 0, 'msg' => 'Supplier harus diisi'];
+            }
+        } else {
+            $supplierID = $request->supplier_id;
+        }
         $invoice_pack_number = $request->invoice_pack_number;
         $grouped = [];
         $date = $request->input('date');
-        foreach ($request->stock_id as $i => $stockId) {
+        foreach ($arrayStockID as $i => $stockId) {
             $thestock = Stock::find($stockId);
             $grouped[] = [
                 'invoice_pack_number' => $invoice_pack_number,
@@ -459,7 +524,7 @@ class InvoicePurchaseController extends Controller
                 'unit' => $request->unit[$i],
                 'price' => $request->price_unit[$i],
                 'discount' => $request->discount[$i] ?? 0,
-                'supplier_id' => $request->supplier_id,
+                'supplier_id' => $supplierID,
                 'book_journal_id' => bookID(),
                 'is_ppn' => $isPPN,
                 'total_ppn_m' => $isPPN ? (format_db($request->total_price[$i]) * 0.11) : 0,
@@ -474,7 +539,7 @@ class InvoicePurchaseController extends Controller
             $invoicePack = InvoicePack::create([
                 'invoice_number' => $invoice_pack_number,
                 'book_journal_id' => bookID(),
-                'person_id' => $request->supplier_id,
+                'person_id' => $supplierID,
                 'person_type' => 'App\Models\Supplier',
                 'reference_model' => 'App\Models\InvoicePurchaseDetail',
                 'invoice_date' => now(),
