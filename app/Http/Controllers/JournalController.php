@@ -553,8 +553,9 @@ class JournalController extends Controller
                     if ($model->count() > 0) {
                         $model->each(function ($item) {
                             $itemID = $item->id;
+                            $class= get_class($item);
                             $item->delete();
-                            $details = DetailKartuInvoice::where('kartu_id', $itemID)->get();
+                            $details = DetailKartuInvoice::where('kartu_id', $itemID)->where('kartu_type',$class)->get();
                             foreach ($details as $detail) {
                                 $detail->delete();
                             }
