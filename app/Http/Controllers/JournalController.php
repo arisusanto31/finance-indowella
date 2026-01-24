@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Imports\excel_kartu_stock\ExcelKartuStockImport;
+use App\Imports\excel_saldo_awal_stock_jurnal\ExcelSaldoAwalImport;
 use App\Imports\MultiSheetImport;
 use App\Jobs\ImportKartuStockJob;
 use App\Jobs\ImportSaldoNLJob;
@@ -15,6 +16,7 @@ use App\Models\InvoiceSaleDetail;
 use App\Models\Journal;
 use App\Models\JournalJobFailed;
 use App\Models\JournalKey;
+use App\Models\KartuStock;
 use App\Models\Stock;
 use App\Models\TaskImport;
 use App\Models\TaskImportDetail;
@@ -363,7 +365,8 @@ class JournalController extends Controller
                     'user_backdate_id' => $userBackdate,
                     'book_journal_id' => $request->input('book_journal_id'),
                     'date' => $date,
-                    'tag' => array_key_exists('tag', $debet) ? $debet['tag'] : null
+                    'tag' => array_key_exists('tag', $debet) ? $debet['tag'] : null,
+                    'custom_amount_saldo' => array_key_exists('custom_amount_saldo', $debet) ? $debet['custom_amount_saldo'] : null
                 ]), $lockManager);
                 // $allLocks[] = ['lock' => $st['lock'], 'name' => $st['lock_name']];
                 if ($st['status'] == 0) {
@@ -394,7 +397,8 @@ class JournalController extends Controller
                     'user_backdate_id' => $userBackdate,
                     'date' => $date,
                     'book_journal_id' => $request->input('book_journal_id'),
-                    'tag' => array_key_exists('tag', $kredit) ? $kredit['tag'] : null
+                    'tag' => array_key_exists('tag', $kredit) ? $kredit['tag'] : null,
+                    'custom_amount_saldo' => array_key_exists('custom_amount_saldo', $kredit) ? $kredit['custom_amount_saldo'] : null
 
                 ]), $lockManager);
                 // $allLocks[] = ['lock' => $st['lock'], 'name' => $st['lock_name']];
@@ -414,12 +418,9 @@ class JournalController extends Controller
             foreach ($allJournals as $journal) {
                 $journal->updateLawanCode();
                 if ($isBackDate == 1) {
-                    $journal->recalculateJournal(false);
+                    $journal->calculateJournalNext(false);
                 }
             }
-
-
-
             if ($isLockIntern == 1) {
                 //lock manual dilepas setelah semua proses transaksi selesai
                 $lockManager->releaseAll();
@@ -427,8 +428,10 @@ class JournalController extends Controller
             return [
                 'status' => 1,
                 'msg' => 'success',
+                'all_journals' => $allJournals,
                 'journal_number' => $theJournalNumber,
-                'allLocks' => $allLocks
+                'allLocks' => $allLocks,
+                'request' => $request->all()
             ];
         };
 
@@ -553,9 +556,9 @@ class JournalController extends Controller
                     if ($model->count() > 0) {
                         $model->each(function ($item) {
                             $itemID = $item->id;
-                            $class= get_class($item);
+                            $class = get_class($item);
                             $item->delete();
-                            $details = DetailKartuInvoice::where('kartu_id', $itemID)->where('kartu_type',$class)->get();
+                            $details = DetailKartuInvoice::where('kartu_id', $itemID)->where('kartu_type', $class)->get();
                             foreach ($details as $detail) {
                                 $detail->delete();
                             }
@@ -584,6 +587,56 @@ class JournalController extends Controller
                 'msg' => $e->getMessage()
             ];
         }
+    }
+
+
+    public static function makeSaldoAwal($codes, $month = null, $year = null)
+    {
+        if ($month == null) {
+            $month = getInput('month');
+        }
+        if ($year == null) {
+            $year = getInput('year');
+        }
+        if ($month == null || $year == null) {
+            return [
+                'status' => 0,
+                'msg' => 'bulan dan tahun harus diisi'
+            ];
+        }
+        $starttime = microtime(true);
+        $date = createCarbon($year . '-' . $month . '-01 00:00:00');
+        //$codes berisi code group dan amount saldo
+
+        $debets = [];
+        $cas = ChartAccount::whereIn('code_group', collect($codes)->keys()->all())->get();
+
+        foreach ($cas as $ca) {
+            $debets[] = [
+                'code_group' => $ca->code_group,
+                'description' => 'rekap saldo awal ' . $ca->name . ' ' . $month . '/' . $year,
+                'amount' => 0,
+                'reference_id' => null,
+                'reference_type' => null,
+                'custom_amount_saldo' => $codes[$ca->code_group]
+            ];
+        }
+        $st = JournalController::createBaseJournal(new Request([
+            'debets' => $debets,
+            'kredits' => [],
+            'type' => 'umum',
+            'user_backdate_id' => user()->id,
+            'is_backdate' => 1,
+            'date' => $date,
+            'is_auto_generated' => 0,
+            'title' => 'Jurnal tutup buku',
+            'tag' => 'opening ' . $month . '/' . $year
+        ]));
+
+        if ($st['status'] == 0) {
+            throw new \Exception($st['msg']);
+        }
+        return $st;
     }
 
     public static function cancelJournal($number)
@@ -709,7 +762,7 @@ class JournalController extends Controller
         $date = $request->input('date');
 
 
-        $import = new MultiSheetImport;
+        $import = new ExcelSaldoAwalImport;
         Excel::import($import, $request->file('file'));
 
         // Ambil data yang sudah diproses
@@ -764,8 +817,9 @@ class JournalController extends Controller
             $data = json_decode($data, true);
             $taskSaldo = [];
             $taskKartuStock = [];
-            $saldos = $data['saldo'];
+            $jurnals = $data['jurnal'];
             $stocks =  $data['stock'];
+
             $bookID = book()->id;
             $task = TaskImport::create([
                 'book_journal_id' => $bookID,
@@ -773,7 +827,7 @@ class JournalController extends Controller
                 'description' => 'import saldo awal ' . $date,
 
             ]);
-            foreach ($saldos as $saldo) {
+            foreach ($jurnals as $saldo) {
 
                 $fixData = [
                     'code_group' => $saldo['code'],
@@ -797,6 +851,7 @@ class JournalController extends Controller
                     'quantity' => $stock['qty'],
                     'unit' => $stock['satuan'],
                     'ref_id' => $stock['ref_id'],
+                    'date' => $date
                 ];
                 $taskImportDetail = TaskImportDetail::create([
                     'task_import_id' => $task->id,
@@ -807,12 +862,7 @@ class JournalController extends Controller
                 $taskKartuStock[] = $taskImportDetail->id;
             }
             DB::commit();
-            // foreach ($taskSaldo as $saldo) {
-            //     ImportSaldoNLJob::dispatch($saldo);
-            // }
-            // foreach ($taskKartuStock as $stock) {
-            //     ImportKartuStockJob::dispatch($stock);
-            // }
+
             return [
                 'status' => 1,
                 'msg' => $task
@@ -855,34 +905,28 @@ class JournalController extends Controller
 
     function resendImportTask($id)
     {
-        $taskDetail = TaskImportDetail::find($id);
-        if ($taskDetail->type == 'saldo_nl') {
-            ImportSaldoNLJob::dispatch($id);
-        } else if ($taskDetail->type == 'kartu_stock') {
-            ImportKartuStockJob::dispatch($id);
-        }
+
+       return KartuStockController::processTaskImport($id);
+        // $taskDetail = TaskImportDetail::find($id);
+        // if ($taskDetail->type == 'kartu_stock') {
+        //     ImportKartuStockJob::dispatch($id);
+        // }
         return ['status' => 1, 'msg' => 'success'];
     }
 
     function resendImportTaskAll($id)
     {
-        $task = TaskImport::find($id);
-        $details = $task->details()->where('status', '<>', 'success')->select('id', 'type', 'status')->get();
+
+        $details = TaskImportDetail::where('task_import_id', $id)->where('type', 'kartu_stock')->where('status', '<>', 'success')->select('id', 'type', 'status')->get();
         $antrianKartuStock = [];
         $antrianNL = [];
         $antrianMboh = [];
-        foreach ($details as $detail) {
+        foreach ($details as $row => $detail) {
             try {
-                if ($detail->type == 'saldo_nl') {
-                    // ImportSaldoNLJob::dispatch($detail->id);
-                    dispatch(new ImportSaldoNLJob($detail->id));
-                    usleep(5000);
-                    $antrianNL[] = $detail;
-                } else if ($detail->type == 'kartu_stock') {
+                if ($detail->type == 'kartu_stock') {
                     // ImportKartuStockJob::dispatch($detail->id);
-                    dispatch(new ImportKartuStockJob($detail->id));
-                    usleep(5000);
-
+                    // dispatch(new ImportKartuStockJob($detail->id));
+                    ImportKartuStockJob::dispatch($detail->id)->onQueue('default')->delay(now()->addMilliseconds(200 * $row));
                     $antrianKartuStock[] = $detail;
                 } else {
                     $antrianMboh[] = $detail;
@@ -899,6 +943,60 @@ class JournalController extends Controller
             'antrian_nl' => $antrianNL,
             'antrian_mboh' => $antrianMboh
         ];
+    }
+
+    function sendImportTaskJurnal($id)
+    {
+
+        DB::beginTransaction();
+        $taskDetail = TaskImportDetail::where('task_import_id', $id)->where('type', 'saldo_nl')->get()->map(function ($val) {
+            $val['payload_array'] = json_decode($val->payload, true);
+            return $val;
+        });
+        $allPayload = collect($taskDetail)->pluck('payload_array')->pluck('amount', 'code_group')->all();
+        $date = collect($taskDetail)->first()['payload_array']['date'];
+        $st = self::makeSaldoAwal($allPayload, createCarbon($date)->format('m'), createCarbon($date)->format('Y'));
+        if ($st['status'] == 1) {
+            $number = $st['journal_number'];
+            $journals = Journal::where('journal_number', $number)->pluck('amount_saldo', 'code_group')->all();
+
+
+            foreach ($allPayload as $codegroup => $amount) {
+                $saldoJournal = array_key_exists($codegroup, $journals) ? $journals[$codegroup] : 0;
+                if (bccomp((string)$amount, (string)$saldoJournal, 2) != 0) {
+                    DB::rollBack();
+                    return [
+                        'status' => 0,
+                        'msg' => 'saldo tidak sesuai untuk code group ' . $codegroup . ' , di jurnal : ' . $saldoJournal . ' , di import : ' . $amount
+                    ];
+                }
+                $taskID = optional($taskDetail->where('type', 'saldo_nl')->where('payload_array.code_group', $codegroup)->first())->id ?? null;
+                if ($taskID) {
+                    $task = TaskImportDetail::find($taskID);
+                    $task->status = 'success';
+                    $task->save();
+                    $payload = json_decode($task->payload, true);
+                    ChartAccountController::makeAlias(new Request([
+                        'code_group' => [$payload['code_group'], ""],
+                        'name' => $payload['name']
+                    ]));
+                } else {
+                    DB::rollBack();
+                    return [
+                        'status' => 0,
+                        'msg' => 'task import untuk code group ' . $codegroup . ' tidak ditemukan'
+                    ];
+                }
+            }
+            DB::commit();
+            return [
+                'status' => 1,
+                'msg' => 'success'
+            ];
+        } else {
+            DB::rollBack();
+            return $st;
+        }
     }
 
     public function getClosingJournal()
@@ -1005,7 +1103,7 @@ class JournalController extends Controller
 
             if ($aksi == 1) {
                 if (count($debets) > 0 && count($kredits) > 0) {
-                    $st = JournalController::Journal(new Request([
+                    $st = JournalController::createBaseJournal(new Request([
                         'debets' => $debets,
                         'kredits' => $kredits,
                         'type' => 'umum',

@@ -67,7 +67,7 @@ trait HasModelSaldoStock
                 ->where('index_date', '<', $indexDateAwal)
                 ->groupBy('stock_id', 'production_number');
         })->select('production_number', 'custom_stock_name', 'stock_id', 'saldo_qty_backend as saldo_qty_awal', 'saldo_rupiah_total as saldo_rupiah_awal', DB::raw('"0" as saldo_qty_akhir'), DB::raw('"0" as saldo_rupiah_akhir'))->get();
-        $mutasi = static::query()->whereBetween(with(new static)->getTable() . '.index_date', [$indexDateAwal, $indexDateAkhir])
+        $mutasi = static::query()->where(with(new static)->getTable() . '.index_date', '>=', $indexDateAwal)->where(with(new static)->getTable() . '.index_date', '<=', $indexDateAkhir)
             ->select(
                 'production_number',
                 'custom_stock_name',

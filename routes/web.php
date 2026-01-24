@@ -102,6 +102,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::get('get-task-import-aktif', [JournalController::class, 'getTaskImportAktif']);
         Route::get('resend-import-task/{id}', [JournalController::class, 'resendImportTask']);
         Route::get('resend-import-task-all/{id}', [JournalController::class, 'resendImportTaskAll']);
+        Route::get('send-import-task-jurnal/{id}', [JournalController::class, 'sendImportTaskJurnal']);
 
         Route::get('get-import-data', [JournalController::class, 'getImportData'])->name('get-import-data');
         Route::post('import-data', [JournalController::class, 'importData'])->name('import-data');
@@ -165,6 +166,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('kartu-mutasi/{id}', [KartuStockController::class, 'kartuMutasi'])->name('kartu-mutasi');
             Route::get('show-history-stock/{id}', [KartuStockController::class, 'showHistoryStock'])->name('show-history-stock');
             Route::post('recalculate', [KartuStockController::class, 'recalculate'])->name('recalculate');
+            Route::get('process-task-import/{id}', [KartuStockController::class, 'processTaskImport'])->name('process-task-import');
         });
 
         Route::prefix('kartu-bdp')->name('kartu-bdp.')->group(function () {
@@ -332,6 +334,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::post('sales-cancel-final', [SalesOrderController::class, 'cancelFinal'])->name('sales-cancel-final');
         Route::post('sales-mark', [SalesOrderController::class, 'mark'])->name('sales-mark');
         Route::post('sales-process-dagang', [SalesOrderController::class, 'processDagang'])->name('sales-process-dagang');
+        Route::post('sales-delete-detail', [SalesOrderController::class, 'deleteDetail'])->name('sales-delete-detail');
 
         Route::get('purchase-open-import-excel/{id}',[InvoicePurchaseController::class, 'openImportExcel'])->name('purchase-open-import-excel');
         Route::post('purchase-get-data-import-excel', [InvoicePurchaseController::class, 'getDataImportExcel'])->name('purchase-get-data-import-excel');

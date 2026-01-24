@@ -251,17 +251,18 @@ class StockController extends Controller
             } else
                 $bookModel = book()->name == "Buku Toko" ? RetailStock::class : ManufStock::class;
             $datastock = $request->input('data');
+
             $referenceStockID = $request->input('stock_id');
             $name = $datastock['name'];
             $category_name = $datastock['category']['name'];
-            $parent_category_name = $datastock['parent_category']['name'];
-            $unit_default = $datastock['unit_default'];
+            $parent_category_name = $datastock['parent_category']['name'] ?? $category_name;
+
+            $unit_default = $datastock['unit_default'] ?? $datastock['unit_info'];
             $unit_backend = $datastock['unit_backend'] ?? 'Pcs';
             $stock_id = $datastock['master_stock_id'];
             $units = $datastock['units_manual'] ?? [];
             $parentcat = StockCategory::addCategoryIfNotExists($parent_category_name);
             $cat = StockCategory::addCategoryIfNotExists($category_name, $parent_category_name);
-
 
             $dataFix = [
                 'name' => $name,
@@ -273,11 +274,15 @@ class StockController extends Controller
                 'reference_stock_id' => $referenceStockID,
                 'reference_stock_type' => $bookModel
             ];
-
-            if ($stock_id) {
-                $stock = Stock::find($stock_id);
-                $stock->update($dataFix);
-            } else {
+            $thestock = Stock::find($stock_id);
+            if (!$thestock) {
+                $thestock = Stock::where('name', $name)->first();
+                if ($thestock) {
+                    $thestock->update($dataFix);
+                    $stock=$thestock;
+                }
+            }
+            if (!$thestock) {
                 $stock = Stock::create($dataFix);
             }
 
@@ -295,7 +300,7 @@ class StockController extends Controller
 
                 foreach ($units as $unit) {
                     $nameKolom = book()->name == 'Buku Toko' ? 'retail_stock_id' : 'stock_id';
-                    $stunit = StockUnit::where('stock_id', $unit[$nameKolom])->where('unit', $unit['unit'])->first();
+                    $stunit = StockUnit::where('stock_id', $stock->id)->where('unit', $unit['unit'])->first();
 
                     if ($stunit) {
                         $stunit->update([

@@ -329,7 +329,7 @@ class ChartAccountController extends Controller
         ];
     }
 
-    function makeAlias(Request $request)
+    public static function makeAlias(Request $request)
     {
         $codeGroups = $request->input('code_group');
         $codeGroup = implode("", $codeGroups);

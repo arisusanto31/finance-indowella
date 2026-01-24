@@ -191,8 +191,12 @@ class Journal extends Model
                 $journal->tag = $tag;
                 $journal->reference_id = $request->input('reference_id');
                 $journal->reference_type = $request->input('reference_type');
-                $lastSaldo = $lastJournal ? $lastJournal->amount_saldo : 0;
-                $journal->amount_saldo = round($lastSaldo + $theAmount, 2);
+                if ($request->input('custom_amount_saldo') != null) {
+                    $journal->amount_saldo = $request->input('custom_amount_saldo');
+                } else {
+                    $lastSaldo = $lastJournal ? $lastJournal->amount_saldo : 0;
+                    $journal->amount_saldo = round($lastSaldo + $theAmount, 2);
+                }
                 $journal->is_backdate = $isBackDate;
                 $journal->user_backdate_id = $request->input('user_backdate_id');
                 $journal->toko_id = $request->input('toko_id');
@@ -332,8 +336,16 @@ class Journal extends Model
         $lastSaldo = $lastJournal ? $lastJournal->amount_saldo : 0;
         $amount = $thejournal->code_group > 200000 ?
             ($thejournal->amount_kredit - $thejournal->amount_debet) : ($thejournal->amount_debet - $thejournal->amount_kredit);
+
         $thejournal->amount_saldo = round($lastSaldo + $amount, 2);
         $thejournal->save();
+        $thejournal->refresh();
+        return $thejournal->calculateJournalNext($isLock);
+    }
+
+    public function calculateJournalNext($isLock = true)
+    {
+        $thejournal = $this;
         $codeGroup = $this->code_group;
         $name = 'generate-journal' . $codeGroup;
         if ($isLock == true) {
@@ -428,9 +440,9 @@ class Journal extends Model
         return $theFixCode;
     }
 
-    public function createKartuLink($isForce=false)
+    public function createKartuLink($isForce = false)
     {
-       return DetailKartuInvoice::storeData(new Request([
+        return DetailKartuInvoice::storeData(new Request([
             'journal_id' => $this->id,
             'is_force' => $isForce
         ]));

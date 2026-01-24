@@ -56,6 +56,7 @@
                         <th>Harga</th>
                         <th>Diskon</th>
                         <th>Total</th>
+                        <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -100,6 +101,10 @@
                                 <input type="text"
                                     class="form-control form-control-sm text-end bg-light border-0 total-field"
                                     value="{{ $item->total_price }}" readonly>
+                            </td>
+                            <td>
+                                <button type="button" onclick="deleteItem('{{ $item->id }}')" class="btn btn-danger btn-sm btn-delete-detail"
+                                    data-detail-id="{{ $item->id }}"><i class="fa fa-trash"></i></button>
                             </td>
                         </tr>
                     @endforeach
@@ -163,4 +168,26 @@
             }
         });
     });
+
+
+    function deleteItem(detailId) {
+        if (confirm('Apakah Anda yakin ingin menghapus item ini?')) {
+            $.ajax({
+                url: '{{ url('admin/invoice/sales-delete-detail') }}',
+                method: 'DELETE',
+                data: {
+                    detail_id: detailId,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(res) {
+                    Swal.fire('Berhasil', 'Item berhasil dihapus', 'success');
+                
+                },
+                error: function() {
+                        Swal.fire('Gagal', 'Gagal menghapus item', 'error');
+
+                }
+            });
+        }
+    }
 </script>

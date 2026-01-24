@@ -5,10 +5,17 @@
             <h5 class="text-primary-dark card-header"> 📥 <strong>IMPORT AWAL DATA </strong>
                 <i id="icon-import" class="bx bx-caret-down toggle-icon"></i>
             </h5>
+
         </a>
 
         <div id="card-import" class="tree-toggle">
             <div class="card-body">
+                <h6> ⚠️ Panduan import</h6>
+                <ul>
+                    <li>Siapkan 1 file excel dengan 2 sheet: "saldo_jurnal" dan "saldo_stock"</li>
+                    <li> saldo jurnal berisi kolom : account_code, account_name, amount_saldo </li>
+                    <li> saldo stock berisi kolom: stock_id, stock_name, saldo_qty, unit, saldo_rupiah </li>
+                </ul>
                 <form action="{{ route('jurnal.get-import-saldo') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="row">
@@ -648,12 +655,12 @@
 
             setTimeout(getTaskImport, 100);
 
-            function exportData(){
+            function exportData() {
                 month = $('#month-export').val();
                 year = $('#year-export').val();
-              
+
                 url = '{{ url('admin/export-data') }}?month=' + month + '&year=' + year;
-                window.location.href=url;
+                window.location.href = url;
             }
 
             function trySearch() {

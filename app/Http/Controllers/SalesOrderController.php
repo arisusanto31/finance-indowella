@@ -921,4 +921,28 @@ class SalesOrderController extends Controller
         $so->delete();
         return ['status' => 1, 'msg' => 'data berhasil dihapus'];
     }
+
+    function deleteDetail(Request $request){
+        
+        $id = $request->input('id');
+        $detail = SalesOrderDetail::find($id);
+        if(!$detail){
+            return ['status' => 0, 'msg' => 'Detail tidak ditemukan'];
+        }
+        $salesOrder = SalesOrder::where('sales_order_number', $detail->sales_order_number)->first();
+        if(!$salesOrder){
+            return ['status' => 0, 'msg' => 'Sales Order tidak ditemukan'];
+        }
+        if($salesOrder->is_final){
+            return ['status' => 0, 'msg' => 'Tidak bisa menghapus detail pada sales order yang sudah final'];
+        }
+        $detail->delete();
+        //update total sales order
+        $totalPrice = SalesOrderDetail::where('sales_order_number', $salesOrder->sales_order_number)->sum('total_price');
+        $totalPPN = SalesOrderDetail::where('sales_order_number', $salesOrder->sales_order_number)->sum('total_ppn_k');
+        $salesOrder->total_price = $totalPrice;
+        $salesOrder->total_ppn_k = $totalPPN;
+        $salesOrder->save();
+        return ['status' => 1, 'msg' => 'Detail berhasil dihapus' ];
+    }
 }

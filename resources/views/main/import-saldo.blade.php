@@ -17,26 +17,23 @@
               </tr>
             </thead>
             <tbody id="body-import-saldo">
-              @foreach($data['saldo_nl'] as $key => $item)
-              @if($key>0 && $item[0] !='')
+              @foreach($data['jurnal'] as $key=> $item)
               <tr>
                 <td>{{$key}}</td>
-                <td>{{$item[0]}}
-                  <input type="hidden" id="saldo-code_group{{$key}}" class="saldo" name="saldo['kode'][]" value="{{$item[0]}}" />
+                <td>{{$item['account_code']}}
+                  <input type="hidden" id="saldo-code_group{{$key}}" class="jurnal" name="saldo['kode'][]" value="{{$item['account_code']}}" />
                 </td>
-                <td>{{$item[1]}}
-                  <span class="badge bg-primary text-white">{{ array_key_exists($item[0],$coas)?$coas[$item[0]] :'??'}}
+                <td>{{$item['account_name']}}
+                  <span class="badge bg-primary text-white">{{ array_key_exists($item['account_code'],$coas)?$coas[$item['account_code']] :'??'}}
                   </span>
-                  <input type="hidden" id="saldo-name{{$key}}" value="{{$item[1]}}" />
+                  <input type="hidden" id="saldo-name{{$key}}" value="{{$item['account_name']}}" />
                 </td>
-                <td>{{format_price(floatval($item[2]))}}
-                  <input type="hidden" id="saldo-amount{{$key}}" name="saldo['amount'][]" value="{{floatval($item[2])}}" />
+                <td>{{format_price(floatval($item['amount_saldo']))}}
+                  <input type="hidden" id="saldo-amount{{$key}}" name="saldo['amount'][]" value="{{floatval($item['amount_saldo'])}}" />
                 </td>
               </tr>
-              @endif
               @endforeach
             </tbody>
-
 
           </table>
         </div>
@@ -55,36 +52,35 @@
               </tr>
             </thead>
             <tbody id="body-import-saldo">
-              @foreach($data['kartu_stock'] as $key => $item)
-              @if($key>0 && $item[2] !='')
+              @foreach($data['stock'] as $key=>$item)
               <tr>
                 @php
-                $name = preg_replace('/\s*\[\d+\]$/', '', $item[2]);
+                $name = preg_replace('/\s*\[\d+\]$/', '', $item['stock_name']);
 
                 @endphp
                 <td>{{$key}}</td>
-                <td>{{$item[1]}}
-                  <input type="hidden" id="stock-ref_id{{$key}}" value="{{$item[1]}}" />
+                <td>{{$item['stock_id']}}
+                  <input type="hidden" id="stock-ref_id{{$key}}" value="{{$item['stock_id']}}" />
                 </td>
                 <td>{{$name}}
-                  @if(!in_array($name,$stocks) && !in_array($item[1], $stockRefs))
+                  @if(!in_array($name,$stocks) && !in_array($item['stock_id'], $stockRefs))
                   <span class="badge bg-primary text-white"> NEW </span>
                   @endif
                   <input type="hidden" value="{{$name}}" id="stock-name{{$key}}" class="stock" name="stock['name'][]" />
                 </td>
 
-                <td>{{$item[4]}}
-                  <input type="hidden" name="stock['qty'][]" id="stock-qty{{$key}}" value="{{$item[4]}}" />
+                <td>{{$item['saldo_qty']}}
+                  <input type="hidden" name="stock['qty'][]" id="stock-qty{{$key}}" value="{{$item['saldo_qty']}}" />
                 </td>
                 <td>
-                  {{$item[3]}}
-                  <input type="hidden" name="stock['satuan'][]" id="stock-satuan{{$key}}" value="{{$item[3]}}" />
+                  {{$item['unit']}}
+                  <input type="hidden" name="stock['satuan'][]" id="stock-satuan{{$key}}" value="{{$item['unit']}}" />
                 </td>
-                <td>{{format_price(floatval($item[6]))}}
-                  <input type="hidden" name="stock['amount'][]" id="stock-amount{{$key}}" value="{{floatval($item[6])}}" />
+                <td>{{format_price(floatval($item['saldo_rupiah']))}}
+                  <input type="hidden" name="stock['amount'][]" id="stock-amount{{$key}}" value="{{floatval($item['saldo_rupiah'])}}" />
                 </td>
               </tr>
-              @endif
+          
               @endforeach
             </tbody>
 
@@ -107,7 +103,7 @@
     function submitFormImport() {
       // let formData = $('#form-data').serialize();
       dataSaldo = [];
-      $('.saldo').each(function(i, elem) {
+      $('.jurnal').each(function(i, elem) {
         id = getNumID($(elem).attr('id'));
         dataSaldo.push({
           code: $(elem).val(),
@@ -128,7 +124,7 @@
         });
       });
       let jsonData = JSON.stringify({
-        saldo: dataSaldo,
+        jurnal: dataSaldo,
         stock: dataStock,
       });
       let encoded = btoa(unescape(encodeURIComponent(jsonData))); // encode UTF-8 aman
