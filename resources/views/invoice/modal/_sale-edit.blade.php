@@ -61,7 +61,7 @@
                 </thead>
                 <tbody>
                     @foreach ($data['details'] as $key => $item)
-                        <tr>
+                        <tr id="row-detail{{ $item->id }}">
                             <td>{{ $key + 1 }}</td>
                             <td class="text-center">
                                 {{ $data->created_at instanceof \Carbon\Carbon ? $data->created_at->format('Y-m-d') : '-' }}
@@ -103,7 +103,8 @@
                                     value="{{ $item->total_price }}" readonly>
                             </td>
                             <td>
-                                <button type="button" onclick="deleteItem('{{ $item->id }}')" class="btn btn-danger btn-sm btn-delete-detail"
+                                <button type="button" onclick="deleteItem('{{ $item->id }}')"
+                                    class="btn btn-danger btn-sm btn-delete-detail"
                                     data-detail-id="{{ $item->id }}"><i class="fa fa-trash"></i></button>
                             </td>
                         </tr>
@@ -180,11 +181,12 @@
                     _token: '{{ csrf_token() }}'
                 },
                 success: function(res) {
+                    $('#row-detail' + detailId).remove();
+
                     Swal.fire('Berhasil', 'Item berhasil dihapus', 'success');
-                
                 },
                 error: function() {
-                        Swal.fire('Gagal', 'Gagal menghapus item', 'error');
+                    Swal.fire('Gagal', 'Gagal menghapus item', 'error');
 
                 }
             });

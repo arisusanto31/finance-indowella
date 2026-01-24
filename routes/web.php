@@ -334,7 +334,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::post('sales-cancel-final', [SalesOrderController::class, 'cancelFinal'])->name('sales-cancel-final');
         Route::post('sales-mark', [SalesOrderController::class, 'mark'])->name('sales-mark');
         Route::post('sales-process-dagang', [SalesOrderController::class, 'processDagang'])->name('sales-process-dagang');
-        Route::post('sales-delete-detail', [SalesOrderController::class, 'deleteDetail'])->name('sales-delete-detail');
+        Route::delete('sales-delete-detail', [SalesOrderController::class, 'deleteDetail'])->name('sales-delete-detail');
 
         Route::get('purchase-open-import-excel/{id}',[InvoicePurchaseController::class, 'openImportExcel'])->name('purchase-open-import-excel');
         Route::post('purchase-get-data-import-excel', [InvoicePurchaseController::class, 'getDataImportExcel'])->name('purchase-get-data-import-excel');

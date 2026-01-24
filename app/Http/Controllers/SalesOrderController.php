@@ -923,8 +923,8 @@ class SalesOrderController extends Controller
     }
 
     function deleteDetail(Request $request){
-        
-        $id = $request->input('id');
+
+        $id = $request->input('detail_id');
         $detail = SalesOrderDetail::find($id);
         if(!$detail){
             return ['status' => 0, 'msg' => 'Detail tidak ditemukan'];
