@@ -10,7 +10,8 @@
         <div class="col-xs-12 col-md-12">
             @if ($data['total_kartu'] == 0)
                 <p>sales ini belum ada jurnal maupun kartu, kamu bisa batalkan finalnya </p>
-                <button class="btn btn-danger mb-5" onclick="batalkanFinal('{{ $data->id }}')">Batalkan Final</button>
+                <button class="btn btn-danger mb-5" onclick="batalkanFinal('{{ $data->id }}')">Batalkan
+                    Final</button>
             @endif
         </div>
         <div class="col-xs-12 col-md-12">
@@ -316,6 +317,7 @@
                         <i id="icon-create" class="bx bx-caret-down toggle-icon card-invoice"></i> </a>
                 </h5>
                 <div id="" class="tree-toggle card-invoice bg-primary-lightest">
+
                     <div class="row p-2">
                         <div class="col-md-12 col-xs-12">
                             <form id="form-invoice-so">
@@ -372,7 +374,7 @@
                                             <select class="form-control select-coa-persediaan" type="text"
                                                 name="code_group_persediaan[]"></select>
                                         </div>
-                                        <div class="clearfix" ></div>
+                                        <div class="clearfix"></div>
                                         <div class="col-md-12 col-xs-12">
                                             <label>Barang jadi</label>
                                             <input type="text" class="form-control"
@@ -399,6 +401,7 @@
                             </div>
                         </div>
                     </div>
+
                 </div>
                 <h5 class="text-primary-dark"> <a href="javascript:void(toggleDivBayarInvoice())"> <strong>buat
                             pembayaran invoice</strong>
