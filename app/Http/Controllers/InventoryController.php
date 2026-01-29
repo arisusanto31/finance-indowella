@@ -203,9 +203,13 @@ class InventoryController extends Controller
     }
     public function getMutasiMasuk()
     {
+        
         $year = getInput('year') ? getInput('year') : date('Y');
+          $indexLastYear = createCarbon($year . '-01-01')->endOfYear()->format('ymdHis000');
+        $indexFirstYear = createCarbon($year . '-01-01')->startOfYear()->format('ymdHis000');
+    
         $kartu = KartuInventory::from('kartu_inventories as ki')->join('inventories as inv', 'inv.id', '=', 'ki.inventory_id')
-            ->whereYear('ki.date', $year)->where('ki.amount', '>', 0)
+            ->where('ki.index_date','<', $indexLastYear)->where('ki.index_date','>=', $indexFirstYear)->where('ki.amount', '>', 0)
             ->select('ki.*', 'inv.name', 'inv.type_aset')->get();
         return [
             'status' => 1,
@@ -215,8 +219,11 @@ class InventoryController extends Controller
     public function getMutasiKeluar()
     {
         $year = getInput('year') ? getInput('year') : date('Y');
+            $indexLastYear = createCarbon($year . '-01-01')->endOfYear()->format('ymdHis000');
+        $indexFirstYear = createCarbon($year . '-01-01')->startOfYear()->format('ymdHis000');
+    
         $kartu = KartuInventory::from('kartu_inventories as ki')->join('inventories as inv', 'inv.id', '=', 'ki.inventory_id')
-            ->whereYear('ki.date', $year)->where('ki.amount', '<', 0)
+            ->where('ki.index_date','<', $indexLastYear)->where('ki.index_date','>=', $indexFirstYear)->where('ki.amount', '<', 0)
             ->select('ki.*', 'inv.name', 'inv.type_aset')->get();
         return [
             'status' => 1,
