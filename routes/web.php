@@ -120,6 +120,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('/get-summary', [InventoryController::class, 'getSummary'])->name('get-summary');
             Route::get('/get-mutasi-masuk', [InventoryController::class, 'getMutasiMasuk'])->name('get-mutasi-masuk');
             Route::get('/get-mutasi-keluar', [InventoryController::class, 'getMutasiKeluar'])->name('get-mutasi-keluar');
+             Route::get('kartu-mutasi/{id}', [InventoryController::class, 'kartuMutasi'])->name('kartu-mutasi');
+           
         });
         Route::prefix('bdd')->name('bdd.')->group(function () {
             Route::get('/', [BDDController::class, 'index']);
