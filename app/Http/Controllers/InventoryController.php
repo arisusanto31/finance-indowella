@@ -151,13 +151,14 @@ class InventoryController extends Controller
         $inventoryAktif = KartuInventory::whereIn('index_date', function ($q) use ($indexFirstYear) {
             $q->select(DB::raw('max(index_date)'))->from('kartu_inventories')->where('index_date', '<', $indexFirstYear)->groupBy('inventory_id');
         })->where('nilai_buku', '>', 0)->select('inventory_id')->pluck('inventory_id')->toArray();
-        $saldoBukuAkhir = KartuInventory::join('inventories as inv', 'inv.id', '=', 'kartu_inventories.inventory_id')->whereIn('kartu_inventories.id', function ($q) use ($indexLastYear) {
+        $saldoBukuAkhir = KartuInventory::join('inventories as inv', 'inv.id', '=', 'kartu_inventories.inventory_id')->whereIn('kartu_inventories.index_date', function ($q) use ($indexLastYear) {
             $q->from('kartu_inventories as ki')->where('ki.book_journal_id', bookID())
-                ->where('index_date', '<', $indexLastYear)->select(DB::raw('max(id) as maxid'))->groupBy('inventory_id');
+                ->where('index_date', '<', $indexLastYear)->select(DB::raw('max(index_date) as maxid'))->groupBy('inventory_id');
         })->select('inventory_id', 'nilai_buku', 'inv.name')->get()->keyBy('inventory_id');
         $idakhir= collect($saldoBukuAkhir)->keys()->toArray();
         $inventoryAktif=array_unique(array_merge($inventoryAktif,$idakhir));
         $inv = Inventory::from('inventories as inv')->whereIn('inv.id', $inventoryAktif)->leftJoin('kartu_inventories as ki', 'ki.inventory_id', '=', 'inv.id')
+            ->where('index_date','<',$indexLastYear)
             ->where('ki.book_journal_id', bookID())
 
             ->select(
@@ -195,7 +196,9 @@ class InventoryController extends Controller
             'status' => 1,
             'msg' => $inv,
             'saldo_buku_akhir' => $saldoBukuAkhir,
-            'year' => $year
+            'year' => $year,
+            'index_first_year' => $indexFirstYear,
+            'index_last_year' => $indexLastYear
         ];
     }
     public function getMutasiMasuk()

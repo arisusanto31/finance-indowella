@@ -111,7 +111,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
 
     Route::prefix('daftar')->group(function () {
         Route::prefix('aset-tetap')->name('aset-tetap.')->group(function () {
-            Route::get('/', [InventoryController::class, 'index']);
+            Route::get('/', [InventoryController::class, 'index'])->name('index');
             Route::get('/create_', [InventoryController::class, 'createInventory'])->name('create');
             Route::get('/create-kartu', [InventoryController::class, 'createKartuInventory'])->name('create-kartu');
             Route::post('/store-inventory', [InventoryController::class, 'storeInventory'])->name('store-inventory');
