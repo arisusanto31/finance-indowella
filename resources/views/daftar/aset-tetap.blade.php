@@ -33,7 +33,8 @@
     .sticky-col-2,
     .sticky-col-3,
     .sticky-col-4,
-    .sticky-col-5 {
+    .sticky-col-5,
+    .sticky-col-6 {
       position: sticky;
 
       z-index: 30;
@@ -44,7 +45,8 @@
     td.sticky-col-2,
     td.sticky-col-3,
     td.sticky-col-4,
-    td.sticky-col-5 {
+    td.sticky-col-5,
+    td.sticky-col-6{
       background-color: #f8f9fa !important;
     }
 
@@ -343,7 +345,8 @@
                 stringData += `
                 <tr>
                   <td class="sticky-col-1">${indexInv + 1}</td>
-                  <td class="sticky-col-2">${dataInv.name}</td>
+                  <td class="sticky-col-2"><div class="wrapper-scroll-horizontal">${dataInv.name} [id:${invID}] </div></td>
+               
                   <td class="sticky-col-3">${dataInv.keterangan_qty_unit}</td>
                   <td class="sticky-col-4">${dataInv.periode} tahun</td>
                   <td class="sticky-col-5">${formatRupiah(dataInv.nilai_perolehan)}</td>

@@ -146,9 +146,20 @@ class InventoryController extends Controller
     {
         if (!$year)
             $year = getInput('year') ? getInput('year') : date('Y');
-        $inv = Inventory::from('inventories as inv')->leftJoin('kartu_inventories as ki', 'ki.inventory_id', '=', 'inv.id')
+        $indexLastYear = createCarbon($year . '-01-01')->endOfYear()->format('ymdHis000');
+        $indexFirstYear = createCarbon($year . '-01-01')->startOfYear()->format('ymdHis000');
+        $inventoryAktif = KartuInventory::whereIn('index_date', function ($q) use ($indexFirstYear) {
+            $q->select(DB::raw('max(index_date)'))->from('kartu_inventories')->where('index_date', '<', $indexFirstYear)->groupBy('inventory_id');
+        })->where('nilai_buku', '>', 0)->select('inventory_id')->pluck('inventory_id')->toArray();
+        $saldoBukuAkhir = KartuInventory::join('inventories as inv', 'inv.id', '=', 'kartu_inventories.inventory_id')->whereIn('kartu_inventories.id', function ($q) use ($indexLastYear) {
+            $q->from('kartu_inventories as ki')->where('ki.book_journal_id', bookID())
+                ->where('index_date', '<', $indexLastYear)->select(DB::raw('max(id) as maxid'))->groupBy('inventory_id');
+        })->select('inventory_id', 'nilai_buku', 'inv.name')->get()->keyBy('inventory_id');
+        $idakhir= collect($saldoBukuAkhir)->keys()->toArray();
+        $inventoryAktif=array_unique(array_merge($inventoryAktif,$idakhir));
+        $inv = Inventory::from('inventories as inv')->whereIn('inv.id', $inventoryAktif)->leftJoin('kartu_inventories as ki', 'ki.inventory_id', '=', 'inv.id')
             ->where('ki.book_journal_id', bookID())
-            ->whereYear('ki.date', $year)
+
             ->select(
                 'inv.id',
                 'inv.name',
@@ -173,15 +184,12 @@ class InventoryController extends Controller
                         'nilai_perolehan' => $theval[0]->nilai_perolehan,
                         'total_pembelian' => $theval[0]->total_pembelian,
                         'periode' => $theval[0]->periode,
-                        'total_penyusutan' => $theval[0]->total_penyusutan,
-                        'penyusutan' => collect($theval)->pluck('total_penyusutan','bulan_susut')
+                        'total_penyusutan' => collect($theval)->sum('total_penyusutan'),
+                        'penyusutan' => collect($theval)->pluck('total_penyusutan', 'bulan_susut')
                     ];
                 });
             });
-        $saldoBukuAkhir = KartuInventory::join('inventories as inv', 'inv.id', '=', 'kartu_inventories.inventory_id')->whereIn('kartu_inventories.id', function ($q) use ($year) {
-            $q->from('kartu_inventories as ki')->where('ki.book_journal_id', bookID())
-                ->whereYear('ki.date', $year)->select(DB::raw('max(id) as maxid'))->groupBy('inventory_id');
-        })->select('inventory_id', 'nilai_buku', 'inv.name')->get()->keyBy('inventory_id');
+
 
         return [
             'status' => 1,
