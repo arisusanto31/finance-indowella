@@ -148,7 +148,7 @@
                                 <div class="table-responsive mt-2">
 
                                     <table id="kartuMasuk"
-                                        class="table table-bordered table-striped table-hover align-middle">
+                                        class="table table-bordered table-mutasi table-striped table-hover align-middle">
                                         <thead class="bg-white text-dark text-center">
                                             <tr>
                                                 <th>No</th>
@@ -175,7 +175,7 @@
 
                                 <div class="table-responsive mt-2">
                                     <table id="kartuKeluar"
-                                        class="table table-bordered table-striped table-hover align-middle">
+                                        class="table table-bordered table-mutasi table-striped table-hover align-middle">
                                         <thead class="bg-white text-dark text-center">
                                             <tr>
                                                 <th>No</th>
@@ -254,6 +254,7 @@
 
 
     @push('scripts')
+       <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
         <script>
             var page = "kartu";
 
@@ -319,7 +320,7 @@
                 page = "kartu";
                 $('#div-table').html('');
                 $.ajax({
-                    url: '{{ route('aset-tetap.get-summary') }}?year={{getInput('year')}}' ,
+                    url: '{{ route('aset-tetap.get-summary') }}?year={{ getInput('year') }}',
                     method: 'get',
                     success: function(res) {
                         console.log(res);
@@ -402,7 +403,7 @@
             function getMutasiKeluar() {
                 page = "keluar";
                 $.ajax({
-                    url: '{{ route('aset-tetap.get-mutasi-keluar') }}?year={{getInput('year')}}',
+                    url: '{{ route('aset-tetap.get-mutasi-keluar') }}?year={{ getInput('year') }}',
                     method: 'get',
                     success: function(res) {
                         console.log(res);
@@ -411,15 +412,18 @@
                             res.msg.forEach(function eachData(data, i) {
                                 dataMutasi[data.id] = data;
                                 stringData += `<tr>
-                <td>${i+1}</td>
-                <td>${data.date}</td>
-                <td>${data.name}</td>
-                <td>${data.type_aset}</td>
-                <td>${formatRupiah(data.amount)}</td>
-                <td>${(!data.journal_number?'<span> belum ada jurnal</span> <button onclick="openLinkJournal('+data.id+')"> <i class="fas fa-link"></i> jurnal</button>':data.journal_number)}</td>
-              </tr>`;
+                                  <td>${i+1}</td>
+                                  <td>${data.date}</td>
+                                  <td>${data.name}</td>
+                                  <td>${data.type_aset}</td>
+                                  <td>${formatRupiah(data.amount)}</td>
+                                  <td>${(!data.journal_number?'<span> belum ada jurnal</span> <button onclick="openLinkJournal('+data.id+')"> <i class="fas fa-link"></i> jurnal</button>':data.journal_number)}</td>
+                                </tr>`;
                             });
                             $('#body-mutasi-keluar').html(stringData);
+                            $('#kartuKeluar').DataTable({
+                              displayLength: -1
+                            });
                         } else {
                             Swal.fire('ops', 'something error ' + res.msg, 'error');
                         }
@@ -433,7 +437,7 @@
             function getMutasiMasuk() {
                 page = "masuk";
                 $.ajax({
-                    url: '{{ route('aset-tetap.get-mutasi-masuk') }}?year={{getInput('year')}}',
+                    url: '{{ route('aset-tetap.get-mutasi-masuk') }}?year={{ getInput('year') }}',
                     method: 'get',
                     success: function(res) {
                         console.log(res);
@@ -443,16 +447,19 @@
                                 dataMutasi[data.id] = data;
 
                                 stringData += `<tr>
-                <td>${i+1}</td>
-                <td>${data.date}</td>
-                <td>${data.name}</td>
-                <td>${data.type_aset}</td>
-                <td>${formatRupiah(data.amount)}</td>
-                <td>${(!data.journal_number?'<span> belum ada jurnal</span> <button onclick="openLinkJournal('+data.id+')"> <i class="fas fa-link"></i> jurnal</button>':data.journal_number)}</td>
-                           
-              </tr>`;
+                                <td>${i+1}</td>
+                                <td>${data.date}</td>
+                                <td>${data.name}</td>
+                                <td>${data.type_aset}</td>
+                                <td>${formatRupiah(data.amount)}</td>
+                                <td>${(!data.journal_number?'<span> belum ada jurnal</span> <button onclick="openLinkJournal('+data.id+')"> <i class="fas fa-link"></i> jurnal</button>':data.journal_number)}</td>
+                                          
+                              </tr>`;
                             });
                             $('#body-mutasi-masuk').html(stringData);
+                            $('#kartuMasuk').DataTable({
+                                displayLength: -1
+                            });
                         } else {
                             Swal.fire('ops', 'something error ' + res.msg, 'error');
                         }

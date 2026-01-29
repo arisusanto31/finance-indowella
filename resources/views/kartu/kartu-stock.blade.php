@@ -115,10 +115,10 @@
                                             mutasi</button>
                                     </div>
                                 </div>
-                                <div class="table-responsive mt-2">
+                                <div class="table-responsive  mt-2">
 
                                     <table id="kartuMasuk"
-                                        class="table table-bordered table-striped table-hover align-middle">
+                                        class="table table-bordered table-mutasi table-striped table-hover align-middle">
                                         <thead class="bg-white text-dark text-center">
                                             <tr>
                                                 <th>No</th>
@@ -130,7 +130,7 @@
                                                 <th>Rp/Unit</th>
                                                 <th>Total</th>
                                                 <th>Nomer Jurnal</th>
-                                                <th>Aksi</th>
+                                             
 
                                             </tr>
 
@@ -145,9 +145,9 @@
                                     <button type="button" class=" btn-primary" onclick="showModalOut()"> 🔃 buat
                                         mutasi</button>
                                 </div>
-                                <div class="table-responsive mt-2">
+                                <div class="table-responsive  mt-2">
                                     <table id="kartuKeluar"
-                                        class="table table-bordered table-striped table-hover align-middle">
+                                        class="table table-bordered table-mutasi table-striped table-hover align-middle">
                                         <thead class="bg-white text-dark text-center">
                                             <tr>
                                                 <th>No</th>
@@ -231,6 +231,8 @@
 
 
     @push('scripts')
+        <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
         <script>
             var page = "kartu";
             setTimeout(function() {
@@ -429,6 +431,9 @@
                                 </tr>`;
                             });
                             $('#body-mutasi-masuk').html(html);
+                            $('#kartuMasuk').DataTable({
+                                displayLength: -1
+                            });
                         } else {
 
                         }
@@ -511,6 +516,9 @@
                                 </tr>`;
                             });
                             $('#body-mutasi-keluar').html(html);
+                            $('#kartuKeluar').DataTable({
+                                "displayLength": -1
+                            });
                         } else {
 
                         }

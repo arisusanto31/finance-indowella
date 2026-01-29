@@ -219,7 +219,7 @@ class InventoryController extends Controller
 
         $kartu = KartuInventory::from('kartu_inventories as ki')->join('inventories as inv', 'inv.id', '=', 'ki.inventory_id')
             ->where('ki.index_date', '<', $indexLastYear)->where('ki.index_date', '>=', $indexFirstYear)->where('ki.amount', '>', 0)
-            ->select('ki.*', 'inv.name', 'inv.type_aset')->get();
+            ->select('ki.*', 'inv.name', 'inv.type_aset')->orderBy('ki.index_date','asc')->get();
         return [
             'status' => 1,
             'msg' => $kartu
@@ -233,7 +233,7 @@ class InventoryController extends Controller
 
         $kartu = KartuInventory::from('kartu_inventories as ki')->join('inventories as inv', 'inv.id', '=', 'ki.inventory_id')
             ->where('ki.index_date', '<', $indexLastYear)->where('ki.index_date', '>=', $indexFirstYear)->where('ki.amount', '<', 0)
-            ->select('ki.*', 'inv.name', 'inv.type_aset')->get();
+            ->select('ki.*', 'inv.name', 'inv.type_aset')->orderBy('ki.index_date','asc')->get();
         return [
             'status' => 1,
             'msg' => $kartu
