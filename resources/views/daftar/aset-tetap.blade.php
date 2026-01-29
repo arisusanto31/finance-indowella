@@ -397,7 +397,7 @@
             function getMutasiKeluar() {
                 page = "keluar";
                 $.ajax({
-                    url: '{{ route('aset-tetap.get-mutasi-keluar') }}',
+                    url: '{{ route('aset-tetap.get-mutasi-keluar') }}?year={{getInput('year')}}',
                     method: 'get',
                     success: function(res) {
                         console.log(res);
@@ -428,7 +428,7 @@
             function getMutasiMasuk() {
                 page = "masuk";
                 $.ajax({
-                    url: '{{ route('aset-tetap.get-mutasi-masuk') }}',
+                    url: '{{ route('aset-tetap.get-mutasi-masuk') }}?year={{getInput('year')}}',
                     method: 'get',
                     success: function(res) {
                         console.log(res);
