@@ -579,7 +579,7 @@ class JournalController extends Controller
             'status' => 1,
             'msg' => [
                 'journals' => $journalDeleted,
-                'kartu_stock' => $kartuDeleted,
+                'kartu' => $kartuDeleted,
                 'links' => $linkDeleted,
                 'recalculate_journals' => $lj
             ]
