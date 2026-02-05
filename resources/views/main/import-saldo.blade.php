@@ -18,6 +18,10 @@
             </thead>
             <tbody id="body-import-saldo">
               @foreach($data['jurnal'] as $key=> $item)
+              @if($item['account_code']=="")
+              @continue
+              @endif
+
               <tr>
                 <td>{{$key}}</td>
                 <td>{{$item['account_code']}}

@@ -130,10 +130,7 @@
                                                 <th>Rp/Unit</th>
                                                 <th>Total</th>
                                                 <th>Nomer Jurnal</th>
-                                             
-
                                             </tr>
-
                                         </thead>
                                         <tbody id="body-mutasi-masuk">
                                         </tbody>

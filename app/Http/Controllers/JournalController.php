@@ -521,6 +521,70 @@ class JournalController extends Controller
         ];
     }
 
+
+    function previewDestroy($id)
+    {
+        $journalDeleted = [];
+        $kartuDeleted = [];
+        $linkDeleted = [];
+        $journal = Journal::find($id);
+        $key = JournalKey::orderBy('id', 'desc')->first();
+        if ($key)
+            if ($journal->created_at < $key->key_at) {
+                return [
+                    'status' => 0,
+                    'msg' => 'jurnal sudah terkunci'
+                ];
+            }
+        if (!user()->can('delete_data_journal')) {
+            return [
+                'status' => 0,
+                'msg' => 'anda tidak memiliki hak akses untuk menghapus jurnal ini'
+            ];
+        }
+        $journals = Journal::where('journal_number', $journal->journal_number)->get();
+        // if (date_diff(createCarbon($journal->created_at), carbonDate())->days > 3) {
+        //     //buat jurnal pembalikan balik aja 
+        //     return self::cancelJournal($journal->journal_number);
+        // } else {
+        $lj = [];
+        foreach ($journals as $j) {
+            //kalo disini langsung hapus aja, biar lebih clean datanya
+            $lj[] = Journal::where('code_group', $j->code_group)->where('index_date', '<', $j->index_date)->orderBy('index_date', 'desc')->first();
+            if ($j->reference_model != null) {
+                //menghapus relasi di model yang di link ke jurnal ini
+                $model = $j->reference_model::where('journal_number', $j->journal_number)->get();
+                if ($model->count() > 0) {
+                    $model->each(function ($item) {
+                        $itemID = $item->id;
+                        $class = get_class($item);
+                        $kartuDeleted[] = $item;
+                        if ($itemID != null && $class != null) {
+                            $details = DetailKartuInvoice::where('kartu_id', $itemID)->where('kartu_type', $class)->get();
+                            foreach ($details as $detail) {
+                                $linkDeleted[] = $detail;
+                            }
+                        }
+                    });
+                }
+            }
+            $details = DetailKartuInvoice::where('journal_id', $j->id)->get();
+            foreach ($details as $detail) {
+                $linkDeleted[] = $detail;
+            }
+            $journalDeleted[] = $j;
+        }
+
+        return [
+            'status' => 1,
+            'msg' => [
+                'journals' => $journalDeleted,
+                'kartu_stock' => $kartuDeleted,
+                'links' => $linkDeleted,
+                'recalculate_journals' => $lj
+            ]
+        ];
+    }
     function destroy($id)
     {
 
@@ -608,8 +672,25 @@ class JournalController extends Controller
         $date = createCarbon($year . '-' . $month . '-01 00:00:00');
         //$codes berisi code group dan amount saldo
 
+        $allca = ChartAccount::pluck('code_group')->all();
+
+        foreach ($codes as $codegroup => $datacode) {
+
+            if (!in_array($codegroup, $allca)) {
+                //lek ga ada brati harus buat lo yaa..
+                $st = ChartAccount::createNewChildChart(new Request([
+                    'code_group' => $datacode['code_group'],
+                    'name' => $datacode['name']
+                ]));
+                if ($st['status'] == 0) {
+                    return $st;
+                }
+            }
+        }
+
         $debets = [];
         $cas = ChartAccount::whereIn('code_group', collect($codes)->keys()->all())->get();
+
 
         foreach ($cas as $ca) {
             $debets[] = [
@@ -618,9 +699,10 @@ class JournalController extends Controller
                 'amount' => 0,
                 'reference_id' => null,
                 'reference_type' => null,
-                'custom_amount_saldo' => $codes[$ca->code_group]
+                'custom_amount_saldo' => $codes[$ca->code_group]['amount']
             ];
         }
+        // return ['status' => 0, 'msg' => $debets];
         $st = JournalController::createBaseJournal(new Request([
             'debets' => $debets,
             'kredits' => [],
@@ -906,7 +988,7 @@ class JournalController extends Controller
     function resendImportTask($id)
     {
 
-       return KartuStockController::processTaskImport($id);
+        return KartuStockController::processTaskImport($id);
         // $taskDetail = TaskImportDetail::find($id);
         // if ($taskDetail->type == 'kartu_stock') {
         //     ImportKartuStockJob::dispatch($id);
@@ -926,7 +1008,7 @@ class JournalController extends Controller
                 if ($detail->type == 'kartu_stock') {
                     // ImportKartuStockJob::dispatch($detail->id);
                     // dispatch(new ImportKartuStockJob($detail->id));
-                    ImportKartuStockJob::dispatch($detail->id)->onQueue('default')->delay(now()->addMilliseconds(200 * $row));
+                    ImportKartuStockJob::dispatch($detail->id)->onQueue('default')->delay(now()->addMilliseconds(50 * $row));
                     $antrianKartuStock[] = $detail;
                 } else {
                     $antrianMboh[] = $detail;
@@ -953,14 +1035,15 @@ class JournalController extends Controller
             $val['payload_array'] = json_decode($val->payload, true);
             return $val;
         });
-        $allPayload = collect($taskDetail)->pluck('payload_array')->pluck('amount', 'code_group')->all();
+        $allPayload = collect($taskDetail)->pluck('payload_array')->keyBy('code_group')->all();
+        // return $allPayload [code:{name:'',amount:'',date:''}];
         $date = collect($taskDetail)->first()['payload_array']['date'];
         $st = self::makeSaldoAwal($allPayload, createCarbon($date)->format('m'), createCarbon($date)->format('Y'));
+
         if ($st['status'] == 1) {
             $number = $st['journal_number'];
             $journals = Journal::where('journal_number', $number)->pluck('amount_saldo', 'code_group')->all();
-
-
+            $allPayload = collect($allPayload)->pluck('amount', 'code_group')->all();
             foreach ($allPayload as $codegroup => $amount) {
                 $saldoJournal = array_key_exists($codegroup, $journals) ? $journals[$codegroup] : 0;
                 if (bccomp((string)$amount, (string)$saldoJournal, 2) != 0) {

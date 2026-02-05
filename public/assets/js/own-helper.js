@@ -247,6 +247,30 @@ function initItemSelectManual(el, url, placeholder = "", parent = null) {
 
 }
 
+function notification(kind='info',message='') {
+
+    const styles = {
+        success: "linear-gradient(135deg, #198754, #146c43)",  // bs5 success vibe
+        error: "linear-gradient(135deg, #dc3545, #b02a37)",
+        info: "linear-gradient(135deg, #0d6efd, #0a58ca)",
+        warning: "linear-gradient(135deg, #ffc107, #ffcd39)"
+    };
+
+    Toastify({
+        text: message,
+        duration: 3000,
+        gravity: "top",
+        position: "right",
+        close: true,
+        stopOnFocus: true,
+        style: { background: styles[kind] ?? styles.info }
+    }).showToast();
+
+
+
+
+}
+
 function normalizeDate(input) {
     // Ganti separator jadi '-'
     const clean = input.replace(/[\/\.]/g, '-'); // handle / atau .
@@ -368,6 +392,24 @@ function swalInfo(title, text, icon = "info") {
     });
 }
 
+function swalQuestion({ title = "Apakah kamu yakin?", text = "Data akan diproses!", confirmText = "Yes", cancelText = "No", proses = () => { } }) {
+    Swal.fire({
+        title: title,
+        text: text,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: confirmText,
+        cancelButtonText: cancelText,
+        allowOutsideClick: false,
+        showLoaderOnConfirm: true,
+        scrollbarPadding: false,
+        focusConfirm: false,
+        didOpen: () => {
+            $('.swal2-container').css('z-index', 2000);
+        },
+        preConfirm: () => proses()
+    });
+}
 function swalConfirmAndSubmit({ url, data, aktif_konfirm = true, onSuccess = null, successText = "Berhasil!", confirmText = "Yes", cancelText = "No", onError = null }) {
 
 
@@ -485,4 +527,19 @@ function swalDelete({ url, elem = null, onSuccess = null, successText = "Berhasi
             });
         }
     });
+}
+
+function showProgressBar(count, total) {
+    $('#div-progressbar').removeClass('hidden');
+    persen = getProsen(count, total);
+    $('#progress-bar-inner').css('width', persen + '%');
+    $('#progress-bar-inner').attr('aria-valuenow', persen);
+    $('#progress-bar-inner').html(persen + '%');
+}
+
+function hideProgressBar() {
+    $('#div-progressbar').addClass('hidden');
+    $('#progress-bar-inner').css('width', '0%');
+    $('#progress-bar-inner').attr('aria-valuenow', 0);
+    $('#progress-bar-inner').html('0%');
 }

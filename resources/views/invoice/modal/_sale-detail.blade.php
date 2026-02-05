@@ -6,6 +6,7 @@
 
 </div>
 <div class="modal-body">
+    <button class="btn btn-secondary mb-3" onclick="updateStatus()"><i class="fas fa-refresh"></i> update status </button>
     <div class="row">
         <div class="col-xs-12 col-md-12">
             @if ($data['total_kartu'] == 0)
@@ -863,6 +864,11 @@
         });
 
 
+    }
+
+    function updateStatus(){
+        updateStatusRow('{{ $data->id }}');
+        notification('success','status updated');
     }
 
     function submitBDP(i) {

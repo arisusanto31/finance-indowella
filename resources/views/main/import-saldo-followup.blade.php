@@ -6,9 +6,10 @@
         <div class="card-body">
 
             <p>Saldo Neraca Lajur
-                @if(collect($details['saldo_nl'])->where('status','success')->count()==0)
-                <br>
-                <button class="bg-primary btn text-white" onclick="sendJurnal('{{ $task->id }}')"> <i class="fas fa-arrow-up"></i> SEND </button>
+                @if (collect($details['saldo_nl'])->where('status', 'success')->count() == 0)
+                    <br>
+                    <button class="bg-primary btn text-white" onclick="sendJurnal('{{ $task->id }}')"> <i
+                            class="fas fa-arrow-up"></i> SEND </button>
                 @endif
             </p>
 
@@ -32,7 +33,7 @@
                             @endphp
                             <tr>
                                 <td>{{ $key + 1 }}</td>
-                                <td> {{$data->id}} </td>
+                                <td> {{ $data->id }} </td>
                                 <td>{{ $item['code_group'] }}
                                 </td>
                                 <td>{{ $item['name'] }}
@@ -94,10 +95,10 @@
                             @endphp
                             <tr>
                                 <td>{{ $key + 1 }}</td>
-                                <td> {{$data->id}} </td>
+                                <td> {{ $data->id }} </td>
                                 <td>{{ $item['ref_id'] }}
                                 </td>
-                            
+
                                 <td>{{ $item['name'] }}
                                 </td>
                                 <td>{{ $item['quantity'] }}
@@ -107,7 +108,7 @@
 
                                 <td>{{ format_price($item['amount']) }}
                                 </td>
-                                <td>
+                                <td id="status-{{ $data->id }}">
                                     <span class="badge {{ bgStatus($data->status) }}">{{ $data->status }}</span>
                                     @if ($data->status == 'failed')
                                         <br>
@@ -118,6 +119,8 @@
                                 </td>
                                 <td>
                                     @if ($data->status != 'success')
+                                        <input type="hidden" id="import-notyet{{ $data->id }}"
+                                            class="import-notyet" value="{{ $data->id }}" />
                                         <button type="button" class="btn btn-primary btn-sm" title="resend data"
                                             onclick="resendData('{{ $data->id }}')"> <i
                                                 class="fas fa-arrow-up"></i></button>
@@ -143,35 +146,67 @@
     @push('scripts')
         <script>
             function resendData(id) {
-                $.ajax({
-                    url: '{{ url('admin/jurnal/resend-import-task') }}/' + id,
-                    method: 'get',
-                    success: function(res) {
-                        console.log(res);
-                        if (res.status == 1) {
-                            Swal.fire('Success', 'Data berhasil di kirim ulang', 'success');
-                        } else {
 
+                return new Promise((resolve) => {
+                    $.ajax({
+                        url: '{{ url('admin/jurnal/resend-import-task') }}/' + id,
+                        method: 'get',
+                        success: function(res) {
+                            console.log(res);
+                            if (res.status == 1) {
+                                $('#status-' + id).html('<span class="badge bg-success">success</span>');
+                                resolve(res);
+                            } else {
+                                notification('error', res.msg);
+                                $('#status-' + id).html('<span class="badge bg-danger">failed</span> <br>' +
+                                    res.msg);
+                                resolve(res);
+                            }
+                        },
+                        error: function(res) {
+                             notification('error', 'Terjadi Kesalahan pada server')
+                            resolve({
+                                status: 0
+                            });
+                           
                         }
-                    },
-                    error: function(res) {}
+
+                    });
                 });
             }
 
             function resendAll() {
-                taskID = '{{ $task->id }}';
-                $.ajax({
-                    url: '{{ url('admin/jurnal/resend-import-task-all') }}/' + taskID,
-                    method: 'get',
-                    success: function(res) {
-                        console.log(res);
-                        if (res.status == 1) {
-                            Swal.fire('Success', 'Data Taks ' + taskID + ' berhasil di kirim ulang', 'success');
-                        } else {
-                            Swal.fire('Error', 'Data gagal di kirim ulang', 'error');
-                        }
-                    },
-                })
+                swalQuestion({
+                    proses: function() {
+                        total = $('.import-notyet').length;
+                        count = 0;
+                        $('.import-notyet').each(async function(i, elem) {
+                            count++;
+                            id = $(elem).val();
+                            res = await resendData(id);
+                            if (res['status'] == 1) {
+                                $('#import-notyet' + id).remove();
+                            }
+                            showProgressBar(count, total);
+                        });
+                        setTimeout(() => {
+                            hideProgressBar();
+                        }, 2000);
+                    }
+                });
+                // taskID = '{{ $task->id }}';
+                // $.ajax({
+                //     url: '{{ url('admin/jurnal/resend-import-task-all') }}/' + taskID,
+                //     method: 'get',
+                //     success: function(res) {
+                //         console.log(res);
+                //         if (res.status == 1) {
+                //             Swal.fire('Success', 'Data Taks ' + taskID + ' berhasil di kirim ulang', 'success');
+                //         } else {
+                //             Swal.fire('Error', 'Data gagal di kirim ulang', 'error');
+                //         }
+                //     },
+                // })
             }
 
             function sendJurnal(taskID) {
@@ -186,7 +221,7 @@
                             Swal.fire('Success', 'Data Taks ' + taskID + ' berhasil di proses kirim jurnal',
                                 'success');
                         } else {
-                            Swal.fire('Error', 'Data gagal di proses kirim jurnal', 'error');
+                            Swal.fire('Error', res.msg, 'error');
                         }
                     },
                 });

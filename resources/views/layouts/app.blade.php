@@ -50,7 +50,7 @@
     <link rel="stylesheet" href="{{ asset('assets/vendor/css/core.css') }}" class="template-customizer-core-css" />
     <link rel="stylesheet" href="{{ asset('assets/vendor/css') }}/{{ book()->theme }}" class="template-customizer-theme-css" />
     <link rel="stylesheet" href="{{ asset('assets/css/helper.css') }}" />
-
+  
     <link rel="stylesheet" href="{{ asset('assets/css/demo.css') }}" />
 
     <!-- Vendors CSS -->
@@ -62,15 +62,19 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
 
     <!-- Page CSS -->
 
     <!-- Helpers -->
     <script src="{{ asset('assets/vendor/js/helpers.js') }}"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    {{-- <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script> --}}
     <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="{{ asset('assets/js/config.js') }}"></script>
+ 
 
     @stack('styles')
 
@@ -195,9 +199,10 @@
             }
         }
 
-        var _url_modal_active="";
+        var _url_modal_active = "";
+
         function showDetailOnModal(url, size = "") {
-            _url_modal_active=url;
+            _url_modal_active = url;
             $.ajax({
                 url: url,
                 method: 'GET',
@@ -223,25 +228,26 @@
         }
 
         function refreshIsiModal() {
-            if(_url_modal_active){
-            $.ajax({
-                url: _url_modal_active,
-                method: 'GET',
-                success: function(response) {
-                    // kalau berhasil, baru atur ukuran modal dan tampilkan
+            if (_url_modal_active) {
+                $.ajax({
+                    url: _url_modal_active,
+                    method: 'GET',
+                    success: function(response) {
+                        // kalau berhasil, baru atur ukuran modal dan tampilkan
 
-                    $('#global-modal-content').html(response);
-                },
-                error: function(xhr) {
-                    // tampilkan error swal atau console
-                    Swal.fire('Oops!', `Gagal memuat konten modal: ${xhr.status} ${xhr.statusText}`, 'error');
-                }
-            });
-        }
+                        $('#global-modal-content').html(response);
+                    },
+                    error: function(xhr) {
+                        // tampilkan error swal atau console
+                        Swal.fire('Oops!', `Gagal memuat konten modal: ${xhr.status} ${xhr.statusText}`,
+                            'error');
+                    }
+                });
+            }
         }
 
         function hideModal() {
-            _url_modal_active="";
+            _url_modal_active = "";
             $('#global-modal-content').modal('hide');
         }
     </script>

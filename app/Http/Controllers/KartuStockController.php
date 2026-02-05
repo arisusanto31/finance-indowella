@@ -321,16 +321,16 @@ class KartuStockController extends Controller
             ->first();
         if (!$stock)
             $stock = Stock::where('name', $data['name'])->first();
-        if ($stock) {
-        }
+      
         info('stock terdaftar:' . json_encode($stock));
 
         try {
             if (!$stock) {
                 if ($task->book_journal_id == 1) {
+                    throw (new \Exception('masuk ke buku jurnal manufaktur'));
                     $manufStock = ManufStock::where('name', $data['name'])->with(['parentCategory', 'category'])->first();
                     if (!$manufStock) {
-                        $manufStock = ManufStock::where('reference_stock_id', intval($data['ref_id']))->with(['parentCategory', 'category'])->first();
+                        $manufStock = ManufStock::where('id', intval($data['ref_id']))->with(['parentCategory', 'category'])->first();
                     }
                     if ($manufStock) {
                         $manufStock['units_manual'] = $manufStock->getUnits();
@@ -346,9 +346,11 @@ class KartuStockController extends Controller
                         $stock = $st['msg'];
                     }
                 } else if ($task->book_journal_id == 2) {
+
                     $retailStock = RetailStock::where('name', $data['name'])->with(['parentCategory', 'category'])->first();
+
                     if (!$retailStock) {
-                        $retailStock = RetailStock::where('reference_stock_id', intval($data['ref_id']))->with(['parentCategory', 'category'])->first();
+                        $retailStock = RetailStock::where('id', intval($data['ref_id']))->with(['parentCategory', 'category'])->first();
                     }
                     if ($retailStock) {
                         $retailStock['units_manual'] = $retailStock->getUnits();
@@ -363,6 +365,9 @@ class KartuStockController extends Controller
                             throw new \Exception($st['msg']);
                         }
                         $stock = $st['msg'];
+                        throw (new \Exception('masuk ke buku jurnal retail'));
+                    } else {
+                        throw new \Exception('retail stock tidak ditemukan');
                     }
                 }
                 if (!$stock) {
@@ -402,8 +407,9 @@ class KartuStockController extends Controller
                     ]);
                 }
             }
-            if ($stock['unit_default'] == null || $stock['units_manual'] == null) {
-                $referenceStock = $stock->reference_stock_type::find($stock->reference_stock_id);
+            if ($stock && ($stock['unit_default'] == null || $stock['units_manual'] == null)) {
+                
+                $referenceStock = $bookModel::find(intval($data['ref_id']));
                 $referenceStock['units_manual'] = $referenceStock->getUnits();
                 $referenceStock['unit_default'] = $referenceStock->unit_info;
                 $st = StockController::sync(new Request([

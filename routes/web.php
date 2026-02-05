@@ -90,6 +90,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::get('verify/{id}', [JournalController::class, 'verify'])->name('verify');
         Route::get('/recalculate/{id}', [JournalController::class, 'recalculate'])->name('recalculate');
         Route::delete('delete/{id}', [JournalController::class, 'destroy'])->name('delete');
+        Route::get('/preview-destroy/{id}', [JournalController::class, 'previewDestroy'])->name('preview-destroy');
         Route::get('/get-saldo-highlight', [JournalController::class, 'getSaldoHighlight'])->name('get-saldo-highlight');
         Route::get('/get-saldo-custom/{id}', [JournalController::class, 'getSaldoCustom'])->name('get-saldo-custom');
         Route::get('/get-laba-rugi/{id}', [JournalController::class, 'getLabaRugi'])->name('get-laba-rugi');

@@ -97,6 +97,13 @@ div.fixed {
   transform: translate(-50%, -50%);
 }
 
+.fixed-on-bottom{
+  position: fixed;
+  right:50px;
+  bottom:50px;
+
+}
+
 .bglevel6 {
   background-color: #6e737b;
   /* biru lebih gelap */

@@ -94,6 +94,7 @@ class SalesOrder extends Model
 
     public function updateStatus()
     {
+        
         $total = collect($this->getTotalKartu())->map(function ($value, $key) {
             $keys = explode(' ', $key);
             if ($keys[0] == 'Piutang') {

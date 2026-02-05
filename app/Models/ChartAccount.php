@@ -97,6 +97,57 @@ class ChartAccount extends Model
         }
     }
 
+    public static function createNewChildChart(Request $request)
+    {
+        try {
+            $codeGroup = $request->input('code_group');
+            $name = $request->input('name');
+
+            $parent = null;
+            $codes = str_split($codeGroup);
+            while ($parent == null && count($codes) > 1) {
+                array_pop($codes);
+                $parentCode = implode("", $codes);
+                for ($i = 0; $i < 6 - count($codes); $i++) {
+                    $parentCode .= '0';
+                }
+                info('mencari parent code ' . $parentCode);
+                $parent = ChartAccount::where('code_group', $parentCode)->first();
+                if($parent){
+                    info('ketemu parent code ' . $parentCode);
+                    break;
+                }else{
+                    info('tidak ketemu parent code ' . $parentCode);
+                }
+            }
+            if ($parent == null) {
+                return [
+                    'status' => 0,
+                    'msg' => 'code ' . $codeGroup . ' harus dibuat manual dulu '
+                ];
+            }
+
+            $chart = new ChartAccount();
+            $chart->name = $name;
+            $chart->code_group = $codeGroup;
+            $chart->account_type = $parent->account_type;
+            $chart->reference_model = $parent->reference_model;
+            $chart->parent_id = $parent->id;
+            $chart->save();
+            $chart->updateLevel();
+            $chart->makeAlias();
+            return [
+                'status' => 1,
+                'msg' => $chart
+            ];
+        } catch (\Exception $e) {
+            return [
+                'status' => 0,
+                'msg' => $e->getMessage()
+            ];
+        }
+    }
+
     public function makeAlias()
     {
         $alias = ChartAccountAlias::where('chart_account_id', $this->id)->where('book_journal_id', bookID())->first();
@@ -441,7 +492,7 @@ class ChartAccount extends Model
         $lastdate = $date->addMonth()->format('ymdHis') . '00';
         $chartAccount = ChartAccountAlias::select('id', 'code_group', 'is_child', 'level')->get();
         $subquery = Journal::from('journals as j')->whereBetween('j.index_date', [(float)$firstdate, (float)$lastdate]);
-        $mutasi_= ChartAccountAlias::from('chart_account_aliases as c')
+        $mutasi_ = ChartAccountAlias::from('chart_account_aliases as c')
             ->leftJoinSub($subquery, 'j', function ($join) {
                 $join->on('j.code_group', '=', 'c.code_group');
             })
