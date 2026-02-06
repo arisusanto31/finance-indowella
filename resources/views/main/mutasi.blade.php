@@ -640,22 +640,22 @@
                         <div class="bg-primary-light p-2 text-white text-start rounded-3 mb-2">
                             <p> <strong>jurnal </strong></p>
                             <ul>
-                              ${data.journals.map(journal => `<li>${journal.code_group} - ${journal.coa_name} : ${formatRupiah(journal.amount_debet)} / ${formatRupiah(journal.amount_kredit)}</li>`).join('')}
+                              ${data.journals.map(journal => `<li>[${journal.id}] ${journal.code_group} - ${journal.coa_name} : ${formatRupiah(journal.amount_debet)} / ${formatRupiah(journal.amount_kredit)}</li>`).join('')}
                             </ul>
                         </div>
                         <div class="bg-primary-light p-2 text-white text-start rounded-3 mb-2">
                             <p> <strong>kartu </strong></p>
                             <ul>
-                              ${data.kartus.map(kartu => `<li>${kartu.class} : ${formatRupiah(kartu.amount_debet)} / ${formatRupiah(kartu.amount_kredit)}</li>`).join('')}
+                              ${data.kartus.map(kartu => `<li>[${kartu.id}] ${kartu.class} : ${formatRupiah(kartu.amount_debet)} / ${formatRupiah(kartu.amount_kredit)}</li>`).join('')}
                             </ul>
                         </div>
                         <div class="bg-primary-light p-2 text-white text-start rounded-3 mb-2">
                             <p> <strong> links </strong></p>
                             <ul>
                               ${data.links.map(link => `<li class="mb-2">
-                                          kartu <div class="d-inline bg-primary-dark rounded-4 ">${link.kartu_type} - ID: ${link.kartu_id} </div>
+                                          kartu <div class="d-inline bg-primary-dark ps-2 pe-2 rounded-4 ">${link.kartu_type} - ID: ${link.kartu_id}</div>  (${formatRupiah(link.amount_debet)} / ${formatRupiah(link.amount_kredit)})
                                           <i class="fas fa-link"></i> 
-                                          jurnal <div class="d-inline bg-primary-dark rounded-4 ">${link.account_name}- ID: ${link.journal_id} </div>
+                                          jurnal <div class="d-inline bg-primary-dark ps-2 pe-2 rounded-4 ">${link.account_name}- ID: ${link.journal_id}</div>  (${formatRupiah(link.amount_debet)} / ${formatRupiah(link.amount_kredit)})
                                          </li>`).join('')}
                             </ul>
                         </div>

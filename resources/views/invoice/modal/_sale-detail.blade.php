@@ -1,12 +1,13 @@
 <div class="modal-header">
-    <h5 class="modal-title" id="exampleModalLabel">Detail Sales Order {{ $data->sales_order_number }} -
+    <h5 class="modal-title" id="exampleModalLabel">Detail Sales Order {{ $data->sales_order_number }} - uid {{ $data->id }} -
         {{ $data->customer->name }} <span class="fs-8 px-2 rounded-1 bg-primary text-white">status: {{ $data->status }}
         </span></h5>
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 
 </div>
 <div class="modal-body">
-    <button class="btn btn-secondary mb-3" onclick="updateStatus()"><i class="fas fa-refresh"></i> update status </button>
+    <button class="btn btn-secondary mb-3" onclick="updateStatus()"><i class="fas fa-refresh"></i> update status
+    </button>
     <div class="row">
         <div class="col-xs-12 col-md-12">
             @if ($data['total_kartu'] == 0)
@@ -66,6 +67,9 @@
 
         <div class="col-xs-12 col-md-12" id="div-resume-total">
 
+        </div>
+
+        <div class="col-xs-12 col-md-12" id="div-history">
         </div>
 
 
@@ -459,10 +463,10 @@
             </div>
         </div>
 
-        <div class="col-xs-12 col-md-12" id="div-resume-kartu">
+        {{-- <div class="col-xs-12 col-md-12" id="div-resume-kartu">
 
 
-        </div>
+        </div> --}}
 
 
 
@@ -477,7 +481,8 @@
 <script>
     var data = @json($data);
     setTimeout(function() {
-        renderResumeKartu(data);
+        console.log('hasil data kartu', data);
+        renderResumeHistory(data);
         renderResumeTotal(data);
     }, 100);
 
@@ -489,6 +494,44 @@
                 id: id
             },
         });
+    }
+
+    function renderResumeHistory(data) {
+        console.log('data history', data['history']);
+        html = `
+         <div class="card mt-4">
+            <div class="card-body">
+            <h5 class="mt-4 text-primary-dark"> <strong>History Proses </strong> </h5>
+                <table class="table-bordered ">
+                <thead>
+                    <tr>
+                        <th class="p-1"> Tanggal </th>
+                        <th class="p-1"> akun jurnal </th>
+                        <th class="p-1"> journal number </th>
+                        <th class="p-1"> Kartu </th>
+                        <th class="p-1"> amount debet </th>
+                        <th class="p-1"> amount kredit </th>
+                    </tr>
+                </thead>
+                <tbody>
+
+
+                ${data['history'].map(item => `
+                    <tr>
+                        <td class="p-1"> ${formatNormalDateTime(new Date(item.date_journal))} </td>
+                        <td class="p-1"> ${item.code_group_name} </td>
+                        <td class="p-1"> ${item.journal_number} </td>
+                        <td class="p-1"> ${item.kartu_type? item.kartu_type+' : '+ item.kartu_id: 'tidak ada kartu'} </td>
+                        <td class=" p-1 text-end"> ${item.amount_debet != 0 ? formatRupiah(item.amount_debet) : '-'} </td>
+                        <td class="p-1 text-end"> ${item.amount_kredit != 0 ? formatRupiah(item.amount_kredit) : '-'} </td>
+                    </tr>
+                `).join('')}
+                </tbody>
+                </table>
+            </div>
+        </div>
+        `;
+        $('#div-history').html(html);
     }
 
     function renderResumeKartu(data) {
@@ -574,15 +617,23 @@
         html = `
           <div class="card mt-4">
                 <div class="card-body">
-                    <h5 class="text-primary-dark mb-2"> <strong>Resume Total </strong>
-                        ${count(data['resume_total'])>0 ?`
-                    
-                            ${collect(data['resume_total']).map((total,key)=>`
-                                <p class="mb-0 mt-2 pb-2" style="font-size:15px; "> <i class="fas fa-circle"></i>
-                                    ${key}</p>
-                                <p class="mb-0 pb-2 fs-7 ps-3"> ${formatRupiah(Math.round(total*100)/100)}</p>`
-                            ).join('')}
-                        `:''}
+                    <h5 class="text-primary-dark mb-2"> <strong>Resume Total </strong></h5>
+                    <div class="d-flex justify-content-start">
+                        ${ 
+                            Object.keys(data['resume_total']).map((bagan)=>`
+                                <div class="p-2 me-2 border border-2 border-primary-dark rounded-1">
+                                    <h6 class="text-primary-dark">${bagan}</h6>
+                                    <ul class="list-unstyled">
+                                    ${Object.keys(data['resume_total'][bagan]).map((akun)=>`
+                                        <li>
+                                            ${akun} : ${formatRupiah(Math.round(data['resume_total'][bagan][akun]*100)/100)}
+                                        </li>
+                                    `).join('')}
+                                    </ul>
+                                </div>   
+                            `).join('')
+                        }
+                    </div>
                 </div>
             </div>
         `;
@@ -594,9 +645,9 @@
             url: '{{ url('admin/invoice/get-data-kartu') }}/{{ $data->sales_order_number }}',
             method: 'get',
             success: function(res) {
-                console.log(res);
+                console.log('hasil data kartu', res);
                 if (res.status == 1) {
-                    renderResumeKartu(res.msg);
+                    renderResumeHistory(res.msg);
                     renderResumeTotal(res.msg);
                 } else {
                     Swal.fire('ops', 'something error ' + res.msg, 'error');
@@ -866,9 +917,9 @@
 
     }
 
-    function updateStatus(){
+    function updateStatus() {
         updateStatusRow('{{ $data->id }}');
-        notification('success','status updated');
+        notification('success', 'status updated');
     }
 
     function submitBDP(i) {
@@ -1004,13 +1055,20 @@
             data: $('#form-invoice-so').serialize(),
             method: 'post',
             success: function(res) {
-                getDataKartu();
-                $('#invoice-submit').html('<i class="fas fa-check"></i> berhasil');
-                $('#invoice-submit').removeClass('btn-primary').addClass('btn-success');
+                console.log('submit invoice',res);
+                if (res.status == 1) {
+                    getDataKartu();
+                    $('#invoice-submit').html('<i class="fas fa-check"></i> berhasil');
+                    $('#invoice-submit').removeClass('btn-primary').addClass('btn-success');
 
-                setTimeout(function() {
-                    updateStatusRow('{{ $data->id }}');
-                }, 1000);
+                    setTimeout(function() {
+                        updateStatusRow('{{ $data->id }}');
+                    }, 1000);
+                } else {
+                    Swal.fire('ops', 'something error ' + res.msg, 'error');
+                    $('#invoice-submit').prop('disabled', false);
+                    $('#invoice-submit').html('submit');
+                }
 
             },
             error: function(res) {

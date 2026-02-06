@@ -58,13 +58,12 @@ class SalesOrder extends Model
         $kartus = collect($this->detailKartuInvoices)->map(function ($val) {
             $val['code_group_name'] = $val->journal ? $val->journal->chartAccount->name : null;
             if ($val->journal) {
-                if($val->journal->code_group >200000){
-                    $val['total'] = $val->journal->amount_kredit-$val->journal->amount_debet;
-                }else{
-                    $val['total'] = $val->journal->amount_debet-$val->journal->amount_kredit;
+                if ($val->journal->code_group > 200000) {
+                    $val['total'] = $val->journal->amount_kredit - $val->journal->amount_debet;
+                } else {
+                    $val['total'] = $val->journal->amount_debet - $val->journal->amount_kredit;
                 }
             } else {
-
                 $kartu = $val->kartu_type::find($val->kartu_id);
                 if (isset($kartu->amount)) {
                     $val['total'] = $kartu->amount;
@@ -80,6 +79,39 @@ class SalesOrder extends Model
             return $val;
         })->groupBy('code_group_name')->map(function ($val) {
             return $val->sum('total');
+        })->all();
+
+        return $kartus ?? [];
+    }
+
+    public function getTotalPosKartu()
+    {
+        $kartus = collect($this->detailKartuInvoices)->map(function ($val) {
+            $val['code_group_name'] = $val->journal ? $val->journal->chartAccount->name : null;
+            $val['pos'] = 'unknown';
+            if ($val->journal) {
+                if ($val->journal->code_group > 200000) {
+                    $val['total'] = $val->journal->amount_kredit - $val->journal->amount_debet;
+                    $val['pos'] = 'pasiva';
+                } else {
+                    $val['total'] = $val->journal->amount_debet - $val->journal->amount_kredit;
+                    $val['pos'] = 'aktiva';
+                }
+            } else {
+                $kartu = $val->kartu_type::find($val->kartu_id);
+                if (isset($kartu->amount)) {
+                    $val['total'] = $kartu->amount;
+                } else if (isset($kartu->amount_debet)) {
+                    $val['total'] = $kartu->amount_debet - $kartu->amount_kredit;
+                } else if (isset($kartu->total_price)) {
+                    $val['total'] = $kartu->total_price;
+                } else if (isset($kartu->mutasi_rupiah_total)) {
+                    $val['total'] = $kartu->mutasi_rupiah_total;
+                }
+            }
+            return $val;
+        })->groupBy('pos')->map(function ($vals) {
+            return collect($vals)->groupBy('code_group_name')->map(function($val){ return collect($val)->sum('total');});
         })->all();
 
         return $kartus ?? [];

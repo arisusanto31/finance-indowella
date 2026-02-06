@@ -299,8 +299,8 @@ class SalesOrderController extends Controller
             }
         }
         $data['details'] = $invdetails;
-        $data['kartus'] = $data->getAllKartu();
-        $data['resume_total'] = $data->getTotalKartu();
+        $data['history'] = $data->detailKartuInvoices;
+        $data['resume_total'] = $data->getTotalPosKartu();
         $data['total_kartu'] = collect($data->detailKartuInvoices)->count();
         $view = view('invoice.modal._sale-detail');
 
@@ -316,8 +316,8 @@ class SalesOrderController extends Controller
     public function getDataKartu($number)
     {
         $data = SalesOrder::where('sales_order_number', $number)->first();
-        $data['kartus'] = $data->getAllKartu();
-        $data['resume_total'] = $data->getTotalKartu();
+        $data['history'] = $data->detailKartuInvoices;
+        $data['resume_total'] = $data->getTotalPosKartu();
         return [
             'status' => 1,
             'msg' => $data

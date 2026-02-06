@@ -91,6 +91,7 @@ class DetailKartuInvoice extends Model
                 'amount_journal' => $journal ? $journal->amount_debet - $journal->amount_kredit : 0,
                 'amount_debet' => $journal ? $journal->amount_debet : 0,
                 'amount_kredit' => $journal ? $journal->amount_kredit : 0,
+                'date_journal' => $journal ? $journal->created_at  : null,
             ];
 
             //oke dari sini sudah ada jurnal dan invoice pack, dan bisa jadi ada kartu
