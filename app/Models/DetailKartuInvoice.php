@@ -7,7 +7,9 @@ use Illuminate\Http\Request;
 
 class DetailKartuInvoice extends Model
 {
-    //
+    //model ini adalah link antara jurnal - kartu - invoice
+
+
     protected $table = 'detail_kartu_invoices';
     public $timestamps = true;
     protected $fillable = [
@@ -21,6 +23,8 @@ class DetailKartuInvoice extends Model
         'account_code_group',
         'account_name',
         'amount_journal',
+        'amount_debet',
+        'amount_kredit',
         'sales_order_id',
         'sales_order_number',
         'purchase_order_id',
@@ -54,23 +58,22 @@ class DetailKartuInvoice extends Model
             $salesOrderNumber = $request->input('sales_order_number');
             $purchaseOrderNumber = $request->input('purchase_order_number');
 
+            $journal = Journal::find($request->input('journal_id'));
+            if (!$journal && $request->input('journal_id') != null) {
+                return ['status' => 0, 'msg' => 'jurnal tidak ditemukan'];
+            }
+            if ($kartuType == Journal::class) {
+                $kartuType = null;
+                $kartuId = null;
+            }
             if ($kartuType != null && $kartuId != null) {
                 $kartu = $kartuType::find($kartuId);
                 if (!$kartu) {
                     return ['status' => 0, 'msg' => 'Kartu not found'];
                 }
-                $journal = Journal::find($kartu->journal_id);
-                if (!$journal) {
-                    return ['status' => 0, 'msg' => 'Journal not found'];
-                }
-            } else {
-                //harus ada journal nya berati
-
-                $journal = Journal::find($request->input('journal_id'));
-                if (!$journal) {
-                    return ['status' => 0, 'msg' => 'Journal not found'];
-                }
             }
+
+
             $dataUpdate = [
                 'kartu_type' => $kartuType,
                 'kartu_id' => $kartuId,
@@ -81,29 +84,35 @@ class DetailKartuInvoice extends Model
                 'sales_order_number' => $salesOrderNumber,
                 'purchase_order_id' => $purchaseOrderID,
                 'purchase_order_number' => $purchaseOrderNumber,
-                'journal_id' => $journal->id,
-                'journal_number' => $journal->journal_number,
-                'account_code_group' => $journal->code_group,
-                'account_name' => $journal->chartAccountAlias ? $journal->chartAccountAlias->name : '',
-                'amount_journal' => $journal->amount_debet - $journal->amount_kredit,
+                'journal_id' => $journal?$journal->id:null,
+                'journal_number' => $journal?$journal->journal_number:null,
+                'account_code_group' => $journal?$journal->code_group:null,
+                'account_name' => $journal && $journal->chartAccountAlias ? $journal->chartAccountAlias->name : '',
+                'amount_journal' => $journal ? $journal->amount_debet - $journal->amount_kredit : 0,
+                'amount_debet' => $journal ? $journal->amount_debet : 0,
+                'amount_kredit' => $journal ? $journal->amount_kredit : 0,
             ];
 
             //oke dari sini sudah ada jurnal dan invoice pack, dan bisa jadi ada kartu
-             $dt=null; 
-            if ($kartuType != null && $kartuId != null) {
-                $dt = DetailKartuInvoice::where('kartu_type', $kartuType)
-                    ->where('kartu_id', $kartuId)
-                    ->first();
-                if ($dt)
-                    $dt->updateData($dataUpdate);
-            }
+            $dt = null;
 
-            if (!$dt) {
-                $dt = DetailKartuInvoice::where('journal_id', $journal->id)->first();
-                if ($dt) {
-                    $dt->updateData($dataUpdate);
-                } else
+            $dt = DetailKartuInvoice::where('journal_id', $journal->id)
+                ->first();
+            if ($dt) {
+                $dt->updateData($dataUpdate);
+            } else {
+                //coba cari dari kartu nya ..
+                if ($kartuType != null && $kartuId != null) {
+                    $dt = DetailKartuInvoice::where('kartu_type', $kartuType)->where('kartu_id', $kartuId)
+                        ->first();
+                    if ($dt) {
+                        $dt->updateData($dataUpdate);
+                    } else {
+                        $dt = DetailKartuInvoice::create($dataUpdate);
+                    }
+                }else{
                     $dt = DetailKartuInvoice::create($dataUpdate);
+                }
             }
 
             return [

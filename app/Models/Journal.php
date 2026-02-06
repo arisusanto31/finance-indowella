@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Jobs\CreateKartuUtangJob;
 use App\Services\LockManager;
+use App\Traits\HasModelDetailKartuInvoice;
 use CustomLogger;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,7 +18,8 @@ use Illuminate\Support\Str;
 
 class Journal extends Model
 {
-    use HasFactory;
+    use HasFactory,HasModelDetailKartuInvoice;
+
     protected $table = "journals";
 
 

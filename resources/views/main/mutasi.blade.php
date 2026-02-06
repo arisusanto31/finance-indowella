@@ -622,16 +622,79 @@
                 $('#body-mutasi-jurnal').html(html);
             }
 
-            function deleteJournal(id) {
+            async function deleteJournal(id) {
                 url = '{{ route('jurnal.delete', ['id' => '__id__']) }}';
                 url = url.replace('__id__', id);
                 console.log(url);
-                swalDelete({
-                    url: url,
-                    successText: "Delete berhasil!",
-                    onSuccess: (res) => {
-
+                preview = await previewDestroyJournal(id);
+                console.log(preview);
+                if (preview.status != 1) {
+                    swalInfo('error', preview.msg, 'error');
+                    return;
+                }
+                data = preview.msg;
+                html = `
+                    <div>
+                        <h6>Preview Hapus Jurnal</h6>
+                        <p>aktivitas ini akan menghapus semua  data terkait jurnal ini </p>
+                        <div class="bg-primary-light p-2 text-white text-start rounded-3 mb-2">
+                            <p> <strong>jurnal </strong></p>
+                            <ul>
+                              ${data.journals.map(journal => `<li>${journal.code_group} - ${journal.coa_name} : ${formatRupiah(journal.amount_debet)} / ${formatRupiah(journal.amount_kredit)}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div class="bg-primary-light p-2 text-white text-start rounded-3 mb-2">
+                            <p> <strong>kartu </strong></p>
+                            <ul>
+                              ${data.kartus.map(kartu => `<li>${kartu.class} : ${formatRupiah(kartu.amount_debet)} / ${formatRupiah(kartu.amount_kredit)}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div class="bg-primary-light p-2 text-white text-start rounded-3 mb-2">
+                            <p> <strong> links </strong></p>
+                            <ul>
+                              ${data.links.map(link => `<li class="mb-2">
+                                          kartu <div class="d-inline bg-primary-dark rounded-4 ">${link.kartu_type} - ID: ${link.kartu_id} </div>
+                                          <i class="fas fa-link"></i> 
+                                          jurnal <div class="d-inline bg-primary-dark rounded-4 ">${link.account_name}- ID: ${link.journal_id} </div>
+                                         </li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+                swalQuestionHtml({
+                    title: "Yakin menghapus jurnal ini?",
+                    html: html,
+                    confirmButtonText: "Yes, Delete it!",
+                    proses: () => {
+                        swalDelete({
+                            url: url,
+                            successText: "Delete berhasil!",
+                            onSuccess: (res) => {
+                                getListMutasiJurnal();
+                            }
+                        });
                     }
+                });
+
+            }
+
+            function previewDestroyJournal(id) {
+                return new Promise((resolve, reject) => {
+                    $.ajax({
+                        url: '{{ url('admin/jurnal/preview-destroy') }}/' + id,
+                        type: 'get',
+                        success: function(res) {
+                            if (res.status == 1) {
+                                resolve(res);
+                            } else {
+                                reject(res.msg);
+                            }
+                        },
+                        error: function(err) {
+                            console.log(err);
+                            reject('something error');
+                        }
+                    });
                 });
             }
 

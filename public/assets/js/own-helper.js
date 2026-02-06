@@ -410,6 +410,25 @@ function swalQuestion({ title = "Apakah kamu yakin?", text = "Data akan diproses
         preConfirm: () => proses()
     });
 }
+
+function swalQuestionHtml({ title = "Apakah kamu yakin?", html = "<p> pastikan data anda benar </p>", confirmText = "Yes", cancelText = "No", proses = () => { } }) {
+    Swal.fire({
+        title: title,
+        html: html,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: confirmText,
+        cancelButtonText: cancelText,
+        allowOutsideClick: false,
+        showLoaderOnConfirm: true,
+        scrollbarPadding: false,
+        focusConfirm: false,
+        didOpen: () => {
+            $('.swal2-container').css('z-index', 2000);
+        },
+        preConfirm: () => proses()
+    });
+}
 function swalConfirmAndSubmit({ url, data, aktif_konfirm = true, onSuccess = null, successText = "Berhasil!", confirmText = "Yes", cancelText = "No", onError = null }) {
 
 

@@ -56,16 +56,25 @@ class SalesOrder extends Model
     public function getTotalKartu()
     {
         $kartus = collect($this->detailKartuInvoices)->map(function ($val) {
-            $val['code_group_name'] = $val->journal->chartAccount->name;
-            $kartu = $val->kartu_type::find($val->kartu_id);
-            if (isset($kartu->amount)) {
-                $val['total'] = $kartu->amount;
-            } else if (isset($kartu->amount_debet)) {
-                $val['total'] = $kartu->amount_debet - $kartu->amount_kredit;
-            } else if (isset($kartu->total_price)) {
-                $val['total'] = $kartu->total_price;
-            } else if (isset($kartu->mutasi_rupiah_total)) {
-                $val['total'] = $kartu->mutasi_rupiah_total;
+            $val['code_group_name'] = $val->journal ? $val->journal->chartAccount->name : null;
+            if ($val->journal) {
+                if($val->journal->code_group >200000){
+                    $val['total'] = $val->journal->amount_kredit-$val->journal->amount_debet;
+                }else{
+                    $val['total'] = $val->journal->amount_debet-$val->journal->amount_kredit;
+                }
+            } else {
+
+                $kartu = $val->kartu_type::find($val->kartu_id);
+                if (isset($kartu->amount)) {
+                    $val['total'] = $kartu->amount;
+                } else if (isset($kartu->amount_debet)) {
+                    $val['total'] = $kartu->amount_debet - $kartu->amount_kredit;
+                } else if (isset($kartu->total_price)) {
+                    $val['total'] = $kartu->total_price;
+                } else if (isset($kartu->mutasi_rupiah_total)) {
+                    $val['total'] = $kartu->mutasi_rupiah_total;
+                }
             }
 
             return $val;
@@ -82,7 +91,7 @@ class SalesOrder extends Model
             $val['code_group_name'] = $val->journal->chartAccount->name;
             $val['type_flow'] = $val->journal->amount_debet > 0 ? 'debet' : 'kredit';
             $val['date'] = $val->journal->created_at->format('Y-m-d H:i:s');
-            $val['journal_number']= $val->journal->journal_number;
+            $val['journal_number'] = $val->journal->journal_number;
             return $val;
         })->groupBy('type_kartu')->map(function ($vals) {
             return $vals->groupBy('type_flow')->all();
@@ -94,7 +103,7 @@ class SalesOrder extends Model
 
     public function updateStatus()
     {
-        
+
         $total = collect($this->getTotalKartu())->map(function ($value, $key) {
             $keys = explode(' ', $key);
             if ($keys[0] == 'Piutang') {
