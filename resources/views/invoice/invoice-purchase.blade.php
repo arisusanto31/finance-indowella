@@ -126,7 +126,8 @@
                             <th>Diskon</th>
                             <th>Sub-Total</th>
                             <th>Total</th>
-                            <th> Aksi</th>
+                            <th>Status </th>
+                            <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -181,6 +182,31 @@
                                                     <i
                                                         class="fas fa-hand-holding-usd"></i>{{ format_price($item->parent->total_ppn_m) }}
                                                 </div>
+                                            @endif
+
+                                        </td>
+                                        <td rowspan="{{ $rowspan }}">
+                                            @if ($item->parent->is_final == 1)
+                                                <span class="badge mb-1 bg-success">FINAL</span>
+                                            @else
+                                                <span class="badge mb-1 bg-warning">DRAFT</span>
+                                            @endif
+                                            @if ($item->parent->prosen_pembayaran >= 100)
+                                                <span class="badge mb-1 bg-success"><i class="fas fa-coins"></i> LUNAS
+                                                </span>
+                                            @else
+                                                <span class="badge mb-1 bg-secondary"><i class="fas fa-coins"></i> terbayar
+                                                    {{ $item->parent->prosen_pembayaran }}%
+                                                </span>
+                                            @endif
+
+                                            @if ($item->parent->prosen_mutasi >= 100)
+                                                <span class="badge mb-1 bg-success"><i class="fas fa-boxes"></i> MUTASI
+                                                    FULL</span>
+                                            @else
+                                                <span class="badge mb-1 bg-secondary"><i class="fas fa-boxes"></i> termutasi
+                                                    {{ $item->parent->prosen_mutasi }}%
+                                                </span>
                                             @endif
 
                                         </td>
@@ -270,7 +296,7 @@
             }
 
 
-             function openImportDataExcel(bookID) {
+            function openImportDataExcel(bookID) {
                 showDetailOnModal('{{ url('admin/invoice/purchase-open-import-excel') }}/' + bookID, 'xl');
             }
 

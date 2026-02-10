@@ -218,7 +218,7 @@ function initItemSelectManual(el, url, placeholder = "", parent = null) {
     if (placeholder == "")
         placeholder = "Cari berdasarkan nama ..."
     if (parent == null) {
-        parent = 'body';
+        parent = $(el).closest('div');
     }
     $(el).select2({
         placeholder: placeholder,
@@ -247,7 +247,7 @@ function initItemSelectManual(el, url, placeholder = "", parent = null) {
 
 }
 
-function notification(kind='info',message='') {
+function notification(kind = 'info', message = '') {
 
     const styles = {
         success: "linear-gradient(135deg, #198754, #146c43)",  // bs5 success vibe

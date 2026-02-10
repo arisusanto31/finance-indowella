@@ -155,15 +155,17 @@ class KartuDPPurchases extends Model
             self::proteksiBackdate($date);
 
             $lockManager = new LockManager();
-            $PONumber = $request->input('sales_order_number');
             $invoiceNumber = $request->input('invoice_pack_number');
             $date = $request->input('date') ?? Date('Y-m-d H:i:s');
             $isBackdate = 0;
             if (carbonDate()->subMinute(5) > createCarbon($date)) {
                 $isBackdate = 1;
             }
-          
+
             $invoices = InvoicePack::where('invoice_number', $invoiceNumber)->first();
+            if(!$invoices){
+                throw new \Exception('Invoice not found '.$invoiceNumber);
+            }
             $invoiceID = $invoices ? $invoices->id : null;
             $amountMutasi = $request->input('amount_mutasi');
             $personID = $request->input('person_id');
@@ -177,21 +179,17 @@ class KartuDPPurchases extends Model
                 throw new \Exception('chart not found');
             }
             $codeName = $chart->name;
-            $invoicePack = PurchaseOrder::where('purchase_order_number', $PONumber)->first();
-            if (!$invoicePack) {
-                $tokoid = null;
-            } else {
-                $tokoid = $invoicePack->toko_id;
-            }
+            $invoicePack = $invoices;
+            $tokoid = $invoicePack->toko_id;
             if ($amountMutasi < 0) {
-                //piutang bertambah
-                $codeDebet = $codeGroup;
-                $codeKredit = $lawanCodeGroup;
+                // bertambah
+                $codeKredit = $codeGroup; //akun uang muka pembelian
+                $codeDebet = $lawanCodeGroup;
                 $amountDebet = 0;
                 $amountKredit = abs($amountMutasi);
             } else {
-                $codeDebet = $lawanCodeGroup;
-                $codeKredit = $codeGroup;
+                $codeKredit = $lawanCodeGroup;
+                $codeDebet = $codeGroup; //akun uang muka pembelian
                 $amountKredit = 0;
                 $amountDebet = $amountMutasi;
             }
@@ -231,9 +229,9 @@ class KartuDPPurchases extends Model
 
                 $number = $st['journal_number'];
                 info('success harusnya dari sini journalnya aman' . $number);
-                $journal = Journal::where('journal_number', $number)->where('code_group', 214000)->first();
+                $journal = Journal::where('journal_number', $number)->where('code_group', 170001)->first();
                 if (!$journal) {
-                    return ['status' => 0, 'msg' => 'kok aneh journal not found 214000'];
+                    return ['status' => 0, 'msg' => 'kok aneh journal not found 170001'];
                 }
                 $journalID = $journal->id;
             } else {
@@ -242,7 +240,7 @@ class KartuDPPurchases extends Model
             }
             $st = self::createKartu(new Request([
                 'type' => 'mutasi',
-           
+
                 'invoice_pack_number' => $invoiceNumber,
                 'invoice_pack_id' => $invoiceID,
                 'description' => $desc,
@@ -290,10 +288,7 @@ class KartuDPPurchases extends Model
             $date = $request->input('date') ?? now();
             self::proteksiBackdate($date);
 
-            $SONumber = $request->input('sales_order_number');
             $invoiceNumber = $request->input('invoice_pack_number');
-            $sales = SalesOrder::where('sales_order_number', $SONumber)->first();
-            $SOID = $sales ? $sales->id : null;
             $invoices = InvoicePack::where('invoice_number', $invoiceNumber)->first();
             $invoiceID = $invoices ? $invoices->id : null;
 
@@ -303,25 +298,21 @@ class KartuDPPurchases extends Model
             $isOtomatisJurnal = $request->input('is_otomatis_jurnal') ?? 0;
             $chart = ChartAccount::where('code_group', $codeGroup)->first();
 
-            $invoicePack = SalesOrder::where('sales_order_number', $SONumber)->first();
-            if (!$invoicePack) {
-                $invoicePack = InvoicePack::where('invoice_number', $invoiceNumber)->first();
+            $invoicePack = InvoicePack::where('invoice_number', $invoiceNumber)->first();
 
-                $tokoid = null;
-            } else {
-                $tokoid = $invoicePack->toko_id;
-            }
+            $tokoid = $invoicePack->toko_id;
+
             $desc = $request->input('description');
             if (!$chart) {
                 throw new \Exception('chart not found');
             }
             $codeName = $chart->name;
             if ($amountBayar < 0) {
-                $codeDebet = $lawanCodeGroup;
-                $codeKredit = $codeGroup;
-            } else {
-                $codeDebet = $codeGroup;
                 $codeKredit = $lawanCodeGroup;
+                $codeDebet = $codeGroup; // akun uang muka pembelian
+            } else {
+                $codeKredit = $codeGroup; // akun uang muka pembelian
+                $codeDebet = $lawanCodeGroup;
             }
             $personID = $request->input('person_id');
             $personType = $request->input('person_type');
@@ -361,9 +352,9 @@ class KartuDPPurchases extends Model
                 if ($st['status'] == 0) return $st;
                 $number = $st['journal_number'];
                 info('success harusnya dari sini journalnya aman' . $number);
-                $journal = Journal::where('journal_number', $number)->where('code_group', 214000)->first();
+                $journal = Journal::where('journal_number', $number)->where('code_group', 170001)->first();
                 if (!$journal) {
-                    return ['status' => 0, 'msg' => 'kok aneh journal not found 214000'];
+                    return ['status' => 0, 'msg' => 'kok aneh journal not found 170001'];
                 }
                 $journalID = $journal->id;
             } else {
@@ -374,8 +365,6 @@ class KartuDPPurchases extends Model
             $amountDebet = $amountBayar < 0 ? abs($amountBayar) : 0;
             $st = self::createKartu(new Request([
                 'type' => 'pelunasan',
-                'sales_order_number' => $SONumber,
-                'sales_order_id' => $SOID,
                 'invoice_pack_number' => $invoiceNumber,
                 'invoice_pack_id' => $invoiceID,
                 'description' => $desc,
@@ -411,7 +400,7 @@ class KartuDPPurchases extends Model
 
     public function recalculateSaldo()
     {
-        $this->refreshCurrentSaldo('sales_order_number');
-        $this->recalculateListSaldo('sales_order_number');
+        $this->refreshCurrentSaldo('invoice_pack_number');
+        $this->recalculateListSaldo('invoice_pack_number');
     }
 }

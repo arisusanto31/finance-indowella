@@ -41,6 +41,7 @@ class KartuDPPurchasesController extends Controller
     public function refresh($id)
     {
         $kartu = KartuDPPurchases::find($id);
+        $kartu->refreshCurrentSaldo('invoice_pack_number');
         $st = $kartu->createDetailKartuInvoice();
         if ($st['status'] == 0) {
             return $st;
@@ -60,6 +61,7 @@ class KartuDPPurchasesController extends Controller
         $view->person = $kh->person;
         $data = KartuDPPurchases::where('invoice_pack_number', $nomer)->get();
         $view->data = $data;
+        $view->type = 'purchases';
 
         return $view;
     }
@@ -77,7 +79,8 @@ class KartuDPPurchasesController extends Controller
     public function recalculateKartuDP($id)
     {
         $kartuDP = KartuDPPurchases::find($id);
-        $kartuDP->recalculateSaldo();
+        $kartuDP->refreshCurrentSaldo('invoice_pack_number');
+        $kartuDP->recalculateSaldo('invoice_pack_number');
         return [
             'status' => 1,
             'msg' => 'Recalculation successful'

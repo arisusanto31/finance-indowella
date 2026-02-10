@@ -50,7 +50,7 @@
 
         </div>
     </div>
-    <div class="modal fade" id="basicModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="basicModal" data-bs-backdrop="static"  tabindex="-1" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -93,7 +93,7 @@
                                 <option value="170001">Uang Muka Pembelian</option>
                             </select>
                         </div>
-                        <div class="col mb-3">
+                        <div class="col mb-3" id="div-akun-lawan">
                             <label for="amount_mutasi" class="form-label">Lawan Akun</label>
                             <select type="text" id="akun-lawan" class="form-control select-coa">
 
@@ -117,7 +117,7 @@
                                 <option value="App\Models\OtherPerson"> Orang Lain</option>
                             </select>
                         </div>
-                        <div class="col mb-0">
+                        <div class="col mb-0" id="div-person">
                             <label for="dobBasic" class="form-label">Person</label>
                             <select class="form-control" id="person_id" placeholder="person"></select>
                         </div>
@@ -134,7 +134,7 @@
         </div>
     </div>
 
-    <div class="modal fade" id="pelunasanModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="pelunasanModal" data-bs-backdrop="static"  tabindex="-1" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -159,7 +159,7 @@
                                 placeholder="Tanggal" />
                         </div>
                     </div>
-                
+
                     <div class="row">
                         <div class="col mb-3">
                             <label for="nameBasic" class="form-label">Nomer Invoice</label>
@@ -190,7 +190,7 @@
                                 <option value="170001">Uang Muka Pembelian</option>
                             </select>
                         </div>
-                        <div class="col mb-3">
+                        <div class="col mb-3" id="div-pelunasan-akun-lawan">
                             <label for="amount_mutasi" class="form-label">Lawan Akun</label>
                             <select type="text" id="pelunasan-akun-lawan" class="form-control select-coa">
 
@@ -206,7 +206,7 @@
                                 <option value="App\Models\OtherPerson"> Orang Lain</option>
                             </select>
                         </div>
-                        <div class="col mb-0">
+                        <div class="col mb-0" id="div-pelunasan-person">
                             <label for="dobBasic" class="form-label">Person</label>
                             <select class="form-control" id="pelunasan-person_id" placeholder="person"></select>
                         </div>
@@ -232,7 +232,7 @@
                         </div> storing data..`);
                 data = {
                     date: $('#date').val(),
-                    sales_order_number: $('#factur').val(),
+                    invoice_pack_number: $('#factur').val(),
                     amount_mutasi: formatDB($('#amount_mutasi').val(), 'id'),
                     person_id: $('#person_id option:selected').val(),
                     person_type: $('#person_type option:selected').val(),
@@ -279,7 +279,6 @@
                     method: 'post',
                     data: {
                         date: $('#pelunasan-date').val(),
-                        sales_order_number: $('#pelunasan-factur').val(),
                         invoice_pack_number: $('#pelunasan-invoice_number').val(),
                         amount_bayar: formatDB($('#pelunasan-amount').val(), 'id'),
                         person_id: $('#pelunasan-person_id option:selected').val(),
@@ -339,10 +338,10 @@
                 type = $('#person_type option:selected').val();
                 if (type === 'App\\Models\\Supplier') {
                     console.log('init oy ' + type);
-                    initItemSelectManual('#person_id', '{{ route('supplier.get-item') }}', 'Person Name ..', '#basicModal');
+                    initItemSelectManual('#person_id', '{{ route('supplier.get-item') }}', 'Person Name ..', '#div-person');
                 } else {
                     initItemSelectManual('#person_id', '{{ route('other-person.get-item') }}', 'Person Name ..',
-                        '#basicModal');
+                        '#div-person');
 
                 }
             }
@@ -352,22 +351,18 @@
                 if (type === 'App\\Models\\Supplier') {
                     console.log('init oy ' + type);
                     initItemSelectManual('#pelunasan-person_id', '{{ route('supplier.get-item') }}', 'Person Name ..',
-                        '#pelunasanModal');
+                        '#div-pelunasan-person');
                 } else {
                     initItemSelectManual('#pelunasan-person_id', '{{ route('other-person.get-item') }}', 'Person Name ..',
-                        '#pelunasanModal');
+                        '#div-pelunasan-person');
 
                 }
             }
             initSelectPerson();
             initSelectPersonPelunasan();
             initItemSelectManual('#pelunasan-akun-lawan', '{{ route('chart-account.get-item') }}', 'akun lawan ..',
-                '#pelunasanModal');
-            initItemSelectManual('#pelunasan-akun-piutang', '{{ route('chart-account.get-item-keuangan') }}?kind=piutang',
-                'akun piutang ..', '#pelunasanModal');
-            initItemSelectManual('#akun-piutang', '{{ route('chart-account.get-item-keuangan') }}?kind=piutang',
-                'akun piutang ..', '#basicModal');
-            initItemSelectManual('#akun-lawan', '{{ route('chart-account.get-item') }}', 'akun lawan ..', '#basicModal');
+                '#div-pelunasan-akun-lawan');
+            initItemSelectManual('#akun-lawan', '{{ route('chart-account.get-item') }}', 'akun lawan ..', '#div-akun-lawan');
 
 
             function getSummary() {
@@ -378,7 +373,7 @@
                     url: '{{ route('kartu-dp-purchases.get-summary') }}?month=' + month + '&year=' + year,
                     method: 'get',
                     success: function(res) {
-                        console.log(res);
+                        console.log('get summary',res);
                         if (res.status == 1) {
                             html = "";
                             saldoAkhir = 0;

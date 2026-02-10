@@ -52,7 +52,6 @@ trait HasModelSaldoUang
         $kartuPiutangAwal = static::query()->whereIn('index_date', function ($q) use ($indexDate, $kolomGroup) {
             $q->from(with(new static)->getTable())->select(DB::raw('max(index_date)'))->where('index_date', '<', $indexDate)->groupBy($kolomGroup);
         })->where('amount_saldo_factur', '<>', 0)->select($kolomGroup, 'invoice_date', 'type', 'amount_saldo_factur', 'person_id', 'person_type')->get();
-
         $kartuPiutangBaru = static::query()->whereMonth('created_at', $month)->whereYear('created_at', $year)
             ->select(
                 DB::raw('sum(amount_debet-amount_kredit) as total_amount '),

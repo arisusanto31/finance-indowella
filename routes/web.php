@@ -323,6 +323,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::post('purchase-create-mutations', [InvoicePurchaseController::class, 'createMutations'])->name('purchase.create-mutations');
 
         Route::get('show-detail/{id}', [InvoicePackController::class, 'showDetail'])->name('detail');
+        Route::get('update-status-invoice/{id}', [InvoicePackController::class, 'updateStatus'])->name('update-status-invoice');
         Route::post('create-claim-pembelian', [InvoicePackController::class, 'createClaimPembelian'])->name('create-claim-pembelian');
         Route::post('create-claim-penjualan', [InvoicePackController::class, 'createClaimPenjualan'])->name('create-claim-penjualan');
         Route::get('get-item-invoice-aktif/{id}', [InvoicePackController::class, 'getItemInvoiceAktif'])->name('get-item-invoice-aktif');

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\InvoiceSaleDetail;
 use App\Models\Customer;
 use App\Traits\HasModelChilds;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 
@@ -25,7 +26,6 @@ class InvoicePack extends Model
         'status',
         'total_ppn_k',
         'total_ppn_m',
-
         'toko_id',
         'reference_id',
         'reference_type',
@@ -33,6 +33,8 @@ class InvoicePack extends Model
         'is_ppn',
         'total_ppn_k',
         'total_ppn_m',
+        'prosen_pembayaran',
+        'prosen_mutasi',
     ];
 
     protected static function booted()
@@ -120,6 +122,39 @@ class InvoicePack extends Model
 
     public function updateStatus()
     {
+        $journals = DetailKartuInvoice::where('invoice_pack_number', $this->invoice_number)
+            ->select(
+                DB::raw('sum(amount_journal) as total_journal'),
+                'account_code_group',
+                DB::raw('count(id) as total_count'),
+                DB::raw('case WHEN account_code_group between 110000 and 120000 then "Kas"
+                         WHEN account_code_group between 140000 and 150000 then "Persediaan" 
+                         ELSE "Lain-lain" END as type_account')
+            )->groupBy('account_code_group')->get()->keyBy('type_account')->all();
+        // throw new \Exception(json_encode($journals));
+        $persediaan = array_key_exists('Persediaan', $journals) ? $journals['Persediaan'] : null;
+        $kas = array_key_exists('Kas', $journals) ? $journals['Kas'] : null;
+        $totalMutasi = 0;
+        $totalBayar = 0;
+        if ($persediaan) {
+            $totalMutasi = $persediaan->total_journal;
+            if ($totalMutasi >= $this->total_price) {
+                $totalMutasi = 100;
+            } else {
+                $totalMutasi = ($totalMutasi / $this->total_price) * 100;
+            }
+        }
+        if ($kas) {
+            $totalBayar = abs($kas->total_journal);
+            if ($totalBayar >= $this->total_price) {
+                $totalBayar = 100;
+            } else {
+                $totalBayar = ($totalBayar / $this->total_price) * 100;
+            }
+        }
+        $this->prosen_pembayaran = $totalBayar;
+        $this->prosen_mutasi = $totalMutasi;
+
         $this->status = $this->is_final == 1 ? 'FINAL' : 'DRAFT';
         $this->save();
     }

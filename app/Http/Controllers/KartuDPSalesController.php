@@ -59,6 +59,7 @@ class KartuDPSalesController extends Controller
         $view->person = $kh->person;
         $data = KartuDPSales::where('sales_order_number', $nomer)->get();
         $view->data = $data;
+        $view->type = 'sales';
 
         return $view;
     }

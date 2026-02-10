@@ -1,15 +1,27 @@
-<div class="modal-header">
-    <h5 class="modal-title" id="exampleModalLabel">Detail Invoice {{ $data->invoice_number }} - {{ $data->person->name }}
-        <span class="fs-8 px-2 rounded-1 bg-primary text-white"> {{ getModel($data->person_type) }} </span>
-    </h5>
-</div>
-<div class="modal-body">
+<div class="modal-header align-items-start flex-column">
     <div class="row">
         <div class="col-xs-12 col-md-12">
+            <h5 class="modal-title" id="exampleModalLabel">Detail Invoice {{ $data->invoice_number }} -
+                {{ $data->person->name }}
+                <span class="fs-8 px-2 rounded-1 bg-primary text-white"> {{ getModel($data->person_type) }} </span>
+            </h5>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12 col-md-12">
+            <button onclick="updateStatus('{{ $data->id }}')"> <i class="fas fa-refresh"></i> update status </button>
             @if ($total_kartu == 0)
                 <p>invoice ini bisa dibatalkan finalnya karena belum ada kartu</p>
                 <button class="btn btn-danger" onclick="batalkanFinal('{{ $data->id }}')">Batalkan Final</button>
             @endif
+        </div>
+    </div>
+</div>
+
+<div class="modal-body">
+    <div class="row">
+        <div class="col-xs-12 col-md-12">
+
         </div>
         <div class="col-xs-12 col-md-12">
             <h5>List Detail</h5>
@@ -67,9 +79,10 @@
                                                 <p>{{ $item->date }} -
                                                     <strong>{{ $item->code_group_name }}</strong> :
                                                     {{ format_price($item->amount_journal) }} <span
-                                                        class="fs-8">[journal_id : {{ $item->journal_id }}, journal_number= {{$item['journal_number']}},
+                                                        class="fs-8">[journal_id : {{ $item->journal_id }},
+                                                        journal_number= {{ $item['journal_number'] }},
                                                         kartu_id= {{ $item->kartu_id }}]
-                                                    
+
                                                     </span>
                                                 </p>
                                             </div>
@@ -159,8 +172,8 @@
                                                                     id="bdp-stock_name"
                                                                     value="{{ $item->custom_stock_name ?? $item->stock->name }}"
                                                                     readonly />
-                                                                <input type="hidden" id="bdp-stock_id" name="stock_id"
-                                                                    value="{{ $item->stock_id }}" />
+                                                                <input type="hidden" id="bdp-stock_id"
+                                                                    name="stock_id" value="{{ $item->stock_id }}" />
                                                             </div>
 
 
@@ -259,6 +272,26 @@
             '#global-modal  #div-input');
     });
 
+
+    function updateStatus(id) {
+
+        $.ajax({
+            url: '{{ url('admin/invoice/update-status-invoice') }}/' + id,
+            method: 'get',
+            success: function(res) {
+                if (res.status == 1) {
+                    swalInfo('success', 'berhasil update status', 'success');
+                } else {
+                    swalInfo()('error', res.msg, 'error');
+                }
+            },
+            error: function(err) {
+                swalInfo('opps',
+                    'something wrong', 'error'
+                );
+            }
+        });
+    }
 
     function batalkanFinal(id) {
         swalConfirmAndSubmit({

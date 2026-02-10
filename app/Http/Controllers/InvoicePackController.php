@@ -33,6 +33,7 @@ class InvoicePackController extends Controller
     public function showDetail($number)
     {
         $data = InvoicePack::where('invoice_number', $number)->first();
+
         $invdetails = $data->reference_model::with('stock')->where('invoice_pack_number', $number)->get();
         $data['details'] = $invdetails;
         $data['kartus'] = $data->getAllKartu();
@@ -404,6 +405,7 @@ class InvoicePackController extends Controller
                     'date' => $date
                 ]));
             }
+            $invoicePack->updateStatus();
             DB::commit();
             return [
                 'status' => 1,
@@ -450,5 +452,15 @@ class InvoicePackController extends Controller
             });
 
         return ['results' => $invoices];
+    }
+
+    public function updateStatus($id)
+    {
+        $invoice = InvoicePack::find($id);
+        if (!$invoice) {
+            return ['status' => 0, 'msg' => 'invoice tidak ditemukan'];
+        }
+        $invoice->updateStatus();
+        return ['status' => 1, 'msg' => $invoice];
     }
 }

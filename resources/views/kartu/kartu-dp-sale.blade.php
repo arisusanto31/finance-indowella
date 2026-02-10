@@ -53,7 +53,7 @@
 
         </div>
     </div>
-    <div class="modal fade" id="basicModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="basicModal" data-bs-backdrop="static"  tabindex="-1" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -137,7 +137,7 @@
         </div>
     </div>
 
-    <div class="modal fade" id="pelunasanModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="pelunasanModal" data-bs-backdrop="static"  tabindex="-1" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -348,10 +348,10 @@
                 type = $('#person_type option:selected').val();
                 if (type === 'App\\Models\\Customer') {
                     console.log('init oy ' + type);
-                    initItemSelectManual('#person_id', '{{ route('customer.get-item') }}', 'Person Name ..', '#basicModal');
+                    initItemSelectManual('#person_id', '{{ route('customer.get-item') }}', 'Person Name ..', );
                 } else {
                     initItemSelectManual('#person_id', '{{ route('other-person.get-item') }}', 'Person Name ..',
-                        '#basicModal');
+                    );
 
                 }
             }
@@ -360,24 +360,20 @@
                 type = $('#pelunasan-person_type option:selected').val();
                 if (type === 'App\\Models\\Customer') {
                     console.log('init oy ' + type);
-                    initItemSelectManual('#pelunasan-person_id', '{{ route('customer.get-item') }}', 'Person Name ..',
-                        '#pelunasanModal');
+                    initItemSelectManual('#pelunasan-person_id', '{{ route('customer.get-item') }}', 'Person Name ..' );
                 } else {
-                    initItemSelectManual('#pelunasan-person_id', '{{ route('other-person.get-item') }}', 'Person Name ..',
-                        '#pelunasanModal');
+                    initItemSelectManual('#pelunasan-person_id', '{{ route('other-person.get-item') }}', 'Person Name ..');
 
                 }
             }
             initSelectPerson();
             initSelectPersonPelunasan();
-            initItemSelectManual('#pelunasan-akun-lawan', '{{ route('chart-account.get-item') }}', 'akun lawan ..',
-                '#pelunasanModal');
+            initItemSelectManual('#pelunasan-akun-lawan', '{{ route('chart-account.get-item') }}', 'akun lawan ..');
             initItemSelectManual('#pelunasan-akun-piutang', '{{ route('chart-account.get-item-keuangan') }}?kind=piutang',
-                'akun piutang ..', '#pelunasanModal');
+                'akun piutang ..');
             initItemSelectManual('#akun-piutang', '{{ route('chart-account.get-item-keuangan') }}?kind=piutang',
-                'akun piutang ..', '#basicModal');
-            initItemSelectManual('#akun-lawan', '{{ route('chart-account.get-item') }}', 'akun lawan ..', '#basicModal');
-
+                'akun piutang ..');
+            initItemSelectManual('#akun-lawan', '{{ route('chart-account.get-item') }}', 'akun lawan ..');
 
             function getSummary() {
                 month = '{{ $month }}';

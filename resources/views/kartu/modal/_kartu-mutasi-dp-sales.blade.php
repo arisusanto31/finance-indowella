@@ -65,9 +65,14 @@
 
 
 <script>
+    var type = '{{ $type }}';
+
     function refreshKartuDP(id) {
+        url = type == 'sales' ? {{ url('admin/kartu/kartu-dp-sales/refresh') }} / +id :
+            '{{ url('admin/kartu/kartu-dp-purchases/refresh') }}/' + id;
+
         $.ajax({
-            url: '{{ url('admin/kartu/kartu-dp-sales/refresh') }}/' + id,
+            url: url,
             method: 'get',
 
             success: function(res) {
@@ -87,20 +92,22 @@
     }
 
     function recalculateKartuDP(id) {
-        $.ajax({
-            url: '{{ url('admin/kartu/kartu-dp-sales/recalculate') }}/' + id,
-            method: 'get',
-            success: function(res) {
-                if (res.status == 1) {
-                    Swal.fire('success', res.msg, 'success');
-                } else {
+        url = type == 'sales' ? '{{ url('admin/kartu/kartu-dp-sales/recalculate') }}/' + id :
+            '{{ url('admin/kartu/kartu-dp-purchases/recalculate') }}/' + id;
+            $.ajax({
+                url: url,
+                method: 'get',
+                success: function(res) {
+                    if (res.status == 1) {
+                        Swal.fire('success', res.msg, 'success');
+                    } else {
+                        Swal.fire('error', 'something error : ' + res.msg, 'error');
+                    }
+                },
+                error: function(res) {
                     Swal.fire('error', 'something error : ' + res.msg, 'error');
                 }
-            },
-            error: function(res) {
-                Swal.fire('error', 'something error : ' + res.msg, 'error');
-            }
-        });
+            });
     }
 
     function searchJournal(id) {

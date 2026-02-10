@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('kartu_dp_purchases', function (Blueprint $table) {
             $table->id();
-            $table->string('tag')->nullable()->after('id');
-            $table->decimal('index_date', 15, 2)->unique();
+            $table->string('tag')->nullable();
+            $table->decimal('index_date', 15, 0)->unique();
             $table->decimal('index_date_group', 12, 0);
             $table->integer('book_journal_id')->nullable();
             $table->string('type');
@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('code_group_name');
             $table->integer('invoice_pack_id')->nullable();
             $table->string('invoice_pack_number')->nullable();
-            $table->date('date');
+            $table->date('invoice_date');
             $table->string('description');
             $table->decimal('amount_kredit', 12, 2);
             $table->decimal('amount_debet', 12, 2);
@@ -36,7 +36,7 @@ return new class extends Migration
             $table->string('person_type')->nullable();
             $table->string('journal_number')->nullable();
             $table->integer('journal_id')->nullable();
-            $table->index(['book_journal_id', 'index_date_group', 'index_date']);
+            $table->index(['book_journal_id', 'index_date_group', 'index_date'],'kartu_dp_purchases_index_date_group_index_date');
             $table->timestamps();
         });
     }
