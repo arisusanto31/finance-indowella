@@ -127,6 +127,16 @@ class ChartAccountController extends Controller
                 $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
                 $finalChart = $finalChart->merge($chart);
             }
+            if ($kind == 'uang_muka_pembelian') {
+                $chart = ChartAccount::aktif()->child()->where('reference_model', 'App\\Models\\KartuDPPurchase');
+                if (getInput('search')) {
+                    foreach (explode(' ', getInput('search')) as $search) {
+                        $chart = $chart->where('name', 'like', '%' . $search . '%');
+                    }
+                }
+                $chart = $chart->select(DB::raw('code_group as id'), DB::raw('name as text'))->get();
+                $finalChart = $finalChart->merge($chart);
+            }
             if ($kind == 'hutang') {
                 $chart = ChartAccount::aktif()->child()->where('reference_model', 'App\\Models\\KartuHutang');
                 if (getInput('search')) {
@@ -334,7 +344,12 @@ class ChartAccountController extends Controller
         $codeGroups = $request->input('code_group');
         $codeGroup = implode("", $codeGroups);
         $name = $request->input('name');
+        $referenceModel = $request->input('reference_model');
         $chart = ChartAccount::where('code_group', $codeGroup)->first();
+        if ($referenceModel) {
+            $chart->reference_model = $referenceModel;
+            $chart->save();
+        }
         $alias = ChartAccountAlias::createOrUpdate(new Request([
             'book_journal_id' => bookID(),
             'chart_account_id' => $chart->id,

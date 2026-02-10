@@ -25,6 +25,7 @@ use App\Http\Controllers\{
     InventoryController,
     KartuBahanJadiController,
     KartuBDPController,
+    KartuDPPurchasesController,
     KartuDPSalesController,
     SalesOrderController,
     TokoController
@@ -233,6 +234,18 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('refresh/{id}', [KartuDPSalesController::class, 'refresh'])->name('refresh');
             Route::get('recalculate/{id}', [KartuDPSalesController::class, 'recalculateKartuDP'])->name('recalculate');
         });
+
+        Route::prefix('kartu-dp-purchases')->name('kartu-dp-purchases.')->group(function () {
+            Route::resource('main', KartuDPPurchasesController::class);
+            Route::post('create-mutation', [KartuDPPurchasesController::class, 'createMutation'])->name('create-mutation');
+            Route::post('create-pelunasan', [KartuDPPurchasesController::class, 'createPelunasan'])->name('create-pelunasan');
+            Route::get('get-summary', [KartuDPPurchasesController::class, 'getSummary'])->name('get-summary');
+            Route::get('show-detail/{id}', [KartuDPPurchasesController::class, 'showDetail'])->name('show-detail');
+            Route::get('search-link-journal', [KartuDPPurchasesController::class, 'searchLinkJournal'])->name('search-link-journal');
+            Route::get('refresh/{id}', [KartuDPPurchasesController::class, 'refresh'])->name('refresh');
+            Route::get('recalculate/{id}', [KartuDPPurchasesController::class, 'recalculateKartuDP'])->name('recalculate');
+        });
+
     });
 
     Route::prefix('master')->group(function () {

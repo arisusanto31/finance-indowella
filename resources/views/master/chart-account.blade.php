@@ -108,6 +108,11 @@
                                 .account_type + '"/>';
                             html += '  </div>';
                             html += '  <div class="col-xs-12">';
+                            html += '       <label>Reference Model</label>';
+                            html += '       <input type="text" class="form-control" name="reference_model" value="' + data
+                                .reference_model + '"/>';
+                            html += '  </div>';
+                            html += '  <div class="col-xs-12">';
                             html +=
                                 '       <button class="btn-control" type="button" onclick="submitAlias()">Submit</button>';
                             html += '  </div>';

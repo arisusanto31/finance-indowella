@@ -39,34 +39,49 @@ class IndexController extends Controller
         $journalKartuStock = Journal::where('reference_model', 'App\\Models\\KartuStock')
             ->leftJoin('kartu_stocks', 'kartu_stocks.journal_id', '=', 'journals.id')
             ->whereNull('kartu_stocks.id')
+            ->whereNull('kartu_stocks.tag')
+            ->whereNull('journals.tag')
             ->count();
         $journalKartuHutang = Journal::where('reference_model', 'App\\Models\\KartuHutang')
             ->leftJoin('kartu_hutangs', 'kartu_hutangs.journal_id', '=', 'journals.id')
             ->whereNull('kartu_hutangs.id')
+            ->whereNull('kartu_hutangs.tag')
+             ->whereNull('journals.tag')
             ->count();
         $journalKartuPiutang = Journal::where('reference_model', 'App\\Models\\KartuPiutang')
             ->leftJoin('kartu_piutangs', 'kartu_piutangs.journal_id', '=', 'journals.id')
             ->whereNull('kartu_piutangs.id')
+            ->whereNull('kartu_piutangs.tag')
+             ->whereNull('journals.tag')
             ->count();
         $KartuPrepaid = Journal::where('reference_model', 'App\\Models\\KartuPrepaidExpense')
             ->leftJoin('kartu_prepaid_expenses', 'kartu_prepaid_expenses.journal_id', '=', 'journals.id')
             ->whereNull('kartu_prepaid_expenses.id')
+            ->whereNull('kartu_prepaid_expenses.tag')
+             ->whereNull('journals.tag')
             ->count();
         $kartuInventory = Journal::where('reference_model', 'App\\Models\\KartuInventory')
             ->leftJoin('kartu_inventories', 'kartu_inventories.journal_id', '=', 'journals.id')
             ->whereNull('kartu_inventories.id')
+            ->whereNull('kartu_inventories.tag')
+             ->whereNull('journals.tag')
             ->count();
         $problemJournal = $journalKartuStock + $journalKartuHutang + $journalKartuPiutang + $KartuPrepaid + $kartuInventory;
 
         $problemKartuStock = KartuStock::where('journal_id', null)
+            ->whereNull('tag')
             ->count();
         $problemKartuHutang = KartuHutang::where('journal_id', null)
+            ->whereNull('tag')
             ->count();
         $problemKartuPiutang = KartuPiutang::where('journal_id', null)
+            ->whereNull('tag')
             ->count();
         $problemKartuPrepaid = KartuPrepaidExpense::where('journal_id', null)
+            ->whereNull('tag')
             ->count();
         $problemKartuInventory = KartuInventory::where('journal_id', null)
+            ->whereNull('tag')
             ->count();
 
 

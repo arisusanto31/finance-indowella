@@ -417,9 +417,9 @@ class JournalController extends Controller
             }
             foreach ($allJournals as $journal) {
                 $journal->updateLawanCode();
-                $st=$journal->createDetailKartuInvoice();
-                if($st['status']==0){
-                    throw new \Exception('gagal membuat detail kartu invoice: '.$st['msg']);
+                $st = $journal->createDetailKartuInvoice();
+                if ($st['status'] == 0) {
+                    throw new \Exception('gagal membuat detail kartu invoice: ' . $st['msg']);
                 }
                 if ($isBackDate == 1) {
                     $journal->calculateJournalNext(false);
@@ -546,9 +546,9 @@ class JournalController extends Controller
                 'msg' => 'anda tidak memiliki hak akses untuk menghapus jurnal ini'
             ];
         }
-        $journals = Journal::where('journals.journal_number', $journal->journal_number)->leftJoin('chart_accounts as ca','journals.code_group','=','ca.code_group')
-            ->select('journals.*','ca.name as coa_name')->get();
-        
+        $journals = Journal::where('journals.journal_number', $journal->journal_number)->leftJoin('chart_accounts as ca', 'journals.code_group', '=', 'ca.code_group')
+            ->select('journals.*', 'ca.name as coa_name')->get();
+
         // if (date_diff(createCarbon($journal->created_at), carbonDate())->days > 3) {
         //     //buat jurnal pembalikan balik aja 
         //     return self::cancelJournal($journal->journal_number);
@@ -558,16 +558,16 @@ class JournalController extends Controller
             //kalo disini langsung hapus aja, biar lebih clean datanya
             $lj[] = Journal::where('code_group', $j->code_group)->where('index_date', '<', $j->index_date)->orderBy('index_date', 'desc')->first();
             if ($j->reference_model != null) {
-             
+
                 //menghapus relasi di model yang di link ke jurnal ini
                 $model = $j->reference_model::where('journal_number', $j->journal_number)->get();
                 if ($model->count() > 0) {
-                    
-                  
-                    $model->each(function ($item) use(&$kartuDeleted, &$linkDeleted) {
+
+
+                    $model->each(function ($item) use (&$kartuDeleted, &$linkDeleted) {
                         $itemID = $item->id;
                         $class = get_class($item);
-                        $item['class']= $class;
+                        $item['class'] = $class;
                         $kartuDeleted[$item->id] = $item;
                         if ($itemID != null && $class != null) {
                             $details = DetailKartuInvoice::where('kartu_id', $itemID)->where('kartu_type', $class)->get();
@@ -709,7 +709,8 @@ class JournalController extends Controller
                 'amount' => 0,
                 'reference_id' => null,
                 'reference_type' => null,
-                'custom_amount_saldo' => $codes[$ca->code_group]['amount']
+                'custom_amount_saldo' => $codes[$ca->code_group]['amount'],
+                'tag' => 'opening ' . $month . '/' . $year
             ];
         }
         // return ['status' => 0, 'msg' => $debets];

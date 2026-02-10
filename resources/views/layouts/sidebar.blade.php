@@ -154,7 +154,13 @@
                 <li class="menu-item">
                     <a href="{{url('admin/kartu/kartu-dp-sales/main') }}" class="menu-link">
                         <!-- <i class="menu-icon tf-icons bx bx-credit-card mr-2 fs-6 me-2" style="margin-right: 10px;"></i> -->
-                        <div data-i18n="Accordion">Kartu DP Sales</div>
+                        <div data-i18n="Accordion">Kartu DP Sale</div>
+                    </a>
+                </li>
+                 <li class="menu-item">
+                    <a href="{{url('admin/kartu/kartu-dp-purchases/main') }}" class="menu-link">
+                        <!-- <i class="menu-icon tf-icons bx bx-credit-card mr-2 fs-6 me-2" style="margin-right: 10px;"></i> -->
+                        <div data-i18n="Accordion">Kartu DP Purchase</div>
                     </a>
                 </li>
 

@@ -12,7 +12,8 @@
             <div class="card-body">
                 <h6> ⚠️ Panduan import</h6>
                 <ul>
-                    <li>Siapkan 1 file excel dengan 2 sheet: "saldo_jurnal" dan "saldo_stock"</li>
+                    <li> Siapkan 1 file excel dengan 5 sheet: "</li>
+                    <li> list sheetnya "saldo_jurnal", "saldo_stock","saldo_hutang","inventaris","bdd", "saldo_bdp" </li>
                     <li> saldo jurnal berisi kolom : account_code, account_name, amount_saldo </li>
                     <li> saldo stock berisi kolom: stock_id, stock_name, saldo_qty, unit, saldo_rupiah </li>
                 </ul>

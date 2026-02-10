@@ -29,6 +29,7 @@ class DetailKartuInvoice extends Model
         'sales_order_number',
         'purchase_order_id',
         'purchase_order_number',
+        'date_journal',
     ];
 
     public function invoicePack()
@@ -62,15 +63,19 @@ class DetailKartuInvoice extends Model
             if (!$journal && $request->input('journal_id') != null) {
                 return ['status' => 0, 'msg' => 'jurnal tidak ditemukan'];
             }
+            $created=null;
             if ($kartuType == Journal::class) {
                 $kartuType = null;
                 $kartuId = null;
             }
+            $created= $journal?$journal->created_at:null;
             if ($kartuType != null && $kartuId != null) {
                 $kartu = $kartuType::find($kartuId);
                 if (!$kartu) {
                     return ['status' => 0, 'msg' => 'Kartu not found'];
                 }
+                if($created==null)
+                $created=$kartu->created_at;
             }
 
 
@@ -91,7 +96,7 @@ class DetailKartuInvoice extends Model
                 'amount_journal' => $journal ? $journal->amount_debet - $journal->amount_kredit : 0,
                 'amount_debet' => $journal ? $journal->amount_debet : 0,
                 'amount_kredit' => $journal ? $journal->amount_kredit : 0,
-                'date_journal' => $journal ? $journal->created_at  : null,
+                'date_journal' => $created,
             ];
 
             //oke dari sini sudah ada jurnal dan invoice pack, dan bisa jadi ada kartu
