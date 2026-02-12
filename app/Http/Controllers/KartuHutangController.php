@@ -109,11 +109,11 @@ class KartuHutangController extends Controller
                 $supplier->name = $payload['supplier_name'];
                 $supplier->save();
             }
-            $kartuHutang = KartuHutang::where('invoice_pack_number', $payload['invoice_pack_number'])->where('tag', 'init_import' . $payload['date'])->first();
+            $kartuHutang = KartuHutang::where('factur_supplier_number', $payload['factur_supplier_number'])->where('tag', 'init_import' . $payload['date'])->first();
             if (!$kartuHutang) {
                 $kartuHutang = new KartuHutang;
                 $kartuHutang->tag = 'init_import' . $payload['date'];
-                $kartuHutang->invoice_pack_number = $payload['invoice_pack_number'];
+                $kartuHutang->factur_supplier_number = $payload['factur_supplier_number'];
             }
             $created = createCarbon($payload['date'] . ' 08:00:00');
             $kartuHutang->index_date = KartuHutang::getNextIndexDate($created);
@@ -121,7 +121,7 @@ class KartuHutangController extends Controller
 
             $kartuHutang->type = 'init';
             $kartuHutang->book_journal_id = book()->id;
-            $kartuHutang->invoice_pack_number = $payload['invoice_pack_number'];
+            $kartuHutang->factur_supplier_number = $payload['factur_supplier_number'];
             $kartuHutang->description = 'saldo awal import kartu hutang';
             $kartuHutang->amount_kredit = 0;
             $kartuHutang->amount_debet = 0;
@@ -133,7 +133,7 @@ class KartuHutangController extends Controller
             $kartuHutang->invoice_date = $payload['date'];
             $kartuHutang->person_id = $supplier->id;
             $kartuHutang->person_type = Supplier::class;
-            $kartuHutang->factur_tax_number = $payload['tax_number'] ?? null;
+            $kartuHutang->factur_tax_number = $payload['factur_tax_number'] ?? null;
             $kartuHutang->save();
 
             $task->status = 'success';
