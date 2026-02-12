@@ -82,6 +82,9 @@ div.fixed {
   position: fixed;
 }
 
+li.no-bullet {
+  list-style-type: none;
+}
 .wrapper-scroll-vertical {
   overflow-y: scroll;
 }

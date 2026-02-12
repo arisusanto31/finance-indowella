@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Inventory;
 use App\Models\KartuInventory;
+use App\Models\TaskImportDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -219,7 +220,7 @@ class InventoryController extends Controller
 
         $kartu = KartuInventory::from('kartu_inventories as ki')->join('inventories as inv', 'inv.id', '=', 'ki.inventory_id')
             ->where('ki.index_date', '<', $indexLastYear)->where('ki.index_date', '>=', $indexFirstYear)->where('ki.amount', '>', 0)
-            ->select('ki.*', 'inv.name', 'inv.type_aset')->orderBy('ki.index_date','asc')->get();
+            ->select('ki.*', 'inv.name', 'inv.type_aset')->orderBy('ki.index_date', 'asc')->get();
         return [
             'status' => 1,
             'msg' => $kartu
@@ -233,10 +234,82 @@ class InventoryController extends Controller
 
         $kartu = KartuInventory::from('kartu_inventories as ki')->join('inventories as inv', 'inv.id', '=', 'ki.inventory_id')
             ->where('ki.index_date', '<', $indexLastYear)->where('ki.index_date', '>=', $indexFirstYear)->where('ki.amount', '<', 0)
-            ->select('ki.*', 'inv.name', 'inv.type_aset')->orderBy('ki.index_date','asc')->get();
+            ->select('ki.*', 'inv.name', 'inv.type_aset')->orderBy('ki.index_date', 'asc')->get();
         return [
             'status' => 1,
             'msg' => $kartu
         ];
+    }
+
+    public static function processTaskImport($id)
+    {
+        try {
+            DB::beginTransaction();
+            $task = TaskImportDetail::find($id);
+            if (!$task) {
+                throw new \Exception('Task import tidak ditemukan');
+            }
+            $payload = $task->payload ? json_decode($task->payload, true) : [];
+            $nameInv = $payload['name'] ?? '';
+            if (!$nameInv || $nameInv == '') {
+                throw new \Exception('Nama inventaris tidak boleh kosong');
+            }
+            $inv = Inventory::where('name', $nameInv)->first();
+            if (!$inv) {
+                $inv = new Inventory;
+                $inv->name = $nameInv;
+            }
+            $inv->type_aset = $payload['type_aset'];
+            $inv->keterangan_qty_unit = $payload['keterangan_qty_unit'];
+            $inv->date = $payload['date'];
+            $inv->nilai_perolehan = $payload['nilai_perolehan'];
+            $inv->periode = $payload['periode'];
+            $inv->book_journal_id = bookID();
+            $inv->toko_id = $payload['toko_id'] ?? 1;
+            $inv->save();
+
+
+            $kartu = KartuInventory::where('inventory_id', $inv->id)->where('tag', 'init_import' . $payload['date'])->first();
+            if (!$kartu) {
+                $kartu = new KartuInventory;
+                $kartu->tag = 'init_import' . $payload['date'];
+                $kartu->inventory_id = $inv->id;
+            }
+            $created = createCarbon($payload['date'] . ' 08:00:00');
+            $kartu->index_date = KartuInventory::getNextIndexDate($created);
+            $kartu->index_date_group = $created->format('ymdHis');
+            $kartu->type_mutasi = 'init';
+            $kartu->amount = 0;
+            $kartu->date = $payload['date'];
+            $kartu->book_journal_id = bookID();
+            $kartu->description = 'saldo awal import inventaris ' . $inv->name;
+            $kartu->toko_id = $inv->toko_id;
+            $kartu->nilai_buku = floatval($payload['nilai_buku']);
+            $kartu->save();
+
+            $task->status = 'success';
+            $task->error_message = "";
+            $task->finished_at = now();
+            $task->save();
+            DB::commit();
+            return [
+                'status' => 1,
+                'msg' => $kartu,
+                'task' => $task
+            ];
+        } catch (Throwable $th) {
+            DB::rollBack();
+            $task = TaskImportDetail::find($id);
+            if ($task) {
+                $task->status = 'failed';
+                $task->error_message = $th->getMessage();
+                $task->save();
+            }
+            return [
+                'status' => 0,
+                'msg' => $th->getMessage(),
+                'task' => $task
+            ];
+        }
     }
 }

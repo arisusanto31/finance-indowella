@@ -26,6 +26,7 @@ use CustomLogger;
 use Illuminate\Console\View\Components\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Redis;
 use Maatwebsite\Excel\Facades\Excel;
 use SebastianBergmann\CodeUnit\FunctionUnit;
@@ -860,43 +861,13 @@ class JournalController extends Controller
 
         // Ambil data yang sudah diproses
         $data = $import->data;
+        // return $data;
         $coas = ChartAccount::aktif()->pluck('name', 'code_group')->all();
         $stocks = Stock::pluck('name')->all();
         $stockRefs = Stock::whereNotNull('reference_stock_id')->pluck('reference_stock_id')->all();
 
         // Kirim ke view konfirmasi
         return view('main.import-saldo', compact('data', 'coas', 'stocks', 'date', 'stockRefs'));
-    }
-
-
-
-    function getImportData()
-    {
-        $view = view('main.import.import-data');
-        return $view;
-    }
-
-
-    function importData()
-    {
-
-        // yang perlu di import
-        // - kartu stock keluar - ini nanti jadi sales order dan jadi invoice pembayaran dkk
-        // - kartu stock masuk - ini nanti jadi purchase order 
-        // - kartu keuangan bank - ini yang bener bener ga bisa diutak atik harus sama persis. trus dilink
-        //                      sama pembayarannya invoice ,/ atau pembayaran dari customer.
-
-        //paling enak itu kalo gathering informasi dulu .pas sudah baru input bersmanaan, import bersamaan
-        //finalkan bersamaan, lunaskan bersamaan, proses bersamaan.  sesuai tanggal yang sudah ada, itu cakep
-
-        //kasih waktu timeout 300 detik
-        ini_set('max_execution_time', 300); // 5 minutes
-        $import = new ExcelKartuStockImport;
-        Excel::import($import, request()->file('file'));
-        return [
-            'status' => 1,
-            'msg' => $import->data
-        ];
     }
 
     public function importSaldo(Request $request)
@@ -912,6 +883,11 @@ class JournalController extends Controller
             $taskKartuStock = [];
             $jurnals = $data['jurnal'];
             $stocks =  $data['stock'];
+            $hutangs = $data['hutang'] ?? [];
+            $inventaris = $data['inventaris'] ?? [];
+            $bdds = $data['bdd'] ?? [];
+
+            // proses hutang
 
             $bookID = book()->id;
             $task = TaskImport::create([
@@ -954,6 +930,57 @@ class JournalController extends Controller
                 ]);
                 $taskKartuStock[] = $taskImportDetail->id;
             }
+
+            foreach ($hutangs as $hutang) {
+                $fixData = [
+                    'date' => excelSerialToCarbon($hutang['tanggal'])->format('Y-m-d'),
+                    'supplier_name' => $hutang['supplier'],
+                    'invoice_pack_number' => $hutang['no_invoice'],
+                    'saldo_akhir' => $hutang['saldo_akhir'],
+                    'tax_number' => $hutang['no_faktur'],
+                ];
+                $taskImportDetail = TaskImportDetail::create([
+                    'task_import_id' => $task->id,
+                    'type' => 'kartu_hutang',
+                    'payload' => json_encode($fixData),
+                    'book_journal_id' => $bookID,
+                ]);
+            }
+
+            foreach ($inventaris as $inv) {
+                $fixData = [
+                    'type_aset' => $inv['jenis'],
+                    'name' => $inv['nama'],
+                    'keterangan_qty_unit' => $inv['jumlah'],
+                    'date' => excelSerialToCarbon($inv['tanggal'])->format('Y-m-d'),
+                    'periode' => $inv['periode'],
+                    'nilai_perolehan' => $inv['total_akumulasi'] + $inv['nilai_buku'],
+                    'nilai_buku' => $inv['nilai_buku']
+                ];
+                $taskImportDetail = TaskImportDetail::create([
+                    'task_import_id' => $task->id,
+                    'type' => 'kartu_inventaris',
+                    'payload' => json_encode($fixData),
+                    'book_journal_id' => $bookID,
+                ]);
+            }
+
+            foreach ($bdds as $bdd) {
+                $fixData = [
+                    'name'   => $bdd['keterangan'],
+                    'periode' => $bdd['bulan'],
+                    'nilai_perolehan' => $bdd['nilai'],
+                    'nilai_buku'   => $bdd['saldo_akhir'],
+                    'date' => excelSerialToCarbon($bdd['tanggal'])->format('Y-m-d'),
+                ];
+                   $taskImportDetail = TaskImportDetail::create([
+                    'task_import_id' => $task->id,
+                    'type' => 'kartu_prepaid',
+                    'payload' => json_encode($fixData),
+                    'book_journal_id' => $bookID,
+                ]);
+            }
+
             DB::commit();
 
             return [
@@ -968,6 +995,45 @@ class JournalController extends Controller
             ];
         }
     }
+    public function downloadTemplateSaldoAwal()
+    {
+        $fullPath = public_path("template/template_import_saldo_awal.xlsx");
+        abort_unless(File::exists($fullPath), 404);
+        return response()->download($fullPath);
+    }
+
+
+
+    // function getImportData()
+    // {
+    //     $view = view('main.import.import-data');
+    //     return $view;
+    // }
+
+
+    // function importData()
+    // {
+
+    //     // yang perlu di import
+    //     // - kartu stock keluar - ini nanti jadi sales order dan jadi invoice pembayaran dkk
+    //     // - kartu stock masuk - ini nanti jadi purchase order 
+    //     // - kartu keuangan bank - ini yang bener bener ga bisa diutak atik harus sama persis. trus dilink
+    //     //                      sama pembayarannya invoice ,/ atau pembayaran dari customer.
+
+    //     //paling enak itu kalo gathering informasi dulu .pas sudah baru input bersmanaan, import bersamaan
+    //     //finalkan bersamaan, lunaskan bersamaan, proses bersamaan.  sesuai tanggal yang sudah ada, itu cakep
+
+    //     //kasih waktu timeout 300 detik
+    //     ini_set('max_execution_time', 300); // 5 minutes
+    //     $import = new ExcelKartuStockImport;
+    //     Excel::import($import, request()->file('file'));
+    //     return [
+    //         'status' => 1,
+    //         'msg' => $import->data
+    //     ];
+    // }
+
+
 
     function getImportSaldoFollowup($id)
     {
@@ -998,8 +1064,19 @@ class JournalController extends Controller
 
     function resendImportTask($id)
     {
+        $taskDetail = TaskImportDetail::find($id);
+        if($taskDetail->type=='kartu_stock')
+            return KartuStockController::processTaskImport($id);
+        else if($taskDetail->type=='kartu_hutang'){
+            return KartuHutangController::processTaskImport($id);
+        }
+        else if($taskDetail->type=='kartu_inventaris'){
+            return InventoryController::processTaskImport($id);
+        }
+        else if($taskDetail->type=='kartu_prepaid'){
+            return BDDController::processTaskImport($id);
+        }
 
-        return KartuStockController::processTaskImport($id);
         // $taskDetail = TaskImportDetail::find($id);
         // if ($taskDetail->type == 'kartu_stock') {
         //     ImportKartuStockJob::dispatch($id);

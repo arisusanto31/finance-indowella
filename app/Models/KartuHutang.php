@@ -396,6 +396,11 @@ class KartuHutang extends Model
     }
 
     public function refreshSaldo(){
+        if($this->tag){
+            //jika ada tag menandakan ini saldo awal import
+            info('kartu hutang - refresh saldo import awal tidak bisa diproses');
+            return $this;
+        }
          $last=KartuHutang::where('person_id', $this->person_id)->where('person_type', $this->person_type)
             ->where('invoice_pack_number', $this->invoice_pack_number)->where('index_date', '<', $this->index_date)->orderBy('index_date','desc')->first();
         $saldoFactur= $last ? $last->amount_saldo_factur : 0;

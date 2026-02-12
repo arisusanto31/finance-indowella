@@ -13,10 +13,17 @@
                 <h6> ⚠️ Panduan import</h6>
                 <ul>
                     <li> Siapkan 1 file excel dengan 5 sheet: "</li>
-                    <li> list sheetnya "saldo_jurnal", "saldo_stock","saldo_hutang","inventaris","bdd", "saldo_bdp" </li>
-                    <li> saldo jurnal berisi kolom : account_code, account_name, amount_saldo </li>
-                    <li> saldo stock berisi kolom: stock_id, stock_name, saldo_qty, unit, saldo_rupiah </li>
+                    <li> list sheetnya "saldo_jurnal", "saldo_stock","saldo_hutang","inventaris","bdd" </li>
+                    <li> "saldo_jurnal" berisi kolom : account_code, account_name, amount_saldo </li>
+                    <li> "saldo_stock" berisi kolom: stock_id, stock_name, saldo_qty, unit, saldo_rupiah </li>
+                    <li> "saldo_hutang" berisi kolom: tanggal, supplier, no invoice, no faktur, saldo akhir </li>
+                    <li> "inventaris" berisi kolom: jenis, nama, jumlah, tahun, tanggal, periode, total akumulasi, nilai
+                        buku</li>
+                    <li> "bdd" berisi kolom: keterangan, nilai,tanggal, bulan,total amortisasi, saldo akhir </li>
+                    <li class="no-bullet"> <button onclick="downloadTemplateSaldoAwal()" class="btn btn-success"> <i
+                                class="fas fa-file-excel"></i> Download Template</button> </li>
                 </ul>
+
                 <form action="{{ route('jurnal.get-import-saldo') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="row">
@@ -271,6 +278,14 @@
                     'chart account');
             }, 100);
 
+            function downloadTemplateSaldoAwal() {
+
+                url = "{{ url('admin/jurnal/download-template-saldo-awal') }}";
+                var win = window.open(url, '_blank');
+               
+
+            }
+
             function changeDateClosingJournal() {
                 date = new Date($('#date-closing-journal').val());
                 console.log(date);
@@ -367,10 +382,9 @@
               <input id="kamount${iRowKredit}" type="text" class="form-control currency-input" placeholder="Amount">
             </div>
           `;
-                kreditWrapper.appendChild(newRow);
+            kreditWrapper.appendChild(newRow);
                 initItemSelectManual('.select-coa', '{{ url('admin/master/chart-account/get-item') }}',
                     'chart account');
-
             });
 
 
@@ -654,10 +668,10 @@
                             <p> <strong> links </strong></p>
                             <ul>
                               ${data.links.map(link => `<li class="mb-2">
-                                          kartu <div class="d-inline bg-primary-dark ps-2 pe-2 rounded-4 ">${link.kartu_type} - ID: ${link.kartu_id}</div>  (${formatRupiah(link.amount_debet)} / ${formatRupiah(link.amount_kredit)})
-                                          <i class="fas fa-link"></i> 
-                                          jurnal <div class="d-inline bg-primary-dark ps-2 pe-2 rounded-4 ">${link.account_name}- ID: ${link.journal_id}</div>  (${formatRupiah(link.amount_debet)} / ${formatRupiah(link.amount_kredit)})
-                                         </li>`).join('')}
+                                                                  kartu <div class="d-inline bg-primary-dark ps-2 pe-2 rounded-4 ">${link.kartu_type} - ID: ${link.kartu_id}</div>  (${formatRupiah(link.amount_debet)} / ${formatRupiah(link.amount_kredit)})
+                                                                  <i class="fas fa-link"></i> 
+                                                                  jurnal <div class="d-inline bg-primary-dark ps-2 pe-2 rounded-4 ">${link.account_name}- ID: ${link.journal_id}</div>  (${formatRupiah(link.amount_debet)} / ${formatRupiah(link.amount_kredit)})
+                                                                 </li>`).join('')}
                             </ul>
                         </div>
                     </div>

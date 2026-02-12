@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\BookJournal;
+use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
 use App\Services\ContextService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -60,6 +61,21 @@ if (!function_exists('db_date_from_dmy')) {
 
         return $dt->format('Y-m-d');
     }
+}
+
+
+function excelSerialToCarbon($value, string $tz = 'Asia/Jakarta'): ?Carbon
+{
+    if ($value === null || $value === '') return null;
+
+    // Pastikan numeric: integer/float
+    if (is_numeric($value)) {
+        // Ini sudah handle 1900/1904, leap bug, dan time fraction
+        $dt = ExcelDate::excelToDateTimeObject((float) $value);
+        return Carbon::instance($dt)->setTimezone($tz);
+    }
+
+    return null; // kalau ternyata string, nanti kamu bisa fallback parse
 }
 
 if (!function_exists('norm_string')) {

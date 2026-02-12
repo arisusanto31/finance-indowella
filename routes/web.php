@@ -83,6 +83,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
     Route::prefix('jurnal')->name('jurnal.')->group(function () {
         Route::get('/buku-besar', [JournalController::class, 'bukuBesar'])->name('main.buku-besar');
         Route::get('/mutasi', [JournalController::class, 'mutasi'])->name('main.mutasi');
+        Route::get('/download-template-saldo-awal', [JournalController::class, 'downloadTemplateSaldoAwal'])->name('download-template-saldo-awal');
         Route::get('/get-list-mutasi', [JournalController::class, 'getListMutasiJurnal']);
         Route::get('/get-buku-besar', [JournalController::class, 'getListBukuBesar']);
         Route::post('/submit-manual', [JournalController::class, 'createBaseJournal']);

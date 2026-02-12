@@ -108,7 +108,7 @@
 
                                 <td>{{ format_price($item['amount']) }}
                                 </td>
-                                <td id="status-{{ $data->id }}">
+                                <td id="status-kartu_stock-{{ $data->id }}">
                                     <span class="badge {{ bgStatus($data->status) }}">{{ $data->status }}</span>
                                     @if ($data->status == 'failed')
                                         <br>
@@ -129,15 +129,84 @@
                             </tr>
                         @endforeach
                     </tbody>
-
-
                 </table>
+            </div>
 
-                <!-- <div class="row">
-            <div class="col-xs-12">
-            </div>
-          </div> -->
-            </div>
+            @php
+                $titles = ['Data Hutang', 'Data Inventaris', 'Data Prepaid'];
+                $keys = ['kartu_hutang', 'kartu_inventaris', 'kartu_prepaid'];
+            @endphp
+
+            @foreach ($titles as $index => $title)
+                <p class="mt-2">{{ $title }}</p>
+                @php
+                    $datatable = $details[$keys[$index]];
+                    $payload = $datatable[0] ? $datatable[0]->payload : null;
+                    $payloadArr = $payload ? json_decode($payload, true) : [];
+                    $allth = collect($payloadArr)->keys();
+                    $allthfix = ['No', 'Task ID', ...$allth->toArray(), 'Status', 'Action'];
+                @endphp
+                <div class="table-responsive">
+                    <table id="" class="table table table-bordered table-striped table-hover align-middle">
+                        <thead class="bg-white text-dark text-center">
+                            <tr>
+                                @foreach ($allthfix as $th)
+                                    <th>{{ $th }}</th>
+                                @endforeach
+                            </tr>
+                        </thead>
+                        <tbody id="body-import-saldo">
+                            @foreach ($datatable as $key => $task)
+                                @php
+                                    $item = json_decode($task->payload, true);
+                                @endphp
+                                <tr>
+                                    @foreach ($allthfix as $th)
+                                        @if ($th == 'No')
+                                            <td>{{ $key + 1 }}
+
+                                                <input type="hidden" class="bdd" value="{{ $key }}" />
+                                            </td>
+                                        @elseif($th == 'Task ID')
+                                            <td>{{ $task->id }}</td>
+                                        @elseif($th == 'Status')
+                                            <td id="status-{{ $keys[$index] }}-{{ $task->id }}">
+                                                <span
+                                                    class="badge {{ bgStatus($task->status) }}">{{ $task->status }}</span>
+                                                @if ($task->status == 'failed')
+                                                    <br>
+                                                    {{ $task->error_message }}
+                                                @elseif($task->status == 'success')
+                                                    <br>
+                                                    {{ $task->journal_number }}
+                                                @endif
+                                            </td>
+                                        @elseif($th == 'Action')
+                                            <td>
+                                                @if ($task->status != 'success')
+                                                    <input type="hidden" id="import-notyet{{ $task->id }}"
+                                                        class="import-notyet" value="{{ $task->id }}" />
+                                                    <button type="button" class="btn btn-primary btn-sm"
+                                                        title="resend data"
+                                                        onclick="resendData('{{ $task->id }}')"> <i
+                                                            class="fas fa-arrow-up"></i></button>
+                                                @endif
+
+                                            </td>
+                                        @else
+                                            <td>{{ $item[$th] }}
+                                                <input class="bdd-data{{ $key }}"
+                                                    id="bdd-{{ $th }}-{{ $key }}" type="hidden"
+                                                    value="{{ $item[$th] }}" />
+                                            </td>
+                                        @endif
+                                    @endforeach
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endforeach
 
         </div>
     </div>
@@ -145,7 +214,7 @@
 
     @push('scripts')
         <script>
-            function resendData(id) {
+            function resendData(id, notify = true) {
 
                 return new Promise((resolve) => {
                     $.ajax({
@@ -154,21 +223,28 @@
                         success: function(res) {
                             console.log(res);
                             if (res.status == 1) {
-                                $('#status-' + id).html('<span class="badge bg-success">success</span>');
+                                task = res.task;
+                                $('#status-' + task.type + '-' + id).html(
+                                    '<span class="badge bg-success">success</span>');
                                 resolve(res);
+                                if (notify) {
+                                    notification('success', 'Data Task ID: ' + id + ' berhasil diproses');
+                                }
                             } else {
+                                task = res.task;
                                 notification('error', res.msg);
-                                $('#status-' + id).html('<span class="badge bg-danger">failed</span> <br>' +
+                                $('#status-' + task.type + '-' + id).html(
+                                    '<span class="badge bg-danger">failed</span> <br>' +
                                     res.msg);
                                 resolve(res);
                             }
                         },
                         error: function(res) {
-                             notification('error', 'Terjadi Kesalahan pada server')
+                            notification('error', 'Terjadi Kesalahan pada server')
                             resolve({
                                 status: 0
                             });
-                           
+
                         }
 
                     });
@@ -183,7 +259,7 @@
                         $('.import-notyet').each(async function(i, elem) {
                             count++;
                             id = $(elem).val();
-                            res = await resendData(id);
+                            res = await resendData(id, notify = false);
                             if (res['status'] == 1) {
                                 $('#import-notyet' + id).remove();
                             }
