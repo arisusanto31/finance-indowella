@@ -31,6 +31,13 @@
                 <input type="number" name="phone" id="phone" class="form-control" placeholder="Telepon" required />
             </div>
         </div>
+
+        <div class="row">
+            <div class="col mb-3">
+                <label for="kode_toko" class="form-label">Kode Toko</label>
+                <input type="text" name="kode_toko" id="kode_toko" class="form-control" placeholder="Kode Toko" required />
+            </div>
+        </div>
     </div>
 
     <div class="modal-footer">

@@ -64,6 +64,7 @@ class KartuStock extends Model
             $kartu->purchase_order_id = $request->input('purchase_order_id');
             $kartu->invoice_pack_number = $request->input('invoice_pack_number');
             $kartu->invoice_pack_id = $request->input('invoice_pack_id');
+            $kartu->tag = $request->input('tag');
 
             $indexDate = KartuStock::getNextIndexDate($date);
             $kartu->index_date = $indexDate;
@@ -119,12 +120,12 @@ class KartuStock extends Model
             $kartu->saldo_qty_backend = moneyAdd($lastCard->saldo_qty_backend, $kartu->mutasi_qty_backend);
             $kartu->saldo_rupiah_total = moneyAdd($lastCard->saldo_rupiah_total, $kartu->mutasi_rupiah_total);
             if ($kartu->saldo_rupiah_total < 0 || $kartu->saldo_qty_backend < 0) {
-                info('kartu stock invalid input, saldo minus jika diinput! '.json_encode($kartu));
+                info('kartu stock invalid input, saldo minus jika diinput! ' . json_encode($kartu));
                 info(json_encode($lastCard));
                 return [
                     'status' => 0,
                     'msg' => 'kartu stock invalid input, saldo minus jika diinput!',
-                    'detail'=>$kartu
+                    'detail' => $kartu
                 ];
             }
             $kartu->save();
@@ -255,6 +256,7 @@ class KartuStock extends Model
                 'code_group' => $codeGroup,
                 'code_group_name' => $codeGroupName,
                 'date' => $date,
+                'tag' => $request->input('tag')
             ]));
 
             if ($st['status'] == 0) {

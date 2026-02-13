@@ -93,6 +93,7 @@ class TokoController extends Controller
             'name' => 'required',
             'phone' => 'required',
             'address' => 'nullable',
+            'kode_toko'=>'nullable',
             'book_journal_id' => 'required|integer'
         ]);
         $toko = Toko::create($data);

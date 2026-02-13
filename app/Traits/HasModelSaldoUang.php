@@ -72,7 +72,7 @@ trait HasModelSaldoUang
             $saldoAwal = (optional($dataAktif)->amount_saldo_factur ?? 0);
             $dataFix = $dataAktif ? $dataAktif : $dataBaru;
             $data = [
-                'person_name' => $dataFix->person->name,
+                'person_name' => optional($dataFix->person)->name ?? '?',
                 'person_type' => $dataFix->person_type,
                 'invoice_date' => $dataFix->invoice_date,
                 $kolomGroup => $factur,

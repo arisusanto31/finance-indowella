@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Inventory;
 use App\Models\KartuInventory;
 use App\Models\TaskImportDetail;
+use App\Models\Toko;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -259,15 +260,16 @@ class InventoryController extends Controller
                 $inv = new Inventory;
                 $inv->name = $nameInv;
             }
+            $kodeToko = Toko::pluck('id', 'kode_toko')->toArray();
+            $tokoID = $payload['toko_id'] ?? 'R1';
+            $inv->toko_id = isset($kodeToko[$tokoID]) ? $kodeToko[$tokoID] : null;
             $inv->type_aset = $payload['type_aset'];
             $inv->keterangan_qty_unit = $payload['keterangan_qty_unit'];
             $inv->date = $payload['date'];
             $inv->nilai_perolehan = $payload['nilai_perolehan'];
             $inv->periode = $payload['periode'];
             $inv->book_journal_id = bookID();
-            $inv->toko_id = $payload['toko_id'] ?? 1;
             $inv->save();
-
 
             $kartu = KartuInventory::where('inventory_id', $inv->id)->where('tag', 'init_import' . $payload['date'])->first();
             if (!$kartu) {
@@ -286,7 +288,6 @@ class InventoryController extends Controller
             $kartu->toko_id = $inv->toko_id;
             $kartu->nilai_buku = floatval($payload['nilai_buku']);
             $kartu->save();
-
             $task->status = 'success';
             $task->error_message = "";
             $task->finished_at = now();

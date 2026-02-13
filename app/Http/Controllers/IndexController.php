@@ -46,7 +46,7 @@ class IndexController extends Controller
             ->leftJoin('kartu_hutangs', 'kartu_hutangs.journal_id', '=', 'journals.id')
             ->whereNull('kartu_hutangs.id')
             ->whereNull('kartu_hutangs.tag')
-             ->whereNull('journals.tag')
+            ->whereNull('journals.tag')
             ->count();
         $journalKartuPiutang = Journal::where('reference_model', 'App\\Models\\KartuPiutang')
             ->leftJoin('kartu_piutangs', 'kartu_piutangs.journal_id', '=', 'journals.id')
@@ -109,7 +109,7 @@ class IndexController extends Controller
         $kbj = KartuBahanJadi::getTotalSaldoRupiah(getInput('date'), true);
         $jbj = KartuBahanJadi::getTotalJournal(getInput('date'));
 
-        $kh = KartuHutang::getTotalsaldoRupiah(getInput('date'));
+        $kh = KartuHutang::getTotalsaldoRupiah(getInput('date'),'factur_supplier_number');
         $jkh = KartuHutang::getTotalJournal(getInput('date'));
 
         $kp = KartuPiutang::getTotalSaldoRupiah(getInput('date'));

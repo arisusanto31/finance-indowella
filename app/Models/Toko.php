@@ -13,6 +13,7 @@ class Toko extends Model
         'book_journal_id',
         'name',
         'phone',
+        'kode_toko',
         'address',
     ];
     protected static function booted()

@@ -31,7 +31,8 @@ class _bdd_import implements ToArray
             'tanggal',
             'bulan',
             'total amortisasi',
-            'saldo akhir'
+            'saldo akhir',
+            'toko_id'
         ];
         $array = $this->extractData($headers);
 

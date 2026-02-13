@@ -51,6 +51,7 @@ class JournalController extends Controller
         if ($query['status'] == 0)
             return $query;
         $chartAccounts = $query['msg'];
+       
         $laba = ChartAccount::getLabaBulanAt($date);
         $aset = collect($chartAccounts['Aset'])->sum('saldo');
         $kewajiban = collect($chartAccounts['Kewajiban'])->sum('saldo');
@@ -955,7 +956,8 @@ class JournalController extends Controller
                     'date' => excelSerialToCarbon($inv['tanggal'])->format('Y-m-d'),
                     'periode' => $inv['periode'],
                     'nilai_perolehan' => $inv['total_akumulasi'] + $inv['nilai_buku'],
-                    'nilai_buku' => $inv['nilai_buku']
+                    'nilai_buku' => $inv['nilai_buku'],
+                    'toko_id' => $inv['toko_id']
                 ];
                 $taskImportDetail = TaskImportDetail::create([
                     'task_import_id' => $task->id,
@@ -971,9 +973,10 @@ class JournalController extends Controller
                     'periode' => $bdd['bulan'],
                     'nilai_perolehan' => $bdd['nilai'],
                     'nilai_buku'   => $bdd['saldo_akhir'],
+                    'toko_id' => $bdd['toko_id'],
                     'date' => excelSerialToCarbon($bdd['tanggal'])->format('Y-m-d'),
                 ];
-                   $taskImportDetail = TaskImportDetail::create([
+                $taskImportDetail = TaskImportDetail::create([
                     'task_import_id' => $task->id,
                     'type' => 'kartu_prepaid',
                     'payload' => json_encode($fixData),
@@ -1004,7 +1007,7 @@ class JournalController extends Controller
 
 
 
-  
+
 
 
     function getImportSaldoFollowup($id)
@@ -1037,15 +1040,13 @@ class JournalController extends Controller
     function resendImportTask($id)
     {
         $taskDetail = TaskImportDetail::find($id);
-        if($taskDetail->type=='kartu_stock')
+        if ($taskDetail->type == 'kartu_stock')
             return KartuStockController::processTaskImport($id);
-        else if($taskDetail->type=='kartu_hutang'){
+        else if ($taskDetail->type == 'kartu_hutang') {
             return KartuHutangController::processTaskImport($id);
-        }
-        else if($taskDetail->type=='kartu_inventaris'){
+        } else if ($taskDetail->type == 'kartu_inventaris') {
             return InventoryController::processTaskImport($id);
-        }
-        else if($taskDetail->type=='kartu_prepaid'){
+        } else if ($taskDetail->type == 'kartu_prepaid') {
             return BDDController::processTaskImport($id);
         }
 
@@ -1121,7 +1122,8 @@ class JournalController extends Controller
                     $payload = json_decode($task->payload, true);
                     ChartAccountController::makeAlias(new Request([
                         'code_group' => [$payload['code_group'], ""],
-                        'name' => $payload['name']
+                        'name' => $payload['name'],
+                        'no_update_ref'=>true
                     ]));
                 } else {
                     DB::rollBack();

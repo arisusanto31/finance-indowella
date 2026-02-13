@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\KartuPrepaidExpense;
 use App\Models\PrepaidExpense;
 use App\Models\TaskImportDetail;
+use App\Models\Toko;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -209,12 +210,14 @@ class BDDController extends Controller
                 $inv = new PrepaidExpense;
                 $inv->name = $nameInv;
             }
+            $kodeToko = Toko::pluck('id', 'kode_toko')->toArray();
+            $tokoID = $payload['toko_id'] ?? 'R1';
+            $inv->toko_id = isset($kodeToko[$tokoID]) ? $kodeToko[$tokoID] : null;
             $inv->type_bdd = 'Biaya Sewa';
             $inv->date = $payload['date'];
             $inv->nilai_perolehan = $payload['nilai_perolehan'];
             $inv->periode = $payload['periode'];
             $inv->book_journal_id = bookID();
-            $inv->toko_id = $payload['toko_id'] ?? 1;
             $inv->save();
 
 

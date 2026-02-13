@@ -33,7 +33,8 @@ class _inventaris_import implements ToArray
             'tanggal',
             'periode',
             'total akumulasi',
-            'nilai buku'
+            'nilai buku',
+            'toko_id'
         ];
         $array = $this->extractData($headers);
 

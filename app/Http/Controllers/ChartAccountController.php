@@ -344,9 +344,10 @@ class ChartAccountController extends Controller
         $codeGroups = $request->input('code_group');
         $codeGroup = implode("", $codeGroups);
         $name = $request->input('name');
+    
         $referenceModel = $request->input('reference_model');
-        $chart = ChartAccount::where('code_group', $codeGroup)->first();
-        if ($referenceModel) {
+        if($request->input('no_update_ref')??false != true){
+            $chart = ChartAccount::where('code_group', $codeGroup)->first();
             $chart->reference_model = $referenceModel;
             $chart->save();
         }
@@ -358,7 +359,8 @@ class ChartAccountController extends Controller
         ]));
         return [
             'status' => 1,
-            'msg' => $alias
+            'msg' => $alias,
+            'reference_model' => $referenceModel
         ];
     }
 

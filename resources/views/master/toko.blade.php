@@ -20,6 +20,7 @@
                     <tr>
                         <th>No</th>
                         <th>Nama</th>
+                        <th>Kode </th>
                         <th>No HP</th>
                         <th>Alamat</th>
                         <th>Default akun kas </th>
@@ -42,6 +43,7 @@
                                     @endif
                                 @endif
                             </td>
+                            <td>{{ $toko->kode_toko }}</td>
                             <td>{{ $toko->phone }}</td>
                             <td>{{ $toko->address }}</td>
                             <td>
@@ -118,7 +120,6 @@
             }
 
             function linkMasterToko(id) {
-
                 asset = '{{ asset('') }}';
                 Swal.fire({
                     title: 'Link dengan master toko',

@@ -342,11 +342,9 @@ class ChartAccount extends Model
         try {
             $start = microtime(true);
             $theLastDate = createCarbon($date)->format('ymdHis') . '00';
-
             $subquery = Journal::where('index_date', '<', (float)$theLastDate)->whereRaw('CONVERT(code_group, UNSIGNED) < ?', [400000])
                 ->select('code_group as scode_group', DB::raw('MAX(index_date) as max_index_date'))
                 ->groupBy('code_group');
-
             $thejournal = Journal::from('journals as j')
                 ->joinSub($subquery, 'subquery', function ($join) {
                     $join->on('j.code_group', '=', 'subquery.scode_group')
@@ -354,6 +352,7 @@ class ChartAccount extends Model
                 });
 
             $saldo =  ChartAccountAlias::from('chart_account_aliases as ca')
+                ->join('chart_accounts as c', 'c.code_group', '=', 'ca.code_group')
                 ->leftJoinSub($thejournal, 'j', function ($join) {
                     $join->on('j.code_group', '=', 'ca.code_group');
                 })
@@ -361,14 +360,13 @@ class ChartAccount extends Model
                 ->select(
                     'ca.name',
                     'ca.id',
-                    'ca.account_type',
+                    'c.account_type',
                     'ca.code_group',
-                    'ca.level',
+                    'c.level',
                     DB::raw('round(coalesce(j.amount_saldo,0),2) as saldo'),
-                    'ca.is_child',
+                    'c.is_child',
                 )
                 ->orderBy('ca.code_group')->get();
-
             $revisiSaldo = collect($saldo)
                 ->map(function ($val) use ($saldo) {
                     if ($val->is_child == 0 && $val->level == 1) {

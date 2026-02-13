@@ -117,7 +117,7 @@
                                         <br>{{ $data->journal_number }}
                                     @endif
                                 </td>
-                                <td>
+                                <td id="action-kartu_stock-{{ $data->id }}">
                                     @if ($data->status != 'success')
                                         <input type="hidden" id="import-notyet{{ $data->id }}"
                                             class="import-notyet" value="{{ $data->id }}" />
@@ -182,7 +182,7 @@
                                                 @endif
                                             </td>
                                         @elseif($th == 'Action')
-                                            <td>
+                                            <td id="action-{{ $keys[$index] }}-{{ $task->id }}">
                                                 @if ($task->status != 'success')
                                                     <input type="hidden" id="import-notyet{{ $task->id }}"
                                                         class="import-notyet" value="{{ $task->id }}" />
@@ -226,10 +226,12 @@
                                 task = res.task;
                                 $('#status-' + task.type + '-' + id).html(
                                     '<span class="badge bg-success">success</span>');
-                                resolve(res);
+                                $('#action-' + task.type + '-' + id).html('');
+
                                 if (notify) {
                                     notification('success', 'Data Task ID: ' + id + ' berhasil diproses');
                                 }
+                                resolve(res);
                             } else {
                                 task = res.task;
                                 notification('error', res.msg);

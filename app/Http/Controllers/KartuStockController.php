@@ -446,6 +446,7 @@ class KartuStockController extends Controller
                     'journal_number' => $journalNumber,
                     'is_custom_rupiah' => 1,
                     'mutasi_rupiah_total' => floatval($data['amount']),
+                    'tag'=>'import nilai awal '
 
                 ]), false);
                 info('hasil dari kartu stcok:' . json_encode($stStock));

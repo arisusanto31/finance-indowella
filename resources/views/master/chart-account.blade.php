@@ -238,11 +238,11 @@
                     method: 'post',
                     data: $('#form-edit-account').serialize(),
                     success: function(res) {
-                        console.log(res);
+                        console.log('make alias',res);
                         if (res.status == 1) {
                             swalInfo('success', 'data berhasil disubmit', 'success');
                             hideFormSmall();
-                            setTimeout(getChartAccount, 100);
+                            // setTimeout(getChartAccount, 100);
                         } else {
                             swal("error", res.msg);
                         }
