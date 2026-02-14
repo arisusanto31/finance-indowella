@@ -430,7 +430,7 @@ class KartuStockController extends Controller
 
             $journal = TaskImportDetail::where('task_import_id', $task->task_import_id)->whereNotNull('journal_number')->first();
             $journalNumber = $journal ? $journal->journal_number : null;
-            if ($data['amount'] > 0) {
+            if (round(format_db($data['amount'])) > 0) {
                 // throw new \Exception('oke amount saldo  > 0');
                 info('try to create kartu stock');
                 $stStock = KartuStock::mutationStore(new Request([

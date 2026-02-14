@@ -234,7 +234,9 @@
                                 resolve(res);
                             } else {
                                 task = res.task;
-                                notification('error', res.msg);
+                                if (notify) {
+                                    notification('error', res.msg);
+                                }
                                 $('#status-' + task.type + '-' + id).html(
                                     '<span class="badge bg-danger">failed</span> <br>' +
                                     res.msg);
@@ -266,7 +268,14 @@
                                 $('#import-notyet' + id).remove();
                             }
                             showProgressBar(count, total);
+                            await new Promise((resolve) => {
+                                setTimeout(() => {
+                                    resolve(true);
+                                }, 100);
+                            });
+
                         });
+
                         setTimeout(() => {
                             hideProgressBar();
                         }, 2000);
@@ -296,7 +305,8 @@
                         loading(0);
                         console.log(res);
                         if (res.status == 1) {
-                            Swal.fire('Success', 'Data Taks ' + taskID + ' berhasil di proses kirim jurnal',
+                            Swal.fire('Success', 'Data Taks ' + taskID +
+                                ' berhasil di proses kirim jurnal',
                                 'success');
                         } else {
                             Swal.fire('Error', res.msg, 'error');
