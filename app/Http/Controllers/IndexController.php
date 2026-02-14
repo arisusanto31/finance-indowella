@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\ImportSaldoNLJob;
+use App\Models\ChartAccount;
 use App\Models\InvoicePack;
 use App\Models\Journal;
 use App\Models\KartuBahanJadi;
@@ -52,19 +53,19 @@ class IndexController extends Controller
             ->leftJoin('kartu_piutangs', 'kartu_piutangs.journal_id', '=', 'journals.id')
             ->whereNull('kartu_piutangs.id')
             ->whereNull('kartu_piutangs.tag')
-             ->whereNull('journals.tag')
+            ->whereNull('journals.tag')
             ->count();
         $KartuPrepaid = Journal::where('reference_model', 'App\\Models\\KartuPrepaidExpense')
             ->leftJoin('kartu_prepaid_expenses', 'kartu_prepaid_expenses.journal_id', '=', 'journals.id')
             ->whereNull('kartu_prepaid_expenses.id')
             ->whereNull('kartu_prepaid_expenses.tag')
-             ->whereNull('journals.tag')
+            ->whereNull('journals.tag')
             ->count();
         $kartuInventory = Journal::where('reference_model', 'App\\Models\\KartuInventory')
             ->leftJoin('kartu_inventories', 'kartu_inventories.journal_id', '=', 'journals.id')
             ->whereNull('kartu_inventories.id')
             ->whereNull('kartu_inventories.tag')
-             ->whereNull('journals.tag')
+            ->whereNull('journals.tag')
             ->count();
         $problemJournal = $journalKartuStock + $journalKartuHutang + $journalKartuPiutang + $KartuPrepaid + $kartuInventory;
 
@@ -109,7 +110,7 @@ class IndexController extends Controller
         $kbj = KartuBahanJadi::getTotalSaldoRupiah(getInput('date'), true);
         $jbj = KartuBahanJadi::getTotalJournal(getInput('date'));
 
-        $kh = KartuHutang::getTotalsaldoRupiah(getInput('date'),'factur_supplier_number');
+        $kh = KartuHutang::getTotalsaldoRupiah(getInput('date'), 'factur_supplier_number');
         $jkh = KartuHutang::getTotalJournal(getInput('date'));
 
         $kp = KartuPiutang::getTotalSaldoRupiah(getInput('date'));
@@ -163,6 +164,12 @@ class IndexController extends Controller
 
     public function areaDeveloper()
     {
+
+        if (getInput('type') == 'all-chart-account') {
+            $chartAccounts = ChartAccount::all();
+            return  $chartAccounts;
+            
+        }
         if (getInput('type') == "pattern") {
             return detectFormat(getInput('nilai'));
         }
