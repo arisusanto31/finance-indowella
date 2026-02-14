@@ -14,6 +14,7 @@ class TaskImport extends Model
         'type',
         'description',
         'status',
+        'request_date'
     ];
 
     protected static function booted()

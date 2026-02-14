@@ -14,6 +14,7 @@ class TaskImportDetail extends Model
         'type',
         'payload',
         'status',
+        'request_date',
         'processed_at',
         'finished_at',
     ];

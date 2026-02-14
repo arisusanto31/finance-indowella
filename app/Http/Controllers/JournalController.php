@@ -895,6 +895,7 @@ class JournalController extends Controller
                 'book_journal_id' => $bookID,
                 'type' => 'saldo_dan_stock_awal',
                 'description' => 'import saldo awal ' . $date,
+                'request_date' => $date
 
             ]);
             foreach ($jurnals as $saldo) {
@@ -910,6 +911,7 @@ class JournalController extends Controller
                     'task_import_id' => $task->id,
                     'type' => 'saldo_nl',
                     'payload' => json_encode($fixData),
+                    'request_date' => $date
                 ]);
                 $taskSaldo[] = $taskImportDetail->id;
                 // ImportSaldoNLJob::dispatch($taskImportDetail->id);
@@ -928,6 +930,7 @@ class JournalController extends Controller
                     'type' => 'kartu_stock',
                     'payload' => json_encode($fixData),
                     'book_journal_id' => $bookID,
+                    'request_date' => $date
                 ]);
                 $taskKartuStock[] = $taskImportDetail->id;
             }
@@ -939,12 +942,14 @@ class JournalController extends Controller
                     'factur_supplier_number' => $hutang['no_invoice'],
                     'saldo_akhir' => $hutang['saldo_akhir'],
                     'factur_tax_number' => $hutang['no_faktur'],
+                    'request_date'=> $date,
                 ];
                 $taskImportDetail = TaskImportDetail::create([
                     'task_import_id' => $task->id,
                     'type' => 'kartu_hutang',
                     'payload' => json_encode($fixData),
                     'book_journal_id' => $bookID,
+                    'request_date' => $date
                 ]);
             }
 
@@ -957,13 +962,15 @@ class JournalController extends Controller
                     'periode' => $inv['periode'],
                     'nilai_perolehan' => $inv['total_akumulasi'] + $inv['nilai_buku'],
                     'nilai_buku' => $inv['nilai_buku'],
-                    'toko_id' => $inv['toko_id']
+                    'toko_id' => $inv['toko_id'],
+                    'request_date' => $date
                 ];
                 $taskImportDetail = TaskImportDetail::create([
                     'task_import_id' => $task->id,
                     'type' => 'kartu_inventaris',
                     'payload' => json_encode($fixData),
                     'book_journal_id' => $bookID,
+                    'request_date' => $date
                 ]);
             }
 
@@ -975,12 +982,14 @@ class JournalController extends Controller
                     'nilai_buku'   => $bdd['saldo_akhir'],
                     'toko_id' => $bdd['toko_id'],
                     'date' => excelSerialToCarbon($bdd['tanggal'])->format('Y-m-d'),
+                    'request_date' => $date
                 ];
                 $taskImportDetail = TaskImportDetail::create([
                     'task_import_id' => $task->id,
                     'type' => 'kartu_prepaid',
                     'payload' => json_encode($fixData),
                     'book_journal_id' => $bookID,
+                    'request_date' => $date
                 ]);
             }
 
