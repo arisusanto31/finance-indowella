@@ -562,3 +562,7 @@ function hideProgressBar() {
     $('#progress-bar-inner').attr('aria-valuenow', 0);
     $('#progress-bar-inner').html('0%');
 }
+
+function inArray(needle, haystack) {
+    return haystack.includes(needle);
+}

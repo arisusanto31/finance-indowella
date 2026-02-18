@@ -37,7 +37,7 @@ class KartuHutangController extends Controller
         $month = getInput('month') ?? Date('m');
         $year = getInput('year') ?? Date('Y');
 
-        return KartuHutang::getSummary($year, $month, 'invoice_pack_number');
+        return KartuHutang::getSummary($year, $month, 'factur_supplier_number');
     }
 
     function getMutasiMasuk()
@@ -58,9 +58,9 @@ class KartuHutangController extends Controller
     {
         $view = view('kartu.modal._kartu-mutasi-hutang');
         $view->factur = $nomer;
-        $kh = KartuHutang::where('invoice_pack_number', $nomer)->orderBy('created_at', 'desc')->first();
+        $kh = KartuHutang::where('factur_supplier_number', $nomer)->orderBy('created_at', 'desc')->first();
         $view->person = $kh->person;
-        $data = KartuHutang::where('invoice_pack_number', $nomer)->get();
+        $data = KartuHutang::where('factur_supplier_number', $nomer)->get();
         $view->data = $data;
         return $view;
     }
@@ -107,6 +107,7 @@ class KartuHutangController extends Controller
             if (!$supplier) {
                 $supplier = new Supplier();
                 $supplier->name = $payload['supplier_name'];
+                $supplier->book_journal_id = book()->id;
                 $supplier->save();
             }
             $kartuHutang = KartuHutang::where('factur_supplier_number', $payload['factur_supplier_number'])->where('tag', 'init_import' . $payload['date'])->first();

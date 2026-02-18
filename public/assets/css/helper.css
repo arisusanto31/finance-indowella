@@ -169,6 +169,6 @@ div.relative-pos {
   position: relative;
 }
 
-div.absolute-pos {
+div.absolute-pos, span.absolute-pos {
   position: absolute;
 }

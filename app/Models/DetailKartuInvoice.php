@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class DetailKartuInvoice extends Model
 {
@@ -31,6 +32,24 @@ class DetailKartuInvoice extends Model
         'purchase_order_number',
         'date_journal',
     ];
+
+    protected static function booted()
+    {
+        static::addGlobalScope('journal', function ($query) {
+            $from = $query->getQuery()->from ?? 'detail_kartu_invoices'; // untuk dukung alias `j` kalau pakai from('journals as j')
+            if (Str::contains($from, ' as ')) {
+                [$table, $alias] = explode(' as ', $from);
+                $alias = trim($alias);
+            } else {
+                $alias = $from;
+            }
+
+            $query->where(function ($q) use ($alias) {
+                $q->whereNull("{$alias}.book_journal_id")
+                    ->orWhere("{$alias}.book_journal_id", bookID());
+            });
+        });
+    }
 
     public function invoicePack()
     {
@@ -63,19 +82,19 @@ class DetailKartuInvoice extends Model
             if (!$journal && $request->input('journal_id') != null) {
                 return ['status' => 0, 'msg' => 'jurnal tidak ditemukan'];
             }
-            $created=null;
+            $created = null;
             if ($kartuType == Journal::class) {
                 $kartuType = null;
                 $kartuId = null;
             }
-            $created= $journal?$journal->created_at:null;
+            $created = $journal ? $journal->created_at : null;
             if ($kartuType != null && $kartuId != null) {
                 $kartu = $kartuType::find($kartuId);
                 if (!$kartu) {
                     return ['status' => 0, 'msg' => 'Kartu not found'];
                 }
-                if($created==null)
-                $created=$kartu->created_at;
+                if ($created == null)
+                    $created = $kartu->created_at;
             }
 
 
@@ -89,9 +108,9 @@ class DetailKartuInvoice extends Model
                 'sales_order_number' => $salesOrderNumber,
                 'purchase_order_id' => $purchaseOrderID,
                 'purchase_order_number' => $purchaseOrderNumber,
-                'journal_id' => $journal?$journal->id:null,
-                'journal_number' => $journal?$journal->journal_number:null,
-                'account_code_group' => $journal?$journal->code_group:null,
+                'journal_id' => $journal ? $journal->id : null,
+                'journal_number' => $journal ? $journal->journal_number : null,
+                'account_code_group' => $journal ? $journal->code_group : null,
                 'account_name' => $journal && $journal->chartAccountAlias ? $journal->chartAccountAlias->name : '',
                 'amount_journal' => $journal ? $journal->amount_debet - $journal->amount_kredit : 0,
                 'amount_debet' => $journal ? $journal->amount_debet : 0,
@@ -116,7 +135,7 @@ class DetailKartuInvoice extends Model
                     } else {
                         $dt = DetailKartuInvoice::create($dataUpdate);
                     }
-                }else{
+                } else {
                     $dt = DetailKartuInvoice::create($dataUpdate);
                 }
             }

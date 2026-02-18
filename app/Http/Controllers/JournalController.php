@@ -1016,9 +1016,6 @@ class JournalController extends Controller
 
 
 
-
-
-
     function getImportSaldoFollowup($id)
     {
         $task = TaskImport::find($id);

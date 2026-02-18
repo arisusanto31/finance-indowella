@@ -126,9 +126,21 @@ class BDDController extends Controller
     {
         if (!$year)
             $year = getInput('year') ? getInput('year') : date('Y');
-        $inv = PrepaidExpense::from('prepaid_expenses as inv')->leftJoin('kartu_prepaid_expenses as ki', 'ki.prepaid_expense_id', '=', 'inv.id')
+        $indexLastYear = createCarbon($year . '-01-01')->endOfYear()->format('ymdHis000');
+        $indexFirstYear = createCarbon($year . '-01-01')->startOfYear()->format('ymdHis000');
+        $inventoryAktif = KartuPrepaidExpense::whereIn('index_date', function ($q) use ($indexFirstYear) {
+            $q->select(DB::raw('max(index_date)'))->from('kartu_prepaid_expenses')->where('index_date', '<', $indexFirstYear)->groupBy('prepaid_expense_id');
+        })->where('nilai_buku', '>', 0)->select('prepaid_expense_id')->pluck('prepaid_expense_id')->toArray();
+        $saldoBukuAkhir = KartuPrepaidExpense::join('prepaid_expenses as inv', 'inv.id', '=', 'kartu_prepaid_expenses.prepaid_expense_id')->whereIn('kartu_prepaid_expenses.index_date', function ($q) use ($indexLastYear) {
+            $q->from('kartu_prepaid_expenses as ki')->where('ki.book_journal_id', bookID())
+                ->where('index_date', '<', $indexLastYear)->select(DB::raw('max(index_date) as maxid'))->groupBy('prepaid_expense_id');
+        })->select('prepaid_expense_id', 'nilai_buku', 'inv.name')->get()->keyBy('prepaid_expense_id');
+        $idakhir = collect($saldoBukuAkhir)->keys()->toArray();
+        $inventoryAktif = array_unique(array_merge($inventoryAktif, $idakhir));
+        $inv = PrepaidExpense::from('prepaid_expenses as inv')->whereIn('inv.id', $inventoryAktif)->leftJoin('kartu_prepaid_expenses as ki', 'ki.prepaid_expense_id', '=', 'inv.id')
+            ->where('index_date', '<', $indexLastYear)
             ->where('ki.book_journal_id', bookID())
-            ->whereYear('ki.date', $year)
+
             ->select(
                 'inv.id',
                 'inv.name',
@@ -146,27 +158,25 @@ class BDDController extends Controller
                     return [
                         'id' => $theval[0]->id,
                         'name' => $theval[0]->name,
-                        'type_aset' => $theval[0]->type_aset,
-                        'keterangan_qty_unit' => $theval[0]->keterangan_qty_unit,
+                        'type_bdd' => $theval[0]->type_bdd,
                         'date' => $theval[0]->date,
                         'nilai_perolehan' => $theval[0]->nilai_perolehan,
                         'total_pembelian' => $theval[0]->total_pembelian,
                         'periode' => $theval[0]->periode,
-                        'total_penyusutan' => $theval[0]->total_penyusutan,
+                        'total_penyusutan' => collect($theval)->sum('total_penyusutan'),
                         'penyusutan' => collect($theval)->pluck('total_penyusutan', 'bulan_susut')
                     ];
                 });
             });
-        $saldoBukuAkhir = KartuPrepaidExpense::join('prepaid_expenses as inv', 'inv.id', '=', 'kartu_prepaid_expenses.prepaid_expense_id')->whereIn('kartu_prepaid_expenses.id', function ($q) use ($year) {
-            $q->from('kartu_prepaid_expenses as ki')->where('ki.book_journal_id', bookID())
-                ->whereYear('ki.date', $year)->select(DB::raw('max(id) as maxid'))->groupBy('prepaid_expense_id');
-        })->select('prepaid_expense_id', 'nilai_buku', 'inv.name')->get()->keyBy('prepaid_expense_id');
+
 
         return [
             'status' => 1,
             'msg' => $inv,
             'saldo_buku_akhir' => $saldoBukuAkhir,
-            'year' => $year
+            'year' => $year,
+            'index_first_year' => $indexFirstYear,
+            'index_last_year' => $indexLastYear
         ];
     }
     public function getMutasiMasuk()

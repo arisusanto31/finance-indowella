@@ -622,7 +622,9 @@
                                     <td>${i+1}</td>
                                     <td>${data.person_name}</td>
                                     <td>${data.invoice_date}</td>
-                                    <td>${data.invoice_pack_number}</td>
+                                    <td>${data.factur_supplier_number}
+                                        ${data.factur_tax_number?`<br><small class="text-muted">(${data.factur_tax_number})</small>`:''}
+                                    </td>
                                     <td class="textright">${formatRupiah(data.saldo_awal)}</td>
                                     <td class="textright">${formatRupiah(data.mutasi)}</td>
                                     <td class="textright">${formatRupiah(data.pelunasan)}</td>

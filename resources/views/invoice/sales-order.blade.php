@@ -12,7 +12,7 @@
                         ORDER</strong>
                     <i id="icon-create" class="bx bx-caret-down toggle-icon"></i> </a>
             </h5>
-         
+
             <div id="card-create" class="container tree-toggle">
                 <div class="mb-3 mt-2">
                     <button type="button" class="btn btn-primary" onclick="addrow()" id="addDebit">+Tambah</button>
@@ -26,8 +26,8 @@
                                 onclick="openImportData('{{ book()->id }}')" id="btn-import">Import dari
                                 Manuf</button>
                         @endif
-                        <button type="button" class="btn btn-primary" onclick="openImportDataExcel('{{ book()->id }}')"
-                            id="btn-import">Import Excel</button>
+                        <button type="button" class="btn btn-primary"
+                            onclick="openImportDataExcel('{{ book()->id }}')" id="btn-import">Import Excel</button>
                     @endif
                 </div>
                 <div class="row g-2 mb-3">
@@ -83,8 +83,6 @@
                                 <input type="text" class="form-control text-end" autocomplete="off" readonly
                                     style="width: 200px;" id="total-gross" readonly>
                             </div>
-
-
                         </div>
                     </div>
                 </div>
@@ -128,9 +126,20 @@
             </div>
         </div>
 
+        <div class="d-flex align-item-center justify-content-center">
+            <div>
+                <button @if (getInput('page') <= 1) disabled @endif onclick="prevPage()"> <i
+                        class="fas fa-chevron-left"></i></button>
+                <span> halaman <input style="width: 50px; text-align: center;" type="text"
+                        value="{{ getInput('page') ? getInput('page') : 1 }}" onchange="goToPage(this.value)" /> /
+                    {{ $totalPage }}</span>
+                <button @if (getInput('page') >= $totalPage) disabled @endif onclick="nextPage()"> <i
+                        class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
         @if ($salesOrders->isNotEmpty())
             <div class="table-responsive mt-2">
-                <table class="table table-bordered">
+                <table id="table-sales" class="table table-bordered">
                     <thead class="table-primary text-center">
                         <tr>
 
@@ -152,7 +161,7 @@
                     </thead>
                     <tbody>
                         @php
-                            $no = 1;
+                            $no = $firstNumber;
                             $parent = [];
                         @endphp
                         @foreach ($salesOrders as $invoiceNumber => $items)
@@ -160,7 +169,6 @@
                                 $theparent = $items->first()->parent;
                                 $parent[$theparent->id] = $theparent;
                                 $rowspan = $items->count();
-
                             @endphp
 
                             @foreach ($items as $index => $item)
@@ -176,7 +184,6 @@
                                         <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }} </td>
                                         <td rowspan="{{ $rowspan }}">{{ $item->customer->name ?? '-' }}</td>
                                     @endif
-
                                     <td>{{ $item->custom_stock_name ?? '-' }}</td>
                                     <td class="text-end">{{ format_price($item->qtyjadi) }}</td>
                                     <td>{{ $item->unitjadi }}</td>
@@ -313,6 +320,17 @@
             </div>
 
         @endif
+        <div class="d-flex align-item-center justify-content-center">
+            <div>
+                <button @if (getInput('page') <= 1) disabled @endif onclick="prevPage()"> <i
+                        class="fas fa-chevron-left"></i></button>
+                <span> halaman <input style="width: 50px; text-align: center;" type="text"
+                        value="{{ getInput('page') ? getInput('page') : 1 }}" onchange="goToPage(this.value)" /> /
+                    {{ $totalPage }}</span>
+                <button @if (getInput('page') >= $totalPage) disabled @endif onclick="nextPage()"> <i
+                        class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
     </div>
 
 
@@ -362,6 +380,29 @@
 
             function lihatDetailInvoice(invoiceNumber) {
                 showDetailOnModal('{{ url('admin/invoice/show-sales-detail') }}/' + invoiceNumber, 'xl');
+            }
+
+            function prevPage() {
+                currentPage = {{ getInput('page') ? getInput('page') : 1 }};
+                if (currentPage > 1) {
+                    window.location.href =
+                        '{{ url('admin/invoice/sales-order') }}?month={{ $month }}&year={{ $year }}&page=' + (
+                            currentPage - 1);
+                }
+            }
+
+            function nextPage() {
+                currentPage = {{ getInput('page') ? getInput('page') : 1 }};
+                if (currentPage < {{ $totalPage }}) {
+                    window.location.href =
+                        '{{ url('admin/invoice/sales-order') }}?month={{ $month }}&year={{ $year }}&page=' + (
+                            currentPage + 1);
+                }
+            }
+
+            function goToPage(page) {
+                window.location.href =
+                    '{{ url('admin/invoice/sales-order') }}?month={{ $month }}&year={{ $year }}&page=' + page;
             }
 
             function prevMonth() {
@@ -436,7 +477,7 @@
                 return bgDelivery;
             }
 
-    
+
             function updateStatusRow(id) {
                 console.log('updating status for id: ' + id);
                 $.ajax({

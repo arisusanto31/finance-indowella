@@ -40,26 +40,42 @@ class SalesOrderController extends Controller
     {
         $month = getInput('month') ? toDigit(getInput('month'), 2) : date('m');
         $year = getInput('year') ? getInput('year') : date('Y');
-        $salesOrders = SalesOrderDetail::from('sales_order_details as sds')->join('sales_orders as so', 'so.sales_order_number', '=', 'sds.sales_order_number')
-            ->where(function ($q) use ($month, $year) {
-                $q->whereMonth('sds.created_at', $month)->whereYear('sds.created_at', $year)->orWhere(function ($que) use ($month, $year) {
-                    $date = createCarbon($year . '-' . $month . '-01');
-                    $que->where('so.status_delivery', '<>', 'TERKIRIM 100%')->where('so.created_at', '<', $date);
-                });
-            })
-            ->select('sds.*')
+        // $salesOrders = SalesOrderDetail::from('sales_order_details as sds')->join('sales_orders as so', 'so.sales_order_number', '=', 'sds.sales_order_number')
+        //     ->where(function ($q) use ($month, $year) {
+        //         $q->whereMonth('sds.created_at', $month)->whereYear('sds.created_at', $year)->orWhere(function ($que) use ($month, $year) {
+        //             $date = createCarbon($year . '-' . $month . '-01');
+        //             $que->where('so.status_delivery', '<>', 'TERKIRIM 100%')->where('so.created_at', '<', $date);
+        //         });
+        //     })
+        //     ->select('sds.*')
+        //     ->with('customer:name,id', 'stock:name,id', 'parent:sales_order_number,id,is_final,total_ppn_k,is_mark,total_price,ref_akun_cash_kind_name,status,status_payment,status_delivery')
+        //     ->orderBy('sds.created_at', 'asc')
+        //     ->paginate(20)
+        //     ->groupBy('sales_order_number');
+        // $invPack = SalesOrder::whereIn('sales_order_number', $salesOrders->keys()->all())
+        //     ->select('is_final', 'is_mark', 'total_price')->get();
+        // $totalInvoice = collect($invPack)->sum('total_price');
+        // $totalInvoiceFinal = collect($invPack)->where('is_final', 1)->sum('total_price');
+        // $totalInvoiceMark = collect($invPack)->where('is_mark', 1)->sum('total_price');
+        $startDate= createCarbon($year.'-'.$month.'-01')->startOfMonth();
+        $endDate= createCarbon($year.'-'.$month.'-01')->endOfMonth();
+        $invPack= SalesOrder::whereBetween('created_at',[$startDate, $endDate])->orWhere(function($q) use ($startDate){
+            $q->where('status_delivery','<>','TERKIRIM 100%')->where('created_at','<',$startDate);    
+        })->select('is_final', 'is_mark', 'total_price','sales_order_number')->get();
+        $totalInvoice= collect($invPack)->sum('total_price');
+        $totalInvoiceFinal= collect($invPack)->where('is_final', 1)->sum('total_price');
+        $totalInvoiceMark= collect($invPack)->where('is_mark', 1)->sum('total_price');
+        $perPage=20;
+        $page= getInput('page') ? getInput('page') : 1;
+        $firstNumber= ($page-1)*$perPage+1;
+        $totalPage= ceil(collect($invPack)->count() / $perPage);
+        $batchedNumber = collect($invPack)->pluck('sales_order_number')->chunk($perPage);
+        $salesOrders= SalesOrderDetail::whereIn('sales_order_number', $batchedNumber->get($page-1, collect([]))->values())
             ->with('customer:name,id', 'stock:name,id', 'parent:sales_order_number,id,is_final,total_ppn_k,is_mark,total_price,ref_akun_cash_kind_name,status,status_payment,status_delivery')
-            ->orderBy('sds.created_at', 'asc')
-            ->get()
-            ->groupBy('sales_order_number');
-        $invPack = SalesOrder::whereIn('sales_order_number', $salesOrders->keys()->all())
-            ->select('is_final', 'is_mark', 'total_price')->get();
-        $totalInvoice = collect($invPack)->sum('total_price');
-        $totalInvoiceFinal = collect($invPack)->where('is_final', 1)->sum('total_price');
-        $totalInvoiceMark = collect($invPack)->where('is_mark', 1)->sum('total_price');
-
+            ->orderBy('created_at', 'asc')
+            ->get()->groupBy('sales_order_number');
         $parent = [];
-        return view('invoice.sales-order', compact('salesOrders', 'month', 'year', 'totalInvoice', 'totalInvoiceFinal', 'totalInvoiceMark', 'parent'));
+        return view('invoice.sales-order', compact('salesOrders', 'month', 'year', 'totalInvoice', 'totalInvoiceFinal', 'totalInvoiceMark', 'parent','firstNumber','totalPage'));
     }
 
     public function store(Request $request)
@@ -328,6 +344,9 @@ class SalesOrderController extends Controller
     {
         $view = view('invoice.modal._sale_order_import');
         $view->toko_parents = LinkTokoParent::pluck('toko_id', 'parent_id')->all();
+        $view->listParentsToko = LinkTokoParent::from('link_toko_parents as ltp')
+            ->join('tokoes as t', 't.id', '=', 'ltp.toko_id')
+            ->select('t.name', DB::raw('group_concat(ltp.parent_id) as parent_ids'))->groupBy('toko_id')->pluck('parent_ids', 'name')->all();
         return $view;
     }
 
@@ -415,6 +434,7 @@ class SalesOrderController extends Controller
         }
 
         $defaultDB = config('database.connections.mysql.database');
+        $dbToko = config('database.connections.tokoSql.database'); //
         $saleModel = $book->name == 'Buku Toko' ? RetailSalesPackage::class : ManufSalesPackage::class;
         $modeBook = $book->name == 'Buku Toko' ? 'toko' : 'manuf';
         $sales = $saleModel::from('packages as pack')
@@ -431,33 +451,72 @@ class SalesOrderController extends Controller
             ->whereNull('inv.id')->whereNull('so.id')->whereMonth('pack.created_at', $month)->whereYear('pack.created_at', $year);
         if ($book->name == 'Buku Toko') {
 
-            if (getInput('toko'))
-                $sales = $sales->join('tokoes as t', 't.id', '=', 'pack.toko_id')
-                    ->where('t.name', getInput('toko'));
+            $sales = $sales->join('tokoes as t', 't.id', '=', 'pack.toko_id');
 
-            if (getInput('is_ppn') == 1) {
-                $sales = $sales->where(function ($q) {
-                    $q->where('pack.is_ppn', 1)->orWhere('pack.is_wajib_lapor', 1);
-                });
+            if (getInput('toko')) {
+                $sales = $sales->whereIn('t.id', explode(',', getInput('toko')));
             }
+            if (getInput('is_ppn') == 1) {
+                $sales = $sales->join($dbToko . '.transactions as tr', 'tr.package_id', '=', 'pack.id')
+                    ->join($dbToko . '.mutation_details as mds', 'mds.transaction_id', '=', 'tr.id')
+                    ->where('mds.real_qty_superbackend_ppn', '<', 0)
+                    ->whereNull('tr.is_cancelled')
+                    ->select(
+                        'pack.id',
+                        DB::raw('"App\\\Models\\\RetailSalesPackage" as reference_type'),
+                        DB::raw('"App\\\Models\\\RetailStock" as stock_type'),
+                        'pack.is_ppn',
+                        'pack.is_wajib_lapor',
+                        'pack.package_number',
+                        'pack.akun_cash_kind_name',
+                        DB::raw('"anonim" as customer_name'),
+                        'pack.created_at',
+                        'pack.toko_id',
+                        'tr.stock_id',
+                        DB::raw('mds.real_qty_superbackend_ppn / mds.real_qty_superbackend * mds.quantity as quantity'),
+                        'tr.unit',
+                        DB::raw('tr.recent_selling_price  as price'),
+                        'tr.unit as unitjadi',
+                        DB::raw('tr.recent_selling_price as pricejadi'),
+                        DB::raw('mds.real_qty_superbackend_ppn/ mds.real_qty_superbackend* mds.quantity as qtyjadi'),
+                        DB::raw('coalesce(tr.discount, 0) + coalesce(tr.biaya_admin_marketplace, 0) as discount'),
+                        'tr.stock_name',
+                        'tr.toko_id',
+                        't.name as toko',
+                        'tr.id as reference_id',
+                        DB::raw('(mds.real_qty_superbackend_ppn / mds.real_qty_superbackend * mds.quantity  * tr.recent_selling_price)-coalesce(tr.discount, 0)-coalesce(tr.biaya_admin_marketplace, 0) as total_price')
+                    )->get()->groupBy('package_number')->map(function ($vals) {
+                        $firstdata = collect($vals)->first();
+                        $details = collect($vals)->map(function ($val) {
+                            return $val->only('stock_id', 'quantity', 'unit', 'price', 'unitjadi', 'pricejadi', 'qtyjadi', 'discount', 'stock_name', 'toko_id', 'toko', 'reference_id', 'reference_type', 'total_price');
+                        });
+                        return [
+                            'id' => $firstdata->id,
+                            'reference_type' => $firstdata->reference_type,
+                            'stock_type' => $firstdata->stock_type,
+                            'is_ppn' => $firstdata->is_ppn,
+                            'is_wajib_lapor' => $firstdata->is_wajib_lapor,
+                            'package_number' => $firstdata->package_number,
+                            'akun_cash_kind_name' => $firstdata->akun_cash_kind_name,
+                            'customer_name' => $firstdata->customer_name,
+                            'created_at' => $firstdata->created_at,
+                            'toko_id' => $firstdata->toko_id,
+                            'details' => $details
+                        ];
+                    })->values()->all();
+            } else {
 
-            $sales = $sales->select(
-                'pack.id',
-                DB::raw('"App\\\Models\\\RetailSalesPackage" as reference_type'),
-                DB::raw('"App\\\Models\\\RetailStock" as stock_type'),
-                'pack.is_ppn',
-                'pack.is_wajib_lapor',
-                'pack.package_number',
-                'pack.akun_cash_kind_name',
-                DB::raw('"anonim" as customer_name'),
-                'pack.created_at',
-                'pack.toko_id',
-            );
+                return [
+                    'status' => 1,
+                    'msg' => []
+                ];
+            }
         } else {
 
             $sales = $sales->join('transactions as tr', 'tr.package_id', '=', 'pack.id');
-            if (getInput('toko'))
-                $sales = $sales->where('tr.kind', getInput('toko'));
+            if (getInput('toko')) {
+                $sales = $sales->whereIn('t.id', explode(',', getInput('toko')));
+            }
 
             if (getInput('is_ppn') == 1) {
                 $sales = $sales->where(function ($q) {
@@ -487,35 +546,37 @@ class SalesOrderController extends Controller
                 'pack.created_at',
                 DB::raw('0 as toko_id')
             );
+
+            $sales = $sales->with('detailSales')->get()->map(function ($val) use ($modeBook) {
+                $val['details'] = collect($val['detailSales'])->map(function ($detailVal) use ($modeBook) {
+                    $data = [];
+
+                    $insheet =  $detailVal['insheet'] ?? 0;
+                    $qtyjadi = $detailVal['qtyjadi'] ?? $detailVal['quantity'];
+                    $pricejadi = $detailVal['pricejadi'] ?? $detailVal['recent_selling_price'];
+                    $unitjadi = $detailVal['unitjadi'] ?? $detailVal['unit_info'];
+                    $data['stock_id'] = $detailVal['stock_id'];
+                    $data['quantity'] = $detailVal['quantity'] + $insheet;
+                    $data['unit'] = $modeBook == 'toko' ? $detailVal['unit'] : $detailVal['unit_info'];
+                    $data['price'] = $detailVal['recent_selling_price'];
+                    $data['qtyjadi'] = $qtyjadi ?? $detailVal['quantity'];
+                    $data['pricejadi'] = $pricejadi ?? $detailVal['recent_selling_price'];
+                    $data['unitjadi'] = $unitjadi ?? $data['unit'];
+                    $data['total_price'] = $detailVal['total'];
+                    $data['discount'] = $detailVal['discount'];
+                    $data['customer_id'] = $detailVal['customer_id'];
+                    $data['stock_name'] = $detailVal['stock_name'];
+                    $data['reference_id'] = $detailVal['id'] ?? null;
+                    $data['toko_id'] = $detailVal['toko_id'] ?? null;
+                    $data['reference_type'] = $modeBook == 'toko' ? 'App\Models\RetailSales' : 'App\Models\ManufSales';
+                    $data['toko'] = $modeBook == 'toko' ? $detailVal->toko->name : $detailVal->kind;
+                    return $data;
+                });
+                return collect($val)->only('id', 'reference_type', 'is_ppn', 'customer_name', 'is_wajib_lapor', 'details', 'package_number', 'stock_type', 'akun_cash_kind_name', 'created_at', 'toko_id');
+            });
         }
 
-        $sales = $sales->with('detailSales')->get()->map(function ($val) use ($modeBook) {
-            $val['details'] = collect($val['detailSales'])->map(function ($detailVal) use ($modeBook) {
-                $data = [];
 
-                $insheet =  $detailVal['insheet'] ?? 0;
-                $qtyjadi = $detailVal['qtyjadi'] ?? $detailVal['quantity'];
-                $pricejadi = $detailVal['pricejadi'] ?? $detailVal['recent_selling_price'];
-                $unitjadi = $detailVal['unitjadi'] ?? $detailVal['unit_info'];
-                $data['stock_id'] = $detailVal['stock_id'];
-                $data['quantity'] = $detailVal['quantity'] + $insheet;
-                $data['unit'] = $modeBook == 'toko' ? $detailVal['unit'] : $detailVal['unit_info'];
-                $data['price'] = $detailVal['recent_selling_price'];
-                $data['qtyjadi'] = $qtyjadi ?? $detailVal['quantity'];
-                $data['pricejadi'] = $pricejadi ?? $detailVal['recent_selling_price'];
-                $data['unitjadi'] = $unitjadi ?? $data['unit'];
-                $data['total_price'] = $detailVal['total'];
-                $data['discount'] = $detailVal['discount'];
-                $data['customer_id'] = $detailVal['customer_id'];
-                $data['stock_name'] = $detailVal['stock_name'];
-                $data['reference_id'] = $detailVal['id'] ?? null;
-                $data['toko_id'] = $detailVal['toko_id'] ?? null;
-                $data['reference_type'] = $modeBook == 'toko' ? 'App\Models\RetailSales' : 'App\Models\ManufSales';
-                $data['toko'] = $modeBook == 'toko' ? $detailVal->toko->name : $detailVal->kind;
-                return $data;
-            });
-            return collect($val)->only('id', 'reference_type', 'is_ppn', 'customer_name', 'is_wajib_lapor', 'details', 'package_number', 'stock_type', 'akun_cash_kind_name', 'created_at', 'toko_id');
-        });
 
         return ['status' => 1, 'msg' => $sales];
     }
@@ -922,18 +983,19 @@ class SalesOrderController extends Controller
         return ['status' => 1, 'msg' => 'data berhasil dihapus'];
     }
 
-    function deleteDetail(Request $request){
+    function deleteDetail(Request $request)
+    {
 
         $id = $request->input('detail_id');
         $detail = SalesOrderDetail::find($id);
-        if(!$detail){
+        if (!$detail) {
             return ['status' => 0, 'msg' => 'Detail tidak ditemukan'];
         }
         $salesOrder = SalesOrder::where('sales_order_number', $detail->sales_order_number)->first();
-        if(!$salesOrder){
+        if (!$salesOrder) {
             return ['status' => 0, 'msg' => 'Sales Order tidak ditemukan'];
         }
-        if($salesOrder->is_final){
+        if ($salesOrder->is_final) {
             return ['status' => 0, 'msg' => 'Tidak bisa menghapus detail pada sales order yang sudah final'];
         }
         $detail->delete();
@@ -943,6 +1005,6 @@ class SalesOrderController extends Controller
         $salesOrder->total_price = $totalPrice;
         $salesOrder->total_ppn_k = $totalPPN;
         $salesOrder->save();
-        return ['status' => 1, 'msg' => 'Detail berhasil dihapus' ];
+        return ['status' => 1, 'msg' => 'Detail berhasil dihapus'];
     }
 }

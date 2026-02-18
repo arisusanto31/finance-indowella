@@ -7,7 +7,10 @@
 <div class="modal-body">
 
     <div class="bglevel1 p-2 mb-2">
-        <b>Import file </b> <span style="font-size:12px"> (kolom: Tanggal, Kode Barang, Nama Barang , Quantity, Satuan, Harga/Pcs, Sub Total, Total Nota, No Invoice, Nama Toko, Supplier)</span>
+        <b>Import file </b> 
+        <br>
+        <button onclick="downloadTemplatePembelian()" class="btn btn-success"> <i
+                class="fas fa-file-excel"></i> Download Template</button>
         <input type="file" id="import-file-input" class="form-control" />
         <button class="btn btn-primary mt-2" onclick="getImportData()">Load Data</button>
     </div>
@@ -61,6 +64,7 @@
                             <th>Qty</th>
                             <th>Satuan</th>
                             <th>Harga</th>
+                            <th>Diskon </th>
                             <th>Total</th>
                             <th>Akun Bayar </th>
                             <th>Aksi</th>
@@ -87,6 +91,16 @@
     initItemSelectManual('.select-coa-kas', '{{ route('chart-account.get-item-keuangan') }}?kind=kas', 'Pilih Akun Kas',
         '#global-modal');
     var allTrans = [];
+
+
+    function downloadTemplatePembelian() {
+
+
+        url = "{{ url('admin/invoice/download-template-pembelian') }}";
+        var win = window.open(url, '_blank');
+
+
+    }
 
     function updateSelectToko(data) {
         allToko = collect(data).map((itema) => {
@@ -138,17 +152,19 @@
                                 <tr>
                                     ${j==0?`
                                     <td rowspan="${jumlah}">
-                                        <input type="checkbox" class="select-row-checkbox" data-id="${item.id}" onchange="updateTotalSelected()" />
+                                        ${item.is_imported ? `<i class="fas fa-check color-primary"></i>` :`
+                                        <input type="checkbox" class="select-row-checkbox" data-id="${item.id}" onchange="updateTotalSelected()" />`}
                                     </td>
                                     <td rowspan="${jumlah}">${i+1}</td>
                                     <td rowspan="${jumlah}">${formatNormalDate(new Date(item.created_at))}</td>
                                     <td rowspan="${jumlah}">${item.package_number} (${item.supplier})</td>
-                                    <td rowspan="${jumlah}">${detail.toko}</td>
+                                    <td rowspan="${jumlah}">${item.toko_name}</td>
                                     `:''}
                                     <td>${detail.stock_name}</td>
                                     <td>${detail['quantity']}</td>
                                     <td>${detail['unit']}</td>
                                     <td>${formatRupiah(detail['price'])}</td>
+                                    <td>${formatRupiah(detail['discount'])}</td>
                                     <td>${formatRupiah(detail['total_price'])}</td>
                                     ${j==0?`
                                     <td rowspan="${jumlah}"> ${formatRupiah(collect(item.details).sum('total_price'))}</td>
@@ -240,10 +256,11 @@
 
 
     var tokoParents = @json($toko_parents);
+
     function importDataSingle(id, isPPN = 0) {
         importData(id, isPPN).then(function(res) {
             console.log(res);
-            if(res.status==0){
+            if (res.status == 0) {
                 swalInfo('opps', res.msg, 'error');
             }
         }).catch(function(err) {
@@ -274,10 +291,10 @@
                 tokoid = null;
                 date = null;
                 //cek dulu jangan2 ada toko_id ynang belum ada linknya 
-                if (tokoParents[data.toko_id] == undefined || tokoParents[data.toko_id] == null) {
-                    swalInfo('opps', `Toko ${data.toko_id} belum ada link ke parent toko`, 'info');
-                    return reject(new Error('Toko belum ada link ke parent toko'));
-                }
+                // if (tokoParents[data.toko_id] == undefined || tokoParents[data.toko_id] == null) {
+                //     swalInfo('opps', `Toko ${data.toko_id} belum ada link ke parent toko`, 'info');
+                //     return reject(new Error('Toko belum ada link ke parent toko'));
+                // }
             }
 
             let dataPost = {
@@ -285,6 +302,7 @@
                 supplier_name: data.supplier,
                 is_ppn: isPPN,
                 invoice_pack_number: data.package_number,
+                factur_supplier_number: data.package_number,
                 reference_stock_id: data.details.map(item => item.stock_id),
                 reference_stock_type: data.stock_type,
                 quantity: data.details.map(item => item.quantity),
@@ -294,7 +312,7 @@
                 unit: data.details.map(item => item.unit),
                 unitjadi: data.details.map(item => item.unitjadi),
                 total_price: data.details.map(item => isPPN ? item.total_price / 1.11 : item.total_price),
-                toko_id: tokoid ? tokoid : tokoParents[data.toko_id],
+                toko_id: data.toko_id,
                 detail_reference_id: data.details.map(item => item.reference_id),
                 detail_reference_type: data.details.map(item => item.reference_type),
                 reference_id: data.id,
@@ -312,7 +330,7 @@
                         $('#status' + id).html(
                             `<i class="fas fa-check color-primary"></i> terimport`);
                     }
-                    
+
                     resolve(res); // kasih tahu "await" kalau sudah selesai
                 },
                 error: function(err) {
