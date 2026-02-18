@@ -12,7 +12,6 @@
                         ORDER</strong>
                     <i id="icon-create" class="bx bx-caret-down toggle-icon"></i> </a>
             </h5>
-
             <div id="card-create" class="container tree-toggle">
                 <div class="mb-3 mt-2">
                     <button type="button" class="btn btn-primary" onclick="addrow()" id="addDebit">+Tambah</button>
@@ -107,14 +106,18 @@
                         >></button>
         </div>
 
-        <div class="d-flex flex-column bg-primary text-white p-2 rounded-2 mb-3" style="max-width:400px">
+        <div class="d-flex flex-column bg-primary text-white p-2  mb-3" style="max-width:400px">
+            <p class="mb-0"><strong>Ringkasan {{ getListMonth()[$month] }} {{ $year }}</strong></p>
             <p class="mb-0">Total Invoice: <strong>Rp{{ format_price($totalInvoice) }}</strong></p>
+            <p class="mb-0">Total Invoice + PPN: <strong>Rp{{ format_price($totalInvoicePPN) }}</strong></p>
             <p class="mb-0" id="total-final">Total Invoice Final:
                 <strong>Rp{{ format_price($totalInvoiceFinal) }}</strong>
             </p>
             <p class="mb-0" id="total-mark">Total Invoice Mark:
                 <strong>Rp{{ format_price($totalInvoiceMark) }}</strong>
             </p>
+            <p class="mb-0">Prosen Lunas: <strong>{{ $prosenLunas }}%</strong></p>
+            <p class="mb-0">Prosen Terkirim: <strong>{{ $prosenTerkirim }}%</strong></p>
         </div>
 
         <div class="fixed" style="top:100px; right:20px; z-index:1000; width:500px;">
@@ -126,19 +129,81 @@
             </div>
         </div>
 
-        <div class="d-flex align-item-center justify-content-center">
-            <div>
-                <button @if (getInput('page') <= 1) disabled @endif onclick="prevPage()"> <i
-                        class="fas fa-chevron-left"></i></button>
-                <span> halaman <input style="width: 50px; text-align: center;" type="text"
-                        value="{{ getInput('page') ? getInput('page') : 1 }}" onchange="goToPage(this.value)" /> /
-                    {{ $totalPage }}</span>
-                <button @if (getInput('page') >= $totalPage) disabled @endif onclick="nextPage()"> <i
-                        class="fas fa-chevron-right"></i></button>
-            </div>
-        </div>
+
         @if ($salesOrders->isNotEmpty())
-            <div class="table-responsive mt-2">
+            <div class="bg-primary-lightest p-2 brtr-2 brtl-2 ">
+                <label> <i class="fas fa-filter"></i> <strong>Filter </strong> </label>
+                <div class="row mb-4">
+                    <div class="col-md-2">
+                        <label>Sales order number</label>
+                        <input class="form-control" type="text" placeholder="sales order number"
+                            id="sales-order" value="{{ getInput('sales_order_number') }}" />
+                    </div>
+                    <div class="col-md-2">
+                        <label>Draft number</label>
+                        <input class="form-control" type="text" placeholder="draft number" id="draft-number" value="{{ getInput('draft_number') }}" />
+                    </div>
+
+                    <div class="col-md-1">
+                        <label> Final </label>
+                        <select id="status-final" class="form-control">
+                            <option value="">Semua</option>
+                            <option @if(getInput('status_final') == 1) selected @endif value="1">Final</option>
+                            <option @if(getInput('status_final') == 0) selected @endif value="0">Belum Final</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1">
+                        <label> Payment </label>
+                        <select id="status-payment" class="form-control">
+                            <option value="">Semua</option>
+                            <option @if(getInput('status_payment') == 1) selected @endif value="1">Lunas</option>
+                            <option @if(getInput('status_payment') == 0) selected @endif value="0">Belum Lunas</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-1">
+                        <label> Kirim </label>
+                        <select id="status-kirim" class="form-control">
+                            <option value="">Semua</option>
+                            <option @if(getInput('status_kirim') == 1) selected @endif value="1">Terkirim</option>
+                            <option @if(getInput('status_kirim') == 0) selected @endif value="0">Belum Terkirim</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-1">
+                        <label> Mark </label>
+                        <select id="status-mark" class="form-control">
+                            <option value="">Semua</option>
+                            <option @if(getInput('status_mark') == 1) selected @endif value="1">Mark</option>
+                            <option @if(getInput('status_mark') == 0) selected @endif value="0">Belum Mark</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-1">
+                        <label> data/page </label>
+                        <input class="form-control" type="number" placeholder="data/page" id="perPage"
+                            value="{{ getInput('perpage') ? getInput('perpage') : 20 }}" />
+                    </div>
+                    <div class="col-md-1">
+                        <label> Aksi <label>
+                                <button class="form-control btn btn-primary" onclick="applyFilter()">Apply</button>
+                    </div>
+                </div>
+                <div class="d-flex align-item-center justify-content-center">
+                    <div>
+                        <button @if (getInput('page') <= 1) disabled @endif onclick="prevPage()"> <i
+                                class="fas fa-chevron-left"></i></button>
+                        <span> halaman <input style="width: 50px; text-align: center;" type="text"
+                                value="{{ getInput('page') ? getInput('page') : 1 }}"
+                                onchange="goToPage(this.value)" />
+                            /
+                            {{ $totalPage }}</span>
+                        <button @if (getInput('page') >= $totalPage) disabled @endif onclick="nextPage()"> <i
+                                class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive ">
                 <table id="table-sales" class="table table-bordered">
                     <thead class="table-primary text-center">
                         <tr>
@@ -193,11 +258,9 @@
                                         @if ($item->total_ppn_k > 0)
                                             <br>
                                             <div class="bg-danger p-2 rounded-2 text-white " style="font-size:11px;">
-                                                <i
-                                                    class="fas fa-hand-holding-usd"></i>{{ format_price($item->total_ppn_k) }}
+                                                <i class="fas fa-hand-holding-usd"></i>{{ format_price($item->total_ppn_k) }}
                                             </div>
                                         @endif
-
                                     </td>
                                     @if ($index === 0)
                                         <td class="" rowspan="{{ $rowspan }}">
@@ -224,9 +287,6 @@
                                             <p class="colorblack text-center" style="width:100%;line-height:120%;">
                                                 <strong>{{ strtoupper($item->parent->status) }}</strong>
                                             </p>
-
-
-
                                             @php
                                                 $bgPayment = 'bglevel3';
                                                 if (preg_match('/^DP/', $item->parent->status_payment)) {
@@ -312,6 +372,17 @@
                     </tbody>
                 </table>
             </div>
+            <div class="d-flex align-item-center justify-content-center">
+                <div>
+                    <button @if (getInput('page') <= 1) disabled @endif onclick="prevPage()"> <i
+                            class="fas fa-chevron-left"></i></button>
+                    <span> halaman <input style="width: 50px; text-align: center;" type="text"
+                            value="{{ getInput('page') ? getInput('page') : 1 }}" onchange="goToPage(this.value)" />
+                          /  {{ $totalPage }} </span>
+                    <button @if (getInput('page') >= $totalPage) disabled @endif onclick="nextPage()"> <i
+                            class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
         @else
             <div class="container p-0">
                 <div class="alert alert-warning text-center">
@@ -320,17 +391,7 @@
             </div>
 
         @endif
-        <div class="d-flex align-item-center justify-content-center">
-            <div>
-                <button @if (getInput('page') <= 1) disabled @endif onclick="prevPage()"> <i
-                        class="fas fa-chevron-left"></i></button>
-                <span> halaman <input style="width: 50px; text-align: center;" type="text"
-                        value="{{ getInput('page') ? getInput('page') : 1 }}" onchange="goToPage(this.value)" /> /
-                    {{ $totalPage }}</span>
-                <button @if (getInput('page') >= $totalPage) disabled @endif onclick="nextPage()"> <i
-                        class="fas fa-chevron-right"></i></button>
-            </div>
-        </div>
+
     </div>
 
 
@@ -377,32 +438,39 @@
             initItemSelectManual('.select2-customer', '{{ url('admin/master/customer/get-item') }}', '-- Pilih Customer --');
             initItemSelectManual('.select2-toko', '{{ url('admin/master/toko/get-item') }}', '-- Pilih Toko --');
 
-
             function lihatDetailInvoice(invoiceNumber) {
                 showDetailOnModal('{{ url('admin/invoice/show-sales-detail') }}/' + invoiceNumber, 'xl');
+            }
+            var currentPage = {{ getInput('page') ? getInput('page') : 1 }};
+
+            function applyFilter() {
+                window.location.href =
+                    '{{ url('admin/invoice/sales-order') }}?month={{ $month }}&year={{ $year }}&page=' + (
+                        currentPage) + '&sales_order_number=' + $('#sales-order').val() + '&draft_number=' + $('#draft-number').val() +
+                    '&status_final=' + $('#status-final').val() + '&status_payment=' + $('#status-payment').val() +
+                    '&status_kirim=' +
+                    $('#status-kirim').val() + '&status_mark=' + $('#status-mark').val() + '&perpage=' + $('#perPage').val();
             }
 
             function prevPage() {
                 currentPage = {{ getInput('page') ? getInput('page') : 1 }};
                 if (currentPage > 1) {
-                    window.location.href =
-                        '{{ url('admin/invoice/sales-order') }}?month={{ $month }}&year={{ $year }}&page=' + (
-                            currentPage - 1);
+                    currentPage--;
+                    applyFilter();
                 }
             }
 
             function nextPage() {
                 currentPage = {{ getInput('page') ? getInput('page') : 1 }};
                 if (currentPage < {{ $totalPage }}) {
-                    window.location.href =
-                        '{{ url('admin/invoice/sales-order') }}?month={{ $month }}&year={{ $year }}&page=' + (
-                            currentPage + 1);
+                    currentPage++;
+                    applyFilter();
                 }
             }
 
             function goToPage(page) {
-                window.location.href =
-                    '{{ url('admin/invoice/sales-order') }}?month={{ $month }}&year={{ $year }}&page=' + page;
+               currentPage= page;
+               applyFilter();
             }
 
             function prevMonth() {

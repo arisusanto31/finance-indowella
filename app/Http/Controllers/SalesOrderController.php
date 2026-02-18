@@ -35,9 +35,9 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class SalesOrderController extends Controller
 {
-    //
     public function index()
     {
+
         $month = getInput('month') ? toDigit(getInput('month'), 2) : date('m');
         $year = getInput('year') ? getInput('year') : date('Y');
         // $salesOrders = SalesOrderDetail::from('sales_order_details as sds')->join('sales_orders as so', 'so.sales_order_number', '=', 'sds.sales_order_number')
@@ -57,25 +57,73 @@ class SalesOrderController extends Controller
         // $totalInvoice = collect($invPack)->sum('total_price');
         // $totalInvoiceFinal = collect($invPack)->where('is_final', 1)->sum('total_price');
         // $totalInvoiceMark = collect($invPack)->where('is_mark', 1)->sum('total_price');
-        $startDate= createCarbon($year.'-'.$month.'-01')->startOfMonth();
-        $endDate= createCarbon($year.'-'.$month.'-01')->endOfMonth();
-        $invPack= SalesOrder::whereBetween('created_at',[$startDate, $endDate])->orWhere(function($q) use ($startDate){
-            $q->where('status_delivery','<>','TERKIRIM 100%')->where('created_at','<',$startDate);    
-        })->select('is_final', 'is_mark', 'total_price','sales_order_number')->get();
-        $totalInvoice= collect($invPack)->sum('total_price');
-        $totalInvoiceFinal= collect($invPack)->where('is_final', 1)->sum('total_price');
-        $totalInvoiceMark= collect($invPack)->where('is_mark', 1)->sum('total_price');
-        $perPage=20;
-        $page= getInput('page') ? getInput('page') : 1;
-        $firstNumber= ($page-1)*$perPage+1;
-        $totalPage= ceil(collect($invPack)->count() / $perPage);
-        $batchedNumber = collect($invPack)->pluck('sales_order_number')->chunk($perPage);
-        $salesOrders= SalesOrderDetail::whereIn('sales_order_number', $batchedNumber->get($page-1, collect([]))->values())
+        $startDate = createCarbon($year . '-' . $month . '-01')->startOfMonth();
+        $endDate = createCarbon($year . '-' . $month . '-01')->endOfMonth();
+        $draftNumber = getInput('draft_number');
+        $statusFinal = getInput('status_final');
+        $statusPayment = getInput('status_payment');
+        $statusKirim = getInput('status_kirim');
+        $statusMark = getInput('status_mark');
+        $salesOrderNumber = getInput('sales_order_number');
+        $invPackFilter = SalesOrder::whereBetween('created_at', [$startDate, $endDate]);
+        if ($salesOrderNumber) {
+            $invPackFilter = $invPackFilter->where('sales_order_number', 'like', '%' . $salesOrderNumber . '%');
+        }
+        if ($statusFinal != "") {
+            $invPackFilter = $invPackFilter->where('is_final', $statusFinal);
+        }
+        if ($statusPayment != "") {
+            if ($statusPayment) {
+                $invPackFilter = $invPackFilter->where(function ($q) {
+                    $q->where('status_payment', 'LUNAS 100%')->orWhere('status_payment', 'DP LUNAS');
+                });
+            } else {
+                $invPackFilter = $invPackFilter->where(function ($q) {
+                    $q->where('status_payment', '<>', 'LUNAS 100%')->where('status_payment', '<>', 'DP LUNAS');
+                });
+            }
+        }
+        if ($statusKirim != "") {
+            if ($statusKirim) {
+                $invPackFilter = $invPackFilter->where('status_delivery', 'terkirim 100%');
+            } else {
+                $invPackFilter = $invPackFilter->where('status_delivery', '<>', 'terkirim 100%');
+            }
+        }
+        if ($statusMark != "") {
+            $invPackFilter = $invPackFilter->where('is_mark', $statusMark);
+        }
+
+
+
+        $invPackFilter = $invPackFilter->select('is_final', 'is_mark', 'total_price', 'sales_order_number')->get();
+        $invPack = SalesOrder::whereBetween('created_at', [$startDate, $endDate])
+            ->select(
+                DB::raw('sum(total_price) as total_invoice'),
+                DB::raw('sum(total_price*1.11) as total_invoice_ppn'),
+                DB::raw('sum(case when is_final = 1 then total_price else 0 end) as total_invoice_final'),
+                DB::raw('sum(case when is_mark = 1 then total_price else 0 end) as total_invoice_mark'),
+                DB::raw('sum(case when status_payment="LUNAS 100%" or status_payment="DP LUNAS" then 1 else 0 end)/count(*)*100 as prosen_lunas'),
+                DB::raw('sum(case when status_delivery="terkirim 100%" then 1 else 0 end)/count(*)*100 as prosen_terkirim')
+            )->first();
+        $totalInvoice = $invPack->total_invoice;
+        $totalInvoiceFinal = $invPack->total_invoice_final;
+        $totalInvoiceMark = $invPack->total_invoice_mark;
+        $totalInvoicePPN = $invPack->total_invoice_ppn;
+        $prosenLunas= round($invPack->prosen_lunas,2);
+        $prosenTerkirim= round($invPack->prosen_terkirim,2);
+        $perPage = getInput('perpage') ? getInput('perpage') : 20;
+        $page = getInput('page') ? getInput('page') : 1;
+        $firstNumber = ($page - 1) * $perPage + 1;
+        $totalPage = ceil(collect($invPackFilter)->count() / $perPage);
+        $batchedNumber = collect($invPackFilter)->pluck('sales_order_number')->chunk($perPage);
+        $salesOrders = SalesOrderDetail::whereIn('sales_order_number', $batchedNumber->get($page - 1, collect([]))->values())
             ->with('customer:name,id', 'stock:name,id', 'parent:sales_order_number,id,is_final,total_ppn_k,is_mark,total_price,ref_akun_cash_kind_name,status,status_payment,status_delivery')
             ->orderBy('created_at', 'asc')
             ->get()->groupBy('sales_order_number');
         $parent = [];
-        return view('invoice.sales-order', compact('salesOrders', 'month', 'year', 'totalInvoice', 'totalInvoiceFinal', 'totalInvoiceMark', 'parent','firstNumber','totalPage'));
+        return view('invoice.sales-order', compact('salesOrders', 'month', 'year', 'totalInvoice',
+         'totalInvoiceFinal', 'totalInvoiceMark', 'totalInvoicePPN', 'prosenLunas', 'prosenTerkirim', 'parent', 'firstNumber', 'perPage', 'totalPage'));
     }
 
     public function store(Request $request)
