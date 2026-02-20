@@ -91,7 +91,12 @@ class SalesOrderController extends Controller
             }
         }
         if ($statusMark != "") {
-            $invPackFilter = $invPackFilter->where('is_mark', $statusMark);
+            if ($statusMark == 0) {
+                $invPackFilter = $invPackFilter->where(function ($q) {
+                    $q->whereNull('is_mark')->orWhere('is_mark', 0);
+                });
+            } else
+                $invPackFilter = $invPackFilter->where('is_mark', $statusMark);
         }
 
 
@@ -110,20 +115,36 @@ class SalesOrderController extends Controller
         $totalInvoiceFinal = $invPack->total_invoice_final;
         $totalInvoiceMark = $invPack->total_invoice_mark;
         $totalInvoicePPN = $invPack->total_invoice_ppn;
-        $prosenLunas= round($invPack->prosen_lunas,2);
-        $prosenTerkirim= round($invPack->prosen_terkirim,2);
+        $prosenLunas = round($invPack->prosen_lunas, 2);
+        $prosenTerkirim = round($invPack->prosen_terkirim, 2);
         $perPage = getInput('perpage') ? getInput('perpage') : 20;
         $page = getInput('page') ? getInput('page') : 1;
-        $firstNumber = ($page - 1) * $perPage + 1;
         $totalPage = ceil(collect($invPackFilter)->count() / $perPage);
+        if ($page > $totalPage) $page = $totalPage;
+        $firstNumber = ($page - 1) * $perPage + 1;
+
         $batchedNumber = collect($invPackFilter)->pluck('sales_order_number')->chunk($perPage);
         $salesOrders = SalesOrderDetail::whereIn('sales_order_number', $batchedNumber->get($page - 1, collect([]))->values())
             ->with('customer:name,id', 'stock:name,id', 'parent:sales_order_number,id,is_final,total_ppn_k,is_mark,total_price,ref_akun_cash_kind_name,status,status_payment,status_delivery')
             ->orderBy('created_at', 'asc')
             ->get()->groupBy('sales_order_number');
         $parent = [];
-        return view('invoice.sales-order', compact('salesOrders', 'month', 'year', 'totalInvoice',
-         'totalInvoiceFinal', 'totalInvoiceMark', 'totalInvoicePPN', 'prosenLunas', 'prosenTerkirim', 'parent', 'firstNumber', 'perPage', 'totalPage'));
+        return view('invoice.sales-order', compact(
+            'salesOrders',
+            'month',
+            'year',
+            'totalInvoice',
+            'totalInvoiceFinal',
+            'totalInvoiceMark',
+            'totalInvoicePPN',
+            'prosenLunas',
+            'prosenTerkirim',
+            'parent',
+            'page',
+            'firstNumber',
+            'perPage',
+            'totalPage'
+        ));
     }
 
     public function store(Request $request)

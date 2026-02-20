@@ -231,10 +231,10 @@ class BDDController extends Controller
             $inv->save();
 
 
-            $kartu = KartuPrepaidExpense::where('prepaid_expense_id', $inv->id)->where('tag', 'init_import' . $payload['date'])->first();
+            $kartu = KartuPrepaidExpense::where('prepaid_expense_id', $inv->id)->where('tag', 'init_import' . $payload['request_date'])->first();
             if (!$kartu) {
                 $kartu = new KartuPrepaidExpense;
-                $kartu->tag = 'init_import' . $payload['date'];
+                $kartu->tag = 'init_import' . $payload['request_date'];
                 $kartu->prepaid_expense_id = $inv->id;
             }
             $created = createCarbon($payload['request_date'] . ' 00:00:00');

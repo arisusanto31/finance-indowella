@@ -129,53 +129,62 @@
             </div>
         </div>
 
-
-        @if ($salesOrders->isNotEmpty())
-            <div class="bg-primary-lightest p-2 brtr-2 brtl-2 ">
-                <label> <i class="fas fa-filter"></i> <strong>Filter </strong> </label>
+        <div class="bg-primary-lightest p-2 brtr-2 brtl-2 ">
+            <label> <i class="fas fa-filter"></i> <strong>Filter </strong> </label>
                 <div class="row mb-4">
                     <div class="col-md-2">
                         <label>Sales order number</label>
-                        <input class="form-control" type="text" placeholder="sales order number"
-                            id="sales-order" value="{{ getInput('sales_order_number') }}" />
+                        <input class="form-control" type="text" placeholder="sales order number" id="sales-order"
+                            value="{{ getInput('sales_order_number') }}" />
                     </div>
                     <div class="col-md-2">
                         <label>Draft number</label>
-                        <input class="form-control" type="text" placeholder="draft number" id="draft-number" value="{{ getInput('draft_number') }}" />
+                        <input class="form-control" type="text" placeholder="draft number" id="draft-number"
+                            value="{{ getInput('draft_number') }}" />
                     </div>
 
                     <div class="col-md-1">
                         <label> Final </label>
-                        <select id="status-final" class="form-control">
-                            <option value="">Semua</option>
-                            <option @if(getInput('status_final') == 1) selected @endif value="1">Final</option>
-                            <option @if(getInput('status_final') == 0) selected @endif value="0">Belum Final</option>
+                        <select id="status-final" autocomplete="off" class="form-control">
+                            <option @if (!getInput('status_final')) selected @endif value="">Semua</option>
+                            <option @if (getInput('status_final') == 1) selected @endif value="1">Final</option>
+                            <option @if (getInput('status_final') === 0) selected @endif value="0">Belum Final
+                            </option>
                         </select>
                     </div>
                     <div class="col-md-1">
                         <label> Payment </label>
                         <select id="status-payment" class="form-control">
-                            <option value="">Semua</option>
-                            <option @if(getInput('status_payment') == 1) selected @endif value="1">Lunas</option>
-                            <option @if(getInput('status_payment') == 0) selected @endif value="0">Belum Lunas</option>
+                            <option @if (!getInput('status_payment')) selected @endif value="">Semua</option>
+                            <option @if (getInput('status_payment') == 1) selected @endif value="1">Lunas</option>
+                            <option @if (getInput('status_payment') === 0) selected @endif value="0">Belum Lunas
+                            </option>
                         </select>
                     </div>
 
                     <div class="col-md-1">
                         <label> Kirim </label>
                         <select id="status-kirim" class="form-control">
-                            <option value="">Semua</option>
-                            <option @if(getInput('status_kirim') == 1) selected @endif value="1">Terkirim</option>
-                            <option @if(getInput('status_kirim') == 0) selected @endif value="0">Belum Terkirim</option>
+                            <option @if (!getInput('status_kirim')) selected @endif value="">Semua
+                            </option>
+                            <option @if (getInput('status_kirim') == 1) selected @endif value="1">Terkirim
+                            </option>
+                            <option @if (getInput('status_kirim') === 0) selected @endif value="0">Belum
+                                Terkirim
+                            </option>
                         </select>
                     </div>
 
                     <div class="col-md-1">
                         <label> Mark </label>
                         <select id="status-mark" class="form-control">
-                            <option value="">Semua</option>
-                            <option @if(getInput('status_mark') == 1) selected @endif value="1">Mark</option>
-                            <option @if(getInput('status_mark') == 0) selected @endif value="0">Belum Mark</option>
+                            <option @if (!getInput('status_mark')) selected @endif value="">Semua
+                            </option>
+                            <option @if (getInput('status_mark') == 1) selected @endif value="1">Mark
+                            </option>
+                            <option @if (getInput('status_mark') === 0) selected @endif value="0">Belum Mark
+                            </option>
+
                         </select>
                     </div>
 
@@ -189,20 +198,25 @@
                                 <button class="form-control btn btn-primary" onclick="applyFilter()">Apply</button>
                     </div>
                 </div>
-                <div class="d-flex align-item-center justify-content-center">
-                    <div>
-                        <button @if (getInput('page') <= 1) disabled @endif onclick="prevPage()"> <i
-                                class="fas fa-chevron-left"></i></button>
-                        <span> halaman <input style="width: 50px; text-align: center;" type="text"
-                                value="{{ getInput('page') ? getInput('page') : 1 }}"
-                                onchange="goToPage(this.value)" />
-                            /
-                            {{ $totalPage }}</span>
-                        <button @if (getInput('page') >= $totalPage) disabled @endif onclick="nextPage()"> <i
-                                class="fas fa-chevron-right"></i></button>
-                    </div>
+         
+
+
+            <div class="d-flex align-item-center justify-content-center">
+                <div>
+                    <button @if ($page <= 1) disabled @endif onclick="prevPage()"> <i
+                            class="fas fa-chevron-left"></i></button>
+                    <span> halaman <input style="width: 50px; text-align: center;" type="number"
+                            value="{{$page}}" onchange="goToPage(this.value)" />
+                        /
+                        {{ $totalPage }}</span>
+                    <button type="button" @if ($page >= $totalPage) disabled @endif onclick="nextPage()">
+                        <i class="fas fa-chevron-right"></i></button>
                 </div>
             </div>
+
+        </div>
+        @if ($salesOrders->isNotEmpty())
+
             <div class="table-responsive ">
                 <table id="table-sales" class="table table-bordered">
                     <thead class="table-primary text-center">
@@ -258,7 +272,8 @@
                                         @if ($item->total_ppn_k > 0)
                                             <br>
                                             <div class="bg-danger p-2 rounded-2 text-white " style="font-size:11px;">
-                                                <i class="fas fa-hand-holding-usd"></i>{{ format_price($item->total_ppn_k) }}
+                                                <i
+                                                    class="fas fa-hand-holding-usd"></i>{{ format_price($item->total_ppn_k) }}
                                             </div>
                                         @endif
                                     </td>
@@ -376,9 +391,9 @@
                 <div>
                     <button @if (getInput('page') <= 1) disabled @endif onclick="prevPage()"> <i
                             class="fas fa-chevron-left"></i></button>
-                    <span> halaman <input style="width: 50px; text-align: center;" type="text"
+                    <span> halaman <input style="width: 50px; text-align: center;" type="number"
                             value="{{ getInput('page') ? getInput('page') : 1 }}" onchange="goToPage(this.value)" />
-                          /  {{ $totalPage }} </span>
+                        / {{ $totalPage }} </span>
                     <button @if (getInput('page') >= $totalPage) disabled @endif onclick="nextPage()"> <i
                             class="fas fa-chevron-right"></i></button>
                 </div>
@@ -393,13 +408,6 @@
         @endif
 
     </div>
-
-
-
-
-
-
-
 
     @push('styles')
         <style>
@@ -441,12 +449,13 @@
             function lihatDetailInvoice(invoiceNumber) {
                 showDetailOnModal('{{ url('admin/invoice/show-sales-detail') }}/' + invoiceNumber, 'xl');
             }
-            var currentPage = {{ getInput('page') ? getInput('page') : 1 }};
+            var currentPage = {{$page}};
 
             function applyFilter() {
                 window.location.href =
                     '{{ url('admin/invoice/sales-order') }}?month={{ $month }}&year={{ $year }}&page=' + (
-                        currentPage) + '&sales_order_number=' + $('#sales-order').val() + '&draft_number=' + $('#draft-number').val() +
+                        currentPage) + '&sales_order_number=' + $('#sales-order').val() + '&draft_number=' + $('#draft-number')
+                    .val() +
                     '&status_final=' + $('#status-final').val() + '&status_payment=' + $('#status-payment').val() +
                     '&status_kirim=' +
                     $('#status-kirim').val() + '&status_mark=' + $('#status-mark').val() + '&perpage=' + $('#perPage').val();
@@ -469,8 +478,8 @@
             }
 
             function goToPage(page) {
-               currentPage= page;
-               applyFilter();
+                currentPage = page;
+                applyFilter();
             }
 
             function prevMonth() {

@@ -110,10 +110,10 @@ class KartuHutangController extends Controller
                 $supplier->book_journal_id = book()->id;
                 $supplier->save();
             }
-            $kartuHutang = KartuHutang::where('factur_supplier_number', $payload['factur_supplier_number'])->where('tag', 'init_import' . $payload['date'])->first();
+            $kartuHutang = KartuHutang::where('factur_supplier_number', $payload['factur_supplier_number'])->where('tag', 'init_import' . $payload['request_date'])->first();
             if (!$kartuHutang) {
                 $kartuHutang = new KartuHutang;
-                $kartuHutang->tag = 'init_import' . $payload['date'];
+                $kartuHutang->tag = 'init_import' . $payload['request_date'];
                 $kartuHutang->factur_supplier_number = $payload['factur_supplier_number'];
             }
             $created = createCarbon($payload['request_date'] . ' 00:00:00');
