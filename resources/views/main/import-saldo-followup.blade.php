@@ -257,7 +257,7 @@
 
             function resendAll() {
                 swalQuestion({
-                    proses: function() {
+                    proses: async function() {
                         total = $('.import-notyet').length;
                         count = 0;
                         elemns = $('.import-notyet');
