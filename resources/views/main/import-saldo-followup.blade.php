@@ -272,7 +272,7 @@
                             await new Promise((resolve) => {
                                 setTimeout(() => {
                                     resolve(true);
-                                }, 100);
+                                }, 10);
                             });
 
                         }
