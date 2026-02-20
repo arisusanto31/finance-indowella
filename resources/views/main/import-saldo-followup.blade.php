@@ -260,7 +260,8 @@
                     proses: function() {
                         total = $('.import-notyet').length;
                         count = 0;
-                        $('.import-notyet').each(async function(i, elem) {
+                        elemns = $('.import-notyet');
+                        for (const elem of elemns) {
                             count++;
                             id = $(elem).val();
                             res = await resendData(id, notify = false);
@@ -274,7 +275,7 @@
                                 }, 100);
                             });
 
-                        });
+                        }
 
                         setTimeout(() => {
                             hideProgressBar();
