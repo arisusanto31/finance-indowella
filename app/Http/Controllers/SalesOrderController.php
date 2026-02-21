@@ -30,7 +30,9 @@ use App\Models\RetailStock;
 use App\Models\RetailToko;
 use App\Models\StockUnit;
 use App\Models\Toko;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 
 class SalesOrderController extends Controller
@@ -67,7 +69,11 @@ class SalesOrderController extends Controller
         $salesOrderNumber = getInput('sales_order_number');
         $invPackFilter = SalesOrder::whereBetween('created_at', [$startDate, $endDate]);
         if ($salesOrderNumber) {
-            $invPackFilter = $invPackFilter->where('sales_order_number', 'like', '%' . $salesOrderNumber . '%');
+            $invPackFilter = $invPackFilter->where('sales_order_number', 'like',  $salesOrderNumber . '%');
+        }
+
+        if($draftNumber){
+            $invPackFilter = $invPackFilter->where('draft_number', 'like',  $draftNumber . '%');
         }
         if ($statusFinal != "") {
             $invPackFilter = $invPackFilter->where('is_final', $statusFinal);
@@ -317,6 +323,7 @@ class SalesOrderController extends Controller
 
         $details = SalesOrderDetail::where('sales_order_number', $salesOrder->sales_order_number)->get();
         $salesOrder->is_final = 1;
+        $salesOrder->draft_number = $salesOrder->sales_order_number;
         $salesOrder->sales_order_number = $salesOrder->getCodeFix();
         foreach ($details as $detail) {
             //cek data
@@ -335,6 +342,7 @@ class SalesOrderController extends Controller
                     return ['status' => 0, 'msg' => 'Tidak ditemukan data penjualan untuk stock ' . $detail->custom_stock_name];
                 }
             }
+            $detail->draft_number = $salesOrder->draft_number;
             $detail->sales_order_number = $salesOrder->sales_order_number;
             $detail->save();
         }
@@ -885,41 +893,69 @@ class SalesOrderController extends Controller
     }
 
 
-    public function kebutuhanProduksiMarked($data)
+    public function kebutuhanProduksiMarked(Request $request)
     {
-        //disini data itu dari btoa jadi harus di dekrip
-        $data = json_decode(base64_decode($data), true);
-        $sales = SalesOrder::from('sales_orders as so')->join('sales_order_details as sds', 'sds.sales_order_number', '=', 'so.sales_order_number')->whereIn('so.id', $data)
-            ->join('stock_units as theunit', function ($join) {
-                $join->on('sds.stock_id', '=', 'theunit.stock_id')
-                    ->on('sds.unit', '=', 'theunit.unit');
-            })
-            ->join('stocks as s', 's.id', '=', 'sds.stock_id')
-            ->select('s.name', DB::raw('sds.quantity * theunit.konversi as qtybackend'), 's.id', 'theunit.konversi', 's.unit_backend as unitbackend')->get()
-            ->groupBy('id')->map(function ($val) {
-                $data = [];
-                $data['id'] = $val[0]->id;
-                $data['name'] = $val[0]->name;
-                $data['unit'] = $val[0]->unitbackend;
-                $data['quantity'] = collect($val)->sum('qtybackend');
-                return $data;
-            });
+        try {
+            //disini data itu dari btoa jadi harus di dekrip
+            // $data = json_decode(base64_decode($data), true);
+            $data =$request->input('parent_ids');
+            $sales = SalesOrder::from('sales_orders as so')->join('sales_order_details as sds', 'sds.sales_order_number', '=', 'so.sales_order_number')->whereIn('so.id', $data)
+                ->join('stock_units as theunit', function ($join) {
+                    $join->on('sds.stock_id', '=', 'theunit.stock_id')
+                        ->on('sds.unit', '=', 'theunit.unit');
+                })
+                ->join('stocks as s', 's.id', '=', 'sds.stock_id')
+                ->select('s.name', DB::raw('round(sum(sds.quantity * theunit.konversi),2) as quantity'), 's.id', 'theunit.konversi', 's.unit_backend as unit')
+                ->groupBy('s.id')
+                ->get()
+                ->keyBy('id');
 
-        $allstockid = $sales->keys()->all();
+            $allstockid = $sales->keys()->all();
 
-        $sisaStock = KartuStock::whereIn('index_date', function ($q) use ($allstockid) {
-            $q->from('kartu_stocks')->whereIn('stock_id', $allstockid)->where('book_journal_id', bookID())->select(DB::raw('max(index_date) as maxindexdate'))
-                ->groupBy('stock_id');
-        })->select('stock_id', 'saldo_qty_backend')->get()
-            ->pluck('saldo_qty_backend', 'stock_id')->all();
+            $sisaStock = KartuStock::whereIn('index_date', function ($q) use ($allstockid) {
+                $q->from('kartu_stocks')->whereIn('stock_id', $allstockid)->where('book_journal_id', bookID())->select(DB::raw('max(index_date) as maxindexdate'))
+                    ->groupBy('stock_id');
+            })->select('stock_id', 'saldo_qty_backend')->get()
+                ->pluck('saldo_qty_backend', 'stock_id')->all();
 
-        $view = view('invoice.kebutuhan-produksi');
-        $view->kebutuhanProduksi = $sales->values()->all();
-        $view->sisaStock = $sisaStock;
-        return $view;
+
+            $result = [
+                'kebutuhanProduksi' => $sales->values()->all(),
+                'sisaStock' => $sisaStock
+            ];
+            $token = Str::uuid()->toString();
+
+            // simpan sementara (misal 2 jam)
+            Cache::put("kebutuhan:$token", json_encode($result), now()->addMinutes(30));
+            return [
+                'status' => 1,
+                'redirect_url' => url('admin/invoice/show-kebutuhan-produksi-marked/' . $token)
+            ];
+        } catch (Throwable $e) {
+            Log::error('Error in kebutuhanProduksiMarked: ' . $e->getMessage());
+            return ['status' => 0, 'msg' => $e->getMessage()];
+        }
+        // $view = view('invoice.kebutuhan-produksi');
+        // $view->kebutuhanProduksi = $sales->values()->all();
+        // $view->sisaStock = $sisaStock;
+
+        // return $view;
         // ->groupBy('stock_id')->map(function ($val) {
         //disini itung jumlah. tapi pastikan satuannya sama ya lur.
         // });
+    }
+
+    public function showKebutuhanProduksiMarked($token)
+    {
+        $data = Cache::get("kebutuhan:$token");
+        if (!$data) {
+            return "Data tidak ditemukan atau sudah expired";
+        }
+        $data = json_decode($data, true);
+        $view = view('invoice.kebutuhan-produksi');
+        $view->kebutuhanProduksi = $data['kebutuhanProduksi'];
+        $view->sisaStock = $data['sisaStock'];
+        return $view;
     }
 
 

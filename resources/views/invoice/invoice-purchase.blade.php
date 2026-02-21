@@ -61,7 +61,6 @@
                                 <input type="text" class="form-control text-end" autocomplete="off" readonly
                                     style="width: 200px;" id="total-invoice" readonly>
                             </div>
-
                             <div class="relative-pos div-ppn">
                                 <div class="absolute-pos" style="left:10px;top:5px;"> PPN </div>
                                 <input type="text" class="form-control text-end" autocomplete="off" readonly
@@ -72,8 +71,6 @@
                                 <input type="text" class="form-control text-end" autocomplete="off" readonly
                                     style="width: 200px;" id="total-gross" readonly>
                             </div>
-
-
                         </div>
                     </div>
                 </div>
@@ -87,8 +84,6 @@
 
 
     <div class="card mb-4 shadow p-3">
-
-
         <div class="text-primary-dark "> 📁 <strong>DAFTAR INVOICE</strong></div>
         <div class="d-flex justify-content pe-4 mb-3">
             <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="prevMonth()">
@@ -153,7 +148,7 @@
                                         <td rowspan="{{ $rowspan }}">{{ $no++ }}</td>
                                         <td rowspan="{{ $rowspan }}">
                                             {{ createCarbon($item->created_at)->format('Y-m-d') }}</td>
-                                        <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }}</td>
+                                        <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }}  <br>  <i class="fas fa-user"></i>{{$item->parent->factur_supplier_number}}</td>
                                         <td rowspan="{{ $rowspan }}">{{ $item->supplier->name ?? '-' }}</td>
                                     @endif
 

@@ -35,6 +35,9 @@ class InvoicePack extends Model
         'total_ppn_m',
         'prosen_pembayaran',
         'prosen_mutasi',
+        'surat_jalan',
+        'factur_supplier_number',
+        'fp_number',
     ];
 
     protected static function booted()

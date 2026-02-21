@@ -131,74 +131,74 @@
 
         <div class="bg-primary-lightest p-2 brtr-2 brtl-2 ">
             <label> <i class="fas fa-filter"></i> <strong>Filter </strong> </label>
-                <div class="row mb-4">
-                    <div class="col-md-2">
-                        <label>Sales order number</label>
-                        <input class="form-control" type="text" placeholder="sales order number" id="sales-order"
-                            value="{{ getInput('sales_order_number') }}" />
-                    </div>
-                    <div class="col-md-2">
-                        <label>Draft number</label>
-                        <input class="form-control" type="text" placeholder="draft number" id="draft-number"
-                            value="{{ getInput('draft_number') }}" />
-                    </div>
-
-                    <div class="col-md-1">
-                        <label> Final </label>
-                        <select id="status-final" autocomplete="off" class="form-control">
-                            <option @if (!getInput('status_final')) selected @endif value="">Semua</option>
-                            <option @if (getInput('status_final') == 1) selected @endif value="1">Final</option>
-                            <option @if (getInput('status_final') === 0) selected @endif value="0">Belum Final
-                            </option>
-                        </select>
-                    </div>
-                    <div class="col-md-1">
-                        <label> Payment </label>
-                        <select id="status-payment" class="form-control">
-                            <option @if (!getInput('status_payment')) selected @endif value="">Semua</option>
-                            <option @if (getInput('status_payment') == 1) selected @endif value="1">Lunas</option>
-                            <option @if (getInput('status_payment') === 0) selected @endif value="0">Belum Lunas
-                            </option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-1">
-                        <label> Kirim </label>
-                        <select id="status-kirim" class="form-control">
-                            <option @if (!getInput('status_kirim')) selected @endif value="">Semua
-                            </option>
-                            <option @if (getInput('status_kirim') == 1) selected @endif value="1">Terkirim
-                            </option>
-                            <option @if (getInput('status_kirim') === 0) selected @endif value="0">Belum
-                                Terkirim
-                            </option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-1">
-                        <label> Mark </label>
-                        <select id="status-mark" class="form-control">
-                            <option @if (!getInput('status_mark')) selected @endif value="">Semua
-                            </option>
-                            <option @if (getInput('status_mark') == 1) selected @endif value="1">Mark
-                            </option>
-                            <option @if (getInput('status_mark') === 0) selected @endif value="0">Belum Mark
-                            </option>
-
-                        </select>
-                    </div>
-
-                    <div class="col-md-1">
-                        <label> data/page </label>
-                        <input class="form-control" type="number" placeholder="data/page" id="perPage"
-                            value="{{ getInput('perpage') ? getInput('perpage') : 20 }}" />
-                    </div>
-                    <div class="col-md-1">
-                        <label> Aksi <label>
-                                <button class="form-control btn btn-primary" onclick="applyFilter()">Apply</button>
-                    </div>
+            <div class="row mb-4">
+                <div class="col-md-2">
+                    <label>Sales order number</label>
+                    <input class="form-control" type="text" placeholder="sales order number" id="sales-order"
+                        value="{{ getInput('sales_order_number') }}" />
                 </div>
-         
+                <div class="col-md-2">
+                    <label>Draft number</label>
+                    <input class="form-control" type="text" placeholder="draft number" id="draft-number"
+                        value="{{ getInput('draft_number') }}" />
+                </div>
+
+                <div class="col-md-1">
+                    <label> Final </label>
+                    <select id="status-final" autocomplete="off" class="form-control">
+                        <option @if (!getInput('status_final')) selected @endif value="">Semua</option>
+                        <option @if (getInput('status_final') == 1) selected @endif value="1">Final</option>
+                        <option @if (getInput('status_final') === 0) selected @endif value="0">Belum Final
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-1">
+                    <label> Payment </label>
+                    <select id="status-payment" class="form-control">
+                        <option @if (!getInput('status_payment')) selected @endif value="">Semua</option>
+                        <option @if (getInput('status_payment') == 1) selected @endif value="1">Lunas</option>
+                        <option @if (getInput('status_payment') === 0) selected @endif value="0">Belum Lunas
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-1">
+                    <label> Kirim </label>
+                    <select id="status-kirim" class="form-control">
+                        <option @if (!getInput('status_kirim')) selected @endif value="">Semua
+                        </option>
+                        <option @if (getInput('status_kirim') == 1) selected @endif value="1">Terkirim
+                        </option>
+                        <option @if (getInput('status_kirim') === 0) selected @endif value="0">Belum
+                            Terkirim
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-1">
+                    <label> Mark </label>
+                    <select id="status-mark" class="form-control">
+                        <option @if (!getInput('status_mark')) selected @endif value="">Semua
+                        </option>
+                        <option @if (getInput('status_mark') == 1) selected @endif value="1">Mark
+                        </option>
+                        <option @if (getInput('status_mark') === 0) selected @endif value="0">Belum Mark
+                        </option>
+
+                    </select>
+                </div>
+
+                <div class="col-md-1">
+                    <label> data/page </label>
+                    <input class="form-control" type="number" placeholder="data/page" id="perPage"
+                        value="{{ getInput('perpage') ? getInput('perpage') : 20 }}" />
+                </div>
+                <div class="col-md-1">
+                    <label> Aksi <label>
+                            <button class="form-control btn btn-primary" onclick="applyFilter()">Apply</button>
+                </div>
+            </div>
+
 
 
             <div class="d-flex align-item-center justify-content-center">
@@ -206,7 +206,7 @@
                     <button @if ($page <= 1) disabled @endif onclick="prevPage()"> <i
                             class="fas fa-chevron-left"></i></button>
                     <span> halaman <input style="width: 50px; text-align: center;" type="number"
-                            value="{{$page}}" onchange="goToPage(this.value)" />
+                            value="{{ $page }}" onchange="goToPage(this.value)" />
                         /
                         {{ $totalPage }}</span>
                     <button type="button" @if ($page >= $totalPage) disabled @endif onclick="nextPage()">
@@ -260,7 +260,10 @@
                                             {{ $item->created_at->format('Y-m-d') }}
                                             <div id="ket-finish{{ $item->parent->id }}"></div>
                                         </td>
-                                        <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }} </td>
+                                        <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }} 
+                                            <br>
+                                            <span style="color:#bbb;">({{ $item->draft_number }})</span>
+                                        </td>
                                         <td rowspan="{{ $rowspan }}">{{ $item->customer->name ?? '-' }}</td>
                                     @endif
                                     <td>{{ $item->custom_stock_name ?? '-' }}</td>
@@ -389,12 +392,11 @@
             </div>
             <div class="d-flex align-item-center justify-content-center">
                 <div>
-                    <button @if (getInput('page') <= 1) disabled @endif onclick="prevPage()"> <i
-                            class="fas fa-chevron-left"></i></button>
+                    <button @if ($page <= 1) disabled @endif onclick="prevPage()"> <i class="fas fa-chevron-left"></i></button>
                     <span> halaman <input style="width: 50px; text-align: center;" type="number"
-                            value="{{ getInput('page') ? getInput('page') : 1 }}" onchange="goToPage(this.value)" />
+                            value="{{$page}}" onchange="goToPage(this.value)" />
                         / {{ $totalPage }} </span>
-                    <button @if (getInput('page') >= $totalPage) disabled @endif onclick="nextPage()"> <i
+                    <button @if ($page >= $totalPage) disabled @endif onclick="nextPage()"> <i
                             class="fas fa-chevron-right"></i></button>
                 </div>
             </div>
@@ -449,7 +451,7 @@
             function lihatDetailInvoice(invoiceNumber) {
                 showDetailOnModal('{{ url('admin/invoice/show-sales-detail') }}/' + invoiceNumber, 'xl');
             }
-            var currentPage = {{$page}};
+            var currentPage = {{ $page }};
 
             function applyFilter() {
                 window.location.href =
@@ -584,24 +586,74 @@
                 });
             }
 
-            function kebutuhanStock() {
-                parentsMarked = [];
+            // function kebutuhanStock() {
+            //     parentsMarked = [];
+            //     $('.select-item:checked').each(function(i, elem) {
+            //         id = $(elem).data('parent-id');
+            //         parentsMarked.push(id);
+            //     });
+            //     console.log(parentsMarked);
+            //     if (parentsMarked.length == 0) {
+            //         swal('Oops!', 'Tidak ada invoice yang ditandai untuk produksi!', 'warning');
+            //         return;
+            //     }
+            //     //ini saya ingin enkripsi data enaknya pake apa ya
+            //     data = safeBtoa(parentsMarked);
+            //     console.log(data);
+            //     url = '{{ url('admin/invoice/kebutuhan-produksi-marked') }}/' + data
+            //     var win = window.open(url, '_blank');
+            // }
+
+
+            async function kebutuhanStock() {
+                const parentsMarked = [];
                 $('.select-item:checked').each(function(i, elem) {
-                    id = $(elem).data('parent-id');
-                    parentsMarked.push(id);
+                    parentsMarked.push($(elem).data('parent-id'));
                 });
-                console.log(parentsMarked);
-                if (parentsMarked.length == 0) {
+
+                if (parentsMarked.length === 0) {
                     swal('Oops!', 'Tidak ada invoice yang ditandai untuk produksi!', 'warning');
                     return;
                 }
-                //ini saya ingin enkripsi data enaknya pake apa ya
-                data = safeBtoa(parentsMarked);
-                console.log(data);
-                url = '{{ url('admin/invoice/kebutuhan-produksi-marked') }}/' + data
-                var win = window.open(url, '_blank');
-            }
 
+                // 1) Buka tab baru dulu (HARUS sinkron saat klik)
+                const win = window.open('about:blank', '_blank');
+                if (!win) {
+                    swal('Oops!', 'Popup diblokir browser. Izinkan popup untuk situs ini.', 'warning');
+                    return;
+                }
+                win.document.write('Loading...'); // opsional
+
+                try {
+                    // 2) POST ke server (kirim data asli, ga perlu lewat URL)
+                    const res = await fetch("{{ url('admin/invoice/kebutuhan-produksi-marked') }}", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                            "Accept": "application/json",
+                        },
+                        body: JSON.stringify({
+                            parent_ids: parentsMarked
+                        })
+                    });
+
+                    if (!res.ok) throw new Error('Request gagal');
+                    console.log(res);
+                    // 3) Server balikin URL tujuan
+                    restData = await res.json();
+                    console.log(restData);
+                    // misal: { redirect_url: "https://.../admin/invoice/kebutuhan-produksi-marked/abc123" }
+
+                    // 4) Arahkan tab baru
+                    win.location.href = restData.redirect_url;
+
+                } catch (err) {
+                    win.close();
+                    swal('Oops!', 'Gagal memproses data. Coba lagi.', 'error');
+                    console.error(err);
+                }
+            }
 
             async function cancelFinalAll() {
                 parentsMarked = [];

@@ -69,64 +69,77 @@ class InvoicePurchaseController extends Controller
     public function getDataImportExcel(Request $request)
     {
 
-        $file = $request->file('file');
-        $bookID = $request->input('book_journal_id');
-        $importer = new ExcelPembelianImport();
-        Excel::import($importer, $file);
-        $stockType = null;
-        if ($bookID == 2) {
-            $class = RetailToko::class;
-            $stockType = RetailStock::class;
-        } else {
-            $class = ManufToko::class;
-            $stockType = ManufStock::class;
-        }
-        $refToko = Toko::pluck('id', 'kode_toko')->all();
-        $tokoName = Toko::pluck('name', 'kode_toko')->all();
+        try {
+            $file = $request->file('file');
+            $bookID = $request->input('book_journal_id');
+            $importer = new ExcelPembelianImport();
+            Excel::import($importer, $file);
+            $stockType = null;
+            if ($bookID == 2) {
+                $class = RetailToko::class;
+                $stockType = RetailStock::class;
+            } else {
+                $class = ManufToko::class;
+                $stockType = ManufStock::class;
+            }
+            $refToko = Toko::pluck('id', 'kode_toko')->all();
+            $tokoName = Toko::pluck('name', 'kode_toko')->all();
 
-        $defaultToko = Toko::first();
+            $defaultToko = Toko::first();
 
-        $data = $importer->result;
-        $idBuatan = 1;
-        $allInvoice = collect($data)->pluck('no_invoice')->all();
-        $existingInvoice = InvoicePack::whereIn('factur_supplier_number', $allInvoice)->pluck('factur_supplier_number')->all();
-        $data = collect($data)->groupBy('no_invoice')->map(function ($item, $key) use ($refToko, $existingInvoice, $tokoName, &$idBuatan, $stockType, $defaultToko) {
-            $kodeToko = norm_string(collect($item)->first()['kode_toko'] ?? null);
-            $tanggal = collect($item)->first()['tanggal'];
+            $data = $importer->result;
+            // throw new \Exception(json_encode($data));
+            $idBuatan = 1;
+            $allInvoice = collect($data)->pluck('no_invoice')->all();
+            $existingInvoice = InvoicePack::whereIn('factur_supplier_number', $allInvoice)->pluck('factur_supplier_number')->all();
+            $data = collect($data)->groupBy('no_invoice')->map(function ($item, $key) use ($refToko, $existingInvoice, $tokoName, &$idBuatan, $stockType, $defaultToko) {
+                $kodeToko = norm_string(collect($item)->first()['kode_toko'] ?? null);
+                $tanggal = collect($item)->first()['tanggal'];
 
+                return [
+                    'package_number' => $key,
+                    'details' => collect($item)->map(function ($val) use ($defaultToko) {
+                        return [
+                            'created_at' => excelSerialToCarbon($val['tanggal']),
+                            'stock_id' => $val['kode_barang'],
+                            'stock_name' => $val['nama_barang'],
+                            'quantity' => $val['quantity'],
+                            'unit' => $val['satuan'],
+                            'price' => $val['harga_pcs'],
+
+                            'total_price' => format_db($val['quantity']) * format_db($val['harga_pcs']) - format_db($val['diskon'] ?? 0),
+                            'discount' => $val['diskon'] ?? 0,
+                            'reference_id' => null,
+                            'reference_type' => null,
+                            'kode_toko' => $val['kode_toko'] ?? $defaultToko->kode_toko,
+
+                        ];
+                    }),
+                    'factur_supplier_number' => $key,
+                    'fp_number' => collect($item)->first()['faktur_pajak'] ?? null,
+                    'surat_jalan' => collect($item)->first()['surat_jalan'] ?? null,
+                    'is_imported' => in_array($key, $existingInvoice),
+                    'stock_type' => $stockType,
+                    'created_at' => excelSerialToCarbon($tanggal),
+                    'total_nota' => collect($item)->sum('total_price'),
+                    'supplier' => collect($item)->first()['supplier'] ?? 'Anonim',
+                    'toko_id' => $refToko[$kodeToko] ?? $defaultToko->id,
+                    'toko_name' => $tokoName[$kodeToko] ?? $defaultToko->name,
+                    'kode_toko' => collect($item)->first()['kode_toko'] ?? $defaultToko->kode_toko,
+                    'id' => $idBuatan++,
+                ];
+            })->values()->all();
             return [
-                'package_number' => $key,
-                'details' => collect($item)->map(function ($val) use ($defaultToko) {
-                    return [
-                        'created_at' => excelSerialToCarbon($val['tanggal']),
-                        'stock_id' => $val['kode_barang'],
-                        'stock_name' => $val['nama_barang'],
-                        'quantity' => $val['quantity'],
-                        'unit' => $val['satuan'],
-                        'price' => $val['harga_pcs'],
-                        'total_price' => format_db($val['quantity']) * format_db($val['harga_pcs']) - format_db($val['diskon'] ?? 0),
-                        'discount' => $val['diskon'] ?? 0,
-                        'reference_id' => null,
-                        'reference_type' => null,
-                        'kode_toko' => $val['kode_toko'] ?? $defaultToko->kode_toko,
-
-                    ];
-                }),
-                'is_imported' => in_array($key, $existingInvoice),
-                'stock_type' => $stockType,
-                'created_at' => excelSerialToCarbon($tanggal),
-                'total_nota' => collect($item)->sum('total_price'),
-                'supplier' => collect($item)->first()['supplier'] ?? 'Anonim',
-                'toko_id' => $refToko[$kodeToko] ?? $defaultToko->id,
-                'toko_name' => $tokoName[$kodeToko] ?? $defaultToko->name,
-                'kode_toko' => collect($item)->first()['kode_toko'] ?? $defaultToko->kode_toko,
-                'id' => $idBuatan++,
+                'status' => 1,
+                'data'   => $data,
             ];
-        })->values()->all();
-        return [
-            'status' => 1,
-            'data'   => $data,
-        ];
+        } catch (Throwable $e) {
+            return [
+                'status' => 0,
+                'msg' => $e->getMessage(),
+                'trace' => $e->getTrace()
+            ];
+        }
     }
 
 
@@ -526,6 +539,7 @@ class InvoicePurchaseController extends Controller
             }
             $facturSupplier = $request->input('factur_supplier_number') ?? $request->invoice_pack_number;
             $facturPajak = $request->input('fp_number');
+            $suratJalan = $request->input('surat_jalan');
             $invoice_pack_number = $request->invoice_pack_number;
             $grouped = [];
             $date = $request->input('date');
@@ -558,6 +572,7 @@ class InvoicePurchaseController extends Controller
                 'fp_number' => $facturPajak,
                 'book_journal_id' => bookID(),
                 'person_id' => $supplierID,
+                'surat_jalan' => $suratJalan,
                 'person_type' => 'App\Models\Supplier',
                 'reference_model' => 'App\Models\InvoicePurchaseDetail',
                 'invoice_date' => now(),

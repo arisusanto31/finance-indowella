@@ -301,6 +301,8 @@
                 date: date ? date : data.created_at,
                 supplier_name: data.supplier,
                 is_ppn: isPPN,
+                fp_number: data.fp_number,
+                surat_jalan: data.surat_jalan,
                 invoice_pack_number: data.package_number,
                 factur_supplier_number: data.package_number,
                 reference_stock_id: data.details.map(item => item.stock_id),
@@ -321,6 +323,7 @@
             };
 
             console.log(dataPost);
+          
             $.ajax({
                 url: '{{ route('invoice.purchase.store') }}',
                 data: dataPost,

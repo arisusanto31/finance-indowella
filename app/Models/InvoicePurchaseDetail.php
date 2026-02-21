@@ -23,6 +23,8 @@ class InvoicePurchaseDetail extends Model
         'created_at',
         'is_ppn',
         'total_ppn_m',
+        'factur_supplier_number',
+        'fp_number',
 
     ];
 
