@@ -69,7 +69,7 @@
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                     <div class="row">
+                    <div class="row">
                         <div class="col mb-3">
                             <label for="nameBasic" class="form-label">Date</label>
                             <input type="datetime-local" id="mutasi-date" class="form-control"
@@ -84,9 +84,9 @@
                     </div>
                     <div class="row">
                         <div class="col mb-3">
-                            <label for="nameBasic" class="form-label">Nomer Ivoice </label>
+                            <label for="nameBasic" class="form-label">Nomer Ivoice <span style="font-size:10px;">(wajib)</span></label>
                             <input type="text" id="invoice_number" class="form-control"
-                                placeholder="Nomer Invoice" />
+                                placeholder="Nomer Invoice" required/>
                         </div>
                     </div>
                     <div class="row">
@@ -246,7 +246,7 @@
                           <span class="visually-hidden">Loading...</span>
                         </div> storing data..`);
                 if ($('#invoice_number').val() == "") {
-                    swalInfo('Opss', '', 'warnig')
+                    swalInfo('Opss', 'faktur atau invoice harus ada', 'warnig')
                     return 0;
                 }
                 $.ajax({
@@ -357,10 +357,9 @@
                 type = $('#person_type option:selected').val();
                 if (type === 'App\\Models\\Customer') {
                     console.log('init oy ' + type);
-                    initItemSelectManual('#person_id', '{{ route('customer.get-item') }}', 'Person Name ..', '#basicModal');
+                    initItemSelectManual('#person_id', '{{ route('customer.get-item') }}', 'Person Name ..');
                 } else {
-                    initItemSelectManual('#person_id', '{{ route('other-person.get-item') }}', 'Person Name ..',
-                        '#basicModal');
+                    initItemSelectManual('#person_id', '{{ route('other-person.get-item') }}', 'Person Name ..');
 
                 }
             }
@@ -379,13 +378,12 @@
             }
             initSelectPerson();
             initSelectPersonPelunasan();
-            initItemSelectManual('#pelunasan-akun-lawan', '{{ route('chart-account.get-item') }}', 'akun lawan ..',
-                '#pelunasanModal');
+            initItemSelectManual('#pelunasan-akun-lawan', '{{ route('chart-account.get-item') }}', 'akun lawan ..', );
             initItemSelectManual('#pelunasan-akun-piutang', '{{ route('chart-account.get-item-keuangan') }}?kind=piutang',
-                'akun piutang ..', '#pelunasanModal');
+                'akun piutang ..');
             initItemSelectManual('#akun-piutang', '{{ route('chart-account.get-item-keuangan') }}?kind=piutang',
-                'akun piutang ..', '#basicModal');
-            initItemSelectManual('#akun-lawan', '{{ route('chart-account.get-item') }}', 'akun lawan ..', '#basicModal');
+                'akun piutang ..');
+            initItemSelectManual('#akun-lawan', '{{ route('chart-account.get-item') }}', 'akun lawan ..');
 
 
             function getSummary() {
