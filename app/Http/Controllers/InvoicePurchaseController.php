@@ -15,7 +15,10 @@ use Illuminate\Support\Facades\DB;
 use Throwable;
 use App\Models\InvoicePurchase;
 use App\Models\Journal;
+use App\Models\KartuBahanJadi;
+use App\Models\KartuBDP;
 use App\Models\KartuHutang;
+use App\Models\KartuInTransit;
 use App\Models\KartuStock;
 use App\Models\LinkTokoParent;
 use App\Models\ManufStock;
@@ -231,6 +234,7 @@ class InvoicePurchaseController extends Controller
         $unit = $request->input('unit');
         $isBackdate = KartuHutang::isBackdate($date);
         $stockId = $request->input('stock_id');
+        $stock = Stock::find($stockId);
         $invoicePack = InvoicePack::find($invoicePackID);
         if (!$invoicePack) {
             return ['status' => 0, 'msg' => 'Invoice tidak ditemukan'];
@@ -247,18 +251,58 @@ class InvoicePurchaseController extends Controller
         try {
             $ks = [];
             if ($coaDebet > 140000 && $coaDebet < 150000) {
-                $kartuStock = KartuStock::mutationStore(new Request([
+                // $kartuStock = KartuStock::mutationStore(new Request([
+                //     'stock_id' => $stockId,
+                //     'mutasi_quantity' => $quantity,
+                //     'unit' => $unit,
+                //     'flow' => 0,
+                //     'code_group' => $coaDebet,
+                //     'invoice_pack_number' => $invoicePackNumber,
+                //     'invoice_pack_id' => $invoicePackID,
+                //     'is_custom_rupiah' => 1,
+                //     'mutasi_rupiah_total' => $nilaiMutasi,
+                //     'date' => $date
+                // ]), false);
+                switch ($coaDebet) {
+                    case 140001:
+                        $thecard = KartuStock::class;
+                        break;
+                    case 140002:
+                        $thecard = KartuStock::class;
+                        break;
+                    case 140003:
+                        $thecard = KartuBDP::class;
+                        break;
+                    case 140004:
+                        $thecard = KartuBahanJadi::class;
+                        break;
+                    case 140005:
+                        $thecard = KartuInTransit::class;
+                        break;
+                    default:
+                        $thecard = KartuStock::class;
+                        break;
+                }
+
+                $kartuStock = $thecard::mutationStore(new Request([
                     'stock_id' => $stockId,
                     'mutasi_quantity' => $quantity,
                     'unit' => $unit,
                     'flow' => 0,
-                    'code_group' => $coaDebet,
+                    'production_number' => $invoicePackNumber,
                     'invoice_pack_number' => $invoicePackNumber,
-                    'invoice_pack_id' => $invoicePackID,
+                    'sales_order_number' => null,
+                    'sales_order_id' => null,
+                    'code_group' => $coaDebet,
+                    'lawan_code_group' => $coaKredit,
+                    'is_otomatis_jurnal' => 0,
                     'is_custom_rupiah' => 1,
                     'mutasi_rupiah_total' => $nilaiMutasi,
-                    'date' => $date
-                ]), false);
+                    'date' => $date,
+                    'description' => 'pembelian ' . $stock->name . ' nomer invoice ' . $invoicePackNumber
+                ]), false);;
+
+
                 if ($kartuStock['status'] == 0) {
                     throw new \Exception($kartuStock['msg']);
                 }
@@ -330,7 +374,7 @@ class InvoicePurchaseController extends Controller
                     ->where('code_group', $coaDebet)->first();
 
                 foreach ($ks as $k) {
-                    $kartu = KartuStock::find($k->id);
+                    $kartu = $thecard::find($k->id);
                     $kartu->journal_id = $journalPersediaan->id;
                     $kartu->journal_number = $journalPersediaan->journal_number;
                     $kartu->save();

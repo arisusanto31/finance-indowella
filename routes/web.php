@@ -27,6 +27,7 @@ use App\Http\Controllers\{
     KartuBDPController,
     KartuDPPurchasesController,
     KartuDPSalesController,
+    KartuInTransitController,
     SalesOrderController,
     TokoController
 };
@@ -123,8 +124,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('/get-summary', [InventoryController::class, 'getSummary'])->name('get-summary');
             Route::get('/get-mutasi-masuk', [InventoryController::class, 'getMutasiMasuk'])->name('get-mutasi-masuk');
             Route::get('/get-mutasi-keluar', [InventoryController::class, 'getMutasiKeluar'])->name('get-mutasi-keluar');
-             Route::get('kartu-mutasi/{id}', [InventoryController::class, 'kartuMutasi'])->name('kartu-mutasi');
-           
+            Route::get('kartu-mutasi/{id}', [InventoryController::class, 'kartuMutasi'])->name('kartu-mutasi');
         });
         Route::prefix('bdd')->name('bdd.')->group(function () {
             Route::get('/', [BDDController::class, 'index']);
@@ -189,6 +189,21 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::post('delete-mutation', [KartuBDPController::class, 'deleteMutation'])->name('delete-mutation');
         });
 
+        Route::prefix('kartu-in-transit')->name('kartu-in-transit.')->group(function () {
+            Route::resource('main', KartuInTransitController::class);
+            Route::post('mutasi-store', [KartuInTransitController::class, 'mutasiStore'])->name('mutasi-store');
+            Route::get('create-mutasi-masuk', [KartuInTransitController::class, 'createMutasiMasuk'])->name('create-mutasi-masuk');
+            Route::get('create-mutasi-keluar', [KartuInTransitController::class, 'createMutasiKeluar'])->name('create-mutasi-keluar');
+            Route::get('get-summary', [KartuInTransitController::class, 'getSummary'])->name('get-summary');
+            Route::get('get-mutasi-masuk', [KartuInTransitController::class, 'getMutasiMasuk'])->name('get-mutasi-masuk');
+            Route::get('get-mutasi-keluar', [KartuInTransitController::class, 'getMutasiKeluar'])->name('get-mutasi-keluar');
+            Route::post('create-mutations', [KartuInTransitController::class, 'createMutations'])->name('create-mutations');
+            Route::post('refresh-kartu', [KartuInTransitController::class, 'refreshKartu'])->name('refresh-kartu');
+            Route::get('show-history-stock/{id}', [KartuInTransitController::class, 'showHistoryStock'])->name('show-history-stock');
+            Route::post('recalculate', [KartuInTransitController::class, 'recalculate'])->name('recalculate');
+            Route::post('delete-mutation', [KartuInTransitController::class, 'deleteMutation'])->name('delete-mutation');
+        });
+
         Route::prefix('kartu-bahan-jadi')->name('kartu-bahan-jadi.')->group(function () {
             Route::resource('main', KartuBahanJadiController::class);
             Route::post('mutasi-store', [KartuBahanJadiController::class, 'mutasiStore'])->name('mutasi-store');
@@ -203,6 +218,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::post('recalculate', [KartuBahanJadiController::class, 'recalculate'])->name('recalculate');
             Route::post('delete-mutation', [KartuBahanJadiController::class, 'deleteMutation'])->name('delete-mutation');
         });
+        
         Route::prefix('kartu-hutang')->name('kartu-hutang.')->group(function () {
             Route::resource('main', KartuHutangController::class);
             Route::post('create-mutation', [KartuHutangController::class, 'createMutation'])->name('create-mutation');
@@ -246,7 +262,6 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('refresh/{id}', [KartuDPPurchasesController::class, 'refresh'])->name('refresh');
             Route::get('recalculate/{id}', [KartuDPPurchasesController::class, 'recalculateKartuDP'])->name('recalculate');
         });
-
     });
 
     Route::prefix('master')->group(function () {
@@ -317,7 +332,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
 
     Route::prefix('invoice')->name('invoice.')->group(function () {
 
-        Route::get('download-template-pembelian',[InvoicePurchaseController::class, 'downloadTemplatePembelian'])->name('download-template-pembelian');
+        Route::get('download-template-pembelian', [InvoicePurchaseController::class, 'downloadTemplatePembelian'])->name('download-template-pembelian');
 
         Route::get('invoice-sales', [InvoiceSaleController::class, 'ShowSales'])->name('sales.index');
         Route::get('invoice-purchase', [InvoicePurchaseController::class, 'showPurchase'])->name('purchase');
@@ -347,7 +362,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::get('sales-open-import/{id}', [SalesOrderController::class, 'openImport'])->name('sales-open-import');
         Route::get('sales-get-data-import/{id}', [SalesOrderController::class, 'getDataImport'])->name('sales-get-data-import');
         Route::post('sales-get-data-import-excel', [SalesOrderController::class, 'getDataImportExcel'])->name('sales-get-data-import-excel');
-        Route::get('sales-open-import-excel/{id}',[SalesOrderController::class, 'openImportExcel'])->name('sales-open-import-excel');
+        Route::get('sales-open-import-excel/{id}', [SalesOrderController::class, 'openImportExcel'])->name('sales-open-import-excel');
         Route::get('show-sales-detail/{id}', [SalesOrderController::class, 'showDetail'])->name('sale-order-detail');
         Route::get('update-input-invoice/{id}', [SalesOrderController::class, 'updateInputInvoice'])->name('update-input-invoice');
         Route::post('sales-make-final', [SalesOrderController::class, 'makeFinal'])->name('sales-make-final');
@@ -356,9 +371,9 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::post('sales-process-dagang', [SalesOrderController::class, 'processDagang'])->name('sales-process-dagang');
         Route::delete('sales-delete-detail', [SalesOrderController::class, 'deleteDetail'])->name('sales-delete-detail');
 
-        Route::get('purchase-open-import-excel/{id}',[InvoicePurchaseController::class, 'openImportExcel'])->name('purchase-open-import-excel');
+        Route::get('purchase-open-import-excel/{id}', [InvoicePurchaseController::class, 'openImportExcel'])->name('purchase-open-import-excel');
         Route::post('purchase-get-data-import-excel', [InvoicePurchaseController::class, 'getDataImportExcel'])->name('purchase-get-data-import-excel');
-        
+
 
         Route::get('invoice-sales-refresh/{id}', [InvoiceSaleController::class, 'refresh'])->name('invoice-sales-refresh');
         Route::get('invoice-sales/edit/{id}', [InvoiceSaleController::class, 'editInvoiceSales']);

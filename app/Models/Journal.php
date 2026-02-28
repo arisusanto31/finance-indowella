@@ -259,6 +259,10 @@ class Journal extends Model
     public function verifyJournal()
     {
         $this->refresh();
+        if($this->reference_model==null){
+            $this->reference_model = $this->chartAccount->reference_model;
+            $this->save();
+        }
         if ($this->reference_model) {
             $this->verified_by = null;
 
@@ -269,14 +273,14 @@ class Journal extends Model
                     $this->verified_by = 1;
                 }
             }
-            if ($this->reference_model == 'App\Models\KartuBDP') {
+            else if ($this->reference_model == 'App\Models\KartuBDP') {
                 $ks = KartuBDP::where('journal_id', $this->id)->get();
                 info(abs(collect($ks)->sum('mutasi_rupiah_total')) . '==' . abs($this->amount_debet - $this->amount_kredit));
                 if (abs(collect($ks)->sum('mutasi_rupiah_total')) == abs($this->amount_debet - $this->amount_kredit)) {
                     $this->verified_by = 1;
                 }
             }
-            if ($this->reference_model == 'App\Models\KartuBahanJadi') {
+            else if ($this->reference_model == 'App\Models\KartuBahanJadi') {
                 $ks = KartuBahanJadi::where('journal_id', $this->id)->get();
                 info(abs(collect($ks)->sum('mutasi_rupiah_total')) . '==' . abs($this->amount_debet - $this->amount_kredit));
                 if (abs(collect($ks)->sum('mutasi_rupiah_total')) == abs($this->amount_debet - $this->amount_kredit)) {
@@ -322,6 +326,13 @@ class Journal extends Model
                 }
                 foreach ($ks as $k) {
                     $k->createDetailKartuInvoice();
+                }
+            }
+            else if($this->reference_model == 'App\Models\KartuInTransit') {
+                $ks = KartuInTransit::where('journal_id', $this->id)->get();
+                info(abs(collect($ks)->sum('mutasi_rupiah_total')) . '==' . abs($this->amount_debet - $this->amount_kredit));
+                if (abs(collect($ks)->sum('mutasi_rupiah_total')) == abs($this->amount_debet - $this->amount_kredit)) {
+                    $this->verified_by = 1;
                 }
             }
         } else {
