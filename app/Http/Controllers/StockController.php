@@ -20,12 +20,42 @@ class StockController extends Controller
     {
         $view = view('master.stock');
         $view->stocks = [];
+        $view->problemsUnit = Stock::whereNull('unit_default')->select('id', 'name')->get();
         return $view;
+    }
+
+    public function fixNullUnitDefault(Request $request)
+    {
+        try {
+            $stocks = Stock::whereNull('stocks.unit_default')->leftJoin('stock_units as su', 'stocks.id', '=', 'su.stock_id')
+                ->select('stocks.id', 'stocks.name', 'su.konversi', 'su.unit')->orderBy('su.konversi', 'asc')->get()->groupBy('id');
+            
+            $statestock = null;
+            foreach ($stocks as $stockid => $dataunits) {
+
+                $thestock = Stock::find($stockid);
+                $statestock = $thestock;
+                $thestock->unit_default = collect($dataunits)->first()->unit;
+                $thestock->save();
+            }
+
+
+            return [
+                'status' => 1,
+                'msg' => 'berhasil'
+            ];
+        } catch (Throwable $th) {
+            return [
+                'status' => 0,
+                'msg' => 'gagal on ' . ($statestock->name ?? 'unknown') . ' ' . $th->getMessage(),
+                'stock' => $statestock
+            ];
+        }
     }
 
     public function getData()
     {
-        $view->stocks = Stock::with(['category', 'parentCategory'])->get();
+        // $view->stocks = Stock::with(['category', 'parentCategory'])->get();
     }
 
     public function update(Request $request, $id)
@@ -45,7 +75,7 @@ class StockController extends Controller
             'parent_category_id',
             'unit_backend',
             'unit_default',
-            'bbok_journal_id',
+            'book_journal_id',
         ]));
         return [
             'status' => 1,
@@ -279,7 +309,7 @@ class StockController extends Controller
                 $thestock = Stock::where('name', $name)->first();
                 if ($thestock) {
                     $thestock->update($dataFix);
-                    $stock=$thestock;
+                    $stock = $thestock;
                 }
             }
             if (!$thestock) {

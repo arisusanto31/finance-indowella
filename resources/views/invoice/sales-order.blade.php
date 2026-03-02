@@ -986,10 +986,6 @@
                 showDetailOnModal('{{ url('/admin/invoice/edit-sales-order') }}/' + invoiceNumber, 'xl');
             }
 
-
-
-
-
             function openImportData(bookID) {
                 showDetailOnModal('{{ url('admin/invoice/sales-open-import') }}/' + bookID, 'xl');
             }
@@ -1134,8 +1130,6 @@
                 parents = {!! json_encode($parent) !!};
                 console.log(parents);
                 updateTotalSelected();
-
-
             });
         </script>
     @endpush

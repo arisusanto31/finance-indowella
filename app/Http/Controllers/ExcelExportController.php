@@ -116,8 +116,10 @@ class ExcelExportController extends Controller
                 ->on('journals.code_group', '=', 'sub_journals.code_group');
         })->pluck('journals.amount_saldo', 'journals.code_group')->all();
 
-        $journals = Journal::whereIn('code_group', $coas)->whereMonth('created_at', $month)->whereYear('created_at', $year)->with(['lawanCode:name,code_group'])
-            ->orderBy('index_date', 'asc')->get()->groupBy('code_group');
+        $journals = Journal::leftJoin('chart_accounts as lawan_code','lawan_code.code_group','=','journals.lawan_code_group')->whereIn('journals.code_group', $coas)->whereMonth('journals.created_at', $month)->whereYear('journals.created_at', $year)
+            ->orderBy('journals.index_date', 'asc')
+            ->select('journals.*', 'lawan_code.name as lawan_code_name')
+            ->get()->groupBy('code_group');
         $chartAccount = ChartAccount::whereIn('chart_accounts.code_group', $coas)->withAlias()->orderBy('chart_accounts.code_group')->pluck('alias_name', 'code_group');
         foreach ($coas as $coa) {
             if (!array_key_exists($coa, $journals->all())) {

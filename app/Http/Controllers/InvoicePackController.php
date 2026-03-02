@@ -250,6 +250,7 @@ class InvoicePackController extends Controller
         } finally {
         }
     }
+
     public function createClaimPembelian(Request $request)
     {
         $toko = Toko::first();
@@ -257,15 +258,19 @@ class InvoicePackController extends Controller
         $coaHutangKas = $request->input('coa_hutang_kas');
         $invoicePackID = $request->input('invoice_pack_id');
         $date = $request->input('date');
+        $invoicePack = InvoicePack::find($invoicePackID);
+        if (!$invoicePack) {
+            return ['status' => 0, 'msg' => 'Invoice tidak ditemukan'];
+        }
+        if (!$date) {
+            $date = $invoicePack->created_at;
+        }
         $isBackdate = 0;
         if (carbonDate()->subMinutes(5) > $date) {
             //date lebih dari 5 menit dari sekarang, berarti backdate
             $isBackdate = 1;
         }
-        $invoicePack = InvoicePack::find($invoicePackID);
-        if (!$invoicePack) {
-            return ['status' => 0, 'msg' => 'Invoice tidak ditemukan'];
-        }
+
         $chartPersediaan = ChartAccount::where('code_group', $coaPersediaan)->first();
         $chartHutangKas = ChartAccount::where('code_group', $coaHutangKas)->first();
         if (!$chartPersediaan || !$chartHutangKas) {

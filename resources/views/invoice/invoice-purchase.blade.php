@@ -82,6 +82,15 @@
         </div>
     </form>
 
+    <div class="fixed" style="top:100px; right:20px; z-index:1000; width:500px;">
+        <div class="row">
+            <div class="col-md-12 col-xs-12 ">
+                <div class="bglevel1 p-2 mb-2 hidden" id="div-selected">
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <div class="card mb-4 shadow p-3">
         <div class="text-primary-dark "> 📁 <strong>DAFTAR INVOICE</strong></div>
@@ -123,6 +132,7 @@
                             <th>Total</th>
                             <th>Status </th>
                             <th>Aksi</th>
+                            <th> <input type="checkbox" id="select-all" onchange="selectCheckToggleAll()"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -148,7 +158,9 @@
                                         <td rowspan="{{ $rowspan }}">{{ $no++ }}</td>
                                         <td rowspan="{{ $rowspan }}">
                                             {{ createCarbon($item->created_at)->format('Y-m-d') }}</td>
-                                        <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }}  <br>  <i class="fas fa-user"></i>{{$item->parent->factur_supplier_number}}</td>
+                                        <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }} <br> <i
+                                                class="fas fa-user"></i>{{ $item->parent->factur_supplier_number }}
+                                        </td>
                                         <td rowspan="{{ $rowspan }}">{{ $item->supplier->name ?? '-' }}</td>
                                     @endif
 
@@ -179,8 +191,11 @@
                                                 </div>
                                             @endif
 
+                                            <input type="hidden" id="total-{{ $item->parent->id }}"
+                                                value="{{ $item->parent->total_price }}">
+
                                         </td>
-                                        <td rowspan="{{ $rowspan }}">
+                                        <td id="status-{{ $item->parent->id }}" rowspan="{{ $rowspan }}">
                                             @if ($item->parent->is_final == 1)
                                                 <span class="badge mb-1 bg-success">FINAL</span>
                                             @else
@@ -190,16 +205,19 @@
                                                 <span class="badge mb-1 bg-success"><i class="fas fa-coins"></i> LUNAS
                                                 </span>
                                             @else
-                                                <span class="badge mb-1 bg-secondary"><i class="fas fa-coins"></i> terbayar
+                                                <span class="badge mb-1 bg-secondary"><i class="fas fa-coins"></i>
+                                                    terbayar
                                                     {{ $item->parent->prosen_pembayaran }}%
                                                 </span>
                                             @endif
 
                                             @if ($item->parent->prosen_mutasi >= 100)
-                                                <span class="badge mb-1 bg-success"><i class="fas fa-boxes"></i> MUTASI
+                                                <span class="badge mb-1 bg-success"><i class="fas fa-boxes"></i>
+                                                    MUTASI
                                                     FULL</span>
                                             @else
-                                                <span class="badge mb-1 bg-secondary"><i class="fas fa-boxes"></i> termutasi
+                                                <span class="badge mb-1 bg-secondary"><i class="fas fa-boxes"></i>
+                                                    termutasi
                                                     {{ $item->parent->prosen_mutasi }}%
                                                 </span>
                                             @endif
@@ -232,6 +250,10 @@
                                                     class="btn btn-sm btn-outline-primary">
                                                     <i class="fas fa-paw"></i>
                                                 </a>
+                                            </td>
+                                            <td rowspan="{{ $rowspan }}"> <input
+                                                    onchange="updateTotalSelected()" type="checkbox"
+                                                    class="select-item" data-parent-id="{{ $item->parent->id }}">
                                             </td>
                                         @endif
                                     @endif
@@ -325,27 +347,96 @@
                 }
             }
 
-            function makeFinal(id) {
-                swalConfirmAndSubmit({
-                    url: '{{ url('admin/invoice/invoice-make-final') }}',
-                    data: {
-                        id: id,
-                        _token: '{{ csrf_token() }}'
-                    },
-                    onSuccess: function(res) {
-                        html = ` <a href="javascript:void(lihatDetailInvoice('${res.msg.invoice_number}'))"
+            // function makeFinal(id) {
+            //     swalConfirmAndSubmit({
+            //         url: '{{ url('admin/invoice/invoice-make-final') }}',
+            //         data: {
+            //             id: id,
+            //             _token: '{{ csrf_token() }}'
+            //         },
+            //         onSuccess: function(res) {
+            //             html = ` <a href="javascript:void(lihatDetailInvoice('${res.msg.invoice_number}'))"
+    //                         class="btn btn-sm btn-outline-primary" title="Lihat Invoice">
+    //                         <i class="fas fa-eye"></i>
+    //                     </a>
+    //                      <a href="javascript:void(makeMark('${res.msg.id}'))"
+    //                         class="btn btn-sm btn-outline-primary">
+    //                         <i class="fas fa-paw"></i>
+    //                     </a>
+    //                     `;
+            //             $('#action' + id).html(html);
+            //             parents[id].is_final = 1;
+            //             updateTotalMarked();
+            //         },
+            //     });
+            // }
+
+
+            function makeFinal(id, aktifConfirm = true) {
+                return new Promise((resolve, reject) => {
+                    swalConfirmAndSubmit({
+                        aktif_konfirm: aktifConfirm,
+                        url: '{{ url('admin/invoice/invoice-make-final') }}',
+                        data: {
+                            id: id,
+                            _token: '{{ csrf_token() }}'
+                        },
+                        onSuccess: function(res) {
+                            html = ` <a href="javascript:void(lihatDetailInvoice('${res.msg.sales_order_number}'))"
                                     class="btn btn-sm btn-outline-primary" title="Lihat Invoice">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                 <a href="javascript:void(makeMark('${res.msg.id}'))"
-                                    class="btn btn-sm btn-outline-primary">
+                                  <a href="javascript:void(makeMark('${res.msg.id}'))"
+                                    class="btn btn-sm btn-outline-primary" title="tandai invoice">
                                     <i class="fas fa-paw"></i>
-                                </a>
+                                  </a>
+                                  <a href="javascript:void(processInvoice('${res.msg.id}'))"
+                                    class="btn btn-sm btn-outline-primary" title="Proses Invoice">
+                                    <i class="fas fa-file-invoice-dollar"></i>
+                                 </a>
                                 `;
-                        $('#action' + id).html(html);
-                        parents[id].is_final = 1;
-                        updateTotalMarked();
+                            $('#action' + id).html(html);
+
+                            // parents[id].is_final = 1;
+                            updateTotalMarked();
+                            setTimeout(() => {
+                                updateStatusRow(id);
+                            }, 100);
+                            resolve(res);
+                        },
+                        onError: function(err) {
+                            resolve({
+                                'status': 0,
+                                'msg': err
+                            });
+                        }
+                    });
+
+                });
+            }
+
+            function updateStatusRow(id) {
+                console.log('updating status for id: ' + id);
+                $.ajax({
+                    url: '{{ url('admin/invoice/update-status-invoice') }}/' + id,
+                    method: 'get',
+                    success: function(res) {
+                        console.log(res);
+                        if (res.status == 1) {
+                            html = `
+                                ${res.msg.is_final == 1 ? `<span class="badge mb-1 bg-success">FINAL</span>` : `<span class="badge mb-1 bg-warning">DRAFT</span>`}
+                                ${res.msg.prosen_pembayaran >= 100 ? `<span class="badge mb-1 bg-success"><i class="fas fa-coins"></i> LUNAS</span>` : `<span class="badge mb-1 bg-secondary"><i class="fas fa-coins"></i> terbayar ${res.msg.prosen_pembayaran}%</span>`}
+                                ${res.msg.prosen_mutasi >= 100 ? `<span class="badge mb-1 bg-success"><i class="fas fa-boxes"></i> MUTASI FULL</span>` : `<span class="badge mb-1 bg-secondary"><i class="fas fa-boxes"></i> termutasi ${res.msg.prosen_mutasi}%</span>`}       
+                            `;
+                            $('#status-' + id).html(html);
+                        } else {
+                            console.error('Error updating status:', res.msg);
+                        }
                     },
+                    error: function(res) {
+                        console.error('Error updating status:something went wrong');
+
+                    }
                 });
             }
 
@@ -359,10 +450,145 @@
                     },
                     success: function(res) {
                         $('.parent' + id).addClass('bg-primary-lightest');
-                        parents[id].is_mark = res.msg.is_mark;
+                        // parents[id].is_mark = res.msg.is_mark;
                         updateTotalMarked();
                     },
                 });
+            }
+
+            function processInvoice(id, aktifConfirm = true) {
+                return new Promise((resolve) => {
+                    swalConfirmAndSubmit({
+                        aktif_konfirm: aktifConfirm,
+                        url: '{{ url('admin/invoice/create-claim-pembelian') }}',
+                        data: {
+                            invoice_pack_id: id,
+                            coa_persediaan: 140001,
+                            coa_hutang_kas: 211000,
+                            date: null,
+                            _token: '{{ csrf_token() }}'
+                        },
+                        onSuccess: function(res) {
+                            resolve(res);
+                        },
+                        onError: function(err) {
+                            resolve({
+                                'status': 0,
+                                'msg': err
+                            });
+                        }
+                    });
+                });
+            }
+
+
+            async function makeFinalAll() {
+                parentsMarked = [];
+                $('.select-item:checked').each(function(i, elem) {
+                    id = $(elem).data('parent-id');
+                    parentsMarked.push(id);
+                });
+                console.log(parentsMarked);
+                if (parentsMarked.length == 0) {
+                    swal('Oops!', 'Tidak ada invoice yang ditandai untuk produksi!', 'warning');
+                    return;
+                }
+                $('#progress-selected').css('width', '0%').html('0%');
+                $('#div-progressbar-selected').removeClass('hidden');
+                totalItems = parentsMarked.length;
+                i = 0;
+                for (const id of parentsMarked) {
+                    res = await makeFinal(id, false);
+                    if (res.status == 0) {
+                        await new Promise((resolve) => {
+                            Swal.fire('Oops!', 'Gagal membuat final untuk SO: ' +
+                                ': ' + res.msg,
+                                'error').then(() => {
+                                resolve();
+                            });
+                        })
+                    }
+                    i++;
+                    percent = Math.round((i / totalItems) * 100);
+                    $('#progress-selected').css('width', percent + '%').html(percent + '%');
+                }
+                setTimeout(() => {
+                    $('#div-progressbar-selected').addClass('hidden');
+                }, 2000);
+            }
+
+            async function invoicingAll() {
+                parentsMarked = [];
+                $('.select-item:checked').each(function(i, elem) {
+                    id = $(elem).data('parent-id');
+                    parentsMarked.push(id);
+                });
+                console.log(parentsMarked);
+                if (parentsMarked.length == 0) {
+                    swal('Oops!', 'Tidak ada invoice yang ditandai untuk produksi!', 'warning');
+                    return;
+                }
+                $('#progress-selected').css('width', '0%').html('0%');
+                $('#div-progressbar-selected').removeClass('hidden');
+                totalItems = parentsMarked.length;
+                i = 0;
+                for (const id of parentsMarked) {
+                    res = await processInvoice(id, false);
+                    if (res.status == 0) {
+                        await new Promise((resolve) => {
+                            Swal.fire('Oops!', 'Gagal membuat final untuk SO: ' +
+                                ': ' + res.msg,
+                                'error').then(() => {
+                                resolve();
+                            });
+                        })
+                    }
+                    i++;
+                    percent = Math.round((i / totalItems) * 100);
+                    $('#progress-selected').css('width', percent + '%').html(percent + '%');
+                }
+                setTimeout(() => {
+                    $('#div-progressbar-selected').addClass('hidden');
+                }, 2000);
+            }
+
+            function selectCheckToggleAll() {
+                $('.select-item').prop('checked', $('#select-all').is(':checked'));
+
+                updateTotalSelected();
+            }
+
+
+            function updateTotalSelected() {
+                let total = 0;
+                let html = '';
+                selectedCount = $('.select-item:checked').length;
+                totalSelected = $('.select-item:checked').each(function() {
+                    const parentId = $(this).data('parent-id');
+                    total += parseFloat($('#total-' + parentId).val());
+                });
+                html = `
+                       Selected ${selectedCount} items, Total: <strong>Rp${formatRupiah(total)}</strong>
+                       <div>
+                          <button class="btn btn-sm btn-success mt-2" onclick="makeFinalAll()"> <i class="fas fa-upload"></i> make final</button>
+                          <button class="btn btn-sm btn-danger mt-2" onclick="cancelFinalAll()"> <i class="fas fa-close"></i> batal final</button>
+                          <button class="btn btn-sm btn-success mt-2" onclick="invoicingAll()"> <i class="fas fa-exchange-alt"></i> Mutasi</button>
+
+                       </div>
+                       <div style="max-width:300px; width:100%;" class="mt-2 hidden" id="div-progressbar-selected">
+                            <div class="progress progress-modern mb-3">
+                                <div class="progress-bar" id="progress-selected" role="progressbar" style="width: 65%;">
+                                    65%
+                                </div>
+                            </div>
+                       </div>
+                    `;
+                if (selectedCount > 0) {
+                    $('#div-selected').removeClass('hidden');
+                    $('#div-selected').html(html);
+                } else {
+                    $('#div-selected').addClass('hidden');
+                }
             }
 
             function updateTotalMarked() {
@@ -536,7 +762,8 @@
             $(document).ready(function() {
                 addrow();
                 parents = {!! json_encode($parent) !!};
-
+                console.log(parents);
+                updateTotalSelected();
             });
         </script>
     @endpush

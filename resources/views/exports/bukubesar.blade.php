@@ -30,7 +30,7 @@
                     <td>{{ $index + 1 }}</td>
                     <td>{{ \Carbon\Carbon::parse($item['created_at'])->format('Y-m-d H:i:s') }}</td>
                     <td>{{ $item['journal_number'] }}</td>
-                    <td>{{ $item['lawan_code_group'] }} - {{ $item['lawan_code'] ? $item['lawan_code']['name'] : '?' }}
+                    <td>{{ $item['lawan_code_group'] }} - {{ $item['lawan_code_name'] ?? '?' }}
                     </td>
                     <td>{{ $item['description'] }}</td>
                     <td style="text-align:right;">{{ number_format($item['amount_debet'], 2, ',', '.') }}</td>

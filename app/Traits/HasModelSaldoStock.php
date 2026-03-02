@@ -75,7 +75,7 @@ trait HasModelSaldoStock
                 DB::raw('coalesce(mutasi_qty_backend,0) as mutasi'),
             )->get();
         $summary = collect($summary)->merge(collect($saldoAkhir))->merge(collect($mutasi));
-
+     
         $dataStock = DB::table('stocks')->whereIn('stocks.id', $summary->pluck('stock_id')->all())->join('stock_categories', 'stocks.category_id', '=', 'stock_categories.id')
             ->join('stock_units', function ($join) {
                 $join->on('stocks.id', '=', 'stock_units.stock_id')

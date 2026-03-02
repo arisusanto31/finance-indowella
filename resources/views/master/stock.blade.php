@@ -12,7 +12,20 @@
 
     <div class="card shadow-sm mb-4">
         <h5 class="text-primary-dark card-header" style="padding-bottom:0px;"> 🍱 <strong>STOCK</strong> </h5>
-
+        
+        @if($problemsUnit->count() > 0)
+        <div class="card-body pa-2">
+            <div class="alert alert-warning mb-0" role="alert">
+                <strong> {{ $problemsUnit->count() }} stock </strong> belum memiliki unit default!
+                <ul>
+                    @foreach ($problemsUnit as $item)
+                        <li>{{ $item->name }}</li>
+                    @endforeach
+                </ul>
+                <button onclick="fixNullUnitDefault()"> <i class="fas fa-wrench"></i> Fix them! </button>
+            </div>
+        </div>
+        @endif
         <div class="card-body">
             <div class="row mt-1">
                 <div class="col-md-3">
@@ -167,6 +180,29 @@
 
             }
 
+            function fixNullUnitDefault() {
+                $.ajax({
+                    url: '{{ route('stock.fix-null-unit-default') }}',
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(res) {
+                        console.log(res);
+                        if (res.status == 1) {
+                            Swal.fire('Berhasil', 'berhasil memperbaiki stock dengan unit default null', 'success');
+                            location.reload();
+                        } else {
+                            Swal.fire('Gagal', 'gagal memperbaiki stock dengan unit default null:' + res.msg, 'error');
+                        }
+                    },
+                    error: function(err) {
+                        console.log(err);
+                        Swal.fire('opps', "Gagal memperbaiki stock dengan unit default null", 'error');
+                    }
+                });
+            }
+
             function tambahSatuan(id) {
                 $.ajax({
                     url: '{{ route('stock.unit-store') }}',
@@ -291,23 +327,23 @@
                                                             ${
                                                             item.units.length == 0 ? '<div class="text-center">belum ada satuan apapun</div>' : 
                                                             item.units.map(unit => `
-                                                                                        <div class="row mb-2">
-                                                                                            <div class="col-md-4">
-                                                                                                <input class="form-control" placeholder="nama satuan" value="${unit.unit}" />
-                                                                                            </div>
-                                                                                            <div class="col-md-4">
-                                                                                                <div class="row">
-                                                                                                    <div class="col-xs-12" style="position:relative; width:100%">
-                                                                                                        <span class="unit-form${item.id}" style="position:absolute; right:20px; top:7px; color:#bbb"> ${item.unit_backend}</span>
-                                                                                                        <input class="form-control" placeholder="konversi" value="${unit.konversi}" />
+                                                                                                <div class="row mb-2">
+                                                                                                    <div class="col-md-4">
+                                                                                                        <input class="form-control" placeholder="nama satuan" value="${unit.unit}" />
+                                                                                                    </div>
+                                                                                                    <div class="col-md-4">
+                                                                                                        <div class="row">
+                                                                                                            <div class="col-xs-12" style="position:relative; width:100%">
+                                                                                                                <span class="unit-form${item.id}" style="position:absolute; right:20px; top:7px; color:#bbb"> ${item.unit_backend}</span>
+                                                                                                                <input class="form-control" placeholder="konversi" value="${unit.konversi}" />
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                    <div class="col-md-3">
+                                                                                                        ${item.unit_default == unit.unit ? '<div class="bg-primary  colorwhite px-2 rounded-1"> default</div>' : ''}
                                                                                                     </div>
                                                                                                 </div>
-                                                                                            </div>
-                                                                                            <div class="col-md-3">
-                                                                                                ${item.unit_default == unit.unit ? '<div class="bg-primary  colorwhite px-2 rounded-1"> default</div>' : ''}
-                                                                                            </div>
-                                                                                        </div>
-                                                                                        `).join('')}
+                                                                                                `).join('')}
                                                         </div>
                                                         <div class="mb-1">+ tambah satuan baru</div>
                                                         <form id="create-unit${item.id }">

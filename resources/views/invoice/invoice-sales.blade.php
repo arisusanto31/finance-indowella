@@ -177,9 +177,6 @@
                                                         <i class="fas fa-upload"></i>
                                                     </a>
 
-
-
-
                                                     <a href="javascript:void(editInvoiceSales('{{ $item->invoice_pack_number }}'))"
                                                         class="btn btn-sm btn-outline-primary" title="Edit Invoice">
                                                         <i class="fas fa-edit"></i>
