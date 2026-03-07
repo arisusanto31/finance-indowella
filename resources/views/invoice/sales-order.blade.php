@@ -679,7 +679,7 @@
                                 'error').then(() => {
                                 resolve();
                             });
-                        })
+                        });
                     }
                     i++;
                     percent = Math.round((i / totalItems) * 100);
