@@ -39,6 +39,15 @@ class KartuInventory extends Model
     ];
 
 
+    public function lawanCodeGroup()
+    {
+        return $this->belongsTo(ChartAccount::class, 'lawan_code_group', 'code_group');
+    }
+
+    public function codeGroup(){
+        return $this->belongsTo(ChartAccount::class, 'code_group', 'code_group');
+    }
+
     protected static function booted()
     {
 
@@ -105,7 +114,6 @@ class KartuInventory extends Model
                 'date'           => 'required|date',
                 'code_group'      => 'required|integer',
                 'lawan_code_group' => 'required|integer',
-               
             ]);
 
 

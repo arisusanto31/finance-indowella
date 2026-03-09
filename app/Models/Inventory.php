@@ -11,7 +11,9 @@ class Inventory extends Model
     protected $table = "inventories";
     public $timestamps  = true;
 
-
+    public function toko(){
+        return $this->belongsTo(Toko::class, 'toko_id');
+    }
     protected static function booted()
     {
 

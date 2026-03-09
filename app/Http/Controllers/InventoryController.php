@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ChartAccountAlias;
+use App\Models\DetailKartuInvoice;
 use App\Models\Inventory;
 use App\Models\KartuInventory;
 use App\Models\TaskImportDetail;
@@ -43,6 +45,15 @@ class InventoryController extends Controller
     {
         return view('daftar.modal._create_inventory');
     }
+
+    public function editInventory($id)
+    {
+        $inventory = Inventory::find($id);
+        $kartu = KartuInventory::where('inventory_id', $id)->where('type_mutasi', 'pembelian')->where('book_journal_id', bookID())->first();
+        $aliasChart = ChartAccountAlias::pluck('name', 'code_group')->toArray();
+        return view('daftar.modal._edit_inventory', compact('inventory', 'kartu', 'aliasChart'));
+    }
+
     public function createKartuInventory()
     {
         return view('daftar.modal._kartu_inventory');
@@ -113,6 +124,59 @@ class InventoryController extends Controller
                 'msg' => $th->getMessage()
             ];
         }
+    }
+
+    public function updateInventory(Request $request)
+    {
+        $request = $request->validate([
+            'id' => 'required|integer',
+            'name' => 'required|string',
+            'keterangan_qty_unit' => 'string',
+            'date' => 'required|date',
+            'nilai_perolehan' => 'required|numeric',
+            'periode' => 'required|integer'
+        ]);
+
+        $inv = Inventory::find($request['id']);
+        if (!$inv) {
+            return [
+                'status' => 0,
+                'msg' => 'Data tidak ditemukan'
+            ];
+        }
+        $kartu = KartuInventory::where('inventory_id', $request['id'])->where('type_mutasi', 'pembelian')->where('book_journal_id', bookID())->first();
+        if ($kartu) {
+            //edit kartunya
+
+            //cek jurnal
+            $link = DetailKartuInvoice::where('kartu_type', KartuInventory::class)->where('kartu_id', $kartu->id)->first();
+            if ($link) {
+                if ($link->journal_id) {
+                    //mending hapus aja jurnal lama, trus create baru.
+                    throw new \Exception('inventaris ini tidak bisa diupdate karena memiliki jurnal, hapus jurnal terlebih dahulu');
+                }
+            }
+        } else {
+            //buat kartu baru kalo emang ga ada
+            $st = KartuInventory::createKartu(new Request([
+                'inventory_id' => $inv->id,
+                'date' => $request['date'],
+                'description' => $request['description'],
+                'toko_id' => $request['toko_id'],
+                'amount' => $request['nilai_perolehan'], // ini pake format indonesia
+                'type_mutasi' => 'pembelian',
+                'code_group' => $request['code_group'],
+                'lawan_code_group' => $request['lawan_code_group'],
+                'is_otomatis_jurnal' => $request['is_otomatis_jurnal'] ?? 0,
+            ]));
+        }
+        $inv->update($request);
+
+
+        return [
+            'status' => 1,
+            'msg' => $inv
+        ];
     }
 
     public function storeKartuInventory(Request $request)

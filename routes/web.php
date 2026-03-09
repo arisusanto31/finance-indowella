@@ -117,8 +117,10 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::prefix('aset-tetap')->name('aset-tetap.')->group(function () {
             Route::get('/', [InventoryController::class, 'index'])->name('index');
             Route::get('/create_', [InventoryController::class, 'createInventory'])->name('create');
+            Route::get('/edit-data/{id}', [InventoryController::class, 'editInventory'])->name('edit-data');
             Route::get('/create-kartu', [InventoryController::class, 'createKartuInventory'])->name('create-kartu');
             Route::post('/store-inventory', [InventoryController::class, 'storeInventory'])->name('store-inventory');
+            Route::post('/update-inventory', [InventoryController::class, 'updateInventory'])->name('update-inventory');
             Route::post('/store-kartu-inventory', [InventoryController::class, 'storeKartuInventory'])->name('store-kartu-inventory');
             Route::get('/get-item', [InventoryController::class, 'getItem'])->name('get-item');
             Route::get('/get-summary', [InventoryController::class, 'getSummary'])->name('get-summary');
@@ -218,7 +220,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::post('recalculate', [KartuBahanJadiController::class, 'recalculate'])->name('recalculate');
             Route::post('delete-mutation', [KartuBahanJadiController::class, 'deleteMutation'])->name('delete-mutation');
         });
-        
+
         Route::prefix('kartu-hutang')->name('kartu-hutang.')->group(function () {
             Route::resource('main', KartuHutangController::class);
             Route::post('create-mutation', [KartuHutangController::class, 'createMutation'])->name('create-mutation');

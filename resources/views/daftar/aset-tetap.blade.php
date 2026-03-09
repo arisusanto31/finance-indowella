@@ -261,6 +261,10 @@
                 showDetailOnModal('{{ route('aset-tetap.create') }}');
             }
 
+            function showModalEditInventory(id) {
+                showDetailOnModal('{{ url('admin/daftar/aset-tetap/edit-data') }}/' + id);
+            }
+
             function showModalKartuInventory() {
                 showDetailOnModal('{{ route('aset-tetap.create-kartu') }}');
             }
@@ -340,7 +344,9 @@
                                     stringData += `
                 <tr>
                   <td class="sticky-col-1">${indexInv + 1}</td>
-                  <td class="sticky-col-2"><div class="wrapper-scroll-horizontal">${dataInv.name} [id:${invID}] </div></td>
+                  <td class="sticky-col-2"><div class="wrapper-scroll-horizontal">
+                    <button onclick="showDetailOnModal('{{ url('admin/daftar/aset-tetap/edit-data') }}/${invID}','xl')"><i class="fas fa-edit"></i></button>
+                    ${dataInv.name} [id:${invID}] </div></td>
                
                   <td class="sticky-col-3">${dataInv.keterangan_qty_unit}</td>
                   <td class="sticky-col-4">${dataInv.periode} tahun</td>
@@ -421,7 +427,7 @@
                             });
                             $('#body-mutasi-keluar').html(stringData);
                             $('#kartuKeluar').DataTable({
-                              displayLength: -1
+                                displayLength: -1
                             });
                         } else {
                             Swal.fire('ops', 'something error ' + res.msg, 'error');
@@ -444,7 +450,6 @@
                             var stringData = "";
                             res.msg.forEach(function eachData(data, i) {
                                 dataMutasi[data.id] = data;
-
                                 stringData += `<tr>
                                 <td>${i+1}</td>
                                 <td>${data.date}</td>
@@ -452,7 +457,6 @@
                                 <td>${data.type_aset}</td>
                                 <td>${formatRupiah(data.amount)}</td>
                                 <td>${(!data.journal_number?'<span> belum ada jurnal</span> <button onclick="openLinkJournal('+data.id+')"> <i class="fas fa-link"></i> jurnal</button>':data.journal_number)}</td>
-                                          
                               </tr>`;
                             });
                             $('#body-mutasi-masuk').html(stringData);
@@ -482,12 +486,10 @@
             function openLinkJournal(id) {
                 $('#modal-journal').modal('show');
                 $('#keterangan-kartu').html(`
-         <p>Link Kartu Inventory ID :  ${id}</p>
-         <p>${dataMutasi[id].name} - ${dataMutasi[id].type_aset} :${formatRupiah(dataMutasi[id].amount)}</p>
-        
-        `);
+                    <p>Link Kartu Inventory ID :  ${id}</p>
+                    <p>${dataMutasi[id].name} - ${dataMutasi[id].type_aset} :${formatRupiah(dataMutasi[id].amount)}</p>
+                `);
                 $('#model_id').val(id);
-
             }
 
             function linkJournal() {
@@ -543,14 +545,14 @@
                             html = "";
                             res.msg.forEach(function eachData(data) {
                                 html += `
-                    <a href="javascript:void(pilihJurnal(${data.id}))" >
-                        <div id="item-jurnal${data.id}" class="col-md-12 col-xs-12 item-jurnal colorblack " style="position:relative; border-bottom:1px solid black;">
-                            <span style="position:absolute; top:0px; left:-17px"> <i class="fas fa-circle"></i></span>
+                                    <a href="javascript:void(pilihJurnal(${data.id}))" >
+                                        <div id="item-jurnal${data.id}" class="col-md-12 col-xs-12 item-jurnal colorblack " style="position:relative; border-bottom:1px solid black;">
+                                            <span style="position:absolute; top:0px; left:-17px"> <i class="fas fa-circle"></i></span>
 
-                            <label  for="journal_id_${data.id}">${data.journal_number} - ${data.description} - ${formatNormalDateTime(new Date(data.created_at))} : ${formatRupiah(data.amount_debet - data.amount_kredit)}</label>
-                        </div>
-                    </a>
-                `;
+                                            <label  for="journal_id_${data.id}">${data.journal_number} - ${data.description} - ${formatNormalDateTime(new Date(data.created_at))} : ${formatRupiah(data.amount_debet - data.amount_kredit)}</label>
+                                        </div>
+                                    </a>
+                                `;
                             });
                             $('#container-journal').html(html);
                         } else {
@@ -562,8 +564,6 @@
                     }
                 });
             }
-
-
             function pilihJurnal(id) {
                 $('.item-jurnal').removeClass('bg-primary colorwhite');
                 $('#item-jurnal' + id).addClass('bg-primary colorwhite');

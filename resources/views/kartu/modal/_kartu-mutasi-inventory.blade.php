@@ -41,12 +41,9 @@
                                 {{ format_price(abs($item->amount)) }}
                                 {{ $item->unit }}
                             @endif
-
                         </td>
-                       
                         <td>
                             {{ format_price($item->nilai_buku) }}
-
                         </td>
                     </tr>
                 @endforeach

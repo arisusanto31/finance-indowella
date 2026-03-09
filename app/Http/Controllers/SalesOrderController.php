@@ -258,7 +258,7 @@ class SalesOrderController extends Controller
             $sales_order_number = $request->sales_order_number . '-draft';
             $grouped = [];
             foreach ($arrayStockID as $i => $stockId) {
-                $nilaiPPN = $isPPN == 1 ? format_db($request->total_price[$i]) * 0.11 : 0;
+                $nilaiPPN = $isPPN == 1 ? format_db($request->total_price[$i]) * 11/100 : 0;
                 $grouped[] = [
                     'sales_order_number' => $sales_order_number,
                     'stock_id' => $stockId,
@@ -797,7 +797,9 @@ class SalesOrderController extends Controller
                     $detail->total_price   = $total;
                     $detail->price = ($total) / $detail->quantity;
                     $detail->sales_order_number = $request->sales_order_number;
-
+                    if($detail->is_ppn){
+                        $detail->total_ppn_k = $total * 11/100;
+                    }
                     $detail->created_at = $tanggalGlobal;
 
 
