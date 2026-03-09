@@ -817,6 +817,9 @@ class SalesOrderController extends Controller
 
 
             $salesOrder->total_price = $totalBaru;
+            if($salesOrder->is_ppn){
+                $salesOrder->total_ppn_k = $totalBaru * 11/100;
+            }
             $salesOrder->save();
 
             DB::commit();
