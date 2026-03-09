@@ -75,14 +75,14 @@
         <div class="row">
             <div class="col mb-3">
                 <label for="" class="form-label">Date</label>
-                <input class="form-control" type="datetime-local" value="{{$inventory->date }}" name="date" id="date-input" />
+                <input class="form-control" type="datetime-local" value="{{$kartu->created_at }}" name="date" id="date-input" />
             </div>
         </div>
         <div class="row">
 
             <div class="col mb-3">
                 <label for="unit" class="form-label">Nilai perolehan</label>
-                <input type="text" value="{{ $inventory->nilai_perolehan }}" class="form-control currency-input" name="nilai_perolehan"
+                <input type="text" value="{{ $inventory->nilai_perolehan }}" class="form-control" name="nilai_perolehan"
                     placeholder="contoh: 17.000.000" />
             </div>
         </div>
