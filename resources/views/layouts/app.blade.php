@@ -209,6 +209,10 @@
                 url: url,
                 method: 'GET',
                 success: function(response) {
+                    loading(0);
+                    if($('#btn-show-link').length){
+                        $('#btn-show-link').attr('disabled', false);
+                    }
                     // kalau berhasil, baru atur ukuran modal dan tampilkan
                     const modalDialog = $('#global-modal').find('.modal-dialog');
                     modalDialog.removeClass('modal-xl modal-lg');

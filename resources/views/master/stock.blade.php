@@ -50,11 +50,11 @@
                 <div class="clearfix"></div>
                 @if (book()->name == 'Buku Toko')
                     <div class="col-md-4">
-                        <button onclick="showLink()" class="btn-primary"> Sinkronkan dengan stock TOKO</button>
+                        <button id="btn-show-link" onclick="showLink()" class="btn-primary"> Sinkronkan dengan stock TOKO</button>
                     </div>
                 @elseif(book()->name == 'Buku Manufaktur')
                     <div class="col-md-4">
-                        <button onclick="showLink()" class="btn-primary"> Sinkronkan dengan stock MANUF</button>
+                        <button id="btn-show-link" onclick="showLink()" class="btn-primary"> Sinkronkan dengan stock MANUF</button>
                     </div>
                 @endif
 
@@ -173,6 +173,8 @@
             });
 
             function showLink() {
+                $('#btn-show-link').attr('disabled', true);
+                loading(1);
                 id = '{{ book()->id }}';
                 finalUrl = '{{ route('stock.open-sinkron', ['id' => 'idreplace']) }}';
                 finalUrl = finalUrl.replace('idreplace', id);
