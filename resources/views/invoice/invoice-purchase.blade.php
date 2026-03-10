@@ -305,8 +305,8 @@
 
     @push('scripts')
         <script>
-            initItemSelectManual('.select2-stock', '{{ url('admin/master/stock/get-item') }}', '-- Pilih Produk --');
-            initItemSelectManual('.select2-supplier', '{{ url('admin/master/supplier/get-item') }}', '-- Pilih Supplier --');
+            initItemSelectManual('.select2-stock', '{{ url('admin/master/stock/get-item') }}', '-- Pilih Produk --','#invoice-wrapper');
+            initItemSelectManual('.select2-supplier', '{{ url('admin/master/supplier/get-item') }}', '-- Pilih Supplier --','#card-create');
 
             function lihatDetailInvoice(invoiceNumber) {
                 showDetailOnModal('{{ url('admin/invoice/show-detail') }}/' + invoiceNumber, 'xl');
@@ -754,7 +754,12 @@
                 </div>
                     `;
                 $('#invoice-wrapper').append(newRow);
-                initItemSelectManual('.select2-stock', '{{ url('admin/master/stock/get-item') }}', '-- Pilih Produk --');
+                $('.select2-stock').each(function(i,elem){
+                    if(!$(elem).hasClass('select2-hidden-accessible')){
+                        initItemSelectManual(elem, '{{ url('admin/master/stock/get-item') }}', '-- Pilih Produk --','#invoice-wrapper');
+                    }
+                });
+                // initItemSelectManual('', '{{ url('admin/master/stock/get-item') }}', '-- Pilih Produk --');
 
 
             }
