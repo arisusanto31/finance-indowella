@@ -590,7 +590,7 @@ class SalesOrderController extends Controller
             }
         } else {
 
-            $sales = $sales->join('transactions as tr', 'tr.package_id', '=', 'pack.id');
+            // $sales = $sales->join('transactions as tr', 'tr.package_id', '=', 'pack.id');
             if (getInput('toko')) {
                 $sales = $sales->whereIn('t.id', explode(',', getInput('toko')));
             }

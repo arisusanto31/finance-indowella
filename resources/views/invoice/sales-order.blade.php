@@ -260,7 +260,7 @@
                                             {{ $item->created_at->format('Y-m-d') }}
                                             <div id="ket-finish{{ $item->parent->id }}"></div>
                                         </td>
-                                        <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }} 
+                                        <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }}
                                             <br>
                                             <span style="color:#bbb;">({{ $item->draft_number }})</span>
                                         </td>
@@ -392,9 +392,10 @@
             </div>
             <div class="d-flex align-item-center justify-content-center">
                 <div>
-                    <button @if ($page <= 1) disabled @endif onclick="prevPage()"> <i class="fas fa-chevron-left"></i></button>
+                    <button @if ($page <= 1) disabled @endif onclick="prevPage()"> <i
+                            class="fas fa-chevron-left"></i></button>
                     <span> halaman <input style="width: 50px; text-align: center;" type="number"
-                            value="{{$page}}" onchange="goToPage(this.value)" />
+                            value="{{ $page }}" onchange="goToPage(this.value)" />
                         / {{ $totalPage }} </span>
                     <button @if ($page >= $totalPage) disabled @endif onclick="nextPage()"> <i
                             class="fas fa-chevron-right"></i></button>
@@ -470,6 +471,9 @@
                     applyFilter();
                 }
             }
+
+
+           
 
             function nextPage() {
                 currentPage = {{ getInput('page') ? getInput('page') : 1 }};

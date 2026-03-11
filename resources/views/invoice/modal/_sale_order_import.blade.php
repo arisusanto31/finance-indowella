@@ -83,6 +83,9 @@
                 </div>
             </div>
             <div class="col-md-4 d-flex justify-content-end">
+                <div id="div-perpage">
+
+                </div>
                 <div id="div-page">
 
                 </div>
@@ -154,6 +157,33 @@
     var batchedCandidateFactur = [];
     var perPage = 15;
     var page = 1;
+    var lastRes = null;
+
+    function changeDataPerPage(value) {
+        perPage = value;
+        batch = 0;
+        count = 0;
+        allCandidateFactur = {};
+        selectedFactur = {};
+        batchedCandidateFactur = {};
+        batchedCandidateFactur[batch] = {};
+        lastRes.msg.forEach(function(item, i) {
+            count++;
+            if (count > perPage) {
+                batch++;
+                count = 1;
+                batchedCandidateFactur[batch] = {};
+            }
+            allCandidateFactur[item.id] = item;
+            batchedCandidateFactur[batch][item.id] = item;
+        });
+        renderTable(1);
+    }
+
+
+    function getBatch(b){
+        console.log("data:", batchedCandidateFactur[b]);
+    }
 
     function getImportData() {
         loading(1);
@@ -171,27 +201,29 @@
             success: function(res) {
                 loading(0);
                 console.log(res);
+                lastRes = res;
                 html = "";
                 // if (toko == "") {
                 //     updateSelectToko(res.msg);
                 // }
-                batch = 0;
-                count = 0;
-                allCandidateFactur = {};
-                selectedFactur = {};
-                batchedCandidateFactur = {};
-                batchedCandidateFactur[batch] = {};
-                res.msg.forEach(function(item, i) {
-                    count++;
-                    if (count > perPage) {
-                        batch++;
-                        count = 1;
-                        batchedCandidateFactur[batch] = {};
-                    }
-                    allCandidateFactur[item.id] = item;
-                    batchedCandidateFactur[batch][item.id] = item;
-                });
-                renderTable(1);
+                changeDataPerPage(perPage);
+                // batch = 0;
+                // count = 0;
+                // allCandidateFactur = {};
+                // selectedFactur = {};
+                // batchedCandidateFactur = {};
+                // batchedCandidateFactur[batch] = {};
+                // res.msg.forEach(function(item, i) {
+                //     count++;
+                //     if (count > perPage) {
+                //         batch++;
+                //         count = 1;
+                //         batchedCandidateFactur[batch] = {};
+                //     }
+                //     allCandidateFactur[item.id] = item;
+                //     batchedCandidateFactur[batch][item.id] = item;
+                // });
+                // renderTable(1);
 
 
             },
@@ -211,14 +243,23 @@
             allTrans[item.id] = item;
             jumlah = item.details.length;
             $('#div-page').html(
-                `   <div class="relative-pos">
+                `  
+                    <div class="relative-pos">
                        <span class="absolute-pos" style="left:10px; top:5px;"> <i class="fas fa-file"></i> </span>
-                    <input class="" style="width:100px; padding-left:30px;"
+                      <input class="" style="width:100px; padding-left:30px;"
                       type="text" onchange="renderTable(this.value)" id="search-page" 
                       value="${thepage}" > of ${Object.keys(batchedCandidateFactur).length} Page
                     </div>
                 `
             );
+            $('#div-perpage').html(
+                ` <div class="relative-pos">
+                         <span class="absolute-pos" style="left:10px; top:5px;"><i class="fas fa-divide"></i> </span>
+                      <input class="" style="width:100px; padding-left:30px;"
+                      type="text" onchange="changeDataPerPage(this.value)" 
+                      value="${perPage}" />
+                    </div>
+                    `);
             allIDFactur = Object.keys(selectedFactur);
             console.log('all id factur', allIDFactur);
             item.details.forEach(function(detail, j) {
