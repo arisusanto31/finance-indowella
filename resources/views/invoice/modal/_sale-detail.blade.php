@@ -96,7 +96,7 @@
                             <div class="col-md-2 col-xs-12">
                                 <label>Jumlah</label>
                                 <input type="text" class="form-control" placeholder="nilai pembayaran"
-                                    value="{{ $data->total_price }}" id="uangmuka-amount" />
+                                    value="{{ format_db_to_id($data->total_price) }}" id="uangmuka-amount" />
                             </div>
 
                             <div class="col-md-2 col-xs-12">
@@ -431,7 +431,7 @@
                             <div class="col-md-2 col-xs-12">
                                 <label>Jumlah bayar</label>
                                 <input type="text" class="form-control" placeholder="nilai pembayaran"
-                                    name="amount" id="bayar-invoice-amount" value="{{ $data->total_price }}" />
+                                    name="amount" id="bayar-invoice-amount" value="{{ format_db_to_id($data->total_price) }}" />
                             </div>
 
                             <div class="col-md-3 col-xs-12">

@@ -258,7 +258,7 @@
                       <input class="" style="width:100px; padding-left:30px;"
                       type="text" onchange="changeDataPerPage(this.value)" 
                       value="${perPage}" />
-                    </div>
+                </div>
                     `);
             allIDFactur = Object.keys(selectedFactur);
             console.log('all id factur', allIDFactur);

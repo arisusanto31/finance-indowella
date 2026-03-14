@@ -225,6 +225,28 @@ function detectFormat($input)
         return 'unknown';
     }
 }
+
+/**
+ * mengubah  format db inggris -> format angka indo pke logic ini ya
+ * 
+ * 1234567.89 -> 1234567,89 
+ */
+function format_db_to_id($formatted)
+{
+    try {
+        // Cek format input
+        $format = detectFormat($formatted);
+       
+        if ($format == 'database') {
+            info(str_replace('.', ',', $formatted));
+            return str_replace('.', ',', $formatted);
+        } else {
+            return (string) $formatted; // kalo ternyata ini sudah format indo, yaudah dikembalikan aja
+        }
+    } catch (\Exception $e) {
+        return '0';
+    }
+}
 if (!function_exists('format_db')) {
     /**
      * Mengubah string harga terformat ke format angka standar (float string)
