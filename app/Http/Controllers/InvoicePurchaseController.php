@@ -315,6 +315,7 @@ class InvoicePurchaseController extends Controller
                     'invoice_pack_number' => $invoicePackNumber,
                     'invoice_pack_id' => $invoicePackID,
                     'amount_mutasi' => $nilaiMutasi,
+                    'factur_supplier_number' => $invoicePack->factur_supplier_number,
                     'person_id' => $invoicePack->person_id,
                     'person_type' => $invoicePack->person_type,
                     'code_group' => $coaKredit,
@@ -430,11 +431,13 @@ class InvoicePurchaseController extends Controller
         $date = $request->input('date');
         $invoicePack = InvoicePack::find($invoicePackID);
         $invoicePackNumber = $invoicePack ? $invoicePack->invoice_number : '';
+        $facturSupplierNumber = $invoicePack ? $invoicePack->factur_supplier_number : '';
 
         if ($coaKredit > 200000) {
             //brati hutang, buat kartu hutang ya lur
             $kartu = KartuHutang::createMutation(new Request([
                 'invoice_pack_number' => $invoicePackNumber,
+                'factur_supplier_number' => $facturSupplierNumber,
                 'invoice_pack_id' => $invoicePackID,
                 'amount_mutasi' => $nilaiMutasi,
                 'person_id' => $invoicePack->person_id ?? null,

@@ -312,6 +312,7 @@ class InvoicePackController extends Controller
                 $kartu = KartuHutang::createMutation(new Request([
                     'invoice_pack_number' => $invoicePack->invoice_number,
                     'invoice_pack_id' => $invoicePackID,
+                    'factur_supplier_number' => $invoicePack->factur_supplier_number,
                     'amount_mutasi' => $invoicePack->total_price,
                     'person_id' => $invoicePack->person_id,
                     'person_type' => $invoicePack->person_type,

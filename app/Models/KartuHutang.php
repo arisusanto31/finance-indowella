@@ -111,6 +111,7 @@ class KartuHutang extends Model
                 $kartu->type = $request->input('type');
                 $kartu->invoice_pack_number = $invoiceNumber;
                 $kartu->invoice_pack_id = $invoiceID;
+                $kartu->factur_supplier_number = $request->input('factur_supplier_number');
                 $kartu->purchase_order_number = $PONumber;
                 $kartu->purchase_order_id = $POID;
                 $kartu->description = $request->input('description');
@@ -176,8 +177,14 @@ class KartuHutang extends Model
             $invoiceID = $invoice ? $invoice->id : null;
             $PO = PurchaseOrder::where('purchase_order_number', $PONumber)->first();
             $POID = $PO ? $PO->id : null;
-            $tokoid= $request->input('toko_id');
-
+            $tokoid = $request->input('toko_id');
+            $facturSupplierNumber = $request->input('factur_supplier_number');
+            if (!$facturSupplierNumber) {
+                $facturSupplierNumber = $invoice ? $invoice->factur_supplier_number : null;
+                if (!$facturSupplierNumber) {
+                    $facturSupplierNumber = $invoiceNumber;
+                }
+            }
 
             $amountMutasi = $request->input('amount_mutasi');
             $personID = $request->input('person_id');
@@ -203,7 +210,7 @@ class KartuHutang extends Model
                         'amount' => $amountMutasi,
                         'reference_id' => null,
                         'reference_type' => null,
-                        'toko_id'=>$tokoid
+                        'toko_id' => $tokoid
                     ],
                 ];
                 $debets = [
@@ -213,7 +220,7 @@ class KartuHutang extends Model
                         'amount' => $amountMutasi,
                         'reference_id' => null,
                         'reference_type' => null,
-                        'toko_id'=>$tokoid
+                        'toko_id' => $tokoid
                     ],
                 ];
                 $st = JournalController::createBaseJournal(new Request([
@@ -244,6 +251,7 @@ class KartuHutang extends Model
                 'purchasing_id' => null,
                 'invoice_pack_id' => $invoiceID,
                 'invoice_pack_number' => $invoiceNumber,
+                'factur_supplier_number' => $facturSupplierNumber,
                 'purchase_order_id' => $POID,
                 'purchase_order_number' => $PONumber,
                 'description' => $desc,
@@ -291,6 +299,13 @@ class KartuHutang extends Model
             $PONumber = $request->input('purchase_order_number');
             $invoice = InvoicePack::where('invoice_number', $invoiceNumber)->first();
             $invoiceID =  $invoice ? $invoice->id : null;
+            $facturSupplierNumber = $request->input('factur_supplier_number');
+            if (!$facturSupplierNumber) {
+                $facturSupplierNumber = $invoice ? $invoice->factur_supplier_number : null;
+                if (!$facturSupplierNumber) {
+                    $facturSupplierNumber = $invoiceNumber;
+                }
+            }
             $PO = PurchaseOrder::where('purchase_order_number', $PONumber)->first();
             $POID = $PO ? $PO->id : null;
             $amountBayar = $request->input('amount_bayar');
@@ -357,6 +372,7 @@ class KartuHutang extends Model
             $st = self::createKartu(new Request([
                 'type' => 'pelunasan',
                 'purchasing_id' => null,
+                'factur_supplier_number' => $facturSupplierNumber,
                 'invoice_pack_number' => $invoiceNumber,
                 'invoice_pack_id' => $invoiceID,
                 'purchase_order_id' => $POID,
@@ -373,7 +389,7 @@ class KartuHutang extends Model
                 'code_group' => $codeGroup,
                 'lawan_code_group' => $lawanCodeGroup,
                 'code_group_name' => $codeName,
-                'date'=>$date
+                'date' => $date
             ]));
 
             if ($st['status'] == 1) {
@@ -395,20 +411,21 @@ class KartuHutang extends Model
         }
     }
 
-    public function refreshSaldo(){
-        if($this->tag){
+    public function refreshSaldo()
+    {
+        if ($this->tag) {
             //jika ada tag menandakan ini saldo awal import
             info('kartu hutang - refresh saldo import awal tidak bisa diproses');
             return $this;
         }
-         $last=KartuHutang::where('person_id', $this->person_id)->where('person_type', $this->person_type)
-            ->where('invoice_pack_number', $this->invoice_pack_number)->where('index_date', '<', $this->index_date)->orderBy('index_date','desc')->first();
-        $saldoFactur= $last ? $last->amount_saldo_factur : 0;
-        $this->amount_saldo_factur=$saldoFactur + $this->amount_debet - $this->amount_kredit;
-        $lastSaldoPerson = KartuHutang::where('person_id',$this->person_id)->where('person_type',$this->person_type)
-            ->where('index_date', '<', $this->index_date)->orderBy('index_date','desc')->first();
-        $saldoPerson= $lastSaldoPerson ? $lastSaldoPerson->amount_saldo_person : 0;
-        $this->amount_saldo_person=$saldoPerson + $this->amount_debet - $this->amount_kredit;
+        $last = KartuHutang::where('person_id', $this->person_id)->where('person_type', $this->person_type)
+            ->where('invoice_pack_number', $this->invoice_pack_number)->where('index_date', '<', $this->index_date)->orderBy('index_date', 'desc')->first();
+        $saldoFactur = $last ? $last->amount_saldo_factur : 0;
+        $this->amount_saldo_factur = $saldoFactur + $this->amount_debet - $this->amount_kredit;
+        $lastSaldoPerson = KartuHutang::where('person_id', $this->person_id)->where('person_type', $this->person_type)
+            ->where('index_date', '<', $this->index_date)->orderBy('index_date', 'desc')->first();
+        $saldoPerson = $lastSaldoPerson ? $lastSaldoPerson->amount_saldo_person : 0;
+        $this->amount_saldo_person = $saldoPerson + $this->amount_debet - $this->amount_kredit;
         $this->save();
         return $this;
     }

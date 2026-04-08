@@ -12,7 +12,7 @@ class KartuHutangFacturSupplierNumber extends Command
      *
      * @var string
      */
-    protected $signature = 'app:dummy-kartu-hutang-factur-supplier-number';
+    protected $signature = 'dummy:kartu-hutang-factur-supplier-number';
 
     /**
      * The console command description.
