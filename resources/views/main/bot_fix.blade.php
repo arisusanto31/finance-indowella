@@ -1,6 +1,8 @@
 <x-app-layout>
 
    <div class="mb-4 card shadow p-3">
+        <div class="text-primary-dark "> 🤖 <strong>BOT FIX JOURNAL  </strong> </div>
+   
     <div class="row mt-2 p-3 bglevel1">
         <div class="col-xs-12 bglevel1">
             <div class="row">
