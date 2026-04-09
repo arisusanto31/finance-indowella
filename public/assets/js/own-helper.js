@@ -218,7 +218,9 @@ function initItemSelectManual(el, url, placeholder = "", parent = null) {
     if (placeholder == "")
         placeholder = "Cari berdasarkan nama ..."
     if (parent == null) {
-        parent = $(el).closest('div');
+        // parent = $(el).closest('div')
+        // ;
+        parent=$('body');
     }
     $(el).select2({
         placeholder: placeholder,
