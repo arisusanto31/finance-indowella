@@ -1,6 +1,7 @@
 <x-app-layout>
 
-    <div class="row mt-50 pa-30 bglevel1">
+   <div class="mb-4 card shadow p-3">
+    <div class="row mt-2 p-3 bglevel1">
         <div class="col-xs-12 bglevel1">
             <div class="row">
                 <div class="col-xs-6 col-md-2">
@@ -16,6 +17,7 @@
             </div>
         </div>
     </div>
+</div>
 
 
 
