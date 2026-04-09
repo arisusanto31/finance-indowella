@@ -286,6 +286,71 @@ class JournalController extends Controller
         }
     }
 
+
+    function botFixJournal()
+    {
+        return view('main.bot_fix');
+    }
+
+      public static function cariProblemJournal()
+    {
+        $indexAwal = getInput('index_date') ? getInput('index_date') : 0;
+        $indexAwal= intval(createCarbon($indexAwal)->format('ymdHis00'));
+        $indexAkhir = $indexAwal + 10000000000;
+        try {
+            $journals = Journal::whereBetween('index_date', [$indexAwal, $indexAkhir])->select('index_date', 'journal_number', 'description', 'amount_kredit', 'amount_debet', 'code_group', 'amount_saldo', 'id')->orderBy('index_date', 'asc')->get();
+            $sub = Journal::select(DB::raw('max(index_date) as max_index_date'), 'code_group')->where('index_date', '<', $indexAwal)->whereNotNull('amount_saldo')->groupBy('code_group');
+            $lastJournal = Journal::joinSub($sub, 'last', function ($join) {
+                $join->on('last.code_group', '=', 'journals.code_group')
+                    ->on('last.max_index_date', '=', 'journals.index_date');
+            })->select('journals.code_group', 'journals.index_date', 'journals.amount_debet', 'journals.amount_kredit', 'journals.amount_saldo', 'journals.journal_number', 'journals.id', 'journals.created_at')->get()->keyBy('code_group');
+
+            foreach ($journals as $journal) {
+                // $last = Journal::where('code_group', $journal->code_group)->where('index_date', '<', $journal->index_date)->orderBy('index_date', 'desc')->first();
+
+                $last = $lastJournal[$journal->code_group] ?? null;
+                if (!$last) {
+                    $last =  new Journal;
+                    $last->amount_saldo = 0;
+                    $last->code_group = $journal->code_group;
+                }
+                if ($journal->code_group < 200000) { //aset
+                    $mutasi = $journal->amount_debet - $journal->amount_kredit;
+                } else {
+                    $mutasi = $journal->amount_kredit - $journal->amount_debet;
+                }
+                $lastSaldo = $last ? $last->amount_saldo : 0;
+                $saldo = floatval($journal->amount_saldo);
+                $koreksi = floatval($lastSaldo + $mutasi);
+
+                if (abs($saldo - $koreksi) > 0.001) {
+                    return ['status' => 1, 'last' => $last, 'now' => $journal, 'perhitungan' => ($saldo - $koreksi)];
+                }
+                $lastJournal[$journal->code_group] = $journal; //update last journal
+            }
+            return [
+                'status' => 0,
+                'msg' => 'tidak ada problem'
+            ];
+        } catch (Throwable $e) {
+            return [
+                'status' => 0,
+                'msg' => $e->getMessage()
+            ];
+        }
+    }
+
+    public function recalculateJournal($id){
+        $journal= Journal::find($id);
+        if($journal){
+            $journal->recalculateJournal();
+        }
+        return [
+            'status' => 1,
+            'msg' => 'done'
+        ];
+    }
+
     public static function createBaseJournal(Request $request, $useTransaction = true, ?LockManager $lockManager = null)
     {
         $urlTryAgain = $request->input('url_try_again');

@@ -74,6 +74,10 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::get('/', [IndexController::class, 'dashboard'])->name('index');;
         Route::get('/inspect-jurnal', [IndexController::class, 'inspectJurnal'])->name('inspect-jurnal');
     });
+
+    Route::get('recalculate-journal/{id}', [JournalController::class, 'recalculateJournal'])->name('recalculate-journal');
+    Route::get('bot-fix-journal', [JournalController::class, 'botFixJournal'])->name('bot-fix-journal');
+    Route::get('cari-problem-journal', [JournalController::class, 'cariProblemJournal']);
     Route::get('/login-dashboard', [IndexController::class, 'loginDashboard']);
     Route::get('/neraca', [JournalController::class, 'neraca']);
     Route::get('/neraca-lajur', [JournalController::class, 'neracalajur']);

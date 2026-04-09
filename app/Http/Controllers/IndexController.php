@@ -250,7 +250,6 @@ class IndexController extends Controller
             return $sodetail;
         }
 
-
         if (getInput('type') == 'repair-task') {
 
             $task = TaskImportDetail::where('type', 'kartu_stock');
