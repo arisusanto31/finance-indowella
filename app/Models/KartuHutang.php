@@ -69,6 +69,7 @@ class KartuHutang extends Model
 
         $personID = $request->input('person_id');
         $personType = $request->input('person_type');
+        $facturNumber = $request->input('factur_supplier_number');
         $lock = Cache::lock('create-kartu-utang' . $personType . '-' . $personID, 90);
         info('kartu utang - trying to create kartu utang');
         try {
@@ -97,7 +98,7 @@ class KartuHutang extends Model
                 $indexDate = self::getNextIndexDate($date);
 
                 $lastKartu = KartuHutang::where('person_id', $personID)->where('person_type', $personType)
-                    ->where('invoice_pack_number', $invoiceNumber)->where('index_date', '<', $indexDate)->orderBy('index_date', 'desc')->first();
+                    ->where('factur_supplier_number', $facturNumber)->where('index_date', '<', $indexDate)->orderBy('index_date', 'desc')->first();
                 $lastSaldoPurchase =  $lastKartu ? $lastKartu->amount_saldo_factur : 0;
                 $lastSaldoFactur = $lastSaldoPurchase;
                 $lastSaldoPerson = KartuHutang::whereIn('index_date', function ($q) use ($personID, $personType, $indexDate) {
@@ -105,13 +106,13 @@ class KartuHutang extends Model
                         ->where('index_date', '<', $indexDate)
                         ->select(
                             DB::raw('max(index_date) as maxid'),
-                        )->groupBy('invoice_pack_number');
+                        )->groupBy('factur_supplier_number');
                 })->sum('amount_saldo_factur');
                 $kartu = new KartuHutang();
                 $kartu->type = $request->input('type');
                 $kartu->invoice_pack_number = $invoiceNumber;
                 $kartu->invoice_pack_id = $invoiceID;
-                $kartu->factur_supplier_number = $request->input('factur_supplier_number');
+                $kartu->factur_supplier_number = $facturNumber;
                 $kartu->purchase_order_number = $PONumber;
                 $kartu->purchase_order_id = $POID;
                 $kartu->description = $request->input('description');
@@ -172,19 +173,18 @@ class KartuHutang extends Model
             $date = $request->input('date') ?? now();
             self::proteksiBackdate($date);
             $invoiceNumber = $request->input('invoice_pack_number');
+            $facturSupplierNumber = $request->input('factur_supplier_number');
+            if (!$facturSupplierNumber) {
+                throw new \Exception('factur supplier number is required');
+            }
             $PONumber = $request->input('purchase_order_number');
-            $invoice = InvoicePack::where('invoice_number', $invoiceNumber)->first();
+            $invoice = InvoicePack::where('factur_supplier_number', $facturSupplierNumber)->first();
+            $invoiceNumber = $invoice ? $invoice->invoice_number : $invoiceNumber;
             $invoiceID = $invoice ? $invoice->id : null;
             $PO = PurchaseOrder::where('purchase_order_number', $PONumber)->first();
             $POID = $PO ? $PO->id : null;
             $tokoid = $request->input('toko_id');
-            $facturSupplierNumber = $request->input('factur_supplier_number');
-            if (!$facturSupplierNumber) {
-                $facturSupplierNumber = $invoice ? $invoice->factur_supplier_number : null;
-                if (!$facturSupplierNumber) {
-                    $facturSupplierNumber = $invoiceNumber;
-                }
-            }
+
 
             $amountMutasi = $request->input('amount_mutasi');
             $personID = $request->input('person_id');

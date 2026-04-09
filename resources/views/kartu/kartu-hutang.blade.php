@@ -293,18 +293,12 @@
                                 value="{{ now() }}" placeholder="date" />
                         </div>
                     </div>
+                    
                     <div class="row">
                         <div class="col mb-3">
-                            <label for="nameBasic" class="form-label">Nomer Purchase Order</label>
-                            <input type="text" id="pelunasan-purchase_order" class="form-control"
-                                placeholder="Nomer Purchase Order" />
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col mb-3">
-                            <label for="nameBasic" class="form-label">Nomer Invoice</label>
+                            <label for="nameBasic" class="form-label">Nomer Faktur Supplier</label>
                             <input type="text" id="pelunasan-factur" class="form-control"
-                                placeholder="Nomer Invoice" />
+                                placeholder="Nomer Faktur Supplier" />
                         </div>
                     </div>
                     <div class="row">
@@ -529,7 +523,7 @@
                     method: 'post',
                     data: {
                         date: $('#pelunasan-date').val(),
-                        invoice_pack_number: $('#pelunasan-factur').val(),
+                        factur_supplier_number: $('#pelunasan-factur').val(),
                         purchase_order_number: $('#pelunasan-purchase_order').val(),
                         description: $('#pelunasan-description').val(),
                         amount_bayar: formatDB($('#pelunasan-amount').val(), 'id'),
