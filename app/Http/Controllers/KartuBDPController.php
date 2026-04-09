@@ -262,7 +262,7 @@ class KartuBDPController extends Controller
                 'saldo_rupiah_total as rupiah_saldo',
                 'ks.journal_number',
 
-            )->get();
+            )->orderBy('ks.index_date','asc')->get();
         $view->title = $name . ' [' . $stock->id . ']';
         $view->datas = $dataHistory;
         $view->model = 'kartu-bdp';
