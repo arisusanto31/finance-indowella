@@ -25,7 +25,7 @@
                 @foreach ($datas as $data)
                     <tr>
                         <td>{{ $data->created_at }}</td>
-                        <td>{{ $data->description }}</td>
+                        <td>[uid:{{$data->id}}]<br>{{ $data->description }}</td>
                         <td class="text-success">
                             @if ($data->qty_debet != 0)
                                 {{ format_price($data->qty_debet) }} {{ $data->unit }}
