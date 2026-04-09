@@ -434,7 +434,7 @@ class KartuHutang extends Model
     public function recalculateSaldo()
     {
         $kartus = KartuHutang::where('person_id', $this->person_id)->where('person_type', $this->person_type)
-            ->where('invoice_pack_number', $this->invoice_pack_number)->where('index_date', '>', $this->index_date)->get();
+            ->where('factur_supplier_number', $this->factur_supplier_number)->where('index_date', '>', $this->index_date)->get();
 
         $saldo = $this->amount_saldo_factur;
         foreach ($kartus as $kartu) {
