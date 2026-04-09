@@ -347,7 +347,8 @@ class JournalController extends Controller
         }
         return [
             'status' => 1,
-            'msg' => 'done'
+            'msg' => $journal
+        
         ];
     }
 
