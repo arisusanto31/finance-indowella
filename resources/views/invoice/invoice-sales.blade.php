@@ -240,24 +240,24 @@
 
     @push('scripts')
         <script>
-            initItemSelectManual('.select2-stock', '{{ url('admin/master/stock/get-item') }}', '-- Pilih Produk --');
-            initItemSelectManual('.select2-customer', '{{ url('admin/master/customer/get-item') }}', '-- Pilih Customer --');
-            initItemSelectManual('.select2-toko', '{{ url('admin/master/toko/get-item') }}', '-- Pilih Toko --');
+            initItemSelectManual('.select2-stock', '{{ url("admin/master/stock/get-item") }}', '-- Pilih Produk --');
+            initItemSelectManual('.select2-customer', '{{ url("admin/master/customer/get-item") }}', '-- Pilih Customer --');
+            initItemSelectManual('.select2-toko', '{{ url("admin/master/toko/get-item") }}', '-- Pilih Toko --');
 
             function lihatDetailInvoice(invoiceNumber) {
-                showDetailOnModal('{{ url('admin/invoice/show-detail') }}/' + invoiceNumber, 'xl');
+                showDetailOnModal('{{ url("admin/invoice/show-detail") }}/' + invoiceNumber, 'xl');
             }
 
             function editInvoiceSales(invoiceNumber) {
                 console.log("ari data :" + invoiceNumber);
-                showDetailOnModal('{{ url('/admin/invoice/invoice-sales/edit') }}/' + invoiceNumber, 'xl');
+                showDetailOnModal('{{ url("/admin/invoice/invoice-sales/edit") }}/' + invoiceNumber, 'xl');
             }
 
 
 
 
             function openImport(bookID) {
-                showDetailOnModal('{{ url('admin/invoice/open-import') }}/' + bookID, 'xl');
+                showDetailOnModal('{{ url("admin/invoice/open-import") }}/' + bookID, 'xl');
             }
 
             function openCardCreate() {
@@ -278,7 +278,7 @@
 
             function submitInvoice() {
                 swalConfirmAndSubmit({
-                    url: '{{ route('invoice.sales.store') }}',
+                    url: '{{ route("invoice.sales.store") }}',
                     data: $('#form-invoice').serialize(),
                     onSuccess: function(res) {
                         if (res.status == 1) {
@@ -297,7 +297,7 @@
                     month = 12;
                     year--;
                 }
-                window.location.href = '{{ url('admin/invoice/invoice-sales') }}?month=' + month + '&year=' + year;
+                window.location.href = '{{ url("admin/invoice/invoice-sales") }}?month=' + month + '&year=' + year;
             }
 
             function nextMonth() {
@@ -308,7 +308,7 @@
                     month = 1;
                     year++;
                 }
-                window.location.href = '{{ url('admin/invoice/invoice-sales') }}?month=' + month + '&year=' + year;
+                window.location.href = '{{ url("admin/invoice/invoice-sales") }}?month=' + month + '&year=' + year;
             }
 
 
@@ -336,7 +336,7 @@
 
             function makeFinal(id) {
                 swalConfirmAndSubmit({
-                    url: '{{ url('admin/invoice/invoice-make-final') }}',
+                    url: '{{ url("admin/invoice/invoice-make-final") }}',
                     data: {
                         id: id,
                         _token: '{{ csrf_token() }}'
@@ -355,7 +355,7 @@
 
             function makeMark(id) {
                 $.ajax({
-                    url: '{{ url('admin/invoice/invoice-mark') }}',
+                    url: '{{ url("admin/invoice/invoice-mark") }}',
                     method: 'post',
                     data: {
                         id: id,
@@ -390,7 +390,7 @@
                 const id = selectedOption.value;
                 console.log('searching for ' + id);
                 $.ajax({
-                    url: '{{ url('admin/master/stock/get-unit') }}/' + id,
+                    url: '{{ url("admin/master/stock/get-unit") }}/' + id,
                     method: 'get',
                     success: function(res) {
                         console.log(res);
@@ -450,7 +450,7 @@
                 </div>
                     `;
                 $('#invoice-wrapper').append(newRow);
-                initItemSelectManual('.select2-stock', '{{ url('admin/master/stock/get-item') }}', '-- Pilih Produk --');
+                initItemSelectManual('.select2-stock', '{{ url("admin/master/stock/get-item") }}', '-- Pilih Produk --');
 
 
             }

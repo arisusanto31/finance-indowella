@@ -89,13 +89,13 @@
             }
 
             function deleteToko(id) {
-                swalDelete('{{ url('admin/master/toko/main/destroy') }}/' + id);
+                swalDelete('{{ url("admin/master/toko/main/destroy") }}/' + id);
             }
 
             function changeCodeKas(id){
                 let selectedCode= $('#code-kas-'+id+' option:selected').val();
                 console.log('change code kas toko id='+id+' to '+selectedCode);
-                $.post('{{ route('toko.change-code-kas') }}',{
+                $.post('{{ route("toko.change-code-kas") }}',{
                     _token: '{{ csrf_token() }}',
                     toko_id: id,
                     code_group_kas: selectedCode
@@ -161,7 +161,7 @@
                     if (result.isConfirmed) {
                         console.log(result.value);
                         swalConfirmAndSubmit({
-                            url: '{{ route('toko.make-link-parent') }}',
+                            url: '{{ route("toko.make-link-parent") }}',
                             data: result.value,
                         });
                     }
@@ -173,7 +173,7 @@
 
                 let parentType = $('#select-parent-type option:selected').val();
                 console.log('change parent type = ' + parentType);
-                initItemSelectManual('#option-parent-id', '{{ route('toko.get-parent-option') }}?parent_type=' + parentType,
+                initItemSelectManual('#option-parent-id', '{{ route("toko.get-parent-option") }}?parent_type=' + parentType,
                     'Pilih Parent ID', '#swal-link-toko');
             }
 

@@ -371,7 +371,7 @@
                     swalInfo('opps', 'nomer invoice harus ada', 'warning');
                 }
                 $.ajax({
-                    url: '{{ url('admin/kartu/kartu-hutang/create-mutation') }}',
+                    url: '{{ url("admin/kartu/kartu-hutang/create-mutation") }}',
                     method: 'post',
                     data: {
                         date: $('#mutasi-date').val(),
@@ -412,7 +412,7 @@
                 month = '{{ $month }}';
                 year = '{{ $year }}';
                 $.ajax({
-                    url: '{{ route('kartu-hutang.get-mutasi-masuk') }}?month=' + month + '&year=' + year,
+                    url: '{{ route("kartu-hutang.get-mutasi-masuk") }}?month=' + month + '&year=' + year,
                     method: 'get',
                     success: function(res) {
                         loading(0);
@@ -456,7 +456,7 @@
                 month = '{{ $month }}';
                 year = '{{ $year }}';
                 $.ajax({
-                    url: '{{ route('kartu-hutang.get-mutasi-keluar') }}?month=' + month + '&year=' + year,
+                    url: '{{ route("kartu-hutang.get-mutasi-keluar") }}?month=' + month + '&year=' + year,
                     method: 'get',
                     success: function(res) {
                         loading(0);
@@ -502,7 +502,7 @@
                     month = 12;
                     year--;
                 }
-                window.location.href = '{{ url('admin/kartu/kartu-hutang/main') }}?month=' + month + '&year=' + year;
+                window.location.href = '{{ url("admin/kartu/kartu-hutang/main") }}?month=' + month + '&year=' + year;
             }
 
             function nextMonth() {
@@ -513,7 +513,7 @@
                     month = 1;
                     year++;
                 }
-                window.location.href = '{{ url('admin/kartu/kartu-hutang/main') }}?month=' + month + '&year=' + year;
+                window.location.href = '{{ url("admin/kartu/kartu-hutang/main") }}?month=' + month + '&year=' + year;
             }
 
             function storePelunasan() {
@@ -525,7 +525,7 @@
                     swalInfo('opps', 'nomer invoice harus ada', 'warning');
                 }
                 $.ajax({
-                    url: '{{ url('admin/kartu/kartu-hutang/create-pelunasan') }}',
+                    url: '{{ url("admin/kartu/kartu-hutang/create-pelunasan") }}',
                     method: 'post',
                     data: {
                         date: $('#pelunasan-date').val(),
@@ -565,9 +565,9 @@
                 type = $('#person_type option:selected').val();
                 if (type === 'App\\Models\\Supplier') {
                     console.log('init oy ' + type);
-                    initItemSelectManual('#person_id', '{{ route('supplier.get-item') }}', 'Person Name ..', '#basicModal');
+                    initItemSelectManual('#person_id', '{{ route("supplier.get-item") }}', 'Person Name ..', '#basicModal');
                 } else {
-                    initItemSelectManual('#person_id', '{{ route('other-person.get-item') }}', 'Person Name ..',
+                    initItemSelectManual('#person_id', '{{ route("other-person.get-item") }}', 'Person Name ..',
                         '#basicModal');
                 }
             }
@@ -576,22 +576,22 @@
                 type = $('#pelunasan-person_type option:selected').val();
                 if (type === 'App\\Models\\Supplier') {
                     console.log('init oy ' + type);
-                    initItemSelectManual('#pelunasan-person_id', '{{ route('supplier.get-item') }}', 'Person Name ..',
+                    initItemSelectManual('#pelunasan-person_id', '{{ route("supplier.get-item") }}', 'Person Name ..',
                         '#pelunasanModal');
                 } else {
-                    initItemSelectManual('#pelunasan-person_id', '{{ route('other-person.get-item') }}', 'Person Name ..',
+                    initItemSelectManual('#pelunasan-person_id', '{{ route("other-person.get-item") }}', 'Person Name ..',
                         '#pelunasanModal');
                 }
             }
             initSelectPerson();
             initSelectPersonPelunasan();
-            initItemSelectManual('#pelunasan-akun-bayar', '{{ route('chart-account.get-item') }}', 'akun pembayaran ..',
+            initItemSelectManual('#pelunasan-akun-bayar', '{{ route("chart-account.get-item") }}', 'akun pembayaran ..',
                 '#pelunasanModal');
-            initItemSelectManual('#pelunasan-akun-hutang', '{{ route('chart-account.get-item-keuangan') }}?kind=hutang',
+            initItemSelectManual('#pelunasan-akun-hutang', '{{ route("chart-account.get-item-keuangan") }}?kind=hutang',
                 'akun hutang ..', '#pelunasanModal');
-            initItemSelectManual('#akun-hutang', '{{ route('chart-account.get-item-keuangan') }}?kind=hutang',
+            initItemSelectManual('#akun-hutang', '{{ route("chart-account.get-item-keuangan") }}?kind=hutang',
                 'akun hutang ..', '#basicModal');
-            initItemSelectManual('#akun-lawan-hutang', '{{ route('chart-account.get-item') }}', 'akun lawan hutang ..',
+            initItemSelectManual('#akun-lawan-hutang', '{{ route("chart-account.get-item") }}', 'akun lawan hutang ..',
                 '#basicModal');
 
             function getSummary() {
@@ -599,7 +599,7 @@
                 year = '{{ $year }}';
                 console.log(month + ',' + year);
                 $.ajax({
-                    url: '{{ route('kartu-hutang.get-summary') }}?month=' + month + '&year=' + year,
+                    url: '{{ route("kartu-hutang.get-summary") }}?month=' + month + '&year=' + year,
                     method: 'get',
                     success: function(res) {
                         console.log(res);
@@ -631,7 +631,7 @@
                                     <td class="textright">${formatRupiah(data.saldo)}</td>
                                     <td class="textright">${formatRupiah(saldoAkhir)}</td>    
                                     <td>
-                                        <button type="button" class="btn btn-primary btn-sm" onclick="showDetailKartuHutang('${data.invoice_pack_number}')"><i class="fas fa-eye"></i> Detail</button>
+                                        <button type="button" class="btn btn-primary btn-sm" onclick="showDetailKartuHutang('${data.factur_supplier_number}')"><i class="fas fa-eye"></i> Detail</button>
                                     </td>                          
                                 </tr>
                             `;
@@ -662,7 +662,7 @@
             setTimeout(getSummary, 100);
 
             function showDetailKartuHutang(factur) {
-                showDetailOnModal('{{ url('admin/kartu/kartu-hutang/show-detail') }}/' + factur, 'xl');
+                showDetailOnModal('{{ url("admin/kartu/kartu-hutang/show-detail") }}/' + factur, 'xl');
             }
         </script>
     @endpush

@@ -253,7 +253,7 @@
                 };
                 console.log(data);
                 $.ajax({
-                    url: '{{ url('admin/kartu/kartu-dp-sales/create-mutation') }}',
+                    url: '{{ url("admin/kartu/kartu-dp-sales/create-mutation") }}',
                     method: 'post',
                     data: data,
                     success: function(res) {
@@ -284,7 +284,7 @@
                           <span class="visually-hidden">Loading...</span>
                         </div> storing data..`);
                 $.ajax({
-                    url: '{{ url('admin/kartu/kartu-dp-sales/create-pelunasan') }}',
+                    url: '{{ url("admin/kartu/kartu-dp-sales/create-pelunasan") }}',
                     method: 'post',
                     data: {
                         date: $('#pelunasan-date').val(),
@@ -330,7 +330,7 @@
                     month = 12;
                     year--;
                 }
-                window.location.href = '{{ url('admin/kartu/kartu-dp-sales/main') }}?month=' + month + '&year=' + year;
+                window.location.href = '{{ url("admin/kartu/kartu-dp-sales/main") }}?month=' + month + '&year=' + year;
             }
 
             function nextMonth() {
@@ -341,16 +341,16 @@
                     month = 1;
                     year++;
                 }
-                window.location.href = '{{ url('admin/kartu/kartu-dp-sales/main') }}?month=' + month + '&year=' + year;
+                window.location.href = '{{ url("admin/kartu/kartu-dp-sales/main") }}?month=' + month + '&year=' + year;
             }
 
             function initSelectPerson() {
                 type = $('#person_type option:selected').val();
                 if (type === 'App\\Models\\Customer') {
                     console.log('init oy ' + type);
-                    initItemSelectManual('#person_id', '{{ route('customer.get-item') }}', 'Person Name ..', );
+                    initItemSelectManual('#person_id', '{{ route("customer.get-item") }}', 'Person Name ..', );
                 } else {
-                    initItemSelectManual('#person_id', '{{ route('other-person.get-item') }}', 'Person Name ..',
+                    initItemSelectManual('#person_id', '{{ route("other-person.get-item") }}', 'Person Name ..',
                     );
 
                 }
@@ -360,27 +360,27 @@
                 type = $('#pelunasan-person_type option:selected').val();
                 if (type === 'App\\Models\\Customer') {
                     console.log('init oy ' + type);
-                    initItemSelectManual('#pelunasan-person_id', '{{ route('customer.get-item') }}', 'Person Name ..' );
+                    initItemSelectManual('#pelunasan-person_id', '{{ route("customer.get-item") }}', 'Person Name ..' );
                 } else {
-                    initItemSelectManual('#pelunasan-person_id', '{{ route('other-person.get-item') }}', 'Person Name ..');
+                    initItemSelectManual('#pelunasan-person_id', '{{ route("other-person.get-item") }}', 'Person Name ..');
 
                 }
             }
             initSelectPerson();
             initSelectPersonPelunasan();
-            initItemSelectManual('#pelunasan-akun-lawan', '{{ route('chart-account.get-item') }}', 'akun lawan ..');
-            initItemSelectManual('#pelunasan-akun-piutang', '{{ route('chart-account.get-item-keuangan') }}?kind=piutang',
+            initItemSelectManual('#pelunasan-akun-lawan', '{{ route("chart-account.get-item") }}', 'akun lawan ..');
+            initItemSelectManual('#pelunasan-akun-piutang', '{{ route("chart-account.get-item-keuangan") }}?kind=piutang',
                 'akun piutang ..');
-            initItemSelectManual('#akun-piutang', '{{ route('chart-account.get-item-keuangan') }}?kind=piutang',
+            initItemSelectManual('#akun-piutang', '{{ route("chart-account.get-item-keuangan") }}?kind=piutang',
                 'akun piutang ..');
-            initItemSelectManual('#akun-lawan', '{{ route('chart-account.get-item') }}', 'akun lawan ..');
+            initItemSelectManual('#akun-lawan', '{{ route("chart-account.get-item") }}', 'akun lawan ..');
 
             function getSummary() {
                 month = '{{ $month }}';
                 year = '{{ $year }}';
                 console.log(month + ',' + year);
                 $.ajax({
-                    url: '{{ route('kartu-dp-sales.get-summary') }}?month=' + month + '&year=' + year,
+                    url: '{{ route("kartu-dp-sales.get-summary") }}?month=' + month + '&year=' + year,
                     method: 'get',
                     success: function(res) {
                         console.log(res);
@@ -438,13 +438,13 @@
             }
 
             function showDetailKartu(factur) {
-                showDetailOnModal('{{ url('admin/kartu/kartu-dp-sales/show-detail') }}/' + factur, 'xl');
+                showDetailOnModal('{{ url("admin/kartu/kartu-dp-sales/show-detail") }}/' + factur, 'xl');
 
             }
 
             function refreshKartuDP(id) {
                 $.ajax({
-                    url: '{{ url('admin/kartu/kartu-dp-sales/refresh') }}/' + id,
+                    url: '{{ url("admin/kartu/kartu-dp-sales/refresh") }}/' + id,
                     method: 'get',
                     success: function(res) {
                         if (res.status == 1) {

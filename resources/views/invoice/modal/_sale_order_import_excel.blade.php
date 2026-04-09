@@ -84,8 +84,8 @@
 
 <script>
     console.log('masuk kok ini sale order import');
-    initItemSelectManual('#select-toko', '{{ route('toko.get-item') }}', 'pilih toko', '#global-modal');
-    initItemSelectManual('.select-coa-kas', '{{ route('chart-account.get-item-keuangan') }}?kind=kas', 'Pilih Akun Kas',
+    initItemSelectManual('#select-toko', '{{ route("toko.get-item") }}', 'pilih toko', '#global-modal');
+    initItemSelectManual('.select-coa-kas', '{{ route("chart-account.get-item-keuangan") }}?kind=kas', 'Pilih Akun Kas',
         '#global-modal');
     var allTrans = [];
 
@@ -116,7 +116,7 @@
         formData.append('_token', '{{ csrf_token() }}');
         formData.append('book_journal_id', id);
         $.ajax({
-            url: '{{ route('invoice.sales-get-data-import-excel') }}',
+            url: '{{ route("invoice.sales-get-data-import-excel") }}',
             data: formData,
             method: 'post',
             processData: false,
@@ -307,7 +307,7 @@
 
             console.log(dataPost);
             $.ajax({
-                url: '{{ route('invoice.sales-order.store') }}',
+                url: '{{ route("invoice.sales-order.store") }}',
                 data: dataPost,
                 method: 'post',
                 success: function(res) {

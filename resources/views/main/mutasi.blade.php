@@ -274,7 +274,7 @@
             var iRowDebet = 1;
             var iRowKredit = 1;
             setTimeout(() => {
-                initItemSelectManual('.select-coa', '{{ url('admin/master/chart-account/get-item') }}',
+                initItemSelectManual('.select-coa', '{{ url("admin/master/chart-account/get-item") }}',
                     'chart account');
             }, 100);
 
@@ -298,7 +298,7 @@
                 $('#date-closing-journal').val(date);
 
                 $.ajax({
-                    url: '{{ url('admin/jurnal/get-closing-journal') }}?date=' + date,
+                    url: '{{ url("admin/jurnal/get-closing-journal") }}?date=' + date,
                     method: 'get',
                     success: function(res) {
                         console.log(res);
@@ -322,7 +322,7 @@
 
             function submitClosingJournal() {
                 swalConfirmAndSubmit({
-                    url: '{{ url('admin/jurnal/tutup-jurnal') }}',
+                    url: '{{ url("admin/jurnal/tutup-jurnal") }}',
                     data: {
                         monthyear: $('#date-closing-journal').val(),
                         aksi: 1,
@@ -358,7 +358,7 @@
             </div>
           `;
                 debitWrapper.appendChild(newRow);
-                initItemSelectManual('.select-coa', '{{ url('admin/master/chart-account/get-item') }}',
+                initItemSelectManual('.select-coa', '{{ url("admin/master/chart-account/get-item") }}',
                     'chart account');
 
             });
@@ -383,7 +383,7 @@
             </div>
           `;
             kreditWrapper.appendChild(newRow);
-                initItemSelectManual('.select-coa', '{{ url('admin/master/chart-account/get-item') }}',
+                initItemSelectManual('.select-coa', '{{ url("admin/master/chart-account/get-item") }}',
                     'chart account');
             });
 
@@ -435,7 +435,7 @@
                             $('#kredit' + id).append(html);
                         }
                     }
-                    initItemSelectManual('#' + nametype + 'toko_id' + id, '{{ url('admin/master/toko/get-item') }}',
+                    initItemSelectManual('#' + nametype + 'toko_id' + id, '{{ url("admin/master/toko/get-item") }}',
                         'Pilih Toko');
                 }
 
@@ -452,7 +452,7 @@
                     month = 12;
                     year--;
                 }
-                window.location.href = '{{ url('admin/jurnal/mutasi') }}?month=' + month + '&year=' + year;
+                window.location.href = '{{ url("admin/jurnal/mutasi") }}?month=' + month + '&year=' + year;
             }
 
             function nextMonth() {
@@ -463,7 +463,7 @@
                     month = 1;
                     year++;
                 }
-                window.location.href = '{{ url('admin/jurnal/mutasi') }}?month=' + month + '&year=' + year;
+                window.location.href = '{{ url("admin/jurnal/mutasi") }}?month=' + month + '&year=' + year;
             }
 
             function submitJournalManual() {
@@ -533,7 +533,7 @@
                     preConfirm: () => {
                         return new Promise((resolve, reject) => {
                             $.ajax({
-                                url: '{{ url('admin/jurnal/submit-manual') }}',
+                                url: '{{ url("admin/jurnal/submit-manual") }}',
                                 method: 'post',
                                 data: data,
                                 success: function(res) {
@@ -569,7 +569,7 @@
                 coa = $('#search-coa').val();
                 loading(1);
                 $.ajax({
-                    url: '{{ url('admin/jurnal/get-list-mutasi') }}?search=' + description + '&coa=' + coa + '&page=' +
+                    url: '{{ url("admin/jurnal/get-list-mutasi") }}?search=' + description + '&coa=' + coa + '&page=' +
                         page + '&month={{ getInput('month') }}&year={{ getInput('year') }}&journal_number=' +
                         journal_number + '&namaCOA=' + name_coa,
                     type: 'GET',
@@ -696,7 +696,7 @@
             function previewDestroyJournal(id) {
                 return new Promise((resolve, reject) => {
                     $.ajax({
-                        url: '{{ url('admin/jurnal/preview-destroy') }}/' + id,
+                        url: '{{ url("admin/jurnal/preview-destroy") }}/' + id,
                         type: 'get',
                         success: function(res) {
                             if (res.status == 1) {
@@ -715,7 +715,7 @@
 
             function verifyJournal(id) {
                 $.ajax({
-                    url: '{{ url('admin/jurnal/verify') }}/' + id,
+                    url: '{{ url("admin/jurnal/verify") }}/' + id,
                     type: 'get',
                     success: function(res) {
                         if (res.status == 1) {
@@ -737,7 +737,7 @@
                 month = $('#month-export').val();
                 year = $('#year-export').val();
 
-                url = '{{ url('admin/export-data') }}?month=' + month + '&year=' + year;
+                url = '{{ url("admin/export-data") }}?month=' + month + '&year=' + year;
                 window.location.href = url;
             }
 
@@ -747,7 +747,7 @@
 
             function getTaskImport() {
                 $.ajax({
-                    url: '{{ url('admin/jurnal/get-task-import-aktif') }}',
+                    url: '{{ url("admin/jurnal/get-task-import-aktif") }}',
                     method: 'get',
                     success: function(res) {
                         console.log(res);

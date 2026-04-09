@@ -53,7 +53,7 @@
 
     @push('scripts')
         <script>
-            initItemSelectManual('.select-coa', '{{ route('chart-account.get-item-all') }}', 'chart account');
+            initItemSelectManual('.select-coa', '{{ route("chart-account.get-item-all") }}', 'chart account');
 
             function searchData() {
                 month = $('#month').val();
@@ -61,7 +61,7 @@
                 coa = $('#coa option:selected').val();
 
                 $.ajax({
-                    url: '{{ url('admin/jurnal/get-buku-besar') }}?coa=' + coa + '&month=' + month + '&year=' + year,
+                    url: '{{ url("admin/jurnal/get-buku-besar") }}?coa=' + coa + '&month=' + month + '&year=' + year,
                     method: 'get',
                     success: function(res) {
                         console.log(res);
@@ -156,7 +156,7 @@
             function updateNotValid(codeGroup) {
                 loading(1);
                 $.ajax({
-                    url: '{{ url('admin/jurnal/update-not-valid') }}?code_group=' + codeGroup,
+                    url: '{{ url("admin/jurnal/update-not-valid") }}?code_group=' + codeGroup,
                     method: 'get',
                     success: function(res) {
                         loading(0);

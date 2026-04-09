@@ -488,7 +488,7 @@
 
     function batalkanFinal(id) {
         swalConfirmAndSubmit({
-            url: '{{ url('admin/invoice/sales-cancel-final') }}',
+            url: '{{ url("admin/invoice/sales-cancel-final") }}',
             data: {
                 _token: '{{ csrf_token() }}',
                 id: id
@@ -642,7 +642,7 @@
 
     function getDataKartu() {
         $.ajax({
-            url: '{{ url('admin/invoice/get-data-kartu') }}/{{ $data->sales_order_number }}',
+            url: '{{ url("admin/invoice/get-data-kartu") }}/{{ $data->sales_order_number }}',
             method: 'get',
             success: function(res) {
                 console.log('hasil data kartu', res);
@@ -662,32 +662,32 @@
     function initAllItem() {
         setTimeout(function() {
             initItemSelectManual('#select-pcoa-persediaan',
-                '{{ route('chart-account.get-item-keuangan') }}?kind=persediaan', '- pilih akun -',
+                '{{ route("chart-account.get-item-keuangan") }}?kind=persediaan', '- pilih akun -',
                 '#global-modal #div-creation');
             initItemSelectManual('#select-pcoa-piutang-kas',
-                '{{ route('chart-account.get-item-keuangan') }}?kind=piutang|kas', '- pilih akun -',
+                '{{ route("chart-account.get-item-keuangan") }}?kind=piutang|kas', '- pilih akun -',
                 '#global-modal #div-creation');
             initItemSelectManual('#select-pcoa-penjualan',
-                '{{ route('chart-account.get-item-keuangan') }}?kind=penjualan', '- pilih akun -',
+                '{{ route("chart-account.get-item-keuangan") }}?kind=penjualan', '- pilih akun -',
                 '#global-modal #div-creation');
             initItemSelectManual('.select-coa-persediaan',
-                '{{ route('chart-account.get-item-keuangan') }}?kind=persediaan', '- pilih akun -',
+                '{{ route("chart-account.get-item-keuangan") }}?kind=persediaan', '- pilih akun -',
                 '#global-modal #div-creation');
             initItemSelectManual('#select-coa-hutang-kas',
-                '{{ route('chart-account.get-item-keuangan') }}?kind=hutang|kas', '- pilih akun -',
+                '{{ route("chart-account.get-item-keuangan") }}?kind=hutang|kas', '- pilih akun -',
                 '#global-modal #div-creation');
-            initItemSelectManual('.select-coa-kas', '{{ route('chart-account.get-item-keuangan') }}?kind=kas',
+            initItemSelectManual('.select-coa-kas', '{{ route("chart-account.get-item-keuangan") }}?kind=kas',
                 '- pilih akun -', '#global-modal #div-creation');
             initItemSelectManual('.select-coa-penjualan',
-                '{{ route('chart-account.get-item-keuangan') }}?kind=penjualan', '- pilih akun -',
+                '{{ route("chart-account.get-item-keuangan") }}?kind=penjualan', '- pilih akun -',
                 '#global-modal #div-creation');
             initItemSelectManual('.select-coa-piutang',
-                '{{ route('chart-account.get-item-keuangan') }}?kind=piutang', '- pilih akun -',
+                '{{ route("chart-account.get-item-keuangan") }}?kind=piutang', '- pilih akun -',
                 '#global-modal #div-creation');
             initItemSelectManual('.select-item-bahan',
-                '{{ route('stock.get-item') }}', '- pilih bahan -', '#global-modal #div-creation');
+                '{{ route("stock.get-item") }}', '- pilih bahan -', '#global-modal #div-creation');
             initItemSelectManual('.select-coa-kas-uangmuka',
-                '{{ route('chart-account.get-item-keuangan') }}?kind=kas|uang_muka_penjualan',
+                '{{ route("chart-account.get-item-keuangan") }}?kind=kas|uang_muka_penjualan',
                 '- pilih akun -', '#global-modal #div-creation');
         }, 350);
 
@@ -701,7 +701,7 @@
     function gantiBahanBDP(id) {
         stockid = $('#bdp-stock_id' + id + ' option:selected').val();
         $.ajax({
-            url: '{{ url('admin/master/stock/get-unit') }}/' + stockid,
+            url: '{{ url("admin/master/stock/get-unit") }}/' + stockid,
             method: 'get',
             success: function(res) {
                 console.log(res);
@@ -728,7 +728,7 @@
         stockID = $('#bdp-stock_id' + id).val();
         productionNumber = $('#bdp-spk_number' + id).val();
         $.ajax({
-            url: '{{ url('admin/invoice/hitung-kisaran-biaya') }}',
+            url: '{{ url("admin/invoice/hitung-kisaran-biaya") }}',
             method: 'post',
             data: {
                 _token: '{{ csrf_token() }}',
@@ -760,7 +760,7 @@
 
         allIDs = collect(data).pluck('id').all();
         $.ajax({
-            url: '{{ url('admin/invoice/hitung-reference-biaya') }}',
+            url: '{{ url("admin/invoice/hitung-reference-biaya") }}',
             method: 'post',
             data: {
                 _token: '{{ csrf_token() }}',
@@ -845,7 +845,7 @@
 
     function updateInputInvoice(number) {
         $.ajax({
-            url: '{{ url('admin/invoice/update-input-invoice') }}/' + number,
+            url: '{{ url("admin/invoice/update-input-invoice") }}/' + number,
             method: 'get',
             data: {
                 sales_order_number: number
@@ -878,7 +878,7 @@
     }
 
     function getInvoiceAktif(number) {
-        initItemSelectManual('#bayar-invoice-invoice_number', '{{ url('admin/invoice/get-item-invoice-aktif') }}/' +
+        initItemSelectManual('#bayar-invoice-invoice_number', '{{ url("admin/invoice/get-item-invoice-aktif") }}/' +
             number, '- pilih invoice -', '#global-modal #div-creation');
     }
 
@@ -890,7 +890,7 @@
         let date = formatNormalDateTime(new Date($('#uangmuka-date').val()));
 
         swalConfirmAndSubmit({
-            url: '{{ url('admin/kartu/kartu-dp-sales/create-mutation') }}',
+            url: '{{ url("admin/kartu/kartu-dp-sales/create-mutation") }}',
             data: {
                 description: description,
                 amount_mutasi: amount,
@@ -927,7 +927,7 @@
         $('#bdp-submit' + i).prop('disabled', true);
         $('#bdp-submit' + i).html('<i class="bx bx-loader bx-spin"></i> loading...');
         swalConfirmAndSubmit({
-            url: '{{ url('admin/kartu/kartu-bdp/create-mutations') }}',
+            url: '{{ url("admin/kartu/kartu-bdp/create-mutations") }}',
             data: $('#form-bdp' + i).serialize(),
             onSuccess: function(res) {
                 console.log(res);
@@ -953,7 +953,7 @@
         $('#bdp-submit' + iBDP).prop('disabled', true);
         $('#bdp-submit' + iBDP).html('<i class="bx bx-loader bx-spin"></i> loading...');
         $.ajax({
-            url: '{{ url('admin/kartu/kartu-bdp/create-mutations') }}',
+            url: '{{ url("admin/kartu/kartu-bdp/create-mutations") }}',
             method: 'post',
             data: $('#form-bdp' + iBDP).serialize(),
             success: function(res) {
@@ -996,7 +996,7 @@
         $('#bahan-jadi-submit' + iBahanJadi).prop('disabled', true);
         $('#bahan-jadi-submit' + iBahanJadi).html('<i class="bx bx-loader bx-spin"></i> loading...');
         $.ajax({
-            url: '{{ url('admin/kartu/kartu-bahan-jadi/create-mutations') }}',
+            url: '{{ url("admin/kartu/kartu-bahan-jadi/create-mutations") }}',
             method: 'post',
             data: $('#form-bahan-jadi' + iBahanJadi).serialize(),
             success: function(res) {
@@ -1029,7 +1029,7 @@
 
     function submitBahanJadi(i) {
         swalConfirmAndSubmit({
-            url: '{{ url('admin/kartu/kartu-bahan-jadi/create-mutations') }}',
+            url: '{{ url("admin/kartu/kartu-bahan-jadi/create-mutations") }}',
             data: $('#form-bahan-jadi' + i).serialize(),
             onSuccess: function(res) {
                 console.log(res);
@@ -1051,7 +1051,7 @@
         $('#invoice-submit').prop('disabled', true);
         $('#invoice-submit').html('<i class="bx bx-loader bx-spin"></i> loading...');
         $.ajax({
-            url: '{{ url('admin/invoice/create-invoices') }}',
+            url: '{{ url("admin/invoice/create-invoices") }}',
             data: $('#form-invoice-so').serialize(),
             method: 'post',
             success: function(res) {
@@ -1082,7 +1082,7 @@
         $('#bayar-invoice-submit').prop('disabled', true);
         $('#bayar-invoice-submit').html('<i class="bx bx-loader bx-spin"></i> loading...');
         $.ajax({
-            url: '{{ url('admin/invoice/submit-bayar-sales-invoice') }}',
+            url: '{{ url("admin/invoice/submit-bayar-sales-invoice") }}',
             data: $('#form-bayar-invoice').serialize(),
             method: 'post',
             success: function(res) {

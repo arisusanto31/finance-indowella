@@ -64,14 +64,14 @@
 <script>
     function deleteKartuPiutang(id) {
         swalDelete({
-            url: '{{ url('admin/kartu/kartu-piutang/delete-mutation') }}/' + id,
+            url: '{{ url("admin/kartu/kartu-piutang/delete-mutation") }}/' + id,
             elem: '#tr-mutasi-piutang-' + id,
         });
     }
 
     function searchJournal(id) {
         $.ajax({
-            url: '{{ route('kartu-piutang.search-link-journal') }}',
+            url: '{{ route("kartu-piutang.search-link-journal") }}',
             method: 'get',
             success: function(res) {
                 console.log(res);
@@ -102,7 +102,7 @@
 
     function refresh(id) {
         $.ajax({
-            url: '{{ url('admin/kartu/kartu-piutang/refresh') }}/' + id,
+            url: '{{ url("admin/kartu/kartu-piutang/refresh") }}/' + id,
             method: 'get',
             success: function(res) {
                 console.log(res);
@@ -123,7 +123,7 @@
 
     function linkJournal(journalId, kartuID) {
         swalConfirmAndSubmit({
-            url: '{{ route('jurnal.link-journal') }}',
+            url: '{{ route("jurnal.link-journal") }}',
             data: {
                 _token: "{{ csrf_token() }}",
                 model_id: kartuID,

@@ -54,7 +54,7 @@
 
 
                                         <a href="javascript:void(0);"
-                                            onclick="showDetailOnModal('{{ url('admin/daftar/karyawan/edit') }}/{{ $karyawan->id }}', 'l')"
+                                            onclick="showDetailOnModal('{{ url("admin/daftar/karyawan/edit") }}/{{ $karyawan->id }}', 'l')"
                                             class="btn btn-success btn-sm" title="Edit">
                                             <i class="bi bi-pencil"></i>
                                         </a>

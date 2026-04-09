@@ -218,7 +218,7 @@
 
                 return new Promise((resolve) => {
                     $.ajax({
-                        url: '{{ url('admin/jurnal/resend-import-task') }}/' + id,
+                        url: '{{ url("admin/jurnal/resend-import-task") }}/' + id,
                         method: 'get',
                         success: function(res) {
                             console.log(res);
@@ -284,7 +284,7 @@
                 });
                 // taskID = '{{ $task->id }}';
                 // $.ajax({
-                //     url: '{{ url('admin/jurnal/resend-import-task-all') }}/' + taskID,
+                //     url: '{{ url("admin/jurnal/resend-import-task-all") }}/' + taskID,
                 //     method: 'get',
                 //     success: function(res) {
                 //         console.log(res);
@@ -300,7 +300,7 @@
             function sendJurnal(taskID) {
                 loading(1);
                 $.ajax({
-                    url: '{{ url('admin/jurnal/send-import-task-jurnal') }}/' + taskID,
+                    url: '{{ url("admin/jurnal/send-import-task-jurnal") }}/' + taskID,
                     method: 'get',
                     success: function(res) {
                         loading(0);

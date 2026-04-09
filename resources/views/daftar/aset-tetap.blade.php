@@ -258,15 +258,15 @@
             var page = "kartu";
 
             function showModalInventory() {
-                showDetailOnModal('{{ route('aset-tetap.create') }}');
+                showDetailOnModal('{{ route("aset-tetap.create") }}');
             }
 
             function showModalEditInventory(id) {
-                showDetailOnModal('{{ url('admin/daftar/aset-tetap/edit-data') }}/' + id);
+                showDetailOnModal('{{ url("admin/daftar/aset-tetap/edit-data") }}/' + id);
             }
 
             function showModalKartuInventory() {
-                showDetailOnModal('{{ route('aset-tetap.create-kartu') }}');
+                showDetailOnModal('{{ route("aset-tetap.create-kartu") }}');
             }
 
 
@@ -323,7 +323,7 @@
                 page = "kartu";
                 $('#div-table').html('');
                 $.ajax({
-                    url: '{{ route('aset-tetap.get-summary') }}?year={{ getInput('year') }}',
+                    url: '{{ route("aset-tetap.get-summary") }}?year={{ getInput('year') }}',
                     method: 'get',
                     success: function(res) {
                         console.log(res);
@@ -345,7 +345,7 @@
                 <tr>
                   <td class="sticky-col-1">${indexInv + 1}</td>
                   <td class="sticky-col-2"><div class="wrapper-scroll-horizontal">
-                    <button onclick="showDetailOnModal('{{ url('admin/daftar/aset-tetap/edit-data') }}/${invID}','xl')"><i class="fas fa-edit"></i></button>
+                    <button onclick="showDetailOnModal('{{ url("admin/daftar/aset-tetap/edit-data") }}/${invID}','xl')"><i class="fas fa-edit"></i></button>
                     ${dataInv.name} [id:${invID}] </div></td>
                
                   <td class="sticky-col-3">${dataInv.keterangan_qty_unit}</td>
@@ -366,7 +366,7 @@
                   <td>${array_key_exists(year+'-12',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-12']) : '-'}</td>
                   <td>${formatRupiah(dataInv.total_penyusutan)}</td>
                   <td>${array_key_exists(invID,res.saldo_buku_akhir)?formatRupiah(res.saldo_buku_akhir[invID].nilai_buku):0}
-                        <button class="btn btn-sm btn-outline-primary" onclick="showDetailOnModal('{{ url('admin/daftar/aset-tetap/kartu-mutasi') }}/${invID}','xl')">
+                        <button class="btn btn-sm btn-outline-primary" onclick="showDetailOnModal('{{ url("admin/daftar/aset-tetap/kartu-mutasi") }}/${invID}','xl')">
                             <i class="fas fa-eye"></i>
                         </button>
 
@@ -408,7 +408,7 @@
             function getMutasiKeluar() {
                 page = "keluar";
                 $.ajax({
-                    url: '{{ route('aset-tetap.get-mutasi-keluar') }}?year={{ getInput('year') }}',
+                    url: '{{ route("aset-tetap.get-mutasi-keluar") }}?year={{ getInput('year') }}',
                     method: 'get',
                     success: function(res) {
                         console.log(res);
@@ -442,7 +442,7 @@
             function getMutasiMasuk() {
                 page = "masuk";
                 $.ajax({
-                    url: '{{ route('aset-tetap.get-mutasi-masuk') }}?year={{ getInput('year') }}',
+                    url: '{{ route("aset-tetap.get-mutasi-masuk") }}?year={{ getInput('year') }}',
                     method: 'get',
                     success: function(res) {
                         console.log(res);
@@ -480,7 +480,7 @@
                 }
             });
             console.log('init berhasil lur ');
-            initItemSelectManual('#select-code_group', '{{ route('chart-account.get-item-keuangan') }}?kind=kartu-inventory',
+            initItemSelectManual('#select-code_group', '{{ route("chart-account.get-item-keuangan") }}?kind=kartu-inventory',
                 'pilih kode akun', '#modal-journal');
 
             function openLinkJournal(id) {
@@ -505,7 +505,7 @@
                 }
 
                 $.ajax({
-                    url: '{{ route('jurnal.link-journal') }}',
+                    url: '{{ route("jurnal.link-journal") }}',
                     method: 'POST',
                     data: {
                         "_token": "{{ csrf_token() }}",
@@ -536,7 +536,7 @@
             function searchJournal() {
 
                 $.ajax({
-                    url: '{{ route('jurnal.search-error') }}?code_group=' + $('#select-code_group').val() +
+                    url: '{{ route("jurnal.search-error") }}?code_group=' + $('#select-code_group').val() +
                         '&daterange=' + $('#daterange').val() + '&description=' + $('#description').val(),
                     method: 'get',
                     success: function(res) {

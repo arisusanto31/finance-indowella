@@ -433,7 +433,7 @@
             console.log('Dashboard script loaded');
             $(document).ready(function() {
                 // Initialize the donut chart
-                initItemSelectManual('#select-codegroup-custom', '{{ route('chart-account.get-item-all') }}?',
+                initItemSelectManual('#select-codegroup-custom', '{{ route("chart-account.get-item-all") }}?',
                     '--Pilih Akun--');
                 loadDataError();
                 getDataSaldoHighlight();
@@ -541,7 +541,7 @@
             // 🔥 Panggil dengan ID chart kamu
             function loadDataError() {
                 $.ajax({
-                    url: '{{ route('dashboard.inspect-jurnal') }}',
+                    url: '{{ route("dashboard.inspect-jurnal") }}',
                     method: 'get',
                     success: function(res) {
                         console.log(res);
@@ -657,7 +657,7 @@
 
             function getDataSaldoHighlight() {
                 $.ajax({
-                    url: '{{ route('jurnal.get-saldo-highlight') }}?date={{ Date('Y-m-d H:i:s') }}',
+                    url: '{{ route("jurnal.get-saldo-highlight") }}?date={{ Date('Y-m-d H:i:s') }}',
                     method: 'get',
                     success: function(res) {
                         console.log(res);
@@ -684,7 +684,7 @@
             function getSaldoCustom() {
                 var code = $('#select-codegroup-custom option:selected').val();
                 $.ajax({
-                    url: '{{ url('admin/jurnal/get-saldo-custom') }}/' + code + '?date={{ Date('Y-m-d H:i:s') }}',
+                    url: '{{ url("admin/jurnal/get-saldo-custom") }}/' + code + '?date={{ Date('Y-m-d H:i:s') }}',
                     method: 'get',
                     success: function(res) {
                         console.log(res);
@@ -708,7 +708,7 @@
 
             function getSummaryBalance() {
                 dateCocok = $('#date-cocok').val();
-                url = '{{ url('admin/get-summary-balance') }}?date=' + dateCocok;
+                url = '{{ url("admin/get-summary-balance") }}?date=' + dateCocok;
                 console.log('get summary balance :'+url);
                 $.ajax({
                     url: url,

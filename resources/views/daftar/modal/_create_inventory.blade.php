@@ -106,16 +106,16 @@
 <script>
     console.log('masuk kok');
     initCurrencyInput('.currency-input');
-    initItemSelectManual('#code-group', '{{ route('chart-account.get-item-keuangan') }}?kind=inventory',
+    initItemSelectManual('#code-group', '{{ route("chart-account.get-item-keuangan") }}?kind=inventory',
         'Pilih Akun Aset', '#global-modal');
-    initItemSelectManual('#lawan-code-group', '{{ route('chart-account.get-item') }}', 'Pilih Akun Lawan',
+    initItemSelectManual('#lawan-code-group', '{{ route("chart-account.get-item") }}', 'Pilih Akun Lawan',
         '#global-modal');
-    initItemSelectManual('.select-stock', '{{ route('stock.get-item') }}', 'Pilih Stock', '#global-modal');
-    initItemSelectManual('.select-toko', '{{ route('toko.get-item') }}', 'Pilih Toko', '#global-modal');
+    initItemSelectManual('.select-stock', '{{ route("stock.get-item") }}', 'Pilih Stock', '#global-modal');
+    initItemSelectManual('.select-toko', '{{ route("toko.get-item") }}', 'Pilih Toko', '#global-modal');
 
     function submitInventory() {
         $.ajax({
-            url: '{{ route('aset-tetap.store-inventory') }}',
+            url: '{{ route("aset-tetap.store-inventory") }}',
             method: 'post',
             data: $('#form-create').serialize(),
             success: function(res) {

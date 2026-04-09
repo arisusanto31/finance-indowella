@@ -107,17 +107,17 @@
 
 <script>
     console.log('masuk kok');
-    initItemSelectManual('.select-stock', '{{ route('stock.get-item') }}', 'Pilih Stock', '#global-modal');
-    initItemSelectManual('.select-coa', '{{ route('chart-account.get-item-keuangan') }}?kind=persediaan',
+    initItemSelectManual('.select-stock', '{{ route("stock.get-item") }}', 'Pilih Stock', '#global-modal');
+    initItemSelectManual('.select-coa', '{{ route("chart-account.get-item-keuangan") }}?kind=persediaan',
         'Pilih Akun Persediaan', '#global-modal');
-    initItemSelectManual('.select-coa-beban', '{{ route('chart-account.get-item-keuangan') }}?kind=persediaan|beban',
+    initItemSelectManual('.select-coa-beban', '{{ route("chart-account.get-item-keuangan") }}?kind=persediaan|beban',
         'Pilih Lawan Akun', '#global-modal');
 
     initCurrencyInput('.currency-input');
 
     function getTotalMutasiRupiah() {
         $.ajax({
-            url: '{{ route('kartu-stock.get-hpp') }}?date=' + $('#date').val() + '&stock_id=' + $(
+            url: '{{ route("kartu-stock.get-hpp") }}?date=' + $('#date').val() + '&stock_id=' + $(
                 '#select-stock option:selected').val() + '&unit=' + $('#unit option:selected').val(),
             method: 'get',
             success: function(res) {
@@ -142,7 +142,7 @@
             return;
         }
         $.ajax({
-            url: '{{ url('admin/master/stock/get-info') }}/' + stockid,
+            url: '{{ url("admin/master/stock/get-info") }}/' + stockid,
             method: 'get',
             success: function(res) {
                 if (res.status == 1) {
@@ -163,7 +163,7 @@
 
     function submitMutasiStock() {
         $.ajax({
-            url: '{{ route('kartu-stock.mutasi-store') }}',
+            url: '{{ route("kartu-stock.mutasi-store") }}',
             method: 'post',
             data: $('#mutasi-keluar').serialize(),
             success: function(res) {

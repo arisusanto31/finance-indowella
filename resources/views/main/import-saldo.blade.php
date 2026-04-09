@@ -241,7 +241,7 @@
 
 
                 swalConfirmAndSubmit({
-                    url: '{{ route('jurnal.import-saldo') }}',
+                    url: '{{ route("jurnal.import-saldo") }}',
                     data: {
                         _token: '{{ csrf_token() }}',
                         data: encoded,
@@ -250,7 +250,7 @@
                     onSuccess: function(res) {
                         console.log(res);
                         if (res.status == 1) {
-                            location.href = '{{ url('admin/jurnal/get-import-saldo-followup') }}/' + res.msg.id;
+                            location.href = '{{ url("admin/jurnal/get-import-saldo-followup") }}/' + res.msg.id;
                         }
                     }
                 });

@@ -102,7 +102,7 @@ class DetailKartuInvoice extends Model
                 'kartu_type' => $kartuType,
                 'kartu_id' => $kartuId,
                 'book_journal_id' => bookID(),
-                'invoice_pack_id' => $invoicePackID,
+                'invoice_pack_id' => $invoicePackID ?? null,
                 'invoice_pack_number' => $invoiceNumber,
                 'sales_order_id' => $saleOrderID,
                 'sales_order_number' => $salesOrderNumber,
@@ -139,6 +139,10 @@ class DetailKartuInvoice extends Model
                     $dt = DetailKartuInvoice::create($dataUpdate);
                 }
             }
+            if (!$dt->invoice_pack_id) {
+                $dt->invoice_pack_id = $dt->getInvoicePackID();
+                $dt->save();
+            }
 
             return [
                 'status' => 1,
@@ -149,6 +153,26 @@ class DetailKartuInvoice extends Model
                 'status' => 0,
                 'msg' => $e->getMessage()
             ];
+        }
+    }
+
+    public function getInvoicePackID()
+    {
+        if (!$this->invoice_pack_id) {
+            //ini asumsi nomer nya ga ada
+            if (!$this->invoice_pack_number && !$this->sales_order_number && !$this->purchase_order_number) {
+                //coba cari lawan jurnalnya
+                $lawanJournal = Journal::where('journal_number', $this->journal_number)->where('id', '<>', $this->journal_id)->first();
+                if ($lawanJournal) {
+                    //cari detail kartu inv dari lawan jurnal id, ambil invoicepackidnya 
+                    $dk = DetailKartuInvoice::where('journal_id', $lawanJournal->id)->first();
+                    if ($dk) {
+                        if ($dk->invoice_pack_id) {
+                            return $dk->invoice_pack_id;
+                        }
+                    }
+                }
+            }
         }
     }
 

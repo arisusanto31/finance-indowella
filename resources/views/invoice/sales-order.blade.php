@@ -445,18 +445,18 @@
 
     @push('scripts')
         <script>
-            initItemSelectManual('.select2-stock', '{{ url('admin/master/stock/get-item') }}', '-- Pilih Produk --');
-            initItemSelectManual('.select2-customer', '{{ url('admin/master/customer/get-item') }}', '-- Pilih Customer --');
-            initItemSelectManual('.select2-toko', '{{ url('admin/master/toko/get-item') }}', '-- Pilih Toko --');
+            initItemSelectManual('.select2-stock', '{{ url("admin/master/stock/get-item") }}', '-- Pilih Produk --');
+            initItemSelectManual('.select2-customer', '{{ url("admin/master/customer/get-item") }}', '-- Pilih Customer --');
+            initItemSelectManual('.select2-toko', '{{ url("admin/master/toko/get-item") }}', '-- Pilih Toko --');
 
             function lihatDetailInvoice(invoiceNumber) {
-                showDetailOnModal('{{ url('admin/invoice/show-sales-detail') }}/' + invoiceNumber, 'xl');
+                showDetailOnModal('{{ url("admin/invoice/show-sales-detail") }}/' + invoiceNumber, 'xl');
             }
             var currentPage = {{ $page }};
 
             function applyFilter() {
                 window.location.href =
-                    '{{ url('admin/invoice/sales-order') }}?month={{ $month }}&year={{ $year }}&page=' + (
+                    '{{ url("admin/invoice/sales-order") }}?month={{ $month }}&year={{ $year }}&page=' + (
                         currentPage) + '&sales_order_number=' + $('#sales-order').val() + '&draft_number=' + $('#draft-number')
                     .val() +
                     '&status_final=' + $('#status-final').val() + '&status_payment=' + $('#status-payment').val() +
@@ -496,7 +496,7 @@
                     month = 12;
                     year--;
                 }
-                window.location.href = '{{ url('admin/invoice/sales-order') }}?month=' + month + '&year=' + year;
+                window.location.href = '{{ url("admin/invoice/sales-order") }}?month=' + month + '&year=' + year;
             }
 
             function nextMonth() {
@@ -507,19 +507,19 @@
                     month = 1;
                     year++;
                 }
-                window.location.href = '{{ url('admin/invoice/sales-order') }}?month=' + month + '&year=' + year;
+                window.location.href = '{{ url("admin/invoice/sales-order") }}?month=' + month + '&year=' + year;
             }
 
             function lihatDetailInvoice(invoiceNumber) {
-                showDetailOnModal('{{ url('admin/invoice/show-sales-detail') }}/' + invoiceNumber, 'xl');
+                showDetailOnModal('{{ url("admin/invoice/show-sales-detail") }}/' + invoiceNumber, 'xl');
             }
 
             function openImportData(bookID) {
-                showDetailOnModal('{{ url('admin/invoice/sales-open-import') }}/' + bookID, 'xl');
+                showDetailOnModal('{{ url("admin/invoice/sales-open-import") }}/' + bookID, 'xl');
             }
 
             function openImportDataExcel(bookID) {
-                showDetailOnModal('{{ url('admin/invoice/sales-open-import-excel') }}/' + bookID, 'xl');
+                showDetailOnModal('{{ url("admin/invoice/sales-open-import-excel") }}/' + bookID, 'xl');
             }
 
             function getBgPayment(statusPayment) {
@@ -564,7 +564,7 @@
             function updateStatusRow(id) {
                 console.log('updating status for id: ' + id);
                 $.ajax({
-                    url: '{{ url('admin/invoice/sales-update-status') }}/' + id,
+                    url: '{{ url("admin/invoice/sales-update-status") }}/' + id,
                     method: 'get',
                     success: function(res) {
                         console.log(res);
@@ -604,7 +604,7 @@
             //     //ini saya ingin enkripsi data enaknya pake apa ya
             //     data = safeBtoa(parentsMarked);
             //     console.log(data);
-            //     url = '{{ url('admin/invoice/kebutuhan-produksi-marked') }}/' + data
+            //     url = '{{ url("admin/invoice/kebutuhan-produksi-marked") }}/' + data
             //     var win = window.open(url, '_blank');
             // }
 
@@ -806,7 +806,7 @@
 
             function destroySO(SONumber) {
                 swalDelete({
-                    url: '{{ url('admin/invoice/sales-order-delete') }}/' + SONumber,
+                    url: '{{ url("admin/invoice/sales-order-delete") }}/' + SONumber,
                     onSuccess: function(res) {
                         if (res.status == 1) {
                             $('#tr-' + SONumber).remove();
@@ -824,7 +824,7 @@
                 return new Promise((resolve, reject) => {
                     swalConfirmAndSubmit({
                         aktif_konfirm: aktifConfirm,
-                        url: '{{ url('admin/invoice/sales-cancel-final') }}',
+                        url: '{{ url("admin/invoice/sales-cancel-final") }}',
                         data: {
                             _token: '{{ csrf_token() }}',
                             id: id
@@ -854,7 +854,7 @@
                 return new Promise((resolve, reject) => {
                     swalConfirmAndSubmit({
                         aktif_konfirm: aktifConfirm,
-                        url: '{{ url('admin/invoice/sales-make-final') }}',
+                        url: '{{ url("admin/invoice/sales-make-final") }}',
                         data: {
                             id: id,
                             _token: '{{ csrf_token() }}'
@@ -898,7 +898,7 @@
                 return new Promise((resolve) => {
                     swalConfirmAndSubmit({
                         aktif_konfirm: aktifConfirm,
-                        url: '{{ url('admin/invoice/sales-process-dagang') }}',
+                        url: '{{ url("admin/invoice/sales-process-dagang") }}',
                         data: {
                             id: id,
                             _token: '{{ csrf_token() }}'
@@ -921,7 +921,7 @@
                 allParentId = collect(parents).keys().all();
                 console.log(allParentId);
                 $.ajax({
-                    url: '{{ route('invoice.sales-get-info-reference-finish') }}',
+                    url: '{{ route("invoice.sales-get-info-reference-finish") }}',
                     method: 'post',
                     data: {
                         ids: allParentId,
@@ -956,7 +956,7 @@
 
             function makeMark(id) {
                 $.ajax({
-                    url: '{{ url('admin/invoice/sales-mark') }}',
+                    url: '{{ url("admin/invoice/sales-mark") }}',
                     method: 'post',
                     data: {
                         id: id,
@@ -987,11 +987,11 @@
 
             function editInvoice(invoiceNumber) {
 
-                showDetailOnModal('{{ url('/admin/invoice/edit-sales-order') }}/' + invoiceNumber, 'xl');
+                showDetailOnModal('{{ url("/admin/invoice/edit-sales-order") }}/' + invoiceNumber, 'xl');
             }
 
             function openImportData(bookID) {
-                showDetailOnModal('{{ url('admin/invoice/sales-open-import') }}/' + bookID, 'xl');
+                showDetailOnModal('{{ url("admin/invoice/sales-open-import") }}/' + bookID, 'xl');
             }
 
             function openCardCreate() {
@@ -1012,7 +1012,7 @@
 
             function submitData() {
                 swalConfirmAndSubmit({
-                    url: '{{ route('invoice.sales-order.store') }}',
+                    url: '{{ route("invoice.sales-order.store") }}',
                     data: $('#form-invoice').serialize(),
                     onSuccess: function(res) {
                         if (res.status == 1) {
@@ -1067,7 +1067,7 @@
                 const id = selectedOption.value;
                 console.log('searching for ' + id);
                 $.ajax({
-                    url: '{{ url('admin/master/stock/get-unit') }}/' + id,
+                    url: '{{ url("admin/master/stock/get-unit") }}/' + id,
                     method: 'get',
                     success: function(res) {
                         console.log(res);
@@ -1123,7 +1123,7 @@
                 </div>
                     `;
                 $('#invoice-wrapper').append(newRow);
-                initItemSelectManual('.select2-stock', '{{ url('admin/master/stock/get-item') }}',
+                initItemSelectManual('.select2-stock', '{{ url("admin/master/stock/get-item") }}',
                     '-- Pilih Produk --');
 
 

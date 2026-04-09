@@ -103,19 +103,19 @@
 <script>
     console.log('masuk kok');
     initCurrencyInput('.currency-input');
-    initItemSelectManual('.select-coa', '{{ route('chart-account.get-item-keuangan') }}?kind=persediaan',
+    initItemSelectManual('.select-coa', '{{ route("chart-account.get-item-keuangan") }}?kind=persediaan',
         'Pilih Akun Persediaan', '#global-modal');
-    initItemSelectManual('.select-stock', '{{ route('stock.get-item') }}', 'Pilih Stock', '#global-modal');
+    initItemSelectManual('.select-stock', '{{ route("stock.get-item") }}', 'Pilih Stock', '#global-modal');
 
 
     function kosongkanStockID() {
         if ('#custom-stock-name' != '') {
             $('#select-stock').val('').change();
-            initItemSelectManual('.select-coa', '{{ route('chart-account.get-item-keuangan') }}?kind=hutang|kas|pendapatan|beban',
+            initItemSelectManual('.select-coa', '{{ route("chart-account.get-item-keuangan") }}?kind=hutang|kas|pendapatan|beban',
                 'Pilih Akun Hutang / Kas', '#global-modal');
             changeUnitDiv('manual');
         } else {
-            initItemSelectManual('.select-coa', '{{ route('chart-account.get-item-keuangan') }}?kind=persediaan',
+            initItemSelectManual('.select-coa', '{{ route("chart-account.get-item-keuangan") }}?kind=persediaan',
                 'Pilih Akun Persediaan', '#global-modal');
             changeUnitDiv('normal');
         }
@@ -154,7 +154,7 @@
         changeUnitDiv('normal');
         $('#custom-stock-name').val('');
         $.ajax({
-            url: '{{ url('admin/master/stock/get-info') }}/' + stockid,
+            url: '{{ url("admin/master/stock/get-info") }}/' + stockid,
             method: 'get',
             success: function(res) {
                 if (res.status == 1) {
@@ -175,7 +175,7 @@
 
     function submitMutasiStock() {
         $.ajax({
-            url: '{{ route('kartu-bdp.mutasi-store') }}',
+            url: '{{ route("kartu-bdp.mutasi-store") }}',
             method: 'post',
             data: $('#mutasi-masuk').serialize(),
             success: function(res) {

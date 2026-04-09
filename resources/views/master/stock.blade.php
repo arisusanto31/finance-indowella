@@ -163,13 +163,13 @@
     @push('scripts')
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
-            initItemSelectManual('#parent-id', '{{ route('stock.category-get-item') }}', 'parent category', '#createCategory');
-            initItemSelectManual('#category-id', '{{ route('stock.category-get-item') }}', 'category', '#createModal');
-            initItemSelectManual('#parent-category-id', '{{ route('stock.category-get-item') }}', 'parent category',
+            initItemSelectManual('#parent-id', '{{ route("stock.category-get-item") }}', 'parent category', '#createCategory');
+            initItemSelectManual('#category-id', '{{ route("stock.category-get-item") }}', 'category', '#createModal');
+            initItemSelectManual('#parent-category-id', '{{ route("stock.category-get-item") }}', 'parent category',
                 '#createModal');
             $('.edit-modal').each(function each(i, elem) {
                 id = getNumID($(elem).attr('id'));
-                initItemSelectManual($(elem), '{{ route('stock.category-get-item') }}', 'category', '#editModal' + id);
+                initItemSelectManual($(elem), '{{ route("stock.category-get-item") }}', 'category', '#editModal' + id);
             });
 
             function showLink() {
@@ -184,7 +184,7 @@
 
             function fixNullUnitDefault() {
                 $.ajax({
-                    url: '{{ route('stock.fix-null-unit-default') }}',
+                    url: '{{ route("stock.fix-null-unit-default") }}',
                     method: 'POST',
                     data: {
                         _token: '{{ csrf_token() }}'
@@ -207,7 +207,7 @@
 
             function tambahSatuan(id) {
                 $.ajax({
-                    url: '{{ route('stock.unit-store') }}',
+                    url: '{{ route("stock.unit-store") }}',
                     method: 'POST',
                     data: $('#create-unit' + id).serialize(),
                     success: function(res) {
@@ -225,7 +225,7 @@
                     }
                 });
             }
-            initItemSelectManual('#category-search', '{{ route('stock.category-get-item') }}', 'category');
+            initItemSelectManual('#category-search', '{{ route("stock.category-get-item") }}', 'category');
 
             function getStock() {
                 category = $('#category-search option:selected').val();
@@ -234,7 +234,7 @@
                 }
                 console.log(category);
                 $.ajax({
-                    url: '{{ url('admin/master/stock/get-stock') }}?search=' + $('#stock-search').val() +
+                    url: '{{ url("admin/master/stock/get-stock") }}?search=' + $('#stock-search').val() +
                         '&category_id=' + category,
                     method: 'GET',
                     success: function(res) {
@@ -397,7 +397,7 @@
             function updateStock(id) {
                 console.log($('#form-edit-stock' + id).serialize());
                 $.ajax({
-                    url: '{{ url('admin/master/stock/main') }}/' + id,
+                    url: '{{ url("admin/master/stock/main") }}/' + id,
                     method: 'POST',
                     data: $('#form-edit-stock' + id).serialize(),
                     success: function(res) {

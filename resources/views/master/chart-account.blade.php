@@ -46,7 +46,7 @@
             function editAccount(id) {
                 loading(1);
                 $.ajax({
-                    url: '{{ url('admin/master/chart-account/get-chart-account') }}/' + id,
+                    url: '{{ url("admin/master/chart-account/get-chart-account") }}/' + id,
                     method: 'get',
                     success: function(res) {
                         console.log(res);
@@ -121,7 +121,7 @@
                             $('#form-body').html(html);
                             // $('#account-account_type').val(data.account_type);
                             $('#form-title').html('FORM EDIT NAME');
-                            initItemSelectManual('#account-parent_id', '{{ route('chart-account.get-item-all') }}',
+                            initItemSelectManual('#account-parent_id', '{{ route("chart-account.get-item-all") }}',
                                 data.parent_id);
                             showFormSmall();
                         } else {
@@ -196,7 +196,7 @@
                 html += '</form>';
                 $('#form-body').html(html);
                 $('#form-title').html('FORM ADD ACCOUNT');
-                initItemSelectManual('#account-parent_id', '{{ route('chart-account.get-item-all') }}');
+                initItemSelectManual('#account-parent_id', '{{ route("chart-account.get-item-all") }}');
                 showFormSmall();
             }
 
@@ -208,7 +208,7 @@
                 parentID = $('#account-parent_id option:selected').val();
 
                 $.ajax({
-                    url: '{{ url('admin/master/chart-account/get-code-group') }}/' + parentID,
+                    url: '{{ url("admin/master/chart-account/get-code-group") }}/' + parentID,
                     method: 'get',
                     success: function(res) {
                         console.log(res);
@@ -234,7 +234,7 @@
 
             function submitAlias() {
                 $.ajax({
-                    url: '{{ url('admin/master/chart-account/make-alias') }}',
+                    url: '{{ url("admin/master/chart-account/make-alias") }}',
                     method: 'post',
                     data: $('#form-edit-account').serialize(),
                     success: function(res) {
@@ -255,7 +255,7 @@
 
             function submitNewAccount() {
                 $.ajax({
-                    url: '{{ url('admin/master/chart-account/main') }}',
+                    url: '{{ url("admin/master/chart-account/main") }}',
                     method: 'post',
                     data: $('#form-new-account').serialize(),
                     success: function(res) {
@@ -335,7 +335,7 @@
 
             function getChartAccount() {
                 $.ajax({
-                    url: '{{ url('admin/master/chart-account/get-chart-accounts') }}',
+                    url: '{{ url("admin/master/chart-account/get-chart-accounts") }}',
                     method: 'get',
                     success: function(res) {
                         console.log(res);
@@ -364,7 +364,7 @@
             }
 
             function deleteAccount(id) {
-                url = '{{ url('admin/master/chart-account/delete-account') }}/' + id;
+                url = '{{ url("admin/master/chart-account/delete-account") }}/' + id;
                 console.log(url);
                 swalDelete({
                     url: url,

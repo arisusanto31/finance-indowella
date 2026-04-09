@@ -92,9 +92,9 @@
 <script>
     console.log('masuk kok');
     initCurrencyInput('.currency-input');
-    initItemSelectManual('.select-coa', '{{ route('chart-account.get-item-keuangan') }}?kind=persediaan',
+    initItemSelectManual('.select-coa', '{{ route("chart-account.get-item-keuangan") }}?kind=persediaan',
         'Pilih Akun Persediaan', '#global-modal');
-    initItemSelectManual('.select-stock', '{{ route('stock.get-item') }}', 'Pilih Stock', '#global-modal');
+    initItemSelectManual('.select-stock', '{{ route("stock.get-item") }}', 'Pilih Stock', '#global-modal');
 
     function updateTotalRupiah() {
         let quantity = $('#mutasi_quantity').val();
@@ -111,7 +111,7 @@
             return;
         }
         $.ajax({
-            url: '{{ url('admin/master/stock/get-info') }}/' + stockid,
+            url: '{{ url("admin/master/stock/get-info") }}/' + stockid,
             method: 'get',
             success: function(res) {
                 if (res.status == 1) {
@@ -132,7 +132,7 @@
 
     function submitMutasiStock() {
         swalConfirmAndSubmit({
-            url: '{{ route('kartu-bahan-jadi.mutasi-store') }}',
+            url: '{{ route("kartu-bahan-jadi.mutasi-store") }}',
             data: $('#mutasi-masuk').serialize(),
             onSuccess: function(res) {
                 console.log(res);

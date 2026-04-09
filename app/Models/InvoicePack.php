@@ -125,7 +125,7 @@ class InvoicePack extends Model
 
     public function updateStatus()
     {
-        $journals = DetailKartuInvoice::where('invoice_pack_number', $this->invoice_number)
+        $journals = DetailKartuInvoice::where('invoice_pack_id', $this->id)
             ->select(
                 DB::raw('sum(amount_journal) as total_journal'),
                 'account_code_group',

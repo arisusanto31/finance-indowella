@@ -129,8 +129,8 @@
 
 <script>
     console.log('masuk kok ini sale order import');
-    initItemSelectManual('#select-toko', '{{ route('toko.get-item') }}', 'pilih toko', '#global-modal');
-    initItemSelectManual('.select-coa-kas', '{{ route('chart-account.get-item-keuangan') }}?kind=kas', 'Pilih Akun Kas',
+    initItemSelectManual('#select-toko', '{{ route("toko.get-item") }}', 'pilih toko', '#global-modal');
+    initItemSelectManual('.select-coa-kas', '{{ route("chart-account.get-item-keuangan") }}?kind=kas', 'Pilih Akun Kas',
         '#global-modal');
     var allTrans = [];
 
@@ -195,7 +195,7 @@
         if (toko == undefined) toko = "";
         $('#table-body').html("");
         $.ajax({
-            url: '{{ url('admin/invoice/sales-get-data-import') }}/' + id + '?monthyear=' + monthyear +
+            url: '{{ url("admin/invoice/sales-get-data-import") }}/' + id + '?monthyear=' + monthyear +
                 '&toko=' + toko + '&customer=' + customer + '&is_ppn=' + isPPN,
             method: 'get',
             success: function(res) {
@@ -466,7 +466,7 @@
 
             console.log(dataPost);
             $.ajax({
-                url: '{{ route('invoice.sales-order.store') }}',
+                url: '{{ route("invoice.sales-order.store") }}',
                 data: dataPost,
                 method: 'post',
                 success: function(res) {

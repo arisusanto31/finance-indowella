@@ -97,15 +97,15 @@
 
 <script>
     initCurrencyInput('.currency-input');
-    initItemSelectManual('#code-group', '{{ route('chart-account.get-item-keuangan') }}?kind=prepaid', 'Pilih Akun Bdd',
+    initItemSelectManual('#code-group', '{{ route("chart-account.get-item-keuangan") }}?kind=prepaid', 'Pilih Akun Bdd',
         '#global-modal');
-    initItemSelectManual('#lawan-code-group', '{{ route('chart-account.get-item') }}?kind=prepaid', 'Pilih Akun Lawan',
+    initItemSelectManual('#lawan-code-group', '{{ route("chart-account.get-item") }}?kind=prepaid', 'Pilih Akun Lawan',
         '#global-modal');
-    initItemSelectManual('.select-toko', '{{ route('toko.get-item') }}', 'Pilih Toko', '#global-modal');
+    initItemSelectManual('.select-toko', '{{ route("toko.get-item") }}', 'Pilih Toko', '#global-modal');
 
     function submitPrepaid() {
         $.ajax({
-            url: '{{ route('bdd.store-prepaid') }}',
+            url: '{{ route("bdd.store-prepaid") }}',
             method: 'post',
             data: $('#form-create').serialize(),
             success: function(res) {

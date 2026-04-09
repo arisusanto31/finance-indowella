@@ -305,27 +305,27 @@
 
     @push('scripts')
         <script>
-            initItemSelectManual('.select2-stock', '{{ url('admin/master/stock/get-item') }}', '-- Pilih Produk --','#invoice-wrapper');
-            initItemSelectManual('.select2-supplier', '{{ url('admin/master/supplier/get-item') }}', '-- Pilih Supplier --','#card-create');
+            initItemSelectManual('.select2-stock', '{{ url("admin/master/stock/get-item") }}', '-- Pilih Produk --','#invoice-wrapper');
+            initItemSelectManual('.select2-supplier', '{{ url("admin/master/supplier/get-item") }}', '-- Pilih Supplier --','#card-create');
 
             function lihatDetailInvoice(invoiceNumber) {
-                showDetailOnModal('{{ url('admin/invoice/show-detail') }}/' + invoiceNumber, 'xl');
+                showDetailOnModal('{{ url("admin/invoice/show-detail") }}/' + invoiceNumber, 'xl');
             }
 
 
             function openImportDataExcel(bookID) {
-                showDetailOnModal('{{ url('admin/invoice/purchase-open-import-excel') }}/' + bookID, 'xl');
+                showDetailOnModal('{{ url("admin/invoice/purchase-open-import-excel") }}/' + bookID, 'xl');
             }
 
 
             function editInvoicePurchase(invoiceNumber) {
                 console.log("Edit Purchase Invoice:", invoiceNumber);
-                showDetailOnModal('{{ url('/admin/invoice/invoice-purchase/edit') }}/' + invoiceNumber, 'xl');
+                showDetailOnModal('{{ url("/admin/invoice/invoice-purchase/edit") }}/' + invoiceNumber, 'xl');
             }
 
             function deleteInvoicePurchase(id) {
                 swalDelete({
-                    url: '{{ url('admin/invoice/delete-invoice-purchase') }}/' + id,
+                    url: '{{ url("admin/invoice/delete-invoice-purchase") }}/' + id,
                     elem: '#TR' + id
                 });
             }
@@ -349,7 +349,7 @@
 
             // function makeFinal(id) {
             //     swalConfirmAndSubmit({
-            //         url: '{{ url('admin/invoice/invoice-make-final') }}',
+            //         url: '{{ url("admin/invoice/invoice-make-final") }}',
             //         data: {
             //             id: id,
             //             _token: '{{ csrf_token() }}'
@@ -376,13 +376,13 @@
                 return new Promise((resolve, reject) => {
                     swalConfirmAndSubmit({
                         aktif_konfirm: aktifConfirm,
-                        url: '{{ url('admin/invoice/invoice-make-final') }}',
+                        url: '{{ url("admin/invoice/invoice-make-final") }}',
                         data: {
                             id: id,
                             _token: '{{ csrf_token() }}'
                         },
                         onSuccess: function(res) {
-                            html = ` <a href="javascript:void(lihatDetailInvoice('${res.msg.sales_order_number}'))"
+                            html = ` <a href="javascript:void(lihatDetailInvoice('${res.msg.invoice_number}'))"
                                     class="btn btn-sm btn-outline-primary" title="Lihat Invoice">
                                     <i class="fas fa-eye"></i>
                                 </a>
@@ -418,7 +418,7 @@
             function updateStatusRow(id) {
                 console.log('updating status for id: ' + id);
                 $.ajax({
-                    url: '{{ url('admin/invoice/update-status-invoice') }}/' + id,
+                    url: '{{ url("admin/invoice/update-status-invoice") }}/' + id,
                     method: 'get',
                     success: function(res) {
                         console.log(res);
@@ -442,7 +442,7 @@
 
             function makeMark(id) {
                 $.ajax({
-                    url: '{{ url('admin/invoice/invoice-mark') }}',
+                    url: '{{ url("admin/invoice/invoice-mark") }}',
                     method: 'post',
                     data: {
                         id: id,
@@ -460,7 +460,7 @@
                 return new Promise((resolve) => {
                     swalConfirmAndSubmit({
                         aktif_konfirm: aktifConfirm,
-                        url: '{{ url('admin/invoice/create-claim-pembelian') }}',
+                        url: '{{ url("admin/invoice/create-claim-pembelian") }}',
                         data: {
                             invoice_pack_id: id,
                             coa_persediaan: 140001,
@@ -609,7 +609,7 @@
 
             function submitInvoice() {
                 swalConfirmAndSubmit({
-                    url: '{{ route('invoice.purchase.store') }}',
+                    url: '{{ route("invoice.purchase.store") }}',
                     data: $('#form-invoice').serialize(),
                     onSuccess: function(res) {
                         if (res.status == 1) {
@@ -638,7 +638,7 @@
                     month = 12;
                     year--;
                 }
-                window.location.href = '{{ url('admin/invoice/invoice-purchase') }}?month=' + month + '&year=' + year;
+                window.location.href = '{{ url("admin/invoice/invoice-purchase") }}?month=' + month + '&year=' + year;
             }
 
             function nextMonth() {
@@ -649,7 +649,7 @@
                     month = 1;
                     year++;
                 }
-                window.location.href = '{{ url('admin/invoice/invoice-purchase') }}?month=' + month + '&year=' + year;
+                window.location.href = '{{ url("admin/invoice/invoice-purchase") }}?month=' + month + '&year=' + year;
             }
 
 
@@ -689,7 +689,7 @@
                 const id = selectedOption.value;
                 console.log('searching for ' + id);
                 $.ajax({
-                    url: '{{ url('admin/master/stock/get-unit') }}/' + id,
+                    url: '{{ url("admin/master/stock/get-unit") }}/' + id,
                     method: 'get',
                     success: function(res) {
                         console.log(res);
@@ -756,10 +756,10 @@
                 $('#invoice-wrapper').append(newRow);
                 $('.select2-stock').each(function(i,elem){
                     if(!$(elem).hasClass('select2-hidden-accessible')){
-                        initItemSelectManual(elem, '{{ url('admin/master/stock/get-item') }}', '-- Pilih Produk --','#invoice-wrapper');
+                        initItemSelectManual(elem, '{{ url("admin/master/stock/get-item") }}', '-- Pilih Produk --','#invoice-wrapper');
                     }
                 });
-                // initItemSelectManual('', '{{ url('admin/master/stock/get-item') }}', '-- Pilih Produk --');
+                // initItemSelectManual('', '{{ url("admin/master/stock/get-item") }}', '-- Pilih Produk --');
 
 
             }

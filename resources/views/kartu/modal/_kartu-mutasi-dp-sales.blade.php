@@ -69,7 +69,7 @@
 
     function refreshKartuDP(id) {
         url = type == 'sales' ? {{ url('admin/kartu/kartu-dp-sales/refresh') }} / +id :
-            '{{ url('admin/kartu/kartu-dp-purchases/refresh') }}/' + id;
+            '{{ url("admin/kartu/kartu-dp-purchases/refresh") }}/' + id;
 
         $.ajax({
             url: url,
@@ -92,8 +92,8 @@
     }
 
     function recalculateKartuDP(id) {
-        url = type == 'sales' ? '{{ url('admin/kartu/kartu-dp-sales/recalculate') }}/' + id :
-            '{{ url('admin/kartu/kartu-dp-purchases/recalculate') }}/' + id;
+        url = type == 'sales' ? '{{ url("admin/kartu/kartu-dp-sales/recalculate") }}/' + id :
+            '{{ url("admin/kartu/kartu-dp-purchases/recalculate") }}/' + id;
             $.ajax({
                 url: url,
                 method: 'get',
@@ -112,7 +112,7 @@
 
     function searchJournal(id) {
         $.ajax({
-            url: '{{ route('kartu-dp-sales.search-link-journal') }}',
+            url: '{{ route("kartu-dp-sales.search-link-journal") }}',
             method: 'get',
             success: function(res) {
                 console.log(res);
@@ -144,7 +144,7 @@
 
     function linkJournal(journalId, kartuID) {
         swalConfirmAndSubmit({
-            url: '{{ route('jurnal.link-journal') }}',
+            url: '{{ route("jurnal.link-journal") }}',
             data: {
                 _token: "{{ csrf_token() }}",
                 model_id: kartuID,

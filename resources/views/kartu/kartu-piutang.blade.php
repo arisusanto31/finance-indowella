@@ -250,7 +250,7 @@
                     return 0;
                 }
                 $.ajax({
-                    url: '{{ url('admin/kartu/kartu-piutang/create-mutation') }}',
+                    url: '{{ url("admin/kartu/kartu-piutang/create-mutation") }}',
                     method: 'post',
                     data: {
                         date: $('#mutasi-date').val(),
@@ -295,7 +295,7 @@
                     month = 12;
                     year--;
                 }
-                window.location.href = '{{ url('admin/kartu/kartu-piutang/main') }}?month=' + month + '&year=' + year;
+                window.location.href = '{{ url("admin/kartu/kartu-piutang/main") }}?month=' + month + '&year=' + year;
             }
 
             function nextMonth() {
@@ -306,7 +306,7 @@
                     month = 1;
                     year++;
                 }
-                window.location.href = '{{ url('admin/kartu/kartu-piutang/main') }}?month=' + month + '&year=' + year;
+                window.location.href = '{{ url("admin/kartu/kartu-piutang/main") }}?month=' + month + '&year=' + year;
             }
 
             function storePelunasan() {
@@ -315,7 +315,7 @@
                           <span class="visually-hidden">Loading...</span>
                         </div> storing data..`);
                 $.ajax({
-                    url: '{{ url('admin/kartu/kartu-piutang/create-pelunasan') }}',
+                    url: '{{ url("admin/kartu/kartu-piutang/create-pelunasan") }}',
                     method: 'post',
                     data: {
                         date: $('#pelunasan-date').val(),
@@ -357,9 +357,9 @@
                 type = $('#person_type option:selected').val();
                 if (type === 'App\\Models\\Customer') {
                     console.log('init oy ' + type);
-                    initItemSelectManual('#person_id', '{{ route('customer.get-item') }}', 'Person Name ..');
+                    initItemSelectManual('#person_id', '{{ route("customer.get-item") }}', 'Person Name ..');
                 } else {
-                    initItemSelectManual('#person_id', '{{ route('other-person.get-item') }}', 'Person Name ..');
+                    initItemSelectManual('#person_id', '{{ route("other-person.get-item") }}', 'Person Name ..');
 
                 }
             }
@@ -368,22 +368,22 @@
                 type = $('#pelunasan-person_type option:selected').val();
                 if (type === 'App\\Models\\Customer') {
                     console.log('init oy ' + type);
-                    initItemSelectManual('#pelunasan-person_id', '{{ route('customer.get-item') }}', 'Person Name ..',
+                    initItemSelectManual('#pelunasan-person_id', '{{ route("customer.get-item") }}', 'Person Name ..',
                         '#pelunasanModal');
                 } else {
-                    initItemSelectManual('#pelunasan-person_id', '{{ route('other-person.get-item') }}', 'Person Name ..',
+                    initItemSelectManual('#pelunasan-person_id', '{{ route("other-person.get-item") }}', 'Person Name ..',
                         '#pelunasanModal');
 
                 }
             }
             initSelectPerson();
             initSelectPersonPelunasan();
-            initItemSelectManual('#pelunasan-akun-lawan', '{{ route('chart-account.get-item') }}', 'akun lawan ..', );
-            initItemSelectManual('#pelunasan-akun-piutang', '{{ route('chart-account.get-item-keuangan') }}?kind=piutang',
+            initItemSelectManual('#pelunasan-akun-lawan', '{{ route("chart-account.get-item") }}', 'akun lawan ..', );
+            initItemSelectManual('#pelunasan-akun-piutang', '{{ route("chart-account.get-item-keuangan") }}?kind=piutang',
                 'akun piutang ..');
-            initItemSelectManual('#akun-piutang', '{{ route('chart-account.get-item-keuangan') }}?kind=piutang',
+            initItemSelectManual('#akun-piutang', '{{ route("chart-account.get-item-keuangan") }}?kind=piutang',
                 'akun piutang ..');
-            initItemSelectManual('#akun-lawan', '{{ route('chart-account.get-item') }}', 'akun lawan ..');
+            initItemSelectManual('#akun-lawan', '{{ route("chart-account.get-item") }}', 'akun lawan ..');
 
 
             function getSummary() {
@@ -391,7 +391,7 @@
                 year = '{{ $year }}';
                 console.log(month + ',' + year);
                 $.ajax({
-                    url: '{{ route('kartu-piutang.get-summary') }}?month=' + month + '&year=' + year,
+                    url: '{{ route("kartu-piutang.get-summary") }}?month=' + month + '&year=' + year,
                     method: 'get',
                     success: function(res) {
                         console.log(res);
@@ -450,7 +450,7 @@
             }
 
             function showDetailKartuPiutang(factur) {
-                showDetailOnModal('{{ url('admin/kartu/kartu-piutang/show-detail') }}/' + factur, 'xl');
+                showDetailOnModal('{{ url("admin/kartu/kartu-piutang/show-detail") }}/' + factur, 'xl');
             }
             setTimeout(getSummary, 100);
         </script>

@@ -242,7 +242,7 @@
                 }
             });
             console.log('init berhasil lur ');
-            initItemSelectManual('#select-code_group', '{{ route('chart-account.get-item-keuangan') }}?kind=persediaan',
+            initItemSelectManual('#select-code_group', '{{ route("chart-account.get-item-keuangan") }}?kind=persediaan',
                 'pilih kode akun', '#modal-journal');
 
 
@@ -254,7 +254,7 @@
                     month = 12;
                     year--;
                 }
-                window.location.href = '{{ url('admin/kartu/kartu-stock/main') }}?month=' + month + '&year=' + year;
+                window.location.href = '{{ url("admin/kartu/kartu-stock/main") }}?month=' + month + '&year=' + year;
             }
 
             function nextMonth() {
@@ -265,13 +265,13 @@
                     month = 1;
                     year++;
                 }
-                window.location.href = '{{ url('admin/kartu/kartu-stock/main') }}?month=' + month + '&year=' + year;
+                window.location.href = '{{ url("admin/kartu/kartu-stock/main") }}?month=' + month + '&year=' + year;
             }
 
             function searchJournal() {
 
                 $.ajax({
-                    url: '{{ route('jurnal.search-error') }}?code_group=' + $('#select-code_group').val() +
+                    url: '{{ route("jurnal.search-error") }}?code_group=' + $('#select-code_group').val() +
                         '&daterange=' + $('#daterange').val() + '&description=' + $('#description').val(),
                     method: 'get',
                     success: function(res) {
@@ -340,7 +340,7 @@
                                 <tr>
                                 <td>${i+1}</td>
                                 <td>
-                                    <button class="btn btn-sm btn-outline-primary" onclick="showDetailOnModal('{{ url('admin/kartu/kartu-stock/show-history-stock') }}/${item.id}','xl')">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="showDetailOnModal('{{ url("admin/kartu/kartu-stock/show-history-stock") }}/${item.id}','xl')">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                 </td>
@@ -461,7 +461,7 @@
                 }
 
                 $.ajax({
-                    url: '{{ route('jurnal.link-journal') }}',
+                    url: '{{ route("jurnal.link-journal") }}',
                     method: 'POST',
                     data: {
                         "_token": "{{ csrf_token() }}",
@@ -528,7 +528,7 @@
 
             function deleteKartu(id) {
                 swalDelete({
-                    url: '{{ url('admin/kartu/kartu-stock/main') }}/' + id
+                    url: '{{ url("admin/kartu/kartu-stock/main") }}/' + id
                 });
             }
 

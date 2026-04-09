@@ -85,8 +85,8 @@
 
 <script>
     console.log('masuk kok');
-    initItemSelectManual('.select-stock', '{{ route('stock.get-item') }}', 'Pilih Stock');
-    initItemSelectManual('.select-coa', '{{ route('chart-account.get-item-keuangan') }}?kind=persediaan|hutang|kas',
+    initItemSelectManual('.select-stock', '{{ route("stock.get-item") }}', 'Pilih Stock');
+    initItemSelectManual('.select-coa', '{{ route("chart-account.get-item-keuangan") }}?kind=persediaan|hutang|kas',
         'Pilih Akun Persediaan');
     initCurrencyInput('.currency-input');
 
@@ -98,7 +98,7 @@
             return;
         }
         $.ajax({
-            url: '{{ url('admin/master/stock/get-info') }}/' + stockid,
+            url: '{{ url("admin/master/stock/get-info") }}/' + stockid,
             method: 'get',
             success: function(res) {
                 if (res.status == 1) {
@@ -119,7 +119,7 @@
 
     function submitMutasiStock() {
         $.ajax({
-            url: '{{ route('kartu-in-transit.mutasi-store') }}',
+            url: '{{ route("kartu-in-transit.mutasi-store") }}',
             method: 'post',
             data: $('#mutasi-keluar').serialize(),
             success: function(res) {

@@ -34,7 +34,7 @@
 
     @push('scripts')
         <script>
-            initItemSelectManual('.select-coa', '{{ route('chart-account.get-item-keuangan') }}?kind=kas', 'chart account');
+            initItemSelectManual('.select-coa', '{{ route("chart-account.get-item-keuangan") }}?kind=kas', 'chart account');
             setTimeout(() => {
                 searchBuku();
             }, 200);
@@ -44,7 +44,7 @@
                 year = '{{ $year }}';
                 kindKas = $('#select-kind-kas option:selected').val();
                 $.ajax({
-                    url: '{{ route('kartu-kas.get-buku-kas') }}?kind=' + kindKas + '&month=' + month + '&year=' + year,
+                    url: '{{ route("kartu-kas.get-buku-kas") }}?kind=' + kindKas + '&month=' + month + '&year=' + year,
                     method: 'get',
                     success: function(res) {
                         console.log(res);
@@ -133,7 +133,7 @@
                             });
 
                             $('#container-kas').html(html);
-                            initItemSelectManual('.select-coa-table', '{{ route('chart-account.get-item') }}');
+                            initItemSelectManual('.select-coa-table', '{{ route("chart-account.get-item") }}');
 
                         } else {
                             Swal.fire('opps', res.msg, 'error');
@@ -153,7 +153,7 @@
                     month = 12;
                     year--;
                 }
-                window.location.href = '{{ url('admin/kartu/kartu-kas/main') }}?month=' + month + '&year=' + year;
+                window.location.href = '{{ url("admin/kartu/kartu-kas/main") }}?month=' + month + '&year=' + year;
             }
 
             function nextMonth() {
@@ -164,7 +164,7 @@
                     month = 1;
                     year++;
                 }
-                window.location.href = '{{ url('admin/kartu/kartu-kas/main') }}?month=' + month + '&year=' + year;
+                window.location.href = '{{ url("admin/kartu/kartu-kas/main") }}?month=' + month + '&year=' + year;
             }
 
             function addKas(codeKas) {
@@ -188,7 +188,7 @@
                 };
                 console.log(data);
                 swalConfirmAndSubmit({
-                    url: '{{ route('kartu-kas.add-kas') }}',
+                    url: '{{ route("kartu-kas.add-kas") }}',
                     data: data,
                     onSuccess: function(res) {
                         searchBuku();

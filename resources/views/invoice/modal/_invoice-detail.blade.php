@@ -253,22 +253,22 @@
 <script>
     $(document).ready(function() {
         initItemSelectManual('#select-pcoa-persediaan',
-            '{{ route('chart-account.get-item-keuangan') }}?kind=persediaan', 'chart account',
+            '{{ route("chart-account.get-item-keuangan") }}?kind=persediaan', 'chart account',
             '#global-modal #div-input');
         initItemSelectManual('#select-pcoa-piutang-kas',
-            '{{ route('chart-account.get-item-keuangan') }}?kind=piutang|kas', 'chart account',
+            '{{ route("chart-account.get-item-keuangan") }}?kind=piutang|kas', 'chart account',
             '#global-modal #div-input');
         initItemSelectManual('#select-pcoa-penjualan',
-            '{{ route('chart-account.get-item-keuangan') }}?kind=penjualan', 'chart account',
+            '{{ route("chart-account.get-item-keuangan") }}?kind=penjualan', 'chart account',
             '#global-modal #div-input');
         initItemSelectManual('.select-coa-persediaan',
-            '{{ route('chart-account.get-item-keuangan') }}?kind=persediaan', 'chart account',
+            '{{ route("chart-account.get-item-keuangan") }}?kind=persediaan', 'chart account',
             '#global-modal #div-input');
         initItemSelectManual('.select-coa-persediaan-beban',
-            '{{ route('chart-account.get-item-keuangan') }}?kind=persediaan|beban', 'chart account',
+            '{{ route("chart-account.get-item-keuangan") }}?kind=persediaan|beban', 'chart account',
             '#global-modal #div-input');
         initItemSelectManual('.select-coa-hutang-kas',
-            '{{ route('chart-account.get-item-keuangan') }}?kind=hutang|kas', 'chart account',
+            '{{ route("chart-account.get-item-keuangan") }}?kind=hutang|kas', 'chart account',
             '#global-modal  #div-input');
     });
 
@@ -276,7 +276,7 @@
     function updateStatus(id) {
 
         $.ajax({
-            url: '{{ url('admin/invoice/update-status-invoice') }}/' + id,
+            url: '{{ url("admin/invoice/update-status-invoice") }}/' + id,
             method: 'get',
             success: function(res) {
                 if (res.status == 1) {
@@ -295,7 +295,7 @@
 
     function batalkanFinal(id) {
         swalConfirmAndSubmit({
-            url: '{{ url('admin/invoice/invoice-cancel-final') }}',
+            url: '{{ url("admin/invoice/invoice-cancel-final") }}',
             data: {
                 _token: '{{ csrf_token() }}',
                 id: id
@@ -313,9 +313,9 @@
     function refresh(id, model) {
         console.log(id, model);
         if (model == 'App\\Models\\InvoicePurchaseDetail') {
-            url = '{{ url('admin/invoice/invoice-purchase-refresh') }}/' + id;
+            url = '{{ url("admin/invoice/invoice-purchase-refresh") }}/' + id;
         } else {
-            url = '{{ url('admin/invoice/invoice-sales-refresh') }}/' + id;
+            url = '{{ url("admin/invoice/invoice-sales-refresh") }}/' + id;
         }
         loading(1);
         $.ajax({
@@ -365,7 +365,7 @@
     function createClaimPenjualan() {
 
         swalConfirmAndSubmit({
-            url: '{{ url(route('invoice.create-claim-penjualan')) }}',
+            url: '{{ route("invoice.create-claim-penjualan") }}',
             data: {
                 coa_penjualan: $('#select-pcoa-penjualan').val(),
                 coa_persediaan: $('#select-pcoa-persediaan').val(),
@@ -391,7 +391,7 @@
     function createClaimPembelian() {
 
         swalConfirmAndSubmit({
-            url: '{{ url(route('invoice.create-claim-pembelian')) }}',
+            url: '{{ route("invoice.create-claim-pembelian") }}',
             data: {
                 coa_persediaan: $('#select-coa-persediaan').val(),
                 coa_hutang_kas: $('#select-coa-hutang-kas').val(),
@@ -414,7 +414,7 @@
 
     function submitMutasiPurchase(i) {
         swalConfirmAndSubmit({
-            url: '{{ url('admin/invoice/purchase-create-mutations') }}',
+            url: '{{ url("admin/invoice/purchase-create-mutations") }}',
             data: $('#form-mutasi-purchase' + i).serialize(),
             onSuccess: function(res) {
                 console.log(res);
