@@ -4741,12 +4741,12 @@ textarea.form-control-lg {
 @media (min-width: 992px) {
   .modal-lg,
 .modal-xl {
-    max-width: 50rem;
+    max-width: 60rem;
   }
 }
 @media (min-width: 1200px) {
   .modal-xl {
-    max-width: 1140px;
+    max-width: 1800px;
   }
 }
 .modal-fullscreen {
@@ -8007,7 +8007,7 @@ form select.selectpicker.is-invalid ~ .btn {
 }
 @media (min-width: 1200px) {
   .modal-xl .modal-dialog {
-    max-width: 1140px;
+    max-width: 1800px;
   }
 }
 .progress {

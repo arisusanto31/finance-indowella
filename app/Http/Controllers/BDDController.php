@@ -229,8 +229,6 @@ class BDDController extends Controller
             $inv->periode = $payload['periode'];
             $inv->book_journal_id = bookID();
             $inv->save();
-
-
             $kartu = KartuPrepaidExpense::where('prepaid_expense_id', $inv->id)->where('tag', 'init_import' . $payload['request_date'])->first();
             if (!$kartu) {
                 $kartu = new KartuPrepaidExpense;
@@ -248,7 +246,6 @@ class BDDController extends Controller
             $kartu->toko_id = $inv->toko_id;
             $kartu->nilai_buku = floatval($payload['nilai_buku']);
             $kartu->save();
-
             $task->status = 'success';
             $task->error_message = "";
             $task->finished_at = now();

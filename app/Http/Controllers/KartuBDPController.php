@@ -261,11 +261,12 @@ class KartuBDPController extends Controller
                 DB::raw('saldo_qty_backend/u.konversi as qty_saldo'),
                 'saldo_rupiah_total as rupiah_saldo',
                 'ks.journal_number',
-
             )->orderBy('ks.index_date','asc')->get();
         $view->title = $name . ' [' . $stock->id . ']';
         $view->datas = $dataHistory;
         $view->model = 'kartu-bdp';
+        $view->productionNumber = $productionNumber;
+        $view->stockId = $id;
         return $view;
     }
 

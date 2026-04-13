@@ -446,6 +446,7 @@ class KartuHutang extends Model
         $kartuOrang = KartuHutang::where('person_id', $this->person_id)->where('person_type', $this->person_type)
             ->where('index_date', '>', $this->index_date)->get();
         $saldoOrang = $this->amount_saldo_person;
+        
         foreach ($kartuOrang as $kartu) {
             $saldoOrang = $saldoOrang + $kartu->amount_debet - $kartu->amount_kredit;
             $kartu->amount_saldo_person = $saldoOrang;

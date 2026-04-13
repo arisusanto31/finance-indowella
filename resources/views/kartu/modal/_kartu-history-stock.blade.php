@@ -23,36 +23,54 @@
             </thead>
             <tbody>
                 @foreach ($datas as $data)
-                    <tr>
-                        <td>{{ $data->created_at }}</td>
-                        <td>[uid:{{$data->id}}]<br>{{ $data->description }}</td>
-                        <td class="text-success">
-                            @if ($data->qty_debet != 0)
-                                {{ format_price($data->qty_debet) }} {{ $data->unit }}
-                            @else
-                                -
-                            @endif
-                        </td>
-                        <td class="text-success">{{ format_price($data->rupiah_debet) }}</td>
-                        <td class="text-danger">
-                            @if($data->qty_kredit!=0)
-                                {{ format_price($data->qty_kredit) }} {{ $data->unit }}
-                            @else
-                                -
-                            @endif
-                        </td>
-                        <td class="text-danger">{{ format_price($data->rupiah_kredit) }}</td>
-                        <td>{{ format_price($data->qty_saldo) }} {{ $data->unit }}</td>
-                        <td>{{ format_price($data->rupiah_saldo) }}</td>
-                        <td>{{ $data->journal_number }}</td>
-                        <td>
-                            <button class="btn btn-primary btn-sm" onclick="recalculate('{{ $data->id }}')">
-                                <i class="fas fa-refresh"></i> recalculate
-                            </button>
-                        </td>
-                    </tr>
+                <tr>
+                    <td>{{ $data->created_at }}</td>
+                    <td>[uid:{{$data->id}}]<br>{{ $data->description }}</td>
+                    <td class="text-success">
+                        @if ($data->qty_debet != 0)
+                        {{ format_price($data->qty_debet) }} {{ $data->unit }}
+                        @else
+                        -
+                        @endif
+                    </td>
+                    <td class="text-success">{{ format_price($data->rupiah_debet) }}</td>
+                    <td class="text-danger">
+                        @if($data->qty_kredit!=0)
+                        {{ format_price($data->qty_kredit) }} {{ $data->unit }}
+                        @else
+                        -
+                        @endif
+                    </td>
+                    <td class="text-danger">{{ format_price($data->rupiah_kredit) }}</td>
+                    <td>{{ format_price($data->qty_saldo) }} {{ $data->unit }}</td>
+                    <td>{{ format_price($data->rupiah_saldo) }}</td>
+                    <td>{{ $data->journal_number }}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="recalculate('{{ $data->id }}')">
+                            <i class="fas fa-refresh"></i> recalculate
+                        </button>
+
+                    </td>
+                </tr>
                 @endforeach
             </tbody>
+            <tfoot>
+                <tr>
+                    <th colspan="2">Total</th>
+                    <th class="text-success">{{ format_price($datas->sum('qty_debet')) }} {{ $data->unit }}</th>
+                    <th class="text-success">{{ format_price($datas->sum('rupiah_debet')) }}</th>
+                    <th class="text-danger">{{ format_price($datas->sum('qty_kredit')) }} {{ $data->unit }}</th>
+                    <th class="text-danger">{{ format_price($datas->sum('rupiah_kredit')) }}</th>
+                    <th>{{ format_price($datas->last()->qty_saldo) }} {{ $data->unit }}</th>
+                    <th>{{ format_price($datas->last()->rupiah_saldo) }}</th>
+                    <th></th>
+                    <th>
+                        @if($model=='kartu-bdp' && $datas->last()->qty_saldo > 0)
+                        <button onclick="bebankan('{{ $productionNumber }}', '{{ $stockId }}')">bebankan</button>
+                        @endif
+                    </th>
+                </tr>
+            </tfoot>
         </table>
     </div>
 </div>
@@ -62,12 +80,28 @@
 
 
 <script>
-  
+    function bebankan(productionNumber, stockId) {
+        swalConfirmAndSubmit({
+            url: '{{ url("admin/kartu/".$model."/bebankan") }}',
+            data: {
+                _token: '{{ csrf_token() }}',
+                production_number: productionNumber,
+                stock_id: stockId
+            },
+            onSuccess: function(response) {
+                // Handle success response
+                console.log("Bebankan successful:", response);
+                // Optionally, you can refresh the modal or update the UI
+            },
+        });
+
+    }
+
     function recalculate(id) {
         // Call your API or perform your calculation logic here
         console.log("Recalculating for ID:", id);
         swalConfirmAndSubmit({
-            url: '{{ url('admin/kartu/'.$model.'/recalculate') }}',
+            url: '{{ url("admin/kartu/".$model."/recalculate") }}',
             data: {
                 _token: '{{ csrf_token() }}',
                 id: id

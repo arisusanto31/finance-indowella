@@ -1,10 +1,10 @@
 <x-app-layout>
     @push('styles')
-        <style>
-            .text-center th {
-                vertical-align: middle;
-            }
-        </style>
+    <style>
+        .text-center th {
+            vertical-align: middle;
+        }
+    </style>
     @endpush
 
     <div class="card shadow-sm mb-4">
@@ -209,33 +209,33 @@
 
 
     @push('scripts')
-        <script>
-            var page = "kartu";
-            setTimeout(function() {
-                getSummary();
-            }, 200);
-            $('#daterange').daterangepicker({
-                opens: 'right',
-                locale: {
-                    format: 'YYYY-MM-DD'
-                }
-            });
-            console.log('init berhasil lur ');
-            initItemSelectManual('#select-code_group', '{{ route("chart-account.get-item-keuangan") }}?kind=persediaan',
-                'pilih kode akun', '#modal-journal');
+    <script>
+        var page = "kartu";
+        setTimeout(function() {
+            getSummary();
+        }, 200);
+        $('#daterange').daterangepicker({
+            opens: 'right',
+            locale: {
+                format: 'YYYY-MM-DD'
+            }
+        });
+        console.log('init berhasil lur ');
+        initItemSelectManual('#select-code_group', '{{ route("chart-account.get-item-keuangan") }}?kind=persediaan',
+            'pilih kode akun', '#modal-journal');
 
-            function searchJournal() {
+        function searchJournal() {
 
-                $.ajax({
-                    url: '{{ route("jurnal.search-error") }}?code_group=' + $('#select-code_group').val() +
-                        '&daterange=' + $('#daterange').val() + '&description=' + $('#description').val(),
-                    method: 'get',
-                    success: function(res) {
-                        console.log(res);
-                        if (res.status == 1) {
-                            html = "";
-                            res.msg.forEach(function eachData(data) {
-                                html += `
+            $.ajax({
+                url: '{{ route("jurnal.search-error") }}?code_group=' + $('#select-code_group').val() +
+                    '&daterange=' + $('#daterange').val() + '&description=' + $('#description').val(),
+                method: 'get',
+                success: function(res) {
+                    console.log(res);
+                    if (res.status == 1) {
+                        html = "";
+                        res.msg.forEach(function eachData(data) {
+                            html += `
                                 <a href="javascript:void(pilihJurnal(${data.id}))" >
                                     <div id="item-jurnal${data.id}" class="col-md-12 col-xs-12 item-jurnal colorblack " style="position:relative; border-bottom:1px solid black;">
                                         <span style="position:absolute; top:0px; left:-17px"> <i class="fas fa-circle"></i></span>
@@ -244,42 +244,42 @@
                                     </div>
                                 </a>
                             `;
-                            });
-                            $('#container-journal').html(html);
-                        } else {
+                        });
+                        $('#container-journal').html(html);
+                    } else {
 
-                        }
-                    },
-                    error: function(res) {
-                        console.log(res);
                     }
-                });
-            }
+                },
+                error: function(res) {
+                    console.log(res);
+                }
+            });
+        }
 
 
-            function pilihJurnal(id) {
-                $('.item-jurnal').removeClass('bg-primary colorwhite');
-                $('#item-jurnal' + id).addClass('bg-primary colorwhite');
-                $('#journal_id').val(id);
-            }
+        function pilihJurnal(id) {
+            $('.item-jurnal').removeClass('bg-primary colorwhite');
+            $('#item-jurnal' + id).addClass('bg-primary colorwhite');
+            $('#journal_id').val(id);
+        }
 
-            function getSummary() {
-                page = "kartu";
-                $.ajax({
-                    url: "{{ route('kartu-bdp.get-summary') }}?month={{ $month }}&year={{ $year }}",
-                    method: "GET",
-                    success: function(res) {
-                        console.log(res);
-                        if (res.status == 1) {
-                            html = "";
-                            totalSaldoAwal = 0;
-                            totalMasuk = 0;
-                            totalKeluar = 0;
-                            totalSaldoAkhir = 0;
-                            Object.keys(res.msg).forEach(function eachTable(spknumber) {
-                                html += `
+        function getSummary() {
+            page = "kartu";
+            $.ajax({
+                url: "{{ route('kartu-bdp.get-summary') }}?month={{ $month }}&year={{ $year }}",
+                method: "GET",
+                success: function(res) {
+                    console.log(res);
+                    if (res.status == 1) {
+                        html = "";
+                        totalSaldoAwal = 0;
+                        totalMasuk = 0;
+                        totalKeluar = 0;
+                        totalSaldoAkhir = 0;
+                        Object.keys(res.msg).forEach(function eachTable(spknumber) {
+                            html += `
                             <p class="mt-3 mb-0"><strong>${spknumber}</strong></p>
-                            <table id="kartuKasTable" class="table table-bordered table-striped table-hover align-middle">
+                            <table id="kartuKasTable" class="table table-bordered  table-hover align-middle">
                                 <thead class="bg-white text-dark text-center">
                                     <tr>
                                         <th rowspan=2>No</th>
@@ -309,35 +309,37 @@
                                 <tbody id="body-summary">
                                
                             `;
-                                dataTable = res.msg[spknumber];
-                                dataTable.forEach(function(item, i) {
-                                    rupiahUnitAwal = item.saldo_rupiah_awal > 0 ? item
-                                        .saldo_rupiah_awal / item.saldo_qty_awal : 0;
-                                    rupiahUnitAkhir = item.saldo_rupiah_akhir > 0 ? item
-                                        .saldo_rupiah_akhir / item.saldo_qty_akhir : 0;
-                                    masuk = [0, 0, 0];
-                                    keluar = [0, 0, 0];
-                                    if (array_key_exists(spknumber, res.mutasi_masuk)) {
-                                        if (array_key_exists(item.id, res.mutasi_masuk[
-                                                spknumber])) {
-                                            masuk[0] = res.mutasi_masuk[spknumber][item.id].qty;
-                                            masuk[1] = res.mutasi_masuk[spknumber][item.id]
-                                                .rupiah_unit;
-                                            masuk[2] = res.mutasi_masuk[spknumber][item.id].total;
-                                        }
+                            dataTable = res.msg[spknumber];
+                            dataTable.forEach(function(item, i) {
+                                rupiahUnitAwal = item.saldo_rupiah_awal > 0 ? item
+                                    .saldo_rupiah_awal / item.saldo_qty_awal : 0;
+                                rupiahUnitAkhir = item.saldo_rupiah_akhir > 0 ? item
+                                    .saldo_rupiah_akhir / item.saldo_qty_akhir : 0;
+                                masuk = [0, 0, 0];
+                                keluar = [0, 0, 0];
+                                if (array_key_exists(spknumber, res.mutasi_masuk)) {
+                                    if (array_key_exists(item.id, res.mutasi_masuk[
+                                            spknumber])) {
+                                        masuk[0] = res.mutasi_masuk[spknumber][item.id].qty;
+                                        masuk[1] = res.mutasi_masuk[spknumber][item.id]
+                                            .rupiah_unit;
+                                        masuk[2] = res.mutasi_masuk[spknumber][item.id].total;
                                     }
-                                    if (array_key_exists(spknumber, res.mutasi_keluar)) {
-                                        if (array_key_exists(item.id, res.mutasi_keluar[
-                                                spknumber])) {
-                                            keluar[0] = res.mutasi_keluar[spknumber][item.id].qty;
-                                            keluar[1] = res.mutasi_keluar[spknumber][item.id]
-                                                .rupiah_unit;
-                                            keluar[2] = res.mutasi_keluar[spknumber][item.id].total;
-                                        }
+                                }
+                                if (array_key_exists(spknumber, res.mutasi_keluar)) {
+                                    if (array_key_exists(item.id, res.mutasi_keluar[
+                                            spknumber])) {
+                                        keluar[0] = res.mutasi_keluar[spknumber][item.id].qty;
+                                        keluar[1] = res.mutasi_keluar[spknumber][item.id]
+                                            .rupiah_unit;
+                                        keluar[2] = res.mutasi_keluar[spknumber][item.id].total;
                                     }
-                                    html += `
+                                }
+                                html += `
                                 <tr>
-                                <td>${i+1}</td>
+                                <td ${item.saldo_rupiah_akhir == 0 ? 'class="bg-success text-white"': 'class="bg-danger text-white"'}>
+                                ${i+1}
+                                </td>  
                                 <td>
                                     <button class="btn btn-sm btn-outline-primary" onclick="showDetailOnModal('{{ url("admin/kartu/kartu-bdp/show-history-stock") }}/${item.id}?production_number=${spknumber}','xl')">
                                         <i class="fas fa-eye"></i>
@@ -358,64 +360,64 @@
                                 <td>${formatRupiah(rupiahUnitAkhir*item.konversi)}</td>
                                 <td>${formatRupiah(item.saldo_rupiah_akhir)}</td>
                                 </tr>`;
-                                    totalSaldoAwal += parseFloat(item.saldo_rupiah_awal);
-                                    totalMasuk += parseFloat(masuk[2]);
-                                    totalKeluar += parseFloat(keluar[2]);
-                                    totalSaldoAkhir += parseFloat(item.saldo_rupiah_akhir);
-                                });
-                                html += `
+                                totalSaldoAwal += parseFloat(item.saldo_rupiah_awal);
+                                totalMasuk += parseFloat(masuk[2]);
+                                totalKeluar += parseFloat(keluar[2]);
+                                totalSaldoAkhir += parseFloat(item.saldo_rupiah_akhir);
+                            });
+                            html += `
                                 </tbody>
                             </table>
                             `;
-                            });
+                        });
 
-                            $('#container-table').html(html);
-                            $('#total-saldo-awal').html('<strong>' + formatRupiah(totalSaldoAwal) + '</strong>');
-                            $('#total-masuk').html('<strong>' + formatRupiah(totalMasuk) + '</strong>');
-                            $('#total-keluar').html('<strong>' + formatRupiah(totalKeluar) + '</strong>');
-                            $('#total-saldo-akhir').html('<strong>' + formatRupiah(totalSaldoAkhir) + '</strong>');
-                            // $('#kartuKasTable').DataTable({
-                            //     "destroy": true,
-                            //     "order": [
-                            //         [0, "asc"]
-                            //     ],
-                            //     "pageLength": 10,
-                            //     "lengthMenu": [
-                            //         [10, 25, 50, -1],
-                            //         [10, 25, 50, "All"]
-                            //     ],
-                            // });
-                        } else {
+                        $('#container-table').html(html);
+                        $('#total-saldo-awal').html('<strong>' + formatRupiah(totalSaldoAwal) + '</strong>');
+                        $('#total-masuk').html('<strong>' + formatRupiah(totalMasuk) + '</strong>');
+                        $('#total-keluar').html('<strong>' + formatRupiah(totalKeluar) + '</strong>');
+                        $('#total-saldo-akhir').html('<strong>' + formatRupiah(totalSaldoAkhir) + '</strong>');
+                        // $('#kartuKasTable').DataTable({
+                        //     "destroy": true,
+                        //     "order": [
+                        //         [0, "asc"]
+                        //     ],
+                        //     "pageLength": 10,
+                        //     "lengthMenu": [
+                        //         [10, 25, 50, -1],
+                        //         [10, 25, 50, "All"]
+                        //     ],
+                        // });
+                    } else {
 
-                        }
-                    },
-                    error: function(err) {
-                        console.log(err);
                     }
-                });
-            }
+                },
+                error: function(err) {
+                    console.log(err);
+                }
+            });
+        }
 
-            function showModalMasuk() {
-                showDetailOnModal(
-                    "{{ route('kartu-bdp.create-mutasi-masuk') }}?month={{ $month }}&year={{ $year }}");
-            }
+        function showModalMasuk() {
+            showDetailOnModal(
+                "{{ route('kartu-bdp.create-mutasi-masuk') }}?month={{ $month }}&year={{ $year }}");
+        }
 
-            function showModalOut() {
-                showDetailOnModal(
-                    "{{ route('kartu-bdp.create-mutasi-keluar') }}?month={{ $month }}&year={{ $year }}");
-            }
+        function showModalOut() {
+            showDetailOnModal(
+                "{{ route('kartu-bdp.create-mutasi-keluar') }}?month={{ $month }}&year={{ $year }}");
+        }
 
-            function getMutasiMasuk() {
-                page = "masuk";
-                $.ajax({
-                    url: "{{ route('kartu-bdp.get-mutasi-masuk') }}?month={{ $month }}&year={{ $year }}",
-                    method: "GET",
-                    success: function(res) {
-                        console.log(res);
-                        if (res.status == 1) {
-                            html = "";
-                            res.msg.forEach(function(item, i) {
-                                html += `
+        function getMutasiMasuk() {
+            page = "masuk";
+            $.ajax({
+                url: "{{ route('kartu-bdp.get-mutasi-masuk') }}?month={{ $month }}&year={{ $year }}",
+                method: "GET",
+                success: function(res) {
+                    console.log(res);
+                    if (res.status == 1) {
+                        html = "";
+                        res.msg.forEach(function(item, i) {
+                            html += `
                                 <tr>
                                 <td>${i+1}</td>
                                 <td>${formatNormalDateTime(new Date(item.created_at))}</td>
@@ -431,71 +433,71 @@
                                    <td><button class="btn btn-sm btn-danger" onclick="deleteMutation(${item.id})"> <i class="fas fa-trash"></i></button></td>
                            
                                 </tr>`;
-                            });
-                            $('#body-mutasi-masuk').html(html);
-                        } else {
+                        });
+                        $('#body-mutasi-masuk').html(html);
+                    } else {
 
-                        }
-                    },
-                    error: function(err) {
-                        console.log(err);
                     }
-                });
+                },
+                error: function(err) {
+                    console.log(err);
+                }
+            });
+        }
+
+        function openLinkJournal(id) {
+            $('#modal-journal').modal('show');
+            $('#keterangan-kartu').html("Link Kartu Stock ID : " + id);
+            $('#model_id').val(id);
+
+        }
+
+        function linkJournal() {
+            id = $('#journal_id').val();
+            if (id == "") {
+                Swal.fire("opss", "Pilih jurnal terlebih dahulu", "error");
+                return;
+            }
+            model_id = $('#model_id').val();
+            if (model_id == "") {
+                Swal.fire("opss", "Pilih kartu stock terlebih dahulu", "error");
+                return;
             }
 
-            function openLinkJournal(id) {
-                $('#modal-journal').modal('show');
-                $('#keterangan-kartu').html("Link Kartu Stock ID : " + id);
-                $('#model_id').val(id);
-
-            }
-
-            function linkJournal() {
-                id = $('#journal_id').val();
-                if (id == "") {
-                    Swal.fire("opss", "Pilih jurnal terlebih dahulu", "error");
-                    return;
-                }
-                model_id = $('#model_id').val();
-                if (model_id == "") {
-                    Swal.fire("opss", "Pilih kartu stock terlebih dahulu", "error");
-                    return;
-                }
-
-                $.ajax({
-                    url: '{{ route("jurnal.link-journal") }}',
-                    method: 'POST',
-                    data: {
-                        "_token": "{{ csrf_token() }}",
-                        "model_id": model_id,
-                        "journal_id": id,
-                        "model": "App\\Models\\KartuBDP",
-                    },
-                    success: function(res) {
-                        console.log(res);
-                        if (res.status == 1) {
-                            $('#modal-journal').modal('hide');
-                        } else {
-                            Swal.fire("opss", res.msg, "error");
-                        }
-                    },
-                    error: function(err) {
-                        console.log(err);
+            $.ajax({
+                url: '{{ route("jurnal.link-journal") }}',
+                method: 'POST',
+                data: {
+                    "_token": "{{ csrf_token() }}",
+                    "model_id": model_id,
+                    "journal_id": id,
+                    "model": "App\\Models\\KartuBDP",
+                },
+                success: function(res) {
+                    console.log(res);
+                    if (res.status == 1) {
+                        $('#modal-journal').modal('hide');
+                    } else {
+                        Swal.fire("opss", res.msg, "error");
                     }
-                });
-            }
+                },
+                error: function(err) {
+                    console.log(err);
+                }
+            });
+        }
 
-            function getMutasiKeluar() {
-                page = "keluar";
-                $.ajax({
-                    url: "{{ route('kartu-bdp.get-mutasi-keluar') }}?month={{ $month }}&year={{ $year }}",
-                    method: "GET",
-                    success: function(res) {
-                        console.log(res);
-                        if (res.status == 1) {
-                            html = "";
-                            res.msg.forEach(function(item, i) {
-                                html += `
+        function getMutasiKeluar() {
+            page = "keluar";
+            $.ajax({
+                url: "{{ route('kartu-bdp.get-mutasi-keluar') }}?month={{ $month }}&year={{ $year }}",
+                method: "GET",
+                success: function(res) {
+                    console.log(res);
+                    if (res.status == 1) {
+                        html = "";
+                        res.msg.forEach(function(item, i) {
+                            html += `
                                 <tr>
                                 <td>${i+1}</td>
                                 <td>${formatNormalDateTime(new Date(item.created_at))}</td>
@@ -511,87 +513,87 @@
                                 <td><button class="btn btn-sm btn-danger" onclick="deleteMutation(${item.id})"> <i class="fas fa-trash"></i></button></td>
                            
                                 </tr>`;
-                            });
-                            $('#body-mutasi-keluar').html(html);
-                        } else {
+                        });
+                        $('#body-mutasi-keluar').html(html);
+                    } else {
 
-                        }
-                    },
-                    error: function(err) {
-                        console.log(err);
                     }
-                });
-
-            }
-
-
-            function prevMonth() {
-                month = '{{ $month }}';
-                year = '{{ $year }}';
-                month--;
-                if (month < 1) {
-                    month = 12;
-                    year--;
+                },
+                error: function(err) {
+                    console.log(err);
                 }
-                window.location.href = '{{ url("admin/kartu/kartu-bdp/main") }}?month=' + month + '&year=' + year;
-            }
+            });
 
-            function nextMonth() {
-                month = '{{ $month }}';
-                year = '{{ $year }}';
-                month++;
-                if (month > 12) {
-                    month = 1;
-                    year++;
-                }
-                window.location.href = '{{ url("admin/kartu/kartu-bdp/main") }}?month=' + month + '&year=' + year;
-            }
+        }
 
-            function refreshKartu(id) {
-                $.ajax({
-                    url: "{{ route('kartu-bdp.refresh-kartu') }}",
-                    method: "POST",
-                    data: {
-                        "_token": "{{ csrf_token() }}",
-                        "id": id,
-                    },
-                    success: function(res) {
-                        console.log(res);
-                        if (res.status == 1) {
-                            if (page == "masuk") {
-                                getMutasiMasuk();
-                            } else {
-                                getMutasiKeluar();
-                            }
-                            Swal.fire("Berhasil", res.msg, "success");
-                        } else {
-                            Swal.fire("opss", res.msg, "error");
-                        }
-                    },
-                    error: function(err) {
-                        console.log(err);
-                    }
-                });
-            }
 
-            function deleteMutation(id) {
-                swalConfirmAndSubmit({
-                    url: '{{ route("kartu-bdp.delete-mutation") }}',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        id: id
-                    },
-                    onSuccess: function(res) {
-                        if (page == "kartu") {
-                            getSummary();
-                        } else if (page == "masuk") {
+        function prevMonth() {
+            month = '{{ $month }}';
+            year = '{{ $year }}';
+            month--;
+            if (month < 1) {
+                month = 12;
+                year--;
+            }
+            window.location.href = '{{ url("admin/kartu/kartu-bdp/main") }}?month=' + month + '&year=' + year;
+        }
+
+        function nextMonth() {
+            month = '{{ $month }}';
+            year = '{{ $year }}';
+            month++;
+            if (month > 12) {
+                month = 1;
+                year++;
+            }
+            window.location.href = '{{ url("admin/kartu/kartu-bdp/main") }}?month=' + month + '&year=' + year;
+        }
+
+        function refreshKartu(id) {
+            $.ajax({
+                url: "{{ route('kartu-bdp.refresh-kartu') }}",
+                method: "POST",
+                data: {
+                    "_token": "{{ csrf_token() }}",
+                    "id": id,
+                },
+                success: function(res) {
+                    console.log(res);
+                    if (res.status == 1) {
+                        if (page == "masuk") {
                             getMutasiMasuk();
                         } else {
                             getMutasiKeluar();
                         }
+                        Swal.fire("Berhasil", res.msg, "success");
+                    } else {
+                        Swal.fire("opss", res.msg, "error");
                     }
-                });
-            }
-        </script>
+                },
+                error: function(err) {
+                    console.log(err);
+                }
+            });
+        }
+
+        function deleteMutation(id) {
+            swalConfirmAndSubmit({
+                url: '{{ route("kartu-bdp.delete-mutation") }}',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    id: id
+                },
+                onSuccess: function(res) {
+                    if (page == "kartu") {
+                        getSummary();
+                    } else if (page == "masuk") {
+                        getMutasiMasuk();
+                    } else {
+                        getMutasiKeluar();
+                    }
+                }
+            });
+        }
+    </script>
     @endpush
 </x-app-layout>

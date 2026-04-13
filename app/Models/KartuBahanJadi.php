@@ -235,6 +235,10 @@ class KartuBahanJadi extends Model
             $ks = $st['msg'];
             $number = null;
             if ($isOtomatisJurnal) {
+
+                if(!$lawanCodeGroup){
+                    throw new \Exception('lawan code group tidak boleh kosong jika otomatis buat jurnal');
+                }
                 $amount = abs($ks->mutasi_rupiah_total);
 
                 if ($flow == 1) {
