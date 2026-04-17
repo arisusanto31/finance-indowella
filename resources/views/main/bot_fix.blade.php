@@ -92,6 +92,7 @@
                                 <thead>
                                     <tr>
                                         <th>id</th>
+                                        <th>index date</th>
                                         <th>production number</th>
                                         <th>qty mutasi</th>
                                         <th>rupiah mutasi</th>
@@ -112,6 +113,7 @@
                             html+=`
                                 <tr>
                                     <td>${data.id}</td>
+                                    <td>${data.index_date}</td>
                                     <td>${data.production_number}</td>
                                     <td>${data.mutasi_qty_backend} ${data.unit_backend}</td>
                                     <td>${formatRupiah(data.mutasi_rupiah_total)}</td>
