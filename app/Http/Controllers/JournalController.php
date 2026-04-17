@@ -1439,16 +1439,16 @@ class JournalController extends Controller
             )->orderBy('index_date', 'asc')->get()->groupBy('production_number')->map(function ($items) {
                 return collect($items)->groupBy('stock_id');
             });
-            $tableName="kartu_stocks";
+            $tableName = "kartu_stocks";
             switch ($model) {
                 case 'App\\Models\\KartuStock':
-                    $tableName="kartu_stocks";
+                    $tableName = "kartu_stocks";
                     break;
                 case 'App\\Models\\KartuBDP':
-                    $tableName="kartu_bdps";
+                    $tableName = "kartu_bdps";
                     break;
                 case 'App\\Models\\KartuBahanJadi':
-                    $tableName="kartu_bahan_jadis";
+                    $tableName = "kartu_bahan_jadis";
                     break;
             }
 
@@ -1458,9 +1458,6 @@ class JournalController extends Controller
                 return collect($items)->keyBy('stock_id');
             });
 
-
-
-
             $problems = [];
             foreach ($datas as $prod => $vals) {
                 foreach ($vals as $stockid => $valStocks) {
@@ -1468,14 +1465,9 @@ class JournalController extends Controller
                     $saldoQty = $saldoProd ? ($saldoProd->get($stockid)->saldo_qty_backend ?? 0) : 0;
                     $saldoRupiah = $saldoProd ? ($saldoProd->get($stockid)->saldo_rupiah_total ?? 0) : 0;
                     foreach ($valStocks as $row => $valStock) {
-                        // $valStock['qty_ok'] = $saldoQty;
-                        // $valStock['rupiah_ok'] = $saldoRupiah;
-                        // $problems[]=$valStock;
-                        // break;
-                        // if ($row > 0) {
                         $saldoQty = bcadd($saldoQty, $valStock->mutasi_qty_backend, 2);
                         $saldoRupiah = bcadd($saldoRupiah, $valStock->mutasi_rupiah_total, 2);
-                        // }
+
                         if (abs($saldoQty - $valStock->saldo_qty_backend) > 0.1 || abs($saldoRupiah - $valStock->saldo_rupiah_total) > 0.1) {
                             $valStock['qty_ok'] = $saldoQty;
                             $valStock['rupiah_ok'] = $saldoRupiah;
@@ -1490,7 +1482,63 @@ class JournalController extends Controller
                 'status' => 1,
                 'msg' => $problems,
                 'index_date' => $indexDate,
-                'stocks' => $stocks
+                'stocks' => $stocks,
+                'model' => $model
+            ];
+        } else if ($model == 'KartuHutang' || $model == 'KartuPiutang' || $model == 'KartuDPSales') {
+            $model = 'App\\Models\\' . $model;
+            $key = 'sales_order_number';
+            if ($model == 'App\\Models\\KartuHutang') {
+                $key = 'factur_supplier_number';
+            } else if ($model == 'App\\Models\\KartuPiutang') {
+                $key = 'invoice_pack_number';
+            }
+            $datas = $model::where('index_date', '>', $indexDate)->select(
+                'id',
+                'index_date',
+                DB::raw('amount_debet- amount_kredit as mutasi_rupiah_total'),
+                DB::raw('amount_saldo_factur as saldo_rupiah_total'),
+                DB::raw($key.' as number')
+            )->orderBy('index_date', 'asc')->get()->groupBy('number');
+            $tableName = "kartu_hutangs";
+            switch ($model) {
+                case 'App\\Models\\KartuPiutang':
+                    $tableName = "kartu_piutangs";
+                    break;
+                case 'App\\Models\\KartuDPSales':
+                    $tableName = "kartu_dp_sales";
+                    break;
+                case 'App\\Models\\KartuHutang':
+                    $tableName = "kartu_hutangs";
+                    break;
+            }
+
+            $saldoAwal = $model::whereIn('index_date', function ($q) use ($indexDate, $tableName,$key) {
+                $q->select(DB::raw('MAX(index_date)'))->from($tableName)->where('index_date', '<=', $indexDate)->groupBy($key );
+            })->get()->keyBy($key);
+
+            $problems = [];
+            foreach ($datas as $number => $vals) {
+             
+                    $saldoProd = $saldoAwal->get($number);
+                     $saldoRupiah = $saldoProd ?$saldoProd->amount_saldo_factur  : 0;
+                    foreach ($vals as $row => $val) {
+                        $saldoRupiah = bcadd($saldoRupiah, $val->mutasi_rupiah_total, 2);
+
+                        if (abs($saldoRupiah - $val->saldo_rupiah_total) > 0.1) {
+                            $val['rupiah_ok'] = $saldoRupiah;
+                            $problems[] = $val;
+                            break;
+                        }
+                    }
+                
+            }
+
+            return [
+                'status' => 1,
+                'msg' => $problems,
+                'index_date' => $indexDate,
+                'model' => $model
             ];
         }
 
@@ -1511,7 +1559,7 @@ class JournalController extends Controller
             if ($model == 'KartuStock' || $model == 'KartuBDP' || $model == 'KartuBahanJadi') {
                 $model = 'App\\Models\\' . $model;
                 $kartu = $model::find($id);
-                if(!$kartu){
+                if (!$kartu) {
                     throw new \Exception('kartu tidak ditemukan');
                 }
                 $lastKartu = $model::where('production_number', $kartu->production_number)
@@ -1539,6 +1587,41 @@ class JournalController extends Controller
                     ];
                 }
                 upsertInChunks($model, $updater, 'id', ['saldo_qty_backend', 'saldo_rupiah_total']);
+            }
+            else if($model == 'KartuHutang' || $model == 'KartuPiutang' || $model == 'KartuDPSales') {
+                $model = 'App\\Models\\' . $model;
+                $kartu = $model::find($id);
+                if (!$kartu) {
+                    throw new \Exception('kartu tidak ditemukan');
+                }
+                $key = 'sales_order_number';
+                if ($model == 'App\\Models\\KartuHutang') {
+                    $key = 'factur_supplier_number';
+                } else if ($model == 'App\\Models\\KartuPiutang') {
+                    $key = 'invoice_pack_number';
+                }
+                $lastKartu = $model::where($key, $kartu->$key)
+                    ->where('index_date', '<', $kartu->index_date)->orderBy('index_date', 'desc')
+                    ->first();
+
+                $saldoRupiah = $lastKartu ?$lastKartu->amount_saldo_factur  : 0;
+                $nextKartu = $model::where($key, $kartu->$key)
+                    ->where('index_date', '>=', $kartu->index_date)->orderBy('index_date', 'asc')
+                    ->get();
+
+                $updater = [];
+                foreach ($nextKartu as $k) {
+                    $saldoRupiah = bcadd($saldoRupiah, bcsub($k->amount_debet, $k->amount_kredit, 2), 2);
+                    $k->amount_saldo_factur = $saldoRupiah;
+                    $updater[] = [
+                        'id' => $k->id,
+                        'amount_saldo_factur' => $saldoRupiah
+                    ];
+                }
+                upsertInChunks($model, $updater, 'id', ['amount_saldo_factur']);
+            }
+             else {
+                throw new \Exception('model belum diakomodasi');
             }
         } catch (\Exception $e) {
             return [

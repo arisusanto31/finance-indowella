@@ -34,6 +34,7 @@
                             <option value="KartuBahanJadi">Kartu bahan Jadi</option>
                             <option value="KartuHutang">Kartu Hutang</option>
                             <option value="KartuPiutang"> Kartu Piutang</option>
+                            <option value="KartuDPSales">Kartu DP Sales</option>
                         </select>
                     </div>
                     <div class="col-xs-6 col-md-2">
@@ -88,6 +89,7 @@
                     console.log(res);
                     if (res.status == 1) {
                         html = "";
+                        if(model == 'KartuStock' || model == 'KartuBDP' || model == 'KartuBahanJadi') {
                         html = `
                             <table class="table table-bordered">
                                 <thead>
@@ -109,26 +111,63 @@
                                 </tbody>
                             </table>
                         `;
+                        }else{
+                            html = `
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>id</th>
+                                        <th>index date</th>
+                                        <th>Number</th>
+                                        <th>rupiah mutasi</th>
+                                        <th>rupiah saldo</th>
+                                        <th>rupiah saldo seharusnya</th>
+                                        <th>action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="problem-kartu-body">
+                                </tbody>
+                            </table>
+                        `;
+                        }
                         $('#container-output-kartu').html(html);
                         html = "";
                         res.msg.forEach(function(data) {
+                            if(model == 'KartuStock' || model == 'KartuBDP' || model == 'KartuBahanJadi') {
                             html += `
                                 <tr>
                                     <td>${data.id}</td>
                                     <td>${data.index_date}</td>
                                     <td>${res.stocks[data.stock_id]} [${data.stock_id}]</td>
                                     <td>${data.production_number}</td>
-                                    <td>${data.mutasi_qty_backend} ${data.unit_backend}</td>
+                                    <td>${data.mutasi_qty_backend != null ? `${data.mutasi_qty_backend} ${data.unit_backend}` : ''}</td>
                                     <td>${formatRupiah(data.mutasi_rupiah_total)}</td>
-                                    <td>${formatRupiah(data.saldo_qty_backend)} ${data.unit_backend}</td>
+                                    <td> ${data.saldo_qty_backend ? `${formatRupiah(data.saldo_qty_backend)} ${data.unit_backend}` : ''}</td>
                                     <td>${formatRupiah(data.saldo_rupiah_total)}</td>
-                                    <td>${formatRupiah(data.qty_ok)} ${data.unit_backend}</td>
+                                    <td>${data.qty_ok ? `${formatRupiah(data.qty_ok)} ${data.unit_backend}` : ''}</td>
+                                    <td>${data.rupiah_ok ? formatRupiah(data.rupiah_ok) : ''}</td>
+                                    <td id="status-kartu-${data.id}">
+                                        
+                                    </td>
+                                </tr>
+                            `;
+                            }
+                            else{
+                                html += `
+                                <tr>
+                                    <td>${data.id}</td>
+                                    <td>${data.index_date}</td>
+                                    <td>${data.number}</td>
+                                    <td>${formatRupiah(data.mutasi_rupiah_total)}</td>
+                                    <td> ${formatRupiah(data.saldo_rupiah_total)}</td>
                                     <td>${formatRupiah(data.rupiah_ok)}</td>
                                     <td id="status-kartu-${data.id}">
                                         
                                     </td>
                                 </tr>
                             `;
+
+                            }
                         });
                         $('#problem-kartu-body').html(html);
 
