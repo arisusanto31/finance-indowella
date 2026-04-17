@@ -1423,6 +1423,7 @@ class JournalController extends Controller
         $model = getInput('model');
         $indexDate = getInput('index_date');
         $indexDate = createCarbon($indexDate)->format('ymdHis000');
+        $stocks= Stock::pluck('name', 'id')->all();
         if ($model == 'KartuStock' || $model == 'KartuBDP' || $model == 'KartuBahanJadi') {
             $model = 'App\\Models\\' . $model;
             $datas = $model::where('index_date', '>', $indexDate)->select(
@@ -1469,7 +1470,8 @@ class JournalController extends Controller
             return [
                 'status' => 1,
                 'msg' => $problems,
-                'index_date' => $indexDate
+                'index_date' => $indexDate,
+                'stocks' => $stocks
             ];
         }
 
