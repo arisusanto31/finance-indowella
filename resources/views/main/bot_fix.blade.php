@@ -30,7 +30,7 @@
                         <select class="form-control" id="model">
                             <option value="KartuBDP">Kartu BDP</option>
                             <option value="KartuStock"> Kartu Stock</option>
-                            <option value="KartuBahanJadi">Kartu Barang Jadi</option>
+                            <option value="KartuBahanJadi">Kartu bahan Jadi</option>
                             <option value="KartuHutang">Kartu Hutang</option>
                             <option value="KartuPiutang"> Kartu Piutang</option>
                         </select>

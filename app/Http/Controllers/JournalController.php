@@ -1456,7 +1456,7 @@ class JournalController extends Controller
                             $saldoQty = bcadd($saldoQty, $valStock->mutasi_qty_backend, 2);
                             $saldoRupiah = bcadd($saldoRupiah, $valStock->mutasi_rupiah_total, 2);
                         }
-                        if (!bccomp($saldoQty, $valStock->saldo_qty_backend, 2)  || !bccomp($saldoRupiah, $valStock->saldo_rupiah_total, 2)) {
+                        if (abs($saldoQty - $valStock->saldo_qty_backend) > 0.1 || abs($saldoRupiah - $valStock->saldo_rupiah_total) > 0.1) {
                             $valStock['qty_ok'] = $saldoQty;
                             $valStock['rupiah_ok'] = $saldoRupiah;
                             $problems[] = $valStock;
