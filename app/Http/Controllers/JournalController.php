@@ -1448,11 +1448,13 @@ class JournalController extends Controller
 
 
 
+
             $problems = [];
             foreach ($datas as $prod => $vals) {
                 foreach ($vals as $stockid => $valStocks) {
-                    $saldoQty = $saldoAwal->get($prod)->get($stockid)->saldo_qty_backend ?? 0;
-                    $saldoRupiah = $saldoAwal->get($prod)->get($stockid)->saldo_rupiah_total ?? 0;
+                    $saldoProd= $saldoAwal->get($prod);
+                    $saldoQty = $saldoProd?($saldoProd->get($stockid)->saldo_qty_backend ?? 0):0;
+                    $saldoRupiah = $saldoProd?($saldoProd->get($stockid)->saldo_rupiah_total ?? 0):0;
                     foreach ($valStocks as $row => $valStock) {
                         // $valStock['qty_ok'] = $saldoQty;
                         // $valStock['rupiah_ok'] = $saldoRupiah;
