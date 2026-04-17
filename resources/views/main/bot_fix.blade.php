@@ -20,6 +20,7 @@
             </div>
         </div>
 
+        <div class="text-primary-dark mt-3 "> 🤖 <strong>BOT FIX KARTU </strong> </div>
         <div class="row mt-2 p-3 bglevel1">
             <div class="col-xs-12 bglevel1">
                 <div class="row">
