@@ -16,6 +16,8 @@ use App\Models\InvoiceSaleDetail;
 use App\Models\Journal;
 use App\Models\JournalJobFailed;
 use App\Models\JournalKey;
+use App\Models\KartuBahanJadi;
+use App\Models\KartuBDP;
 use App\Models\KartuStock;
 use App\Models\Stock;
 use App\Models\TaskImport;
@@ -51,7 +53,7 @@ class JournalController extends Controller
         if ($query['status'] == 0)
             return $query;
         $chartAccounts = $query['msg'];
-       
+
         $laba = ChartAccount::getLabaBulanAt($date);
         $aset = collect($chartAccounts['Aset'])->sum('saldo');
         $kewajiban = collect($chartAccounts['Kewajiban'])->sum('saldo');
@@ -292,10 +294,10 @@ class JournalController extends Controller
         return view('main.bot_fix');
     }
 
-      public static function cariProblemJournal()
+    public static function cariProblemJournal()
     {
         $indexAwal = getInput('index_date') ? getInput('index_date') : 0;
-        $indexAwal= intval(createCarbon($indexAwal)->format('ymdHis00'));
+        $indexAwal = intval(createCarbon($indexAwal)->format('ymdHis00'));
         $indexAkhir = $indexAwal + 10000000000;
         try {
             $journals = Journal::whereBetween('index_date', [$indexAwal, $indexAkhir])->select('index_date', 'journal_number', 'description', 'amount_kredit', 'amount_debet', 'code_group', 'amount_saldo', 'id')->orderBy('index_date', 'asc')->get();
@@ -340,15 +342,16 @@ class JournalController extends Controller
         }
     }
 
-    public function recalculateJournal($id){
-        $journal= Journal::find($id);
-        if($journal){
+    public function recalculateJournal($id)
+    {
+        $journal = Journal::find($id);
+        if ($journal) {
             $journal->recalculateJournal();
         }
         return [
             'status' => 1,
             'journal' => $journal
-        
+
         ];
     }
 
@@ -1008,7 +1011,7 @@ class JournalController extends Controller
                     'factur_supplier_number' => $hutang['no_invoice'],
                     'saldo_akhir' => $hutang['saldo_akhir'],
                     'factur_tax_number' => $hutang['no_faktur'],
-                    'request_date'=> $date,
+                    'request_date' => $date,
                 ];
                 $taskImportDetail = TaskImportDetail::create([
                     'task_import_id' => $task->id,
@@ -1195,7 +1198,7 @@ class JournalController extends Controller
                     ChartAccountController::makeAlias(new Request([
                         'code_group' => [$payload['code_group'], ""],
                         'name' => $payload['name'],
-                        'no_update_ref'=>true
+                        'no_update_ref' => true
                     ]));
                 } else {
                     DB::rollBack();
@@ -1413,5 +1416,67 @@ class JournalController extends Controller
         }
 
         return ['status' => 0, 'msg' => $errMsg];
+    }
+
+    public function cariProblemKartu()
+    {
+        $model = getInput('model');
+        $indexDate = getInput('index_date');
+        $indexDate = createCarbon($indexDate)->format('ymdHis000');
+        if ($model == 'KartuStock' || $model == 'KartuBDP' || $model == 'KartuBahanJadi') {
+            $model = 'App\\Models\\' . $model;
+            $datas = $model::where('index_date', '>', $indexDate)->select(
+                'id',
+                'index_date',
+                'mutasi_qty_backend',
+                'mutasi_rupiah_total',
+                'saldo_qty_backend',
+                'saldo_rupiah_total',
+                'unit_backend',
+                'production_number'
+            )->orderBy('index_date', 'asc')->get()->groupBy('production_number')->map(function ($items) {
+                return collect($items)->groupBy('stock_id');
+            });
+
+
+
+            $problems = [];
+            foreach ($datas as $prod => $vals) {
+
+                foreach ($vals as $stockid => $valStocks) {
+
+                    $saldoQty = collect($valStocks)->first()->saldo_qty_backend;
+                    $saldoRupiah = collect($valStocks)->first()->saldo_rupiah_total;
+                    foreach ($valStocks as $row => $valStock) {
+                        $valStock['qty_ok'] = $saldoQty;
+                        $valStock['rupiah_ok'] = $saldoRupiah;
+                        $problems[]=$valStock;
+                        break;
+                        // if ($row > 0) {
+                        //     $saldoQty = bcadd($saldoQty, $valStock->mutasi_qty_backend, 2);
+                        //     $saldoRupiah = bcadd($saldoRupiah, $valStock->mutasi_rupiah_total, 2);
+                        // }
+                        // if (!bccomp($saldoQty, $valStock->saldo_qty_backend, 2)  || !bccomp($saldoRupiah, $valStock->saldo_rupiah_total, 2)) {
+                        //     $valStock['qty_ok'] = $saldoQty;
+                        //     $valStock['rupiah_ok'] = $saldoRupiah;
+                        //     $problems[] = $valStock;
+                        //     break;
+                        // }
+                    }
+                }
+            }
+
+            return [
+                'status' => 1,
+                'msg' => $problems,
+                'index_date'=>$indexDate
+            ];
+        }
+
+        return [
+            'status' => 0,
+            'msg' => 'model belum diakomodasi',
+            'model' => $model
+        ];
     }
 }
