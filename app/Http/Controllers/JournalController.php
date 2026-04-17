@@ -1428,6 +1428,7 @@ class JournalController extends Controller
             $model = 'App\\Models\\' . $model;
             $datas = $model::where('index_date', '>', $indexDate)->select(
                 'id',
+                'stock_id',
                 'index_date',
                 'mutasi_qty_backend',
                 'mutasi_rupiah_total',

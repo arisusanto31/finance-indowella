@@ -115,7 +115,7 @@
                                 <tr>
                                     <td>${data.id}</td>
                                     <td>${data.index_date}</td>
-                                    <td>${res.stocks[data.stock_id]}</td>
+                                    <td>${res.stocks[data.stock_id]} [${data.stock_id}]</td>
                                     <td>${data.production_number}</td>
                                     <td>${data.mutasi_qty_backend} ${data.unit_backend}</td>
                                     <td>${formatRupiah(data.mutasi_rupiah_total)}</td>
