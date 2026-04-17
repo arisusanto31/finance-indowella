@@ -343,6 +343,25 @@ if (!function_exists('moneyCmp')) {
 }
 
 
+if (!function_exists('upsertInChunks')) {
+    /**
+     * Upsert data secara bertahap agar tidak melebihi batas placeholder.
+     *
+     * @param string|Model $modelClass Nama class model Laravel (misal: \App\Models\Journal::class)
+     * @param array $data Data array of associative arrays
+     * @param array|string $uniqueBy Kolom unik (contoh: 'id')
+     * @param array $updateFields Kolom-kolom yang diupdate jika duplikat
+     * @param int $chunkSize Ukuran maksimal data per chunk
+     */
+    function upsertInChunks($modelClass, array $data, $uniqueBy, array $updateFields, int $chunkSize = 5000)
+    {
+        foreach (array_chunk($data, $chunkSize) as $chunk) {
+            $modelClass::upsert($chunk, $uniqueBy, $updateFields);
+        }
+    }
+}
+
+
 function toDigit($number, $digit)
 {
     $str = sprintf("%0" . $digit . "d", $number);

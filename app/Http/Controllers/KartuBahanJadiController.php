@@ -288,7 +288,6 @@ class KartuBahanJadiController extends Controller
     }
     public function getMutasiMasuk()
     {
-
         $month = getInput('month') ?? date('m');
         $year = getInput('year') ?? date('Y');
         $dateAwal = $year . '-' . $month . '-01 00:00:00';
@@ -346,7 +345,6 @@ class KartuBahanJadiController extends Controller
         if (!$productionNumber) {
             throw new \Exception('Production number is required');
         }
-
         $view = view('kartu.modal._kartu-history-stock');
         $year = Date('Y');
         $stock = Stock::find($id);
@@ -359,7 +357,6 @@ class KartuBahanJadiController extends Controller
             ->groupBy('unit')->orderBy(DB::raw('count(*)'), 'desc')->first();
         $unit = $kartuStock ? $kartuStock->unit : $stock->unit_default;
         $name = $kartuStock ? $kartuStock->custom_stock_name : $stock->name;
-
         $dataHistory = KartuBahanJadi::from('kartu_bahan_jadis as ks')
             ->leftJoin('stock_units as u', function ($join) use ($unit) {
                 $join->on('u.unit', '=', DB::raw("'" . $unit . "'"))

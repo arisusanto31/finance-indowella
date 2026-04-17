@@ -83,10 +83,10 @@
             $.ajax({
                 url: '{{url("admin/cari-problem-kartu")}}?index_date=' + indexdate + '&model=' + model,
                 method: 'get',
-                success: function(res) {
+                success: async function(res) {
                     console.log(res);
                     if (res.status == 1) {
-                        html ="";
+                        html = "";
                         html = `
                             <table class="table table-bordered">
                                 <thead>
@@ -109,9 +109,9 @@
                             </table>
                         `;
                         $('#container-output-kartu').html(html);
-                        html="";
-                        res.msg.forEach(function(data){
-                            html+=`
+                        html = "";
+                        res.msg.forEach(function(data) {
+                            html += `
                                 <tr>
                                     <td>${data.id}</td>
                                     <td>${data.index_date}</td>
@@ -123,17 +123,26 @@
                                     <td>${formatRupiah(data.saldo_rupiah_total)}</td>
                                     <td>${formatRupiah(data.qty_ok)} ${data.unit_backend}</td>
                                     <td>${formatRupiah(data.rupiah_ok)}</td>
+                                    <td id="status-kartu-${data.id}">
+                                        
+                                    </td>
                                 </tr>
                             `;
                         });
                         $('#problem-kartu-body').html(html);
 
+                        for (i = 0; i < res.msg.length; i++) {
+                            data = res.msg[i];
+                            await fixProblemKartu(data.id, model);
+                            
+                        }
+
                     } else {
-                        Swal.fire('success', 'sudah tidak ada problem','success');
+                        Swal.fire('success', 'sudah tidak ada problem', 'success');
                     }
                 },
                 error: function(res) {
-                    Swal.fire('opps', 'something error','error');
+                    Swal.fire('opps', 'something error', 'error');
                 }
             });
         }
@@ -174,10 +183,8 @@
                         html += '        <p class="ml-10">saldo: ' + res.last.amount_saldo + '</p>';
                         html += '   </div>';
                         html += '   <div class="col-xs-1">'
-                        html += '        <p id="status' + res.now.id +
-                            '"> <i class="fas fa-spinner fa-spin"></i> fixing </p>';
+                        html += '        <p id="status' + res.now.id + '"> <i class="fas fa-spinner fa-spin"></i> fixing </p>';
                         html += '   </div>';
-
                         html += '   <div class="clearfix"  style="border-bottom:1px solid black"></div>';
                         html += '</div>';
                         $('#container-output').append(html);
@@ -198,11 +205,41 @@
                 },
                 error: function(res) {
                     loading(0);
-                    swalInfo('opps', 'something error');
+                    Swal.fire('opps', 'something error','error');
                 }
             });
         }
-    </script>
 
+        function fixProblemKartu(id, model) {
+            $('#status-kartu-' + id).html('<i class="fas fa-spinner fa-spin"></i> fixing');
+            return new Promise(function(resolve, reject) {
+                $.ajax({
+                    url: '{{ url("admin/fix-problem-kartu") }}',
+                    method: 'post',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        id: id,
+                        model: model
+                    },
+                    success: function(res) {
+                        console.log(res);
+                        if (res.status == 1) {
+                            $('#status-kartu-' + id).html('<i class="fas fa-check colorgreen"></i> beres');
+                            resolve(res);
+                        } else {
+                            $('#status-kartu-' + id).html('<i class="fas fa-close colorred"></i> ajur');
+                            Swal.fire('oppss', 'something error','error');
+                            reject(res);
+                        }
+                    },
+                    error: function(res) {
+                        $('#status-kartu-' + id).html('<i class="fas fa-close colorred"></i> ajur');
+                        Swal.fire('opps', 'something error','error');
+                        reject(res);
+                    }
+                });
+            });
+        }
+    </script>
     @endpush
 </x-app-layout>

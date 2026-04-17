@@ -14,7 +14,7 @@ return new class extends Migration
         //
 
         Schema::table('kartu_stocks', function (Blueprint $table) {
-            $table->string('production_number')->nullable()->after('stock_id');
+            $table->string('production_number')->default('0')->after('stock_id');
         });
     }
 
