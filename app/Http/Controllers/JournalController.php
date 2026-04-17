@@ -1423,7 +1423,7 @@ class JournalController extends Controller
         $model = getInput('model');
         $indexDate = getInput('index_date');
         $indexDate = createCarbon($indexDate)->format('ymdHis000');
-        $stocks= Stock::pluck('name', 'id')->all();
+        $stocks = Stock::pluck('name', 'id')->all();
         if ($model == 'KartuStock' || $model == 'KartuBDP' || $model == 'KartuBahanJadi') {
             $model = 'App\\Models\\' . $model;
             $datas = $model::where('index_date', '>', $indexDate)->select(
@@ -1440,15 +1440,19 @@ class JournalController extends Controller
                 return collect($items)->groupBy('stock_id');
             });
 
+            $saldoAwal = KartuBahanJadi::whereIn('index_date', function ($q) use ($indexDate) {
+                $q->select(DB::raw('MAX(index_date)'))->from('kartu_bahan_jadis')->where('index_date', '<=', $indexDate)->groupBy('stock_id', 'production_number');
+            })->get()->groupBy('production_number')->map(function ($items) {
+                return collect($items)->keyBy('stock_id');
+            });
+
 
 
             $problems = [];
             foreach ($datas as $prod => $vals) {
-
                 foreach ($vals as $stockid => $valStocks) {
-
-                    $saldoQty = collect($valStocks)->first()->saldo_qty_backend;
-                    $saldoRupiah = collect($valStocks)->first()->saldo_rupiah_total;
+                    $saldoQty = $saldoAwal->get($prod)->get($stockid)->saldo_qty_backend ?? 0;
+                    $saldoRupiah = $saldoAwal->get($prod)->get($stockid)->saldo_rupiah_total ?? 0;
                     foreach ($valStocks as $row => $valStock) {
                         // $valStock['qty_ok'] = $saldoQty;
                         // $valStock['rupiah_ok'] = $saldoRupiah;
