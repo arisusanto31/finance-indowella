@@ -1448,20 +1448,20 @@ class JournalController extends Controller
                     $saldoQty = collect($valStocks)->first()->saldo_qty_backend;
                     $saldoRupiah = collect($valStocks)->first()->saldo_rupiah_total;
                     foreach ($valStocks as $row => $valStock) {
-                        $valStock['qty_ok'] = $saldoQty;
-                        $valStock['rupiah_ok'] = $saldoRupiah;
-                        $problems[]=$valStock;
-                        break;
-                        // if ($row > 0) {
-                        //     $saldoQty = bcadd($saldoQty, $valStock->mutasi_qty_backend, 2);
-                        //     $saldoRupiah = bcadd($saldoRupiah, $valStock->mutasi_rupiah_total, 2);
-                        // }
-                        // if (!bccomp($saldoQty, $valStock->saldo_qty_backend, 2)  || !bccomp($saldoRupiah, $valStock->saldo_rupiah_total, 2)) {
-                        //     $valStock['qty_ok'] = $saldoQty;
-                        //     $valStock['rupiah_ok'] = $saldoRupiah;
-                        //     $problems[] = $valStock;
-                        //     break;
-                        // }
+                        // $valStock['qty_ok'] = $saldoQty;
+                        // $valStock['rupiah_ok'] = $saldoRupiah;
+                        // $problems[]=$valStock;
+                        // break;
+                        if ($row > 0) {
+                            $saldoQty = bcadd($saldoQty, $valStock->mutasi_qty_backend, 2);
+                            $saldoRupiah = bcadd($saldoRupiah, $valStock->mutasi_rupiah_total, 2);
+                        }
+                        if (!bccomp($saldoQty, $valStock->saldo_qty_backend, 2)  || !bccomp($saldoRupiah, $valStock->saldo_rupiah_total, 2)) {
+                            $valStock['qty_ok'] = $saldoQty;
+                            $valStock['rupiah_ok'] = $saldoRupiah;
+                            $problems[] = $valStock;
+                            break;
+                        }
                     }
                 }
             }
@@ -1469,7 +1469,7 @@ class JournalController extends Controller
             return [
                 'status' => 1,
                 'msg' => $problems,
-                'index_date'=>$indexDate
+                'index_date' => $indexDate
             ];
         }
 
