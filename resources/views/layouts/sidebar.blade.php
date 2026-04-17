@@ -157,7 +157,7 @@
                         <div data-i18n="Accordion">Kartu DP Sale</div>
                     </a>
                 </li>
-                 <li class="menu-item">
+                <li class="menu-item">
                     <a href="{{url('admin/kartu/kartu-dp-purchases/main') }}" class="menu-link">
                         <!-- <i class="menu-icon tf-icons bx bx-credit-card mr-2 fs-6 me-2" style="margin-right: 10px;"></i> -->
                         <div data-i18n="Accordion">Kartu DP Purchase</div>
@@ -170,7 +170,7 @@
                         <div data-i18n="Accordion">Kartu Stock</div>
                     </a>
                 </li>
-                  <li class="menu-item">
+                <li class="menu-item">
                     <a href="{{url('admin/kartu/kartu-in-transit/main') }}" class="menu-link">
                         <!-- <i class="menu-icon tf-icons bx bx-package mr-2 fs-6 me-2" style="margin-right: 10px;"></i> -->
                         <div data-i18n="Accordion">Kartu In Transit</div>
@@ -190,10 +190,6 @@
                 </li>
             </ul>
         </li>
-
-
-
-
 
         <li class="menu-item">
             <a href="cards-basic.html" class="menu-link menu-toggle">
@@ -293,10 +289,25 @@
                 </li>
 
         </li>
+
+
+
+
+
     </ul>
     </li>
 
 
+    <li class="menu-header small text-uppercase">
+        <span class="menu-header-text ">ALAT</span>
+    </li>
+    <li class="menu-item">
+        <a href="{{url('admin/bot-fix-journal')}}" class="menu-link">
+            <i class="menu-icon tf-icons bx bx-refresh"></i>
+            <div data-i18n="recalculate">BOT FIX</div>
+            <input type="hidden" class="url-active" value="bot fix" />
+        </a>
+    </li>
 
 
 
