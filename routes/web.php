@@ -193,6 +193,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('show-history-stock/{id}', [KartuBDPController::class, 'showHistoryStock'])->name('show-history-stock');
             Route::post('recalculate', [KartuBDPController::class, 'recalculate'])->name('recalculate');
             Route::post('delete-mutation', [KartuBDPController::class, 'deleteMutation'])->name('delete-mutation');
+            Route::post('bebankan', [KartuBDPController::class, 'bebankan'])->name('bebankan');
         });
 
         Route::prefix('kartu-in-transit')->name('kartu-in-transit.')->group(function () {

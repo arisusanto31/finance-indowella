@@ -79,7 +79,7 @@ trait HasModelSaldoStock
         $dataStock = DB::table('stocks')->whereIn('stocks.id', $summary->pluck('stock_id')->all())->join('stock_categories', 'stocks.category_id', '=', 'stock_categories.id')
             ->join('stock_units', function ($join) {
                 $join->on('stocks.id', '=', 'stock_units.stock_id')
-                    ->on('stocks.unit_default', '=', 'stock_units.unit');
+                    ->on('stock_units.unit','=', DB::raw('coalesce(stocks.unit_default,stocks.unit_backend)'));
             })->select(
                 'stocks.*',
                 'stock_units.konversi as konversi',

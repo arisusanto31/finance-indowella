@@ -91,6 +91,11 @@
             onSuccess: function(response) {
                 // Handle success response
                 console.log("Bebankan successful:", response);
+                if(response.status==1){
+
+                }else{
+                    
+                }
                 // Optionally, you can refresh the modal or update the UI
             },
         });

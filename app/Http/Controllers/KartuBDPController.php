@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\InvoicePack;
 use App\Models\Journal;
 use App\Models\KartuBahanJadi;
 use App\Models\KartuBDP;
@@ -186,6 +187,48 @@ class KartuBDPController extends Controller
             'status' => 1,
             'msg' => $allSt
         ];
+    }
+
+    public function bebankan(Request $request){
+        $number = $request->input('production_number');
+        $stockid=  $request->input('stock_id');
+        $kartuBDP= KartuBDP::where('production_number',$number)->where('stock_id',$stockid)->first();
+        $invoice= InvoicePack::where('sales_order_id',$kartuBDP->sales_order_id)->first();
+        if(!$invoice){
+            return [
+                'status' => 0,
+                'msg' => 'Tidak menemukan untuk Invoice dari sales order '.$kartuBDP->sales_order_number
+            ];
+        }
+        $date= $invoice->created_at;
+        $codeHPP= 601000;
+        $lastKartu= KartuBDP::where('stock_id',$stockid)->where('production_number',$number)->orderBy('index_date','desc')->first();
+        $saldoAkhir= ($lastKartu->saldo_qty_backend ??0);
+        $thedata=[
+            'date'=>$date,
+            'stock_id'=>$stockid,
+            'mutasi_quantity'=> $saldoAkhir,
+            'unit'=> $kartuBDP->unit,
+            'flow'=> 1,
+            'code_group'=>140003,
+            'invoice_pack_number'=> $invoice->invoice_number,
+            'sales_order_number'=> $kartuBDP->sales_order_number,
+            'production_number'=> $number,
+            'is_otomatis_jurnal'=> 1,
+            'lawan_code_group'=>$codeHPP,
+        ];
+        // return $thedata;
+        $st= KartuBDP::mutationStore(new Request($thedata));
+        if($st['status']==0){
+            return $st; 
+        }
+        return [
+            'status' => 1,
+            'bdp'=>$kartuBDP,
+            'msg' => $st['msg'],
+            'invoice' => $invoice
+        ];
+
     }
     public function getMutasiMasuk()
     {

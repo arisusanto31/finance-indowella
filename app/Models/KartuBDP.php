@@ -194,7 +194,6 @@ class KartuBDP extends Model
                     $stockid = $kartuBDP->stock_id;
                 } else {
                     $idCustom = Stock::withoutGlobalScope('journal')->where('name', 'like', 'stock_custom%')->pluck('id')->all();
-
                     $stockCustomTerpakai = KartuBDP::where('production_number', $productionNumber)->whereIn('stock_id', $idCustom)->pluck('stock_id')->all();
                     $stockid = $idCustom[0];
                     $i = 0;
@@ -213,7 +212,6 @@ class KartuBDP extends Model
                 throw new \Exception('lawan code group tidak boleh sama dengan code group');
             }
             $isOtomatisJurnal = $request->input('is_otomatis_jurnal');
-
             if (!$chart) {
                 if ($useTransaction)
                     DB::rollBack();
