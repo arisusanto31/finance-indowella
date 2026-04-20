@@ -1650,13 +1650,13 @@ class JournalController extends Controller
             $startDate = Carbon::createFromFormat('d/m/Y', $splitDate[0])->format('Y-m-d 00:00:00');
             $endDate = Carbon::createFromFormat('d/m/Y', $splitDate[1])->format('Y-m-d 23:59:59');
             $indexStart = Carbon::createFromFormat('d/m/Y', $splitDate[0])->format('ymdHis00');
-            $indexEnd = Carbon::createFromFormat('d/m/Y', $splitDate[1])->format('ymdHis00');
+            $indexEnd = Carbon::createFromFormat('d/m/Y', $splitDate[1])->format('ymd23595999');
         } else {
 
             $startDate = createCarbon($date)->format('Y-m-d 00:00:00');
             $endDate = Carbon::now()->format('Y-m-d 23:59:59');
             $indexStart = createCarbon($date)->format('ymdHis00');
-            $indexEnd = Carbon::now()->format('ymdHis00');
+            $indexEnd = Carbon::now()->format('ymd23595999');
         }
         $fixModel = 'App\\Models\\' . $model;
         // $journals = Journal::where('index_date', '>=', $indexDateJournal)
@@ -1707,7 +1707,7 @@ class JournalController extends Controller
                 $join->on('dk.kartu_id', '=', 'kartu.id')->where('dk.kartu_type', $fixModel);
             })
                 ->where('kartu.index_date', '>', $indexStart . '0')
-                ->where('kartu.index_date', '<=', $indexEnd . '0')
+                ->where('kartu.index_date', '<=', $indexEnd . '9')
                 ->select(
                     'kartu.id',
                     'kartu.index_date',
@@ -1721,7 +1721,7 @@ class JournalController extends Controller
                     $join->on('dk.kartu_id', '=', 'kartu.id')->where('dk.kartu_type', $fixModel);
                 })
                 ->where('kartu.index_date', '>', $indexStart . '0')
-                ->where('kartu.index_date', '<=', $indexEnd . '0')
+                ->where('kartu.index_date', '<=', $indexEnd . '9')
                 ->select(
                     'kartu.id',
                     'kartu.index_date',
@@ -1735,7 +1735,7 @@ class JournalController extends Controller
                     $join->on('dk.kartu_id', '=', 'kartu.id')->where('dk.kartu_type', $fixModel);
                 })
                 ->where('kartu.index_date', '>', $indexStart . '0')
-                ->where('kartu.index_date', '<=', $indexEnd . '0')
+                ->where('kartu.index_date', '<=', $indexEnd . '9')
                 ->select(
                     'kartu.index_date',
                     'kartu.description',
