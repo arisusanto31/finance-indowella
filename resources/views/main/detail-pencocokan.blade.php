@@ -45,6 +45,13 @@
                         </tr>
                     </thead>
                     <tbody>
+                        <tr>
+                            <td colspan="2">Saldo Awal</td>
+                            <td></td>
+                            <td>{{ format_price($lastSaldoKartu) }}</td>
+                            <td></td>
+                        </tr>
+
                         @foreach ($kartus as $kartu)
                         @php
                         $lastSaldoKartu+= $kartu->amount;
@@ -92,6 +99,12 @@
                         </tr>
                     </thead>
                     <tbody>
+                        <tr>
+                            <td colspan="3">Saldo Awal</td>
+                            <td></td>
+                            <td>{{ format_price($lastSaldoJournal) }}</td>
+                            <td></td>
+                        </tr>
                         @foreach ($journals as $journal)
                         @php
                         $lastSaldoJournal+= $journal->amount;
