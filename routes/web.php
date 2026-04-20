@@ -63,6 +63,7 @@ Route::prefix('book')->middleware(['auth', 'role:admin,web'])->group(function ()
     Route::get('/pilih-jurnal', [JournalController::class, 'pilihJurnal'])->name('pilih.jurnal');
     Route::get('/login-jurnal/{id}', [JournalController::class, 'loginJurnal'])->name('login.jurnal');
     Route::post('/logout-jurnal', [JournalController::class, 'logoutJurnal'])->name('logout.jurnal');
+    Route::post('/change-theme', [JournalController::class, 'changeTheme'])->name('change-theme');
 });
 
 Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])->group(function () {
@@ -402,7 +403,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::get('sales-update-status/{id}', [SalesOrderController::class, 'updateStatus']);
         Route::get('get-data-kartu/{number}', [SalesOrderController::class, 'getDataKartu'])->name('get-data-kartu');
 
-        
+
     });
 });
 

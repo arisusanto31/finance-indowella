@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\BookJournal;
+use App\Models\BookTheme;
 use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
 use App\Services\ContextService;
 use Carbon\Carbon;
@@ -38,6 +39,40 @@ if (!function_exists('book')) {
         return BookJournal::find(bookID());
     }
 }
+
+if (!function_exists('bookTheme')) {
+    function bookTheme()
+    {
+
+        $bookTheme = BookTheme::where('user_id', user()->id)->where('book_id', bookID())->first();
+        if ($bookTheme) {
+            return $bookTheme->theme;
+        } else {
+            if (bookID() == 1) {
+                return 'theme-default-blue.css';
+            } else if (bookID() == 2) {
+                return 'theme-default-green.css';
+            }
+        }
+    }
+}
+
+
+function alltheme()
+{
+    return [
+       'blue' => 'theme-default-blue.css',
+       'green' => 'theme-default-green.css',
+       'brown' => 'theme-default-brown.css',
+       'pink' => 'theme-default-pink.css',
+       'orange' => 'theme-default-orange.css',
+       'red'=> 'theme-default-red.css',
+       'black' => 'theme-default-black.css',
+       'indigo' => 'theme-default-indigo.css',
+       'cream' => 'theme-default-cream.css',
+    ];
+}
+
 
 if (!function_exists('bookID')) {
     function bookID()
@@ -236,7 +271,7 @@ function format_db_to_id($formatted)
     try {
         // Cek format input
         $format = detectFormat($formatted);
-       
+
         if ($format == 'database') {
             info(str_replace('.', ',', $formatted));
             return str_replace('.', ',', $formatted);

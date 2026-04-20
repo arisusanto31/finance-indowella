@@ -12,7 +12,7 @@
 
 
   <link href="{{ asset('assets/vendor/css/core.css') }}" rel="stylesheet" />
-  <link href="{{ asset('assets/vendor/css/theme-default.css') }}" rel="stylesheet" />
+  <!-- <link href="{{ asset('assets/vendor/css/theme-default.css') }}" rel="stylesheet" /> -->
   <link href="{{ asset('assets/css/demo.css') }}" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
 
@@ -29,6 +29,58 @@
   <style>
     body {
       font-family: 'Inter', sans-serif;
+    }
+
+    .theme-blue {
+      background-color: #007bff;
+    }
+
+    .theme-indigo {
+      background-color: #6610f2;
+    }
+
+    .theme-purple {
+      background-color: #696cff;
+    }
+
+    .theme-pink {
+      background-color: #e83e8c;
+    }
+
+    .theme-red {
+      background-color: #ff3e1d;
+    }
+
+    .theme-orange {
+      background-color: #fd7e14;
+    }
+
+    .theme-yellow {
+      background-color: #ffab00;
+    }
+
+    .theme-green {
+      background-color: #71dd37;
+    }
+
+    .theme-teal {
+      background-color: #20c997;
+    }
+
+    .theme-cyan {
+      background-color: #03c3ec;
+    }
+
+    .theme-brown {
+      background-color: #993932;
+    }
+
+    .theme-black {
+      background-color: #050312;
+    }
+
+    .theme-cream{
+      background-color: #e3ce8f;
     }
   </style>
 </head>
@@ -85,11 +137,11 @@
           <form class="space-y-6 max-w-md">
             <div>
               <label class="block font-semibold text-gray-700 mb-1">Nama</label>
-              <p class="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-700" name="first_name" type="text" >{{ user()->name }} </p>
+              <p class="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-700" name="first_name" type="text">{{ user()->name }} </p>
             </div>
             <div>
               <label class="block font-semibold text-gray-700 mb-1">E-mail</label>
-              <p class="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-700" name="email" type="email" >{{ user()->email }} </p>
+              <p class="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-700" name="email" type="email">{{ user()->email }} </p>
             </div>
 
             <div class="row p-3" style="background-color: #f8f9fa;">
@@ -122,29 +174,36 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           @foreach($books as $book)
-          @php
-          $isToko = str_contains(strtolower($book->name), 'toko');
-          $isManufaktur = str_contains(strtolower($book->name), 'manufaktur');
-          $bgColor = $isToko ? 'bg-green-600' : ($isManufaktur ? 'bg-blue-600' : 'bg-gray-700');
-          @endphp
           <div class="h-full">
             <button onclick="pilihBook('{{ $book->id }}')"
-              class="rounded-xl text-white px-4 py-4 w-full min-h-[220px] shadow-sm flex flex-col items-center space-y-2 {{ $bgColor }}">
+              class="rounded-xl text-white px-4 py-4 w-full min-h-[220px] shadow-sm flex flex-col items-center space-y-2 theme-{{ $book->theme_color }}">
               <img src="{{ asset('assets/img/openboox-removebg.png') }}" alt="Book Icon" class="w-20 h-20 mb-2" />
               <div class="font-semibold">{{ $book->name }}</div>
               <p class="text-xs text-center">{{ $book->description }}</p>
             </button>
+            <select autocomplete="off" class="form-select select-theme mt-2" onchange="changeTheme(this,'{{ $book->id }}')">
+              @foreach(alltheme() as $color => $theme)
+              <option value="{{$theme}}" @if($theme==$book->theme) selected @endif >{{ucfirst($color)}}</option>
+              @endforeach
+
+            </select>
           </div>
           @endforeach
 
 
           <div class="h-full">
             <button onclick="pilihBook('{{ $thebook->id }}')"
-              class="bg-gray-500 text-white rounded-xl px-4 py-4 w-full min-h-[220px] shadow-md flex flex-col items-center space-y-2">
+              class="text-white rounded-xl px-4 py-4 w-full min-h-[220px] shadow-md flex flex-col items-center space-y-2 theme-{{ $thebook->theme_color }}">
               <img src="{{ asset('assets/img/openboox-removebg.png') }}" alt="Book Icon" class="w-20 h-20 mb-2" />
               <div class="font-semibold">Buku {{ user()->name }}</div>
               <p class="text-xs text-center">Buku {{ user()->name }}, bisa untuk coba coba yaa</p>
             </button>
+            <select autocomplete="off" class="form-select select-theme  mt-2" onchange="changeTheme(this,'{{ $thebook->id }}')">
+              @foreach(alltheme() as $color => $theme)
+              <option value="{{$theme}}" @if($theme==$thebook->theme) selected @endif >{{ucfirst($color)}}</option>
+              @endforeach
+
+            </select>
           </div>
         </div>
       </div>
@@ -218,6 +277,7 @@
 
   <script>
     const defaultImg = "https://via.placeholder.com/100";
+    $('.select-theme').attr('autocomplete', 'off');
 
     function toggleDropdown() {
       document.getElementById('dropdownMenu').classList.toggle('hidden');
@@ -440,6 +500,22 @@
         successText: "berhasil submit",
         onSuccess: (res) => {
           getRole();
+        }
+      });
+    }
+
+    function changeTheme(select, bookId) {
+      const theme = select.value;
+      swalConfirmAndSubmit({
+        url: '{{ route("change-theme") }}',
+        data: {
+          book_id: bookId,
+          theme: theme,
+          _token: '{{ csrf_token() }}'
+        },
+        successText: "berhasil ganti theme",
+        onSuccess: function(response) {
+          location.reload();
         }
       });
     }

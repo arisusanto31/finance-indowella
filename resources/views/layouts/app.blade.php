@@ -48,7 +48,7 @@
 
     <!-- Core CSS -->
     <link rel="stylesheet" href="{{ asset('assets/vendor/css/core.css') }}" class="template-customizer-core-css" />
-    <link rel="stylesheet" href="{{ asset('assets/vendor/css') }}/{{ book()->theme }}" class="template-customizer-theme-css" />
+    <link rel="stylesheet" href="{{ asset('assets/vendor/css') }}/{{ bookTheme() }}" class="template-customizer-theme-css" />
     <link rel="stylesheet" href="{{ asset('assets/css/helper.css') }}" />
   
     <link rel="stylesheet" href="{{ asset('assets/css/demo.css') }}" />

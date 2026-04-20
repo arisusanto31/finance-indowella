@@ -10,6 +10,7 @@ use App\Jobs\ImportSaldoNLJob;
 use App\Jobs\RecalculateJournalJob;
 use App\Jobs\UpdateLawanCodeJournalJob;
 use App\Models\BookJournal;
+use App\Models\BookTheme;
 use App\Models\ChartAccount;
 use App\Models\DetailKartuInvoice;
 use App\Models\InvoiceSaleDetail;
@@ -198,10 +199,23 @@ class JournalController extends Controller
                 'theme' => 'theme-default-brown.css'
             ]);
         }
-
-        $view->books = BookJournal::where('type', '<>', 'own')->get();
+        $bookTheme= BookTheme::where('user_id',user()->id)->pluck('theme','book_id')->all();
+        $books= BookJournal::where('type', '<>', 'own')->get()->map(function($val) use($bookTheme){
+            $val->theme = $bookTheme[$val->id] ?? $val->theme;
+            $val->theme_color = str_replace(['theme-default-','.css'],'',$val->theme);
+            return $val;
+        });
+        $thebook->theme= $bookTheme[$thebook->id] ?? $thebook->theme;
+        $thebook->theme_color = str_replace(['theme-default-','.css'],'',$thebook->theme);
+        $view->books = $books;
         $view->thebook = $thebook;;
         return $view;
+    }
+
+    public function changeTheme(Request $request){
+        $bookid = $request->input('book_id');
+        $theme = $request->input('theme');
+        return BookTheme::createOrUpdate(user()->id,$bookid,$theme);
     }
 
     public function loginJurnal($id)
