@@ -8,31 +8,35 @@
 <div class="modal-header">
     <h5 class="modal-title" id="exampleModalLabel">Detail Pencocokan {{ $model }}
     </h5>
+
+
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
 <div class="modal-body">
     <div class="row">
-        <div class="col-xs-6 col-md-6">
-            <h5> {{ $model }}</h5>
+        <div class="col-x-12 col-md-4">
+            <span> Filter Tanggal </span>
+            <input type="text" id="daterange" onchange="changeDateRange(this)" value="{{ createCarbon($startDate)->format('d/m/Y') }} - {{ createCarbon($endDate)->format('d/m/Y') }}" class="form-control">
 
+        </div>
+        <div class="clearfix"> </div>
+        <div class="col-xs-6 col-md-6 mt-3">
+            <h5> {{ $model }}</h5>
             <div class="card p-2 mb-2 br-5 mt-2 bg-primary-lightest wrapper-scroll-vertical" style="height:20vh;">
                 <h5> Resume </h5>
                 <ul>
                     <li> Total Mutasi : {{format_price(collect($kartus)->sum('amount'))}}</li>
-                    <li > List tanpa link : 
-                         <ul>
+                    <li> List tanpa link :
+                        <ul>
                             @foreach ($kartus as $kartu)
                             @if($kartu->journal_id == null)
                             <li>{{$kartu->index_date}} - {{$kartu->id}} - {{ format_price($kartu->amount) }}</li>
                             @endif
                             @endforeach
                         </ul>
-
                     </li>
                 </ul>
-               
             </div>
-
             <div class="wrapper-scroll-vertical">
                 <table class="table table-bordered ">
                     <thead>
@@ -51,7 +55,6 @@
                             <td>{{ format_price($lastSaldoKartu) }}</td>
                             <td></td>
                         </tr>
-
                         @foreach ($kartus as $kartu)
                         @php
                         $lastSaldoKartu+= $kartu->amount;
@@ -132,3 +135,39 @@
 <div class="modal-footer">
     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 </div>
+
+<script>
+    initDateRangePicker('#daterange');
+
+    function initDateRangePicker(t) {
+        $(t).daterangepicker({
+            autoUpdateInput: false,
+            locale: {
+                cancelLabel: 'Clear',
+                format: 'DD/MM/YYYY'
+            }
+        });
+
+        $(t).on('apply.daterangepicker', function(ev, picker) {
+            $(this).val(
+                picker.startDate.format('DD/MM/YYYY') +
+                ' - ' +
+                picker.endDate.format('DD/MM/YYYY')
+            );
+            changeDateRange(this);
+        });
+
+        $(t).on('cancel.daterangepicker', function() {
+            $(this).val('');
+        });
+    }
+
+    
+
+    function changeDateRange(input) {
+        console.log("woii BERUBAH");
+        let dateRange = $(input).val();
+        showDetailOnModal('{{url("admin/show-detail-pencocokan")}}?date_range=' + dateRange + '&model={{$model}}', 'xl');
+
+    }
+</script>

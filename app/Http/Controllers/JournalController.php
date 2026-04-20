@@ -29,6 +29,7 @@ use App\Models\TaskImport;
 use App\Models\TaskImportDetail;
 use App\Models\Toko;
 use App\Services\LockManager;
+use Carbon\Carbon;
 use CustomLogger;
 use Illuminate\Console\View\Components\Task;
 use Illuminate\Http\Request;
@@ -1640,47 +1641,60 @@ class JournalController extends Controller
     function detailPencocokan()
     {
         $date = getInput('date');
+        $dateRange= getInput('date_range');
         $model = getInput('model');
+        
 
+        if($dateRange){
+            $splitDate= explode(' - ',$dateRange);
+            $startDate= Carbon::createFromFormat('d/m/Y', $splitDate[0])->format('Y-m-d 00:00:00');
+            $endDate= Carbon::createFromFormat('d/m/Y', $splitDate[1])->format('Y-m-d 23:59:59');
+            $indexStart= Carbon::createFromFormat('d/m/Y', $splitDate[0])->format('ymdHis00');
+            $indexEnd= Carbon::createFromFormat('d/m/Y', $splitDate[1])->format('ymdHis00');
+        }else{
+
+            $startDate= createCarbon($date)->format('Y-m-d 00:00:00');
+            $endDate= Carbon::now()->format('Y-m-d 23:59:59');
+            $indexStart= createCarbon($date)->format('ymdHis00');
+            $indexEnd= Carbon::now()->format('ymdHis00');
+        }
         $fixModel = 'App\\Models\\' . $model;
-        $indexDate = createCarbon($date)->format('ymdHis000');
-        $indexDateJournal = createCarbon($date)->format('ymdHis00');
-        $journals = Journal::where('index_date', '>=', $indexDateJournal)
-            ->select('index_date', 'description', 'amount_debet', 'amount_kredit')->get();
+        // $journals = Journal::where('index_date', '>=', $indexDateJournal)
+        //     ->select('index_date', 'description', 'amount_debet', 'amount_kredit')->get();
         $tableName = "";
         if ($model == 'KartuStock') {
             $tableName = "kartu_stocks";
-            $saldoKartu = KartuStock::getTotalSaldoRupiah(getInput('date'));
-            $saldoJournal = KartuStock::getTotalJournal(getInput('date'));
+            $saldoKartu = KartuStock::getTotalSaldoRupiah($startDate, true);
+            $saldoJournal = KartuStock::getTotalJournal($startDate);
         } else if ($model == 'KartuBDP') {
             $tableName = "kartu_bdps";
-            $saldoKartu = KartuBDP::getTotalSaldoRupiah(getInput('date'), true);
-            $saldoJournal = KartuBDP::getTotalJournal(getInput('date'));
+            $saldoKartu = KartuBDP::getTotalSaldoRupiah($startDate, true);
+            $saldoJournal = KartuBDP::getTotalJournal($startDate);
         } else if ($model == 'KartuBahanJadi') {
             $tableName = "kartu_bahan_jadis";
-            $saldoKartu = KartuBahanJadi::getTotalSaldoRupiah(getInput('date'), true);
-            $saldoJournal = KartuBahanJadi::getTotalJournal(getInput('date'));
+            $saldoKartu = KartuBahanJadi::getTotalSaldoRupiah($startDate, true);
+            $saldoJournal = KartuBahanJadi::getTotalJournal($startDate);
         } else if ($model == 'KartuHutang') {
             $tableName = "kartu_hutangs";
 
-            $saldoKartu = KartuHutang::getTotalsaldoRupiah(getInput('date'), 'factur_supplier_number');
-            $saldoJournal = KartuHutang::getTotalJournal(getInput('date'));
+            $saldoKartu = KartuHutang::getTotalsaldoRupiah($startDate, 'factur_supplier_number');
+            $saldoJournal = KartuHutang::getTotalJournal($startDate);
         } else if ($model == 'KartuPiutang') {
             $tableName = "kartu_piutangs";
-            $saldoKartu = KartuPiutang::getTotalSaldoRupiah(getInput('date'));
-            $saldoJournal = KartuPiutang::getTotalJournal(getInput('date'));
+            $saldoKartu = KartuPiutang::getTotalSaldoRupiah($startDate);
+            $saldoJournal = KartuPiutang::getTotalJournal($startDate);
         } else if ($model == 'KartuDPSales') {
             $tableName = "kartu_dp_sales";
-            $saldoKartu = KartuDPSales::getTotalSaldoRupiah(getInput('date'), 'sales_order_number');
-            $saldoJournal = KartuDPSales::getTotalJournal(getInput('date'));
+            $saldoKartu = KartuDPSales::getTotalSaldoRupiah($startDate, 'sales_order_number');
+            $saldoJournal = KartuDPSales::getTotalJournal($startDate);
         } else if ($model == 'KartuInventory') {
             $tableName = "kartu_inventories";
-            $saldoKartu = KartuInventory::getTotalSaldoRupiah(getInput('date'), 'inventory_id');
-            $saldoJournal = KartuInventory::getTotalJournal(getInput('date'));
+            $saldoKartu = KartuInventory::getTotalSaldoRupiah($startDate, 'inventory_id');
+            $saldoJournal = KartuInventory::getTotalJournal($startDate);
         } else if ($model == 'KartuBDD') {
             $tableName = "kartu_prepaid_expenses";
-            $saldoKartu = KartuPrepaidExpense::getTotalSaldoRupiah(getInput('date'), 'prepaid_expense_id');
-            $saldoJournal = KartuPrepaidExpense::getTotalJournal(getInput('date'));
+            $saldoKartu = KartuPrepaidExpense::getTotalSaldoRupiah($startDate, 'prepaid_expense_id');
+            $saldoJournal = KartuPrepaidExpense::getTotalJournal($startDate);
         } else {
             return [
                 'status' => 0,
@@ -1692,7 +1706,8 @@ class JournalController extends Controller
             $kartu = $fixModel::from($tableName . ' as kartu')->leftJoin('detail_kartu_invoices as dk', function ($join) use ($fixModel) {
                 $join->on('dk.kartu_id', '=', 'kartu.id')->where('dk.kartu_type', $fixModel);
             })
-                ->where('kartu.index_date', '>=', $indexDate)
+                ->where('kartu.index_date', '>', $indexStart.'0')
+                ->where('kartu.index_date', '<=', $indexEnd.'0')
                 ->select(
                     'kartu.id',
                     'kartu.index_date',
@@ -1718,7 +1733,8 @@ class JournalController extends Controller
                 $join->on('dk.journal_id', '=', 'j.id')->where('dk.kartu_type', $fixModel);
             })
            ->leftJoin('chart_accounts as ca', 'ca.code_group', '=', 'j.code_group')
-            ->where('j.index_date', '>=', $indexDateJournal)
+            ->where('j.index_date', '>', $indexStart)
+            ->where('j.index_date', '<=', $indexEnd)
             ->where('j.reference_model', $fixModel)
             ->select(
                 'j.index_date',
@@ -1736,6 +1752,8 @@ class JournalController extends Controller
         $view->model = $model;
         $view->lastSaldoKartu = $saldoKartu;
         $view->lastSaldoJournal = $saldoJournal;
+        $view->startDate= $startDate;
+        $view->endDate= $endDate;
         return $view;
     }
 }
