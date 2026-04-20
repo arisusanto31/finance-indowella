@@ -18,6 +18,11 @@ use App\Models\JournalJobFailed;
 use App\Models\JournalKey;
 use App\Models\KartuBahanJadi;
 use App\Models\KartuBDP;
+use App\Models\KartuDPSales;
+use App\Models\KartuHutang;
+use App\Models\KartuInventory;
+use App\Models\KartuPiutang;
+use App\Models\KartuPrepaidExpense;
 use App\Models\KartuStock;
 use App\Models\Stock;
 use App\Models\TaskImport;
@@ -1498,7 +1503,7 @@ class JournalController extends Controller
                 'index_date',
                 DB::raw('amount_debet- amount_kredit as mutasi_rupiah_total'),
                 DB::raw('amount_saldo_factur as saldo_rupiah_total'),
-                DB::raw($key.' as number')
+                DB::raw($key . ' as number')
             )->orderBy('index_date', 'asc')->get()->groupBy('number');
             $tableName = "kartu_hutangs";
             switch ($model) {
@@ -1513,25 +1518,24 @@ class JournalController extends Controller
                     break;
             }
 
-            $saldoAwal = $model::whereIn('index_date', function ($q) use ($indexDate, $tableName,$key) {
-                $q->select(DB::raw('MAX(index_date)'))->from($tableName)->where('index_date', '<=', $indexDate)->groupBy($key );
+            $saldoAwal = $model::whereIn('index_date', function ($q) use ($indexDate, $tableName, $key) {
+                $q->select(DB::raw('MAX(index_date)'))->from($tableName)->where('index_date', '<=', $indexDate)->groupBy($key);
             })->get()->keyBy($key);
 
             $problems = [];
             foreach ($datas as $number => $vals) {
-             
-                    $saldoProd = $saldoAwal->get($number);
-                     $saldoRupiah = $saldoProd ?$saldoProd->amount_saldo_factur  : 0;
-                    foreach ($vals as $row => $val) {
-                        $saldoRupiah = bcadd($saldoRupiah, $val->mutasi_rupiah_total, 2);
 
-                        if (abs($saldoRupiah - $val->saldo_rupiah_total) > 0.1) {
-                            $val['rupiah_ok'] = $saldoRupiah;
-                            $problems[] = $val;
-                            break;
-                        }
+                $saldoProd = $saldoAwal->get($number);
+                $saldoRupiah = $saldoProd ? $saldoProd->amount_saldo_factur  : 0;
+                foreach ($vals as $row => $val) {
+                    $saldoRupiah = bcadd($saldoRupiah, $val->mutasi_rupiah_total, 2);
+
+                    if (abs($saldoRupiah - $val->saldo_rupiah_total) > 0.1) {
+                        $val['rupiah_ok'] = $saldoRupiah;
+                        $problems[] = $val;
+                        break;
                     }
-                
+                }
             }
 
             return [
@@ -1587,8 +1591,7 @@ class JournalController extends Controller
                     ];
                 }
                 upsertInChunks($model, $updater, 'id', ['saldo_qty_backend', 'saldo_rupiah_total']);
-            }
-            else if($model == 'KartuHutang' || $model == 'KartuPiutang' || $model == 'KartuDPSales') {
+            } else if ($model == 'KartuHutang' || $model == 'KartuPiutang' || $model == 'KartuDPSales') {
                 $model = 'App\\Models\\' . $model;
                 $kartu = $model::find($id);
                 if (!$kartu) {
@@ -1604,7 +1607,7 @@ class JournalController extends Controller
                     ->where('index_date', '<', $kartu->index_date)->orderBy('index_date', 'desc')
                     ->first();
 
-                $saldoRupiah = $lastKartu ?$lastKartu->amount_saldo_factur  : 0;
+                $saldoRupiah = $lastKartu ? $lastKartu->amount_saldo_factur  : 0;
                 $nextKartu = $model::where($key, $kartu->$key)
                     ->where('index_date', '>=', $kartu->index_date)->orderBy('index_date', 'asc')
                     ->get();
@@ -1619,8 +1622,7 @@ class JournalController extends Controller
                     ];
                 }
                 upsertInChunks($model, $updater, 'id', ['amount_saldo_factur']);
-            }
-             else {
+            } else {
                 throw new \Exception('model belum diakomodasi');
             }
         } catch (\Exception $e) {
@@ -1633,5 +1635,107 @@ class JournalController extends Controller
             'status' => 1,
             'msg' => 'success'
         ];
+    }
+
+    function detailPencocokan()
+    {
+        $date = getInput('date');
+        $model = getInput('model');
+
+        $fixModel = 'App\\Models\\' . $model;
+        $indexDate = createCarbon($date)->format('ymdHis000');
+        $indexDateJournal = createCarbon($date)->format('ymdHis00');
+        $journals = Journal::where('index_date', '>=', $indexDateJournal)
+            ->select('index_date', 'description', 'amount_debet', 'amount_kredit')->get();
+        $tableName = "";
+        if ($model == 'KartuStock') {
+            $tableName = "kartu_stocks";
+            $saldoKartu = KartuStock::getTotalSaldoRupiah(getInput('date'));
+            $saldoJournal = KartuStock::getTotalJournal(getInput('date'));
+        } else if ($model == 'KartuBDP') {
+            $tableName = "kartu_bdps";
+            $saldoKartu = KartuBDP::getTotalSaldoRupiah(getInput('date'), true);
+            $saldoJournal = KartuBDP::getTotalJournal(getInput('date'));
+        } else if ($model == 'KartuBahanJadi') {
+            $tableName = "kartu_bahan_jadis";
+            $saldoKartu = KartuBahanJadi::getTotalSaldoRupiah(getInput('date'), true);
+            $saldoJournal = KartuBahanJadi::getTotalJournal(getInput('date'));
+        } else if ($model == 'KartuHutang') {
+            $tableName = "kartu_hutangs";
+
+            $saldoKartu = KartuHutang::getTotalsaldoRupiah(getInput('date'), 'factur_supplier_number');
+            $saldoJournal = KartuHutang::getTotalJournal(getInput('date'));
+        } else if ($model == 'KartuPiutang') {
+            $tableName = "kartu_piutangs";
+            $saldoKartu = KartuPiutang::getTotalSaldoRupiah(getInput('date'));
+            $saldoJournal = KartuPiutang::getTotalJournal(getInput('date'));
+        } else if ($model == 'KartuDPSales') {
+            $tableName = "kartu_dp_sales";
+            $saldoKartu = KartuDPSales::getTotalSaldoRupiah(getInput('date'), 'sales_order_number');
+            $saldoJournal = KartuDPSales::getTotalJournal(getInput('date'));
+        } else if ($model == 'KartuInventory') {
+            $tableName = "kartu_inventories";
+            $saldoKartu = KartuInventory::getTotalSaldoRupiah(getInput('date'), 'inventory_id');
+            $saldoJournal = KartuInventory::getTotalJournal(getInput('date'));
+        } else if ($model == 'KartuBDD') {
+            $tableName = "kartu_prepaid_expenses";
+            $saldoKartu = KartuPrepaidExpense::getTotalSaldoRupiah(getInput('date'), 'prepaid_expense_id');
+            $saldoJournal = KartuPrepaidExpense::getTotalJournal(getInput('date'));
+        } else {
+            return [
+                'status' => 0,
+                'msg' => 'model belum diakomodasi'
+            ];
+        }
+
+        if ($model == "KartuStock" || $model == "KartuBDP" || $model == "KartuBahanJadi") {
+            $kartu = $fixModel::from($tableName . ' as kartu')->leftJoin('detail_kartu_invoices as dk', function ($join) use ($fixModel) {
+                $join->on('dk.kartu_id', '=', 'kartu.id')->where('dk.kartu_type', $fixModel);
+            })
+                ->where('kartu.index_date', '>=', $indexDate)
+                ->select(
+                    'kartu.id',
+                    'kartu.index_date',
+                    'kartu.stock_id',
+                    'kartu.mutasi_rupiah_total as amount',
+                    'dk.journal_id'
+                )->get();
+        } else if ($model == "KartuHutang" || $model == "KartuPiutang" || $model == "KartuDPSales") {
+            $kartu = $fixModel::from($tableName . ' as kartu')->where('index_date', '>=', $indexDate)
+                ->select('index_date', 'description', DB::raw('amount_debet - amount_kredit as amount'))->get();
+        } else if ($model == 'KartuBDD' || $model == 'KartuInventaris') {
+            $kartu = $fixModel::from($tableName . ' as kartu')->where('index_date', '>=', $indexDate)
+                ->select('index_date', 'description', 'amount', 'type_mutasi', 'nilai_buku')->get();
+        } else {
+            return [
+                'status' => 0,
+                'msg' => 'model belum diakomodasi'
+            ];
+        }
+
+        $journals = Journal::from('journals as j')
+            ->leftJoin('detail_kartu_invoices as dk', function ($join) use ($fixModel) {
+                $join->on('dk.journal_id', '=', 'j.id')->where('dk.kartu_type', $fixModel);
+            })
+           ->leftJoin('chart_accounts as ca', 'ca.code_group', '=', 'j.code_group')
+            ->where('j.index_date', '>=', $indexDateJournal)
+            ->where('j.reference_model', $fixModel)
+            ->select(
+                'j.index_date',
+                'ca.name as code_group_name',
+                'j.journal_number', 
+                'j.description',
+                'j.code_group',
+                'dk.kartu_id as kartu_id',
+                DB::raw('j.amount_debet-j.amount_kredit as amount')
+            )->orderBy('j.index_date', 'asc')->get();
+
+        $view = view('main.detail-pencocokan');
+        $view->kartus = $kartu;
+        $view->journals = $journals;
+        $view->model = $model;
+        $view->lastSaldoKartu = $saldoKartu;
+        $view->lastSaldoJournal = $saldoJournal;
+        return $view;
     }
 }

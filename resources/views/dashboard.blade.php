@@ -268,13 +268,19 @@
                 <div class="card-body ">
                     <div class="">
                         <h5 id="" class="pb-0 mt-3 mb-0 text-primary"> <i class="fas fa-circle"></i> Kartu
-                            Stock <span style="font-size:14px"> vs jurnal</span> </h5>
+                            Stock <span style="font-size:14px"> vs jurnal</span>
+                         <button onclick="showDetailMutasi('KartuStock')"><i class="fas fa-eye"></i> </button> 
+                        </h5>
                         <div id="cocok-kartu-stock" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
                         <h5 id="" class="pb-0 mt-3 mb-0 text-primary"> <i class="fas fa-circle"></i> Kartu
-                            BDP <span style="font-size:14px"> vs jurnal</span> </h5>
+                            BDP <span style="font-size:14px"> vs jurnal</span>
+                            <button onclick="showDetailMutasi('KartuBDP')"><i class="fas fa-eye"></i> </button>
+                        </h5>
                         <div id="cocok-kartu-bdp" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
                         <h5 id="" class="pb-0 mt-3 mb-0  text-primary"> <i class="fas fa-circle"></i> Kartu
                             Bahan Jadi <span style="font-size:14px"> vs jurnal</span>
+                             <button onclick="showDetailMutasi('KartuBahanJadi')"><i class="fas fa-eye"></i> </button> 
+                        
                         </h5>
                         <div id="cocok-kartu-bahan-jadi" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
                         <h5 class="pb-0 mt-3 mb-0 text-primary"> <i class="fas fa-circle"></i> Kartu Piutang <span
@@ -293,7 +299,9 @@
                         <div id="cocok-kartu-inventaris" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
                         <h5 class="pb-0 mt-3 mb-0 text-primary">
                              <i class="fas fa-circle"></i> BDD<span
-                                style="font-size:14px"> vs jurnal</span> </h5>
+                                style="font-size:14px"> vs jurnal</span>
+                                 <!-- <button onclick="showDetailMutasi('KartuBDD')"><i class="fas fa-eye"></i> </button>  -->
+                            </h5>
                         <div id="cocok-kartu-bdd" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
 
                     </div>
@@ -444,6 +452,14 @@
 
             var lastDate = null;
 
+            function showDetailMutasi(typeKartu){
+                let date = $('#date-cocok').val();
+                let url = '{{url("admin/show-detail-pencocokan")}}?model='+typeKartu+'&date='+date;
+                
+                showDetailOnModal(url, 'xl');
+            }
+
+            
             function onFocusOutDate() {
                 dateCocok = $('#date-cocok').val();
                 if (dateCocok != lastDate) {
