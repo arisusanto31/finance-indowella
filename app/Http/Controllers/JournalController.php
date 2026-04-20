@@ -1649,7 +1649,7 @@ class JournalController extends Controller
             $splitDate = explode(' - ', $dateRange);
             $startDate = Carbon::createFromFormat('d/m/Y', $splitDate[0])->format('Y-m-d 00:00:00');
             $endDate = Carbon::createFromFormat('d/m/Y', $splitDate[1])->format('Y-m-d 23:59:59');
-            $indexStart = Carbon::createFromFormat('d/m/Y', $splitDate[0])->format('ymdHis00');
+            $indexStart = Carbon::createFromFormat('d/m/Y', $splitDate[0])->format('ymd00000000');
             $indexEnd = Carbon::createFromFormat('d/m/Y', $splitDate[1])->format('ymd23595999');
         } else {
 
