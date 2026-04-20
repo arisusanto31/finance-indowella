@@ -1714,7 +1714,7 @@ class JournalController extends Controller
                     'kartu.stock_id',
                     'kartu.mutasi_rupiah_total as amount',
                     DB::raw('coalesce(dk.journal_id, kartu.journal_id) as journal_id'),
-                )->get();
+                )->groupBy('kartu.id')->get();
         } else if ($model == "KartuHutang" || $model == "KartuPiutang" || $model == "KartuDPSales") {
             $kartu = $fixModel::from($tableName . ' as kartu')
                 ->leftJoin('detail_kartu_invoices as dk', function ($join) use ($fixModel) {
@@ -1728,7 +1728,7 @@ class JournalController extends Controller
                     DB::raw('kartu.amount_debet - kartu.amount_kredit as amount'),
                     'kartu.description',
                     DB::raw('coalesce(dk.journal_id, kartu.journal_id) as journal_id'),
-                )->get();
+                )->groupBy('kartu.id')->get();
         } else if ($model == 'KartuBDD' || $model == 'KartuInventaris') {
             $kartu = $fixModel::from($tableName . ' as kartu')
                 ->leftJoin('detail_kartu_invoices as dk', function ($join) use ($fixModel) {
@@ -1743,7 +1743,7 @@ class JournalController extends Controller
                     'kartu.type_mutasi',
                     'kartu.nilai_buku',
                     DB::raw('coalesce(dk.journal_id, kartu.journal_id) as journal_id'),
-                )->get();
+                )->groupBy('kartu.id')->get();
         } else {
             return [
                 'status' => 0,
@@ -1760,14 +1760,15 @@ class JournalController extends Controller
             ->where('j.index_date', '<=', $indexEnd)
             ->where('j.reference_model', $fixModel)
             ->select(
+                'j.id',
                 'j.index_date',
                 'ca.name as code_group_name',
                 'j.journal_number',
                 'j.description',
                 'j.code_group',
-                'dk.kartu_id as kartu_id',
-                DB::raw('j.amount_debet-j.amount_kredit as amount')
-            )->orderBy('j.index_date', 'asc')->get();
+                DB::raw('group_concat(dk.kartu_id) as kartu_id'),
+                DB::raw('case when j.code_group > 200000 then j.amount_kredit-j.amount_debet else j.amount_debet-j.amount_kredit end as amount')
+            )->groupBy('j.id')->orderBy('j.index_date', 'asc')->get();
 
         $view = view('main.detail-pencocokan');
         $view->kartus = $kartu;

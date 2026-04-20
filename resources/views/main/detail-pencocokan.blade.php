@@ -42,7 +42,7 @@
                     <thead>
                         <tr>
                             <th>index date</th>
-                            <th>Deskripsi</th>
+                            <th>kartu ID</th>
                             <th>amount</th>
                             <th>Saldo</th>
                             <th>Journal ID </th>
@@ -61,7 +61,7 @@
                         @endphp
                         <tr @if($kartu->journal_id == null) class="bg-danger text-white" @else class="bg-success text-white" @endif>
                             <td>{{ $kartu->index_date }}</td>
-                            <td>{{ $kartu->description }}</td>
+                            <td>{{ $kartu->id }}</td>
                             <td>{{ format_price($kartu->amount) }}</td>
                             <td>{{ format_price($lastSaldoKartu) }}</td>
                             <td><i class="fas fa-link"></i> {{ $kartu->journal_id }}</td>
@@ -93,9 +93,9 @@
                     <thead>
                         <tr>
                             <th>index date</th>
+                            <th>Journal ID </th>
                             <th>COA</th>
                             <th>Number </th>
-                            <!-- <th>Deskripsi</th> -->
                             <th>amount</th>
                             <th>Saldo</th>
                             <th>Kartu ID </th>
@@ -104,6 +104,7 @@
                     <tbody>
                         <tr>
                             <td colspan="3">Saldo Awal</td>
+                            <td></td>
                             <td></td>
                             <td>{{ format_price($lastSaldoJournal) }}</td>
                             <td></td>
@@ -114,9 +115,9 @@
                         @endphp
                         <tr @if($journal->kartu_id == null) class="bg-danger text-white" @else class="bg-success text-white" @endif>
                             <td>{{ $journal->index_date }}</td>
+                            <td> {{ $journal->id }}</td>
                             <td>{{ $journal->code_group }}</td>
                             <td>{{ $journal->journal_number }}</td>
-                            <!-- <td>{{ $journal->description }}</td> -->
                             <td class="">{{ format_price($journal->amount) }}</td>
                             <td>{{ format_price($lastSaldoJournal) }}</td>
                             <td><i class="fas fa-link"></i> {{ $journal->kartu_id }}</td>
