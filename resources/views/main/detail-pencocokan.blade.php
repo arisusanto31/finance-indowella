@@ -1,6 +1,6 @@
 <style>
     .wrapper-scroll-vertical {
-        max-height: 400px;
+        max-height: 50vh;
         overflow-y: auto;
     }
 </style>
@@ -15,7 +15,7 @@
         <div class="col-xs-6 col-md-6">
             <h5> {{ $model }}</h5>
 
-            <div class="card p-2 mb-2 br-5 mt-2 bg-primary-lightest wrapper-scroll-vertical" style="height:150px;">
+            <div class="card p-2 mb-2 br-5 mt-2 bg-primary-lightest wrapper-scroll-vertical" style="height:20vh;">
                 <h5> Resume </h5>
                 <ul>
                     <li> Total Mutasi : {{format_price(collect($kartus)->sum('amount'))}}</li>
@@ -71,7 +71,7 @@
         <div class="col-xs-6 col-md-6">
             <h5>Journal</h5>
 
-            <div class="card p-2 mb-2 br-5 mt-2 bg-primary-lightest wrapper-scroll-vertical" style="height:150px;">
+            <div class="card p-2 mb-2 br-5 mt-2 bg-primary-lightest wrapper-scroll-vertical" style="height:20vh;">
                 <h5> Resume </h5>
                 <ul>
                     <li> Total Mutasi : {{format_price(collect($journals)->sum('amount'))}}</li>
