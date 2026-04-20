@@ -279,28 +279,37 @@
                         <div id="cocok-kartu-bdp" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
                         <h5 id="" class="pb-0 mt-3 mb-0  text-primary"> <i class="fas fa-circle"></i> Kartu
                             Bahan Jadi <span style="font-size:14px"> vs jurnal</span>
-                             <button onclick="showDetailMutasi('KartuBahanJadi')"><i class="fas fa-eye"></i> </button> 
+                            <button onclick="showDetailMutasi('KartuBahanJadi')"><i class="fas fa-eye"></i> </button> 
                         
                         </h5>
                         <div id="cocok-kartu-bahan-jadi" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
                         <h5 class="pb-0 mt-3 mb-0 text-primary"> <i class="fas fa-circle"></i> Kartu Piutang <span
-                                style="font-size:14px"> vs jurnal</span> </h5>
+                                style="font-size:14px"> vs jurnal</span>
+                               <button onclick="showDetailMutasi('KartuPiutang')"><i class="fas fa-eye"></i> </button> 
+                        
+                        </h5>
                         <div id="cocok-kartu-piutang" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
                         <h5 class="pb-0 mt-3 mb-0 text-primary"> <i class="fas fa-circle"></i> Kartu Hutang <span
-                                style="font-size:14px"> vs jurnal</span></h5>
+                                style="font-size:14px"> vs jurnal</span>
+                             <button onclick="showDetailMutasi('KartuHutang')"><i class="fas fa-eye"></i> </button> 
+                        </h5>
                         <div id="cocok-kartu-hutang" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
                         <h5 class="pb-0 mt-3 mb-0 text-primary">
                              <i class="fas fa-circle"></i> Kartu DP Sales <span
-                                style="font-size:14px"> vs jurnal</span> </h5>
+                                style="font-size:14px"> vs jurnal</span>
+                             <button onclick="showDetailMutasi('KartuDPSales')"><i class="fas fa-eye"></i> </button>    
+                        </h5>
                         <div id="cocok-kartu-dp" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
                         <h5 class="pb-0 mt-3 mb-0 text-primary">
                              <i class="fas fa-circle"></i> Inventaris <span
-                                style="font-size:14px"> vs jurnal</span> </h5>
+                                style="font-size:14px"> vs jurnal</span>
+                             <button onclick="showDetailMutasi('KartuInventaris')"><i class="fas fa-eye"></i> </button> 
+                        </h5>
                         <div id="cocok-kartu-inventaris" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
                         <h5 class="pb-0 mt-3 mb-0 text-primary">
                              <i class="fas fa-circle"></i> BDD<span
                                 style="font-size:14px"> vs jurnal</span>
-                                 <!-- <button onclick="showDetailMutasi('KartuBDD')"><i class="fas fa-eye"></i> </button>  -->
+                                 <button onclick="showDetailMutasi('KartuBDD')"><i class="fas fa-eye"></i> </button> 
                             </h5>
                         <div id="cocok-kartu-bdd" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
 

@@ -1641,22 +1641,22 @@ class JournalController extends Controller
     function detailPencocokan()
     {
         $date = getInput('date');
-        $dateRange= getInput('date_range');
+        $dateRange = getInput('date_range');
         $model = getInput('model');
-        
 
-        if($dateRange){
-            $splitDate= explode(' - ',$dateRange);
-            $startDate= Carbon::createFromFormat('d/m/Y', $splitDate[0])->format('Y-m-d 00:00:00');
-            $endDate= Carbon::createFromFormat('d/m/Y', $splitDate[1])->format('Y-m-d 23:59:59');
-            $indexStart= Carbon::createFromFormat('d/m/Y', $splitDate[0])->format('ymdHis00');
-            $indexEnd= Carbon::createFromFormat('d/m/Y', $splitDate[1])->format('ymdHis00');
-        }else{
 
-            $startDate= createCarbon($date)->format('Y-m-d 00:00:00');
-            $endDate= Carbon::now()->format('Y-m-d 23:59:59');
-            $indexStart= createCarbon($date)->format('ymdHis00');
-            $indexEnd= Carbon::now()->format('ymdHis00');
+        if ($dateRange) {
+            $splitDate = explode(' - ', $dateRange);
+            $startDate = Carbon::createFromFormat('d/m/Y', $splitDate[0])->format('Y-m-d 00:00:00');
+            $endDate = Carbon::createFromFormat('d/m/Y', $splitDate[1])->format('Y-m-d 23:59:59');
+            $indexStart = Carbon::createFromFormat('d/m/Y', $splitDate[0])->format('ymdHis00');
+            $indexEnd = Carbon::createFromFormat('d/m/Y', $splitDate[1])->format('ymdHis00');
+        } else {
+
+            $startDate = createCarbon($date)->format('Y-m-d 00:00:00');
+            $endDate = Carbon::now()->format('Y-m-d 23:59:59');
+            $indexStart = createCarbon($date)->format('ymdHis00');
+            $indexEnd = Carbon::now()->format('ymdHis00');
         }
         $fixModel = 'App\\Models\\' . $model;
         // $journals = Journal::where('index_date', '>=', $indexDateJournal)
@@ -1706,21 +1706,44 @@ class JournalController extends Controller
             $kartu = $fixModel::from($tableName . ' as kartu')->leftJoin('detail_kartu_invoices as dk', function ($join) use ($fixModel) {
                 $join->on('dk.kartu_id', '=', 'kartu.id')->where('dk.kartu_type', $fixModel);
             })
-                ->where('kartu.index_date', '>', $indexStart.'0')
-                ->where('kartu.index_date', '<=', $indexEnd.'0')
+                ->where('kartu.index_date', '>', $indexStart . '0')
+                ->where('kartu.index_date', '<=', $indexEnd . '0')
                 ->select(
                     'kartu.id',
                     'kartu.index_date',
                     'kartu.stock_id',
                     'kartu.mutasi_rupiah_total as amount',
-                    'dk.journal_id'
+                    DB::raw('coalesce(dk.journal_id, kartu.journal_id) as journal_id'),
                 )->get();
         } else if ($model == "KartuHutang" || $model == "KartuPiutang" || $model == "KartuDPSales") {
-            $kartu = $fixModel::from($tableName . ' as kartu')->where('index_date', '>=', $indexDate)
-                ->select('index_date', 'description', DB::raw('amount_debet - amount_kredit as amount'))->get();
+            $kartu = $fixModel::from($tableName . ' as kartu')
+                ->leftJoin('detail_kartu_invoices as dk', function ($join) use ($fixModel) {
+                    $join->on('dk.kartu_id', '=', 'kartu.id')->where('dk.kartu_type', $fixModel);
+                })
+                ->where('kartu.index_date', '>', $indexStart . '0')
+                ->where('kartu.index_date', '<=', $indexEnd . '0')
+                ->select(
+                    'kartu.id',
+                    'kartu.index_date',
+                    DB::raw('kartu.amount_debet - kartu.amount_kredit as amount'),
+                    'kartu.description',
+                    DB::raw('coalesce(dk.journal_id, kartu.journal_id) as journal_id'),
+                )->get();
         } else if ($model == 'KartuBDD' || $model == 'KartuInventaris') {
-            $kartu = $fixModel::from($tableName . ' as kartu')->where('index_date', '>=', $indexDate)
-                ->select('index_date', 'description', 'amount', 'type_mutasi', 'nilai_buku')->get();
+            $kartu = $fixModel::from($tableName . ' as kartu')
+                ->leftJoin('detail_kartu_invoices as dk', function ($join) use ($fixModel) {
+                    $join->on('dk.kartu_id', '=', 'kartu.id')->where('dk.kartu_type', $fixModel);
+                })
+                ->where('kartu.index_date', '>', $indexStart . '0')
+                ->where('kartu.index_date', '<=', $indexEnd . '0')
+                ->select(
+                    'kartu.index_date',
+                    'kartu.description',
+                    'kartu.amount',
+                    'kartu.type_mutasi',
+                    'kartu.nilai_buku',
+                    DB::raw('coalesce(dk.journal_id, kartu.journal_id) as journal_id'),
+                )->get();
         } else {
             return [
                 'status' => 0,
@@ -1732,14 +1755,14 @@ class JournalController extends Controller
             ->leftJoin('detail_kartu_invoices as dk', function ($join) use ($fixModel) {
                 $join->on('dk.journal_id', '=', 'j.id')->where('dk.kartu_type', $fixModel);
             })
-           ->leftJoin('chart_accounts as ca', 'ca.code_group', '=', 'j.code_group')
+            ->leftJoin('chart_accounts as ca', 'ca.code_group', '=', 'j.code_group')
             ->where('j.index_date', '>', $indexStart)
             ->where('j.index_date', '<=', $indexEnd)
             ->where('j.reference_model', $fixModel)
             ->select(
                 'j.index_date',
                 'ca.name as code_group_name',
-                'j.journal_number', 
+                'j.journal_number',
                 'j.description',
                 'j.code_group',
                 'dk.kartu_id as kartu_id',
@@ -1752,8 +1775,8 @@ class JournalController extends Controller
         $view->model = $model;
         $view->lastSaldoKartu = $saldoKartu;
         $view->lastSaldoJournal = $saldoJournal;
-        $view->startDate= $startDate;
-        $view->endDate= $endDate;
+        $view->startDate = $startDate;
+        $view->endDate = $endDate;
         return $view;
     }
 }
