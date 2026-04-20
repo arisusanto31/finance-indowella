@@ -17,7 +17,7 @@
         <div class="col-x-12 col-md-4">
             <span> Filter Tanggal </span>
             <input type="text" id="daterange" onchange="changeDateRange(this)" value="{{ createCarbon($startDate)->format('d/m/Y') }} - {{ createCarbon($endDate)->format('d/m/Y') }}" class="form-control">
-
+            data from {{ $indexStart }} to {{ $indexEnd }}
         </div>
         <div class="clearfix"> </div>
         <div class="col-xs-6 col-md-6 mt-3">

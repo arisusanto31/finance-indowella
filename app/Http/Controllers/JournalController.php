@@ -1778,6 +1778,8 @@ class JournalController extends Controller
         $view->lastSaldoJournal = $saldoJournal;
         $view->startDate = $startDate;
         $view->endDate = $endDate;
+        $view->indexStart = $indexStart;
+        $view->indexEnd = $indexEnd;
         return $view;
     }
 }
