@@ -199,23 +199,24 @@ class JournalController extends Controller
                 'theme' => 'theme-default-brown.css'
             ]);
         }
-        $bookTheme= BookTheme::where('user_id',user()->id)->pluck('theme','book_id')->all();
-        $books= BookJournal::where('type', '<>', 'own')->get()->map(function($val) use($bookTheme){
+        $bookTheme = BookTheme::where('user_id', user()->id)->pluck('theme', 'book_id')->all();
+        $books = BookJournal::where('type', '<>', 'own')->get()->map(function ($val) use ($bookTheme) {
             $val->theme = $bookTheme[$val->id] ?? $val->theme;
-            $val->theme_color = str_replace(['theme-default-','.css'],'',$val->theme);
+            $val->theme_color = str_replace(['theme-default-', '.css'], '', $val->theme);
             return $val;
         });
-        $thebook->theme= $bookTheme[$thebook->id] ?? $thebook->theme;
-        $thebook->theme_color = str_replace(['theme-default-','.css'],'',$thebook->theme);
+        $thebook->theme = $bookTheme[$thebook->id] ?? $thebook->theme;
+        $thebook->theme_color = str_replace(['theme-default-', '.css'], '', $thebook->theme);
         $view->books = $books;
         $view->thebook = $thebook;;
         return $view;
     }
 
-    public function changeTheme(Request $request){
+    public function changeTheme(Request $request)
+    {
         $bookid = $request->input('book_id');
         $theme = $request->input('theme');
-        return BookTheme::createOrUpdate(user()->id,$bookid,$theme);
+        return BookTheme::createOrUpdate(user()->id, $bookid, $theme);
     }
 
     public function loginJurnal($id)
@@ -414,10 +415,12 @@ class JournalController extends Controller
             $isAuto = $request->input('is_auto_generated');
             $userBackdate = $request->input('user_backdate_id');
 
-            if (collect($debets)->sum('amount') - collect($kredits)->sum('amount') != 0) {
+            if (abs(collect($debets)->sum('amount') - collect($kredits)->sum('amount')) > 0.001) {
                 return [
                     'status' => 0,
-                    'msg' => 'jumlah debet dan kredit berbeda'
+                    'msg' => 'jumlah debet dan kredit berbeda',
+                    'debets' => collect($debets)->sum('amount'),
+                    'kredits' => collect($kredits)->sum('amount')
                 ];
             }
 
@@ -686,7 +689,7 @@ class JournalController extends Controller
             ]
         ];
     }
-    function destroy($id)
+    static function destroy($id)
     {
 
         DB::beginTransaction();
@@ -978,7 +981,6 @@ class JournalController extends Controller
             $bdds = $data['bdd'] ?? [];
 
             // proses hutang
-
             $bookID = book()->id;
             $task = TaskImport::create([
                 'book_journal_id' => $bookID,
@@ -1246,7 +1248,8 @@ class JournalController extends Controller
         $msg = $journal ? $journal->journal_number : null;
         return [
             'status' => 1,
-            'msg' => $msg
+            'msg' => $msg,
+            'monthyear' => $date
         ];
     }
     public static function tutupJurnal(Request $request)
@@ -1426,7 +1429,7 @@ class JournalController extends Controller
             if ($lockManager) {
                 $lockManager->releaseAll();
             }
-            return ['status' => 1, 'input' => $allInput, 'output' => $allOutput];
+            return ['status' => 1, 'input' => $allInput, 'output' => $allOutput, 'monthyear' => $monthyear];
         } catch (\Throwable $e) {
             $errMsg = $e->getMessage();
         }
@@ -1435,7 +1438,41 @@ class JournalController extends Controller
             $lockManager->releaseAll();
         }
 
-        return ['status' => 0, 'msg' => $errMsg];
+        return ['status' => 0, 'msg' => $errMsg, 'input' => $allInput, 'monthyear' => $monthyear];
+    }
+
+    public static function hapusTutupJurnal(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $monthyear = createCarbon($request->input('monthyear'))->startOfDay()->format('Y-m-d');
+
+
+            $keyMonth = createCarbon($monthyear)->addMonth()->format('Y-m-d 00:00:00');
+            $journalKeys = JournalKey::where('key_at', '>', $keyMonth)->count();
+            if ($journalKeys > 0) {
+                return [
+                    'status' => 0,
+                    'msg' => 'penutup ' . $monthyear . ' terkunci oleh penutup bulan berikutnya',
+                    'monthyear' => $monthyear
+                ];
+            }
+            $thejournalkey = JournalKey::where('key_at', $keyMonth)->first();
+            $thejournalkey?->delete();
+
+            $tag = 'closing ' . $monthyear;
+            $journal = Journal::where('tag', $tag)->first();
+            if (!$journal) {
+                return ['status' => 0, 'msg' => 'tidak ditemukan jurnal penutupan ' . $monthyear, 'monthyear' => $monthyear];
+            }
+
+            $journals = Journal::where('tag', $tag)->delete();
+            DB::commit();
+            return ['status' => 1, 'msg' => 'success', 'monthyear' => $monthyear];
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return ['status' => 0, 'msg' => $e->getMessage(), 'monthyear' => $monthyear];
+        }
     }
 
     public function cariProblemKartu()

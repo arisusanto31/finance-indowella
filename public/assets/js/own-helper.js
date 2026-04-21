@@ -507,7 +507,7 @@ function swalConfirmAndSubmit({ url, data, aktif_konfirm = true, onSuccess = nul
     }
 }
 
-function swalDelete({ url, elem = null, onSuccess = null, successText = "Berhasil!", confirmText = "Dihapus", cancelText = "Cancel" }) {
+function swalDelete({ url, elem = null, onSuccess = null, onError=null, successText = "Berhasil!", confirmText = "Dihapus", cancelText = "Cancel" }) {
     console.log('trying delete on url ' + url);
     Swal.fire({
         title: "Apakah kamu yakin?",
@@ -541,7 +541,8 @@ function swalDelete({ url, elem = null, onSuccess = null, successText = "Berhasi
                         if (typeof onSuccess === "function") onSuccess(res);
                     });
                 } else {
-                    return Promise.reject(res.msg || "Gagal menyimpan data");
+                  if(typeof onError === "function") onError(res.msg || "Gagal menghapus data");
+                    return Promise.reject(res.msg || "Gagal menghapus data");
                 }
             }).catch(err => {
                 Swal.showValidationMessage(err || "Terjadi kesalahan!");

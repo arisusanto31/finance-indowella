@@ -120,6 +120,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::get('get-import-data', [JournalController::class, 'getImportData'])->name('get-import-data');
         Route::post('import-data', [JournalController::class, 'importData'])->name('import-data');
         Route::post('tutup-jurnal', [JournalController::class, 'tutupJurnal']);
+        Route::post('hapus-tutup-jurnal', [JournalController::class, 'hapusTutupJurnal']);
     });
 
     Route::prefix('daftar')->group(function () {

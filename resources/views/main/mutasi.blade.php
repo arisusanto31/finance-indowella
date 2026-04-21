@@ -307,7 +307,7 @@
                                 $('#keterangan-closing').html('Tidak ada jurnal penutup di bulan ini');
                                 $('#btn-closing').prop('disabled', false);
                             } else {
-                                $('#keterangan-closing').html('sudah ada jurnal penutup  bulan ini di ' + res.msg);
+                                $('#keterangan-closing').html('sudah ada jurnal penutup  bulan ini di ' + res.msg+ ` <button class="btn btn-sm btn-danger" onclick="hapusTutupJurnal('${res.monthyear}')"> <i class="fas fa-trash"></i> </button>`);
                                 $('#btn-closing').prop('disabled', true);
                             }
                         } else {
@@ -320,6 +320,24 @@
                 });
             }
 
+
+            function hapusTutupJurnal(monthyear){
+                swalConfirmAndSubmit({
+                    url: '{{ url("admin/jurnal/hapus-tutup-jurnal") }}',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        monthyear: monthyear
+                    },
+                    onSuccess: (res) => {
+                        if (res.status == 1) {
+
+                        } else {
+
+                        }
+                    }
+                });
+
+            }
             function submitClosingJournal() {
                 swalConfirmAndSubmit({
                     url: '{{ url("admin/jurnal/tutup-jurnal") }}',
@@ -686,6 +704,9 @@
                             successText: "Delete berhasil!",
                             onSuccess: (res) => {
                                 getListMutasiJurnal();
+                            },onError: (err) => {
+                                console.log('masuk error sini padahal');
+                                swalInfo('error', err, 'error');
                             }
                         });
                     }
@@ -703,6 +724,7 @@
                                 resolve(res);
                             } else {
                                 reject(res.msg);
+                                Swal.fire('opps', res.msg, 'error');
                             }
                         },
                         error: function(err) {
