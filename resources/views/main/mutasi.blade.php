@@ -733,12 +733,78 @@
 
             setTimeout(getTaskImport, 100);
 
-            function exportData() {
-                month = $('#month-export').val();
-                year = $('#year-export').val();
+            // function exportData() {
+            //     month = $('#month-export').val();
+            //     year = $('#year-export').val();
+            //     $('#btn-export').prop('disabled', true).html('processing...');
+            //     url = '{{ url("admin/export-data") }}?month=' + month + '&year=' + year;
+            //     // window.location.href = url;
+            //     $.ajax({
+            //         url:url,
+            //         method:'get',
+            //         success:function(res){
+            //            Swal.fire('success', 'export data berhasil, silahkan cek email anda', 'success');
+            //               $('#btn-export').prop('disabled', false).html('export data');
+            //         },error:function(err){
+            //             Swal.fire('opps', 'something error', 'error');
+            //               $('#btn-export').prop('disabled', false).html('export data');
+            //         }
+            //     });
+            // }
 
-                url = '{{ url("admin/export-data") }}?month=' + month + '&year=' + year;
-                window.location.href = url;
+            function exportData() {
+                let month = $('#month-export').val();
+                let year = $('#year-export').val();
+
+                $('#btn-export')
+                    .prop('disabled', true)
+                    .html('processing...');
+
+                let url = '{{ url("admin/export-data") }}?month=' + month + '&year=' + year;
+
+                $.ajax({
+                    url: url,
+                    method: 'GET',
+                    xhrFields: {
+                        responseType: 'blob'
+                    },
+
+                    success: function (data, status, xhr) {
+
+                        // ambil nama file dari header jika ada
+                        let filename = "export.xlsx";
+
+                        let disposition = xhr.getResponseHeader('Content-Disposition');
+                        if (disposition && disposition.indexOf('filename=') !== -1) {
+                            filename = disposition.split('filename=')[1].replace(/"/g, '');
+                        }
+
+                        // bikin link download
+                        let link = document.createElement('a');
+                        let blob = new Blob([data]);
+                        let downloadUrl = window.URL.createObjectURL(blob);
+
+                        link.href = downloadUrl;
+                        link.download = filename;
+                        document.body.appendChild(link);
+                        link.click();
+                        link.remove();
+
+                        window.URL.revokeObjectURL(downloadUrl);
+
+                        Swal.fire('Success', 'File berhasil didownload', 'success');
+                    },
+
+                    error: function () {
+                        Swal.fire('Oops', 'Something error', 'error');
+                    },
+
+                    complete: function () {
+                        $('#btn-export')
+                            .prop('disabled', false)
+                            .html('export data');
+                    }
+                });
             }
 
             function trySearch() {
