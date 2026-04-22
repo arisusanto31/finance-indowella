@@ -18,7 +18,7 @@ use Illuminate\Support\Str;
 
 class Journal extends Model
 {
-    use HasFactory,HasModelDetailKartuInvoice;
+    use HasFactory, HasModelDetailKartuInvoice;
 
     protected $table = "journals";
 
@@ -56,6 +56,19 @@ class Journal extends Model
     protected static function booted()
     {
 
+        static::creating(function ($unit) {
+            $date = createCarbon($unit->created_at);
+
+            $startMonth = $date->copy()->startOfMonth()->addMinutes(2);
+            $endMonth   = $date->copy()->endOfMonth()->subMinutes(2);
+
+            if (
+                empty($unit->tag) &&
+                ($date <= $startMonth || $date >= $endMonth)
+            ) {
+                throw new \Exception('Maaf, tidak bisa memasukkan jurnal pada tanggal kritis.');
+            }
+        });
         static::addGlobalScope('journal', function ($query) {
             $from = $query->getQuery()->from ?? 'journals'; // untuk dukung alias `j` kalau pakai from('journals as j')
             if (Str::contains($from, ' as ')) {
@@ -76,7 +89,6 @@ class Journal extends Model
     public static function createOrUpdate(Request $request)
     {
         $id = $request->input('id');
-
         try {
             $journal = $id ? Journal::find($id) : new Journal;
             $journal->chart_account_id = $request->input('chart_account_id');
@@ -123,6 +135,7 @@ class Journal extends Model
         $debet = $request->input('amount_debet');
         $kredit = $request->input('amount_kredit');
         $codeGroup = $request->input('code_group');
+        $lawanCodeGroup = $request->input('lawan_code_group');
         $isBackDate = $request->input('is_backdate');
         $tokoID = $request->input('toko_id');
         $tag = $request->input('tag');
@@ -169,7 +182,7 @@ class Journal extends Model
                 // info('counter:' . $counter);
                 $finalIndexDate = $indexDate . sprintf("%02d", ($counter + 1));
                 $lastJournal = Journal::where('chart_account_id', $coaID)->where('index_date', '<', $finalIndexDate)->orderBy('index_date', 'desc')->first();
-                info('get final index date for code group'.$request->input('code_group').': ' . $finalIndexDate);
+                info('get final index date for code group' . $request->input('code_group') . ': ' . $finalIndexDate);
                 $journal = new Journal;
                 $chartAccount = ChartAccount::find($coaID);
                 $journal->index_date = $finalIndexDate;
@@ -177,6 +190,7 @@ class Journal extends Model
                 $journal->chart_account_id = $coaID;
                 $journal->reference_model = $chartAccount->reference_model;
                 $journal->journal_number = $journal_number;
+                $journal->lawan_code_group = $lawanCodeGroup;
                 $journal->code_group = $request->input('code_group');
                 $journal->description = $request->input('description');
                 $journal->amount_debet = $debet > 0 ? $debet : 0;
@@ -259,7 +273,7 @@ class Journal extends Model
     public function verifyJournal()
     {
         $this->refresh();
-        if($this->reference_model==null){
+        if ($this->reference_model == null) {
             $this->reference_model = $this->chartAccount->reference_model;
             $this->save();
         }
@@ -272,15 +286,13 @@ class Journal extends Model
                 if (abs(collect($ks)->sum('mutasi_rupiah_total')) == abs($this->amount_debet - $this->amount_kredit)) {
                     $this->verified_by = 1;
                 }
-            }
-            else if ($this->reference_model == 'App\Models\KartuBDP') {
+            } else if ($this->reference_model == 'App\Models\KartuBDP') {
                 $ks = KartuBDP::where('journal_id', $this->id)->get();
                 info(abs(collect($ks)->sum('mutasi_rupiah_total')) . '==' . abs($this->amount_debet - $this->amount_kredit));
                 if (abs(collect($ks)->sum('mutasi_rupiah_total')) == abs($this->amount_debet - $this->amount_kredit)) {
                     $this->verified_by = 1;
                 }
-            }
-            else if ($this->reference_model == 'App\Models\KartuBahanJadi') {
+            } else if ($this->reference_model == 'App\Models\KartuBahanJadi') {
                 $ks = KartuBahanJadi::where('journal_id', $this->id)->get();
                 info(abs(collect($ks)->sum('mutasi_rupiah_total')) . '==' . abs($this->amount_debet - $this->amount_kredit));
                 if (abs(collect($ks)->sum('mutasi_rupiah_total')) == abs($this->amount_debet - $this->amount_kredit)) {
@@ -327,8 +339,7 @@ class Journal extends Model
                 foreach ($ks as $k) {
                     $k->createDetailKartuInvoice();
                 }
-            }
-            else if($this->reference_model == 'App\Models\KartuInTransit') {
+            } else if ($this->reference_model == 'App\Models\KartuInTransit') {
                 $ks = KartuInTransit::where('journal_id', $this->id)->get();
                 info(abs(collect($ks)->sum('mutasi_rupiah_total')) . '==' . abs($this->amount_debet - $this->amount_kredit));
                 if (abs(collect($ks)->sum('mutasi_rupiah_total')) == abs($this->amount_debet - $this->amount_kredit)) {
@@ -411,7 +422,7 @@ class Journal extends Model
         if ($search) {
 
             $primaryCode = self::getPrimaryCode($search);
-            $q->where('journals.code_group', 'like', '%' . $primaryCode . '%');
+            $q->where('journals.code_group', 'like',  $primaryCode . '%');
         }
     }
 

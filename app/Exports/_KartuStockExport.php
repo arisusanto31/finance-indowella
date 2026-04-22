@@ -19,10 +19,11 @@ class _KartuStockExport implements FromCollection, WithTitle, WithEvents, Should
      * @return \Illuminate\Support\Collection
      */
 
-    protected $data, $kotakRange, $headings;
+    protected $data, $kotakRange, $headings, $mergeFooter;
 
     public function __construct($data)
     {
+        $this->mergeFooter = [];
         $this->data = $data;
         $this->headings = [
             'No',
@@ -48,9 +49,13 @@ class _KartuStockExport implements FromCollection, WithTitle, WithEvents, Should
         //
         $fixData = [];
         $fixData[] = $this->headings;
-        $fixData[] = ["", "", "","", "qty", "rp/unit", "total", "qty", "rp/unit", "total", "qty", "rp/unit", "total", "qty", "rp/unit", "total"];
+        $fixData[] = ["", "", "", "", "qty", "rp/unit", "total", "qty", "rp/unit", "total", "qty", "rp/unit", "total", "qty", "rp/unit", "total"];
         $baris = 2;
-        $this->kotakRange = 'A1:P' . (count($this->data['msg']) + $baris);
+        $this->kotakRange = 'A1:P' . (count($this->data['msg']) + $baris + 1);
+        $totalSaldoAwal = 0;
+        $totalMasuk = 0;
+        $totalKeluar = 0;
+        $totalSaldoAkhir = 0;
         foreach ($this->data['msg'] as $i => $item) {
             $baris++;
             $mutasiMasuk = data_get($this->data, 'mutasi_masuk.' . $item->id . '.qty', 0);
@@ -59,6 +64,10 @@ class _KartuStockExport implements FromCollection, WithTitle, WithEvents, Should
             $mutasiKeluar = data_get($this->data, 'mutasi_keluar.' . $item->id . '.qty', 0);
             $rupiahKeluar = data_get($this->data, 'mutasi_keluar.' . $item->id . '.total', 0);
             $hargaKeluar = $mutasiKeluar > 0 ? $rupiahKeluar / $mutasiKeluar : 0;
+            $totalSaldoAwal += $item['awal_rupiah'];
+            $totalMasuk += $rupiahMasuk;
+            $totalKeluar += $rupiahKeluar;
+            $totalSaldoAkhir += $item['akhir_rupiah'];
             $fixData[] = [
                 $i + 1,
                 $item->id,
@@ -79,6 +88,35 @@ class _KartuStockExport implements FromCollection, WithTitle, WithEvents, Should
                 format_price($item['akhir_rupiah']),
             ];
         }
+
+        $fixData[] = [
+            "Total",
+            "",
+            "",
+            "",
+            
+            format_price($totalSaldoAwal),
+            "",
+            "",
+
+            format_price($totalMasuk),
+            "",
+            "",
+
+            format_price($totalKeluar),
+            "",
+            "",
+
+            format_price($totalSaldoAkhir),
+            "",
+            "",
+        ];
+        $baris++;
+        $this->mergeFooter[] = ['start' => 'A' . $baris, 'end' => 'D' . $baris];
+        $this->mergeFooter[] = ['start' => 'E' . $baris, 'end' => 'G' . $baris];
+        $this->mergeFooter[] = ['start' => 'H' . $baris, 'end' => 'J' . $baris];
+        $this->mergeFooter[] = ['start' => 'K' . $baris, 'end' => 'M' . $baris];
+        $this->mergeFooter[] = ['start' => 'N' . $baris, 'end' => 'P' . $baris];
 
         return collect($fixData);
     }
@@ -118,6 +156,18 @@ class _KartuStockExport implements FromCollection, WithTitle, WithEvents, Should
                 $sheet->getStyle('A1:P2')->getAlignment()->setHorizontal('center');
                 $sheet->getStyle('A1:P2')->getAlignment()->setVertical('center');
                 $sheet->getStyle('E3:P' . $akhirRow)->getAlignment()->setHorizontal('right');
+
+                foreach ($this->mergeFooter as  $row => $m) {
+                    if ($row == 0) {
+                        $sheet->getStyle($m['start'] . ':' . $m['end'])->getAlignment()->setHorizontal('center');
+                    } else {
+                        $sheet->getStyle($m['start'] . ':' . $m['end'])->getAlignment()->setHorizontal('right');
+                    }
+                    $sheet->mergeCells($m['start'] . ':' . $m['end']);
+                    $sheet->getStyle($m['start'] . ':' . $m['end'])->getFont()->setBold(true);
+
+                    $sheet->getStyle($m['start'] . ':' . $m['end'])->getAlignment()->setVertical('center');
+                }
             },
         ];
     }

@@ -133,7 +133,26 @@ class JournalController extends Controller
         $countJournal = Journal::searchNote($search)->searchCOA($coa)->searchNumber($number)->searchNameCOA($nameCOA)->where('index_date', '>', $startIndex)->sortindex()->where('index_date', '<', $finishIndex)->select('journal_number')->distinct()->get()->count();
         $maxPage = ceil($countJournal / $perPage);
         $journalNumbers = collect($paginateJournalNumber->items())->pluck('journal_number')->all();
-        $journal = Journal::whereIn('journal_number', $journalNumbers)->sortIndex()->get()->groupBy('journal_number');
+        $aliasChartAccount = ChartAccount::aktif()->withAlias()->pluck('alias_name', 'code_group')->all();
+        $journal = Journal::whereIn('journal_number', $journalNumbers)->sortIndex()->get()->groupBy('journal_number')->map(function ($vals) use ($aliasChartAccount) {
+            return collect($vals)->groupBy('code_group')->map(function ($v) use ($aliasChartAccount) {
+                $data = collect($v)->first();
+                if (collect($v)->count() > 1) {
+                    $amountDebet = collect($v)->sum('amount_debet');
+                    $amountKredit = collect($v)->sum('amount_kredit');
+                    $selisih = $amountDebet - $amountKredit;
+                    if ($selisih > 0) {
+                        $data->amount_debet = $selisih;
+                        $data->amount_kredit = 0;
+                    } else if ($selisih <= 0) {
+                        $data->amount_kredit = abs($selisih);
+                        $data->amount_debet = 0;
+                    }
+                    $data->description = isset($aliasChartAccount[$data->code_group]) ? 'SUM ' . $aliasChartAccount[$data->code_group] : '';
+                }
+                return $data;
+            })->values()->sortBy('amount_kredit')->values()->all();
+        });
         $chartAccount = ChartAccount::aktif()->pluck('name', 'code_group');
         return [
             'status' => 1,
@@ -154,7 +173,7 @@ class JournalController extends Controller
             //breati ga ada permintaan date, kita cari di month dan year ya
             $month = getInput('month') ? toDigit(getInput('month'), 2) : Date('m');
             $year = getInput('year') ? getInput('year') : Date('Y');
-            $date = createCarbon($year . '-' . $month . '-01')->format('Y-m-t 23:59:59');
+            $date = createCarbon($year . '-' . $month . '-01')->format('Y-m-t 23:58:59');
         }
         $labarugi = ChartAccount::getRincianLabaBulanAt($date);
         $data = [
@@ -264,8 +283,8 @@ class JournalController extends Controller
         $year = getInput('year');
 
         $indexDate = createCarbon($year . '-' . $month . '-01')->format('ymdHis00');
-        $coas = ChartAccount::aktif()->child()->where('code_group', 'like', Journal::getPrimaryCode($code) . '%')->pluck('code_group')->all();
 
+        $coas = ChartAccount::aktif()->child()->where('code_group', 'like', Journal::getPrimaryCode($code) . '%')->pluck('code_group')->all();
         $subData = Journal::select(DB::raw('max(index_date) as maxindex'), 'code_group')->where('index_date', '<', $indexDate)->whereIn('code_group', $coas)
             ->groupBy('code_group');
         $lastSaldoJournal = Journal::joinSub($subData, 'sub_journals', function ($q) {
@@ -319,7 +338,7 @@ class JournalController extends Controller
     {
         $indexAwal = getInput('index_date') ? getInput('index_date') : 0;
         $indexAwal = intval(createCarbon($indexAwal)->format('ymdHis00'));
-        $indexAkhir = $indexAwal + 10000000000;
+        $indexAkhir = $indexAwal + 30000000000; //cari 3 bulan kedepan
         try {
             $journals = Journal::whereBetween('index_date', [$indexAwal, $indexAkhir])->select('index_date', 'journal_number', 'description', 'amount_kredit', 'amount_debet', 'code_group', 'amount_saldo', 'id')->orderBy('index_date', 'asc')->get();
             $sub = Journal::select(DB::raw('max(index_date) as max_index_date'), 'code_group')->where('index_date', '<', $indexAwal)->whereNotNull('amount_saldo')->groupBy('code_group');
@@ -1299,7 +1318,17 @@ class JournalController extends Controller
                 if (bccomp($saldo, '0', 2) > 0) {
                     $debets[] = [
                         'code_group' => $ca->code_group,
+                        'lawan_code_group' => 302200,
                         'description' => 'penutupan ' . $ca->name . ' ' . $originalYear . '/' . $originalMonth,
+                        'amount' => $saldo,
+                        'reference_id' => null,
+                        'reference_type' => null,
+                        'tag' => $tag
+                    ];
+                    $kredits[] = [
+                        'code_group' => 302200,
+                        'lawan_code_group' => $ca->code_group,
+                        'description' => 'Ikhtisar laba rugi (' . $ca->name . ')' . $originalYear . '/' . $originalMonth,
                         'amount' => $saldo,
                         'reference_id' => null,
                         'reference_type' => null,
@@ -1308,8 +1337,18 @@ class JournalController extends Controller
                 } elseif (bccomp($saldo, '0', 2) < 0) {
                     $kredits[] = [
                         'code_group' => $ca->code_group,
+                        'lawan_code_group' => 302200,
                         'description' => 'penutupan ' . $ca->name . ' ' . $originalYear . '/' . $originalMonth,
-                        'amount' => bcmul($saldo, '-1', 2),
+                        'amount' => round(abs($saldo), 2),
+                        'reference_id' => null,
+                        'reference_type' => null,
+                        'tag' => $tag
+                    ];
+                    $debets[] = [
+                        'code_group' => 302200,
+                        'lawan_code_group' => $ca->code_group,
+                        'description' => 'Ikhtisar laba rugi (' . $ca->name . ')' . $originalYear . '/' . $originalMonth,
+                        'amount' => round(abs($saldo), 2),
                         'reference_id' => null,
                         'reference_type' => null,
                         'tag' => $tag
@@ -1319,30 +1358,29 @@ class JournalController extends Controller
 
             $selisih = $totalSaldo;
 
-            if (bccomp($selisih, '0', 2) > 0) {
-                $kredits[] = [
-                    'code_group' => 302200,
-                    'description' => 'Ikhtisar laba rugi' . $originalYear . '/' . $originalMonth,
-                    'amount' => $selisih,
-                    'reference_id' => null,
-                    'reference_type' => null,
-                    'tag' => $tag
-                ];
-            } elseif (bccomp($selisih, '0', 2) < 0) {
-                $debets[] = [
-                    'code_group' => 302200,
-                    'description' => 'Ikhtisar laba rugi' . $originalYear . '/' . $originalMonth,
-                    'amount' => bcmul($selisih, '-1', 2),
-                    'reference_id' => null,
-                    'reference_type' => null,
-                    'tag' => $tag
-                ];
-            }
+            // if (bccomp($selisih, '0', 2) > 0) {
+            //     $kredits[] = [
+            //         'code_group' => 302200,
+            //         'description' => 'Ikhtisar laba rugi' . $originalYear . '/' . $originalMonth,
+            //         'amount' => $selisih,
+            //         'reference_id' => null,
+            //         'reference_type' => null,
+            //         'tag' => $tag
+            //     ];
+            // } elseif (bccomp($selisih, '0', 2) < 0) {
+            //     $debets[] = [
+            //         'code_group' => 302200,
+            //         'description' => 'Ikhtisar laba rugi' . $originalYear . '/' . $originalMonth,
+            //         'amount' => bcmul($selisih, '-1', 2),
+            //         'reference_id' => null,
+            //         'reference_type' => null,
+            //         'tag' => $tag
+            //     ];
+            // }
 
             $allInput = [];
             $allOutput = [];
-            $tanggalJurnal = createCarbon($monthyear)->addMonth()->format('Y-m-d 00:00:00');
-
+            $tanggalJurnal = createCarbon($monthyear)->endOfMonth()->format('Y-m-d H:i:s');
 
             if ($aksi == 1) {
                 if (count($debets) > 0 && count($kredits) > 0) {
@@ -1466,7 +1504,19 @@ class JournalController extends Controller
                 return ['status' => 0, 'msg' => 'tidak ditemukan jurnal penutupan ' . $monthyear, 'monthyear' => $monthyear];
             }
 
-            $journals = Journal::where('tag', $tag)->delete();
+            $journals = Journal::where('tag', $tag)->get();
+            $lj = [];
+            foreach ($journals as $j) {
+                $lastJ = Journal::where('code_group', $j->code_group)->where('index_date', '<', $j->index_date)->orderBy('index_date', 'desc')->first();
+                if ($lastJ) {
+                    $lj[] = $lastJ;
+                }
+            }
+            $dk = DetailKartuInvoice::whereIn('journal_id', $journals->pluck('id')->all())->delete();
+            Journal::where('tag', $tag)->delete();
+            foreach ($lj as $j) {
+                $j->recalculateJournal();
+            }
             DB::commit();
             return ['status' => 1, 'msg' => 'success', 'monthyear' => $monthyear];
         } catch (\Throwable $e) {

@@ -17,11 +17,12 @@ class _PenjualanExport implements FromCollection, WithHeadings, WithTitle, WithE
      */
 
 
-    protected $data, $mergeKolom;
+    protected $data, $mergeKolom, $mergeFooter;
     public function __construct($data)
     {
         $this->data = $data;
         $this->mergeKolom = [];
+        $this->mergeFooter = [];
     }
 
     public function collection()
@@ -71,6 +72,25 @@ class _PenjualanExport implements FromCollection, WithHeadings, WithTitle, WithE
                 }
             }
         }
+        $totalPenjualan = collect($this->data['msg'])->map(function ($detail) {
+            return collect($detail)->sum('total_price');
+        })->sum();
+        $fixData[] = [
+            "Total Penjualan",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            format_price($totalPenjualan)
+        ];
+        $this->mergeFooter[] = ['start' => 'A' . $baris, 'end' => 'G' . $baris];
+        $baris++;
 
         return collect($fixData);
     }
@@ -124,11 +144,18 @@ class _PenjualanExport implements FromCollection, WithHeadings, WithTitle, WithE
 
                 //menge Cell
                 foreach ($this->mergeKolom as $m) {
-                    $allKolomMerge = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'N'];
+                    $allKolomMerge = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'N', 'L'];
                     foreach ($allKolomMerge as $kolom) {
                         $rangeMerge = $kolom . $m['start'] . ':' . $kolom . $m['end'];
                         $sheet->mergeCells($rangeMerge);
                     }
+                }
+
+                foreach ($this->mergeFooter as $m) {
+                    $sheet->mergeCells($m['start'] . ':' . $m['end']);
+                    $sheet->getStyle($m['start'] . ':' . $m['end'])->getFont()->setBold(true);
+                    $sheet->getStyle($m['start'] . ':' . $m['end'])->getAlignment()->setHorizontal('center');
+                    $sheet->getStyle($m['start'] . ':' . $m['end'])->getAlignment()->setVertical('center');
                 }
             },
         ];

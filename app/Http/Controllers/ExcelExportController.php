@@ -55,9 +55,9 @@ class ExcelExportController extends Controller
         $data['msg'] = collect($data['msg'])->map(function ($item) use ($mutasi) {
             $item['mutasi_debet'] = 0;
             $item['mutasi_kredit'] = 0;
-            if (isset($mutasi['msg'][$item['id']])) {
-                $item['mutasi_debet'] = $mutasi['msg'][$item['id']]['total_debet'];
-                $item['mutasi_kredit'] = $mutasi['msg'][$item['id']]['total_kredit'];
+            if (isset($mutasi['msg'][$item['code_group']])) {
+                $item['mutasi_debet'] = $mutasi['msg'][$item['code_group']]['total_debet'];
+                $item['mutasi_kredit'] = $mutasi['msg'][$item['code_group']]['total_kredit'];
             }
             return $item;
         });
@@ -71,7 +71,7 @@ class ExcelExportController extends Controller
         $data = [];
         $totalPenjualan = 0;
         for ($i = $month; $i > 0; $i--) {
-            $date = createCarbon($year . '-' . ($i) . '-01')->addMonth();
+            $date = createCarbon($year . '-' . ($i) . '-01')->endOfMonth()->subMinutes(2)->format('Y-m-d H:i:s');
             $lr = ChartAccount::getRincianLabaBulanAt($date)->keyBy('code_group');
             $penjualan = collect($lr)->where('code_group', '<', 500000)->sum('saldo_akhir');
             $totalPenjualan += $penjualan;

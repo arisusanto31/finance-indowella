@@ -17,7 +17,7 @@ class _PembelianExport implements FromCollection, WithHeadings, WithTitle, WithE
      */
 
 
-    protected $data, $mergeKolom;
+    protected $data, $mergeKolom, $mergeFooter;
     public function __construct($data)
     {
         $this->data = $data;
@@ -75,6 +75,30 @@ class _PembelianExport implements FromCollection, WithHeadings, WithTitle, WithE
                 }
             }
         }
+
+        $totalPembelian = collect($this->data['msg'])->map(function ($detail) {
+            return collect($detail)->sum('total_price');
+        })->sum();
+        $fixData[] = [
+            "Total",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            format_price($totalPembelian)
+        ];
+
+
+        $this->mergeFooter[] = ['start' => 'A' . $baris, 'end' => 'I' . $baris];
+        $baris++;
 
         return collect($fixData);
     }
@@ -134,6 +158,12 @@ class _PembelianExport implements FromCollection, WithHeadings, WithTitle, WithE
                         $rangeMerge = $kolom . $m['start'] . ':' . $kolom . $m['end'];
                         $sheet->mergeCells($rangeMerge);
                     }
+                }
+                foreach ($this->mergeFooter as $m) {
+                    $sheet->mergeCells($m['start'] . ':' . $m['end']);
+                    $sheet->getStyle($m['start'] . ':' . $m['end'])->getFont()->setBold(true);
+                    $sheet->getStyle($m['start'] . ':' . $m['end'])->getAlignment()->setHorizontal('center');
+                    $sheet->getStyle($m['start'] . ':' . $m['end'])->getAlignment()->setVertical('center');
                 }
             },
         ];

@@ -615,40 +615,42 @@
                 $('#max-page').html('of ' + res.max_page);
                 Object.keys(res.msg).forEach(function eachJournalNumber(journalNumber, i) {
                     rowspan = res.msg[journalNumber].length;
-                    res.msg[journalNumber].forEach(function eachJournal(journal, j) {
+                    journals= res.msg[journalNumber];
+                    journals.forEach(function eachJournal(journal, j) {
                         tanggal = formatNormalDateTime(new Date(journal.created_at));
                         if (j == 0) {
                             html += `
-              <tr>
-                <td class="text-center" rowspan="${rowspan}">${i+1}</td>
-                <td rowspan="${rowspan}">${tanggal}</td>
-                <td rowspan="${rowspan}">${journal.journal_number} [${journal.id}]</td>
-                <td>${journal.code_group} - ${res.chart_accounts[journal.code_group]}</td>
-                <td>${journal.description}</td>
-                <td class="text-end">${formatRupiah(journal.amount_debet)}</td>
-                <td class="text-end">${formatRupiah(journal.amount_kredit)}</td>
-                <td> 
-                     ${journal.verified_by == 1 ? '<span class="bg-primary p-1 fs-7 rounded-1 colorwhite" ><i class="fas fa-check"></i> valid </span>' : '<span class="bg-warning fs-7 p-1 rounded-1 colorwhite"><i class="fas fa-times"></i> invalid</span>'}
-                     <button class="btn btn-secondary btn-sm" onclick="verifyJournal(${journal.id})" > <i class="fas fa-refresh"></i></button>
-                     <button class="btn btn-danger btn-sm" onclick="deleteJournal(${journal.id})" > <i class="fas fa-trash"></i></button>
-                </td>
-               
-               </tr>
-            `;
-                        } else {
-                            html += `
-              <tr>
-                <td>${journal.code_group} - ${res.chart_accounts[journal.code_group]}</td>
-                <td>${journal.description}</td>
-                <td class="text-end">${formatRupiah(journal.amount_debet)}</td>
-                <td class="text-end">${formatRupiah(journal.amount_kredit)}</td>
-                <td>
-                   ${journal.verified_by == 1 ? '<span class="bg-primary p-1 fs-7 rounded-1 colorwhite " ><i class="fas fa-check"></i> valid </span>' : '<span class="bg-warning fs-7 p-1 rounded-1 colorwhite"><i class="fas fa-times"></i> invalid</span>'}
-                   <button class="btn btn-secondary btn-sm" onclick="verifyJournal(${journal.id})" > <i class="fas fa-refresh"></i></button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteJournal(${journal.id})" > <i class="fas fa-trash"></i></button>
-                </td>
-              </tr>
-            `;
+                                    <tr>
+                                        <td class="text-center" rowspan="${rowspan}">${i+1}</td>
+                                        <td rowspan="${rowspan}">${tanggal}</td>
+                                        <td rowspan="${rowspan}">${journal.journal_number} [${journal.id}]</td>
+                                        <td>${journal.code_group} - ${res.chart_accounts[journal.code_group]}</td>
+                                        <td>${journal.description}</td>
+                                        <td class="text-end ${journal.amount_debet>0 ?'text-success':''}">${formatRupiah(journal.amount_debet)}</td>
+                                        <td class="text-end ${journal.amount_kredit>0 ?'text-danger':''}">${formatRupiah(journal.amount_kredit)}</td>
+                                        <td> 
+                                            ${journal.verified_by == 1 ? '<span class="bg-primary p-1 fs-7 rounded-1 colorwhite" ><i class="fas fa-check"></i> valid </span>' : '<span class="bg-warning fs-7 p-1 rounded-1 colorwhite"><i class="fas fa-times"></i> invalid</span>'}
+                                            <button class="btn btn-secondary btn-sm" onclick="verifyJournal(${journal.id})" > <i class="fas fa-refresh"></i></button>
+                                            <button class="btn btn-danger btn-sm" onclick="deleteJournal(${journal.id})" > <i class="fas fa-trash"></i></button>
+                                        </td>
+                                    
+                                    </tr>
+                                    `;
+                                                } else {
+                                                    html += `
+                                    <tr>
+                                        <td>${journal.code_group} - ${res.chart_accounts[journal.code_group]}</td>
+                                        <td>${journal.description}</td>
+                                         <td class="text-end ${journal.amount_debet>0 ?'text-success':''}">${formatRupiah(journal.amount_debet)}</td>
+                                        <td class="text-end ${journal.amount_kredit>0 ?'text-danger':''}">${formatRupiah(journal.amount_kredit)}</td>
+                                    
+                                        <td>
+                                        ${journal.verified_by == 1 ? '<span class="bg-primary p-1 fs-7 rounded-1 colorwhite " ><i class="fas fa-check"></i> valid </span>' : '<span class="bg-warning fs-7 p-1 rounded-1 colorwhite"><i class="fas fa-times"></i> invalid</span>'}
+                                        <button class="btn btn-secondary btn-sm" onclick="verifyJournal(${journal.id})" > <i class="fas fa-refresh"></i></button>
+                                            <button class="btn btn-danger btn-sm" onclick="deleteJournal(${journal.id})" > <i class="fas fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                    `;
                         }
                     });
                 });
