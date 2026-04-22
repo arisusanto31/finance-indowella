@@ -30,10 +30,11 @@ class InvoicePackController extends Controller
 
         return view('invoice.show', compact('invoice'));
     }
+   
+   
     public function showDetail($number)
     {
         $data = InvoicePack::where('invoice_number', $number)->first();
-
         $invdetails = $data->reference_model::with('stock')->where('invoice_pack_number', $number)->get();
         $data['details'] = $invdetails;
         $data['kartus'] = $data->getAllKartu();
