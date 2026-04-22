@@ -30,7 +30,7 @@ class KartuKasController extends Controller
         $year = getInput('year') ?? Date('Y');
 
         $indexDate = createCarbon($year . '-' . $month . '-01')->format('ymdHis00');
-        $coas = ChartAccount::aktif()->where('code_group', 'like', Journal::getPrimaryCode($kindCodeGroup) . '%')->pluck('code_group')->all();
+        $coas = ChartAccount::aktif()->child()->where('code_group', 'like', Journal::getPrimaryCode($kindCodeGroup) . '%')->pluck('code_group')->all();
 
         $subData = Journal::select(DB::raw('max(index_date) as maxindex'), 'code_group')->where('index_date', '<', $indexDate)->whereIn('code_group', $coas)
             ->groupBy('code_group');

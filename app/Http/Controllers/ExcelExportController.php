@@ -120,7 +120,7 @@ class ExcelExportController extends Controller
             ->orderBy('journals.index_date', 'asc')
             ->select('journals.*', 'lawan_code.name as lawan_code_name')
             ->get()->groupBy('code_group');
-        $chartAccount = ChartAccount::whereIn('chart_accounts.code_group', $coas)->withAlias()->orderBy('chart_accounts.code_group')->pluck('alias_name', 'code_group');
+        $chartAccount = ChartAccount::withAlias()->orderBy('chart_accounts.code_group')->pluck('alias_name', 'code_group');
         foreach ($coas as $coa) {
             if (!array_key_exists($coa, $journals->all())) {
                 $journals[$coa] = [];

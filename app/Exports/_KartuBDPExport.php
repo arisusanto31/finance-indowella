@@ -98,7 +98,7 @@ class _KartuBDPExport implements FromCollection, WithEvents, WithTitle, ShouldAu
                     $item['name'],
                     $item['unit_default'],
                     format_price($item['saldo_qty_awal'] / $item['konversi']),
-                    format_price($item['saldo_qty_awal'] > 0 ? ($item['saldo_rupiah_awal'] / $item['saldo_qty_awal']) : 0),
+                    format_price($item['saldo_qty_awal'] != 0 ? ($item['saldo_rupiah_awal'] / $item['saldo_qty_awal']) : 0),
                     format_price($item['saldo_rupiah_awal']),
                     format_price($mutasiMasuk / $item['konversi']),
                     format_price($hargaMasuk),
@@ -107,7 +107,7 @@ class _KartuBDPExport implements FromCollection, WithEvents, WithTitle, ShouldAu
                     format_price($hargaKeluar),
                     format_price($rupiahKeluar),
                     format_price($item['saldo_qty_akhir'] / $item['konversi']),
-                    format_price($item['saldo_qty_akhir'] > 0 ? ($item['saldo_rupiah_akhir'] / $item['saldo_qty_akhir']) : 0),
+                    format_price($item['saldo_qty_akhir'] != 0 ? ($item['saldo_rupiah_akhir'] / $item['saldo_qty_akhir']) : 0),
                     format_price($item['saldo_rupiah_akhir']),
                 ];
                 $baris++;
@@ -117,16 +117,16 @@ class _KartuBDPExport implements FromCollection, WithEvents, WithTitle, ShouldAu
             "",
             "",
             format_price($totalQtyAwal),
-            format_price($totalQtyAwal > 0 ? ($totalRupiahAwal / $totalQtyAwal) : 0),
+            format_price($totalQtyAwal != 0 ? ($totalRupiahAwal / $totalQtyAwal) : 0),
             format_price($totalRupiahAwal),
             format_price($totalQtyMasuk),
-            format_price($totalQtyMasuk > 0 ? ($totalRupiahMasuk / $totalQtyMasuk) : 0),
+            format_price($totalQtyMasuk != 0 ? ($totalRupiahMasuk / $totalQtyMasuk) : 0),
             format_price($totalRupiahMasuk),
             format_price($totalQtyKeluar),
-            format_price($totalQtyKeluar > 0 ? ($totalRupiahKeluar / $totalQtyKeluar) : 0),
+            format_price($totalQtyKeluar != 0 ? ($totalRupiahKeluar / $totalQtyKeluar) : 0),
             format_price($totalRupiahKeluar),
             format_price($totalQtyAkhir),
-            format_price($totalQtyAkhir > 0 ? ($totalRupiahAkhir / $totalQtyAkhir) : 0),
+            format_price($totalQtyAkhir != 0 ? ($totalRupiahAkhir / $totalQtyAkhir) : 0),
             format_price($totalRupiahAkhir),
             ];
             $baris++;
