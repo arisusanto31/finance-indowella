@@ -96,13 +96,13 @@ class ExcelExportController extends Controller
 
     public static function getBukuKas($month, $year)
     {
-        $coas = ChartAccount::aktif()->child()->where('code_group', '<', 120000)->pluck('code_group')->all();
+        $coas = ChartAccount::aktif()->child()->where('code_group', '<', 120000)->orderBy('code_group')->pluck('code_group')->all();
         return self::_getMutationJournal($month, $year, $coas);
     }
 
     public static function getBukuMemo($month, $year)
     {
-        $coas = ChartAccount::aktif()->child()->where('code_group', '>=', 120000)->pluck('code_group')->all();
+        $coas = ChartAccount::aktif()->child()->where('code_group', '>=', 120000)->orderBy('code_group')->pluck('code_group')->all();
         return self::_getMutationJournal($month, $year, $coas);
     }
 
@@ -126,9 +126,10 @@ class ExcelExportController extends Controller
                 $journals[$coa] = [];
             }
         }
+        
         $kotakBaris = [];
         $baris = 1;
-        foreach ($chartAccount as $code => $name) {
+        foreach ($coas as $code ) {
             $baris++;
             $start = $baris;
             if (isset($journals[$code]))
@@ -139,11 +140,12 @@ class ExcelExportController extends Controller
                 'start' => $start,
                 'end' => $end
             ];
-            $baris = $end + 2;
+            $baris = $end + 3;
         }
         return [
             'status' => 1,
             'msg' => $journals,
+            'coas'=>$coas,
             'chart_accounts' => $chartAccount,
             'month' => $month,
             'year' => $year,
