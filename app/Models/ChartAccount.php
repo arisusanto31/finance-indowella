@@ -189,7 +189,7 @@ class ChartAccount extends Model
             if ($level > 20) break;
         }
 
-        if (count(value: $this->childs) > 0) {
+        if (count($this->childs) > 0) {
             $this->is_child = false;
         } else {
             $this->is_child = true;
@@ -462,12 +462,15 @@ class ChartAccount extends Model
                     $idchilds = ChartAccountAlias::where('code_group', 'like', $code . '%')->pluck('code_group');
                     $val->saldo_akhir = round($saldo_akhir->whereIn('code_group', $idchilds)->sum('saldo_akhir'), 2);
                 }
+                
                 return $val;
             })->keyBy('code_group');
 
-
+        $isChild= ChartAccount::select('level','is_child','code_group')->get()->keyBy('code_group')->all();
         $fixdatas = ChartAccountAlias::where('is_deleted', false)->select('name', 'account_type', 'id', 'code_group', 'level')->orderBy('code_group')->get()
-            ->map(function ($val) use ($saldoAkhir, $saldoAwal) {
+            ->map(function ($val) use ($saldoAkhir, $saldoAwal, $isChild) {
+                $val['is_child']=array_key_exists($val->code_group, $isChild) ? $isChild[$val->code_group]->is_child : 1;
+                $val['level']=array_key_exists($val->code_group, $isChild) ? $isChild[$val->code_group]->level : 1;
                 $val['saldo_awal'] = array_key_exists($val->code_group, $saldoAwal->all()) ? money($saldoAwal[$val->code_group]->saldo_akhir) : 0;
                 $val['saldo_akhir'] = array_key_exists($val->code_group, $saldoAkhir->all()) ? money($saldoAkhir[$val->code_group]->saldo_akhir) : 0;
                 return $val;

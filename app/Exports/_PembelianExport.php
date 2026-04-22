@@ -4,13 +4,14 @@ namespace App\Exports;
 
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 
-class _PembelianExport implements FromCollection, WithHeadings, WithTitle, WithEvents, ShouldAutoSize
+class _PembelianExport implements FromCollection, WithHeadings, WithTitle, WithEvents, ShouldAutoSize,WithColumnFormatting
 {
     /**
      * @return \Illuminate\Support\Collection
@@ -24,6 +25,15 @@ class _PembelianExport implements FromCollection, WithHeadings, WithTitle, WithE
         $this->mergeKolom = [];
     }
 
+
+    public function columnFormats(): array
+    {
+        return [
+            'L' => '#,##0.00',
+            'M' => '#,##0.00',
+            'N' => '#,##0.00',
+        ];
+    }
     public function collection()
     {
         //
@@ -51,9 +61,9 @@ class _PembelianExport implements FromCollection, WithHeadings, WithTitle, WithE
                         $d->custom_stock_name,
                         $d->quantity,
                         $d->unit,
-                        format_price($d->price),
-                        format_price($d->total_price),
-                        format_price(collect($detail)->sum('total_price'))
+                        $d->price,
+                        $d->total_price,
+                        collect($detail)->sum('total_price')
                     ];
                 } else {
                     $fixData[] = [
@@ -68,8 +78,8 @@ class _PembelianExport implements FromCollection, WithHeadings, WithTitle, WithE
                         $d->custom_stock_name,
                         $d->quantity,
                         $d->unit,
-                        format_price($d->price),
-                        format_price($d->total_price),
+                        $d->price,
+                        $d->total_price,
                         ""
                     ];
                 }
@@ -93,7 +103,7 @@ class _PembelianExport implements FromCollection, WithHeadings, WithTitle, WithE
             "",
             "",
             "",
-            format_price($totalPembelian)
+            $totalPembelian
         ];
 
 

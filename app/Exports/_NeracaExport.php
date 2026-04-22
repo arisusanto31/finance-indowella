@@ -5,9 +5,10 @@ namespace App\Exports;
 use Maatwebsite\Excel\Concerns\FromView;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use Maatwebsite\Excel\Concerns\WithTitle;
 
-class _NeracaExport implements FromView,WithTitle,ShouldAutoSize
+class _NeracaExport implements FromView,WithTitle,ShouldAutoSize,WithColumnFormatting
 {
 
     protected $data;
@@ -34,6 +35,12 @@ class _NeracaExport implements FromView,WithTitle,ShouldAutoSize
         ]);
     }
 
+     public function columnFormats(): array
+    {
+        return [
+            'B' => '#,##0.00',
+        ];
+    }
     public function title(): string
     {
         return 'Neraca '.$this->data['year'].'-'.$this->data['month'];

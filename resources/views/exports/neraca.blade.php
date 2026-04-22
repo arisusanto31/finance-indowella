@@ -5,12 +5,12 @@
     @foreach($aset as $item)
         <tr>
             <td>{{ $item['name'] }}</td>
-            <td style="text-align:right;">{{ number_format($item['saldo'], 2, ',', '.') }}</td>
+            <td style="text-align:right;">{{ $item['saldo'] }}</td>
         </tr>
     @endforeach
     <tr>
         <td><strong>Total ASET</strong></td>
-        <td style="text-align:right;"><strong>{{ number_format($totalAset, 2, ',', '.') }}</strong></td>
+        <td style="text-align:right;"><strong>{{ $totalAset }}</strong></td>
     </tr>
 
     <tr><td colspan="2"><br></td></tr>
@@ -21,7 +21,7 @@
     @foreach($kewajiban as $item)
         <tr>
             <td>{{ $item['name'] }}</td>
-            <td style="text-align:right;">{{ number_format($item['saldo'], 2, ',', '.') }}</td>
+            <td style="text-align:right;">{{ $item['saldo'] }}</td>
         </tr>
     @endforeach
 
@@ -30,18 +30,18 @@
     </tr>
     <tr>
         <td>Laba Bulan Berjalan</td>
-        <td style="text-align:right;">{{ number_format($laba_bulan, 2, ',', '.') }}</td>
+        <td style="text-align:right;">{{ $laba_bulan }}</td>
     </tr>
     @foreach($ekuitas as $item)
         <tr>
             <td>{{ $item['name'] }}</td>
-            <td style="text-align:right;">{{ number_format($item['saldo'], 2, ',', '.') }}</td>
+            <td style="text-align:right;">{{ $item['saldo'] }}</td>
         </tr>
     @endforeach
 
     <tr>
         <td><strong>Total KEWAJIBAN + EKUITAS</strong></td>
-        <td style="text-align:right;"><strong>{{ number_format($totalPassiva, 2, ',', '.') }}</strong></td>
+        <td style="text-align:right;"><strong>{{ $totalPassiva }}</strong></td>
     </tr>
 
     <tr><td colspan="2"><br></td></tr>

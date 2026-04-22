@@ -4,13 +4,14 @@ namespace App\Exports;
 
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 
-class _PenjualanExport implements FromCollection, WithHeadings, WithTitle, WithEvents, ShouldAutoSize
+class _PenjualanExport implements FromCollection, WithHeadings, WithTitle, WithEvents, ShouldAutoSize,WithColumnFormatting
 {
     /**
      * @return \Illuminate\Support\Collection
@@ -24,6 +25,16 @@ class _PenjualanExport implements FromCollection, WithHeadings, WithTitle, WithE
         $this->mergeKolom = [];
         $this->mergeFooter = [];
     }
+
+      public function columnFormats(): array
+    {
+        return [
+            'J' => '#,##0.00',
+            'K' => '#,##0.00',
+            'L' => '#,##0.00',
+        ];
+    }
+
 
     public function collection()
     {
@@ -50,9 +61,9 @@ class _PenjualanExport implements FromCollection, WithHeadings, WithTitle, WithE
                         $d->custom_stock_name,
                         $d->quantity,
                         $d->unit,
-                        format_price($d->price),
-                        format_price($d->total_price),
-                        format_price(collect($detail)->sum('total_price'))
+                        ($d->price),
+                        ($d->total_price),
+                        (collect($detail)->sum('total_price'))
                     ];
                 } else {
                     $fixData[] = [
@@ -65,8 +76,8 @@ class _PenjualanExport implements FromCollection, WithHeadings, WithTitle, WithE
                         $d->custom_stock_name,
                         $d->quantity,
                         $d->unit,
-                        format_price($d->price),
-                        format_price($d->total_price),
+                        ($d->price),
+                        ($d->total_price),
                         ""
                     ];
                 }
@@ -87,7 +98,7 @@ class _PenjualanExport implements FromCollection, WithHeadings, WithTitle, WithE
             "",
             "",
             "",
-            format_price($totalPenjualan)
+            $totalPenjualan
         ];
         $this->mergeFooter[] = ['start' => 'A' . $baris, 'end' => 'G' . $baris];
         $baris++;

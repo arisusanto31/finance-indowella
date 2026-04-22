@@ -23,6 +23,7 @@ class ChartAccountController extends Controller
                 //belum ada alias. langsug create kan
                 $ca->makeAlias();
             }
+            $ca->updateLevel();
         }
         return $view;
     }

@@ -4,6 +4,7 @@ namespace App\Exports;
 
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithTitle;
@@ -15,31 +16,58 @@ class _NeracaLajurExport implements
     WithHeadings,
     WithTitle,
     ShouldAutoSize,
-    WithEvents
+    WithEvents,
+    WithColumnFormatting
+
 {
     /**
      * @return \Illuminate\Support\Collection
      */
 
-    protected $data, $baris;
+    protected $data, $baris, $barisParent;
     public function __construct($jsdata)
     {
         $this->data = $jsdata;
+        $this->barisParent = [];
         $this->baris = count($this->data['msg']);
     }
     public function collection()
     {
         //
-        return collect($this->data['msg'])->map(function ($item) {
-            return [
-                $item['code_group'],
-                $item['name'],
-                format_price($item['saldo_awal']),
-                format_price($item['mutasi_debet']),
-                format_price($item['mutasi_kredit']),
-                format_price($item['saldo_akhir']),
-            ];
-        });
+        $baris = 1;
+        $fixData=[];
+        foreach( $this->data['msg'] as $item){
+            $baris++;
+            if ($item['is_child'] == 1) {
+                $fixData[] = [
+                    $item['code_group'],
+                    $item['name'],
+                    $item['saldo_awal'],
+                    $item['mutasi_debet'],
+                    $item['mutasi_kredit'],
+                    $item['saldo_akhir'],
+                ];
+            } else {
+                if($item['level']==0){
+                    //mbah e..
+                    
+                    $fixData[]=[""];
+                    $baris++;
+                }
+                $this->barisParent[] = $baris;
+                $fixData[] = [
+                    $item['code_group'],
+                    $item['name'],
+                    '-',
+                    '-',
+                    '-',
+                    '-',
+                ];
+            }
+        }
+
+
+        return collect($fixData);
     }
 
     public function headings(): array
@@ -51,6 +79,16 @@ class _NeracaLajurExport implements
             'Mutasi Debet',
             'Mutasi Kredit',
             'Saldo Akhir',
+        ];
+    }
+
+    public function columnFormats(): array
+    {
+        return [
+            'C' => '#,##0.00',
+            'D' => '#,##0.00',
+            'E' => '#,##0.00',
+            'F' => '#,##0.00',
         ];
     }
 
@@ -80,6 +118,10 @@ class _NeracaLajurExport implements
                 $sheet->getStyle('A1:F1')->getAlignment()->setHorizontal('center');
                 $sheet->getStyle('A1:F1')->getAlignment()->setVertical('center');
                 $sheet->getStyle('C2:F' . $this->baris)->getAlignment()->setHorizontal('right');
+
+                foreach($this->barisParent as $bp){
+                    $sheet->getStyle('A'.$bp.':F'.$bp)->getFont()->setBold(true);
+                }
             },
         ];
     }
