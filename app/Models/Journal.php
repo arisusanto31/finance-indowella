@@ -166,10 +166,10 @@ class Journal extends Model
                         $now->addSecond();
                     }
                 }
-                info('counter:' . $counter);
+                // info('counter:' . $counter);
                 $finalIndexDate = $indexDate . sprintf("%02d", ($counter + 1));
                 $lastJournal = Journal::where('chart_account_id', $coaID)->where('index_date', '<', $finalIndexDate)->orderBy('index_date', 'desc')->first();
-
+                info('get final index date for code group'.$request->input('code_group').': ' . $finalIndexDate);
                 $journal = new Journal;
                 $chartAccount = ChartAccount::find($coaID);
                 $journal->index_date = $finalIndexDate;
