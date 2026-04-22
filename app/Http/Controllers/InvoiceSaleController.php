@@ -169,8 +169,12 @@ class InvoiceSaleController extends Controller
 
         $firstDate = createCarbon("$year-$month-01")->startOfMonth()->format('Y-m-d');
         $lastDate = createCarbon("$year-$month-01")->endOfMonth()->format('Y-m-d');
-        $invoices = InvoiceSaleDetail::leftJoin('invoice_packs as inv', 'inv.invoice_number', '=', 'invoice_sale_details.invoice_pack_number')->where('invoice_sale_details.created_at', '>=', $firstDate)
-            ->where('invoice_sale_details.created_at', '<=', $lastDate)->with('customer', 'stock', 'parent')
+        $invoices = InvoiceSaleDetail::leftJoin('invoice_packs as inv', 'inv.invoice_number', '=', 'invoice_sale_details.invoice_pack_number')
+            // ->where('invoice_sale_details.created_at', '>=', $firstDate)
+            // ->where('invoice_sale_details.created_at', '<=', $lastDate)
+            ->whereMonth('invoice_sale_details.created_at', $month)
+            ->whereYear('invoice_sale_details.created_at', $year)
+            ->with('customer', 'stock', 'parent')
             ->select('invoice_sale_details.*', 'inv.is_final', 'inv.is_mark')
             ->get();        // $invPack = InvoicePack::whereMonth('created_at', $month)->whereYear('created_at', $year)->where('reference_model', InvoiceSaleDetail::class)
         //     ->select('is_final', 'is_mark', 'total_price')->get();
