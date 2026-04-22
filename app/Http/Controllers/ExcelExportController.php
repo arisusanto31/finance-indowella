@@ -49,9 +49,7 @@ class ExcelExportController extends Controller
     public static function getDataNL($month, $year)
     {
         $data = ChartAccount::getRincianSaldoNeracaLajur($month, $year);
-
         $mutasi = ChartAccount::getRincianMutationNeracaLajur($month, $year);
-
         $data['msg'] = collect($data['msg'])->map(function ($item) use ($mutasi) {
             $item['mutasi_debet'] = 0;
             $item['mutasi_kredit'] = 0;
@@ -80,8 +78,6 @@ class ExcelExportController extends Controller
                 return $val;
             });
             $lr['penjualan'] = $penjualan;
-
-
             $data[$year . '-' . toDigit($i, 2)] = $lr;
         }
         $charts = ChartAccount::aktif()->child()->withAlias()->where('chart_accounts.code_group', '>=', 400000)->select('chart_accounts.code_group', DB::raw('coalesce(ca.name,chart_accounts.name) as alias_name'))->get();
@@ -126,7 +122,6 @@ class ExcelExportController extends Controller
                 $journals[$coa] = [];
             }
         }
-        
         $kotakBaris = [];
         $baris = 1;
         foreach ($coas as $code ) {
@@ -170,7 +165,6 @@ class ExcelExportController extends Controller
     }
     public static function getPenjualan($month, $year)
     {
-
         $inv = InvoiceSaleDetail::from('invoice_sale_details as d')
             ->join('invoice_packs as inv_pack', function ($join) {
                 $join->on('inv_pack.invoice_number', '=', 'd.invoice_pack_number');

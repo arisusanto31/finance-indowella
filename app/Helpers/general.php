@@ -99,6 +99,131 @@ if (!function_exists('db_date_from_dmy')) {
 }
 
 
+function strtm($datastring, $datamax = 10, $align = "left")
+{
+    $len = strlen($datastring);
+    $kolomKosong = $datamax > $len ? $datamax - $len : 0;
+    if ($align == 'left') {
+        $hasil = $datastring . str_repeat(' ', $kolomKosong);
+    } else if ($align == 'right') {
+        $hasil = str_repeat(' ', $kolomKosong) . $datastring;
+    } else if ($align == 'center') {
+        $kolomKiri = intval($kolomKosong / 2);
+        $kolomKanan = $kolomKosong - $kolomKiri;
+        $hasil = str_repeat(' ', $kolomKiri) . $datastring . str_repeat(' ', $kolomKanan);
+    } else {
+        $hasil = $datastring;
+    }
+    return $hasil;
+}
+function getMaxStringLen($arrayString)
+{
+    $max = collect($arrayString)->map(function ($item) {
+        //jika item int maka format angka
+        if(is_int($item) || is_float($item)){
+            $item=format_price($item,2);
+        }
+        return strlen(strval($item));
+    })->max();
+    return $max;
+}
+
+function makeStringTableTerminal($data, $setting = [])
+{
+    $keys = collect($data)->keys()->all();
+    $max = collect($data)->map(function ($items, $key) {
+        $themax = getMaxStringLen($items);
+        if ($themax < strlen($key)) {
+            $themax = strlen($key);
+        }
+        return $themax;
+    });
+    $hasilString = [];
+
+    //===============buat baris awal ya==================
+    $string = "+";
+    foreach ($keys as $key) {
+        $string .= str_repeat('=', $max[$key] + 2) . "+";
+    }
+    $hasilString[] = $string;
+    //===============buat isi headeer==================
+    $string = "| ";
+    foreach ($keys as $key) {
+        $string .=  strtm($key, $max[$key], "center") . " | ";
+    }
+    $hasilString[] = $string;
+    //===============buat baris header ya==================
+    $string = "+";
+    foreach ($keys as $key) {
+        $string .= str_repeat('=', $max[$key] + 2) . "+";
+    }
+    $hasilString[] = $string;
+    //===============buat isinya==================
+    foreach ($data[$keys[0]] as $row => $value) {
+        $string = "| ";
+        foreach ($keys as $key) {
+
+            $content=$data[$key][$row];
+            //jika integer maka format price
+            if (is_int($content) || is_float($content)) {
+                $content=format_price($content,2);
+            }
+            $string .= strtm($content, $max[$key], $setting[$key] ?? "left") . " | ";
+        }
+        $hasilString[] = $string;
+    }
+    //===============buat baris akhir ya==================
+    $string = "+";
+    foreach ($keys as $key) {
+        $string .= str_repeat('=', $max[$key] + 2) . "+";
+    }
+    $hasilString[] = $string;
+    return $hasilString;
+}
+
+function makeSuperTableTerminal($data, $columnSetting)
+{
+    $dT = [];
+    $sT = [];
+    foreach ($columnSetting as $column => $align) {
+        $dT[$column] = collect($data)->pluck($column)->all();
+        $sT[$column] = $align;
+    }
+    $hasil = makeStringTableTerminal($dT, $sT);
+    return $hasil;
+}
+
+
+function tampilkanTableTerminal($data, $columnSetting, $handle)
+{
+    $hasil = makeSuperTableTerminal($data, $columnSetting);
+    foreach ($hasil as $row) {
+        $handle->info($row);
+    }
+}
+
+
+
+if (!function_exists('upsertInChunks')) {
+    /**
+     * Upsert data secara bertahap agar tidak melebihi batas placeholder.
+     *
+     * @param string|Model $modelClass Nama class model Laravel (misal: \App\Models\Journal::class)
+     * @param array $data Data array of associative arrays
+     * @param array|string $uniqueBy Kolom unik (contoh: 'id')
+     * @param array $updateFields Kolom-kolom yang diupdate jika duplikat
+     * @param int $chunkSize Ukuran maksimal data per chunk
+     */
+    function upsertInChunks($modelClass, array $data, $uniqueBy, array $updateFields, int $chunkSize = 5000)
+    {
+        foreach (array_chunk($data, $chunkSize) as $chunk) {
+            $modelClass::upsert($chunk, $uniqueBy, $updateFields);
+        }
+    }
+}
+
+
+
 function excelSerialToCarbon($value, string $tz = 'Asia/Jakarta'): ?Carbon
 {
     if ($value === null || $value === '') return null;
