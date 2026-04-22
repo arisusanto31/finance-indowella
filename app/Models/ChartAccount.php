@@ -398,7 +398,7 @@ class ChartAccount extends Model
         $starttime = microtime(true);
         $date = createCarbon($year . '-' . $month . '-01 00:00:00');
         $firstdate = $date->format('ymdHis') . '00';
-        $lastdate = $date->addMonth()->format('ymdHis') . '00';
+        $lastdate = $date->addMonth()->addMinute()->format('ymdHis') . '00';
         $subquery = Journal::where('index_date', '<', (float)$firstdate)
             ->select('code_group as scode_group', DB::raw('MAX(index_date) as max_index_date'))
             ->groupBy('code_group');
@@ -487,7 +487,7 @@ class ChartAccount extends Model
         $starttime = microtime(true);
         $date = createCarbon($year . '-' . $month . '-01 00:00:00');
         $firstdate = $date->format('ymdHis') . '00';
-        $lastdate = $date->addMonth()->format('ymdHis') . '00';
+        $lastdate = $date->addMonth()->addMinute()->format('ymdHis') . '00';
         $chartAccount = ChartAccountAlias::select('id', 'code_group', 'is_child', 'level')->get();
         $subquery = Journal::from('journals as j')->whereBetween('j.index_date', [(float)$firstdate, (float)$lastdate]);
         $mutasi_ = ChartAccountAlias::from('chart_account_aliases as c')
