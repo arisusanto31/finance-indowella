@@ -167,18 +167,18 @@ class InvoiceSaleController extends Controller
         $month = getInput('month') ? toDigit(getInput('month'), 2) : date('m');
         $year = getInput('year') ? getInput('year') : date('Y');
 
-        $invoices = InvoiceSaleDetail::whereMonth('created_at', $month)->whereYear('created_at', $year)->with('customer', 'stock', 'parent')
-            ->get()
-            ->groupBy('invoice_pack_number');
-        $invPack = InvoicePack::whereMonth('created_at', $month)->whereYear('created_at', $year)->where('reference_model', InvoiceSaleDetail::class)
-            ->select('is_final', 'is_mark', 'total_price')->get();
-        $totalInvoice = collect($invoices)->sum(function ($group) {
-            return collect($group)->sum('total_price');
-        });
-        $totalInvoiceFinal = collect($invPack)->where('is_final', 1)->sum('total_price');
-        $totalInvoiceMark = collect($invPack)->where('is_mark', 1)->sum('total_price');
+        $firstDate = createCarbon("$year-$month-01")->startOfMonth()->format('Y-m-d');
+        $lastDate = createCarbon("$year-$month-01")->endOfMonth()->format('Y-m-d');
+        $invoices = InvoiceSaleDetail::leftJoin('invoice_packs as inv', 'inv.invoice_number', '=', 'invoice_sale_details.invoice_pack_number')->where('invoice_sale_details.created_at', '>=', $firstDate)
+            ->where('invoice_sale_details.created_at', '<=', $lastDate)->with('customer', 'stock', 'parent')
+            ->select('invoice_sale_details.*', 'inv.is_final', 'inv.is_mark')
+            ->get();        // $invPack = InvoicePack::whereMonth('created_at', $month)->whereYear('created_at', $year)->where('reference_model', InvoiceSaleDetail::class)
+        //     ->select('is_final', 'is_mark', 'total_price')->get();
+        $totalInvoice = collect($invoices)->sum('total_price');
+        $totalInvoiceFinal = collect($invoices)->where('is_final', 1)->sum('total_price');
+        $totalInvoiceMark = collect($invoices)->where('is_mark', 1)->sum('total_price');
         $parent = [];
-
+        $invoices = collect($invoices)->groupBy('invoice_number');
         // dd($invoices);
         return view('invoice.invoice-sales', compact('invoices', 'month', 'year', 'totalInvoice', 'totalInvoiceFinal', 'totalInvoiceMark', 'parent'));
     }
@@ -533,8 +533,8 @@ class InvoiceSaleController extends Controller
             }
 
 
-            if($isPPN){
-              
+            if ($isPPN) {
+
                 self::createPPNKeluaran(new Request([
                     'code_group_debet' =>  $codeGroupPiutangs[0], //piutang usaha
                     'code_group_kredit' => 212500, //ppn keluaran
@@ -544,7 +544,6 @@ class InvoiceSaleController extends Controller
                     'invoice_pack_id' => $invoicePack->id,
                     'date' => $date
                 ]));
-
             }
 
             DB::commit();
@@ -558,7 +557,7 @@ class InvoiceSaleController extends Controller
         }
     }
 
-     public static function createPPNKeluaran(Request $request)
+    public static function createPPNKeluaran(Request $request)
     {
         $coaDebet = $request->input('code_group_debet');
         $coaKredit = $request->input('code_group_kredit');
@@ -709,7 +708,7 @@ class InvoiceSaleController extends Controller
 
         return $view;
     }
-    
+
 
     public function getDataImport($book_journal_id)
     {
