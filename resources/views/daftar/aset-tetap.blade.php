@@ -349,7 +349,7 @@
                     ${dataInv.name} [id:${invID}] </div></td>
                
                   <td class="sticky-col-3">${dataInv.keterangan_qty_unit}</td>
-                  <td class="sticky-col-4">${$dataInv.date} <br> ${dataInv.periode} tahun</td>
+                  <td class="sticky-col-4">${dataInv.date} <br> ${dataInv.periode} tahun</td>
                   <td class="sticky-col-5">${formatRupiah(dataInv.nilai_perolehan)}</td>
                   <td>${formatRupiah(dataInv.total_pembelian)}</td>
                   <td>${array_key_exists(year+'-01',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-01']) : '-'}</td>
