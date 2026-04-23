@@ -22,7 +22,7 @@ class ExcelExportController extends Controller
 
     public static function getDataNeraca($month, $year)
     {
-        $date = createCarbon($year . '-' . $month . '-01')->format('Y-m-t 23:59:59');
+        $date = createCarbon($year . '-' . $month . '-01')->format('Y-m-t 23:59:54');
         $query = ChartAccount::getRincianNeracaAt($date);
         if ($query['status'] == 0)
             return $query;
@@ -69,7 +69,7 @@ class ExcelExportController extends Controller
         $data = [];
         $totalPenjualan = 0;
         for ($i = $month; $i > 0; $i--) {
-            $date = createCarbon($year . '-' . ($i) . '-01')->endOfMonth()->subMinutes(2)->format('Y-m-d H:i:s');
+            $date = createCarbon($year . '-' . ($i) . '-01')->endOfMonth()->subSeconds(5)->format('Y-m-d H:i:s');
             $lr = ChartAccount::getRincianLabaBulanAt($date)->keyBy('code_group');
             $penjualan = collect($lr)->where('code_group', '<', 500000)->sum('saldo_akhir');
             $totalPenjualan += $penjualan;

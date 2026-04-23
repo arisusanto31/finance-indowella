@@ -54,7 +54,7 @@ class JournalController extends Controller
             //breati ga ada permintaan date, kita cari di month dan year ya
             $month = getInput('month') ? toDigit(getInput('month'), 2) : Date('m');
             $year = getInput('year') ? getInput('year') : Date('Y');
-            $date = createCarbon($year . '-' . $month . '-01')->format('Y-m-t 23:59:59');
+            $date = createCarbon($year . '-' . $month . '-01')->format('Y-m-t 23:59:54');
         }
         $query = ChartAccount::getRincianNeracaAt($date);
         if ($query['status'] == 0)
@@ -173,7 +173,7 @@ class JournalController extends Controller
             //breati ga ada permintaan date, kita cari di month dan year ya
             $month = getInput('month') ? toDigit(getInput('month'), 2) : Date('m');
             $year = getInput('year') ? getInput('year') : Date('Y');
-            $date = createCarbon($year . '-' . $month . '-01')->format('Y-m-t 23:58:59');
+            $date = createCarbon($year . '-' . $month . '-01')->format('Y-m-t 23:59:54');
         }
         $labarugi = ChartAccount::getRincianLabaBulanAt($date);
         $data = [
@@ -192,6 +192,12 @@ class JournalController extends Controller
     {
         if ($tokoid == "" || $tokoid == "null" || $tokoid == 0) $tokoid = null;
         $date = getInput('date') ? getInput('date') : carbonDate();
+          if (!$date) {
+            //breati ga ada permintaan date, kita cari di month dan year ya
+            $month = getInput('month') ? toDigit(getInput('month'), 2) : Date('m');
+            $year = getInput('year') ? getInput('year') : Date('Y');
+            $date = createCarbon($year . '-' . $month . '-01')->format('Y-m-t 23:59:54');
+        }
         $labarugi = ChartAccount::getRincianLabaBulanAt($date, $tokoid);
         return [
             'status' => 1,
