@@ -13,7 +13,7 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 
 use function Laravel\Prompts\form;
 
-class _KartuHutangExport implements FromCollection, WithHeadings, WithTitle, WithEvents, ShouldAutoSize
+class _KartuDPSalesExport implements FromCollection, WithHeadings, WithTitle, WithEvents, ShouldAutoSize
 {
     /**
      * @return \Illuminate\Support\Collection
@@ -38,7 +38,7 @@ class _KartuHutangExport implements FromCollection, WithHeadings, WithTitle, Wit
                 $i + 1,
                 $item['person_name'],
                 createCarbon($item['invoice_date'])->format('Y-m-d'),
-                $item['factur_supplier_number'],
+                $item['sales_order_number'],
                 format_price($item['saldo_awal']),
                 format_price($item['mutasi']),
                 format_price($item['pelunasan']),
@@ -68,7 +68,7 @@ class _KartuHutangExport implements FromCollection, WithHeadings, WithTitle, Wit
             'No',
             'Person',
             'Tanggal',
-            'No Invoice',
+            'No Sales Order',
             'Saldo Awal',
             'Mutasi',
             'Pelunasan',
@@ -79,7 +79,7 @@ class _KartuHutangExport implements FromCollection, WithHeadings, WithTitle, Wit
 
     public function title(): string
     {
-        return 'Utang ' . $this->data['year'] . '-' . $this->data['month'];
+        return 'DP Sales ' . $this->data['year'] . '-' . $this->data['month'];
     }
 
     public function registerEvents(): array

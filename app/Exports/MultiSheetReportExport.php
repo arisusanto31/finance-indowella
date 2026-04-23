@@ -32,6 +32,7 @@ class MultiSheetReportExport implements WithMultipleSheets
         $penjualan = ExcelExportController::getPenjualan($this->month, $this->year);
         $kartuPiutang = ExcelExportController::getKartuPiutang($this->month, $this->year);
         $kartuHutang = ExcelExportController::getKartuHutang($this->month, $this->year);
+        $kartuDPSales= ExcelExportController::getKartuDPSales($this->month, $this->year);
         $kartuInventory = ExcelExportController::getKartuInventory($this->year);
         $kartuBDD = ExcelExportController::getKartuBDD($this->year);
         $kartuStock = ExcelExportController::getKartuStock($this->month, $this->year);
@@ -47,6 +48,7 @@ class MultiSheetReportExport implements WithMultipleSheets
             'penjualan'  => new _PenjualanExport($penjualan),
             'kartu_piutang' => new _KartuPiutangExport($kartuPiutang),
             'kartu_hutang' => new _KartuHutangExport($kartuHutang),
+            'kartu_dpsales' => new _KartuDPSalesExport($kartuDPSales),
             'kartu_inventory' => new _KartuInventoryExport($kartuInventory),
             'kartu_bdd' => new _KartuBDDExport($kartuBDD),
             'kartu_stock' => new _KartuStockExport($kartuStock),

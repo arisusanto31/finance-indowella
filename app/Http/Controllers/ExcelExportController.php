@@ -9,6 +9,7 @@ use App\Models\InvoiceSaleDetail;
 use App\Models\Journal;
 use App\Models\KartuBahanJadi;
 use App\Models\KartuBDP;
+use App\Models\KartuDPSales;
 use App\Models\KartuHutang;
 use App\Models\KartuPiutang;
 use App\Services\ContextService;
@@ -178,7 +179,7 @@ class ExcelExportController extends Controller
 
     public static function getKartuPiutang($month, $year)
     {
-        $summary = KartuPiutang::getSummary($year, $month);
+        $summary = KartuPiutang::getSummary($year, $month,'invoice_pack_number');
         if ($summary['status'] == 0) {
             return $summary;
         }
@@ -191,7 +192,20 @@ class ExcelExportController extends Controller
 
     public static function getKartuHutang($month, $year)
     {
-        $summary = KartuHutang::getSummary($year, $month);
+        $summary = KartuHutang::getSummary($year, $month,'factur_supplier_number');
+        if ($summary['status'] == 0) {
+            return $summary;
+        }
+        return [
+            'msg' => $summary['msg'],
+            'month' => $month,
+            'year' => $year,
+        ];
+    }
+
+    public static function getKartuDPSales($month, $year)
+    {
+        $summary = KartuDPSales::getSummary($year, $month,'sales_order_number');
         if ($summary['status'] == 0) {
             return $summary;
         }
@@ -234,6 +248,7 @@ class ExcelExportController extends Controller
         //    $view = view('exports.bukumemo');
         // $view->data = $data;
         // return $view;
+        set_time_limit(0);
         return Excel::download(new MultiSheetReportExport($month, $year), 'INDOKO PACKAGING ' . $year . '-' . $month . '.xlsx');
     }
 }
