@@ -28,6 +28,7 @@ class _KartuInventoryExport implements FromCollection, WithTitle, WithEvents, Sh
             'No',
             'Nama Aset',
             'Qty',
+            'Tanggal Perolehan',
             'Periode',
             'Nilai Perolehan',
             'Mutasi Pembelian'
@@ -58,6 +59,7 @@ class _KartuInventoryExport implements FromCollection, WithTitle, WithEvents, Sh
                     $i,
                     $item['name'],
                     $item['keterangan_qty_unit'],
+                    $item['date'],
                     $item['periode'] . ' tahun',
                     format_price($item['nilai_perolehan']),
                     format_price($item['total_pembelian']),
@@ -90,7 +92,7 @@ class _KartuInventoryExport implements FromCollection, WithTitle, WithEvents, Sh
         return [
             AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
-                $sheet->freezePane('G1');
+                $sheet->freezePane('H1');
 
                 //menge Cell
                 foreach ($this->kotakKolom as $m) {
