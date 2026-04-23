@@ -1646,6 +1646,54 @@ class JournalController extends Controller
                 'index_date' => $indexDate,
                 'model' => $model
             ];
+        } else if ($model == 'KartuInventory' || $model == 'KartuPrepaidExpense') {
+            $model = 'App\\Models\\' . $model;
+            $key = 'sales_order_number';
+            if ($model == 'App\\Models\\KartuInventory') {
+                $key = 'inventory_id';
+            } else if ($model == 'App\\Models\\KartuPrepaidExpense') {
+                $key = 'prepaid_expense_id';
+            }
+            $datas = $model::where('index_date', '>', $indexDate)->select(
+                'id',
+                'index_date',
+                DB::raw('amount as mutasi_rupiah_total'),
+                DB::raw('nilai_buku as saldo_rupiah_total'),
+                DB::raw($key . ' as number')
+            )->orderBy('index_date', 'asc')->get()->groupBy('number');
+            $tableName = "kartu_inventories";
+            switch ($model) {
+                case 'App\\Models\\KartuPrepaidExpense':
+                    $tableName = "kartu_prepaid_expenses";
+                    break;
+            }   
+
+            $saldoAwal = $model::whereIn('index_date', function ($q) use ($indexDate, $tableName, $key) {
+                $q->select(DB::raw('MAX(index_date)'))->from($tableName)->where('index_date', '<=', $indexDate)->groupBy($key);
+            })->get()->keyBy($key);
+
+            $problems = [];
+            foreach ($datas as $number => $vals) {
+
+                $saldoProd = $saldoAwal->get($number);
+                $saldoRupiah = $saldoProd ? $saldoProd->nilai_buku  : 0;
+                foreach ($vals as $row => $val) {
+                    $saldoRupiah = bcadd($saldoRupiah, $val->mutasi_rupiah_total, 2);
+
+                    if (abs($saldoRupiah - $val->saldo_rupiah_total) > 0.1) {
+                        $val['rupiah_ok'] = $saldoRupiah;
+                        $problems[] = $val;
+                        break;
+                    }
+                }
+            }
+
+            return [
+                'status' => 1,
+                'msg' => $problems,
+                'index_date' => $indexDate,
+                'model' => $model
+            ];
         }
 
         return [
@@ -1724,7 +1772,38 @@ class JournalController extends Controller
                     ];
                 }
                 upsertInChunks($model, $updater, 'id', ['amount_saldo_factur']);
-            } else {
+            }
+            else if($model=='KartuInventory' || $model == 'KartuPrepaidExpense'){
+                $model = 'App\\Models\\' . $model;
+                $kartu = $model::find($id);
+                if (!$kartu) {
+                    throw new \Exception('kartu tidak ditemukan');
+                }
+                $key = 'inventory_id';
+                if ($model == 'App\\Models\\KartuPrepaidExpense') {
+                    $key = 'prepaid_expense_id';
+                }
+                $lastKartu = $model::where($key, $kartu->$key)
+                    ->where('index_date', '<', $kartu->index_date)->orderBy('index_date', 'desc')
+                    ->first();
+
+                $saldoRupiah = $lastKartu ? $lastKartu->nilai_buku  : 0;
+                $nextKartu = $model::where($key, $kartu->$key)
+                    ->where('index_date', '>=', $kartu->index_date)->orderBy('index_date', 'asc')
+                    ->get();
+
+                $updater = [];
+                foreach ($nextKartu as $k) {
+                    $saldoRupiah = bcadd($saldoRupiah, $k->amount, 2);
+                    $k->nilai_buku = $saldoRupiah;
+                    $updater[] = [
+                        'id' => $k->id,
+                        'nilai_buku' => $saldoRupiah
+                    ];
+                }
+                upsertInChunks($model, $updater, 'id', ['nilai_buku']);
+            }
+            else {
                 throw new \Exception('model belum diakomodasi');
             }
         } catch (\Exception $e) {

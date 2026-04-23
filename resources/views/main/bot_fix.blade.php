@@ -35,6 +35,8 @@
                             <option value="KartuHutang">Kartu Hutang</option>
                             <option value="KartuPiutang"> Kartu Piutang</option>
                             <option value="KartuDPSales">Kartu DP Sales</option>
+                            <option value="KartuInventory">Kartu Inventory</option>
+                            <option value="KartuPrepaidExpense">Kartu Prepaid Expense</option>
                         </select>
                     </div>
                     <div class="col-xs-6 col-md-2">
