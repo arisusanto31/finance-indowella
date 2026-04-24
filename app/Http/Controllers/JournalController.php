@@ -344,7 +344,9 @@ class JournalController extends Controller
     {
         $indexAwal = getInput('index_date') ? getInput('index_date') : 0;
         $indexAwal = intval(createCarbon($indexAwal)->format('ymdHis00'));
-        $indexAkhir = $indexAwal + 30000000000; //cari 3 bulan kedepan
+        $indexAkhir= Carbon::createFromFormat('ymdHis00', $indexAwal)->addMonth()->format('ymdHis00');
+         
+        //ari 3 bulan kedepan
         try {
             $journals = Journal::whereBetween('index_date', [$indexAwal, $indexAkhir])->select('index_date', 'journal_number', 'description', 'amount_kredit', 'amount_debet', 'code_group', 'amount_saldo', 'id')->orderBy('index_date', 'asc')->get();
             $sub = Journal::select(DB::raw('max(index_date) as max_index_date'), 'code_group')->where('index_date', '<', $indexAwal)->whereNotNull('amount_saldo')->groupBy('code_group');
