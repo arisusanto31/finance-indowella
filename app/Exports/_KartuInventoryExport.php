@@ -43,7 +43,7 @@ class _KartuInventoryExport implements FromCollection, WithTitle, WithEvents, Sh
         $this->kotakKolom = [];
     }
 
-     public function columnFormats(): array
+    public function columnFormats(): array
     {
         return [
             'G' => '#,##0.00',
@@ -71,6 +71,7 @@ class _KartuInventoryExport implements FromCollection, WithTitle, WithEvents, Sh
         $total = 0;
         $baris = 1;
         $fixData = [];
+        $globalSusut = 0;
         foreach ($this->data['msg'] as $jenis => $data) {
             $fixData[] = [$jenis];
             $baris++;
@@ -101,12 +102,40 @@ class _KartuInventoryExport implements FromCollection, WithTitle, WithEvents, Sh
                 $dataBaris[] = ($item['total_penyusutan']);
                 $dataBaris[] = ($this->data['saldo_buku_akhir'][$id]->nilai_buku ?? 0);
                 $fixData[] = $dataBaris;
+                $globalSusut += $totalSusut;
             }
             $end = $baris;
             $fixData[] = [""];
             $baris += 2;
             $this->kotakKolom[] = ['start' => $start, 'end' => $end];
         }
+        $fixData[] = [
+            'Resume Keseluruhan ' . $this->data['year']
+        ];
+        $baris++;
+        $bukuAkhir = collect($this->data['saldo_buku_akhir'])->sum('nilai_buku');
+        $akumulasiAkhir =collect($this->data['msg'])->sum(function($item) {
+            return collect($item)->sum('total_penyusutan');
+        });
+        $start = $baris;
+      
+      
+        $fixData[] = [
+            'Total Penyusutan',
+            format_price($globalSusut)
+        ];
+      
+        $fixData[] = [
+            'Saldo Akhir Akumulasi Penyusutan',
+            format_price($akumulasiAkhir)
+        ];
+          $fixData[] = [
+            'Nilai Buku Akhir',
+            format_price($bukuAkhir)
+        ];
+        $end = $baris + 3;
+       
+
         return collect($fixData);
     }
 
