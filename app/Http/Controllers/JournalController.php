@@ -1494,10 +1494,11 @@ class JournalController extends Controller
 
             $keyMonth = createCarbon($monthyear)->addMonth()->format('Y-m-d 00:00:00');
             $journalKeys = JournalKey::where('key_at', '>', $keyMonth)->count();
+            $nextKey= JournalKey::where('key_at', '>', $keyMonth)->orderBy('key_at', 'asc')->first();
             if ($journalKeys > 0) {
                 return [
                     'status' => 0,
-                    'msg' => 'penutup ' . $monthyear . ' terkunci oleh penutup bulan berikutnya',
+                    'msg' => 'penutup ' . $monthyear . ' terkunci oleh penutup bulan ' . createCarbon($nextKey->key_at)->format('Y-m-d'),
                     'monthyear' => $monthyear
                 ];
             }
