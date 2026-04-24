@@ -1492,7 +1492,7 @@ class JournalController extends Controller
             $monthyear = createCarbon($request->input('monthyear'))->startOfDay()->format('Y-m-d');
 
 
-            $keyMonth = createCarbon($monthyear)->addMonth()->format('Y-m-d 00:00:00');
+            $keyMonth = createCarbon($monthyear)->format('Y-m-t 23:59:59');
             $journalKeys = JournalKey::where('key_at', '>', $keyMonth)->count();
             $nextKey= JournalKey::where('key_at', '>', $keyMonth)->orderBy('key_at', 'asc')->first();
             if ($journalKeys > 0) {
