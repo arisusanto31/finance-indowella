@@ -54,7 +54,7 @@ class JournalController extends Controller
             //breati ga ada permintaan date, kita cari di month dan year ya
             $month = getInput('month') ? toDigit(getInput('month'), 2) : Date('m');
             $year = getInput('year') ? getInput('year') : Date('Y');
-            $date = createCarbon($year . '-' . $month . '-01')->endOfMonth()->format('Y-m-d H:i:s');
+            $date = createCarbon($year . '-' . $month . '-01')->endOfMonth()->subSeconds(5)->format('Y-m-d H:i:s');
         }
         $query = ChartAccount::getRincianNeracaAt($date);
         if ($query['status'] == 0)
