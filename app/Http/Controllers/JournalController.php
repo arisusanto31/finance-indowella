@@ -1307,9 +1307,12 @@ class JournalController extends Controller
                         ->on('j.index_date', '=', 'subquery.max_index_date');
                 })
                 ->rightJoin('chart_accounts as ca', 'ca.code_group', '=', 'j.code_group')
+                ->rightJoin('chart_account_aliases as alias',function($join){
+                    $join->on('alias.code_group','=','ca.code_group')->where('alias.book_journal_id',book()->id);
+                })
                 ->where('ca.code_group', '>=', 400000)->where('ca.is_child', 1)
                 ->select(
-                    'ca.name',
+                    'alias.name',
                     'ca.id',
                     'ca.code_group',
                     DB::raw('CAST(ROUND(COALESCE(j.amount_saldo,0),2) AS DECIMAL(15,2)) AS saldo'),
