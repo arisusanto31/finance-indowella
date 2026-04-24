@@ -330,7 +330,7 @@
                     },
                     onSuccess: (res) => {
                         if (res.status == 1) {
-
+                            changeDateClosingJournal();
                         } else {
 
                         }
