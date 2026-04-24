@@ -1518,11 +1518,13 @@ class JournalController extends Controller
                     $lj[] = $lastJ;
                 }
             }
+          
             $dk = DetailKartuInvoice::whereIn('journal_id', $journals->pluck('id')->all())->delete();
             Journal::where('tag', $tag)->delete();
+            //   throw new \Exception('sampek sini aman');
             foreach ($lj as $j) {
                 if($j)
-                $j->recalculateJournal();
+                $j->calculateJournalNext();
             }
             DB::commit();
             return ['status' => 1, 'msg' => 'success', 'monthyear' => $monthyear];
