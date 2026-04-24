@@ -344,7 +344,7 @@ class JournalController extends Controller
     {
         $indexAwal = getInput('index_date') ? getInput('index_date') : 0;
         $indexAwal = intval(createCarbon($indexAwal)->format('ymdHis00'));
-        $indexAkhir= Carbon::createFromFormat('ymdHis00', $indexAwal)->addMonth()->format('ymdHis00');
+        $indexAkhir= Carbon::createFromFormat('ymdHis00', $indexAwal)->addMonths(12)->format('ymdHis00');
          
         //ari 3 bulan kedepan
         try {
@@ -380,7 +380,9 @@ class JournalController extends Controller
             }
             return [
                 'status' => 0,
-                'msg' => 'tidak ada problem'
+                'msg' => 'tidak ada problem',
+                'from'=> $indexAwal,
+                'to' => $indexAkhir
             ];
         } catch (Throwable $e) {
             return [
