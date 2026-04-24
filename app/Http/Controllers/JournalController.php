@@ -1370,10 +1370,7 @@ class JournalController extends Controller
 
             $selisih = $totalSaldo;
 
-            return [
-                'debets'=> $debets,
-                'kredits' => $kredits,
-            ];
+           
             $allInput = [];
             $allOutput = [];
             $tanggalJurnal = createCarbon($monthyear)->endOfMonth()->format('Y-m-d H:i:s');
