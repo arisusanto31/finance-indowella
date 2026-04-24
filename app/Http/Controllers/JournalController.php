@@ -1296,6 +1296,7 @@ class JournalController extends Controller
             $tag = 'closing ' . $monthyear;
             $theLastDate = createCarbon($monthyear)->addMonth()->format('ymdHis') . '00';
             $subquery = DB::table('journals')
+                ->where('book_journal_id', book()->id)
                 ->where('index_date', '<', (float)$theLastDate)->whereRaw('CONVERT(code_group, UNSIGNED) > ?', [400000])
                 ->select('code_group', DB::raw('MAX(index_date) as max_index_date'))
                 ->groupBy('code_group');
@@ -1305,7 +1306,7 @@ class JournalController extends Controller
                     $join->on('j.code_group', '=', 'subquery.code_group')
                         ->on('j.index_date', '=', 'subquery.max_index_date');
                 })
-                ->rightJoin('chart_accounts as ca', 'ca.id', '=', 'j.chart_account_id')
+                ->rightJoin('chart_accounts as ca', 'ca.code_group', '=', 'j.code_group')
                 ->where('ca.code_group', '>=', 400000)->where('ca.is_child', 1)
                 ->select(
                     'ca.name',
