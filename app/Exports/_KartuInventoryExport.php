@@ -5,6 +5,7 @@ namespace App\Exports;
 use Maatwebsite\Excel\Concerns\FromCollection;
 
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithTitle;
@@ -13,7 +14,7 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 
 use function Laravel\Prompts\form;
 
-class _KartuInventoryExport implements FromCollection, WithTitle, WithEvents, ShouldAutoSize
+class _KartuInventoryExport implements FromCollection, WithTitle, WithEvents, ShouldAutoSize, WithColumnFormatting
 {
     /**
      * @return \Illuminate\Support\Collection
@@ -36,9 +37,33 @@ class _KartuInventoryExport implements FromCollection, WithTitle, WithEvents, Sh
         for ($i = 1; $i <= 12; $i++) {
             $this->headingsStart[] = 'Penyusutan ' . $data['year'] . '-' . toDigit($i, 2);
         }
-        $this->headingsStart[] = 'Akumulasi Penyusutan';
+        $this->headingsStart[] = 'Total Penyusutan';
+        $this->headingsStart[] = 'Akumulasi akhir Penyusutan';
         $this->headingsStart[] = 'Nilai Buku';
         $this->kotakKolom = [];
+    }
+
+     public function columnFormats(): array
+    {
+        return [
+            'G' => '#,##0.00',
+            'H' => '#,##0.00',
+            'I' => '#,##0.00',
+            'J' => '#,##0.00',
+            'K' => '#,##0.00',
+            'L' => '#,##0.00',
+            'M' => '#,##0.00',
+            'N' => '#,##0.00',
+            'O' => '#,##0.00',
+            'P' => '#,##0.00',
+            'Q' => '#,##0.00',
+            'R' => '#,##0.00',
+            'S' => '#,##0.00',
+            'T' => '#,##0.00',
+            'U' => '#,##0.00',
+            'V' => '#,##0.00',
+
+        ];
     }
     public function collection()
     {
@@ -61,20 +86,24 @@ class _KartuInventoryExport implements FromCollection, WithTitle, WithEvents, Sh
                     $item['keterangan_qty_unit'],
                     $item['date'],
                     $item['periode'] . ' tahun',
-                    format_price($item['nilai_perolehan']),
-                    format_price($item['total_pembelian']),
+                    ($item['nilai_perolehan']),
+                    ($item['total_pembelian']),
                 ];
+                $totalSusut = 0;
                 for ($j = 1; $j <= 12; $j++) {
-                    $dataBaris[] = $item['penyusutan'] ?
-                        format_price($item['penyusutan'][$this->data['year'] . '-' . toDigit($j, 2)] ?? 0) :
-                        "-";
+                    $nilai = $item['penyusutan'] ?
+                        ($item['penyusutan'][$this->data['year'] . '-' . toDigit($j, 2)] ?? 0) :
+                        0;
+                    $dataBaris[] = $nilai == 0 ? '-' : ($nilai);
+                    $totalSusut += $nilai;
                 }
-                $dataBaris[] = format_price($item['total_penyusutan']);
-                $dataBaris[] = format_price($this->data['saldo_buku_akhir'][$id]->nilai_buku ?? 0);
+                $dataBaris[] = ($totalSusut);
+                $dataBaris[] = ($item['total_penyusutan']);
+                $dataBaris[] = ($this->data['saldo_buku_akhir'][$id]->nilai_buku ?? 0);
                 $fixData[] = $dataBaris;
             }
             $end = $baris;
-            $fixData[] = [];
+            $fixData[] = [""];
             $baris += 2;
             $this->kotakKolom[] = ['start' => $start, 'end' => $end];
         }
@@ -96,7 +125,7 @@ class _KartuInventoryExport implements FromCollection, WithTitle, WithEvents, Sh
 
                 //menge Cell
                 foreach ($this->kotakKolom as $m) {
-                    $range = 'A' . ($m['start']) . ':T' . ($m['end']);
+                    $range = 'A' . ($m['start']) . ':V' . ($m['end']);
                     $sheet->getStyle($range)->applyFromArray([
                         'borders' => [
                             'allBorders' => [
@@ -105,11 +134,11 @@ class _KartuInventoryExport implements FromCollection, WithTitle, WithEvents, Sh
                             ],
                         ],
                     ]);
-                    $colHeader = 'A' . ($m['start'] - 1) . ':T' . ($m['start']);
+                    $colHeader = 'A' . ($m['start'] - 1) . ':V' . ($m['start']);
                     $sheet->getStyle($colHeader)->getFont()->setBold(true);
                     $sheet->getStyle($colHeader)->getAlignment()->setHorizontal('center');
                     $sheet->getStyle($colHeader)->getAlignment()->setVertical('center');
-                    $sheet->getStyle('E' . ($m['start'] + 1) . ':T' . $m['end'])->getAlignment()->setHorizontal('right');
+                    $sheet->getStyle('E' . ($m['start'] + 1) . ':V' . $m['end'])->getAlignment()->setHorizontal('right');
                 }
             },
 

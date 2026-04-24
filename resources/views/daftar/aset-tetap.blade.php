@@ -313,7 +313,8 @@
                 'Penyusutan ' + year + '-' + '10',
                 'Penyusutan ' + year + '-' + '11',
                 'Penyusutan ' + year + '-' + '12',
-                'Akumulasi Penyusutan',
+                'Total Penyusutan',
+                'Akumulasi akhir Penyusutan',
                 'Nilai Buku'
             ];
 
@@ -364,6 +365,7 @@
                   <td>${array_key_exists(year+'-10',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-10']) : '-'}</td>
                   <td>${array_key_exists(year+'-11',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-11']) : '-'}</td>
                   <td>${array_key_exists(year+'-12',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-12']) : '-'}</td>
+                  <td>${formatRupiah(collect(dataInv.penyusutan).sum())}</td>
                   <td>${formatRupiah(dataInv.total_penyusutan)}</td>
                   <td>${array_key_exists(invID,res.saldo_buku_akhir)?formatRupiah(res.saldo_buku_akhir[invID].nilai_buku):0}
                         <button class="btn btn-sm btn-outline-primary" onclick="showDetailOnModal('{{ url("admin/daftar/aset-tetap/kartu-mutasi") }}/${invID}','xl')">

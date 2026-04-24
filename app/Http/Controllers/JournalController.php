@@ -1521,6 +1521,7 @@ class JournalController extends Controller
             $dk = DetailKartuInvoice::whereIn('journal_id', $journals->pluck('id')->all())->delete();
             Journal::where('tag', $tag)->delete();
             foreach ($lj as $j) {
+                if($j)
                 $j->recalculateJournal();
             }
             DB::commit();
