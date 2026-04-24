@@ -1323,9 +1323,7 @@ class JournalController extends Controller
 
             foreach ($chartAccounts as $ca) {
                 $saldo = number_format((string) $ca->saldo, 2, '.', '');
-
                 $totalSaldo = bcadd($totalSaldo, $saldo, 2);
-
                 if (bccomp($saldo, '0', 2) > 0) {
                     $debets[] = [
                         'code_group' => $ca->code_group,
@@ -1369,30 +1367,13 @@ class JournalController extends Controller
 
             $selisih = $totalSaldo;
 
-            // if (bccomp($selisih, '0', 2) > 0) {
-            //     $kredits[] = [
-            //         'code_group' => 302200,
-            //         'description' => 'Ikhtisar laba rugi' . $originalYear . '/' . $originalMonth,
-            //         'amount' => $selisih,
-            //         'reference_id' => null,
-            //         'reference_type' => null,
-            //         'tag' => $tag
-            //     ];
-            // } elseif (bccomp($selisih, '0', 2) < 0) {
-            //     $debets[] = [
-            //         'code_group' => 302200,
-            //         'description' => 'Ikhtisar laba rugi' . $originalYear . '/' . $originalMonth,
-            //         'amount' => bcmul($selisih, '-1', 2),
-            //         'reference_id' => null,
-            //         'reference_type' => null,
-            //         'tag' => $tag
-            //     ];
-            // }
-
+            return [
+                'debets'=> $debets,
+                'kredits' => $kredits,
+            ];
             $allInput = [];
             $allOutput = [];
             $tanggalJurnal = createCarbon($monthyear)->endOfMonth()->format('Y-m-d H:i:s');
-
             if ($aksi == 1) {
                 if (count($debets) > 0 && count($kredits) > 0) {
                     $st = JournalController::createBaseJournal(new Request([
