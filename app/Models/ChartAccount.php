@@ -113,10 +113,10 @@ class ChartAccount extends Model
                 }
                 info('mencari parent code ' . $parentCode);
                 $parent = ChartAccount::where('code_group', $parentCode)->first();
-                if($parent){
+                if ($parent) {
                     info('ketemu parent code ' . $parentCode);
                     break;
-                }else{
+                } else {
                     info('tidak ketemu parent code ' . $parentCode);
                 }
             }
@@ -399,6 +399,20 @@ class ChartAccount extends Model
         $date = createCarbon($year . '-' . $month . '-01 00:00:00');
         $firstdate = $date->copy()->startOfMonth()->format('ymdHis') . '00';
         $lastdate = $date->copy()->endOfMonth()->subSeconds(5)->format('ymdHis') . '99';
+        return static::_rincianSaldoNeracaLajur($firstdate, $lastdate);
+    }
+
+    public static function getRincianSaldoNeracaLajurYear($year)
+    {
+        $starttime = microtime(true);
+        $firstdate = createCarbon($year . '-01-01 00:00:00')->format('ymdHis') . '00';
+        $lastdate = createCarbon($year . '-12-31 23:59:59')->format('ymdHis') . '99';
+        return static::_rincianSaldoNeracaLajur($firstdate, $lastdate);
+    }
+
+    public static function _rincianSaldoNeracaLajur($firstdate, $lastdate)
+    {
+        $starttime = microtime(true);
         $subquery = Journal::where('index_date', '<', (float)$firstdate)
             ->select('code_group as scode_group', DB::raw('MAX(index_date) as max_index_date'))
             ->groupBy('code_group');
@@ -462,15 +476,15 @@ class ChartAccount extends Model
                     $idchilds = ChartAccountAlias::where('code_group', 'like', $code . '%')->pluck('code_group');
                     $val->saldo_akhir = round($saldo_akhir->whereIn('code_group', $idchilds)->sum('saldo_akhir'), 2);
                 }
-                
+
                 return $val;
             })->keyBy('code_group');
 
-        $isChild= ChartAccount::select('level','is_child','code_group')->get()->keyBy('code_group')->all();
+        $isChild = ChartAccount::select('level', 'is_child', 'code_group')->get()->keyBy('code_group')->all();
         $fixdatas = ChartAccountAlias::where('is_deleted', false)->select('name', 'account_type', 'id', 'code_group', 'level')->orderBy('code_group')->get()
             ->map(function ($val) use ($saldoAkhir, $saldoAwal, $isChild) {
-                $val['is_child']=array_key_exists($val->code_group, $isChild) ? $isChild[$val->code_group]->is_child : 1;
-                $val['level']=array_key_exists($val->code_group, $isChild) ? $isChild[$val->code_group]->level : 1;
+                $val['is_child'] = array_key_exists($val->code_group, $isChild) ? $isChild[$val->code_group]->is_child : 1;
+                $val['level'] = array_key_exists($val->code_group, $isChild) ? $isChild[$val->code_group]->level : 1;
                 $val['saldo_awal'] = array_key_exists($val->code_group, $saldoAwal->all()) ? money($saldoAwal[$val->code_group]->saldo_akhir) : 0;
                 $val['saldo_akhir'] = array_key_exists($val->code_group, $saldoAkhir->all()) ? money($saldoAkhir[$val->code_group]->saldo_akhir) : 0;
                 return $val;
@@ -484,13 +498,24 @@ class ChartAccount extends Model
         ];
     }
 
-
     public static function getRincianMutationNeracaLajur($month, $year)
     {
-        $starttime = microtime(true);
         $date = createCarbon($year . '-' . $month . '-01 00:00:00');
         $firstdate = $date->copy()->startOfMonth()->format('ymdHis') . '00';
         $lastdate = $date->copy()->endOfMonth()->subSeconds(5)->format('ymdHis') . '99';
+        return static::_rincianMutationNeracaLajur($firstdate, $lastdate);
+    }
+
+    public static function getRincianMutationNeracaLajurYear($year)
+    {
+        $firstdate = createCarbon($year . '-01-01 00:00:00')->format('ymdHis') . '00';
+        $lastdate = createCarbon($year . '-12-31 23:59:59')->format('ymdHis') . '99';
+        return static::_rincianMutationNeracaLajur($firstdate, $lastdate);
+    } 
+
+    public static function _rincianMutationNeracaLajur($firstdate, $lastdate)
+    {
+        $starttime = microtime(true);
         $chartAccount = ChartAccountAlias::select('id', 'code_group', 'is_child', 'level')->get();
         $subquery = Journal::from('journals as j')->whereBetween('j.index_date', [(float)$firstdate, (float)$lastdate]);
         $mutasi_ = ChartAccountAlias::from('chart_account_aliases as c')

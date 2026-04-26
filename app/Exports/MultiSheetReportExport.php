@@ -26,6 +26,8 @@ class MultiSheetReportExport implements WithMultipleSheets
         $neraca = ExcelExportController::getDataNeraca($this->month, $this->year);
         $nl = ExcelExportController::getDataNL($this->month, $this->year);
         $lr = ExcelExportController::getDataLR($this->month, $this->year);
+
+        
         $kas = ExcelExportController::getBukuKas($this->month, $this->year);
         $memo = ExcelExportController::getBukuMemo($this->month, $this->year);
         $pembelian = ExcelExportController::getPembelian($this->month, $this->year);

@@ -153,11 +153,17 @@ class ExcelExportController extends Controller
 
     public static function getPembelian($month, $year)
     {
+        $date= createCarbon($year . '-' . $month . '-01');
+        $indexStart = $date->copy()->startOfMonth()->format('ymdHis00');
+        $indexEnd= $date->copy()->endOfMonth()->format('ymdHis99');
 
         $inv = InvoicePurchaseDetail::from('invoice_purchase_details as d')
             ->join('invoice_packs as inv_pack', function ($join) {
                 $join->on('inv_pack.invoice_number', '=', 'd.invoice_pack_number');
-            })->whereMonth('d.created_at', $month)->whereYear('d.created_at', $year)->where('inv_pack.is_final', 1)->select('d.*')->get()->groupBy('invoice_pack_number');
+            })
+            ->where('index_date','>', $indexStart)
+            ->where('index_date','<', $indexEnd)
+            ->select('d.*')->get()->groupBy('invoice_pack_number');
         return [
             'month' => $month,
             'year' => $year,
@@ -166,10 +172,17 @@ class ExcelExportController extends Controller
     }
     public static function getPenjualan($month, $year)
     {
+        $date= createCarbon($year . '-' . $month . '-01');
+        $indexStart = $date->copy()->startOfMonth()->format('ymdHis00');
+        $indexEnd= $date->copy()->endOfMonth()->format('ymdHis99');
+
         $inv = InvoiceSaleDetail::from('invoice_sale_details as d')
             ->join('invoice_packs as inv_pack', function ($join) {
                 $join->on('inv_pack.invoice_number', '=', 'd.invoice_pack_number');
-            })->whereMonth('d.created_at', $month)->whereYear('d.created_at', $year)->where('inv_pack.is_final', 1)->select('d.*')->get()->groupBy('invoice_pack_number');
+            })
+            ->where('index_date','>', $indexStart)
+            ->where('index_date','<', $indexEnd)
+            ->select('d.*')->get()->groupBy('invoice_pack_number');
         return [
             'month' => $month,
             'year' => $year,
