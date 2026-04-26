@@ -3,8 +3,10 @@
 namespace App\Models;
 
 use App\Traits\HasIndexDate;
+use App\Traits\HasModelSaldoUang;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class InvoicePurchaseDetail extends Model
@@ -53,6 +55,8 @@ class InvoicePurchaseDetail extends Model
             }
         });
     }
+
+
     protected static function booted()
     {
         static::addGlobalScope('journal', function ($query) {
@@ -90,6 +94,22 @@ class InvoicePurchaseDetail extends Model
     public function supplier()
     {
         return $this->belongsTo(\App\Models\Supplier::class, 'supplier_id');
+    }
+
+    public static function getTotalMutasiKartu($date){
+        $dateAwal = createCarbon($date)->startOfMonth()->format('ymdHis000');
+        $dateAkhir = createCarbon($date)->format('ymdHis999');
+        $total = InvoicePurchaseDetail::query()->where('index_date','>',$dateAwal)->where('index_date','<',$dateAkhir)->sum('total_price');
+        return $total ? $total : 0;
+    }
+
+    public static function getTotalMutasiJournal($date){
+        $dateAwal = createCarbon($date)->startOfMonth()->format('ymdHis00');
+        $dateAkhir = createCarbon($date)->format('ymdHis99');
+        $coa = ChartAccount::where('reference_model', KartuStock::class)->pluck('code_group')->all();
+        $total = Journal::where('index_date','>',$dateAwal)->where('index_date','<',$dateAkhir)->whereIn('code_group', $coa)->where('amount_debet','>',0)->sum(DB::raw('amount_debet-amount_kredit'));
+        return $total ? ($total) : 0;
+
     }
 
     public function fillKartuStockID(){

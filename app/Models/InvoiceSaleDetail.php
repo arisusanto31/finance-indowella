@@ -4,14 +4,16 @@ namespace App\Models;
 
 use App\Traits\HasIndexDate;
 use App\Traits\HasModelDetailKartuInvoice;
+use App\Traits\HasModelSaldoUang;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class InvoiceSaleDetail extends Model
 {
 
-    use HasModelDetailKartuInvoice, HasIndexDate;
+    use HasModelDetailKartuInvoice, HasIndexDate, HasModelSaldoUang;
     protected $fillable = [
         'row_index',
         'invoice_pack_number',
@@ -71,6 +73,23 @@ class InvoiceSaleDetail extends Model
         return $this->belongsTo(\App\Models\Customer::class, 'customer_id');
     }
 
+    public static function getTotalMutasiKartu($date)
+    {
+        $dateAwal = createCarbon($date)->startOfMonth()->format('ymdHis000');
+        $dateAkhir = createCarbon($date)->format('ymdHis999');
+        $total = InvoiceSaleDetail::query()->where('index_date', '>', $dateAwal)->where('index_date', '<', $dateAkhir)->sum('total_price');
+        return $total ? $total : 0;
+    }
+
+    public static function getTotalMutasiJounal($date)
+    {
+        $dateAwal = createCarbon($date)->startOfMonth()->format('ymdHis00');
+        $dateAkhir = createCarbon($date)->format('ymdHis99');
+        $coa = ChartAccount::where('reference_model', InvoiceSaleDetail::class)->pluck('code_group')->all();
+        $total = Journal::where('index_date', '>', $dateAwal)->where('index_date', '<', $dateAkhir)->whereIn('code_group', $coa)->sum(DB::raw('amount_debet-amount_kredit'));
+        return $total ? $total*-1 : 0;
+    }
+
     public function fillIndexDate()
     {
 
@@ -78,7 +97,7 @@ class InvoiceSaleDetail extends Model
             $journal  = Journal::find($this->journal_id);
             if ($journal) {
                 $this->index_date_group = $journal->index_date_group;
-                $this->index_date= self::getNextIndexDate(Carbon::createFromFormat('ymdHis', $journal->index_date_group));
+                $this->index_date = self::getNextIndexDate($journal->created_at);
                 $this->save();
             }
         }

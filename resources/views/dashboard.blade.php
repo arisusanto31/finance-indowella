@@ -313,6 +313,20 @@
                             </h5>
                         <div id="cocok-kartu-bdd" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
 
+                         <h5 class="pb-0 mt-3 mb-0 text-primary">
+                             <i class="fas fa-circle"></i> Penjualan<span
+                                style="font-size:14px"> vs jurnal</span>
+                                 <button onclick="showDetailMutasi('KartuPenjualan')"><i class="fas fa-eye"></i> </button> 
+                            </h5>
+                        <div id="cocok-kartu-penjualan" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
+
+                         <h5 class="pb-0 mt-3 mb-0 text-primary">
+                             <i class="fas fa-circle"></i> Pembelian<span
+                                style="font-size:14px"> vs jurnal</span>
+                                 <button onclick="showDetailMutasi('KartuPembelian')"><i class="fas fa-eye"></i> </button> 
+                            </h5>
+                        <div id="cocok-kartu-pembelian" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
+
                     </div>
                 </div>
             </div>
@@ -682,7 +696,7 @@
 
             function getDataSaldoHighlight() {
                 $.ajax({
-                    url: '{{ route("jurnal.get-saldo-highlight") }}?date={{ Date('Y-m-d H:i:s') }}',
+                    url: '{{ route("jurnal.get-saldo-highlight") }}?date={{ Date("Y-m-d H:i:s") }}',
                     method: 'get',
                     success: function(res) {
                         console.log(res);
@@ -709,7 +723,7 @@
             function getSaldoCustom() {
                 var code = $('#select-codegroup-custom option:selected').val();
                 $.ajax({
-                    url: '{{ url("admin/jurnal/get-saldo-custom") }}/' + code + '?date={{ Date('Y-m-d H:i:s') }}',
+                    url: '{{ url("admin/jurnal/get-saldo-custom") }}/' + code + "?date={{ Date('Y-m-d H:i:s') }}",
                     method: 'get',
                     success: function(res) {
                         console.log(res);
@@ -741,24 +755,49 @@
                     success: function(res) {
                         console.log(res);
                         if (res.status == 1) {
+                            var isCocokStock = (Math.abs(res.kartu_stock.saldo - res.kartu_stock.journal)<0.01)?1:0;
+                            var isCocokBdp = (Math.abs(res.kartu_bdp.saldo - res.kartu_bdp.journal)<0.01)?1:0;
+                            var isCocokBahanJadi = (Math.abs(res.kartu_bahan_jadi.saldo - res.kartu_bahan_jadi.journal)<0.01)?1:0;
+                            var isCocokPiutang = (Math.abs(res.kartu_piutang.saldo - res.kartu_piutang.journal)<0.01)?1:0;
+                            var isCocokHutang = (Math.abs(res.kartu_hutang.saldo - res.kartu_hutang.journal)<0.01)?1:0;
+                            var isCocokDp = (Math.abs(res.kartu_dp.saldo - res.kartu_dp.journal)<0.01)?1:0;
+                            var isCocokInventaris = (Math.abs(res.kartu_inventaris.saldo - res.kartu_inventaris.journal)<0.01)?1:0;
+                            var isCocokBdd = (Math.abs(res.kartu_bdd.saldo - res.kartu_bdd.journal)<0.01)?1:0;
+                            var isCocokPenjualan = (Math.abs(res.penjualan.saldo - res.penjualan.journal)<0.01)?1:0;
+                            var isCocokPembelian = (Math.abs(res.pembelian.saldo - res.pembelian.journal)<0.01)?1:0;
+
                             $('#cocok-kartu-stock').html("Rp " + formatRupiah(res.kartu_stock.saldo) + ' vs ' +
-                                formatRupiah(res.kartu_stock.journal));
+                                formatRupiah(res.kartu_stock.journal)+
+                                `${isCocokStock?'<span class="text-success"> <i class="fas fa-check"></i></span>':'<span class="text-danger"> <i class="fas fa-times"></i></span>'}`);
                             $('#cocok-kartu-bdp').html("Rp " + formatRupiah(res.kartu_bdp.saldo) + ' vs ' +
-                                formatRupiah(res.kartu_bdp.journal));
+                                formatRupiah(res.kartu_bdp.journal)+
+                                `${isCocokBdp?'<span class="text-success"> <i class="fas fa-check"></i></span>':'<span class="text-danger"> <i class="fas fa-times"></i></span>'}`);
                             $('#cocok-kartu-bahan-jadi').html("Rp " + formatRupiah(res.kartu_bahan_jadi.saldo) +
                                 ' vs ' +
-                                formatRupiah(res.kartu_bahan_jadi.journal));
+                                formatRupiah(res.kartu_bahan_jadi.journal)+
+                                `${isCocokBahanJadi?'<span class="text-success"> <i class="fas fa-check"></i></span>':'<span class="text-danger"> <i class="fas fa-times"></i></span>'}`);
                             $('#cocok-kartu-piutang').html("Rp " + formatRupiah(res.kartu_piutang.saldo) + ' vs ' +
-                                formatRupiah(res.kartu_piutang.journal));
+                                formatRupiah(res.kartu_piutang.journal)+
+                                `${isCocokPiutang?'<span class="text-success"> <i class="fas fa-check"></i></span>':'<span class="text-danger"> <i class="fas fa-times"></i></span>'}`);
                             $('#cocok-kartu-hutang').html("Rp " + formatRupiah(res.kartu_hutang.saldo) + ' vs ' +
-                                formatRupiah(res.kartu_hutang.journal));
+                                formatRupiah(res.kartu_hutang.journal)+
+                                `${isCocokHutang?'<span class="text-success"> <i class="fas fa-check"></i></span>':'<span class="text-danger"> <i class="fas fa-times"></i></span>'}`);
                             $('#cocok-kartu-dp').html("Rp " + formatRupiah(res.kartu_dp.saldo) + ' vs ' +
-                                formatRupiah(res.kartu_dp.journal));
+                                formatRupiah(res.kartu_dp.journal)+
+                                `${isCocokDp?'<span class="text-success"> <i class="fas fa-check"></i></span>':'<span class="text-danger"> <i class="fas fa-times"></i></span>'}`);
                             $('#cocok-kartu-inventaris').html("Rp " + formatRupiah(res.kartu_inventaris.saldo) +
                                 ' vs ' +
-                                formatRupiah(res.kartu_inventaris.journal));
+                                formatRupiah(res.kartu_inventaris.journal)+
+                                `${isCocokInventaris?'<span class="text-success"> <i class="fas fa-check"></i></span>':'<span class="text-danger"> <i class="fas fa-times"></i></span>'}`);
                             $('#cocok-kartu-bdd').html("Rp " + formatRupiah(res.kartu_bdd.saldo) + ' vs ' +
-                                formatRupiah(res.kartu_bdd.journal));
+                                formatRupiah(res.kartu_bdd.journal)+
+                                `${isCocokBdd?'<span class="text-success"> <i class="fas fa-check"></i></span>':'<span class="text-danger"> <i class="fas fa-times"></i></span>'}`);
+                            $('#cocok-kartu-penjualan').html("Rp " + formatRupiah(res.penjualan.saldo) + ' vs ' +
+                                formatRupiah(res.penjualan.journal)+
+                                `${isCocokPenjualan?'<span class="text-success"> <i class="fas fa-check"></i></span>':'<span class="text-danger"> <i class="fas fa-times"></i></span>'}`);
+                            $('#cocok-kartu-pembelian').html("Rp " + formatRupiah(res.pembelian.saldo) + ' vs ' +
+                                formatRupiah(res.pembelian.journal)+
+                                `${isCocokPembelian?'<span class="text-success"> <i class="fas fa-check"></i></span>':'<span class="text-danger"> <i class="fas fa-times"></i></span>'}`);
 
                         } else {
                             swalInfo('opps', 'something error' + res.msg, 'error');

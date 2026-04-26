@@ -30,6 +30,7 @@ class FillInvoicePurchaseSaleIndex extends Command
     {
         //
 
+        try{
         Session::put('book_journal_id', 1);
         $invSales = InvoiceSaleDetail::whereNull('index_date')->get();
         foreach ($invSales as $invSale) {
@@ -51,6 +52,9 @@ class FillInvoicePurchaseSaleIndex extends Command
             }else{
                 $this->error('Failed to update Invoice Purchase Detail ID: ' . $invPurchase->id . ' - Kartu Stock ID not found');
             }
+        }
+        }catch(\Exception $e){
+            $this->error('Error: ' . $e->getMessage());
         }
     }
 }

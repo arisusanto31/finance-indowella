@@ -111,14 +111,7 @@ trait HasModelSaldoUang
         return ['status' => 1, 'msg' => $kartu];
     }
 
-    public function getTotalMutasiKartu(){
-        static::query()
-
-    }
-
-    public function getTotalMutasiJournal(){
-
-    }
+ 
 
     public function refreshCurrentSaldo($kolomGroup = 'invoice_pack_number')
     {

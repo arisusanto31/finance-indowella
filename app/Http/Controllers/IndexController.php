@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Jobs\ImportSaldoNLJob;
 use App\Models\ChartAccount;
 use App\Models\InvoicePack;
+use App\Models\InvoicePurchaseDetail;
+use App\Models\InvoiceSaleDetail;
 use App\Models\Journal;
 use App\Models\KartuBahanJadi;
 use App\Models\KartuBDP;
@@ -84,7 +86,7 @@ class IndexController extends Controller
         $problemKartuInventory = KartuInventory::where('journal_id', null)
             ->whereNull('tag')
             ->count();
-
+     
 
         return [
             'status' => 1,
@@ -125,6 +127,11 @@ class IndexController extends Controller
         $kprepaid = KartuPrepaidExpense::getTotalSaldoRupiah(getInput('date'), 'prepaid_expense_id');
         $jprepaid = KartuPrepaidExpense::getTotalJournal(getInput('date'));
 
+        $kpenjualan= InvoiceSaleDetail::getTotalMutasiKartu(getInput('date'));
+        $jpenjualan= InvoiceSaleDetail::getTotalMutasiJounal(getInput('date'));
+
+        $kpembelian= InvoicePurchaseDetail::getTotalMutasiKartu(getInput('date'));
+        $jpembelian= InvoicePurchaseDetail::getTotalMutasiJournal(getInput('date'));
         return [
             'kartu_stock' => [
                 'saldo' => $ks,
@@ -157,6 +164,14 @@ class IndexController extends Controller
             'kartu_bdd' => [
                 'saldo' => $kprepaid,
                 'journal' => $jprepaid
+            ],
+            'penjualan' => [
+                'saldo' => $kpenjualan,
+                'journal' => $jpenjualan
+            ],
+            'pembelian' => [
+                'saldo' => $kpembelian,
+                'journal' => $jpembelian
             ],
             'status' => 1
         ];
