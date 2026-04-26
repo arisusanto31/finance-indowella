@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
+use App\Traits\HasIndexDate;
 use App\Traits\HasModelDetailKartuInvoice;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class InvoiceSaleDetail extends Model
 {
 
-    use HasModelDetailKartuInvoice;
+    use HasModelDetailKartuInvoice, HasIndexDate;
     protected $fillable = [
         'row_index',
         'invoice_pack_number',
@@ -67,5 +69,18 @@ class InvoiceSaleDetail extends Model
     public function customer()
     {
         return $this->belongsTo(\App\Models\Customer::class, 'customer_id');
+    }
+
+    public function fillIndexDate()
+    {
+
+        if ($this->journal_id > 0) {
+            $journal  = Journal::find($this->journal_id);
+            if ($journal) {
+                $this->index_date_group = $journal->index_date_group;
+                $this->index_date= self::getNextIndexDate(Carbon::createFromFormat('ymdHis', $journal->index_date_group));
+                $this->save();
+            }
+        }
     }
 }

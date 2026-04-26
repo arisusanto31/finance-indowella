@@ -808,4 +808,6 @@ class InvoiceSaleController extends Controller
             return ['status' => 0, 'msg' => $e->getMessage()];
         }
     }
+
+    
 }

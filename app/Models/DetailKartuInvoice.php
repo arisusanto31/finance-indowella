@@ -121,8 +121,7 @@ class DetailKartuInvoice extends Model
             //oke dari sini sudah ada jurnal dan invoice pack, dan bisa jadi ada kartu
             $dt = null;
 
-            $dt = DetailKartuInvoice::where('journal_id', $journal->id)
-                ->first();
+            $dt = DetailKartuInvoice::where('journal_id', $journal->id)->first();
             if ($dt) {
                 $dt->updateData($dataUpdate);
             } else {

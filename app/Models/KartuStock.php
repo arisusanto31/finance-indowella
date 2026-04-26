@@ -186,16 +186,15 @@ class KartuStock extends Model
             $chart = ChartAccount::where('code_group', $codeGroup)->first();
             $PONumber = $request->input('purchase_order_number');
             $SONumber = $request->input('sales_order_number');
+
+            $POID= $request->input('purchase_order_id');
             $invoiceNumber = $request->input('invoice_pack_number');
             $isOtomatisJurnal = $request->input('is_otomatis_jurnal') == 'on' ? true : false;
             $desc = $request->input('description');
             $lawanCodeGroup = $request->input('lawan_code_group');
 
-            $POID = $SOID = $invID = null;
-            if ($PONumber) {
-                $PO = PurchaseOrder::where('purchase_order_number', $PONumber)->first();
-                $POID = $PO ? $PO->id : null;
-            }
+             $SOID = $invID = null;
+        
             if ($SONumber) {
                 $SO = SalesOrder::where('sales_order_number', $SONumber)->first();
                 $SOID = $SO ? $SO->id : null;

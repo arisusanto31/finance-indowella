@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Traits\HasIndexDate;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 class InvoicePurchaseDetail extends Model
 {
 
+    use HasIndexDate;
     protected $fillable = [
         'invoice_pack_number',
         'invoice_pack_id',
@@ -87,5 +90,24 @@ class InvoicePurchaseDetail extends Model
     public function supplier()
     {
         return $this->belongsTo(\App\Models\Supplier::class, 'supplier_id');
+    }
+
+    public function fillKartuStockID(){
+        $ks= KartuStock::leftJoin('journals','journals.id','kartu_stocks.journal_id')
+        ->where('journals.book_journal_id',bookID())
+        ->where('kartu_stocks.stock_id',$this->stock_id)
+        ->where('journals.description','like','%'.$this->invoice_pack_number.'%')
+        ->select('kartu_stocks.id as kartu_stock_id','journals.id as journal_id','journals.journal_number','journals.index_date_group')
+        ->first();
+        if($ks){
+            $this->kartu_stock_id=$ks->kartu_stock_id;
+            $this->index_date=self::getNextIndexDate(Carbon::createFromFormat('ymdHis', $ks->index_date_group));
+            $this->index_date_group= $ks->index_date_group;
+            $this->journal_id=$ks->journal_id;
+            $this->journal_number=$ks->journal_number;
+            $this->save();
+        }
+
+        
     }
 }

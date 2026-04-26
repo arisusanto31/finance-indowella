@@ -299,6 +299,7 @@ class InvoicePackController extends Controller
                     'code_group' => $coaPersediaan,
                     'is_custom_rupiah' => 1,
                     'mutasi_rupiah_total' => $detail->total_price,
+                    'purchase_order_id'=>$detail->id,
                     'date' => $date
                 ]), false);
                 if ($kartuStock['status'] == 0) {

@@ -100,6 +100,8 @@ class JournalController extends Controller
         return ChartAccount::getRincianMutationNeracaLajur($month, $year);
     }
 
+    
+
     public function linkJournal(Request $request)
     {
         $model = $request->input('model');

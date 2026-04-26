@@ -224,7 +224,8 @@ class InvoicePurchaseController extends Controller
 
         $coaDebet = $request->input('code_group_debet');
         $coaKredit = $request->input('code_group_kredit');
-        $toko = Toko::first();
+        $toko = Toko::first();  
+        $poID= $request->input('invoice_purchase_detail_id');
 
         $invoicePackID = $request->input('invoice_pack_id');
         $invoicePackNumber = $request->input('invoice_pack_number');
@@ -289,6 +290,7 @@ class InvoicePurchaseController extends Controller
                     'mutasi_quantity' => $quantity,
                     'unit' => $unit,
                     'flow' => 0,
+                    'purchase_order_id'=>$poID,
                     'production_number' => $invoicePackNumber,
                     'invoice_pack_number' => $invoicePackNumber,
                     'sales_order_number' => null,

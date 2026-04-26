@@ -28,6 +28,7 @@ trait HasIndexDate
         $lastData = static::query()->where('index_date_group', $date)
             ->select(DB::raw('MAX(index_date) as maxindex'))
             ->first();
+        info('last index date ' . ($lastData ? $lastData->maxindex : 'null'));
 
         $lastIndex = $lastData && $lastData->maxindex ? ((int) substr($lastData->maxindex, -3)) : 0;
 
