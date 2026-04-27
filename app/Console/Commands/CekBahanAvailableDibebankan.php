@@ -41,15 +41,17 @@ class CekBahanAvailableDibebankan extends Command
             ->whereIn('stock_id', $allstockid)->select('saldo_qty_backend', 'saldo_rupiah_total', 'stock_id')->get()->groupBy('stock_id')
             ->map(function ($item) use ($stocknames) {
                 $min = collect($item)->min('saldo_qty_backend');
-                if($min>0){
-                return [
-                    'stock_id' => $item[0]->stock_id,
-                    'stock_name' => $stocknames[$item[0]->stock_id] ?? '',
-                    'available' => $min,
+                if ($min > 0) {
+                    return [
+                        'stock_id' => $item[0]->stock_id,
+                        'stock_name' => $stocknames[$item[0]->stock_id] ?? '',
+                        'available' => $min,
 
-                ];
+                    ];
                 }
-            })->filter(function($val){ return !is_null($val); })->values();
+            })->filter(function ($val) {
+                if($val)return true;
+            })->values();
 
         tampilkanTableTerminal($allMutasi, [
             'stock_id' => 'center',
