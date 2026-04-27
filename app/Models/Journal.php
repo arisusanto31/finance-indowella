@@ -181,7 +181,7 @@ class Journal extends Model
                 }
                 // info('counter:' . $counter);
                 $finalIndexDate = $indexDate . sprintf("%02d", ($counter + 1));
-                $codeGroup= $request->input('code_group');
+                $codeGroup = $request->input('code_group');
                 $lastJournal = Journal::where('code_group', $codeGroup)->where('index_date', '<', $finalIndexDate)->orderBy('index_date', 'desc')->first();
                 info('get final index date for code group' . $codeGroup . ': ' . $finalIndexDate);
                 $journal = new Journal;
@@ -356,12 +356,11 @@ class Journal extends Model
 
     public function recalculateJournal($isLock = true)
     {
-        $thejournal = $this;
+        $thejournal = Journal::find($this->id);
         $lastJournal = Journal::where('code_group', $thejournal->code_group)->where('index_date', '<', $thejournal->index_date)->orderBy('index_date', 'desc')->first();
         $lastSaldo = $lastJournal ? $lastJournal->amount_saldo : 0;
         $amount = $thejournal->code_group > 200000 ?
             ($thejournal->amount_kredit - $thejournal->amount_debet) : ($thejournal->amount_debet - $thejournal->amount_kredit);
-
         $thejournal->amount_saldo = round($lastSaldo + $amount, 2);
         $thejournal->save();
         $thejournal->refresh();
@@ -384,6 +383,7 @@ class Journal extends Model
             $mustEditJournal = Journal::where('index_date', '>', $thejournal->index_date)->where('code_group', $thejournal->code_group)->sortindex()->get();
             $lastSaldo = $thejournal->amount_saldo;
             $newdata = [];
+            $dataUpdate = [];
             foreach ($mustEditJournal as $journal) {
 
                 if ($journal->code_group < 200000) { //aktiva
@@ -391,10 +391,21 @@ class Journal extends Model
                 } else { //passiva
                     $journal->amount_saldo = round(($lastSaldo - $journal->amount_debet + $journal->amount_kredit), 2);
                 }
-                $journal->save();
+                // $journal->save();
+                $dataUpdate[] = [
+                    'id' => $journal->id,
+                    'amount_saldo' => $journal->amount_saldo
+                ];
                 $lastSaldo = $journal->amount_saldo;
                 $newdata[] = collect($journal)->only(['id', 'description', 'index_date', 'amount_saldo', 'amount_debet', 'amount_kredit']);
             }
+
+            upsertInChunks(
+                Journal::class,
+                $dataUpdate,
+                'id',
+                ['amount_saldo']
+            );
         } catch (LockTimeoutException $e) {
             return [
                 'status' => 0,

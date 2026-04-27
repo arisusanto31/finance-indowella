@@ -459,7 +459,7 @@ class JournalController extends Controller
         ];
     }
 
-    public static function createBaseJournal(Request $request, $useTransaction = true, ?LockManager $lockManager = null)
+    public static function createBaseJournal(Request $request, $useTransaction = true, ?LockManager $lockManager = null,$noRecalculate=false)
     {
         $urlTryAgain = $request->input('url_try_again');
 
@@ -490,7 +490,7 @@ class JournalController extends Controller
             ];
         }
 
-        $callback = function () use ($request, $isLockIntern, $urlTryAgain, $date, $lockManager, $isBackDate, $useTransaction) {
+        $callback = function () use ($request, $isLockIntern, $urlTryAgain, $date, $lockManager, $isBackDate,$noRecalculate, $useTransaction) {
             $kredits = $request->input('kredits');
             $debets = $request->input('debets');
             $type = $request->input('type');
@@ -598,8 +598,9 @@ class JournalController extends Controller
                 if ($st['status'] == 0) {
                     throw new \Exception('gagal membuat detail kartu invoice: ' . $st['msg']);
                 }
-
-                $journal->recalculateJournal();
+                if ($isBackDate == 1 && !$noRecalculate) {
+                    $journal->calculateJournalNext(false);
+                }
             }
             if ($isLockIntern == 1) {
                 //lock manual dilepas setelah semua proses transaksi selesai
@@ -1438,7 +1439,7 @@ class JournalController extends Controller
                         'date' => $tanggalJurnal,
                         'is_auto_generated' => 0,
                         'title' => 'Jurnal tutup buku'
-                    ]), false, $lockManager);
+                    ]), false, $lockManager, true);
 
                     if ($st['status'] == 0) return $st;
                     $allOutput[] = $st;
@@ -1491,7 +1492,7 @@ class JournalController extends Controller
                     'date' => $tanggalJurnal,
                     'is_auto_generated' => 0,
                     'title' => 'Jurnal tutup buku'
-                ]), false, $lockManager);
+                ]), false, $lockManager, true);
 
                 if ($st['status'] == 1) {
                     JournalKey::create([
@@ -1508,6 +1509,17 @@ class JournalController extends Controller
                 'debet' => $debets,
                 'kredit' => $kredits
             ];
+
+            //setelah terinput baru recalculate jadi 
+            $minIndex= Journal::where('tag', $tag)->min('index_date');
+            $sub= Journal::where('index_date','<',$minIndex)
+                ->select('code_group',DB::raw('MAX(index_date) as max_index_date'))->groupBy('code_group');
+            $lastJournals= Journal::joinSub($sub,'sub',function($join){
+                $join->on('journals.code_group','=','sub.code_group')->on('journals.index_date','=','sub.max_index_date');
+            })->select('journals.*')->get();
+            foreach($lastJournals as $j){
+                $j->calculateJournalNext(false);
+            }
             DB::commit();
             if ($lockManager) {
                 $lockManager->releaseAll();
@@ -1564,7 +1576,7 @@ class JournalController extends Controller
             //   throw new \Exception('sampek sini aman');
             foreach ($lj as $j) {
                 if ($j)
-                    $j->calculateJournalNext();
+                    $j->calculateJournalNext(false);
             }
             DB::commit();
             return ['status' => 1, 'msg' => 'success', 'monthyear' => $monthyear];
