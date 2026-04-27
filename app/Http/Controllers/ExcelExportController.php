@@ -364,6 +364,11 @@ class ExcelExportController extends Controller
             return in_array($item['code_group'], $codeHPP);
         })->sum('saldo_akhir');
 
+        $saldoLaba= collect($neraca['msg']['Ekuitas'])->where('code_group',302000)->first()['saldo']??0; 
+        $sumNeracaLaba= $neracaLabaBulan+ $saldoLaba;
+        $sumKartuLR= collect($lr['msg'])->sum(function($tahun){
+            return collect($tahun)->sum('saldo_akhir');
+        });
         $data = [];
         $data[] = [
             'keterangan' => 'Total Pembelian vs Total Kartu Masuk',
@@ -442,6 +447,12 @@ class ExcelExportController extends Controller
             'data1'=> $penambahanPiutang,
             'data2'=> $totalPenjualan,
             'hasil'=>abs($penambahanPiutang - $totalPenjualan) > 0.01 ? 'TIDAK SESUAI (' . ($penambahanPiutang - $totalPenjualan) . ')' : 'SESUAI'  
+        ];
+        $data[]=[
+            'keterangan'=> 'sum neraca laba vs sum kartu LR',
+            'data1'=> $sumNeracaLaba,
+            'data2'=> $sumKartuLR,
+            'hasil'=>abs($sumNeracaLaba - $sumKartuLR) > 0.01 ? 'TIDAK SESUAI (' . ($sumNeracaLaba - $sumKartuLR) . ')' : 'SESUAI'  
         ];
         $data[]=[
             'keterangan'=>"AwalStock +pembelian- akhir stock vs HPP",
