@@ -57,6 +57,21 @@ class InvoiceSaleDetail extends Model
         static::updating(function ($model) {});
     }
 
+    public static function getNextIndexDate($inputDate)
+    {
+        $date = createCarbon($inputDate)->format('ymdHis');
+
+        $lastData = static::query()->where('index_date_group', $date)
+            ->select(DB::raw('MAX(index_date) as maxindex'))
+            ->first();
+        info('last index date from ' . $date . ' : ' . ($lastData ? $lastData->maxindex : 'null'));
+
+        $lastIndex = $lastData && $lastData->maxindex ? ((int) substr($lastData->maxindex, -3)) : 0;
+
+        $newIndex = $date . str_pad($lastIndex + 1, 3, '0', STR_PAD_LEFT);
+
+        return $newIndex;
+    }
     public function parent()
     {
 
@@ -87,7 +102,7 @@ class InvoiceSaleDetail extends Model
         $dateAkhir = createCarbon($date)->format('ymdHis99');
         $coa = ChartAccount::where('reference_model', InvoiceSaleDetail::class)->pluck('code_group')->all();
         $total = Journal::where('index_date', '>', $dateAwal)->where('index_date', '<', $dateAkhir)->whereIn('code_group', $coa)->sum(DB::raw('amount_debet-amount_kredit'));
-        return $total ? $total*-1 : 0;
+        return $total ? $total * -1 : 0;
     }
 
     public function fillIndexDate()

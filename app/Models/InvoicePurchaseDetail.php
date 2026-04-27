@@ -113,6 +113,22 @@ class InvoicePurchaseDetail extends Model
         return $total ? ($total) : 0;
     }
 
+     public static function getNextIndexDate($inputDate)
+    {
+        $date = createCarbon($inputDate)->format('ymdHis');
+
+        $lastData = static::query()->where('index_date_group', $date)
+            ->select(DB::raw('MAX(index_date) as maxindex'))
+            ->first();
+        info('last index date from '.$date.' : ' . ($lastData ? $lastData->maxindex : 'null'));
+
+        $lastIndex = $lastData && $lastData->maxindex ? ((int) substr($lastData->maxindex, -3)) : 0;
+
+        $newIndex = $date . str_pad($lastIndex + 1, 3, '0', STR_PAD_LEFT);
+
+        return $newIndex;
+    }
+
     public function fillKartuStockID()
     {
         try {
