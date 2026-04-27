@@ -59,7 +59,7 @@ class fillINVKartuStockID extends Command
         }
         if ($ks) {
             $inv->kartu_stock_id = $ks->kartu_stock_id;
-            $inv->index_date = self::getNextIndexDate(Carbon::createFromFormat('ymdHis', $ks->index_date_group));
+            $inv->index_date = InvoicePurchaseDetail::getNextIndexDate(Carbon::createFromFormat('ymdHis', $ks->index_date_group));
             $inv->index_date_group = $ks->index_date_group;
             $inv->journal_id = $ks->journal_id;
             $inv->journal_number = $ks->journal_number;
