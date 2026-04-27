@@ -40,21 +40,35 @@ class EvaluasiHPP extends Command
         $journalPersediaan=Journal::where('index_date', '>', $indexStart)->where('index_date', '<', $indexEnd)
             ->whereIn('code_group', $codeKartuStock)
             ->select('lawan_code_group',DB::raw('SUM(amount_kredit) as total_kredit'))
-            ->groupBy('lawan_code_group')->get();
+            ->groupBy('lawan_code_group')->having('total_kredit', '>', 0)->get();
+
+        $journalPersediaanMasuk= Journal::where('index_date', '>', $indexStart)->where('index_date', '<', $indexEnd)
+            ->whereIn('code_group', $codeKartuStock)
+            ->select('lawan_code_group',DB::raw('SUM(amount_debet) as total_debet'))
+            ->groupBy('lawan_code_group')->having('total_debet', '>', 0)->get();
         $journalHPP=Journal::where('index_date', '>', $indexStart)->where('index_date', '<', $indexEnd)
             ->whereIn('code_group', $codeHPP)
             ->select('lawan_code_group',DB::raw('SUM(amount_debet) as total_debet'))
-            ->groupBy('lawan_code_group')->get();
-        $this->info('Persediaan');
+            ->groupBy('lawan_code_group')->having('total_debet', '>', 0)->get();
+        $this->info('Persediaan Keluar');
         tampilkanTableTerminal($journalPersediaan->toArray(),[
             'lawan_code_group' => 'center',
             'total_kredit' => 'right'
         ], $this);
-        $this->info('HPP');
+
+        $this->info('Persediaan Masuk');
+        tampilkanTableTerminal($journalPersediaanMasuk->toArray(),[
+            'lawan_code_group' => 'center',
+            'total_debet' => 'right'
+        ], $this);
+
+        $this->info('HPP Masuk');
         tampilkanTableTerminal($journalHPP->toArray(),[
             'lawan_code_group' => 'center',
             'total_debet' => 'right'
         ], $this);
+
+
         $this->info('Evaluasi');
     }
 }
