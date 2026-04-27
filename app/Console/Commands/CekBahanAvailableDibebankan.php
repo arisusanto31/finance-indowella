@@ -41,7 +41,7 @@ class CekBahanAvailableDibebankan extends Command
         })->where('saldo_qty_backend', '>', 0)->select('stock_id', 'saldo_qty_backend', DB::raw('saldo_rupiah_total/saldo_qty_backend as hpp'))->get()->keyBy('stock_id');
         $stockname = Stock::whereIn('id', $allstockid)->pluck('name', 'id')->all();
         for ($month = 12; $month > 0; $month--) {
-            $indexDateAwal = createCarbon($year . '-' . toDigit($month, 2) . '-01')->format('ymdHis000');
+            $indexDateAwal = createCarbon($year . '-' . toDigit($month, 2) . '-01')->startOfMonth()->format('ymdHis000');
             $indexDateAkhir = createCarbon($year . '-' . toDigit($month, 2) . '-01')->endOfMonth()->format('ymdHis999');
             // $this->info('cari mutasi dari '.$indexDateAwal.' sampai '.$indexDateAkhir);
             $mutasi = KartuStock::where('index_date', '>', $indexDateAwal)->where('index_date', '<', $indexDateAkhir)
