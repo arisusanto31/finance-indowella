@@ -96,38 +96,44 @@ class InvoicePurchaseDetail extends Model
         return $this->belongsTo(\App\Models\Supplier::class, 'supplier_id');
     }
 
-    public static function getTotalMutasiKartu($date){
+    public static function getTotalMutasiKartu($date)
+    {
         $dateAwal = createCarbon($date)->startOfMonth()->format('ymdHis000');
         $dateAkhir = createCarbon($date)->format('ymdHis999');
-        $total = InvoicePurchaseDetail::query()->where('index_date','>',$dateAwal)->where('index_date','<',$dateAkhir)->sum('total_price');
+        $total = InvoicePurchaseDetail::query()->where('index_date', '>', $dateAwal)->where('index_date', '<', $dateAkhir)->sum('total_price');
         return $total ? $total : 0;
     }
 
-    public static function getTotalMutasiJournal($date){
+    public static function getTotalMutasiJournal($date)
+    {
         $dateAwal = createCarbon($date)->startOfMonth()->format('ymdHis00');
         $dateAkhir = createCarbon($date)->format('ymdHis99');
         $coa = ChartAccount::where('reference_model', KartuStock::class)->pluck('code_group')->all();
-        $total = Journal::where('index_date','>',$dateAwal)->where('index_date','<',$dateAkhir)->whereIn('code_group', $coa)->where('amount_debet','>',0)->sum(DB::raw('amount_debet-amount_kredit'));
+        $total = Journal::where('index_date', '>', $dateAwal)->where('index_date', '<', $dateAkhir)->whereIn('code_group', $coa)->where('amount_debet', '>', 0)->sum(DB::raw('amount_debet-amount_kredit'));
         return $total ? ($total) : 0;
-
     }
 
-    public function fillKartuStockID(){
-        $ks= KartuStock::leftJoin('journals','journals.id','kartu_stocks.journal_id')
-        ->where('journals.book_journal_id',bookID())
-        ->where('kartu_stocks.stock_id',$this->stock_id)
-        ->where('journals.description','like','%'.$this->invoice_pack_number.'%')
-        ->select('kartu_stocks.id as kartu_stock_id','journals.id as journal_id','journals.journal_number','journals.index_date_group')
-        ->first();
+    public function fillKartuStockID()
+    {
+        $ks = KartuStock::where('purchase_order_id', $this->id)->first();
         if($ks){
-            $this->kartu_stock_id=$ks->kartu_stock_id;
-            $this->index_date=self::getNextIndexDate(Carbon::createFromFormat('ymdHis', $ks->index_date_group));
-            $this->index_date_group= $ks->index_date_group;
-            $this->journal_id=$ks->journal_id;
-            $this->journal_number=$ks->journal_number;
+            $ks->kartu_stock_id = $ks->id;
+        }
+        if (!$ks) {
+            $ks = KartuStock::leftJoin('journals', 'journals.id', 'kartu_stocks.journal_id')
+                ->where('journals.book_journal_id', bookID())
+                ->where('kartu_stocks.stock_id', $this->stock_id)
+                ->where('journals.description', 'like', '%' . $this->invoice_pack_number . '%')
+                ->select('kartu_stocks.id as kartu_stock_id', 'journals.id as journal_id', 'journals.journal_number', 'journals.index_date_group')
+                ->first();
+        }
+        if ($ks) {
+            $this->kartu_stock_id = $ks->kartu_stock_id;
+            $this->index_date = self::getNextIndexDate(Carbon::createFromFormat('ymdHis', $ks->index_date_group));
+            $this->index_date_group = $ks->index_date_group;
+            $this->journal_id = $ks->journal_id;
+            $this->journal_number = $ks->journal_number;
             $this->save();
         }
-
-        
     }
 }
