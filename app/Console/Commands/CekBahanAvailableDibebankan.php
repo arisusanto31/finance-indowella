@@ -15,7 +15,7 @@ class CekBahanAvailableDibebankan extends Command
      *
      * @var string
      */
-    protected $signature = 'cek:bahan-available-dibebankan {bookid} {catid} {year=2025}';
+    protected $signature = 'cek:bahan-available-dibebankan {bookid} {catid} {month} {year=2025}';
 
     /**
      * The console command description.
@@ -32,10 +32,11 @@ class CekBahanAvailableDibebankan extends Command
         //
         Session::put('book_journal_id', $this->argument('bookid', 1));
         $catid = $this->argument('catid');
+        $month = $this->argument('month');
         $year = $this->argument('year', 2025);
         $catid = explode(',', $catid);
         $stocknames = Stock::whereIn('category_id', $catid)->pluck('name', 'id')->all();
-        $start = createCarbon($year . '-01-01 00:00:00')->format('ymdHis000');
+        $start = createCarbon($year . '-' . $month . '-01 00:00:00')->format('ymdHis000');
         $allstockid = Stock::whereIn('category_id', $catid)->pluck('id')->toArray();
         $allMutasi = KartuStock::where('index_date', '>', $start)
             ->whereIn('stock_id', $allstockid)->select('saldo_qty_backend', 'saldo_rupiah_total', 'stock_id')->get()->groupBy('stock_id')
