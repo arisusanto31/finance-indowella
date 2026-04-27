@@ -56,21 +56,22 @@ class CekBahanAvailableDibebankan extends Command
             $mutasi = $mutasi->pluck('total_pembelian', 'stock_id')->all();
             $datas = [];
             foreach ($lasthpp as $stockid => $data) {
+
+                $datas[] = [
+                    'month' => $year . '-' . $month,
+                    'stock_id' => $stockid,
+                    'stock_name' => $stockname[$stockid] ?? $stockid,
+                    'available' => $lasthpp[$stockid]->saldo_qty_backend,
+                    'hpp' => $data->hpp,
+                    'total_nilai' => $lasthpp[$stockid]->saldo_qty_backend * $data->hpp,
+                    'total_pembelian' => isset($mutasi[$stockid]) ? $mutasi[$stockid] : 0
+                ];
                 $lasthpp[$stockid]->saldo_qty_backend -= isset($mutasi[$stockid]) ? $mutasi[$stockid] : 0;
                 if ($lasthpp[$stockid]->saldo_qty_backend <= 0) {
                     // $lasthpp[$stockid]->saldo_qty_backend = 0;
                     //buang array stock id dalam lasthpp
                     unset($lasthpp[$stockid]);
                 }
-                $datas[] = [
-                    'month' => $year . '-' . $month,
-                    'stock_id' => $stockid,
-                    'stock_name' => $stockname[$stockid] ?? $stockid,
-                    'available' => $data->saldo_qty_backend,
-                    'hpp' => $data->hpp,
-                    'total_nilai' => $data->saldo_qty_backend * $data->hpp,
-                    'total_pembelian' => isset($mutasi[$stockid]) ? $mutasi[$stockid] : 0
-                ];
             }
             tampilkanTableTerminal($datas, [
                 'month' => 'center',
