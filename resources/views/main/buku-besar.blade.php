@@ -171,6 +171,7 @@
                     data:{
                         journal_id:id,
                         lawan_code:lawanCode,
+                        _token:'{{ csrf_token() }}'
                     },
                     success: function(res) {
                         loading(0);

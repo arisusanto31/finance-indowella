@@ -304,7 +304,8 @@ class JournalController extends Controller
             ->orderBy('index_date', 'asc')
             ->selectRaw(
                 'journals.*,
-                case when journals.created_at < ? then 1 else 0 end as is_locked', [$key->created_at??'2025-01-01 00:00:00']
+                case when journals.created_at < ? then 1 else 0 end as is_locked',
+                [$key->created_at ?? '2025-01-01 00:00:00']
             )
             ->get()->groupBy('code_group');
         $chartAccount = ChartAccount::aktif()->withAlias()->pluck('alias_name', 'code_group');
@@ -328,38 +329,48 @@ class JournalController extends Controller
 
     public function changeLawanCode(Request $request)
     {
-        $journalId = $request->input('journal_id');
-        $lawanCodeGroup = $request->input('lawan_code_group');
-        $journal = Journal::find($journalId);
-        $lawanJournal= Journal::where('index_date', $journal->index_date)->where('journal_number',$journal->journal_number)
-            ->where('code_group', $lawanCodeGroup)->first();
-        $chart= ChartAccount::where('code_group',$lawanCodeGroup)->first();
-        
-        if (!$journal) {
-            return [
-                'status' => 0,
-                'msg' => 'Journal tidak ditemukan'
-            ];
-        }
-        if ($journal->is_locked) {
-            return [
-                'status' => 0,
-                'msg' => 'Journal sudah terkunci, tidak bisa diubah'
-            ];
-        }
-        $lawanJournal->code_group= $lawanCodeGroup;
-        $lawanJournal->chart_account_id = $chart->id;
-        $lawanJournal->save();
-        $journal->lawan_code_group = $lawanCodeGroup;
-        $journal->save();
-        $lawanJournal->recalculateJournal();
-        return [
-            'status' => 1,
-            'msg' => 'Lawan code berhasil diubah',
-             'month' => getInput('month'),
-             'year' => getInput('year')
-         ];
 
+        DB::beginTransaction();
+        try {
+            $journalId = $request->input('journal_id');
+            $lawanCodeGroup = $request->input('lawan_code');
+
+            $journal = Journal::find($journalId);
+            $lawanJournal = Journal::where('index_date', $journal->index_date)->where('journal_number', $journal->journal_number)
+                ->where('code_group', $journal->lawan_code_group)->first();
+            $chart = ChartAccount::where('code_group', $lawanCodeGroup)->first();
+
+            if ($chart->is_child == 0) {
+                throw new \Exception('Lawan code harus child');
+            }
+
+            if (!$journal) {
+                throw new \Exception('Journal tidak ditemukan');
+            }
+            if ($journal->is_locked) {
+                throw new \Exception('Journal sudah terkunci, tidak bisa diubah');
+            }
+            $lawanJournal->code_group = $lawanCodeGroup;
+            $lawanJournal->chart_account_id = $chart->id;
+            $lawanJournal->save();
+            $journal->lawan_code_group = $lawanCodeGroup;
+            $journal->save();
+            $lawanJournal->recalculateJournal();
+            DB::commit();
+            return [
+                'status' => 1,
+                'msg' => 'Lawan code berhasil diubah',
+                'month' => getInput('month'),
+                'year' => getInput('year')
+            ];
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return [
+                'status' => 0,
+                'msg' => $e->getMessage()
+            ];
+        }
+    }
 
     public function updateNotValid()
     {
@@ -587,9 +598,8 @@ class JournalController extends Controller
                 if ($st['status'] == 0) {
                     throw new \Exception('gagal membuat detail kartu invoice: ' . $st['msg']);
                 }
-                if ($isBackDate == 1) {
-                    $journal->recalculateJournal();
-                }
+
+                $journal->recalculateJournal();
             }
             if ($isLockIntern == 1) {
                 //lock manual dilepas setelah semua proses transaksi selesai

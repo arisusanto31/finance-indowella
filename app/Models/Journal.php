@@ -181,8 +181,9 @@ class Journal extends Model
                 }
                 // info('counter:' . $counter);
                 $finalIndexDate = $indexDate . sprintf("%02d", ($counter + 1));
-                $lastJournal = Journal::where('chart_account_id', $coaID)->where('index_date', '<', $finalIndexDate)->orderBy('index_date', 'desc')->first();
-                info('get final index date for code group' . $request->input('code_group') . ': ' . $finalIndexDate);
+                $codeGroup= $request->input('code_group');
+                $lastJournal = Journal::where('code_group', $codeGroup)->where('index_date', '<', $finalIndexDate)->orderBy('index_date', 'desc')->first();
+                info('get final index date for code group' . $codeGroup . ': ' . $finalIndexDate);
                 $journal = new Journal;
                 $chartAccount = ChartAccount::find($coaID);
                 $journal->index_date = $finalIndexDate;
@@ -191,7 +192,7 @@ class Journal extends Model
                 $journal->reference_model = $chartAccount->reference_model;
                 $journal->journal_number = $journal_number;
                 $journal->lawan_code_group = $lawanCodeGroup;
-                $journal->code_group = $request->input('code_group');
+                $journal->code_group = $codeGroup;
                 $journal->description = $request->input('description');
                 $journal->amount_debet = $debet > 0 ? $debet : 0;
                 $journal->amount_kredit = $kredit > 0 ? $kredit : 0;
