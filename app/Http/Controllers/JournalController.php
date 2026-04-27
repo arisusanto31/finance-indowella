@@ -155,7 +155,7 @@ class JournalController extends Controller
                 return $data;
             })->values()->sortBy('amount_kredit')->values()->all();
         });
-        $chartAccount = ChartAccount::aktif()->pluck('name', 'code_group');
+        $chartAccount = ChartAccount::aktif()->withAlias()->get()->pluck('alias_name', 'code_group');
         return [
             'status' => 1,
             'msg' => $journal,
