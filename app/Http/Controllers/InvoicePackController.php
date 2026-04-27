@@ -306,6 +306,7 @@ class InvoicePackController extends Controller
                     throw new \Exception($kartuStock['msg']);
                 }
                 $ks[] = $kartuStock['msg'];
+                $detail->fillKartuStockID();
             }
             info(json_encode($ks));
             //oke sampek sini chat dan invoice sudah valid

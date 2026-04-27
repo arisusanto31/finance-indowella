@@ -398,6 +398,9 @@ class InvoicePurchaseController extends Controller
                 ]));
             }
 
+            $invp= InvoicePurchaseDetail::find($poID);
+            $invp->fillKartuStockID();
+
             DB::commit();
             return [
                 'status' => 1,

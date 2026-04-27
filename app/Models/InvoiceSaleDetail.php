@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 class InvoiceSaleDetail extends Model
 {
 
-    use HasModelDetailKartuInvoice, HasIndexDate, HasModelSaldoUang;
+    use HasModelDetailKartuInvoice;
     protected $fillable = [
         'row_index',
         'invoice_pack_number',

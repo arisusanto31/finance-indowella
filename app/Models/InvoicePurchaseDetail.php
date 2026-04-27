@@ -12,7 +12,7 @@ use Illuminate\Support\Str;
 class InvoicePurchaseDetail extends Model
 {
 
-    use HasIndexDate;
+   
     protected $fillable = [
         'invoice_pack_number',
         'invoice_pack_id',
