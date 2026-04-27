@@ -56,7 +56,7 @@ class CekBahanAvailableDibebankan extends Command
 
         tampilkanTableTerminal($allMutasi, [
             'stock_id' => 'center',
-            'stock_name' => 'center',
+            'stock_name' => 'left',
             'available' => 'right',
         ], $this);
     }
