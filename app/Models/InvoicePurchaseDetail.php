@@ -124,7 +124,7 @@ class InvoicePurchaseDetail extends Model
                 ->where('journals.book_journal_id', bookID())
                 ->where('kartu_stocks.stock_id', $this->stock_id)
                 ->where('journals.description', 'like', '%' . $this->invoice_pack_number . '%')
-                ->select('kartu_stocks.id as kartu_stock_id', 'journals.id as journal_id', 'journals.journal_number', 'journals.index_date_group')
+                ->select('kartu_stocks.id as kartu_stock_id','kartu_stocks.mutasi_rupiah_total', 'journals.id as journal_id', 'journals.journal_number', 'journals.index_date_group')
                 ->get();
             if(count($ks)==1){
                 $ks = $ks->first();
