@@ -300,12 +300,13 @@ class JournalController extends Controller
                 ->on('journals.code_group', '=', 'sub_journals.code_group');
         })->pluck('journals.amount_saldo', 'journals.code_group')->all();
         $key = JournalKey::orderBy('key_at', 'desc')->first();
+        $indexKey= $key?createCarbon($key->key_at)->format('ymdHis00'):'25010100000000';
         $journals = Journal::searchCOA($code)->whereMonth('created_at', $month)->whereYear('created_at', $year)
             ->orderBy('index_date', 'asc')
             ->selectRaw(
                 'journals.*,
-                case when journals.created_at < ? then 1 else 0 end as is_locked',
-                [$key->created_at ?? '2025-01-01 00:00:00']
+                case when journals.index_date < ? then 1 else 0 end as is_locked',
+                [$indexKey]
             )
             ->get()->groupBy('code_group');
         $chartAccount = ChartAccount::aktif()->withAlias()->pluck('alias_name', 'code_group');
