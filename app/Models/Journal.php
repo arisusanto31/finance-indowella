@@ -420,7 +420,6 @@ class Journal extends Model
     public function scopeSearchCOA($q, $search)
     {
         if ($search) {
-
             $primaryCode = self::getPrimaryCode($search);
             $q->where('journals.code_group', 'like',  $primaryCode . '%');
         }

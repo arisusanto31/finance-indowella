@@ -63,7 +63,7 @@ class ChartAccountController extends Controller
         $alias = ChartAccountAlias::pluck('name', 'code_group')->all();
         $finalChart = $charts->map(function ($val) use ($alias) {
             if (array_key_exists($val['id'], $alias)) {
-                $val['text'] = $alias[$val->id];
+                $val['text'] = $val['id'].' - '.$alias[$val['id']];
             }
             return $val;
         });

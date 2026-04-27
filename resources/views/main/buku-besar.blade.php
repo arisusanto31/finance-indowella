@@ -15,7 +15,7 @@
                 <!-- <a href="#" class="btn btn-primary btn-big-custom rounded-0">Tambah Jurnal Umum</a> -->
             </div>
             <div class="row">
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <select id="coa" class="form-select select-coa"></select>
 
                 </div>
@@ -76,6 +76,7 @@
                                         <tr>
                                             <th>No</th>
                                             <th>📅 Tanggal</th>
+                                            <th>🔢 ID jurnal</th>
                                             <th>#️⃣ No Jurnal</th>
                                             <th>🔢 LAWAN COA</th>
                                             <th>📎 Description</th>
@@ -114,8 +115,16 @@
                                     <tr>
                                         <td>${index+1}</td>
                                         <td>${tanggal}</td>
+                                        <td>${item.id} ${item.is_locked==1?`<span class="badge bg-warning"><i class="fa fa-lock"></i> </span>`:''}</td>
                                         <td>${item.journal_number} </td>
-                                        <td>${item.lawan_code_group} - ${res.chart_accounts[item.lawan_code_group]}</td>
+                                        <td>
+                                            ${item.is_locked==1?`
+                                                ${item.lawan_code_group} - ${res.chart_accounts[item.lawan_code_group]??''}
+                                            `:`
+                                            <select onchange="changeLawanCode(${item.id}, this.value)" class="select-lawan-code">
+                                                <option value="${item.lawan_code_group}">${item.lawan_code_group} - ${res.chart_accounts[item.lawan_code_group]??''}</option>   
+                                            </select>`}
+                                        </td>
                                         <td>${item.description}</td>
                                         <td>${formatRupiah(item.amount_debet)}</td>
                                         <td>${formatRupiah(item.amount_kredit)}</td>
@@ -143,11 +152,38 @@
                             });
 
                             $('#container-buku').html(html);
+                            initItemSelectManual('.select-lawan-code', '{{ route("chart-account.get-item-all") }}', 'chart account');
                         } else {
                             Swal.fire('opps', res.msg, 'error');
                         }
                     },
                     error: function(res) {
+                        Swal.fire('opps', 'Gagal mendapatkan data', 'error');
+                    }
+                });
+            }
+
+            function changeLawanCode(id,lawanCode){
+                loading(1);
+                $.ajax({
+                    url: '{{ url("admin/jurnal/change-lawan-code") }}',
+                    method: 'post',
+                    data:{
+                        journal_id:id,
+                        lawan_code:lawanCode,
+                    },
+                    success: function(res) {
+                        loading(0);
+                        console.log(res);
+                        if (res.status == 1) {
+                            Swal.fire('Berhasil', res.msg, 'success');
+                            searchData();
+                        } else {
+                            Swal.fire('opps', res.msg, 'error');
+                        }
+                    },
+                    error: function(res) {
+                        loading(0);
                         Swal.fire('opps', 'Gagal mendapatkan data', 'error');
                     }
                 });

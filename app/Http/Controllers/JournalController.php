@@ -100,7 +100,7 @@ class JournalController extends Controller
         return ChartAccount::getRincianMutationNeracaLajur($month, $year);
     }
 
-    
+
 
     public function linkJournal(Request $request)
     {
@@ -194,7 +194,7 @@ class JournalController extends Controller
     {
         if ($tokoid == "" || $tokoid == "null" || $tokoid == 0) $tokoid = null;
         $date = getInput('date') ? getInput('date') : carbonDate();
-          if (!$date) {
+        if (!$date) {
             //breati ga ada permintaan date, kita cari di month dan year ya
             $month = getInput('month') ? toDigit(getInput('month'), 2) : Date('m');
             $year = getInput('year') ? getInput('year') : Date('Y');
@@ -299,15 +299,21 @@ class JournalController extends Controller
             $q->on('journals.index_date', '=', 'sub_journals.maxindex')
                 ->on('journals.code_group', '=', 'sub_journals.code_group');
         })->pluck('journals.amount_saldo', 'journals.code_group')->all();
-
-        $journals = Journal::searchCOA($code)->whereMonth('created_at', $month)->whereYear('created_at', $year)->with(['lawanCode:name,code_group'])
-            ->orderBy('index_date', 'asc')->get()->groupBy('code_group');
+        $key = JournalKey::orderBy('key_at', 'desc')->first();
+        $journals = Journal::searchCOA($code)->whereMonth('created_at', $month)->whereYear('created_at', $year)
+            ->orderBy('index_date', 'asc')
+            ->selectRaw(
+                'journals.*,
+                case when journals.created_at < ? then 1 else 0 end as is_locked', [$key->created_at??'2025-01-01 00:00:00']
+            )
+            ->get()->groupBy('code_group');
         $chartAccount = ChartAccount::aktif()->withAlias()->pluck('alias_name', 'code_group');
         foreach ($coas as $coa) {
             if (!array_key_exists($coa, $journals->all())) {
                 $journals[$coa] = [];
             }
         }
+
         return [
             'status' => 1,
             'msg' => $journals,
@@ -315,9 +321,44 @@ class JournalController extends Controller
             'month' => $month,
             'year' => $year,
             'saldo_awal' => $lastSaldoJournal,
-            'code_group' => $code
+            'code_group' => $code,
+            'key' => $key
         ];
     }
+
+    public function changeLawanCode(Request $request)
+    {
+        $journalId = $request->input('journal_id');
+        $lawanCodeGroup = $request->input('lawan_code_group');
+        $journal = Journal::find($journalId);
+        $lawanJournal= Journal::where('index_date', $journal->index_date)->where('journal_number',$journal->journal_number)
+            ->where('code_group', $lawanCodeGroup)->first();
+        $chart= ChartAccount::where('code_group',$lawanCodeGroup)->first();
+        
+        if (!$journal) {
+            return [
+                'status' => 0,
+                'msg' => 'Journal tidak ditemukan'
+            ];
+        }
+        if ($journal->is_locked) {
+            return [
+                'status' => 0,
+                'msg' => 'Journal sudah terkunci, tidak bisa diubah'
+            ];
+        }
+        $lawanJournal->code_group= $lawanCodeGroup;
+        $lawanJournal->chart_account_id = $chart->id;
+        $lawanJournal->save();
+        $journal->lawan_code_group = $lawanCodeGroup;
+        $journal->save();
+        $lawanJournal->recalculateJournal();
+        return [
+            'status' => 1,
+            'msg' => 'Lawan code berhasil diubah',
+             'month' => getInput('month'),
+             'year' => getInput('year')
+         ];
 
 
     public function updateNotValid()
@@ -346,8 +387,8 @@ class JournalController extends Controller
     {
         $indexAwal = getInput('index_date') ? getInput('index_date') : 0;
         $indexAwal = intval(createCarbon($indexAwal)->format('ymdHis00'));
-        $indexAkhir= Carbon::createFromFormat('ymdHis00', $indexAwal)->addMonths(12)->format('ymdHis00');
-         
+        $indexAkhir = Carbon::createFromFormat('ymdHis00', $indexAwal)->addMonths(12)->format('ymdHis00');
+
         //ari 3 bulan kedepan
         try {
             $journals = Journal::whereBetween('index_date', [$indexAwal, $indexAkhir])->select('index_date', 'journal_number', 'description', 'amount_kredit', 'amount_debet', 'code_group', 'amount_saldo', 'id')->orderBy('index_date', 'asc')->get();
@@ -383,7 +424,7 @@ class JournalController extends Controller
             return [
                 'status' => 0,
                 'msg' => 'tidak ada problem',
-                'from'=> $indexAwal,
+                'from' => $indexAwal,
                 'to' => $indexAkhir
             ];
         } catch (Throwable $e) {
@@ -547,7 +588,7 @@ class JournalController extends Controller
                     throw new \Exception('gagal membuat detail kartu invoice: ' . $st['msg']);
                 }
                 if ($isBackDate == 1) {
-                    $journal->calculateJournalNext(false);
+                    $journal->recalculateJournal();
                 }
             }
             if ($isLockIntern == 1) {
@@ -1309,8 +1350,8 @@ class JournalController extends Controller
                         ->on('j.index_date', '=', 'subquery.max_index_date');
                 })
                 ->rightJoin('chart_accounts as ca', 'ca.code_group', '=', 'j.code_group')
-                ->rightJoin('chart_account_aliases as alias',function($join){
-                    $join->on('alias.code_group','=','ca.code_group')->where('alias.book_journal_id',book()->id);
+                ->rightJoin('chart_account_aliases as alias', function ($join) {
+                    $join->on('alias.code_group', '=', 'ca.code_group')->where('alias.book_journal_id', book()->id);
                 })
                 ->where('ca.code_group', '>=', 400000)->where('ca.is_child', 1)
                 ->select(
@@ -1372,7 +1413,7 @@ class JournalController extends Controller
 
             $selisih = $totalSaldo;
 
-           
+
             $allInput = [];
             $allOutput = [];
             $tanggalJurnal = createCarbon($monthyear)->endOfMonth()->format('Y-m-d H:i:s');
@@ -1482,7 +1523,7 @@ class JournalController extends Controller
 
             $keyMonth = createCarbon($monthyear)->endOfMonth()->format('Y-m-d H:i:s');
             $journalKeys = JournalKey::where('key_at', '>', $keyMonth)->count();
-            $nextKey= JournalKey::where('key_at', '>', $keyMonth)->orderBy('key_at', 'asc')->first();
+            $nextKey = JournalKey::where('key_at', '>', $keyMonth)->orderBy('key_at', 'asc')->first();
             if ($journalKeys > 0) {
                 return [
                     'status' => 0,
@@ -1507,13 +1548,13 @@ class JournalController extends Controller
                     $lj[] = $lastJ;
                 }
             }
-          
+
             $dk = DetailKartuInvoice::whereIn('journal_id', $journals->pluck('id')->all())->delete();
             Journal::where('tag', $tag)->delete();
             //   throw new \Exception('sampek sini aman');
             foreach ($lj as $j) {
-                if($j)
-                $j->calculateJournalNext();
+                if ($j)
+                    $j->calculateJournalNext();
             }
             DB::commit();
             return ['status' => 1, 'msg' => 'success', 'monthyear' => $monthyear];
@@ -1664,7 +1705,7 @@ class JournalController extends Controller
                 case 'App\\Models\\KartuPrepaidExpense':
                     $tableName = "kartu_prepaid_expenses";
                     break;
-            }   
+            }
 
             $saldoAwal = $model::whereIn('index_date', function ($q) use ($indexDate, $tableName, $key) {
                 $q->select(DB::raw('MAX(index_date)'))->from($tableName)->where('index_date', '<=', $indexDate)->groupBy($key);
@@ -1770,8 +1811,7 @@ class JournalController extends Controller
                     ];
                 }
                 upsertInChunks($model, $updater, 'id', ['amount_saldo_factur']);
-            }
-            else if($model=='KartuInventory' || $model == 'KartuPrepaidExpense'){
+            } else if ($model == 'KartuInventory' || $model == 'KartuPrepaidExpense') {
                 $model = 'App\\Models\\' . $model;
                 $kartu = $model::find($id);
                 if (!$kartu) {
@@ -1800,8 +1840,7 @@ class JournalController extends Controller
                     ];
                 }
                 upsertInChunks($model, $updater, 'id', ['nilai_buku']);
-            }
-            else {
+            } else {
                 throw new \Exception('model belum diakomodasi');
             }
         } catch (\Exception $e) {

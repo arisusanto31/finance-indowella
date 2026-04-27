@@ -108,6 +108,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::get('/get-laba-rugi/{id}', [JournalController::class, 'getLabaRugi'])->name('get-laba-rugi');
         Route::get('/get-closing-journal', [JournalController::class, 'getClosingJournal'])->name('get-closing-journal');
         Route::get('/update-not-valid', [JournalController::class, 'updateNotValid'])->name('update-not-valid');
+        Route::post('/change-lawan-code', [JournalController::class, 'changeLawanCode'])->name('change-lawan-code');
 
         Route::post('get-import-saldo', [JournalController::class, 'getImportSaldo'])->name('get-import-saldo');
         Route::post('import-saldo', [JournalController::class, 'importSaldo'])->name('import-saldo');
