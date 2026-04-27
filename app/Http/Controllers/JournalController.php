@@ -300,7 +300,7 @@ class JournalController extends Controller
                 ->on('journals.code_group', '=', 'sub_journals.code_group');
         })->pluck('journals.amount_saldo', 'journals.code_group')->all();
         $key = JournalKey::orderBy('key_at', 'desc')->first();
-        $indexKey= $key?createCarbon($key->key_at)->format('ymdHis00'):'25010100000000';
+        $indexKey = $key ? createCarbon($key->key_at)->format('ymdHis00') : '25010100000000';
         $journals = Journal::searchCOA($code)->whereMonth('created_at', $month)->whereYear('created_at', $year)
             ->orderBy('index_date', 'asc')
             ->selectRaw(
@@ -460,7 +460,7 @@ class JournalController extends Controller
         ];
     }
 
-    public static function createBaseJournal(Request $request, $useTransaction = true, ?LockManager $lockManager = null,$noRecalculate=false)
+    public static function createBaseJournal(Request $request, $useTransaction = true, ?LockManager $lockManager = null, $noRecalculate = false)
     {
         $urlTryAgain = $request->input('url_try_again');
 
@@ -491,7 +491,7 @@ class JournalController extends Controller
             ];
         }
 
-        $callback = function () use ($request, $isLockIntern, $urlTryAgain, $date, $lockManager, $isBackDate,$noRecalculate, $useTransaction) {
+        $callback = function () use ($request, $isLockIntern, $urlTryAgain, $date, $lockManager, $isBackDate, $noRecalculate, $useTransaction) {
             $kredits = $request->input('kredits');
             $debets = $request->input('debets');
             $type = $request->input('type');
@@ -1512,13 +1512,13 @@ class JournalController extends Controller
             ];
 
             //setelah terinput baru recalculate jadi 
-            $minIndex= Journal::where('tag', $tag)->min('index_date');
-            $sub= Journal::where('index_date','<',$minIndex)
-                ->select('code_group',DB::raw('MAX(index_date) as max_index_date'))->groupBy('code_group');
-            $lastJournals= Journal::joinSub($sub,'sub',function($join){
-                $join->on('journals.code_group','=','sub.code_group')->on('journals.index_date','=','sub.max_index_date');
+            $minIndex = Journal::where('tag', $tag)->min('index_date');
+            $sub = Journal::where('index_date', '<', $minIndex)
+                ->select('code_group', DB::raw('MAX(index_date) as max_index_date'))->groupBy('code_group');
+            $lastJournals = Journal::joinSub($sub, 'sub', function ($join) {
+                $join->on('journals.code_group', '=', 'sub.code_group')->on('journals.index_date', '=', 'sub.max_index_date');
             })->select('journals.*')->get();
-            foreach($lastJournals as $j){
+            foreach ($lastJournals as $j) {
                 $j->calculateJournalNext(false);
             }
             DB::commit();
@@ -2021,5 +2021,66 @@ class JournalController extends Controller
         $view->indexStart = $indexStart;
         $view->indexEnd = $indexEnd;
         return $view;
+    }
+
+    function cekBeforeExport()
+    {
+        $month = getInput('month');
+        $year = getInput('year');
+        $neraca = ExcelExportController::getDataNeraca($month, $year);
+        $nl = ExcelExportController::getDataNL($month, $year);
+        $lr = ExcelExportController::getDataLR($month, $year);
+        $kas = ExcelExportController::getBukuKas($month, $year);
+        $memo = ExcelExportController::getBukuMemo($month, $year);
+        $pembelian = ExcelExportController::getPembelian($month, $year);
+        $penjualan = ExcelExportController::getPenjualan($month, $year);
+        $kartuPiutang = ExcelExportController::getKartuPiutang($month, $year);
+        $kartuHutang = ExcelExportController::getKartuHutang($month, $year);
+        $kartuDPSales = ExcelExportController::getKartuDPSales($month, $year);
+        $kartuInventory = ExcelExportController::getKartuInventory($year);
+        $kartuBDD = ExcelExportController::getKartuBDD($year);
+        $kartuStock = ExcelExportController::getKartuStock($month, $year);
+        $kartuBDP = ExcelExportController::getKartuBDP($month, $year);
+        $kartuBahanJadi = ExcelExportController::getKartuBahanJadi($month, $year);
+        $analyze = ExcelExportController::analyze(new Request(
+            [
+                'month' => $month,
+                'year' => $year,
+                'neraca' => $neraca,
+                'neraca_lajur' => $nl,
+                'laba_rugi' => $lr,
+                'kas' => $kas,
+                'pembelian' => $pembelian,
+                'penjualan' => $penjualan,
+                'kartu_piutang' => $kartuPiutang,
+                'kartu_hutang' => $kartuHutang,
+                'kartu_dpsales' => $kartuDPSales,
+                'kartu_inventory' => $kartuInventory,
+                'kartu_bdd' => $kartuBDD,
+                'kartu_stock' => $kartuStock,
+                'kartu_bdp' => $kartuBDP,
+                'kartu_bahan_jadi' => $kartuBahanJadi,
+            ]
+        ));
+        return [
+            'status' => 1,
+            'msg' => 'success',
+            'neraca' => $neraca,
+            'nl' => $nl,
+            'lr' => $lr,
+            'kas' => $kas,
+            'memo' => $memo,
+            'pembelian' => $pembelian,
+            'penjualan' => $penjualan,
+            'kartuPiutang' => $kartuPiutang,
+            'kartuHutang' => $kartuHutang,
+            'kartuDPSales' => $kartuDPSales,
+            'kartuInventory' => $kartuInventory,
+            'kartuBDD' => $kartuBDD,
+            'kartuStock' => $kartuStock,
+            'kartuBDP' => $kartuBDP,
+            'kartuBahanJadi' => $kartuBahanJadi,
+            'analyze' => $analyze['msg']
+        ];
     }
 }

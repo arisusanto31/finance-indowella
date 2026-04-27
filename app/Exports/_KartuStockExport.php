@@ -5,6 +5,7 @@ namespace App\Exports;
 use Maatwebsite\Excel\Concerns\FromCollection;
 
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithTitle;
@@ -13,7 +14,7 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 
 use function Laravel\Prompts\form;
 
-class _KartuStockExport implements FromCollection, WithTitle, WithEvents, ShouldAutoSize
+class _KartuStockExport implements FromCollection, WithTitle, WithEvents, ShouldAutoSize,WithColumnFormatting
 {
     /**
      * @return \Illuminate\Support\Collection
@@ -73,19 +74,19 @@ class _KartuStockExport implements FromCollection, WithTitle, WithEvents, Should
                 $item->id,
                 $item->name,
                 $item->unit_default,
-                format_price($item['awal_qty'] / $item->konversi),
-                format_price($item['awal_qty'] > 0 ? ($item['awal_rupiah'] / $item['awal_qty']) : 0),
-                format_price($item['awal_rupiah']),
-                format_price($mutasiMasuk / $item->konversi),
-                format_price($hargaMasuk),
-                format_price($rupiahMasuk),
-                format_price($mutasiKeluar / $item->konversi),
-                format_price($hargaKeluar),
-                format_price($rupiahKeluar),
+                ($item['awal_qty'] / $item->konversi),
+                ($item['awal_qty'] > 0 ? ($item['awal_rupiah'] / $item['awal_qty']) : 0),
+                ($item['awal_rupiah']),
+                ($mutasiMasuk / $item->konversi),
+                ($hargaMasuk),
+                ($rupiahMasuk),
+                ($mutasiKeluar / $item->konversi),
+                ($hargaKeluar),
+                ($rupiahKeluar),
 
-                format_price($item['akhir_qty'] / $item->konversi),
-                format_price($item['akhir_qty'] > 0 ? ($item['akhir_rupiah'] / $item['akhir_qty']) : 0),
-                format_price($item['akhir_rupiah']),
+                ($item['akhir_qty'] / $item->konversi),
+                ($item['akhir_qty'] > 0 ? ($item['akhir_rupiah'] / $item['akhir_qty']) : 0),
+                ($item['akhir_rupiah']),
             ];
         }
 
@@ -95,19 +96,19 @@ class _KartuStockExport implements FromCollection, WithTitle, WithEvents, Should
             "",
             "",
             
-            format_price($totalSaldoAwal),
+            ($totalSaldoAwal),
             "",
             "",
 
-            format_price($totalMasuk),
+            ($totalMasuk),
             "",
             "",
 
-            format_price($totalKeluar),
+            ($totalKeluar),
             "",
             "",
 
-            format_price($totalSaldoAkhir),
+            ($totalSaldoAkhir),
             "",
             "",
         ];
@@ -119,6 +120,24 @@ class _KartuStockExport implements FromCollection, WithTitle, WithEvents, Should
         $this->mergeFooter[] = ['start' => 'N' . $baris, 'end' => 'P' . $baris];
 
         return collect($fixData);
+    }
+
+      public function columnFormats(): array
+    {
+        return [
+            'E' => '#,##0.00',
+            'F' => '#,##0.00',
+            'G' => '#,##0.00',
+            'H' => '#,##0.00',
+            'I' => '#,##0.00',
+            'J' => '#,##0.00',
+            'K' => '#,##0.00',
+            'L' => '#,##0.00',
+            'M' => '#,##0.00',
+            'N' => '#,##0.00',
+            'O' => '#,##0.00',
+            'P' => '#,##0.00',
+        ];
     }
 
 
