@@ -58,6 +58,7 @@ class fillINVKartuStockID extends Command
             }
         }
         if ($ks) {
+            $this->info('ketemu kartu stock id ' . $ks->kartu_stock_id . ' dengan total ' . $ks->mutasi_rupiah_total);
             $inv->kartu_stock_id = $ks->kartu_stock_id;
             $inv->index_date = InvoicePurchaseDetail::getNextIndexDate(Carbon::createFromFormat('ymdHis', $ks->index_date_group));
             $inv->index_date_group = $ks->index_date_group;
