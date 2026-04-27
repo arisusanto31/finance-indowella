@@ -34,7 +34,7 @@ class CekBahanAvailableDibebankan extends Command
         $catid = $this->argument('catid');
         $year = $this->argument('year', 2025);
         $catid = explode(',', $catid);
-        $allstockid = Stock::whereIn('parent_category_id', $catid)->pluck('id')->toArray();
+        $allstockid = Stock::whereIn('category_id', $catid)->pluck('id')->toArray();
         $lasthpp = KartuStock::whereIn('index_date', function ($q) use ($allstockid) {
             $q->selectRaw('max(index_date)')->from('kartu_stocks')
                 ->whereIn('stock_id', $allstockid)->groupBy('stock_id');
