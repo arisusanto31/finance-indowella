@@ -39,13 +39,13 @@ class CekBahanAvailableDibebankan extends Command
             $q->selectRaw('max(index_date)')->from('kartu_stocks')
                 ->whereIn('stock_id', $allstockid)->groupBy('stock_id');
         })->where('saldo_qty_backend', '>', 0)->select('stock_id', 'saldo_qty_backend', DB::raw('saldo_rupiah_total/saldo_qty_backend as hpp'))->get()->keyBy('stock_id');
-        $stockname= Stock::whereIn('id', $allstockid)->pluck('name', 'id')->all();
+        $stockname = Stock::whereIn('id', $allstockid)->pluck('name', 'id')->all();
         for ($month = 12; $month > 0; $month--) {
             $indexDateAwal = createCarbon($year . '-' . toDigit($month, 2) . '-01')->format('ymdHis000');
             $indexDateAkhir = createCarbon($year . '-' . toDigit($month, 2) . '-01')->endOfMonth()->format('ymdHis999');
             // $this->info('cari mutasi dari '.$indexDateAwal.' sampai '.$indexDateAkhir);
             $mutasi = KartuStock::where('index_date', '>', $indexDateAwal)->where('index_date', '<', $indexDateAkhir)
-            
+
                 ->whereIn('stock_id', $allstockid)
                 ->where('mutasi_qty_backend', '>', 0)->select(DB::raw('sum(mutasi_qty_backend) as total_pembelian'), 'stock_id')->groupBy('stock_id')
                 ->get();
@@ -53,11 +53,17 @@ class CekBahanAvailableDibebankan extends Command
             //     'stock_id' => 'center',
             //     'total_pembelian' => 'right'
             // ], $this);
-            $mutasi=$mutasi->pluck('total_pembelian', 'stock_id')->all();
+            $mutasi = $mutasi->pluck('total_pembelian', 'stock_id')->all();
             $datas = [];
             foreach ($lasthpp as $stockid => $data) {
+                $lasthpp[$stockid]->saldo_qty_backend -= isset($mutasi[$stockid]) ? $mutasi[$stockid] : 0;
+                if ($lasthpp[$stockid]->saldo_qty_backend <= 0) {
+                    // $lasthpp[$stockid]->saldo_qty_backend = 0;
+                    //buang array stock id dalam lasthpp
+                    unset($lasthpp[$stockid]);
+                }
                 $datas[] = [
-                    'month' => $year.'-'.$month,
+                    'month' => $year . '-' . $month,
                     'stock_id' => $stockid,
                     'stock_name' => $stockname[$stockid] ?? $stockid,
                     'available' => $data->saldo_qty_backend,
@@ -65,18 +71,11 @@ class CekBahanAvailableDibebankan extends Command
                     'total_nilai' => $data->saldo_qty_backend * $data->hpp,
                     'total_pembelian' => isset($mutasi[$stockid]) ? $mutasi[$stockid] : 0
                 ];
-
-                $lasthpp[$stockid]->saldo_qty_backend -= isset($mutasi[$stockid]) ? $mutasi[$stockid] : 0;
-                if ($lasthpp[$stockid]->saldo_qty_backend <= 0) {
-                    // $lasthpp[$stockid]->saldo_qty_backend = 0;
-                    //buang array stock id dalam lasthpp
-                    unset($lasthpp[$stockid]);
-                }
             }
             tampilkanTableTerminal($datas, [
                 'month' => 'center',
                 'stock_id' => 'center',
-                'stock_name'=> 'center',
+                'stock_name' => 'center',
                 'available' => 'right',
                 'hpp' => 'right',
                 'total_nilai' => 'right',
