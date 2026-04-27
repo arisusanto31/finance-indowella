@@ -6,6 +6,7 @@ use App\Models\InvoicePurchaseDetail;
 use App\Models\KartuStock;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Session;
 
 class fillINVKartuStockID extends Command
 {
@@ -14,7 +15,7 @@ class fillINVKartuStockID extends Command
      *
      * @var string
      */
-    protected $signature = 'fill:inv-kartu-stock-id {invid}';
+    protected $signature = 'fill:inv-kartu-stock-id {bookid} {invid}';
 
     /**
      * The console command description.
@@ -29,7 +30,8 @@ class fillINVKartuStockID extends Command
     public function handle()
     {
         //
-        $invid = $this->argument('invid');
+        Session::put('book_journal_id', $this->argument('bookid', 1));
+        $invid = intval($this->argument('invid'));
         $inv = InvoicePurchaseDetail::find($invid);
         $ks = KartuStock::where('purchase_order_id', $inv->id)->first();
         if ($ks) {
