@@ -333,14 +333,16 @@ class ExcelExportController extends Controller
             return in_array($item['code_group'], $codeKas);
         })->sum('saldo_akhir');
         $totalKas = collect($kas)->sum(function($code){
-            return collect($code)->sortByDesc('index_date')->first()['amount_saldo'] ?? 0;
+            return collect($code)->sum(function($item){
+                return collect($item)->sortByDesc('index_date')->first()['amount_saldo'] ?? 0;
+            });
         });
         $codePiutang= ChartAccount::where('is_child', 1)->where('code_group', 'like', '12%')->pluck('code_group')->all();
         $NLSumPiutang= collect($neracaLajur['msg'])->filter(function($item) use ($codePiutang){
             return in_array($item['code_group'], $codePiutang);
         })->sum('saldo_akhir');
-        $codeUtang = ChartAccount::where('is_child', 1)->where('code_group', 'like', '211%')->pluck('code_group')->all();
-        $NLSumUtang = collect($neracaLajur['msg'])->filter(function ($item) use ($codeUtang) {
+        $codeUtang = ChartAccount::where('code_group','211000')->pluck('code_group')->all();
+        $NLUtangUsaha = collect($neracaLajur['msg'])->filter(function ($item) use ($codeUtang) {
             return in_array($item['code_group'], $codeUtang);
         })->sum('saldo_akhir');
         $codeDP= ChartAccount::where('is_child', 1)->where('code_group', 'like', '214000')->pluck('code_group')->all();
@@ -353,7 +355,7 @@ class ExcelExportController extends Controller
             return in_array($item['code_group'], $codeKewajiban);
         })->sum('saldo_akhir');
 
-        $neracaKewajiban = $neraca['Kewajiban'][0]['saldo']??0;
+        $neracaKewajiban = $neraca['Kewajiban']??0;
         $neracaLabaBulan= $neraca['laba_bulan']??0;
         $labaKartuLR = collect($lr['msg'][$year . '-' . toDigit($month, 2)])->sum('saldo_akhir');
 
@@ -412,10 +414,10 @@ class ExcelExportController extends Controller
             'hasil'=>abs($saldoAkhirPiutang - $NLSumPiutang) > 0.01 ? 'TIDAK SESUAI (' . ($saldoAkhirPiutang - $NLSumPiutang) . ')' : 'SESUAI'
         ];
         $data[]=[
-            'keterangan'=> 'Saldo Akhir Utang vs NL sum utang',
+            'keterangan'=> 'Saldo Akhir Utang vs NL Utang Usaha',
             'data1'=> $saldoAkhirUtang,
-            'data2'=> $NLSumUtang,
-            'hasil'=>abs($saldoAkhirUtang - $NLSumUtang) > 0.01 ? 'TIDAK SESUAI (' . ($saldoAkhirUtang - $NLSumUtang) . ')' : 'SESUAI'
+            'data2'=> $NLUtangUsaha,
+            'hasil'=>abs($saldoAkhirUtang - $NLUtangUsaha) > 0.01 ? 'TIDAK SESUAI (' . ($saldoAkhirUtang - $NLUtangUsaha) . ')' : 'SESUAI'
         ];
         $data[]=[
             'keterangan'=> 'Saldo DP vs NL Saldo DP',
@@ -445,7 +447,7 @@ class ExcelExportController extends Controller
             'keterangan'=>"AwalStock +pembelian- akhir stock vs HPP",
             'data1'=> $totalPersediaanAwal + $totalPembelian - $totalPersediaan,
             'data2'=> $NLSumHPP,
-            'hasil'=>abs(($totalPersediaanAwal + $totalPembelian - $totalPersediaan) - $NLSumHPP) > 0.01 ? 'TIDAK SESUAI (' . (($totalPersediaanAwal + $totalPembelian - $totalPersediaan) - $NLSumHPP) . ')' : 'SESUAI'
+            'hasil'=>abs(($totalPersediaanAwal + $totalPembelian - $totalPersediaan) + $NLSumHPP) > 0.01 ? 'TIDAK SESUAI (' . (($totalPersediaanAwal + $totalPembelian - $totalPersediaan) + $NLSumHPP) . ')' : 'SESUAI'
         ];
         return [
             'status' => 1,
