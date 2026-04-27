@@ -115,30 +115,34 @@ class InvoicePurchaseDetail extends Model
 
     public function fillKartuStockID()
     {
-        $ks = KartuStock::where('purchase_order_id', $this->id)->first();
-        if($ks){
-            $ks->kartu_stock_id = $ks->id;
-        }
-        if (!$ks) {
-            $ks = KartuStock::leftJoin('journals', 'journals.id', 'kartu_stocks.journal_id')
-                ->where('journals.book_journal_id', bookID())
-                ->where('kartu_stocks.stock_id', $this->stock_id)
-                ->where('journals.description', 'like', '%' . $this->invoice_pack_number . '%')
-                ->select('kartu_stocks.id as kartu_stock_id','kartu_stocks.mutasi_rupiah_total', 'journals.id as journal_id', 'journals.journal_number', 'journals.index_date_group')
-                ->get();
-            if(count($ks)==1){
-                $ks = $ks->first();
-            }else{
-                $ks= collect($ks)->where('mutasi_rupiah_total', $this->total_price)->first();
+        try {
+            $ks = KartuStock::where('purchase_order_id', $this->id)->first();
+            if ($ks) {
+                $ks->kartu_stock_id = $ks->id;
             }
-        }
-        if ($ks) {
-            $this->kartu_stock_id = $ks->kartu_stock_id;
-            $this->index_date = self::getNextIndexDate(Carbon::createFromFormat('ymdHis', $ks->index_date_group));
-            $this->index_date_group = $ks->index_date_group;
-            $this->journal_id = $ks->journal_id;
-            $this->journal_number = $ks->journal_number;
-            $this->save();
+            if (!$ks) {
+                $ks = KartuStock::leftJoin('journals', 'journals.id', 'kartu_stocks.journal_id')
+                    ->where('journals.book_journal_id', bookID())
+                    ->where('kartu_stocks.stock_id', $this->stock_id)
+                    ->where('journals.description', 'like', '%' . $this->invoice_pack_number . '%')
+                    ->select('kartu_stocks.id as kartu_stock_id', 'kartu_stocks.mutasi_rupiah_total', 'journals.id as journal_id', 'journals.journal_number', 'journals.index_date_group')
+                    ->get();
+                if (count($ks) == 1) {
+                    $ks = $ks->first();
+                } else {
+                    $ks = collect($ks)->where('mutasi_rupiah_total', $this->total_price)->first();
+                }
+            }
+            if ($ks) {
+                $this->kartu_stock_id = $ks->kartu_stock_id;
+                $this->index_date = self::getNextIndexDate(Carbon::createFromFormat('ymdHis', $ks->index_date_group));
+                $this->index_date_group = $ks->index_date_group;
+                $this->journal_id = $ks->journal_id;
+                $this->journal_number = $ks->journal_number;
+                $this->save();
+            }
+        } catch (\Exception $e) {
+            info('gagal isi kartu stock id untuk invoice purchase detail id ' . $this->id . ' dengan error ' . $e->getMessage());
         }
     }
 }
