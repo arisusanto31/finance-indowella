@@ -38,7 +38,7 @@ class CekBahanAvailableDibebankan extends Command
         $start = createCarbon($year . '-01-01 00:00:00')->format('ymdHis000');
         $allstockid = Stock::whereIn('category_id', $catid)->pluck('id')->toArray();
         $allMutasi = KartuStock::where('index_date', '>', $start)
-            ->whereIn('stock_id', $allstockid)->selec('saldo_qty_backend', 'saldo_rupiah_total', 'stock_id')->get()->groupBy('stock_id')
+            ->whereIn('stock_id', $allstockid)->select('saldo_qty_backend', 'saldo_rupiah_total', 'stock_id')->get()->groupBy('stock_id')
             ->map(function ($item) use ($stocknames) {
                 $min = collect($item)->min('saldo_qty_backend');
                 return [
