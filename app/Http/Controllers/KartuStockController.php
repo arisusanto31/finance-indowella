@@ -142,7 +142,7 @@ class KartuStockController extends Controller
         $data->mutasi_rupiah_total= $kartu ? $kartu->mutasi_rupiah_total : 0;
         $data->konversi= $unit ? $unit->konversi : 1;
       
-        return ['status' => 1, 'msg' => $data,'date'=>$date];
+        return ['status' => 1, 'msg' => $data,'indexdate'=>$indexDate];
     }
 
     public function destroy($id)
