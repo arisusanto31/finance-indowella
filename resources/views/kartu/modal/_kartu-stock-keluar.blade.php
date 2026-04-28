@@ -123,7 +123,7 @@
             success: function(res) {
                 console.log(res);
                 if (res.status == 1) {
-                    hpp = Math.round(res.msg.hppbackend * res.msg.konversi * 100) / 100;
+                    hpp = Math.round(res.msg.hppbackend * res.msg.konversi * 1000) / 1000;
                     total = hpp * formatDB($('#mutasi_quantity').val());
                     console.log('total', total);
                     $('#mutasi-rupiah-total').val(formatRupiah(total));
