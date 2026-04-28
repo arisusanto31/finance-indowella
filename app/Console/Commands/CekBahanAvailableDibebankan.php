@@ -43,9 +43,10 @@ class CekBahanAvailableDibebankan extends Command
             $q->selectRaw('max(index_date)')->from('kartu_stocks')
                 ->where('index_date', '<', $start)->whereIn('stock_id', $allstockid)
                 ->groupBy('stock_id');
-        })->select('stock_id', 'saldo_qty_backend')->get()->keyBy('stock_id');
-        $this->info(json_encode($lastMutasi));
-        $allMutasi = KartuStock::where('index_date', '>', $start)
+        })->pluck('index_date')->all();
+        $allMutasi = KartuStock::where(function ($q) use ($start, $lastMutasi) {
+            $q->where('index_date', '>', $start)->orWhereIn('index_date', $lastMutasi);
+        })
             ->whereIn('stock_id', $allstockid)->select('saldo_qty_backend', 'saldo_rupiah_total', 'stock_id')->get()->groupBy('stock_id')
             ->map(function ($item, $stockid) use ($stocknames, $lastMutasi) {
                 $item = collect($item)->merge(collect($lastMutasi[$stockid] ?? ['saldo_qty_backend' => 0, 'stock_id' => $stockid, 'saldo_rupiah_total' => 0]))->values();
