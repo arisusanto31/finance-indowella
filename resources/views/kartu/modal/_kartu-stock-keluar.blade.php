@@ -134,7 +134,8 @@
                     }
                     console.log('total', total);
                     $('#mutasi-rupiah-total').val(formatRupiah(total));
-                    $('#keterangan').html('Nilai per unit :' + formatRupiah(hpp));
+                    $('#keterangan').html('Nilai per unit :' + formatRupiah(hpp)
+                      + '<br> tersedia :'+ (res.msg.saldo_qty_backend / res.msg.konversi) + ' ' + $('#unit option:selected').text());
                 }
             },
             error: function(res) {
