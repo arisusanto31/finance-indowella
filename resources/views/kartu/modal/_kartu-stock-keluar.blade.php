@@ -129,7 +129,7 @@
                     if(res.msg.saldo_qty_backend==0){
                         hpp=0; total=0;
                     }else{
-                    total = qtypermintaan * res.msg.mutasi_rupiah_total / res.msg.saldo_qty_backend;
+                    total = qtypermintaan * res.msg.saldo_rupiah_total / res.msg.saldo_qty_backend;
                         hpp= total / qtypermintaan * res.msg.konversi;
                     }
                     console.log('total', total);
