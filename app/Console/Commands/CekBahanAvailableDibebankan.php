@@ -38,20 +38,26 @@ class CekBahanAvailableDibebankan extends Command
         $stocknames = Stock::whereIn('category_id', $catid)->pluck('name', 'id')->all();
         $start = createCarbon($year . '-' . $month . '-01 00:00:00')->format('ymdHis000');
         $allstockid = Stock::whereIn('category_id', $catid)->pluck('id')->toArray();
+
+        $lastMutasi = KartuStock::whereIn('index_date', function ($q) use ($start, $allstockid) {
+            $q->selectRaw('max(index_date)')->from('kartu_stocks')
+                ->where('index_date', '<', $start)->whereIn('stock_id', $allstockid)
+                ->groupBy('stock_id');
+        })->select('stock_id', 'saldo_qty_backend')->get()->keyBy('stock_id');
         $allMutasi = KartuStock::where('index_date', '>', $start)
             ->whereIn('stock_id', $allstockid)->select('saldo_qty_backend', 'saldo_rupiah_total', 'stock_id')->get()->groupBy('stock_id')
-            ->map(function ($item) use ($stocknames) {
-                $min = collect($item)->min('saldo_qty_backend');
+            ->map(function ($item, $stockid) use ($stocknames, $lastMutasi) {
+                $item = collect($item)->merge(collect($lastMutasi[$stockid] ?? ['saldo_qty_backend' => 0, 'saldo_rupiah_total' => 0])->only(['saldo_qty_backend', 'saldo_rupiah_total', 'stock_id' => $stockid]))->values();
+                    $min = collect($item)->min('saldo_qty_backend');
                 if ($min > 0) {
                     return [
                         'stock_id' => $item[0]->stock_id,
                         'stock_name' => $stocknames[$item[0]->stock_id] ?? '',
                         'available' => $min,
-
                     ];
                 }
             })->filter(function ($val) {
-                if($val)return true;
+                if ($val) return true;
             })->values();
 
         tampilkanTableTerminal($allMutasi, [
