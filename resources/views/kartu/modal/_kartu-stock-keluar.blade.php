@@ -16,7 +16,7 @@
         <div class="row">
             <div class="col mb-3">
                 <label for="nameBasic" class="form-label">Date</label>
-                <input type="datetime-local" name="date" id="date" class="form-control "
+                <input onchange="getTotalMutasiRupiah()" type="datetime-local" name="date" id="date" class="form-control "
                     value="{{ now() }}" placeholder="date">
             </div>
         </div>
@@ -151,6 +151,7 @@
                         html += `<option value="${item.unit}">${item.unit}</option>`;
                     });
                     $('#unit').html(html);
+                    getTotalMutasiRupiah();
                 } else {
                     Swal.fire('ops', 'something error ' + res.msg, 'error');
                 }
