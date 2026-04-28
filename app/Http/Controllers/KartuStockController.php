@@ -14,6 +14,7 @@ use App\Models\TaskImportDetail;
 use App\Services\ContextService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use stdClass;
 
 class KartuStockController extends Controller
 {
@@ -111,26 +112,35 @@ class KartuStockController extends Controller
 
     public function getHPP()
     {
-        $date = getInput('date') ?? date('Y-m-d 23:59:59');
+        $date = getInput('date') ?? date('Y-m-d H:i:s');
         $indexDate = createCarbon($date)->format('ymdHis999');
         $stockid = getInput('stock_id');
         $unit = getInput('unit');
         if (!$date || !$stockid || !$unit) {
             return ['status' => 0, 'msg' => 'Tanggal, Stock ID dan Unit harus diisi'];
         }
-        $kartu = KartuStock::where('kartu_stocks.stock_id', $stockid)
-            ->join('stock_units as su', 'su.stock_id', '=', 'kartu_stocks.stock_id')
-            ->where('su.unit', $unit)
-            ->where('kartu_stocks.index_date', '<=', $indexDate)
-            ->select(
+        // $kartu = KartuStock::where('kartu_stocks.stock_id', $stockid)
+        //     ->join('stock_units as su', 'su.stock_id', '=', 'kartu_stocks.stock_id')
+        //     ->where('su.unit', $unit)
+        //     ->where('kartu_stocks.index_date', '<=', $indexDate)
+        //     ->select(
 
 
-                DB::raw('coalesce(kartu_stocks.saldo_rupiah_total/ kartu_stocks.saldo_qty_backend,0) as hppbackend'),
-                DB::raw('su.konversi')
-            )
-            ->orderBy('kartu_stocks.index_date', 'desc')
-            ->first();
-        return ['status' => 1, 'msg' => $kartu];
+        //         DB::raw('coalesce(kartu_stocks.saldo_rupiah_total/ kartu_stocks.saldo_qty_backend,0) as hppbackend'),
+        //         DB::raw('su.konversi')
+        //     )
+        //     ->orderBy('kartu_stocks.index_date', 'desc')
+        //     ->first();
+        $kartu= KartuStock::where('index_date','<',$indexDate)
+            ->where('stock_id',$stockid)
+            ->orderBy('index_date','desc')->first();
+        $unit= StockUnit::where('stock_id',$stockid)->where('unit',$unit)->first();
+        $hpp= $kartu ? ($kartu->saldo_qty_backend != 0 ? ($kartu->saldo_rupiah_total / $kartu->saldo_qty_backend) : 0) : 0;
+        $data= new stdClass;
+        $data->hppbackend= $hpp;
+        $data->konversi= $unit ? $unit->konversi : 1;
+      
+        return ['status' => 1, 'msg' => $data];
     }
 
     public function destroy($id)
