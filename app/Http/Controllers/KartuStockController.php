@@ -140,6 +140,7 @@ class KartuStockController extends Controller
         $data->hppbackend= $hpp;
         $data->kartu_stock_id= $kartu ? $kartu->id : null;
         $data->mutasi_rupiah_total= $kartu ? $kartu->mutasi_rupiah_total : 0;
+        $data->saldo_qty_backend= $kartu ? $kartu->saldo_qty_backend : 0;
         $data->konversi= $unit ? $unit->konversi : 1;
       
         return ['status' => 1, 'msg' => $data,'indexdate'=>$indexDate];

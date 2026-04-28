@@ -123,8 +123,15 @@
             success: function(res) {
                 console.log(res);
                 if (res.status == 1) {
-                    hpp = Math.round(res.msg.hppbackend * res.msg.konversi * 1000) / 1000;
-                    total = hpp * formatDB($('#mutasi_quantity').val());
+                    // hpp = Math.round(res.msg.hppbackend * res.msg.konversi * 1000) / 1000;
+                    // total = hpp * formatDB($('#mutasi_quantity').val());
+                    qtypermintaan= formatDB($('#mutasi_quantity').val()) * res.msg.konversi;
+                    if(res.msg.saldo_qty_backend==0){
+                        hpp=0; total=0;
+                    }else{
+                    total = qtypermintaan * res.msg.mutasi_rupiah_total / res.msg.saldo_qty_backend;
+                        hpp= total / qtypermintaan * res.msg.konversi;
+                    }
                     console.log('total', total);
                     $('#mutasi-rupiah-total').val(formatRupiah(total));
                     $('#keterangan').html('Nilai per unit :' + formatRupiah(hpp));
