@@ -469,7 +469,7 @@ class SalesOrderController extends Controller
                 'payment' => collect($item)->first()['payment'],
                 'details' => collect($item)->map(function ($val) {
                     return [
-                        'created_at' => db_date_from_dmy($val['tanggal']),
+                        'created_at' => excelSerialToCarbon($val['tanggal']),
                         'stock_id' => $val['kode_barang'],
                         'stock_name' => $val['nama_barang'],
                         'quantity' => $val['quantity'],
@@ -484,7 +484,7 @@ class SalesOrderController extends Controller
                     ];
                 }),
                 'stock_type' => $stockType,
-                'created_at' => db_date_from_dmy($tanggal),
+                'created_at' => excelSerialToCarbon($tanggal),
                 'akun_cash_kind_name' => $akunCash,
                 'total_nota' => collect($item)->first()['total_nota'],
                 'customer_name' => collect($item)->first()['nama_customer'] ?? 'Anonim',
