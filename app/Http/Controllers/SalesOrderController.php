@@ -72,7 +72,7 @@ class SalesOrderController extends Controller
             $invPackFilter = $invPackFilter->where('sales_order_number', 'like',  $salesOrderNumber . '%');
         }
 
-        if($draftNumber){
+        if ($draftNumber) {
             $invPackFilter = $invPackFilter->where('draft_number', 'like',  $draftNumber . '%');
         }
         if ($statusFinal != "") {
@@ -258,7 +258,18 @@ class SalesOrderController extends Controller
             $sales_order_number = $request->sales_order_number . '-draft';
             $grouped = [];
             foreach ($arrayStockID as $i => $stockId) {
-                $nilaiPPN = $isPPN == 1 ? format_db($request->total_price[$i]) * 11/100 : 0;
+                
+                // if ($isPPN) {
+                //     if ($request->ppn_unit[$i]) {
+                //         $nilaiPPN = format_db($request->ppn_unit[$i]) * format_db($request->quantity[$i]);
+                //     } else
+                //         $nilaiPPN = format_db($request->ppn_unit[$i]) * 11 / 100;
+
+                // } else {
+                //     $nilaiPPN = 0;
+                // }
+                $nilaiPPN= $isPPN ? round(format_db($request->total_price[$i]) * 11 / 100) : 0;
+                $totalPrice= round(format_db($request->total_price[$i])) ;
                 $grouped[] = [
                     'sales_order_number' => $sales_order_number,
                     'stock_id' => $stockId,
@@ -273,7 +284,7 @@ class SalesOrderController extends Controller
                     'total_ppn_k' => $nilaiPPN,
                     'customer_id' => $customerID,
                     'book_journal_id' => bookID(),
-                    'total_price' => format_db($request->total_price[$i]) ?? 0,
+                    'total_price' => $totalPrice ?? 0,
                     'toko_id' => $request->toko_id,
                     'custom_stock_name' => $request->custom_stock_name[$i] ?? null,
                     'created_at' => $request->input('created_at') ?? now(),
@@ -309,8 +320,6 @@ class SalesOrderController extends Controller
             return ['status' => 0, 'msg' => $e->getMessage()];
         }
     }
-
-
 
 
     public function makeFinal(Request $request)
@@ -401,8 +410,6 @@ class SalesOrderController extends Controller
         $view->dateFinished = $dateFinished;
         $view->dateUangMuka = $data->created_at;
         $view->dateProses = createCarbon($data->created_at)->addDay()->format('Y-m-d H:i:s');
-
-
         return $view;
     }
 
@@ -437,7 +444,6 @@ class SalesOrderController extends Controller
 
     public function getDataImportExcel(Request $request)
     {
-
         $file = $request->file('file');
         $bookID = $request->input('book_journal_id');
         $importer = new ExcelPenjualanImport();
@@ -797,8 +803,8 @@ class SalesOrderController extends Controller
                     $detail->total_price   = $total;
                     $detail->price = ($total) / $detail->quantity;
                     $detail->sales_order_number = $request->sales_order_number;
-                    if($detail->is_ppn){
-                        $detail->total_ppn_k = $total * 11/100;
+                    if ($detail->is_ppn) {
+                        $detail->total_ppn_k = $total * 11 / 100;
                     }
                     $detail->created_at = $tanggalGlobal;
 
@@ -817,8 +823,8 @@ class SalesOrderController extends Controller
 
 
             $salesOrder->total_price = $totalBaru;
-            if($salesOrder->is_ppn){
-                $salesOrder->total_ppn_k = $totalBaru * 11/100;
+            if ($salesOrder->is_ppn) {
+                $salesOrder->total_ppn_k = $totalBaru * 11 / 100;
             }
             $salesOrder->save();
 
@@ -903,7 +909,7 @@ class SalesOrderController extends Controller
         try {
             //disini data itu dari btoa jadi harus di dekrip
             // $data = json_decode(base64_decode($data), true);
-            $data =$request->input('parent_ids');
+            $data = $request->input('parent_ids');
             $sales = SalesOrder::from('sales_orders as so')->join('sales_order_details as sds', 'sds.sales_order_number', '=', 'so.sales_order_number')->whereIn('so.id', $data)
                 ->join('stock_units as theunit', function ($join) {
                     $join->on('sds.stock_id', '=', 'theunit.stock_id')
