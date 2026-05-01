@@ -498,7 +498,7 @@ class SalesOrderController extends Controller
         })->values()->all();
         $dateAwal = createCarbon($year.'-'.$month.'-01')->startOfMonth();
         $dateAkhir = createCarbon($year.'-'.$month.'-01')->endOfMonth();
-        $sales= SalesOrder::where('created_at','>',$dateAwal)->where('created_at','<',$dateAkhir)->pluck(DB::raw('total_price+total_ppn_k as total_nota'),'package_number')->all();
+        $sales= SalesOrder::where('created_at','>',$dateAwal)->where('created_at','<',$dateAkhir)->pluck(DB::raw('total_price+total_ppn_k as total_nota'),'sales_order_number')->all();
         $problem=[];
         foreach($data as $pack){
             $number =  $pack['package_number'];
