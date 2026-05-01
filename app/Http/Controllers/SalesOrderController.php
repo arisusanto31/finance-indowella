@@ -438,6 +438,82 @@ class SalesOrderController extends Controller
         return $view;
     }
 
+    public function cekImportDataExcel(Request $request){
+         $file = $request->file('file');
+        $bookID = $request->input('book_journal_id');
+        $month= $request->input('month');
+        $year= $request->input('year');
+        $importer = new ExcelPenjualanImport();
+        Excel::import($importer, $file);
+        $stockType = null;
+        if ($bookID == 2) {
+            $class = RetailToko::class;
+            $stockType = RetailStock::class;
+        } else {
+            $class = ManufToko::class;
+            $stockType = ManufStock::class;
+        }
+        $refToko = $class::select('name', 'id')->get()->map(function ($item) {
+            return [
+                'name' => norm_string($item->name),
+                'id' => $item->id,
+            ];
+        })->pluck('id', 'name')->all();
+
+
+        $data = $importer->result;
+        $idBuatan = 1;
+        $data = collect($data)->groupBy('no_transaksi')->map(function ($item, $key) use ($refToko, &$idBuatan, $stockType) {
+            $tokoname = norm_string(collect($item)->first()['nama_toko'] ?? null);
+            $tanggal = collect($item)->first()['tanggal'];
+            $akunCash = collect($item)->first()['payment'];
+            return [
+                'package_number' => $key,
+                'payment' => collect($item)->first()['payment'],
+                'details' => collect($item)->map(function ($val) {
+                    return [
+                        'created_at' => excelSerialToCarbon($val['tanggal']),
+                        'stock_id' => $val['kode_barang'],
+                        'stock_name' => $val['nama_barang'],
+                        'quantity' => $val['quantity'],
+                        'unit' => $val['satuan'],
+                        'price' => $val['harga_pcs'],
+                        'total_price' => $val['sub_total'],
+                        'akun_cash_kind_name' => $val['payment'],
+                        'reference_id' => null,
+                        'reference_type' => null,
+                        'toko' => $val['nama_toko'] ?? null,
+
+                    ];
+                }),
+                'stock_type' => $stockType,
+                'created_at' => excelSerialToCarbon($tanggal),
+                'akun_cash_kind_name' => $akunCash,
+                'total_nota' => collect($item)->first()['total_nota'],
+                'customer_name' => collect($item)->first()['nama_customer'] ?? 'Anonim',
+                'toko_id' => $refToko[$tokoname] ?? null,
+                'toko' => collect($item)->first()['nama_toko'] ?? null,
+                'id' => $idBuatan++,
+            ];
+        })->values()->all();
+        $dateAwal = createCarbon($year.'-'.$month.'-01')->startOfMonth();
+        $dateAkhir = createCarbon($year.'-'.$month.'-01')->endOfMonth();
+        $sales= SalesOrder::where('created_at','>',$dateAwal)->where('created_at','<',$dateAkhir)->pluck(DB::raw('total_price+total_ppn_k as total_nota'),'package_number')->all();
+        $problem=[];
+        foreach($data as $pack){
+            $number =  $pack['package_number'];
+            $totalRef= array_key_exists($number,$sales) ? $sales[$number] : 0;
+            if( abs($pack['total_nota']-$totalRef) > 0.001 ){
+                $pack['total_ref']= $totalRef;
+                $problem[] = $pack;
+            }
+        }
+        return [
+            'status' => 1,
+            'data'   => $problem,
+        ];
+    }
+
     public function getDataImportExcel(Request $request)
     {
         $file = $request->file('file');

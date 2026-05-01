@@ -378,6 +378,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::get('sales-open-import/{id}', [SalesOrderController::class, 'openImport'])->name('sales-open-import');
         Route::get('sales-get-data-import/{id}', [SalesOrderController::class, 'getDataImport'])->name('sales-get-data-import');
         Route::post('sales-get-data-import-excel', [SalesOrderController::class, 'getDataImportExcel'])->name('sales-get-data-import-excel');
+        Route::post('sales-cek-data-import-excel', [SalesOrderController::class, 'cekDataImportExcel'])->name('sales-cek-data-import-excel');
         Route::get('sales-open-import-excel/{id}', [SalesOrderController::class, 'openImportExcel'])->name('sales-open-import-excel');
         Route::get('show-sales-detail/{id}', [SalesOrderController::class, 'showDetail'])->name('sale-order-detail');
         Route::get('update-input-invoice/{id}', [SalesOrderController::class, 'updateInputInvoice'])->name('update-input-invoice');

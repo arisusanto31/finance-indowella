@@ -9,7 +9,22 @@
     <div class="bglevel1 p-2 mb-2">
         <b>Import file </b> <span style="font-size:12px"> (kolom: Tanggal, Kode Barang, Nama Barang , Quantity, Satuan, Harga/Pcs, Sub Total, Total Nota, No Transaksi, Payment, Nama Toko, Nama Customer)</span>
         <input type="file" id="import-file-input" class="form-control" />
-        <button class="btn btn-primary mt-2" onclick="getImportData()">Load Data</button>
+        <div class="row">
+            <div class="col-md-6">
+                <button class="btn btn-primary mt-2" onclick="getImportData()">Load Data</button>
+
+
+            </div>
+            <div class="col-md-6">
+                <div class="">
+                    <button class="btn mt-2" onclick="cekImportData()"> compare import dengan sales</button>
+                    <input type="number" id="input-month" style="width:100px;" class="form-control mt-2" />
+                    <input type="number" id="input-year" style="width:100px;" class="form-control mt-2" />
+                </div>
+
+            </div>
+        </div>
+
     </div>
     <div class="bglevel1 p-2 mb-2">
         <div class="form-check form-switch">
@@ -46,7 +61,7 @@
                     </div>
                 </div>
             </div>
-            <pre id ="halo"></pre>
+            <pre id="halo"></pre>
             <div class="table-responsive mt-2">
                 <table class="table table-bordered table-striped">
                     <thead>
@@ -174,6 +189,70 @@
         });
     }
 
+    function cekImportData() {
+        loading(1);
+        id = "{{ book()->id }}";
+        file = $('#import-file-input')[0].files[0];
+        let formData = new FormData();
+        formData.append('file', file);
+        formData.append('month', $('#input-month').val());
+        formData.append('year', $('#input-year').val());
+        formData.append('_token', '{{ csrf_token() }}');
+        formData.append('book_journal_id', id);
+        $.ajax({
+            url: '{{ route("invoice.sales-cek-data-import-excel") }}',
+            data: formData,
+            method: 'post',
+            processData: false,
+            contentType: false,
+            success: function(res) {
+                console.log(res);
+                if (res.status == 1) {
+                    res.data.forEach(function(item, i) {
+                        let detailsHtml = '';
+                        jumlah = item.details.length;
+                        item.details.forEach(function(detail, j) {
+                            detailsHtml += `
+                                    <tr>
+                                        ${j==0?`
+                                        <td rowspan="${jumlah}">
+                                            <input type="checkbox" class="select-row-checkbox" data-id="${item.id}" onchange="updateTotalSelected()" />
+                                        </td>
+                                        <td rowspan="${jumlah}">${i+1}</td>
+                                        <td rowspan="${jumlah}">${formatNormalDate(new Date(item.created_at))}</td>
+                                        <td rowspan="${jumlah}">${item.package_number} (${item.customer_name})</td>
+                                        <td rowspan="${jumlah}">${detail.toko}</td>
+                                        `:''}
+                                        <td>${detail.stock_name}</td>
+                                        <td>${detail['quantity']}</td>
+                                        <td>${detail['unit']}</td>
+                                        <td>${detail['price']}</td>
+                                        <td>${detail['total_price']}</td>
+                                        ${j==0?`
+                                        <td rowspan="${jumlah}"> ${formatRupiah(collect(item.details).sum('total_price'))}<br>${item.akun_cash_kind_name}</td>
+                                        <td rowspan="${jumlah}" id="status${item.id}">
+                                            <button class="btn btn-success btn-sm" onclick="importDataSingle('${item.id}')">
+                                                import NON
+                                            </button>
+                                            <button class="btn btn-success btn-sm mt-1" onclick="importDataSingle('${item.id}', 1)">
+                                                import PPN
+                                            </button>
+                                        </td>
+                                        `:''}
+                                    </tr>`;
+                        });
+                        $('#table-body').append(detailsHtml);
+                    });
+                } else {
+
+                }
+            },
+            error: function(err) {
+                loading(0);
+            }
+        });
+    }
+
     function updateTotalSelected() {
         let countSelected = $('.select-row-checkbox:checked').length;
         if (countSelected > 0) {
@@ -241,10 +320,11 @@
 
 
     var tokoParents = @json($toko_parents);
+
     function importDataSingle(id, isPPN = 0) {
         importData(id, isPPN).then(function(res) {
             console.log(res);
-            if(res.status==0){
+            if (res.status == 0) {
                 swalInfo('opps', res.msg, 'error');
             }
         }).catch(function(err) {
@@ -290,10 +370,10 @@
                 reference_stock_id: data.details.map(item => item.stock_id),
                 reference_stock_type: data.stock_type,
                 quantity: data.details.map(item => item.quantity),
-                qtyjadi: data.details.map(item => item.qtyjadi==undefined?item.quantity:item.qtyjadi),
+                qtyjadi: data.details.map(item => item.qtyjadi == undefined ? item.quantity : item.qtyjadi),
                 price_unit: data.details.map(item => isPPN ? (item.price / 1.11) : item.price),
-                pricejadi: data.details.map(item => isPPN ? (item.pricejadi>0 ? item.pricejadi / 1.11 : item.price/1.11) : (item.pricejadi>0 ? item.pricejadi : item.price)),
-                ppn_unit: data.details.map(item => isPPN? (item.price / 1.11 * 0.11) : 0),
+                pricejadi: data.details.map(item => isPPN ? (item.pricejadi > 0 ? item.pricejadi / 1.11 : item.price / 1.11) : (item.pricejadi > 0 ? item.pricejadi : item.price)),
+                ppn_unit: data.details.map(item => isPPN ? (item.price / 1.11 * 0.11) : 0),
                 unit: data.details.map(item => item.unit),
                 unitjadi: data.details.map(item => item.unitjadi),
                 total_price: data.details.map(item => isPPN ? (item.total_price / 1.11) : item.total_price),
@@ -307,7 +387,7 @@
             };
 
             console.log(dataPost);
-        
+
             $.ajax({
                 url: '{{ route("invoice.sales-order.store") }}',
                 data: dataPost,
@@ -317,7 +397,7 @@
                         $('#status' + id).html(
                             `<i class="fas fa-check color-primary"></i> terimport`);
                     }
-                    
+
                     resolve(res); // kasih tahu "await" kalau sudah selesai
                 },
                 error: function(err) {
