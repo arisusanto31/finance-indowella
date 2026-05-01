@@ -230,11 +230,14 @@
                                         <td>${detail['unit']}</td>
                                         <td>${detail['price']}</td>
                                         <td>${detail['total_price']}
-                                                <br> vs <br>
-                                            ${item.total_ref ? formatRupiah(item.total_ref) : 'no data'}
+                                              
                                         </td>
                                         ${j==0?`
-                                        <td rowspan="${jumlah}"> ${formatRupiah(collect(item.details).sum('total_price'))}<br>${item.akun_cash_kind_name}</td>
+                                        <td rowspan="${jumlah}"> 
+                                          ${formatRupiah(item.total_nota)} 
+                                            <br> vs <br>
+                                            ${item.total_ref ? formatRupiah(item.total_ref) : 'no data'}
+                                          <br>${item.akun_cash_kind_name}</td>
                                         <td rowspan="${jumlah}" id="status${item.id}">
                                             <button class="btn btn-success btn-sm" onclick="importDataSingle('${item.id}')">
                                                 import NON
