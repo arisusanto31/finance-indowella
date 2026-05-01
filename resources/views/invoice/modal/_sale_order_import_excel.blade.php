@@ -16,7 +16,7 @@
 
             </div>
             <div class="col-md-6">
-                <div class="flex justify-content-start flex-columns">
+                <div class="d-flex justify-content-start flex-columns">
                     <button class="btn-primary mt-2" onclick="cekImportData()"> compare import dengan sales</button>
                     <input type="number" id="input-month" style="width:100px;" class="form-control mt-2" />
                     <input type="number" id="input-year" style="width:100px;" class="form-control mt-2" />
