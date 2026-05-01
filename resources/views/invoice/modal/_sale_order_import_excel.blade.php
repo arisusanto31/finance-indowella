@@ -145,7 +145,7 @@
                 }
                 allTrans = collect(res.data).keyBy('id').all();
                 console.log(allTrans);
-
+                
                 res.data.forEach(function(item, i) {
                     let detailsHtml = '';
                     jumlah = item.details.length;
@@ -207,7 +207,9 @@
             contentType: false,
             success: function(res) {
                 console.log(res);
+                loading(0);
                 if (res.status == 1) {
+                    $('#halo').html('total selisih=' + formatRupiah(collect(res.data).sum('total_nota') - collect(res.data).sum('total_ref')));
                     res.data.forEach(function(item, i) {
                         let detailsHtml = '';
                         jumlah = item.details.length;
@@ -227,7 +229,10 @@
                                         <td>${detail['quantity']}</td>
                                         <td>${detail['unit']}</td>
                                         <td>${detail['price']}</td>
-                                        <td>${detail['total_price']}</td>
+                                        <td>${detail['total_price']}
+                                                <br> vs <br>
+                                            ${item.total_ref ? formatRupiah(item.total_ref) : 'no data'}
+                                        </td>
                                         ${j==0?`
                                         <td rowspan="${jumlah}"> ${formatRupiah(collect(item.details).sum('total_price'))}<br>${item.akun_cash_kind_name}</td>
                                         <td rowspan="${jumlah}" id="status${item.id}">
