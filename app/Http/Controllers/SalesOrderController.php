@@ -111,7 +111,7 @@ class SalesOrderController extends Controller
         $invPack = SalesOrder::whereBetween('created_at', [$startDate, $endDate])
             ->select(
                 DB::raw('sum(total_price) as total_invoice'),
-                DB::raw('sum(total_price*1.11) as total_invoice_ppn'),
+                DB::raw('sum(total_price)+ sum(total_ppn_k) as total_invoice_ppn'),
                 DB::raw('sum(case when is_final = 1 then total_price else 0 end) as total_invoice_final'),
                 DB::raw('sum(case when is_mark = 1 then total_price else 0 end) as total_invoice_mark'),
                 DB::raw('sum(case when status_payment="LUNAS 100%" or status_payment="DP LUNAS" then 1 else 0 end)/count(*)*100 as prosen_lunas'),
