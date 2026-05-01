@@ -501,7 +501,7 @@ class SalesOrderController extends Controller
         $sales= SalesOrder::where('created_at','>',$dateAwal)->where('created_at','<',$dateAkhir)->pluck(DB::raw('total_price+total_ppn_k as total_nota'),'sales_order_number')->all();
         $problem=[];
         foreach($data as $pack){
-            $number =  $pack['package_number'].'-draft';
+            $number =  trim($pack['package_number']).'-draft';
             $totalRef= array_key_exists($number,$sales) ? $sales[$number] : 0;
             if( abs($pack['total_nota']-$totalRef) > 0.001 ){
                 $pack['total_ref']= $totalRef;
