@@ -438,7 +438,7 @@ class SalesOrderController extends Controller
         return $view;
     }
 
-    public function cekImportDataExcel(Request $request){
+    public function cekDataImportExcel(Request $request){
          $file = $request->file('file');
         $bookID = $request->input('book_journal_id');
         $month= $request->input('month');
