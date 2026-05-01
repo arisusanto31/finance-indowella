@@ -258,13 +258,11 @@ class SalesOrderController extends Controller
             $sales_order_number = $request->sales_order_number . '-draft';
             $grouped = [];
             foreach ($arrayStockID as $i => $stockId) {
-                
                 // if ($isPPN) {
                 //     if ($request->ppn_unit[$i]) {
                 //         $nilaiPPN = format_db($request->ppn_unit[$i]) * format_db($request->quantity[$i]);
                 //     } else
                 //         $nilaiPPN = format_db($request->ppn_unit[$i]) * 11 / 100;
-
                 // } else {
                 //     $nilaiPPN = 0;
                 // }
@@ -329,7 +327,6 @@ class SalesOrderController extends Controller
         if ($salesOrder->is_final == 1) {
             return ['status' => 0, 'msg' => 'Sales Order ' . $salesOrder->sales_order_number . ' sudah dalam status final'];
         }
-
         $details = SalesOrderDetail::where('sales_order_number', $salesOrder->sales_order_number)->get();
         $salesOrder->is_final = 1;
         $salesOrder->draft_number = $salesOrder->sales_order_number;
@@ -372,7 +369,6 @@ class SalesOrderController extends Controller
         if (collect($salesOrder->detailKartuInvoices)->count() > 0) {
             return ['status' => 0, 'msg' => 'Tidak bisa membatalkan invoice yang sudah terhubung dengan kartu'];
         }
-
         $salesOrder->is_final = 0;
         $salesOrder->save();
         $salesOrder->updateStatus();
@@ -617,7 +613,7 @@ class SalesOrderController extends Controller
                 });
             }
             $sales = $sales->select(
-                'pack.id',
+               'pack.id',
                 DB::raw('"App\\\Models\\\ManufSalesPackage" as reference_type'),
                 DB::raw('"App\\\Models\\\ManufStock" as stock_type'),
                 'pack.is_ppn',
@@ -633,7 +629,6 @@ class SalesOrderController extends Controller
             $sales = $sales->with('detailSales')->get()->map(function ($val) use ($modeBook) {
                 $val['details'] = collect($val['detailSales'])->map(function ($detailVal) use ($modeBook) {
                     $data = [];
-
                     $insheet =  $detailVal['insheet'] ?? 0;
                     $qtyjadi = $detailVal['qtyjadi'] ?? $detailVal['quantity'];
                     $pricejadi = $detailVal['pricejadi'] ?? $detailVal['recent_selling_price'];
@@ -683,7 +678,6 @@ class SalesOrderController extends Controller
     public function editInvoice($number)
     {
         $data = SalesOrder::where('sales_order_number', $number)->first();
-
         $data->updateStatus();
         $invdetails = SalesOrderDetail::with('stock')->where('sales_order_number', $number)->get();
         foreach ($invdetails as $detail) {
@@ -714,15 +708,11 @@ class SalesOrderController extends Controller
     {
         $clean = str_replace(['/', '.'], '-', $input);
         $parts = explode('-', $clean);
-
         if (count($parts) !== 3) return null;
-
         [$a, $b, $c] = $parts;
-
         if (strlen($a) === 4) {
             return sprintf('%04d-%02d-%02d', $a, $b, $c);
         }
-
         if (strlen($c) === 4) {
             if ((int)$b > 12) {
                 return sprintf('%04d-%02d-%02d', $c, $a, $b);

@@ -290,9 +290,9 @@
                 reference_stock_id: data.details.map(item => item.stock_id),
                 reference_stock_type: data.stock_type,
                 quantity: data.details.map(item => item.quantity),
-                qtyjadi: data.details.map(item => item.qtyjadi),
+                qtyjadi: data.details.map(item => item.qtyjadi==undefined?item.quantity:item.qtyjadi),
                 price_unit: data.details.map(item => isPPN ? (item.price / 1.11) : item.price),
-                pricejadi: data.details.map(item => isPPN ? (item.pricejadi / 1.11) : item.pricejadi),
+                pricejadi: data.details.map(item => isPPN ? (item.pricejadi>0 ? item.pricejadi / 1.11 : item.price/1.11) : (item.pricejadi>0 ? item.pricejadi : item.price)),
                 ppn_unit: data.details.map(item => isPPN? (item.price / 1.11 * 0.11) : 0),
                 unit: data.details.map(item => item.unit),
                 unitjadi: data.details.map(item => item.unitjadi),
@@ -307,6 +307,7 @@
             };
 
             console.log(dataPost);
+        
             $.ajax({
                 url: '{{ route("invoice.sales-order.store") }}',
                 data: dataPost,
