@@ -413,7 +413,7 @@ class ChartAccount extends Model
     public static function _rincianSaldoNeracaLajur($firstdate, $lastdate)
     {
         $starttime = microtime(true);
-        $subquery = Journal::where('index_date', '<', (float)$firstdate)
+        $subquery = Journal::where('index_date', '<=', (float)$firstdate)
             ->select('code_group as scode_group', DB::raw('MAX(index_date) as max_index_date'))
             ->groupBy('code_group');
 

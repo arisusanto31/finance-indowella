@@ -62,7 +62,7 @@ class ChartAccountAlias extends Model
         $codeGroup = $request->input('code_group');
         $name = $request->input('name');
 
-        $alias = ChartAccountAlias::where('chart_account_id', $coaID)->where('code_group', $codeGroup)->first();
+        $alias = ChartAccountAlias::where('code_group', $codeGroup)->first();
         if ($alias) {
             $alias->update([
                 'name' => $name
