@@ -65,8 +65,7 @@ class ChartAccountController extends Controller
             if (array_key_exists($val['id'], $alias)) {
                 $val['text'] = $val['id'].' - '.$alias[$val['id']];
             }
-            re
-            rn $val;
+            return $val;
         });
         return [
             'results' => $finalChart
