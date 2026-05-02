@@ -397,7 +397,7 @@ class ChartAccount extends Model
     {
         $starttime = microtime(true);
         $date = createCarbon($year . '-' . $month . '-01 00:00:00');
-        $firstdate = $date->copy()->startOfMonth()->format('ymdHis') . '00';
+        $firstdate = $date->copy()->startOfMonth()->format('ymdHis') . '99';
         $lastdate = $date->copy()->endOfMonth()->subSeconds(5)->format('ymdHis') . '99';
         return static::_rincianSaldoNeracaLajur($firstdate, $lastdate);
     }
@@ -405,7 +405,7 @@ class ChartAccount extends Model
     public static function getRincianSaldoNeracaLajurYear($year)
     {
         $starttime = microtime(true);
-        $firstdate = createCarbon($year . '-01-01 00:00:00')->format('ymdHis') . '00';
+        $firstdate = createCarbon($year . '-01-01 00:00:00')->format('ymdHis') . '99';
         $lastdate = createCarbon($year . '-12-31 23:59:59')->format('ymdHis') . '99';
         return static::_rincianSaldoNeracaLajur($firstdate, $lastdate);
     }
