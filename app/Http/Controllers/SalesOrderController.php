@@ -193,6 +193,13 @@ class SalesOrderController extends Controller
             } else {
                 $isPPN = 0;
             }
+            $existSale = SalesOrder::where('sales_order_number', $request->sales_order_number)->first();
+            if ($existSale) {
+                return [
+                    'status' => 1,
+                    'msg' => 'sudah terupdate'
+                ];
+            }
             $customerID = null;
             $arrayStockID = [];
             $detailReferenceID = $request->detail_reference_id ?? null;
@@ -266,8 +273,8 @@ class SalesOrderController extends Controller
                 // } else {
                 //     $nilaiPPN = 0;
                 // }
-                $nilaiPPN= $isPPN ? round(format_db($request->total_price[$i]) * 11 / 100) : 0;
-                $totalPrice= round(format_db($request->total_price[$i])) ;
+                $nilaiPPN = $isPPN ? round(format_db($request->total_price[$i]) * 11 / 100) : 0;
+                $totalPrice = round(format_db($request->total_price[$i]));
                 $grouped[] = [
                     'sales_order_number' => $sales_order_number,
                     'stock_id' => $stockId,
@@ -438,11 +445,12 @@ class SalesOrderController extends Controller
         return $view;
     }
 
-    public function cekDataImportExcel(Request $request){
-         $file = $request->file('file');
+    public function cekDataImportExcel(Request $request)
+    {
+        $file = $request->file('file');
         $bookID = $request->input('book_journal_id');
-        $month= $request->input('month');
-        $year= $request->input('year');
+        $month = $request->input('month');
+        $year = $request->input('year');
         $importer = new ExcelPenjualanImport();
         Excel::import($importer, $file);
         $stockType = null;
@@ -496,15 +504,15 @@ class SalesOrderController extends Controller
                 'id' => $idBuatan++,
             ];
         })->values()->all();
-        $dateAwal = createCarbon($year.'-'.$month.'-01')->startOfMonth();
-        $dateAkhir = createCarbon($year.'-'.$month.'-01')->endOfMonth();
-        $sales= SalesOrder::where('created_at','>=',$dateAwal)->where('created_at','<=',$dateAkhir)->pluck(DB::raw('total_price+total_ppn_k as total_nota'),'sales_order_number')->all();
-        $problem=[];
-        foreach($data as $pack){
-            $number =  trim($pack['package_number']).'-draft';
-            $totalRef= array_key_exists($number,$sales) ? $sales[$number] : 0;
-            if( abs($pack['total_nota']-$totalRef) > 0.001 ){
-                $pack['total_ref']= $totalRef;
+        $dateAwal = createCarbon($year . '-' . $month . '-01')->startOfMonth();
+        $dateAkhir = createCarbon($year . '-' . $month . '-01')->endOfMonth();
+        $sales = SalesOrder::where('created_at', '>=', $dateAwal)->where('created_at', '<=', $dateAkhir)->pluck(DB::raw('total_price+total_ppn_k as total_nota'), 'sales_order_number')->all();
+        $problem = [];
+        foreach ($data as $pack) {
+            $number =  trim($pack['package_number']) . '-draft';
+            $totalRef = array_key_exists($number, $sales) ? $sales[$number] : 0;
+            if (abs($pack['total_nota'] - $totalRef) > 0.001) {
+                $pack['total_ref'] = $totalRef;
                 $problem[] = $pack;
             }
         }
@@ -689,7 +697,7 @@ class SalesOrderController extends Controller
                 });
             }
             $sales = $sales->select(
-               'pack.id',
+                'pack.id',
                 DB::raw('"App\\\Models\\\ManufSalesPackage" as reference_type'),
                 DB::raw('"App\\\Models\\\ManufStock" as stock_type'),
                 'pack.is_ppn',
