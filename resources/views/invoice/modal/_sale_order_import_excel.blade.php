@@ -210,6 +210,8 @@
                 loading(0);
                 if (res.status == 1) {
                     $('#halo').html('total selisih=' + formatRupiah(collect(res.data).sum('total_nota') - collect(res.data).sum('total_ref')));
+                    allTrans = collect(res.data).keyBy('id').all();
+                    console.log(allTrans);
                     res.data.forEach(function(item, i) {
                         let detailsHtml = '';
                         jumlah = item.details.length;
