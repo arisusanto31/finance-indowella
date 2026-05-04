@@ -186,6 +186,8 @@ class SalesOrderController extends Controller
                 'akun_cash_kind_name' => 'nullable|string',
 
             ]);
+
+
             if ($request->input('is_ppn') == 'on') {
                 $isPPN = 1;
             } else if ($request->input('is_ppn') == 1) {
@@ -193,12 +195,37 @@ class SalesOrderController extends Controller
             } else {
                 $isPPN = 0;
             }
-            $existSale = SalesOrder::where('sales_order_number', $request->sales_order_number)->first();
+            $salesOrderNumber = $request->sales_order_number;
+            //mencegah duplikasi import.
+            $created = $request->input('created_at');
+            $existSale = SalesOrder::where('sales_order_number', $salesOrderNumber . '-draft')
+                ->where('created_at', $created)->first();
             if ($existSale) {
                 return [
                     'status' => 1,
                     'msg' => 'sudah terupdate'
                 ];
+            }
+
+
+            //cek agar tidak ada duplikasi global number
+            $cek = SalesOrder::where('sales_order_number', $salesOrderNumber . '-draft')->first();
+            if ($cek) {
+                if ($request->input('reassign_number') == true) {
+                    //cari nomer baru yang masuk.
+                    $partNumber = explode('-', $salesOrderNumber);
+                    $kodeToko = substr($partNumber[0], 0, 3);
+                    for ($i = 1; $i < 8; $i++) {
+                        $kodeKaryawan = toDigit($i, 2);
+                        $numberBaru = $kodeToko . $kodeKaryawan . '-' . $partNumber[1];
+                        //cek apakah ada 
+                        $sales = SalesOrder::where('sales_order_number', $numberBaru . '-draft')->first();
+                        if (!$sales) {
+                            $salesOrderNumber = $numberBaru;
+                            break;
+                        }
+                    }
+                }
             }
             $customerID = null;
             $arrayStockID = [];
@@ -262,7 +289,7 @@ class SalesOrderController extends Controller
                 $customerID = $request->customer_id;
             }
 
-            $sales_order_number = $request->sales_order_number . '-draft';
+            $sales_order_number = $salesOrderNumber . '-draft';
             $grouped = [];
             foreach ($arrayStockID as $i => $stockId) {
                 // if ($isPPN) {

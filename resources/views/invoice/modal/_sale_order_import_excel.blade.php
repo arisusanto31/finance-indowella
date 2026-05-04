@@ -391,6 +391,7 @@
                 detail_reference_type: data.details.map(item => item.reference_type),
                 reference_id: data.id,
                 reference_type: data.reference_type,
+                reassign_number:true,
                 _token: '{{ csrf_token() }}'
             };
 
