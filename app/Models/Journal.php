@@ -357,13 +357,17 @@ class Journal extends Model
     public function recalculateJournal($isLock = true)
     {
         $thejournal = Journal::find($this->id);
-        $lastJournal = Journal::where('code_group', $thejournal->code_group)->where('index_date', '<', $thejournal->index_date)->orderBy('index_date', 'desc')->first();
-        $lastSaldo = $lastJournal ? $lastJournal->amount_saldo : 0;
-        $amount = $thejournal->code_group > 200000 ?
-            ($thejournal->amount_kredit - $thejournal->amount_debet) : ($thejournal->amount_debet - $thejournal->amount_kredit);
-        $thejournal->amount_saldo = round($lastSaldo + $amount, 2);
-        $thejournal->save();
-        $thejournal->refresh();
+        $tag = $this->tag;
+        $first = explode(' ', $tag);
+        if ($first[0] != 'opening') {
+            $lastJournal = Journal::where('code_group', $thejournal->code_group)->where('index_date', '<', $thejournal->index_date)->orderBy('index_date', 'desc')->first();
+            $lastSaldo = $lastJournal ? $lastJournal->amount_saldo : 0;
+            $amount = $thejournal->code_group > 200000 ?
+                ($thejournal->amount_kredit - $thejournal->amount_debet) : ($thejournal->amount_debet - $thejournal->amount_kredit);
+            $thejournal->amount_saldo = round($lastSaldo + $amount, 2);
+            $thejournal->save();
+            $thejournal->refresh();
+        }
         return $thejournal->calculateJournalNext($isLock);
     }
 
@@ -392,10 +396,13 @@ class Journal extends Model
                     $journal->amount_saldo = round(($lastSaldo - $journal->amount_debet + $journal->amount_kredit), 2);
                 }
                 // $journal->save();
-                $dataUpdate[] = [
-                    'id' => $journal->id,
-                    'amount_saldo' => $journal->amount_saldo
-                ];
+                $firsttag = explode(' ', $journal->tag)[0] ?? '';
+                if ($firsttag != 'opening') {
+                    $dataUpdate[] = [
+                        'id' => $journal->id,
+                        'amount_saldo' => $journal->amount_saldo
+                    ];
+                }
                 $lastSaldo = $journal->amount_saldo;
                 $newdata[] = collect($journal)->only(['id', 'description', 'index_date', 'amount_saldo', 'amount_debet', 'amount_kredit']);
             }
