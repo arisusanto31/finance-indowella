@@ -73,6 +73,29 @@ class ChartAccountAlias extends Model
         });
     }
 
+     public function updateLevel()
+    {
+        $level = 0;
+        $parent = $this->parent;
+        while ($parent) {
+            $parent = $parent->parent;
+            $level++;
+            if ($level > 20) break;
+        }
+
+        if (count($this->childs) > 0) {
+            $this->is_child = false;
+        } else {
+            $this->is_child = true;
+        }
+        $this->level = $level;
+        $this->save();
+        return $this;
+    }
+
+
+
+    
     public static function createOrUpdate(Request $request)
     {
         $coaID = $request->input('chart_account_id');
