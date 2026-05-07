@@ -54,6 +54,8 @@
                             loading(0);
 
                             data = res.msg;
+                            //jadikan string dulu code group nya
+                            data.code_group = data.code_group.toString();
                             theCodeGrop = data.code_group.split("");
 
                             html = "";
