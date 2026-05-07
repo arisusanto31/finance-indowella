@@ -61,11 +61,13 @@ class ChartAccountAlias extends Model
         $coaID = $request->input('chart_account_id');
         $codeGroup = $request->input('code_group');
         $name = $request->input('name');
+        $referenceModel = $request->input('reference_model');
 
         $alias = ChartAccountAlias::where('code_group', $codeGroup)->first();
         if ($alias) {
             $alias->update([
-                'name' => $name
+                'name' => $name,
+                'reference_model' => $referenceModel,
             ]);
         } else {
             $alias = new ChartAccountAlias();
@@ -73,6 +75,7 @@ class ChartAccountAlias extends Model
             $alias->chart_account_id = $coaID;
             $alias->code_group = $codeGroup;
             $alias->name = $name;
+            $alias->reference_model = $referenceModel;
             $alias->save();
         }
 

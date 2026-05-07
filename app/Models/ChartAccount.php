@@ -150,7 +150,15 @@ class ChartAccount extends Model
 
     public function makeAlias()
     {
-        $alias = ChartAccountAlias::where('chart_account_id', $this->id)->where('book_journal_id', bookID())->first();
+        $alias = ChartAccountAlias::where('code_group', $this->code_group)->where('book_journal_id', bookID())->first();
+        $aliasParent = null;
+        if ($this->parent_id) {
+            $parentChart = ChartAccount::find($this->parent_id);
+            if (!$parentChart) {
+                throw new \Exception('Parent chart account not found for code group ' . $this->code_group . ' with parent id ' . $this->parent_id);
+            }
+            $aliasParent = ChartAccountAlias::where('code_group', $parentChart->code_group)->first();
+        }
         if (!$alias) {
             $alias = new ChartAccountAlias();
             $alias->book_journal_id = bookID();
@@ -161,15 +169,34 @@ class ChartAccount extends Model
             $alias->level = $this->level;
             $alias->reference_model = $this->reference_model;
             $alias->account_type = $this->account_type;
+            $alias->parent_id = $aliasParent ? $aliasParent->id : null;
             $alias->save();
         }
+
         return $alias;
+    }
+    public function updateAlias()
+    {
+        $alias = ChartAccountAlias::where('code_group', intval($this->code_group))->first();
+        if(!$alias){
+           return ;
+        }
+        if ($alias->parent_id == null && $this->parent_id != null) {
+            $parentChart = ChartAccount::find($this->parent_id);
+            if (!$parentChart) {
+
+                throw new \Exception('Parent chart account not found for code group ' . $this->code_group . ' with parent id ' . $this->parent_id);
+            }
+            $aliasParent = ChartAccountAlias::where('code_group', $parentChart->code_group)->first();
+            $alias->parent_id = $aliasParent ? $aliasParent->id : null;
+            $alias->save();
+        }
     }
 
     public function scopeWithAlias($q)
     {
         $q->leftJoin('chart_account_aliases as ca', function ($join) {
-            $join->on('ca.chart_account_id', '=', 'chart_accounts.id')
+            $join->on('ca.code_group', '=', 'chart_accounts.code_group')
                 ->on('ca.book_journal_id', '=', DB::raw(bookID()));
         })->where(function ($q) {
             $q->where('ca.book_journal_id', bookID())
@@ -511,7 +538,7 @@ class ChartAccount extends Model
         $firstdate = createCarbon($year . '-01-01 00:00:00')->format('ymdHis') . '00';
         $lastdate = createCarbon($year . '-12-31 23:59:59')->format('ymdHis') . '99';
         return static::_rincianMutationNeracaLajur($firstdate, $lastdate);
-    } 
+    }
 
     public static function _rincianMutationNeracaLajur($firstdate, $lastdate)
     {

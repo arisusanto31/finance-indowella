@@ -185,11 +185,12 @@ class Journal extends Model
                 $lastJournal = Journal::where('code_group', $codeGroup)->where('index_date', '<', $finalIndexDate)->orderBy('index_date', 'desc')->first();
                 info('get final index date for code group' . $codeGroup . ': ' . $finalIndexDate);
                 $journal = new Journal;
+                $caAlias= ChartAccountAlias::where('code_group',$codeGroup)->first();
                 $chartAccount = ChartAccount::find($coaID);
                 $journal->index_date = $finalIndexDate;
                 $journal->index_date_group = $indexDate; //nilai ymdHis
                 $journal->chart_account_id = $coaID;
-                $journal->reference_model = $chartAccount->reference_model;
+                $journal->reference_model = $caAlias->reference_model;
                 $journal->journal_number = $journal_number;
                 $journal->lawan_code_group = $lawanCodeGroup;
                 $journal->code_group = $codeGroup;

@@ -17,11 +17,13 @@ class ChartAccountController extends Controller
     {
         $view = view('master.chart-account');
         $charts = ChartAccount::withAlias()->get();
-
+     
         foreach ($charts as $ca) {
             if ($ca->alias_id == null) {
                 //belum ada alias. langsug create kan
                 $ca->makeAlias();
+            }else{
+                $ca->updateAlias();
             }
             $ca->updateLevel();
         }
@@ -73,7 +75,7 @@ class ChartAccountController extends Controller
     }
     public function getChartAccounts()
     {
-        $charts = ChartAccount::aktif()->orderBy('code_group')->get()->groupBy('parent_id');
+        $charts = ChartAccountAlias::orderBy('code_group')->get()->groupBy('parent_id');
         $alias = ChartAccountAlias::get()->keyBy('code_group')->all();
         return [
             'status' => 1,
@@ -89,7 +91,7 @@ class ChartAccountController extends Controller
         $finalChart = collect([]);
         foreach ($kinds as $kind) {
             if ($kind == 'pendapatan') {
-                $chart = ChartAccount::aktif()->child()->where('account_type', 'Pendapatan');
+                $chart = ChartAccountAlias::aktif()->child()->where('account_type', 'Pendapatan');
                 if (getInput('search')) {
                     foreach (explode(' ', getInput('search')) as $search) {
                         $chart = $chart->where('name', 'like', '%' . $search . '%');
@@ -99,7 +101,7 @@ class ChartAccountController extends Controller
                 $finalChart = $finalChart->merge($chart);
             }
             if ($kind == 'penjualan') {
-                $chart = ChartAccount::aktif()->child()->whereBetween('code_group', [400000, 500000]);
+                $chart = ChartAccountAlias::aktif()->child()->whereBetween('code_group', [400000, 500000]);
                 if (getInput('search')) {
                     foreach (explode(' ', getInput('search')) as $search) {
                         $chart = $chart->where('name', 'like', '%' . $search . '%');
@@ -109,7 +111,7 @@ class ChartAccountController extends Controller
                 $finalChart = $finalChart->merge($chart);
             }
             if ($kind == 'piutang') {
-                $chart = ChartAccount::aktif()->child()->where('reference_model', 'App\\Models\\KartuPiutang');
+                $chart = ChartAccountAlias::aktif()->child()->where('reference_model', 'App\\Models\\KartuPiutang');
                 if (getInput('search')) {
                     foreach (explode(' ', getInput('search')) as $search) {
                         $chart = $chart->where('name', 'like', '%' . $search . '%');
@@ -119,7 +121,7 @@ class ChartAccountController extends Controller
                 $finalChart = $finalChart->merge($chart);
             }
             if ($kind == 'uang_muka_penjualan') {
-                $chart = ChartAccount::aktif()->child()->where('reference_model', 'App\\Models\\KartuDPSales');
+                $chart = ChartAccountAlias::aktif()->child()->where('reference_model', 'App\\Models\\KartuDPSales');
                 if (getInput('search')) {
                     foreach (explode(' ', getInput('search')) as $search) {
                         $chart = $chart->where('name', 'like', '%' . $search . '%');
@@ -129,7 +131,7 @@ class ChartAccountController extends Controller
                 $finalChart = $finalChart->merge($chart);
             }
             if ($kind == 'uang_muka_pembelian') {
-                $chart = ChartAccount::aktif()->child()->where('reference_model', 'App\\Models\\KartuDPPurchase');
+                $chart = ChartAccountAlias::aktif()->child()->where('reference_model', 'App\\Models\\KartuDPPurchase');
                 if (getInput('search')) {
                     foreach (explode(' ', getInput('search')) as $search) {
                         $chart = $chart->where('name', 'like', '%' . $search . '%');
@@ -139,7 +141,7 @@ class ChartAccountController extends Controller
                 $finalChart = $finalChart->merge($chart);
             }
             if ($kind == 'hutang') {
-                $chart = ChartAccount::aktif()->child()->where('reference_model', 'App\\Models\\KartuHutang');
+                $chart = ChartAccountAlias::aktif()->child()->where('reference_model', 'App\\Models\\KartuHutang');
                 if (getInput('search')) {
                     foreach (explode(' ', getInput('search')) as $search) {
                         $chart = $chart->where('name', 'like', '%' . $search . '%');
@@ -149,7 +151,7 @@ class ChartAccountController extends Controller
                 $finalChart = $finalChart->merge($chart);
             }
             if ($kind == 'prepaid') {
-                $chart = ChartAccount::aktif()->child()->where('reference_model', 'App\\Models\\KartuPrepaidExpense');
+                $chart = ChartAccountAlias::aktif()->child()->where('reference_model', 'App\\Models\\KartuPrepaidExpense');
                 if (getInput('search')) {
                     foreach (explode(' ', getInput('search')) as $search) {
                         $chart = $chart->where('name', 'like', '%' . $search . '%');
@@ -159,7 +161,7 @@ class ChartAccountController extends Controller
                 $finalChart = $finalChart->merge($chart);
             }
             if ($kind == 'persediaan') {
-                $chart = ChartAccount::aktif()->child()->whereBetween('code_group', [140000, 150000]);
+                $chart = ChartAccountAlias::aktif()->child()->whereBetween('code_group', [140000, 150000]);
                 if (getInput('search')) {
                     foreach (explode(' ', getInput('search')) as $search) {
                         $chart = $chart->where('name', 'like', '%' . $search . '%');
@@ -169,7 +171,7 @@ class ChartAccountController extends Controller
                 $finalChart = $finalChart->merge($chart);
             }
             if ($kind == 'kartu-inventory') {
-                $chart = ChartAccount::aktif()->child()->where('reference_model', 'App\\Models\\KartuInventory');
+                $chart = ChartAccountAlias::aktif()->child()->where('reference_model', 'App\\Models\\KartuInventory');
                 if (getInput('search')) {
                     foreach (explode(' ', getInput('search')) as $search) {
                         $chart = $chart->where('name', 'like', '%' . $search . '%');
@@ -179,7 +181,7 @@ class ChartAccountController extends Controller
                 $finalChart = $finalChart->merge($chart);
             }
             if ($kind == 'inventory') {
-                $chart = ChartAccount::aktif()->child()->where(function ($q) {
+                $chart = ChartAccountAlias::aktif()->child()->where(function ($q) {
                     $q->whereBetween('code_group', [181000, 181999])->orWhere('code_group', 301000);
                 });
                 if (getInput('search')) {
@@ -191,7 +193,7 @@ class ChartAccountController extends Controller
                 $finalChart = $finalChart->merge($chart);
             }
             if ($kind == 'akumulasi_inventory') {
-                $chart = ChartAccount::aktif()->child()->where(function ($q) {
+                $chart = ChartAccountAlias::aktif()->child()->where(function ($q) {
                     $q->whereBetween('code_group', [182000, 182999])->orWhere('code_group', 301000);
                 });
                 if (getInput('search')) {
@@ -203,7 +205,7 @@ class ChartAccountController extends Controller
                 $finalChart = $finalChart->merge($chart);
             }
             if ($kind == 'beban_inventory') {
-                $chart = ChartAccount::aktif()->child()->where(function ($q) {
+                $chart = ChartAccountAlias::aktif()->child()->where(function ($q) {
                     $q->whereBetween('code_group', [800010, 800015])->orWhere('code_group', 301000);
                 });
                 if (getInput('search')) {
@@ -215,7 +217,7 @@ class ChartAccountController extends Controller
                 $finalChart = $finalChart->merge($chart);
             }
             if ($kind == 'kas') {
-                $chart = ChartAccount::aktif()->child()->where(function ($q) {
+                $chart = ChartAccountAlias::aktif()->child()->where(function ($q) {
                     $q->whereBetween('code_group', [110000, 120000])->orWhere('code_group', 301000);
                 });
                 if (getInput('search')) {
@@ -227,7 +229,7 @@ class ChartAccountController extends Controller
                 $finalChart = $finalChart->merge($chart);
             }
             if ($kind == 'beban') {
-                $chart = ChartAccount::aktif()->child()->where('account_type', 'Beban');
+                $chart = ChartAccountAlias::aktif()->child()->where('account_type', 'Beban');
                 if (getInput('search')) {
                     foreach (explode(' ', getInput('search')) as $search) {
                         $chart = $chart->where('name', 'like', '%' . $search . '%');
@@ -237,7 +239,7 @@ class ChartAccountController extends Controller
                 $finalChart = $finalChart->merge($chart);
             }
             if ($kind == 'pemindahan') {
-                $chart = ChartAccount::aktif()->child()->where('name', 'Ayat Silang');
+                $chart = ChartAccountAlias::aktif()->child()->where('name', 'Ayat Silang');
                 if (getInput('search')) {
                     foreach (explode(' ', getInput('search')) as $search) {
                         $chart = $chart->where('name', 'like', '%' . $search . '%');
@@ -247,7 +249,7 @@ class ChartAccountController extends Controller
                 $finalChart = $finalChart->merge($chart);
             }
             if ($kind == 'modal') {
-                $chart = ChartAccount::aktif()->child()->where('account_type', 'Ekuitas');
+                $chart = ChartAccountAlias::aktif()->child()->where('account_type', 'Ekuitas');
                 if (getInput('search')) {
                     foreach (explode(' ', getInput('search')) as $search) {
                         $chart = $chart->where('name', 'like', '%' . $search . '%');
@@ -257,7 +259,7 @@ class ChartAccountController extends Controller
                 $finalChart = $finalChart->merge($chart);
             }
             if ($kind == 'lainlain') {
-                $chart = ChartAccount::aktif()->child();
+                $chart = ChartAccountAlias::aktif()->child();
                 if (getInput('search')) {
                     foreach (explode(' ', getInput('search')) as $search) {
                         $chart = $chart->where('name', 'like', '%' . $search . '%');
@@ -282,8 +284,8 @@ class ChartAccountController extends Controller
 
     public function getItemChartAccountAsetTetap()
     {
-        $chart = ChartAccount::where('code_group', 181000)->first();
-        $charts = ChartAccount::where('parent_id', $chart->id);
+        $chart = ChartAccountAlias::where('code_group', 181000)->first();
+        $charts = ChartAccountAlias::where('parent_id', $chart->id);
         if (getInput('search')) {
             foreach (explode(' ', getInput('search')) as $search) {
                 $charts = $charts->where('name', 'like', '%' . $search . '%');
@@ -298,8 +300,8 @@ class ChartAccountController extends Controller
 
     public function getItemChartAccountBDD()
     {
-        $chart = ChartAccount::where('code_group', 160000)->first();
-        $charts = ChartAccount::where('parent_id', $chart->id);
+        $chart = ChartAccountAlias::where('code_group', 160000)->first();
+        $charts = ChartAccountAlias::where('parent_id', $chart->id);
         if (getInput('search')) {
             foreach (explode(' ', getInput('search')) as $search) {
                 $charts = $charts->where('name', 'like', '%' . $search . '%');
@@ -315,7 +317,7 @@ class ChartAccountController extends Controller
     {
 
         $theFixCode = 0;
-        $chart = ChartAccount::where('code_group', $id)->first();
+        $chart = ChartAccountAlias::where('code_group', $id)->first();
         $code = $chart->code_group;
         for ($i = 1; $i < 10000000; $i *= 10) {
             if ($code % $i != 0) {
@@ -332,7 +334,7 @@ class ChartAccountController extends Controller
 
     public function getChartAccount($id)
     {
-        $chart = ChartAccount::find($id);
+        $chart = ChartAccountAlias::find($id);
         $parent = $chart->parent;
         return [
             'status' => 1,
@@ -356,7 +358,8 @@ class ChartAccountController extends Controller
             'book_journal_id' => bookID(),
             'chart_account_id' => $chart->id,
             'code_group' => $codeGroup,
-            'name' => $name
+            'name' => $name,
+            'reference_model' => $referenceModel,
         ]));
         return [
             'status' => 1,
@@ -367,7 +370,7 @@ class ChartAccountController extends Controller
 
     public function updateAllLevel()
     {
-        $chartAccounts = ChartAccount::all();
+        $chartAccounts = ChartAccountAlias::all();
         foreach ($chartAccounts as $chart) {
             $chart->updateLevel();
         }
@@ -379,7 +382,7 @@ class ChartAccountController extends Controller
 
     public function destroy($id)
     {
-        $chart = ChartAccount::find($id);
+        $chart = ChartAccountAlias::find($id);  
         $chart->is_deleted = 1;
         $chart->deleted_at = Date('Y-m-d H:i:s');
         $chart->save();
@@ -390,10 +393,10 @@ class ChartAccountController extends Controller
     }
 
     public function deleteAccount($id)
-    {
+    {       
         $chartAlias = ChartAccountAlias::find($id);
         $chartAlias->is_deleted = 1;
-        $chartAlias->save();
+        $chartAlias->save();        
         return [
             'status' => 1,
             'msg' => $chartAlias
