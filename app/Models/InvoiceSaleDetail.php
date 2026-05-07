@@ -100,7 +100,7 @@ class InvoiceSaleDetail extends Model
     {
         $dateAwal = createCarbon($date)->startOfMonth()->format('ymdHis00');
         $dateAkhir = createCarbon($date)->format('ymdHis99');
-        $coa = ChartAccount::where('reference_model', InvoiceSaleDetail::class)->pluck('code_group')->all();
+        $coa = ChartAccountAlias::where('reference_model', InvoiceSaleDetail::class)->pluck('code_group')->all();
         $total = Journal::where('index_date', '>', $dateAwal)->where('index_date', '<', $dateAkhir)->whereIn('code_group', $coa)->sum(DB::raw('amount_debet-amount_kredit'));
         return $total ? $total * -1 : 0;
     }
