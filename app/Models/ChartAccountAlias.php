@@ -35,6 +35,11 @@ class ChartAccountAlias extends Model
 
     return $q;
     }
+      public function scopeChild($q)
+    {
+        $q->where('chart_account_aliases.is_child', true);
+    }
+
     public function chartAccount()
     {
         return $this->belongsTo(ChartAccount::class, 'chart_account_id');
