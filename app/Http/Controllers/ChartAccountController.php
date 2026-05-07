@@ -25,7 +25,12 @@ class ChartAccountController extends Controller
             }else{
                 $ca->updateAlias();
             }
-            $ca->updateLevel();
+        
+        }
+        $allaliasID= collect($charts)->pluck('alias_id')->all();
+        $aliases= ChartAccountAlias::whereIn('id',$allaliasID)->get();
+        foreach($aliases as $al){
+            $al->updateLevel();
         }
         return $view;
     }
