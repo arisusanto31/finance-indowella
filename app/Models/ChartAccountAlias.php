@@ -24,11 +24,11 @@ class ChartAccountAlias extends Model
 
       public function parent()
     {
-        return $this->belongsTo('App\Models\ChartAccount', 'parent_id');
+        return $this->belongsTo('App\Models\ChartAccountAlias', 'parent_id');
     }
     public function childs()
     {
-        return $this->hasMany('App\Models\ChartAccount', 'parent_id');
+        return $this->hasMany('App\Models\ChartAccountAlias', 'parent_id');
     }
 
     public function scopeAktif($q){
