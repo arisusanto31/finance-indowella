@@ -22,7 +22,10 @@ class ChartAccountAlias extends Model
         'account_type',
     ];
 
+    public function scopeAktif($q){
 
+    return $q;
+    }
     public function chartAccount()
     {
         return $this->belongsTo(ChartAccount::class, 'chart_account_id');
