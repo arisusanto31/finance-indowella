@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use App\Models\ChartAccount;
+use App\Models\ChartAccountAlias;
 use App\Models\Journal;
 use App\Models\KartuBahanJadi;
 use App\Models\KartuBDP;
@@ -34,7 +35,7 @@ trait HasModelSaldoStock
     public static function getTotalJournal($date)
     {
         $indexDate = createCarbon($date)->format('ymdHis00');
-        $coa = ChartAccount::where('reference_model', static::class)->pluck('code_group')->all();
+        $coa = ChartAccountAlias::where('reference_model', static::class)->pluck('code_group')->all();
         $sub = Journal::select(DB::raw('max(index_date) as max_index_date'), 'code_group')
             ->where('index_date', '<', $indexDate)
             ->whereIn('code_group', $coa)
