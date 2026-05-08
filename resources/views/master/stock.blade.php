@@ -258,7 +258,7 @@
                         <tr>
                             <td> ${index + 1 }</td>
                             <td>${formatNormalDateTime(new Date(item.created_at))}</td>
-                            <td>${item.name}</td>
+                            <td>${item.name} [${item.id}]</td>
                             <td>${item.category.name}</td>
                             <td>${item.parent_category.name}
                             <div class="modal fade" id="editModal${item.id}" tabindex="-1"
