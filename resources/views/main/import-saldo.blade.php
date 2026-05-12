@@ -5,6 +5,8 @@
         <div class="card-body">
             <form id="form-data" method="POST">
                 @csrf
+                
+                @if(array_key_exists('jurnal',$data))
                 <p>Saldo Neraca Lajur</p>
                 <div class="table-responsive">
                     <table id="" class="table table table-bordered table-striped table-hover align-middle">
@@ -45,7 +47,9 @@
 
                     </table>
                 </div>
+                @endif
 
+                @if(array_key_exists('stock',$data))
                 <p class="mt-2">Data Saldo Stock</p>
                 <div class="table-responsive">
                     <table id="" class="table table table-bordered table-striped table-hover align-middle">
@@ -101,51 +105,56 @@
                     </table>
                 </div>
 
+                @endif
+
+
                 @php
-                    $titles = ['Saldo Hutang', 'Inventaris', 'BDD'];
-                    $keys = ['hutang', 'inventaris', 'bdd'];
+                    $titles = ['Saldo Hutang', 'Inventaris', 'BDD','Stock In Transit'];
+                    $keys = ['hutang', 'inventaris', 'bdd','stock_in_transit'];
                 @endphp
 
                 @foreach ($keys as $index => $key_title)
-                    <p class="mt-2">Data {{ $titles[$index] }}</p>
-                    @php
-                        $datatable = $data[$key_title];
-                        $allth = collect(collect($datatable)->first())->keys();
-                        $allthfix = ['No', ...$allth->toArray()];
-                    @endphp
-                    <div class="table-responsive">
-                        <table id="" class="table table table-bordered table-striped table-hover align-middle">
-                            <thead class="bg-white text-dark text-center">
-                                <tr>
-                                    @foreach ($allthfix as $th)
-                                        <th>{{ $th }}</th>
-                                    @endforeach
-                                </tr>
-                            </thead>
-                            <tbody id="body-import-saldo">
-                                @foreach ($datatable as $key => $item)
+                    @if(array_key_exists($key_title,$data))
+                        <p class="mt-2">Data {{ $titles[$index] }}</p>
+                        @php
+                            $datatable = $data[$key_title];
+                            $allth = collect(collect($datatable)->first())->keys();
+                            $allthfix = ['No', ...$allth->toArray()];
+                        @endphp
+                        <div class="table-responsive">
+                            <table id="" class="table table table-bordered table-striped table-hover align-middle">
+                                <thead class="bg-white text-dark text-center">
                                     <tr>
                                         @foreach ($allthfix as $th)
-                                            @if ($th == 'No')
-                                                <td>{{ $key + 1 }}
-                                                    <input type="hidden" class="{{ $key_title }}"
-                                                        value="{{ $key }}" />
-                                                </td>
-                                            @else
-                                                <td>{{ $item[$th] }}
-                                                    <input type="hidden"
-                                                        class="{{ $key_title }}-data{{ $key }}"
-                                                        id="{{ $key_title }}-{{ $th }}-{{ $key }}"
-                                                        value="{{ $item[$th] }}" />
-
-                                                </td>
-                                            @endif
+                                            <th>{{ $th }}</th>
                                         @endforeach
                                     </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody id="body-import-saldo">
+                                    @foreach ($datatable as $key => $item)
+                                        <tr>
+                                            @foreach ($allthfix as $th)
+                                                @if ($th == 'No')
+                                                    <td>{{ $key + 1 }}
+                                                        <input type="hidden" class="{{ $key_title }}"
+                                                            value="{{ $key }}" />
+                                                    </td>
+                                                @else
+                                                    <td>{{ $item[$th] }}
+                                                        <input type="hidden"
+                                                            class="{{ $key_title }}-data{{ $key }}"
+                                                            id="{{ $key_title }}-{{ $th }}-{{ $key }}"
+                                                            value="{{ $item[$th] }}" />
+
+                                                    </td>
+                                                @endif
+                                            @endforeach
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
                 @endforeach
 
 
@@ -227,12 +236,26 @@
                     dataBDD.push(thedata);
                 });
 
+                kartuInTransit=[];
+                $('.stock_in_transit').each(function(i, elem) {
+                    key = $(elem).val();
+                    thedata = {};
+                    $('.stock_in_transit-data' + key).each(function(j, el) {
+                        theid = $(el).attr('id');
+                        splitinfo = theid.split('-');
+                        field = splitinfo[1];
+                        thedata[field] = $(el).val();
+                    });
+                    kartuInTransit.push(thedata);
+                });
+
                 allData = {
                     jurnal: dataSaldo,
                     stock: dataStock,
                     inventaris: dataInventaris,
                     hutang: dataHutang,
-                    bdd: dataBDD
+                    bdd: dataBDD,
+                    stock_in_transit: kartuInTransit
                 }
                 let jsonData = JSON.stringify(allData);
                 console.log('alldata', allData);

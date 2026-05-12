@@ -8,8 +8,14 @@ use App\Models\KartuBDP;
 use App\Models\KartuInTransit;
 
 use App\Models\KartuStock;
+use App\Models\ManufStock;
+use App\Models\RetailStock;
 use App\Models\SalesOrder;
 use App\Models\Stock;
+use App\Models\StockCategory;
+use App\Models\StockUnit;
+use App\Models\TaskImportDetail;
+use App\Services\ContextService;
 use App\Services\LockManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -346,5 +352,195 @@ class KartuInTransitController extends Controller
             return ['status' => 0, 'msg' => 'Mutasi memiliki jurnal, hapus dari jurnalnya'];
         }
         return $kartu->makeDelete();
+    }
+
+    public static function processTaskImport($taskID)
+    {
+        $task = TaskImportDetail::find($taskID);
+        ContextService::setBookJournalID($task->book_journal_id);
+
+        if ($task->status == 'success') {
+            return;
+        }
+
+        $data = json_decode($task->payload, true);
+        $qty = $data['quantity'];
+        $unit = $data['unit'];
+        $invoiceNumber = $data['invoice_pack_number'];
+        info('data :' . json_encode($data));
+        $lawanCode = 301000;
+        $bookModel = $task->book_journal_id == 1 ? ManufStock::class : RetailStock::class;
+        info('book model:' . $bookModel);
+        $stock = Stock::where('reference_stock_id', intval($data['ref_id']))
+            ->where('reference_stock_type', $bookModel)
+            ->first();
+        if (!$stock)
+            $stock = Stock::where('name', $data['name'])->first();
+
+        info('stock terdaftar:' . json_encode($stock));
+
+        try {
+            if (!$stock) {
+                if ($task->book_journal_id == 1) {
+                    throw (new \Exception('masuk ke buku jurnal manufaktur'));
+                    $manufStock = ManufStock::where('name', $data['name'])->with(['parentCategory', 'category'])->first();
+                    if (!$manufStock) {
+                        $manufStock = ManufStock::where('id', intval($data['ref_id']))->with(['parentCategory', 'category'])->first();
+                    }
+                    if ($manufStock) {
+                        $manufStock['units_manual'] = $manufStock->getUnits();
+                        $manufStock['unit_default'] = $manufStock->unit_info;
+                        $st = StockController::sync(new Request([
+                            'book_journal_id' => 1,
+                            'data' => $manufStock,
+                            'stock_id' => $manufStock->id,
+                        ]));
+                        if ($st['status'] == 0) {
+                            throw new \Exception($st['msg']);
+                        }
+                        $stock = $st['msg'];
+                    }
+                } else if ($task->book_journal_id == 2) {
+
+                    $retailStock = RetailStock::where('name', $data['name'])->with(['parentCategory', 'category'])->first();
+
+                    if (!$retailStock) {
+                        $retailStock = RetailStock::where('id', intval($data['ref_id']))->with(['parentCategory', 'category'])->first();
+                    }
+                    if ($retailStock) {
+                        $retailStock['units_manual'] = $retailStock->getUnits();
+                        $retailStock['unit_default'] = $retailStock->unit_info;
+
+                        $st = StockController::sync(new Request([
+                            'book_journal_id' => 2,
+                            'data' => $retailStock,
+                            'stock_id' => $retailStock->id,
+                        ]));
+                        if ($st['status'] == 0) {
+                            throw new \Exception($st['msg']);
+                        }
+                        $stock = $st['msg'];
+                        throw (new \Exception('masuk ke buku jurnal retail'));
+                    } else {
+                        throw new \Exception('retail stock tidak ditemukan');
+                    }
+                }
+                if (!$stock) {
+                    //nah disini buat stock nih
+                    $unitBackend = 'Pcs';
+                    if ($unit == 'Kg' || $unit == 'Gram') {
+                        $unitBackend = 'Gram';
+                    }
+                    if ($unit == 'Meter' || $unit == 'Cm' || $unit == 'm') {
+                        $unitBackend = 'Meter';
+                    }
+
+                    $unknownCat = StockCategory::where('name', 'unknown')->first();
+                    if (!$unknownCat) {
+                        $unknownCat = StockCategory::create([
+                            'name' => 'unknown',
+                            'parent_id' => null
+                        ]);
+                    }
+                    $stockNameFirst = explode(' ', $data['name'])[0];
+                    $category = StockCategory::where('name', 'like', '%' . $stockNameFirst . '%')->first();
+                    if (!$category) {
+                        $category = $unknownCat;
+                    }
+                    $stock = Stock::create([
+                        'name' => $data['name'],
+                        'unit_backend' => $unitBackend,
+                        'parent_category_id' => $category->parent_id,
+                        'category_id' => $category->id,
+                        'unit_default' => $data['unit'],
+                        'book_journal_id' => $task->book_journal_id,
+                    ]);
+                    StockUnit::create([
+                        'stock_id' => $stock->id,
+                        'unit' => $data['unit'],
+                        'konversi' => 1,
+                    ]);
+                }
+            }
+            if ($stock && ($stock['unit_default'] == null || $stock['units_manual'] == null)) {
+
+                $referenceStock = $bookModel::find(intval($data['ref_id']));
+                $referenceStock['units_manual'] = $referenceStock->getUnits();
+                $referenceStock['unit_default'] = $referenceStock->unit_info;
+                $st = StockController::sync(new Request([
+                    'book_journal_id' => 2,
+                    'data' => $referenceStock,
+                    'stock_id' => $referenceStock->id,
+                    'master_stock_id' => $stock->id,
+                ]));
+                if ($st['status'] == 0) {
+                    throw new \Exception($st['msg']);
+                }
+                $stock = $st['msg'];
+            }
+
+            DB::beginTransaction();
+            if ($task->processed_at == null)
+                $task->processed_at = now();
+
+            $journal = TaskImportDetail::where('task_import_id', $task->task_import_id)->whereNotNull('journal_number')->first();
+            $journalNumber = $journal ? $journal->journal_number : null;
+            if (round(format_db($data['amount'])) > 0) {
+                // throw new \Exception('oke amount saldo  > 0');
+                info('try to create kartu stock transit');
+
+
+                $st = KartuInTransit::mutationStore(new Request([
+                    'stock_id' => $stock->id,
+                    'mutasi_qty_backend' => $qty,
+                    'unit_backend' => $unit,
+                    'mutasi_quantity' => $qty,
+                    'unit' => $unit,
+                    'flow' => 0,
+                    'invoice_pack_number' => $invoiceNumber,
+                    'production_number' => $invoiceNumber,
+                    'sales_order_number' => null,
+                    'sales_order_id' => null,
+                    'code_group' => 140002,
+                    'lawan_code_group' => $lawanCode,
+                    'is_otomatis_jurnal' => false,
+                    'is_custom_rupiah' => 1,
+                    'journal_number' => $journalNumber,
+                    'mutasi_rupiah_total' => floatval($data['amount']),
+                    'date' => $data['date'],
+                    'description' => 'INIT AWAL - ' . $data['date'],
+                    'tag' => 'import saldo awal ' . $data['date']
+                ]), false);
+                info('hasil dari kartu stock transit:' . json_encode($st));
+                if ($st['status'] == 0) {
+                    throw new \Exception($st['msg']);
+                }
+            }
+
+            $task->status = 'success';
+            $task->error_message = "";
+            $task->journal_number = $journalNumber;
+            $task->finished_at = now();
+            $task->save();
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            if ($task->processed_at == null)
+                $task->processed_at = now();
+            $task->error_message = $e->getMessage();
+            $task->status = 'failed';
+            $task->save();
+            return [
+                'status' => 0,
+                'msg' => 'Processing task import kartu stock failed: ' . $e->getMessage(),
+                'task' => $task
+            ];
+        }
+
+        return [
+            'status' => 1,
+            'msg' => 'Processing task import kartu stock completed.',
+            'task' => $task
+        ];
     }
 }

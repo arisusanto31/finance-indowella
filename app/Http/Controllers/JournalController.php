@@ -21,6 +21,7 @@ use App\Models\KartuBahanJadi;
 use App\Models\KartuBDP;
 use App\Models\KartuDPSales;
 use App\Models\KartuHutang;
+use App\Models\KartuInTransit;
 use App\Models\KartuInventory;
 use App\Models\KartuPiutang;
 use App\Models\KartuPrepaidExpense;
@@ -1035,10 +1036,9 @@ class JournalController extends Controller
 
         $import = new ExcelSaldoAwalImport;
         Excel::import($import, $request->file('file'));
-
         // Ambil data yang sudah diproses
         $data = $import->data;
-        // return $data;
+
         $coas = ChartAccount::aktif()->pluck('name', 'code_group')->all();
         $stocks = Stock::pluck('name')->all();
         $stockRefs = Stock::whereNotNull('reference_stock_id')->pluck('reference_stock_id')->all();
@@ -1063,6 +1063,9 @@ class JournalController extends Controller
             $hutangs = $data['hutang'] ?? [];
             $inventaris = $data['inventaris'] ?? [];
             $bdds = $data['bdd'] ?? [];
+            $stockInTransit = $data['stock_in_transit'] ?? [];
+
+        
 
             // proses hutang
             $bookID = book()->id;
@@ -1168,6 +1171,26 @@ class JournalController extends Controller
                 ]);
             }
 
+             foreach ($stockInTransit as $stock) {
+                $fixData = [
+                    'name' => $stock['stock_name'],
+                    'amount' => $stock['saldo_rupiah'],
+                    'quantity' => $stock['saldo_qty'],
+                    'unit' => $stock['unit'],
+                    'ref_id' => $stock['stock_id'],   
+                    'invoice_pack_number' => $stock['no_invoice'],
+                    'date' => $date
+                ];
+                $taskImportDetail = TaskImportDetail::create([
+                    'task_import_id' => $task->id,
+                    'type' => 'kartu_stock_in_transit',
+                    'payload' => json_encode($fixData),
+                    'book_journal_id' => $bookID,
+                    'request_date' => $date
+                ]);
+                $taskKartuStock[] = $taskImportDetail->id;
+            }
+           
             DB::commit();
 
             return [
@@ -1229,6 +1252,9 @@ class JournalController extends Controller
             return InventoryController::processTaskImport($id);
         } else if ($taskDetail->type == 'kartu_prepaid') {
             return BDDController::processTaskImport($id);
+        }
+        else if($taskDetail->type=='kartu_stock_in_transit'){
+            return KartuInTransitController::processTaskImport($id);
         }
 
         // $taskDetail = TaskImportDetail::find($id);

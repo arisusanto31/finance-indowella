@@ -4,7 +4,7 @@
         <h5 class="text-primary-dark card-header"> 🔎 <strong> Status Import {{ $task->description }}
                 [{{ $task->id }}] </strong> </h5>
         <div class="card-body">
-
+            @if(array_key_exists('saldo_nl',$details->all()))
             <p>Saldo Neraca Lajur
                 @if (collect($details['saldo_nl'])->where('status', 'success')->count() == 0)
                     <br>
@@ -65,11 +65,15 @@
                 </table>
 
             </div>
+            @endif
 
-            <p class="mt-2">Data Saldo Stock
-                <br>
+            <br>
                 <button class="bg-primary btn  text-white" onclick="resendAll()"><i class="fas fa-arrow-up"></i> resend
                     All</button>
+            @if(array_key_exists('kartu_stock',$details->all() ))
+
+            <p class="mt-2">Data Saldo Stock
+                
             </p>
 
 
@@ -131,13 +135,15 @@
                     </tbody>
                 </table>
             </div>
+            @endif
 
             @php
-                $titles = ['Data Hutang', 'Data Inventaris', 'Data Prepaid'];
-                $keys = ['kartu_hutang', 'kartu_inventaris', 'kartu_prepaid'];
+                $titles = ['Data Hutang', 'Data Inventaris', 'Data Prepaid', 'Data Stock In Transit'];
+                $keys = ['kartu_hutang', 'kartu_inventaris', 'kartu_prepaid','kartu_stock_in_transit'];
             @endphp
 
             @foreach ($titles as $index => $title)
+                @if(array_key_exists($keys[$index],$details->all() ))
                 <p class="mt-2">{{ $title }}</p>
                 @php
                     $datatable = $details[$keys[$index]];
@@ -206,6 +212,7 @@
                         </tbody>
                     </table>
                 </div>
+                @endif
             @endforeach
 
         </div>
