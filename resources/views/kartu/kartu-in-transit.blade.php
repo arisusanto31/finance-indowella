@@ -284,7 +284,7 @@
                                     <tr>
                                         <th rowspan=2>No</th>
                                         <th rowspan=2>Aksi </th>
-                                        <th rowspan=2>NO SPK</th>
+                                        <th rowspan=2>NO invoice</th>
                                         <th rowspan=2>Nama Barang</th>
                                         <th colspan=3>Saldo Awal</th>
                                         <th colspan=3>Masuk</th>

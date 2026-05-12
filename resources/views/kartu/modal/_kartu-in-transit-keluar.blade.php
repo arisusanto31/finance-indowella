@@ -84,10 +84,10 @@
 
 
 <script>
-    console.log('masuk kok');
-    initItemSelectManual('.select-stock', '{{ route("stock.get-item") }}', 'Pilih Stock');
+    console.log('masuk kok in transit keluar');
+    initItemSelectManual('.select-stock', '{{ route("stock.get-item") }}', 'Pilih Stock','#global-modal');
     initItemSelectManual('.select-coa', '{{ route("chart-account.get-item-keuangan") }}?kind=persediaan|hutang|kas',
-        'Pilih Akun Persediaan');
+        'Pilih Akun Persediaan','#global-modal');
     initCurrencyInput('.currency-input');
 
 
