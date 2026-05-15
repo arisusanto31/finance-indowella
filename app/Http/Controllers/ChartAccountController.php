@@ -16,19 +16,19 @@ class ChartAccountController extends Controller
     public function index()
     {
         $view = view('master.chart-account');
-        $charts = ChartAccount::withAlias()->get();
+        // $charts = ChartAccount::withAlias()->get();
      
-        foreach ($charts as $ca) {
-            if ($ca->alias_id == null) {
-                //belum ada alias. langsug create kan
-                $ca->makeAlias();
-            }else{
-                $ca->updateAlias();
-            }
+        // foreach ($charts as $ca) {
+        //     if ($ca->alias_id == null) {
+        //         //belum ada alias. langsug create kan
+        //         $ca->makeAlias();
+        //     }else{
+        //         $ca->updateAlias();
+        //     }
         
-        }
-        $allaliasID= collect($charts)->pluck('alias_id')->all();
-        $aliases= ChartAccountAlias::whereIn('id',$allaliasID)->get();
+        // }
+        // $allaliasID= collect($charts)->pluck('alias_id')->all();
+        $aliases= ChartAccountAlias::get();
         foreach($aliases as $al){
             $al->updateLevel();
         }
