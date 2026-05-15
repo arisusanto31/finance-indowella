@@ -430,7 +430,7 @@ class Journal extends Model
                 $lock->release();
             // CustomLogger::log('journal', 'info', 'recalculate release lock ' . $name);
         }
-        return ['status' => 1, 'msg' => $dataUpdate];
+        return ['status' => 1, 'msg' => $dataUpdate,'journal'=>$this];
     }
 
     public function scopeSearchNote($q, $search)
