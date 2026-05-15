@@ -272,6 +272,11 @@
                          <button onclick="showDetailMutasi('KartuStock')"><i class="fas fa-eye"></i> </button> 
                         </h5>
                         <div id="cocok-kartu-stock" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
+                         <h5 id="" class="pb-0 mt-3 mb-0 text-primary"> <i class="fas fa-circle"></i> Kartu
+                            In Transit <span style="font-size:14px"> vs jurnal</span>
+                            <button onclick="showDetailMutasi('KartuInTransit')"><i class="fas fa-eye"></i> </button>
+                        </h5>
+                        <div id="cocok-kartu-in-transit" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
                         <h5 id="" class="pb-0 mt-3 mb-0 text-primary"> <i class="fas fa-circle"></i> Kartu
                             BDP <span style="font-size:14px"> vs jurnal</span>
                             <button onclick="showDetailMutasi('KartuBDP')"><i class="fas fa-eye"></i> </button>
@@ -765,10 +770,14 @@
                             var isCocokBdd = (Math.abs(res.kartu_bdd.saldo - res.kartu_bdd.journal)<0.01)?1:0;
                             var isCocokPenjualan = (Math.abs(res.penjualan.saldo - res.penjualan.journal)<0.01)?1:0;
                             var isCocokPembelian = (Math.abs(res.pembelian.saldo - res.pembelian.journal)<0.01)?1:0;
+                            var isCocokInTransit = (Math.abs(res.kartu_in_transit.saldo - res.kartu_in_transit.journal)<0.01)?1:0;
 
                             $('#cocok-kartu-stock').html("Rp " + formatRupiah(res.kartu_stock.saldo) + ' vs ' +
                                 formatRupiah(res.kartu_stock.journal)+
                                 `${isCocokStock?'<span class="text-success"> <i class="fas fa-check"></i></span>':'<span class="text-danger"> <i class="fas fa-times"></i></span>'}`);
+                            $('#cocok-kartu-in-transit').html("Rp " + formatRupiah(res.kartu_in_transit.saldo) + ' vs ' +
+                                formatRupiah(res.kartu_in_transit.journal)+
+                                `${isCocokInTransit?'<span class="text-success"> <i class="fas fa-check"></i></span>':'<span class="text-danger"> <i class="fas fa-times"></i></span>'}`);
                             $('#cocok-kartu-bdp').html("Rp " + formatRupiah(res.kartu_bdp.saldo) + ' vs ' +
                                 formatRupiah(res.kartu_bdp.journal)+
                                 `${isCocokBdp?'<span class="text-success"> <i class="fas fa-check"></i></span>':'<span class="text-danger"> <i class="fas fa-times"></i></span>'}`);

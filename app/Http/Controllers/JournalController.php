@@ -1941,7 +1941,13 @@ class JournalController extends Controller
             $tableName = "kartu_stocks";
             $saldoKartu = KartuStock::getTotalSaldoRupiah($startDate, true);
             $saldoJournal = KartuStock::getTotalJournal($startDate);
-        } else if ($model == 'KartuBDP') {
+        }
+        else if($model=='KartuInTransit'){
+            $tableName= 'kartu_in_transits';
+            $saldoKartu = KartuInTransit::getTotalSaldoRupiah($startDate, true);
+            $saldoJournal = KartuInTransit::getTotalJournal($startDate);
+        }
+        else if ($model == 'KartuBDP') {
             $tableName = "kartu_bdps";
             $saldoKartu = KartuBDP::getTotalSaldoRupiah($startDate, true);
             $saldoJournal = KartuBDP::getTotalJournal($startDate);

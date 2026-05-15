@@ -12,6 +12,7 @@ use App\Models\KartuBahanJadi;
 use App\Models\KartuBDP;
 use App\Models\KartuDPSales;
 use App\Models\KartuHutang;
+use App\Models\KartuInTransit;
 use App\Models\KartuInventory;
 use App\Models\KartuPiutang;
 use App\Models\KartuPrepaidExpense;
@@ -106,6 +107,9 @@ class IndexController extends Controller
         $ks = KartuStock::getTotalSaldoRupiah(getInput('date'));
         $jks = KartuStock::getTotalJournal(getInput('date'));
 
+        $kit= KartuInTransit::getTotalSaldoRupiah(getInput('date'));
+        $jkit= KartuInTransit::getTotalJournal(getInput('date'));
+
         $kbdp = KartuBDP::getTotalSaldoRupiah(getInput('date'), true);
         $jkbdp = KartuBDP::getTotalJournal(getInput('date'));
 
@@ -136,6 +140,10 @@ class IndexController extends Controller
             'kartu_stock' => [
                 'saldo' => $ks,
                 'journal' => $jks
+            ],
+            'kartu_in_transit' => [
+                'saldo' => $kit,
+                'journal' => $jkit
             ],
             'kartu_bdp' => [
                 'saldo' => $kbdp,
