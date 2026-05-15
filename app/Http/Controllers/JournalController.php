@@ -357,6 +357,9 @@ class JournalController extends Controller
                 throw new \Exception('Journal sudah terkunci, tidak bisa diubah');
             }
             $lawanJournal->code_group = $lawanCodeGroup;
+        
+            $lawanJournal->save();
+            $lawanJournal->index_date= Journal::getNextIndexDate($lawanJournal->created_at);
             $lawanJournal->save();
             $journal->lawan_code_group = $lawanCodeGroup;
             $journal->save();
