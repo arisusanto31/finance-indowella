@@ -173,7 +173,7 @@ class Journal extends Model
                 while ($counter >= 99) {
                     $indexDate = $now->format('ymdHis');
                     info('code Group:' . $coaID . ' on ' . $indexDate . ',bookid=' . bookID());
-                    $lastIndexDate = Journal::where('chart_account_id', $coaID)->where('index_date_group', $indexDate)->select(DB::raw('max(index_date) as maxindex'))->first();
+                    $lastIndexDate = Journal::where('code_group', $codeGroup)->where('index_date_group', $indexDate)->select(DB::raw('max(index_date) as maxindex'))->first();
                     $counter = $lastIndexDate ? $lastIndexDate->maxindex % 100 : 0;
                     if ($counter >= 99) {
                         $now->addSecond();
@@ -185,7 +185,7 @@ class Journal extends Model
                 $lastJournal = Journal::where('code_group', $codeGroup)->where('index_date', '<', $finalIndexDate)->orderBy('index_date', 'desc')->first();
                 info('get final index date for code group' . $codeGroup . ': ' . $finalIndexDate);
                 $journal = new Journal;
-                $caAlias= ChartAccountAlias::where('code_group',$codeGroup)->first();
+                $caAlias = ChartAccountAlias::where('code_group', $codeGroup)->first();
                 $chartAccount = ChartAccount::find($coaID);
                 $journal->index_date = $finalIndexDate;
                 $journal->index_date_group = $indexDate; //nilai ymdHis
@@ -272,6 +272,23 @@ class Journal extends Model
         ];
     }
 
+    public function updateIndexDate()
+    {
+        $counter = 9999;
+        $now = $this->created_at;
+        while ($counter >= 99) {
+            $indexDate = $now->format('ymdHis');
+            $lastIndexDate = Journal::where('code_group', $this->code_group)->where('index_date_group', $indexDate)->select(DB::raw('max(index_date) as maxindex'))->first();
+            $counter = $lastIndexDate ? $lastIndexDate->maxindex % 100 : 0;
+            if ($counter >= 99) {
+                $now->addSecond();
+            }
+        }
+        // info('counter:' . $counter);
+        $finalIndexDate = $indexDate . sprintf("%02d", ($counter + 1));
+        $this->index_date = $finalIndexDate;
+        $this->save();
+    }
     public function verifyJournal()
     {
         $this->refresh();
@@ -368,7 +385,7 @@ class Journal extends Model
             $thejournal->amount_saldo = round($lastSaldo + $amount, 2);
             $thejournal->save();
             $thejournal->refresh();
-        }else{
+        } else {
             return [
                 'status' => 0,
                 'msg' => 'tidak bisa recalculate journal opening balance'
@@ -430,7 +447,7 @@ class Journal extends Model
                 $lock->release();
             // CustomLogger::log('journal', 'info', 'recalculate release lock ' . $name);
         }
-        return ['status' => 1, 'msg' => $dataUpdate,'journal'=>$this];
+        return ['status' => 1, 'msg' => $dataUpdate, 'journal' => $this];
     }
 
     public function scopeSearchNote($q, $search)

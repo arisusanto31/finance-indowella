@@ -359,8 +359,7 @@ class JournalController extends Controller
             $lawanJournal->code_group = $lawanCodeGroup;
         
             $lawanJournal->save();
-            $lawanJournal->index_date= Journal::getNextIndexDate($lawanJournal->created_at);
-            $lawanJournal->save();
+            $lawanJournal->updateIndexDate();
             $journal->lawan_code_group = $lawanCodeGroup;
             $journal->save();
             $lawanJournal->recalculateJournal();
