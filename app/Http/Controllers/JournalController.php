@@ -339,12 +339,12 @@ class JournalController extends Controller
             $lawanCodeGroup = $request->input('lawan_code');
 
             $journal = Journal::find($journalId);
-            $lawanJournal = Journal::where('index_date', $journal->index_date)->where('journal_number', $journal->journal_number)
+            $lawanJournal = Journal::where('journal_number', $journal->journal_number)
                 ->where('code_group', $journal->lawan_code_group)->first();
-                if(!$lawanJournal){
-                    throw new \Exception('Lawan journal tidak ditemukan');
-                }
-            $chart = ChartAccountAlias::withoutGlobalScopes()->where('book_journal_id',book()->id)->where('code_group', $lawanCodeGroup)->first();
+            if (!$lawanJournal) {
+                throw new \Exception('Lawan journal tidak ditemukan');
+            }
+            $chart = ChartAccountAlias::withoutGlobalScopes()->where('book_journal_id', book()->id)->where('code_group', $lawanCodeGroup)->first();
 
             if ($chart->is_child == 0) {
                 throw new \Exception('Lawan code harus child');
@@ -357,7 +357,7 @@ class JournalController extends Controller
                 throw new \Exception('Journal sudah terkunci, tidak bisa diubah');
             }
             $lawanJournal->code_group = $lawanCodeGroup;
-             $lawanJournal->save();
+            $lawanJournal->save();
             $journal->lawan_code_group = $lawanCodeGroup;
             $journal->save();
             $lawanJournal->recalculateJournal();
@@ -1068,7 +1068,7 @@ class JournalController extends Controller
             $bdds = $data['bdd'] ?? [];
             $stockInTransit = $data['stock_in_transit'] ?? [];
 
-        
+
 
             // proses hutang
             $bookID = book()->id;
@@ -1174,13 +1174,13 @@ class JournalController extends Controller
                 ]);
             }
 
-             foreach ($stockInTransit as $stock) {
+            foreach ($stockInTransit as $stock) {
                 $fixData = [
                     'name' => $stock['stock_name'],
                     'amount' => $stock['saldo_rupiah'],
                     'quantity' => $stock['saldo_qty'],
                     'unit' => $stock['unit'],
-                    'ref_id' => $stock['stock_id'],   
+                    'ref_id' => $stock['stock_id'],
                     'invoice_pack_number' => $stock['no_invoice'],
                     'date' => $date
                 ];
@@ -1193,7 +1193,7 @@ class JournalController extends Controller
                 ]);
                 $taskKartuStock[] = $taskImportDetail->id;
             }
-           
+
             DB::commit();
 
             return [
@@ -1255,8 +1255,7 @@ class JournalController extends Controller
             return InventoryController::processTaskImport($id);
         } else if ($taskDetail->type == 'kartu_prepaid') {
             return BDDController::processTaskImport($id);
-        }
-        else if($taskDetail->type=='kartu_stock_in_transit'){
+        } else if ($taskDetail->type == 'kartu_stock_in_transit') {
             return KartuInTransitController::processTaskImport($id);
         }
 
