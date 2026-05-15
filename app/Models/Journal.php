@@ -369,7 +369,10 @@ class Journal extends Model
             $thejournal->save();
             $thejournal->refresh();
         }else{
-            throw new \Exception('tidak bisa recalculate journal opening balance');
+            return [
+                'status' => 0,
+                'msg' => 'tidak bisa recalculate journal opening balance'
+            ];
         }
         return $thejournal->calculateJournalNext($isLock);
     }
@@ -427,7 +430,7 @@ class Journal extends Model
                 $lock->release();
             // CustomLogger::log('journal', 'info', 'recalculate release lock ' . $name);
         }
-        return ['status' => 1, 'msg' => $newdata, 'journal' => $thejournal];
+        return ['status' => 1, 'msg' => $dataUpdate];
     }
 
     public function scopeSearchNote($q, $search)

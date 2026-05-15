@@ -455,7 +455,12 @@ class JournalController extends Controller
     {
         $journal = Journal::find($id);
         if ($journal) {
-            $journal->recalculateJournal();
+            return $journal->recalculateJournal();
+        }else{
+            return [
+                'status' => 0,
+                'msg' => 'Journal tidak ditemukan'
+            ];
         }
         return [
             'status' => 1,
