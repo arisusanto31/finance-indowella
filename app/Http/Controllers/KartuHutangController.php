@@ -117,7 +117,7 @@ class KartuHutangController extends Controller
                 $kartuHutang->tag = 'init_import' . $payload['request_date'];
                 $kartuHutang->factur_supplier_number = $payload['factur_supplier_number'];
             }
-            $created = createCarbon($payload['request_date'] . ' 00:00:00');
+            $created = createCarbon($payload['request_date'] . ':00');
             $kartuHutang->index_date = KartuHutang::getNextIndexDate($created);
             $kartuHutang->index_date_group = $created->format('ymdHis');
 

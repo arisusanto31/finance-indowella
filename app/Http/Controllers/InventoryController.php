@@ -356,7 +356,7 @@ class InventoryController extends Controller
                 $kartu->tag = 'init_import' . $payload['request_date'];
                 $kartu->inventory_id = $inv->id;
             }
-            $created = createCarbon($payload['request_date'] . ' 00:00:00');
+            $created = createCarbon($payload['request_date'] . ':00');
             $kartu->index_date = KartuInventory::getNextIndexDate($created);
             $kartu->index_date_group = $created->format('ymdHis');
             $kartu->type_mutasi = 'init';
