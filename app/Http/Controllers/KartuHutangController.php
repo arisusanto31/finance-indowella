@@ -103,8 +103,9 @@ class KartuHutangController extends Controller
             if ($payload['supplier_name'] == '') {
                 return;
             }
-            $supplier = DB::table('suppliers')->where('name', $payload['supplier_name'])->first();
+            $supplier = DB::table('suppliers')->where('name', 'like', '%' . $payload['supplier_name'] . '%')->first();
             if (!$supplier) {
+                return ['status'=>0,'msg'=>'supplier ' . $payload['supplier_name'] . ' tidak ditemukan'];
                 $supplier = new Supplier();
                 $supplier->name = $payload['supplier_name'];
                 $supplier->book_journal_id = book()->id;
