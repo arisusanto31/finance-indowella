@@ -341,6 +341,9 @@ class JournalController extends Controller
             $journal = Journal::find($journalId);
             $lawanJournal = Journal::where('index_date', $journal->index_date)->where('journal_number', $journal->journal_number)
                 ->where('code_group', $journal->lawan_code_group)->first();
+                if(!$lawanJournal){
+                    throw new \Exception('Lawan journal tidak ditemukan');
+                }
             $chart = ChartAccountAlias::withoutGlobalScopes()->where('book_journal_id',book()->id)->where('code_group', $lawanCodeGroup)->first();
 
             if ($chart->is_child == 0) {
