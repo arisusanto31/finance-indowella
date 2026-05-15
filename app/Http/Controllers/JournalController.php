@@ -12,6 +12,7 @@ use App\Jobs\UpdateLawanCodeJournalJob;
 use App\Models\BookJournal;
 use App\Models\BookTheme;
 use App\Models\ChartAccount;
+use App\Models\ChartAccountAlias;
 use App\Models\DetailKartuInvoice;
 use App\Models\InvoiceSaleDetail;
 use App\Models\Journal;
@@ -340,7 +341,7 @@ class JournalController extends Controller
             $journal = Journal::find($journalId);
             $lawanJournal = Journal::where('index_date', $journal->index_date)->where('journal_number', $journal->journal_number)
                 ->where('code_group', $journal->lawan_code_group)->first();
-            $chart = ChartAccount::where('code_group', $lawanCodeGroup)->first();
+            $chart = ChartAccountAlias::withoutGlobalScopes()->where('book_journal_id',book()->id)->where('code_group', $lawanCodeGroup)->first();
 
             if ($chart->is_child == 0) {
                 throw new \Exception('Lawan code harus child');
@@ -353,8 +354,7 @@ class JournalController extends Controller
                 throw new \Exception('Journal sudah terkunci, tidak bisa diubah');
             }
             $lawanJournal->code_group = $lawanCodeGroup;
-            $lawanJournal->chart_account_id = $chart->id;
-            $lawanJournal->save();
+             $lawanJournal->save();
             $journal->lawan_code_group = $lawanCodeGroup;
             $journal->save();
             $lawanJournal->recalculateJournal();
