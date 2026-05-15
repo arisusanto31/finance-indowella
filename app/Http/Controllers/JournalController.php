@@ -408,7 +408,7 @@ class JournalController extends Controller
         //ari 3 bulan kedepan
         try {
             $journals = Journal::whereBetween('index_date', [$indexAwal, $indexAkhir])->select('index_date', 'journal_number', 'description', 'amount_kredit', 'amount_debet', 'code_group', 'amount_saldo', 'id')->orderBy('index_date', 'asc')->get();
-            $sub = Journal::select(DB::raw('max(index_date) as max_index_date'), 'code_group')->where('index_date', '<', $indexAwal)->whereNotNull('amount_saldo')->groupBy('code_group');
+            $sub = Journal::select(DB::raw('max(index_date) as max_index_date'), 'code_group')->where('index_date', '<', $indexAwal)->groupBy('code_group');
             $lastJournal = Journal::joinSub($sub, 'last', function ($join) {
                 $join->on('last.code_group', '=', 'journals.code_group')
                     ->on('last.max_index_date', '=', 'journals.index_date');
