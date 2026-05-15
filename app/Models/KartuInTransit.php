@@ -62,6 +62,7 @@ class KartuInTransit extends Model
             $kartu->invoice_pack_number = $request->input('invoice_pack_number');
             $kartu->invoice_pack_id = $request->input('invoice_pack_id');
             $kartu->custom_stock_name = $request->input('custom_stock_name');
+            $kartu->tag= $request->input('tag');
 
             $kartu->production_number = $request->input('production_number');
             if (!$kartu->production_number) {
@@ -272,6 +273,7 @@ class KartuInTransit extends Model
             $st = self::create(new Request([
                 'stock_id' => $stockid,
                 'sales_order_number' => $SONumber,
+                'tag'=> $request->input('tag'),
                 'sales_order_id' => $SOID,
                 'invoice_pack_number' => $invoiceNumber,
                 'invoice_pack_id' => $invID,

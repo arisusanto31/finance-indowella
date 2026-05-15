@@ -358,11 +358,9 @@ class KartuInTransitController extends Controller
     {
         $task = TaskImportDetail::find($taskID);
         ContextService::setBookJournalID($task->book_journal_id);
-
         if ($task->status == 'success') {
             return;
         }
-
         $data = json_decode($task->payload, true);
         $qty = $data['quantity'];
         $unit = $data['unit'];
@@ -509,7 +507,7 @@ class KartuInTransitController extends Controller
                     'mutasi_rupiah_total' => floatval($data['amount']),
                     'date' => $data['date'],
                     'description' => 'INIT AWAL - ' . $data['date'],
-                    'tag' => 'import saldo awal ' . $data['date']
+                    'tag' => 'init_import' . $data['date']
                 ]), false);
                 info('hasil dari kartu stock transit:' . json_encode($st));
                 if ($st['status'] == 0) {

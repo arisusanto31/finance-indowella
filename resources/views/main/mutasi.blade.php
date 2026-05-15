@@ -28,7 +28,7 @@
                     @csrf
                     <div class="row">
                         <div class="col-md-2">
-                            <input type="date" class="form-control" name="date">
+                            <input type="datetime-local" class="form-control" name="date">
                         </div>
                         <div class="col-md-6">
                             <input type="file" class="form-control" name="file">
