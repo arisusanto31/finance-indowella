@@ -368,6 +368,8 @@ class Journal extends Model
             $thejournal->amount_saldo = round($lastSaldo + $amount, 2);
             $thejournal->save();
             $thejournal->refresh();
+        }else{
+            throw new \Exception('tidak bisa recalculate journal opening balance');
         }
         return $thejournal->calculateJournalNext($isLock);
     }
