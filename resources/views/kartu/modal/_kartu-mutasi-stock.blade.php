@@ -42,12 +42,10 @@
                                 {{ format_price(abs($item->mutasi)) }}
                                 {{ $item->unit }}
                             @endif
-
                         </td>
                         <td>
                             {{ format_price($item->saldo) }}
                             {{ $item->unit }}
-
                         </td>
                         <td>
                             {{ format_price($item->saldo_rupiah) }}

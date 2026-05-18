@@ -52,7 +52,7 @@
         <div class="row">
             <div class="col mb-3">
                 <label for="quantity" class="form-label">Jumlah Mutasi</label>
-                <input type="text" name="mutasi_quantity" id="mutasi_quantity" autocomplete="off" class="form-control currency-input" placeholder="jumlah" />
+                <input type="text" onchange="updateTotalRupiah()" name="mutasi_quantity" id="mutasi_quantity" autocomplete="off" class="form-control currency-input" placeholder="jumlah" />
             </div>
             <div class="col mb-3">
                 <label for="unit" class="form-label">Satuan</label>
@@ -86,7 +86,7 @@
     initItemSelectManual('.select-stock', '{{route("stock.get-item")}}', 'Pilih Stock', '#global-modal');
 
     function updateTotalRupiah() {
-        let quantity = $('#mutasi_quantity').val();
+        let quantity = formatDB($('#mutasi_quantity').val());
         let totalRupiah = formatDB($('#mutasi-rupiah-total').val()) / quantity;
         let unit = $('#unit').val();
         let keterangan = 'Total Nilai Per unit : ' + formatRupiah(totalRupiah) + ' / ' + unit;
