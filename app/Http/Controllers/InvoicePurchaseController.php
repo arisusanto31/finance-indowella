@@ -620,7 +620,7 @@ class InvoicePurchaseController extends Controller
             }
             DB::beginTransaction();
 
-            //create pack ya
+            //create pack 
             $invoicePack = InvoicePack::create([
                 'invoice_number' => $invoice_pack_number,
                 'factur_supplier_number' => $facturSupplier,

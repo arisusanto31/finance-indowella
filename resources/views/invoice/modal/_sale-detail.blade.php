@@ -1028,6 +1028,8 @@
     }
 
     function submitBahanJadi(i) {
+
+        console.log($('#form-bahan-jadi' + i).serialize());
         swalConfirmAndSubmit({
             url: '{{ url("admin/kartu/kartu-bahan-jadi/create-mutations") }}',
             data: $('#form-bahan-jadi' + i).serialize(),
