@@ -205,7 +205,7 @@ class KartuBahanJadi extends Model
             $qtybackend = $qty * $dataunit->konversi;
             $unitbackend = $stock->unit_backend;
             if($qtybackend==0){
-                throw new \Exception('qty backend kartu bahan jadi tidak boleh nol');
+                throw new \Exception('qty backend kartu bahan jadi tidak boleh nol (qty= ' . $qty .',konversi= '.$dataunit->konversi.')');  
             }
             $mutasiRupiahUnit = money($mutasiRupiahTotal / $qtybackend);
             $st = self::create(new Request([
