@@ -191,7 +191,7 @@ class KartuBahanJadi extends Model
             else
                 $mutasiRupiahTotal = 0;
             $isCustom = $request->input('is_custom_rupiah');
-            $dataunit = StockUnit::where('stock_id', $stockid)->where('unit', ownucfirst($unit))->first();
+            $dataunit = StockUnit::where('stock_id', $stockid)->where('unit', $unit)->first();
 
             $stock = Stock::find($stockid);
             if (!$unit) {
@@ -205,7 +205,7 @@ class KartuBahanJadi extends Model
             $qtybackend = $qty * $dataunit->konversi;
             $unitbackend = $stock->unit_backend;
             if($qtybackend==0){
-                throw new \Exception('qty backend kartu bahan jadi tidak boleh nol (qty= ' . $qty .',konversi= '.$dataunit->konversi.')');  
+                throw new \Exception('qty backend kartu bahan jadi tidak boleh nol (qty= ' . $qty .',konversi= '.$dataunit->konversi.',stock id= '.$stockid.')');  
             }
             $mutasiRupiahUnit = money($mutasiRupiahTotal / $qtybackend);
             $st = self::create(new Request([
