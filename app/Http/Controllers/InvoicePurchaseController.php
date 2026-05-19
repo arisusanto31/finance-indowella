@@ -220,8 +220,6 @@ class InvoicePurchaseController extends Controller
 
     public function createMutations(Request $request)
     {
-
-
         $coaDebet = $request->input('code_group_debet');
         $coaKredit = $request->input('code_group_kredit');
         $toko = Toko::first();  
@@ -599,6 +597,9 @@ class InvoicePurchaseController extends Controller
             $date = $request->input('date');
             foreach ($arrayStockID as $i => $stockId) {
                 $thestock = Stock::find($stockId);
+                $nilaiPPN = $isPPN ? round(format_db($request->total_price[$i]) * 11 / 100) : 0;
+                $totalPrice = round(format_db($request->total_price[$i]));
+               
                 $grouped[] = [
                     'factur_supplier_number' => $facturSupplier,
                     'fp_number' => $facturPajak,
@@ -606,13 +607,13 @@ class InvoicePurchaseController extends Controller
                     'stock_id' => $stockId,
                     'quantity' => $request->quantity[$i],
                     'unit' => $request->unit[$i],
-                    'price' => $request->price_unit[$i],
+                    'price' => round($request->price_unit[$i]),
                     'discount' => $request->discount[$i] ?? 0,
                     'supplier_id' => $supplierID,
                     'book_journal_id' => bookID(),
                     'is_ppn' => $isPPN,
-                    'total_ppn_m' => $isPPN ? (format_db($request->total_price[$i]) * 0.11) : 0,
-                    'total_price' => format_db($request->total_price[$i]) ?? 0,
+                    'total_ppn_m' => $nilaiPPN,
+                    'total_price' => $totalPrice,
                     'custom_stock_name' => $request->custom_stock_name[$i] ?? $thestock->name,
                     'created_at' => $date ?? now()
                 ];
