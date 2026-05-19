@@ -99,11 +99,11 @@ class InvoicePack extends Model
     public function getCodeFix()
     {
         $data = $this;
-        if ($data->index == null) {
+        if ($data->index == null||$data->index == 0) {
             //menandakan bahwa invoice ini belum pernah dapat fix code
             $personType = $data->person_type;
             $personID = $data->person_id;
-            $inv = InvoicePack::where('is_final', 1)->where('person_id', $personID)
+            $inv = InvoicePack::where('person_id', $personID)
                 ->where('person_type', $personType)
                 ->orderBy('index', 'desc')->first();
             if ($inv) {
