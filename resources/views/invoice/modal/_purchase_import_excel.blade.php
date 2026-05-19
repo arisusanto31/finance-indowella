@@ -305,7 +305,7 @@
                 surat_jalan: data.surat_jalan,
                 invoice_pack_number: data.package_number,
                 factur_supplier_number: data.package_number,
-                reference_stock_id: data.details.map(item => item.stock_id),
+                reference_stock_id: data.details.map(item => parseInt(item.stock_id)),
                 reference_stock_type: data.stock_type,
                 quantity: data.details.map(item => item.quantity),
                 qtyjadi: data.details.map(item => item.qtyjadi),
