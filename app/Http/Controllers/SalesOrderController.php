@@ -423,7 +423,7 @@ class SalesOrderController extends Controller
         $reference = $data->reference;
         $dateFinished = $reference->delivery_at ?? $data->created_at;
         // $data->updateStatus();
-        $invdetails = SalesOrderDetail::with('stock')->where('sales_order_number', $number)->get();
+        $invdetails = SalesOrderDetail::where('sales_order_number', $number)->with('stock')->get();
         foreach ($invdetails as $detail) {
             if ($detail->unitjadi == '??') {
                 $detail->unitjadi = $detail->unit;
