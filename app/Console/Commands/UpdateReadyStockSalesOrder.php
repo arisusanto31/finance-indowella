@@ -13,7 +13,7 @@ class UpdateReadyStockSalesOrder extends Command
      *
      * @var string
      */
-    protected $signature = 'update:ready-stock-sales-order {bookid} {id}';
+    protected $signature = 'update:ready-stock-sales-order {bookid} {monthyear}';
 
     /**
      * The console command description.
@@ -28,12 +28,18 @@ class UpdateReadyStockSalesOrder extends Command
     public function handle()
     {
         //
+        $monthyear = $this->argement('monthyear') . '-01';
+        $startDate = createCarbon($monthyear)->startOfMonth();
+        $endDate = createCarbon($monthyear)->endOfMonth();
         $bookid = $this->argument('bookid');
-        $id = $this->argument('id');
         Session::put('book_journal_id', $bookid);
-        $SO = SalesOrder::find($id);
-        $st=$SO->updateReadyStock();
-        $this->info(json_encode($st));
-        $this->info('ready stock sales order ' . $SO->is_ready_stock);
+
+        $salesOrders =  SalesOrder::where('created_at', '>=', $startDate)
+            ->where('created_at', '<', $endDate)->get();
+        foreach ($salesOrders as $so) {
+            $st = $so->updateReadyStock();
+            $this->info(json_encode($st));
+            $this->info('ready stock sales order ' . $so->is_ready_stock);
+        }
     }
 }
