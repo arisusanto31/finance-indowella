@@ -421,7 +421,11 @@ class SalesOrderController extends Controller
     {
         $data = SalesOrder::where('sales_order_number', $number)->first();
         $reference = $data->reference;
-        $dateFinished = $reference->delivery_at ?? $data->created_at;
+        if($reference){
+            $dateFinished = $reference->delivery_at ?? $data->created_at;
+        }else{
+            $dateFinished = $data->created_at->addMinutes(3);
+        }
         // $data->updateStatus();
         $invdetails = SalesOrderDetail::where('sales_order_number', $number)->with('stock')->get();
         foreach ($invdetails as $detail) {
