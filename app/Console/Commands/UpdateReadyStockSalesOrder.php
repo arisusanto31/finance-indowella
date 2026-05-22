@@ -28,7 +28,7 @@ class UpdateReadyStockSalesOrder extends Command
     public function handle()
     {
         //
-        $monthyear = $this->argement('monthyear') . '-01';
+        $monthyear = $this->argument('monthyear') . '-01';
         $startDate = createCarbon($monthyear)->startOfMonth();
         $endDate = createCarbon($monthyear)->endOfMonth();
         $bookid = $this->argument('bookid');
