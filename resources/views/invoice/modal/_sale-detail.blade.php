@@ -34,7 +34,7 @@
                 <tbody id="body-detail-invoice">
                     @foreach ($data['details'] as $key => $item)
                         <tr class="item-tr">
-                            <td>{{ $key + 1 }}</td>
+                            <td>{{ $key + 1 }} [{{$item->id}}]</td>
                             <td>
                                 {{ $item->custom_stock_name }}
                                 <div class="fs-8 bg-primary px-1 text-white rounded-1">bahan: {{ $item->stock->name }}
