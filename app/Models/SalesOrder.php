@@ -29,6 +29,12 @@ class SalesOrder extends Model
     {
         return $this->morphTo();
     }
+     public function getReference(){
+        if($this->reference_type && $this->reference_id){
+            return $this->reference;
+        }
+        return null;
+    }
     public function details()
     {
         return $this->hasMany(SalesOrderDetail::class, 'sales_order_number', 'sales_order_number');
