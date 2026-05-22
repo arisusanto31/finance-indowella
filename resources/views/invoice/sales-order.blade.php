@@ -257,7 +257,7 @@
                                     @if ($index === 0)
                                         <td rowspan="{{ $rowspan }}">{{ $no++ }}</td>
                                         <td rowspan="{{ $rowspan }}">
-                                            {{ $item->created_at->format('Y-m-d') }}
+                                            {{ $item->created_at->format('Y-m-d H:i:s') }}
                                             <div id="ket-finish{{ $item->parent->id }}"></div>
                                         </td>
                                         <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }}
