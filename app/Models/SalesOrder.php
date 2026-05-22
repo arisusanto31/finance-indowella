@@ -102,7 +102,8 @@ class SalesOrder extends Model
             
             foreach ($this->details as $detail) {
                 $stock = $detail->stock;
-                $lastStock = KartuStock::where('stock_id', $stock->id)->where('index_date', '<=', $deliveryAt)->orderBy('index_date', 'desc')->first();
+                $indexDelivery= createCarbon($deliveryAt)->format('ymdHis000');
+                $lastStock = KartuStock::where('stock_id', $stock->id)->where('index_date', '<=', $indexDelivery)->orderBy('index_date', 'desc')->first();
                 $saldoStock = 0;
                 if ($lastStock) {
                     $saldoStock = floatval($lastStock->saldo_qty_backend)    / floatval($allKonversi[$stock->id][$detail->unit]);
