@@ -77,9 +77,10 @@ class KartuStock extends Model
                 $lastCard->saldo_rupiah_total = 0;
             }
 
+            $stock= Stock::find($kartu->stock_id);
             if ($lastCard->saldo_qty_backend == 0 && $flow == 1) {
                 //kalo keluar
-                throw new \Exception('tidak ada saldo qty barang ini ');
+                throw new \Exception('tidak ada saldo qty barang '.$stock->name);
             }
 
             if ($isCustom == 0 && $flow == 1) {
