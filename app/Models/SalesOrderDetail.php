@@ -49,6 +49,13 @@ class SalesOrderDetail extends Model
     public function reference(){
         return $this->morphTo();
     }
+    
+    public function getReference(){
+        if($this->reference_type && $this->reference_id){
+            return $this->reference;
+        }
+        return null;
+    }
 
 
     protected static function boot()
