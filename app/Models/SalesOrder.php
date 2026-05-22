@@ -106,6 +106,7 @@ class SalesOrder extends Model
                 $saldoStock = 0;
                 if ($lastStock) {
                     $saldoStock = floatval($lastStock->saldo_qty_backend)    / floatval($allKonversi[$stock->id][$detail->unit]);
+                    $this->info('stock ' . $stock->name . ', saldo stock ' . $saldoStock . ', qty order ' . $detail->quantity);
                     if ($saldoStock < $detail->quantity) {
                         $readyStock = 0;
                         $detail->is_ready_stock = 0;
@@ -115,6 +116,7 @@ class SalesOrder extends Model
                         $detail->save();
                     }
                 } else {
+                    $this->info('stock ' . $stock->name . ', saldo stock ' . $saldoStock . ', qty order ' . $detail->quantity);
                     $readyStock = 0;
                     $detail->is_ready_stock = 0;
                     $detail->save();
