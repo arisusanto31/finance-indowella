@@ -184,8 +184,6 @@ class KartuHutang extends Model
             $PO = PurchaseOrder::where('purchase_order_number', $PONumber)->first();
             $POID = $PO ? $PO->id : null;
             $tokoid = $request->input('toko_id');
-
-
             $amountMutasi = $request->input('amount_mutasi');
             $personID = $request->input('person_id');
             $personType = $request->input('person_type');
@@ -268,7 +266,6 @@ class KartuHutang extends Model
                 'code_group_name' => $codeGroupName,
                 'date' => $date
             ]));
-
             if ($st['status'] == 1) {
                 if ($useTransaction)
                     DB::commit();

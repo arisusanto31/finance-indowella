@@ -29,8 +29,9 @@ class SalesOrder extends Model
     {
         return $this->morphTo();
     }
-     public function getReference(){
-        if($this->reference_type && $this->reference_id){
+    public function getReference()
+    {
+        if ($this->reference_type && $this->reference_id) {
             return $this->reference;
         }
         return null;
@@ -77,6 +78,61 @@ class SalesOrder extends Model
         });
     }
 
+
+    public function updateReadyStock()
+    {
+
+        try {
+            $readyStock = 1;
+            $reference = $this->getReference();
+            if ($reference) {
+                $deliveryAt = $reference->delivery_at;
+                if(!$deliveryAt){
+                    $deliveryAt = $this->created_at;
+                }
+            } else {
+                $deliveryAt = $this->created_at;
+            }
+
+            //nah mari kita analisa semua stocknya berdasarkan tanggal delivery at ini
+            $allKonversi = StockUnit::whereIn('stock_id', $this->details->pluck('stock_id'))->get()->groupBy('stock_id')->map(function ($item) {
+                return collect($item)->pluck('konversi', 'unit')->all();
+            })->all();
+            
+            
+            foreach ($this->details as $detail) {
+                $stock = $detail->stock;
+                $lastStock = KartuStock::where('stock_id', $stock->id)->where('index_date', '<=', $deliveryAt)->orderBy('index_date', 'desc')->first();
+                $saldoStock = 0;
+                if ($lastStock) {
+                    $saldoStock = floatval($lastStock->saldo_qty_backend)    / floatval($allKonversi[$stock->id][$detail->unit]);
+                    if ($saldoStock < $detail->quantity) {
+                        $readyStock = 0;
+                        $detail->is_ready_stock = 0;
+                        $detail->save();
+                    } else {
+                        $detail->is_ready_stock = 1;
+                        $detail->save();
+                    }
+                } else {
+                    $readyStock = 0;
+                    $detail->is_ready_stock = 0;
+                    $detail->save();
+                }
+            }
+            $this->is_ready_stock = $readyStock;
+            $this->save();
+            return [
+                'status' => 1,
+                'msg' => 'ready stock updated'
+            ];
+        } catch (\Exception $e) {
+            return [
+                'status' => 0,
+                'msg' => $e->getMessage()
+            ];
+        }
+    }
 
     public function getTotalKartu()
     {

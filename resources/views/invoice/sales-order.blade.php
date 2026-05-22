@@ -260,14 +260,20 @@
                                             {{ $item->created_at->format('Y-m-d H:i:s') }}
                                             <div id="ket-finish{{ $item->parent->id }}"></div>
                                         </td>
-                                        <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }}
+                                        <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }} [{{$theparent->id}}]
                                             <br>
                                             <span style="color:#bbb;">({{ $item->draft_number }})</span>
                                         </td>
                                         <td rowspan="{{ $rowspan }}">{{ $item->customer->name ?? '-' }}</td>
                                     @endif
                                     <td>{{ $item->custom_stock_name ?? '-' }}</td>
-                                    <td class="text-end">{{ format_price($item->qtyjadi) }}</td>
+                                    <td class="text-end">
+                                        @if($item->is_ready_stock)
+                                            <span class="text-success"><i class="fas fa-box"></i></span>
+                                        @else
+                                            <span class="text-danger"><i class="fas fa-box"></i></span>
+                                        @endif
+                                        {{ format_price($item->qtyjadi) }} </td>
                                     <td>{{ $item->unitjadi }}</td>
                                     <td class="text-end">Rp{{ format_price($item->pricejadi) }}</td>
                                     <td class="text-end">Rp{{ format_price($item->discount) }}</td>
