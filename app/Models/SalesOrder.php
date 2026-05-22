@@ -103,6 +103,16 @@ class SalesOrder extends Model
         return $kartus ?? [];
     }
 
+    // public function updateJam($countMax=0){
+    //     if($countMax==0){
+    //         //cari tau dulu countmax sebenarnya PPl
+
+    //     }
+    //     $maxdate= SalesOrder::whereDate('created_at',createCarbon($this->created_at)->format('Y-m-d'))->max('created_at');
+
+
+    // }
+
     public function getTotalPosKartu()
     {
         $kartus = collect($this->detailKartuInvoices)->map(function ($val) {

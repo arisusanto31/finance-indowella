@@ -187,6 +187,8 @@ class InvoiceSaleController extends Controller
         return view('invoice.invoice-sales', compact('invoices', 'month', 'year', 'totalInvoice', 'totalInvoiceFinal', 'totalInvoiceMark', 'parent'));
     }
 
+    
+
     // public function showSales()
     // {
     //     $invoices = InvoiceSaleDetail::latest()->get();
