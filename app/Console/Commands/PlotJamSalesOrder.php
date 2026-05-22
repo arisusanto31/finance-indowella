@@ -6,6 +6,7 @@ use App\Models\SalesOrder;
 use DateInterval;
 use DatePeriod;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Session;
 
 class PlotJamSalesOrder extends Command
 {
@@ -14,7 +15,7 @@ class PlotJamSalesOrder extends Command
      *
      * @var string
      */
-    protected $signature = 'plot:jam-sales-order {monthyear}';
+    protected $signature = 'plot:jam-sales-order {bookid} {monthyear}';
 
     /**
      * The console command description.
@@ -29,6 +30,9 @@ class PlotJamSalesOrder extends Command
     public function handle()
     {
         //
+
+        $bookid = $this->argument('bookid');
+        Session::put('book_journal_id', $bookid);
         $monthyear = $this->argument('monthyear');
         $startDate = createCarbon($monthyear . '-01')->startOfMonth();
         $endDate = createCarbon($monthyear . '-01')->endOfMonth();
@@ -40,10 +44,10 @@ class PlotJamSalesOrder extends Command
         );
         foreach ($period as $date) {
             $this->info('Plotting tanggal ' . $date->format('Y-m-d'));
-            $countMax = SalesOrder::whereDate('created_at', $date->format('Y-m-d'))->count();
-            $countPerjam = round($countMax / 13);
+            $countMax = SalesOrder::where('created_at', '>=', $date->format('Y-m-d 00:00:00'))->where('created_at', '<=', $date->format('Y-m-d 23:59:59'))->count();
+            $countPerjam = round($countMax / 12);
             $this->info('count max ' . $countMax . ', count per jam ' . $countPerjam);
-            $salesOrders = SalesOrder::whereDate('created_at', $date->format('Y-m-d'))->orderBy('created_at')->get();
+            $salesOrders = SalesOrder::where('created_at', '>=', $date->format('Y-m-d 00:00:00'))->where('created_at', '<=', $date->format('Y-m-d 23:59:59'))->orderBy('created_at')->get();
             $lastJam = -1;
             $iMinutes = 0;
             $randMinutes = [];
