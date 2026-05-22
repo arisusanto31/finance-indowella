@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Imports\ExcelPembelianImport;
 use App\Imports\ExcelPenjualanImport;
 use App\Models\ChartAccount;
+use App\Models\ChartAccountAlias;
 use App\Models\DetailKartuInvoice;
 use App\Models\InvoicePack;
 use App\Models\InvoicePurchaseDetail;
@@ -282,7 +283,7 @@ class InvoicePurchaseController extends Controller
                 //         $thecard = KartuStock::class;
                 //         break;
                 // }
-                $chart= ChartAccount::where('code_group',$coaDebet)->first();
+                $chart= ChartAccountAlias::where('code_group',$coaDebet)->first();
                 $thecard= $chart->reference_model;
 
                 $kartuStock = $thecard::mutationStore(new Request([
