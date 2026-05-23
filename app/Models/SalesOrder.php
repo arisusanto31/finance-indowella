@@ -150,7 +150,7 @@ class SalesOrder extends Model
                     ->where('saldo_qty_backend', '>', $qtyJualBackend)->orderBy('index_date', 'asc')
                     ->first();
                 if ($lastDate) {
-                    $maxDate[] = createCarbon($lastDate)->addDay()->format('Y-m-d') . ' ' . createCarbon($detail->created_at)->format('H:i:s');
+                    $maxDate[] = createCarbon($lastDate->created_at)->addDay()->format('Y-m-d') . ' ' . createCarbon($detail->created_at)->format('H:i:s');
                 }
             }
         }
