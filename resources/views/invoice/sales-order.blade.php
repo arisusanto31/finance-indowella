@@ -165,7 +165,7 @@
                 <div class="col-md-1">
                     <label> Kirim </label>
                     <select id="status-kirim" class="form-control">
-                        <option @if (!getInput('status_kirim')) selected @endif value="">Semua
+                        <option @if (getInput('status_kirim') === "" || getInput('status_kirim') === null) selected @endif value="">Semua
                         </option>
                         <option @if (getInput('status_kirim') == 1) selected @endif value="1">Terkirim
                         </option>
@@ -178,7 +178,7 @@
                 <div class="col-md-1">
                     <label> Ready Stock </label>
                     <select id="status-ready-stock" class="form-control">
-                        <option @if (!getInput('status_ready_stock')) selected @endif value="">Semua
+                        <option @if (getInput('status_ready_stock') === "" || getInput('status_ready_stock') === null) selected @endif value="">Semua
                         </option>
                         <option @if (getInput('status_ready_stock') == 1) selected @endif value="1">Ready Stock
                         </option>
@@ -190,7 +190,7 @@
                 <div class="col-md-1">
                     <label> Mark </label>
                     <select id="status-mark" class="form-control">
-                        <option @if (!getInput('status_mark')) selected @endif value="">Semua
+                        <option @if (getInput('status_mark') === "" || getInput('status_mark') === null) selected @endif value="">Semua
                         </option>
                         <option @if (getInput('status_mark') == 1) selected @endif value="1">Mark
                         </option>
