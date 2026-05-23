@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ChartAccount;
+use App\Models\ChartAccountAlias;
 use App\Models\DetailKartuInvoice;
 use App\Models\InvoicePack;
 use App\Models\InvoicePurchaseDetail;
@@ -272,8 +273,8 @@ class InvoicePackController extends Controller
             $isBackdate = 1;
         }
 
-        $chartPersediaan = ChartAccount::where('code_group', $coaPersediaan)->first();
-        $chartHutangKas = ChartAccount::where('code_group', $coaHutangKas)->first();
+        $chartPersediaan = ChartAccountAlias::where('code_group', $coaPersediaan)->first();
+        $chartHutangKas = ChartAccountAlias::where('code_group', $coaHutangKas)->first();
         if (!$chartPersediaan || !$chartHutangKas) {
             return ['status' => 0, 'msg' => 'Chart account tidak ditemukan'];
         }
@@ -291,7 +292,8 @@ class InvoicePackController extends Controller
                 if ($stock->name == 'custom') {
                     throw new \Exception('Tidak bisa membuat kartu "stock custom"');
                 }
-                $kartuStock = KartuStock::mutationStore(new Request([
+                $thecard= $chartPersediaan->reference_model;
+                $kartuStock = $thecard::mutationStore(new Request([
                     'stock_id' => $detail->stock_id,
                     'mutasi_quantity' => $detail->quantity,
                     'unit' => $detail->unit,
