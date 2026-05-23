@@ -176,6 +176,17 @@
                 </div>
 
                 <div class="col-md-1">
+                    <label> Ready Stock </label>
+                    <select id="status-ready-stock" class="form-control">
+                        <option @if (!getInput('status_ready_stock')) selected @endif value="">Semua
+                        </option>
+                        <option @if (getInput('status_ready_stock') == 1) selected @endif value="1">Ready Stock
+                        </option>
+                        <option @if (getInput('status_ready_stock') === 0) selected @endif value="0">Belum Ready Stock
+                        </option>
+                </div>
+
+                <div class="col-md-1">
                     <label> Mark </label>
                     <select id="status-mark" class="form-control">
                         <option @if (!getInput('status_mark')) selected @endif value="">Semua

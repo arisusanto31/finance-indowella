@@ -66,6 +66,7 @@ class SalesOrderController extends Controller
         $statusPayment = getInput('status_payment');
         $statusKirim = getInput('status_kirim');
         $statusMark = getInput('status_mark');
+        $statusReadyStock = getInput('status_ready_stock');
         $salesOrderNumber = getInput('sales_order_number');
         $invPackFilter = SalesOrder::whereBetween('created_at', [$startDate, $endDate]);
         if ($salesOrderNumber) {
@@ -94,6 +95,14 @@ class SalesOrderController extends Controller
                 $invPackFilter = $invPackFilter->where('status_delivery', 'terkirim 100%');
             } else {
                 $invPackFilter = $invPackFilter->where('status_delivery', '<>', 'terkirim 100%');
+            }
+        }
+
+        if($statusReadyStock != ""){
+            if($statusReadyStock){
+                $invPackFilter = $invPackFilter->where('is_ready_stock', 1);
+            } else {
+                $invPackFilter = $invPackFilter->where('is_ready_stock', 0);
             }
         }
         if ($statusMark != "") {
