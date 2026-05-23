@@ -184,6 +184,7 @@
                         </option>
                         <option @if (getInput('status_ready_stock') === 0) selected @endif value="0">Belum Ready Stock
                         </option>
+                    </select>
                 </div>
 
                 <div class="col-md-1">
