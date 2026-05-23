@@ -479,7 +479,7 @@
                     .val() +
                     '&status_final=' + $('#status-final').val() + '&status_payment=' + $('#status-payment').val() +
                     '&status_kirim=' +
-                    $('#status-kirim').val() + '&status_mark=' + $('#status-mark').val() + '&perpage=' + $('#perPage').val();
+                    $('#status-kirim').val() +'&status_ready_stock=' + $('#status-ready-stock').val() + '&status_mark=' + $('#status-mark').val() + '&perpage=' + $('#perPage').val();
             }
 
             function prevPage() {
