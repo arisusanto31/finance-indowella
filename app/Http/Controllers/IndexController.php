@@ -199,7 +199,7 @@ class IndexController extends Controller
         if (getInput('type') == 'change-date') {
             $id = getInput('id');
             $so = SalesOrder::find($id);
-            $allConversion = StockUnit::whereIn('stock_id', collect($so->details)->pluck('stock_id')->unique())->groupBy('stock_id')->map(function ($q) {
+            $allConversion = StockUnit::whereIn('stock_id', collect($so->details)->pluck('stock_id')->unique()->all())->get()->groupBy('stock_id')->map(function ($q) {
                 return $q->pluck('konversi', 'unit')->toArray();
             });
             return $so->findDateReadyStock($allConversion);

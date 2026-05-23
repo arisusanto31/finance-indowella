@@ -38,7 +38,7 @@ class changeInvoiceDateForReadyStock extends Command
         $salesOrders = SalesOrder::where('created_at', '>=', $startDate)
             ->where('created_at', '<', $endDate)->where('is_ready_stock', 0)->get();
 
-        $allConversion = StockUnit::groupBy('stock_id')->map(function ($q) {
+        $allConversion = StockUnit::select('stock_id','konversi','unit')->get()->groupBy('stock_id')->map(function ($q) {
             return $q->pluck('konversi', 'unit')->toArray();
         });
         foreach ($salesOrders as $so) {
