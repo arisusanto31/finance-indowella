@@ -478,9 +478,6 @@
                 }
             }
 
-
-           
-
             function nextPage() {
                 currentPage = {{ getInput('page') ? getInput('page') : 1 }};
                 if (currentPage < {{ $totalPage }}) {
@@ -754,12 +751,9 @@
                     res = await processInvoice(id, false);
                     if (res.status == 0) {
                         await new Promise((resolve) => {
-                            Swal.fire('Oops!', 'Gagal membuat final untuk SO: ' +
-                                ': ' + res.msg,
-                                'error').then(() => {
-                                resolve();
-                            });
-                        })
+                          notification('error', 'Gagal memproses invoice untuk SO: ' + id + ': ' + res.msg);
+                          resolve();
+                        });
                     }
                     i++;
                     percent = Math.round((i / totalItems) * 100);
