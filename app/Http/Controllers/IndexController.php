@@ -19,6 +19,7 @@ use App\Models\KartuPrepaidExpense;
 use App\Models\KartuStock;
 use App\Models\SalesOrder;
 use App\Models\SalesOrderDetail;
+use App\Models\StockUnit;
 use App\Models\TaskImportDetail;
 use Illuminate\Http\Request;
 
@@ -87,7 +88,7 @@ class IndexController extends Controller
         $problemKartuInventory = KartuInventory::where('journal_id', null)
             ->whereNull('tag')
             ->count();
-     
+
 
         return [
             'status' => 1,
@@ -107,8 +108,8 @@ class IndexController extends Controller
         $ks = KartuStock::getTotalSaldoRupiah(getInput('date'));
         $jks = KartuStock::getTotalJournal(getInput('date'));
 
-        $kit= KartuInTransit::getTotalSaldoRupiah(getInput('date'));
-        $jkit= KartuInTransit::getTotalJournal(getInput('date'));
+        $kit = KartuInTransit::getTotalSaldoRupiah(getInput('date'));
+        $jkit = KartuInTransit::getTotalJournal(getInput('date'));
 
         $kbdp = KartuBDP::getTotalSaldoRupiah(getInput('date'), true);
         $jkbdp = KartuBDP::getTotalJournal(getInput('date'));
@@ -131,11 +132,11 @@ class IndexController extends Controller
         $kprepaid = KartuPrepaidExpense::getTotalSaldoRupiah(getInput('date'), 'prepaid_expense_id');
         $jprepaid = KartuPrepaidExpense::getTotalJournal(getInput('date'));
 
-        $kpenjualan= InvoiceSaleDetail::getTotalMutasiKartu(getInput('date'));
-        $jpenjualan= InvoiceSaleDetail::getTotalMutasiJounal(getInput('date'));
+        $kpenjualan = InvoiceSaleDetail::getTotalMutasiKartu(getInput('date'));
+        $jpenjualan = InvoiceSaleDetail::getTotalMutasiJounal(getInput('date'));
 
-        $kpembelian= InvoicePurchaseDetail::getTotalMutasiKartu(getInput('date'));
-        $jpembelian= InvoicePurchaseDetail::getTotalMutasiJournal(getInput('date'));
+        $kpembelian = InvoicePurchaseDetail::getTotalMutasiKartu(getInput('date'));
+        $jpembelian = InvoicePurchaseDetail::getTotalMutasiJournal(getInput('date'));
         return [
             'kartu_stock' => [
                 'saldo' => $ks,
@@ -191,10 +192,17 @@ class IndexController extends Controller
         if (getInput('type') == 'all-chart-account') {
             $chartAccounts = ChartAccount::all();
             return  $chartAccounts;
-            
         }
         if (getInput('type') == "pattern") {
             return detectFormat(getInput('nilai'));
+        }
+        if (getInput('type') == 'change-date') {
+            $id = getInput('id');
+            $so = SalesOrder::find($id);
+            $allConversion = StockUnit::whereIn('stock_id', collect($so->details)->pluck('stock_id')->unique())->groupBy('stock_id')->map(function ($q) {
+                return $q->pluck('konversi', 'unit')->toArray();
+            });
+            return $so->findDateReadyStock($allConversion);
         }
         if (getInput('type') == 'format_db') {
             return format_db(getInput('nilai'));

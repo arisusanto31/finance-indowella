@@ -87,7 +87,7 @@ class SalesOrder extends Model
             $reference = $this->getReference();
             if ($reference) {
                 $deliveryAt = $reference->delivery_at;
-                if(!$deliveryAt){
+                if (!$deliveryAt) {
                     $deliveryAt = $this->created_at;
                 }
             } else {
@@ -98,11 +98,11 @@ class SalesOrder extends Model
             $allKonversi = StockUnit::whereIn('stock_id', $this->details->pluck('stock_id'))->get()->groupBy('stock_id')->map(function ($item) {
                 return collect($item)->pluck('konversi', 'unit')->all();
             })->all();
-            
-            
+
+
             foreach ($this->details as $detail) {
                 $stock = $detail->stock;
-                $indexDelivery= createCarbon($deliveryAt)->format('ymdHis000');
+                $indexDelivery = createCarbon($deliveryAt)->format('ymdHis000');
                 $lastStock = KartuStock::where('stock_id', $stock->id)->where('index_date', '<=', $indexDelivery)->orderBy('index_date', 'desc')->first();
                 $saldoStock = 0;
                 if ($lastStock) {
@@ -137,6 +137,49 @@ class SalesOrder extends Model
         }
     }
 
+    public function findDateReadyStock($allConversion)
+    {
+        $so = $this;
+        $maxDate = [];
+        foreach ($so->details as $detail) {
+            if ($detail->is_ready_stock == 0) {
+                //kita cari stock itu ready pertanggal apa bung.
+                $qtyJualBackend = $detail->quantity * $allConversion[$detail->stock_id][$detail->unit];
+                $indexDate = createCarbon($so->created_at)->format('ymdHis000');
+                $lastDate = KartuStock::where('index_date', '>', $indexDate)->where('stock_id', $detail->stock_id)
+                    ->where('saldo_qty_backend', '>', $qtyJualBackend)->orderBy('index_date', 'asc')
+                    ->first();
+                if ($lastDate) {
+                    $maxDate[] = createCarbon($lastDate)->addDay()->format('Y-m-d') . ' ' . createCarbon($detail->created_at)->format('H:i:s');
+                }
+            }
+        }
+        //marikita ambil yang paling lambat date nya 
+        if (!empty($maxDate)) {
+            $themaxDate = collect($maxDate)->max();
+            $so->created_at = $themaxDate;
+            $so->save();
+            foreach ($so->details as $detail) {
+                $detail->created_at = $themaxDate;
+                $detail->save();
+            }
+            $so->updateReadyStock();
+           return [
+                'status' => 1,
+                'msg' => 'sales order ' . $so->sales_order_number . ' updated to ready stock at ' . $themaxDate
+            ];
+        } else {
+           return [
+                'status' => 0,
+                'msg' => 'sales order ' . $so->sales_order_number . ' is not ready stock but no max date found'
+            ];
+        }
+    }
+
+    function info($msg)
+    {
+        info($msg);
+    }
     public function getTotalKartu()
     {
         $kartus = collect($this->detailKartuInvoices)->map(function ($val) {
