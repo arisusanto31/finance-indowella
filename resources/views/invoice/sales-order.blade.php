@@ -428,7 +428,7 @@
 
         @endif
 
-        <div id="div-progress-background" style="position:fixed; top: 100px; right:20px; z-index:1000; width:300px;">
+        <div id="div-progress-background" class="bg-light p-3 rounded" style="position:fixed; top: 100px; right:20px; z-index:1000; width:300px;">
 
         </div>
 
@@ -550,8 +550,10 @@
                                         <div style="max-width:300px; width:100%;" class="mt-2 div-bg-process" id="div-bg-process${process.id}">
                                             <p>${process.description_process}</p>
                                             <span> <i class="fas fa-box colorblack" ></i>${process.total_task} 
-                                                   <i class="fas fa-check text-success" ></i>${process.success_task} 
-                                                   <i class="fas fa-times text-danger" ></i>${process.failed_task} </span>
+                                                   <i class="fas fa-box text-success" ></i>${process.success_task} 
+                                                   <i class="fas fa-box text-danger" ></i>${process.failed_task}
+                                                   <i class="fas fa-spinner fa-spin text-primary"> ${process.progress}%</i>
+                                                   </span>
                                             <div class="progress progress-modern mb-3">
                                                 <div class="progress-bar" id="bg-process${process.id}" role="progressbar" style="width: ${process.progress}%;">
                                                     ${process.progress}%
