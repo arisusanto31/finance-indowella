@@ -34,7 +34,7 @@ class InvoicingProcess extends Command
         //
         $bookid = $this->argument('bookid');
         $month = $this->argument('month');
-        $date = createCarbon($month);
+        $date = createCarbon($month.'-'.'01');
         $startDate = $date->startOfMonth();
         $endDate = $date->endOfMonth();
         Session::put('book_journal_id', $bookid);
