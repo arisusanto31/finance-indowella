@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Imports\excel_kartu_stock\_stock_keluar_import;
 use App\Imports\ExcelPenjualanImport;
+use App\Models\BackgroundProcess;
 use App\Models\BookJournal;
 use App\Models\Customer;
 use App\Models\InvoicePack;
@@ -98,8 +99,8 @@ class SalesOrderController extends Controller
             }
         }
 
-        if($statusReadyStock != ""){
-            if($statusReadyStock){
+        if ($statusReadyStock != "") {
+            if ($statusReadyStock) {
                 $invPackFilter = $invPackFilter->where('is_ready_stock', 1);
             } else {
                 $invPackFilter = $invPackFilter->where('is_ready_stock', 0);
@@ -161,6 +162,8 @@ class SalesOrderController extends Controller
             'totalPage'
         ));
     }
+
+
 
     public function store(Request $request)
     {
@@ -430,9 +433,9 @@ class SalesOrderController extends Controller
     {
         $data = SalesOrder::where('sales_order_number', $number)->first();
         $reference = $data->getReference();
-        if($reference){
+        if ($reference) {
             $dateFinished = $reference->delivery_at ?? $data->created_at;
-        }else{
+        } else {
             $dateFinished = $data->created_at->addMinutes(3);
         }
         // $data->updateStatus();
@@ -1102,7 +1105,7 @@ class SalesOrderController extends Controller
     }
 
 
-    public function processDagang(Request $request)
+    public static function processDagang(Request $request)
     {
 
 
@@ -1236,5 +1239,21 @@ class SalesOrderController extends Controller
         $salesOrder->total_ppn_k = $totalPPN;
         $salesOrder->save();
         return ['status' => 1, 'msg' => 'Detail berhasil dihapus'];
+    }
+
+    function getBackgroundProcess()
+    {
+        $followedIds = getInput('followed_ids')
+            ? explode(',', getInput('followed_ids')) : [];
+        $bgs = BackgroundProcess::where('monitoring_url', url('admin/invoice/sales-order'))
+            ->where('status', '<>', 'finished')
+            ->orWhere(function ($q) use ($followedIds) {
+                $q->whereIn('id', $followedIds);
+            })
+            ->get();
+        return [
+            'status' => 1,
+            'msg' => $bgs
+        ];
     }
 }

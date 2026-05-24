@@ -387,7 +387,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::post('sales-mark', [SalesOrderController::class, 'mark'])->name('sales-mark');
         Route::post('sales-process-dagang', [SalesOrderController::class, 'processDagang'])->name('sales-process-dagang');
         Route::delete('sales-delete-detail', [SalesOrderController::class, 'deleteDetail'])->name('sales-delete-detail');
-
+        Route::get('sales-get-background-process', [SalesOrderController::class, 'getBackgroundProcess'])->name('sales-get-background-process');
+        
         Route::get('purchase-open-import-excel/{id}', [InvoicePurchaseController::class, 'openImportExcel'])->name('purchase-open-import-excel');
         Route::post('purchase-get-data-import-excel', [InvoicePurchaseController::class, 'getDataImportExcel'])->name('purchase-get-data-import-excel');
 

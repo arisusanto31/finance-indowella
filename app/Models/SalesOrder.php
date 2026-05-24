@@ -144,7 +144,7 @@ class SalesOrder extends Model
         foreach ($so->details as $detail) {
             if ($detail->is_ready_stock == 0) {
                 //kita cari stock itu ready pertanggal apa bung.
-                $qtyJualBackend = $detail->quantity * $allConversion[$detail->stock_id][$detail->unit];
+                $qtyJualBackend = $detail->quantity * ($allConversion[$detail->stock_id][$detail->unit] ?? 1);
                 $indexDate = createCarbon($so->created_at)->format('ymdHis000');
                 $lastDate = KartuStock::where('index_date', '>', $indexDate)->where('stock_id', $detail->stock_id)
                     ->where('saldo_qty_backend', '>', $qtyJualBackend)->orderBy('index_date', 'asc')
