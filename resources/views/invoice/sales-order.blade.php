@@ -551,8 +551,8 @@
                                             <p>${process.description_process}</p>
                                             <span> <i class="fas fa-box colorblack" ></i>${process.total_task} 
                                                    <i class="fas fa-box text-success" ></i>${process.success_task} 
-                                                   <i class="fas fa-box text-danger" ></i>${process.failed_task}
-                                                   <i class="fas fa-spinner fa-spin text-primary"> ${process.progress}%</i>
+                                                   <i class="fas fa-box text-danger" style="margin-right:30px;"></i>${process.failed_task}
+                                                   <i class="fas fa-spinner fa-spin text-primary"></i> ${process.progress}%
                                                    </span>
                                             <div class="progress progress-modern mb-3">
                                                 <div class="progress-bar" id="bg-process${process.id}" role="progressbar" style="width: ${process.progress}%;">
