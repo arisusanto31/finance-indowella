@@ -548,7 +548,10 @@
                                 if($('#div-bg-process'+process.id).length==0){
                                     html=`
                                         <div style="max-width:300px; width:100%;" class="mt-2 div-bg-process" id="div-bg-process${process.id}">
-                                            <p>${process.description}</p>
+                                            <p>${process.description_process}</p>
+                                            <span> <i class="fas fa-box colorblack" ></i>${process.total_task} 
+                                                   <i class="fas fa-check text-success" ></i>${process.success_task} 
+                                                   <i class="fas fa-times text-danger" ></i>${process.failed_task} </span>
                                             <div class="progress progress-modern mb-3">
                                                 <div class="progress-bar" id="bg-process${process.id}" role="progressbar" style="width: ${process.progress}%;">
                                                     ${process.progress}%
