@@ -62,16 +62,19 @@ class InvoicingProcess extends Command
                 $iProgress++;
                 if ($st['status'] == 1) {
                     $successTask++;
+                    $this->info("Successfully processed sales order ID: {$sale->id}");
                 } else {
                     $failedTask++;
+                    $this->error("Failed to process sales order ID: {$sale->id}. Reason: " . $st['msg']);
                 }
                 if ($iProgress % 10 == 0 || $iProgress == $count) {
-                    $this->info("Processed sales order ID: {$sale->id}, Progress: " . number_format(($iProgress / $count) * 100, 2) . "%");
+                    $this->info("Processed sales Progress: " . number_format(($iProgress / $count) * 100, 2) . "%");
                     $backgroundProcess->update([
                         'progress' => ($iProgress / $count) * 100,
                         'success_task' => $successTask,
                         'failed_task' => $failedTask,
                     ]);
+                
                 }
             }
         }
