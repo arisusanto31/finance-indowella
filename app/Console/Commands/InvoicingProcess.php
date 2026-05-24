@@ -35,7 +35,7 @@ class InvoicingProcess extends Command
         //
         $bookid = $this->argument('bookid');
         $month = $this->argument('month');
-        InvoicingProcessJob::dispatch($bookid, $month);
+        InvoicingProcessJob::dispatch($bookid, $month)->onQueue('default');
       
     }
 }
