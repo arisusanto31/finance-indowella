@@ -69,13 +69,13 @@ class InvoicingProcessJob implements ShouldQueue
                         $failedTask++;
                         info("Failed to process sales order ID: {$sale->id}. Reason: " . $st['msg']);
                     }
+                    $backgroundProcess->update([
+                        'progress' => ($iProgress / $count) * 100,
+                        'success_task' => $successTask,
+                        'failed_task' => $failedTask,
+                    ]);
                     if ($iProgress % 10 == 0 || $iProgress == $count) {
                         info("Processed sales Progress: " . number_format(($iProgress / $count) * 100, 2) . "%");
-                        $backgroundProcess->update([
-                            'progress' => ($iProgress / $count) * 100,
-                            'success_task' => $successTask,
-                            'failed_task' => $failedTask,
-                        ]);
                     }
                 }
                 $backgroundProcess->update([
