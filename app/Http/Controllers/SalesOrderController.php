@@ -1245,7 +1245,7 @@ class SalesOrderController extends Controller
     {
         $followedIds = getInput('followed_ids')
             ? explode(',', getInput('followed_ids')) : [];
-        $bgs = BackgroundProcess::where('monitoring_url', url('admin/invoice/sales-order'))
+        $bgs = BackgroundProcess::where('monitoring_url', 'admin/invoice/sales-order')
             ->where('status', '<>', 'finished')
             ->orWhere(function ($q) use ($followedIds) {
                 $q->whereIn('id', $followedIds);

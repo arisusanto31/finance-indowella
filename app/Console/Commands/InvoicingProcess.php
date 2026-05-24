@@ -48,7 +48,7 @@ class InvoicingProcess extends Command
         $this->info("Found $count sales order(s) to process for month: " . $date->format('F Y'));
         if ($count > 0) {
             $backgroundProcess = BackgroundProcess::create([
-                'monitoring_url' => url('admin/invoice/sales-order'),
+                'monitoring_url' => 'admin/invoice/sales-order',
                 'total_task' => $count,
                 'description_process' => "Processing invoicing for month: $month and year: " . $date->year,
                 'status' => 'processing',
@@ -77,6 +77,13 @@ class InvoicingProcess extends Command
                 
                 }
             }
+            $backgroundProcess->update([
+                'status' => 'finished',
+                'progress' => 100,
+                'success_task' => $successTask,
+                'failed_task' => $failedTask,
+            ]);
+            $this->info("Invoicing process completed. Total: $count, Success: $successTask, Failed: $failedTask");
         }
     }
 }
