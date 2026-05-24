@@ -35,8 +35,8 @@ class InvoicingProcess extends Command
         $bookid = $this->argument('bookid');
         $month = $this->argument('month');
         $date = createCarbon($month.'-'.'01');
-        $startDate = $date->startOfMonth();
-        $endDate = $date->endOfMonth();
+        $startDate = $date->copy()->startOfMonth();
+        $endDate = $date->copy()->endOfMonth();
         Session::put('book_journal_id', $bookid);
         $sales = SalesOrder::where('created_at', '>=', $startDate)
             ->where('created_at', '<=', $endDate)
