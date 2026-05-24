@@ -45,7 +45,7 @@ class InvoicingProcess extends Command
             ->where('is_ready_stock', 1)
             ->get();
         $count = $sales->count();
-        $this->info("Found $count sales order(s) to process for month: $month and year: " . $date->year);
+        $this->info("Found $count sales order(s) to process for month: " . $date->format('F Y'));
         if ($count > 0) {
             $backgroundProcess = BackgroundProcess::create([
                 'monitoring_url' => url('admin/invoice/sales-order'),
