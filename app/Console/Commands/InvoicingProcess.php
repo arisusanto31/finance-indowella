@@ -41,6 +41,7 @@ class InvoicingProcess extends Command
         $sales = SalesOrder::where('created_at', '>=', $startDate)
             ->where('created_at', '<=', $endDate)
             ->where('is_final', 1)
+            ->where('status_delivery', '<>', 'terkirim 100%')
             ->where('is_ready_stock', 1)
             ->get();
         $count = $sales->count();
