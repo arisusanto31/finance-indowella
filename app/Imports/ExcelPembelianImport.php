@@ -36,11 +36,6 @@ class ExcelPembelianImport implements ToArray
         ];
 
         $fillHeaders = [
-            'No Invoice',
-            'Faktur Pajak',
-            'Surat Jalan',
-            'Supplier',
-            'Tanggal'
         ];
         $array = $this->extractData($headers, false, $fillHeaders);
 
