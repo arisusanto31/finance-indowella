@@ -378,7 +378,7 @@ class Journal extends Model
         $tag = $this->tag;
         $first = explode(' ', $tag);
         if ($first[0] != 'opening') {
-            $lastJournal = Journal::where('code_group', $thejournal->code_group)->where('index_date', '<', $thejournal->index_date)->orderBy('index_date', 'desc')->first();
+            $lastJournal = Journal::where('index_date', '<', $thejournal->index_date)->where('code_group', $thejournal->code_group)->orderBy('index_date', 'desc')->first();
             $lastSaldo = $lastJournal ? $lastJournal->amount_saldo : 0;
             $amount = $thejournal->code_group > 200000 ?
                 ($thejournal->amount_kredit - $thejournal->amount_debet) : ($thejournal->amount_debet - $thejournal->amount_kredit);
