@@ -154,6 +154,7 @@ class KartuPiutang extends Model
 
     public static function createMutation(Request $request, $useTransaction = true, ?LockManager $lockManager = null)
     {
+        $time= microtime(true);
         if ($useTransaction)
             DB::beginTransaction();
         try {
@@ -215,6 +216,8 @@ class KartuPiutang extends Model
                         'reference_type' => null,
                     ],
                 ];
+                CustomLogger::log('kartu-piutang','info','kp- mulai persiapan. time '.(microtime(true)-$time).' seconds');
+                $time= microtime(true);
                 $st = JournalController::createBaseJournal(new Request([
                     'kredits' => $kredits,
                     'debets' => $debets,
@@ -230,6 +233,8 @@ class KartuPiutang extends Model
                 $number = $st['journal_number'];
                 $journal = Journal::where('journal_number', $number)->whereBetween('code_group', [120000, 130000])->first();
                 $journalID = $journal->id;
+                CustomLogger::log('kartu-piutang','info','kp- berhasil buat jurnal. total time '.(microtime(true)-$time).' seconds');
+                $time= microtime(true);
             } else {
                 $number = null;
                 $journalID = null;
@@ -254,6 +259,7 @@ class KartuPiutang extends Model
                 'code_group_name' => $codeName,
                 'date' => $request->input('date') ?? now()
             ]));
+            CustomLogger::log('kartu-piutang','info','kp- berhasil buat kartu piutang. total time '.(microtime(true)-$time).' seconds');    
 
             if ($st['status'] == 1) {
                 if ($useTransaction)
