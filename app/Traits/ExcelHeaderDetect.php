@@ -79,8 +79,9 @@ trait ExcelHeaderDetect
         return $row[$idx] ?? null;
     }
 
-    private function isRowEmpty(array $row): bool
+    private function isRowEmpty(array $row, ?int $keyHeader = null): bool
     {
+        if ($keyHeader !== null && trim((string)($row[$keyHeader] ?? '')) === '') return true;
         foreach ($row as $v) {
             if (trim((string)$v) !== '') return false;
         }
@@ -142,6 +143,7 @@ trait ExcelHeaderDetect
 
     public function extractData($headers, $isTwoHeader = false, $fillHeaders = [])
     {
+    
         [$rowHeader, $mapHeader] = $this->detectHeader($this->array, $headers);
         $dataArray = $this->array;
         $maxColumn = count($dataArray[$rowHeader]);
@@ -167,7 +169,12 @@ trait ExcelHeaderDetect
         } else {
             $fixHeader = $mapHeader;
         }
-
+        
+        $keyHeader = collect($headers)->diff($fillHeaders)->first();
+        if($keyHeader ){
+            $keyHeader= $this->normHeader($keyHeader);
+        }
+        $indexKeyHeader = $fixHeader[$keyHeader] ?? null;
         foreach ($fillHeaders as $fh) {
             $fh = $this->normHeader($fh);
             if (array_key_exists($fh, $fixHeader)) {
@@ -183,7 +190,7 @@ trait ExcelHeaderDetect
         $allData = [];
         for ($i = $fixRow + 1; $i < count($dataArray); $i++) {
             $row = $dataArray[$i];
-            if ($this->isRowEmpty($row)) continue;
+            if ($this->isRowEmpty($row,$indexKeyHeader)) continue;
 
             $item = [];
             foreach ($fixHeader as $key => $colIndex) {

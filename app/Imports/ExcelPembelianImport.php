@@ -8,7 +8,7 @@ use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 use Maatwebsite\Excel\Concerns\ToArray;
 use Maatwebsite\Excel\Concerns\ToCollection;
 
-class ExcelPembelianImport implements ToArray,SkipsEmptyRows
+class ExcelPembelianImport implements ToArray
 {
     use ExcelHeaderDetect;
 
@@ -39,7 +39,8 @@ class ExcelPembelianImport implements ToArray,SkipsEmptyRows
             'No Invoice',
             'Faktur Pajak',
             'Surat Jalan',
-            'Supplier'
+            'Supplier',
+            'Tanggal'
         ];
         $array = $this->extractData($headers, false, $fillHeaders);
 
