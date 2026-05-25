@@ -34,8 +34,8 @@ class InvoicingProcessJob implements ShouldQueue
     public function handle(): void
     {
         //
-        $this->info("hallo brother");
-        return ;
+        // $this->info("hallo brother");
+        // return ;
         try {
             $bookid = $this->bookid;
             $month = $this->month;
@@ -90,7 +90,7 @@ class InvoicingProcessJob implements ShouldQueue
                 $this->info("Invoicing process completed. Total: $count, Success: $successTask, Failed: $failedTask");
             }
         } catch (\Exception $e) {
-            info("Error in InvoicingProcessJob: " . $e->getMessage());
+            $this->info("Error in InvoicingProcessJob: " . $e->getMessage());
         }
     }
 
