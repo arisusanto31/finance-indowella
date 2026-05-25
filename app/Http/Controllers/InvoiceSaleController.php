@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\DB;
 use Throwable;
 use App\Models\InvoiceSale;
 use App\Models\KartuStock;
+use CustomLogger;
 use Illuminate\Support\Facades\Log;
 
 
@@ -382,7 +383,7 @@ class InvoiceSaleController extends Controller
     }
 
     //fungsi ini untuk create invoice dari Sales Order
-    public static function createInvoices(Request $request)
+    public static function createInvoices(Request $request,$timestart=null)
     {
         $lockManager = new LockManager();
         // return ['status' => 0, 'msg' => $request->all()];
@@ -462,6 +463,7 @@ class InvoiceSaleController extends Controller
                 $data['invoice_pack_id'] = $invoicePack->id;
                 $details[] = InvoiceSaleDetail::create($data);
             }
+            CustomLogger::log('invoicing',"info","create invoice pack and details . proces time : ".(microtime(true)-$timestart)." seconds");
             foreach ($salesDetailIDs as $i => $saleDetailID) {
                 $dataDetailSale = $realDataSales[$saleDetailID];
                 $person = $invoicePack->person;
@@ -480,6 +482,7 @@ class InvoiceSaleController extends Controller
                 if ($kartu['status'] == 0) {
                     throw new \Exception($kartu['msg']);
                 }
+                CustomLogger::log('invoicing',"info","create kartu piutang . proces time : ".(microtime(true)-$timestart)." seconds");
                 $journalNumber = $kartu['msg']->journal_number;
                 $journal = Journal::where('journal_number', $journalNumber)->where('code_group', $codeGroupPenjualans[$i])->first();
                 $journalID = $journal ? $journal->id : null;
@@ -536,6 +539,7 @@ class InvoiceSaleController extends Controller
                         throw new \Exception($stStock['msg']);
                     }
                 }
+                CustomLogger::log('invoicing',"info","create kartu stock . proces time : ".(microtime(true)-$timestart)." seconds");
             }
 
 
@@ -550,6 +554,7 @@ class InvoiceSaleController extends Controller
                     'invoice_pack_id' => $invoicePack->id,
                     'date' => $date
                 ]),$lockManager);
+                CustomLogger::log('invoicing',"info","create kartu ppn keluaran . proces time : ".(microtime(true)-$timestart)." seconds");
             }
 
             DB::commit();

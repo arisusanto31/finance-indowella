@@ -31,6 +31,7 @@ use App\Models\RetailStock;
 use App\Models\RetailToko;
 use App\Models\StockUnit;
 use App\Models\Toko;
+use CustomLogger;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -1107,7 +1108,7 @@ class SalesOrderController extends Controller
 
     public static function processDagang(Request $request)
     {
-
+        $time=microtime(true);
 
         //tanpa BDP, bahan jadi, langsung invoice dari barang dagang
         $id = $request->input('id');
@@ -1167,10 +1168,14 @@ class SalesOrderController extends Controller
             'custom_stock_name' => collect($data)->pluck('custom_stock_name')->all()
         ];
 
-        $st = InvoiceSaleController::createInvoices(new Request($dataFix));
+        CustomLogger::log('invoicing',"info","persiapan proses . proces time : ".(microtime(true)-$time)." seconds");
+
+        $st = InvoiceSaleController::createInvoices(new Request($dataFix),$time);
         if ($st['status'] == 0) {
             return $st;
         }
+        CustomLogger::log('invoicing',"info","create all sub invoice . proces time : ".(microtime(true)-$time)." seconds");
+
         $invoiceNumber = $st['pack']->invoice_number;
         $amount = $st['pack']->total_price;
         $date = $salesOrder->created_at;
@@ -1190,6 +1195,8 @@ class SalesOrderController extends Controller
             'codegroup_bayar' => $codeBayar,
             'codegroup_piutang' => $codeGroupPiutang,
         ]));
+        CustomLogger::log('invoicing',"info","submit bayar sales invoice . proces time : ".(microtime(true)-$time)." seconds");
+
 
         if ($st['status'] == 0) {
             return $st;
