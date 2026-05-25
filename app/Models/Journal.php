@@ -173,7 +173,7 @@ class Journal extends Model
                 while ($counter >= 99) {
                     $indexDate = $now->format('ymdHis');
                     info('code Group:' . $coaID . ' on ' . $indexDate . ',bookid=' . bookID());
-                    $lastIndexDate = Journal::where('code_group', $codeGroup)->where('index_date_group', $indexDate)->select(DB::raw('max(index_date) as maxindex'))->first();
+                    $lastIndexDate = Journal::where('code_group', strval($codeGroup))->where('index_date_group', $indexDate)->select(DB::raw('max(index_date) as maxindex'))->first();
                     $counter = $lastIndexDate ? $lastIndexDate->maxindex % 100 : 0;
                     if ($counter >= 99) {
                         $now->addSecond();
@@ -182,7 +182,7 @@ class Journal extends Model
                 // info('counter:' . $counter);
                 $finalIndexDate = $indexDate . sprintf("%02d", ($counter + 1));
                 $codeGroup = $request->input('code_group');
-                $lastJournal = Journal::where('code_group', $codeGroup)->where('index_date', '<', $finalIndexDate)->orderBy('index_date', 'desc');
+                $lastJournal = Journal::where('code_group', strval($codeGroup))->where('index_date', '<', $finalIndexDate)->orderBy('index_date', 'desc');
                 CustomLogger::log('invoicing','info','query '.$lastJournal->toSql().' with param '.json_encode($lastJournal->getBindings()));
                 $lastJournal = $lastJournal->first();
                 info('get final index date for code group' . $codeGroup . ': ' . $finalIndexDate);
@@ -380,7 +380,7 @@ class Journal extends Model
         $tag = $this->tag;
         $first = explode(' ', $tag);
         if ($first[0] != 'opening') {
-            $lastJournal = Journal::where('code_group', $thejournal->code_group)->where('index_date', '<', $thejournal->index_date)->orderBy('index_date', 'desc')->first();
+            $lastJournal = Journal::where('code_group', strval($thejournal->code_group))->where('index_date', '<', $thejournal->index_date)->orderBy('index_date', 'desc')->first();
             $lastSaldo = $lastJournal ? $lastJournal->amount_saldo : 0;
             $amount = $thejournal->code_group > 200000 ?
                 ($thejournal->amount_kredit - $thejournal->amount_debet) : ($thejournal->amount_debet - $thejournal->amount_kredit);
@@ -409,7 +409,7 @@ class Journal extends Model
             if ($isLock == true) {
                 $lock->block(20);
             }
-            $mustEditJournal = Journal::where('code_group', $thejournal->code_group)->where('index_date', '>', $thejournal->index_date)->sortindex()->get();
+            $mustEditJournal = Journal::where('code_group', strval($thejournal->code_group))->where('index_date', '>', $thejournal->index_date)->sortindex()->get();
             $lastSaldo = $thejournal->amount_saldo;
             $newdata = [];
             $dataUpdate = [];
