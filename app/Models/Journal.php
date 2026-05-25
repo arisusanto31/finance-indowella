@@ -405,7 +405,8 @@ class Journal extends Model
         // CustomLogger::log('journal', 'info', 'recalculate make lock ' . $name);
         try {
            
-            $mustEditJournal = Journal::where('code_group', strval($thejournal->code_group))->where('index_date', '>', $thejournal->index_date)->orderBy('index_date','asc')->get();
+            $mustEditJournal = Journal::where('code_group', strval($thejournal->code_group))->where('index_date', '>', $thejournal->index_date)->whereNotLike('tag', 'opening%')->orderBy('index_date','asc')
+             ->select('amount_debet','amount_kredit','id','code_group')->get();
             $lastSaldo = $thejournal->amount_saldo;
             $newdata = [];
             $dataUpdate = [];
@@ -417,13 +418,13 @@ class Journal extends Model
                     $journal->amount_saldo = round(($lastSaldo - $journal->amount_debet + $journal->amount_kredit), 2);
                 }
                 // $journal->save();
-                $firsttag = explode(' ', $journal->tag)[0] ?? '';
-                if ($firsttag != 'opening') {
+                // $firsttag = explode(' ', $journal->tag)[0] ?? '';
+                // if ($firsttag != 'opening') {
                     $dataUpdate[] = [
                         'id' => $journal->id,
                         'amount_saldo' => $journal->amount_saldo
                     ];
-                }
+                // }
                 $lastSaldo = $journal->amount_saldo;
                 $newdata[] = collect($journal)->only(['id', 'description', 'index_date', 'amount_saldo', 'amount_debet', 'amount_kredit']);
             }
