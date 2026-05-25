@@ -154,14 +154,15 @@ class KartuDPSales extends Model
     }
 
 
-    public static function createMutation(Request $request)
+    public static function createMutation(Request $request, $lockManager = null)
     {
         DB::beginTransaction();
         try {
             $date = $request->input('date') ?? now();
             self::proteksiBackdate($date);
-
-            $lockManager = new LockManager();
+            if(!$lockManager){
+                $lockManager = new LockManager();
+            }
             $SONumber = $request->input('sales_order_number');
             $invoiceNumber = $request->input('invoice_pack_number');
             $date = $request->input('date') ?? Date('Y-m-d H:i:s');
@@ -290,7 +291,7 @@ class KartuDPSales extends Model
 
 
 
-    public static function createPelunasan(Request $request)
+    public static function createPelunasan(Request $request, $lockManager = null)
     {
 
 
@@ -366,7 +367,7 @@ class KartuDPSales extends Model
                     'title' => 'create penerimaan penjualan',
                     'url_try_again' => null
 
-                ]), false);
+                ]), false, $lockManager);
                 if ($st['status'] == 0) return $st;
                 $number = $st['journal_number'];
                 info('success harusnya dari sini journalnya aman' . $number);

@@ -383,9 +383,10 @@ class InvoiceSaleController extends Controller
     }
 
     //fungsi ini untuk create invoice dari Sales Order
-    public static function createInvoices(Request $request,$timestart=null)
+    public static function createInvoices(Request $request,$timestart=null,$modeNoRecalculate=false)
     {
         $lockManager = new LockManager();
+        $lockManager->setModeNoRecalculate($modeNoRecalculate);
         // return ['status' => 0, 'msg' => $request->all()];
         $codeGroupPenjualans = $request->input('code_group_penjualan');
         $customStockNames = $request->input('custom_stock_name');
@@ -558,6 +559,15 @@ class InvoiceSaleController extends Controller
             }
 
             DB::commit();
+            //nah mari kita recalculate semua jurnal yang terlibat
+            $allJournals= $lockManager->getAllJournals();
+            $allJournals= collect($allJournals)->groupBy('code_group')->map(function($items){
+                //kita ambil yang index paling muda
+                $item = collect($items)->sortBy('created_at')->first();
+                //jalankan recalculate untuk yang paling muda
+                $item->calculateJournalNext(false);
+            });
+
             $lockManager->releaseAll();
             //buat jurnal penjualan
             return ['status' => 1, 'pack' => $invoicePack, 'details' => $details];
@@ -640,9 +650,10 @@ class InvoiceSaleController extends Controller
         return $journalNumber;
     }
 
-    public static function submitBayarSalesInvoice(Request $request)
+    public static function submitBayarSalesInvoice(Request $request, $modeNoRecalculate=false)
     {
         $lockManager = new LockManager();
+        $lockManager->setModeNoRecalculate($modeNoRecalculate);
         $codeGroupPiutang = $request->input('codegroup_piutang');
         $codeGroupBayar = $request->input('codegroup_bayar');
         $invoiceNumber = $request->input('invoice_number');

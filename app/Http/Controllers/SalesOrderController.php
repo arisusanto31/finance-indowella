@@ -1112,6 +1112,7 @@ class SalesOrderController extends Controller
 
         //tanpa BDP, bahan jadi, langsung invoice dari barang dagang
         $id = $request->input('id');
+        $modeNoRecalculate=true;
 
         $salesOrder = SalesOrder::find($id);
         if (!$salesOrder) {
@@ -1170,7 +1171,7 @@ class SalesOrderController extends Controller
 
         CustomLogger::log('invoicing',"info","persiapan proses . proces time : ".(microtime(true)-$time)." seconds");
 
-        $st = InvoiceSaleController::createInvoices(new Request($dataFix),$time);
+        $st = InvoiceSaleController::createInvoices(new Request($dataFix),$time,$modeNoRecalculate);
         if ($st['status'] == 0) {
             return $st;
         }
@@ -1194,7 +1195,7 @@ class SalesOrderController extends Controller
             'date' => $date,
             'codegroup_bayar' => $codeBayar,
             'codegroup_piutang' => $codeGroupPiutang,
-        ]));
+        ]),$modeNoRecalculate);
         CustomLogger::log('invoicing',"info","submit bayar sales invoice . proces time : ".(microtime(true)-$time)." seconds");
 
 

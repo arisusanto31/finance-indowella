@@ -8,6 +8,9 @@ use Illuminate\Contracts\Cache\LockTimeoutException;
 class LockManager
 {
     protected $locks = [];
+    protected $allCodeGroups = [];
+    protected $modeNoRecalculate=false;
+    protected $journals=[];
 
     public function acquire($key, $ttl = 30, $wait = 10)
     {
@@ -22,6 +25,28 @@ class LockManager
 
         return $this->locks[$key];
     }
+  
+
+    public function addCodeGroup($codeGroup){
+        if(!in_array($codeGroup,$this->allCodeGroups)){
+            $this->allCodeGroups[]=$codeGroup;
+        }
+    }
+
+    public function addJournal($journal){
+        $this->journals[]=$journal;
+    }
+    public function getAllJournals(){
+        return $this->journals;
+    }
+
+    public function setModeNoRecalculate($modeNoRecalculate){
+        $this->modeNoRecalculate=$modeNoRecalculate;
+    }
+
+    public function getModeNoRecalculate(){
+        return $this->modeNoRecalculate;
+    }
 
     public function releaseAll()
     {
@@ -29,5 +54,6 @@ class LockManager
             optional($lock)->release();
             info('release lock '.$key);
         }
+    
     }
 }
