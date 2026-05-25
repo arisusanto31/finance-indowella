@@ -11,6 +11,8 @@ class LockManager
 
     public function acquire($key, $ttl = 30, $wait = 10)
     {
+        $bookID= bookID();
+        $key=$bookID.'_'.$key;
         if (!isset($this->locks[$key])) {
             $lock = Cache::lock($key, $ttl);
             $lock->block($wait);
