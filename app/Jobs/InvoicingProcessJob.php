@@ -48,6 +48,7 @@ class InvoicingProcessJob implements ShouldQueue
                 ->where('is_final', 1)
                 ->where('status_delivery', '<>', 'terkirim 100%')
                 ->where('is_ready_stock', 1)
+                ->select('id')
                 ->get();
             $count = $sales->count();
             $this->info("Found $count sales order(s) to process for month: " . $date->format('F Y'));
@@ -59,10 +60,12 @@ class InvoicingProcessJob implements ShouldQueue
                     'status' => 'processing',
                     'progress' => 0,
                 ]);
+                $theBG= BackgroundProcess::find($backgroundProcess->id);
                 $iProgress = 0;
                 $successTask = 0;
                 $failedTask = 0;
                 foreach ($sales as $sale) {
+
                     $st = SalesOrderController::processDagang(new Request(['id' => $sale->id]));
                     $iProgress++;
                     if ($st['status'] == 1) {
@@ -72,21 +75,20 @@ class InvoicingProcessJob implements ShouldQueue
                         $failedTask++;
                         $this->info("Failed to process sales order ID: {$sale->id}. Reason: " . $st['msg']);
                     }
-                    $backgroundProcess->update([
-                        'progress' => ($iProgress / $count) * 100,
-                        'success_task' => $successTask,
-                        'failed_task' => $failedTask,
-                    ]);
+                    $theBG->progress= ($iProgress / $count) * 100;
+                    $theBG->success_task= $successTask;
+                    $theBG->failed_task= $failedTask;
+                    $theBG->save();
                     if ($iProgress % 10 == 0 || $iProgress == $count) {
                         $this->info("Processed sales Progress: " . number_format(($iProgress / $count) * 100, 2) . "%");
                     }
                 }
-                $backgroundProcess->update([
-                    'status' => 'finished',
-                    'progress' => 100,
-                    'success_task' => $successTask,
-                    'failed_task' => $failedTask,
-                ]);
+                $theBG->status= 'finished';
+                $theBG->progress= 100;
+                $theBG->success_task= $successTask;
+                $theBG->failed_task= $failedTask;
+                $theBG->save();
+                
                 $this->info("Invoicing process completed. Total: $count, Success: $successTask, Failed: $failedTask");
             }
         } catch (\Exception $e) {
