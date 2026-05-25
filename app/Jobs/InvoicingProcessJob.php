@@ -34,6 +34,8 @@ class InvoicingProcessJob implements ShouldQueue
     public function handle(): void
     {
         //
+        $this->info("hallo brother");
+        return ;
         try {
             $bookid = $this->bookid;
             $month = $this->month;
