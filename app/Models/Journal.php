@@ -245,7 +245,7 @@ class Journal extends Model
                 info('success creating journal' . $codeGroup);
                 $journal->createKartuLink();
                 $journal->verifyJournal();
-                CustomLogger::log('invoicing','info','journal created '.$codeGroup.' with time '.(microtime(true)-$time).' seconds');
+                // CustomLogger::log('invoicing','info','journal created '.$codeGroup.' with time '.(microtime(true)-$time).' seconds');
             } catch (Throwable $e) {
                 info('failed creating journal: ' . $e->getMessage());
                 return [

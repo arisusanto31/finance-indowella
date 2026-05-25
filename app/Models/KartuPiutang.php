@@ -7,6 +7,7 @@ use App\Services\LockManager;
 use App\Traits\HasIndexDate;
 use App\Traits\HasModelDetailKartuInvoice;
 use App\Traits\HasModelSaldoUang;
+use CustomLogger;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -57,6 +58,7 @@ class KartuPiutang extends Model
 
         $personID = $request->input('person_id');
         $personType = $request->input('person_type');
+        $time= microtime(true);
         info('kartu piutang - trying to create kartu piutang');
         try {
 
@@ -82,11 +84,12 @@ class KartuPiutang extends Model
                 $realAmount = $amount_debet - $amount_kredit;
                 $indexDate = self::getNextIndexDate($date);
 
-                $lastKartu = KartuPiutang::where('index_date', '<', $indexDate)
-                    ->where('invoice_pack_number', $invoiceNumber)->orderBy('index_date', 'desc')->first();
+                $lastKartu = KartuPiutang::where('invoice_pack_number', $invoiceNumber)
+                    ->where('index_date', '<', $indexDate)
+                    ->orderBy('index_date', 'desc')->first();
                 $lastSaldo =  $lastKartu ? $lastKartu->amount_saldo_factur : 0;
                 $lastSaldoFactur = $lastSaldo;
-
+                CustomLogger::log('invoicing','info','kp- cari last kartu piutang. time '.(microtime(true)-$time).' seconds');
 
 
                 $kartu = new KartuPiutang();
@@ -115,8 +118,10 @@ class KartuPiutang extends Model
                 $kartu->index_date = $indexDate;
                 $kartu->index_date_group = createCarbon($date)->format('ymdHis');
                 $kartu->save();
+                CustomLogger::log('invoicing','info','kp- berhasil simpan kartu piutang. time '.(microtime(true)-$time).' seconds');
                 if (self::isBackdate($date)) {
                     $kartu->recalculateSaldo();
+                    CustomLogger::log('invoicing','info','kp- kartu piutang backdate, berhasil recalculate saldo. time '.(microtime(true)-$time).' seconds');
                 }
 
 
@@ -406,8 +411,9 @@ class KartuPiutang extends Model
 
     public function recalculateSaldo()
     {
-        $kartus = KartuPiutang::where('index_date', '>', $this->index_date)
-            ->where('invoice_pack_number', $this->invoice_pack_number)->select('id','amount_debet','amount_kredit')->get();
+        $kartus = KartuPiutang::where('invoice_pack_number', strval($this->invoice_pack_number))
+            ->where('index_date', '>', $this->index_date)
+            ->select('id','amount_debet','amount_kredit')->get();
 
         $saldo = $this->amount_saldo_factur;
         $data=[];
