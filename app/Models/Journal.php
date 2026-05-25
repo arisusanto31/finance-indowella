@@ -182,7 +182,9 @@ class Journal extends Model
                 // info('counter:' . $counter);
                 $finalIndexDate = $indexDate . sprintf("%02d", ($counter + 1));
                 $codeGroup = $request->input('code_group');
-                $lastJournal = Journal::where('code_group', $codeGroup)->where('index_date', '<', $finalIndexDate)->orderBy('index_date', 'desc')->first();
+                $lastJournal = Journal::where('code_group', $codeGroup)->where('index_date', '<', $finalIndexDate)->orderBy('index_date', 'desc');
+                CustomLogger::log('invoicing','info','query '.$lastJournal->toSql().' with param '.json_encode($lastJournal->getBindings()));
+                $lastJournal = $lastJournal->first();
                 info('get final index date for code group' . $codeGroup . ': ' . $finalIndexDate);
                 $journal = new Journal;
                 $caAlias = ChartAccountAlias::where('code_group', $codeGroup)->first();
