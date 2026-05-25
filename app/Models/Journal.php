@@ -139,6 +139,7 @@ class Journal extends Model
         $isBackDate = $request->input('is_backdate');
         $tokoID = $request->input('toko_id');
         $tag = $request->input('tag');
+        $time=microtime(true);
         if (!$tokoID) {
             $tokoID = Toko::first()->id ?? throw new \Exception('tidak ada data toko. silakan buat dulu data toko');
         }
@@ -183,7 +184,6 @@ class Journal extends Model
                 $finalIndexDate = $indexDate . sprintf("%02d", ($counter + 1));
                 $codeGroup = $request->input('code_group');
                 $lastJournal = Journal::where('code_group', strval($codeGroup))->where('index_date', '<', $finalIndexDate)->orderBy('index_date', 'desc');
-                CustomLogger::log('invoicing','info','query '.$lastJournal->toSql().' with param '.json_encode($lastJournal->getBindings()));
                 $lastJournal = $lastJournal->first();
                 info('get final index date for code group' . $codeGroup . ': ' . $finalIndexDate);
                 $journal = new Journal;
@@ -245,6 +245,7 @@ class Journal extends Model
                 info('success creating journal' . $codeGroup);
                 $journal->createKartuLink();
                 $journal->verifyJournal();
+                CustomLogger::log('invoicing','info','journal created '.$codeGroup.' with time '.(microtime(true)-$time).' seconds');
             } catch (Throwable $e) {
                 info('failed creating journal: ' . $e->getMessage());
                 return [
