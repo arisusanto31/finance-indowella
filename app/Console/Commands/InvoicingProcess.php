@@ -22,7 +22,7 @@ class InvoicingProcess extends Command
     /**
      * The console command description.
      *
-     * @var string
+     * @var strinC
      */
     protected $description = 'Process invoicing for a given month and year';
 

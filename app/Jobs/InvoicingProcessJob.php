@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Http\Controllers\SalesOrderController;
 use App\Models\BackgroundProcess;
 use App\Models\SalesOrder;
+use CustomLogger;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Http\Request;
@@ -47,7 +48,7 @@ class InvoicingProcessJob implements ShouldQueue
                 ->where('is_ready_stock', 1)
                 ->get();
             $count = $sales->count();
-            info("Found $count sales order(s) to process for month: " . $date->format('F Y'));
+            $this->info("Found $count sales order(s) to process for month: " . $date->format('F Y'));
             if ($count > 0) {
                 $backgroundProcess = BackgroundProcess::create([
                     'monitoring_url' => 'admin/invoice/sales-order',
@@ -64,10 +65,10 @@ class InvoicingProcessJob implements ShouldQueue
                     $iProgress++;
                     if ($st['status'] == 1) {
                         $successTask++;
-                        info("Successfully processed sales order ID: {$sale->id}");
+                        $this->info("Successfully processed sales order ID: {$sale->id}");
                     } else {
                         $failedTask++;
-                        info("Failed to process sales order ID: {$sale->id}. Reason: " . $st['msg']);
+                        $this->info("Failed to process sales order ID: {$sale->id}. Reason: " . $st['msg']);
                     }
                     $backgroundProcess->update([
                         'progress' => ($iProgress / $count) * 100,
@@ -75,7 +76,7 @@ class InvoicingProcessJob implements ShouldQueue
                         'failed_task' => $failedTask,
                     ]);
                     if ($iProgress % 10 == 0 || $iProgress == $count) {
-                        info("Processed sales Progress: " . number_format(($iProgress / $count) * 100, 2) . "%");
+                        $this->info("Processed sales Progress: " . number_format(($iProgress / $count) * 100, 2) . "%");
                     }
                 }
                 $backgroundProcess->update([
@@ -84,10 +85,16 @@ class InvoicingProcessJob implements ShouldQueue
                     'success_task' => $successTask,
                     'failed_task' => $failedTask,
                 ]);
-                info("Invoicing process completed. Total: $count, Success: $successTask, Failed: $failedTask");
+                $this->info("Invoicing process completed. Total: $count, Success: $successTask, Failed: $failedTask");
             }
         } catch (\Exception $e) {
             info("Error in InvoicingProcessJob: " . $e->getMessage());
         }
+    }
+
+    function info($message)
+    {
+          CustomLogger::log('background_process', 'info', "InvoicingProcessJob: $message");
+      
     }
 }

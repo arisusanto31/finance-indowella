@@ -77,6 +77,11 @@ return [
             'path' => storage_path('logs/journal.log'),
             'level' => env('LOG_LEVEL', 'debug'),
         ],
+        'background_process' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/background_process.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+        ],
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),
