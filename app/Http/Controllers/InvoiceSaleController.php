@@ -476,7 +476,7 @@ class InvoiceSaleController extends Controller
                     'is_otomatis_jurnal' => 1,
                     'description' => 'penjualan ' . $person->name . ' ' . $invoicePack->invoice_number . ' item-' . ($i + 1),
                     'date' => $date,
-                ]), $lockManager);
+                ]),false, $lockManager);
                 if ($kartu['status'] == 0) {
                     throw new \Exception($kartu['msg']);
                 }
@@ -514,7 +514,7 @@ class InvoiceSaleController extends Controller
                         'lawan_code_group' => 601000, //hpp
                         'is_otomatis_jurnal' => 1,
                         'date' => $date
-                    ]), false, $lockManager);
+                    ]), false , $lockManager);
                     if ($st['status'] == 0) {
                         throw new \Exception($st['msg']);
                     }
@@ -549,7 +549,7 @@ class InvoiceSaleController extends Controller
                     'description' => 'PPN Keluaran penjualan ' . $invoicePack->invoice_number,
                     'invoice_pack_id' => $invoicePack->id,
                     'date' => $date
-                ]));
+                ]),$lockManager);
             }
 
             DB::commit();
@@ -563,7 +563,7 @@ class InvoiceSaleController extends Controller
         }
     }
 
-    public static function createPPNKeluaran(Request $request)
+    public static function createPPNKeluaran(Request $request, $lockManager = null)
     {
         $coaDebet = $request->input('code_group_debet');
         $coaKredit = $request->input('code_group_kredit');
@@ -590,7 +590,7 @@ class InvoiceSaleController extends Controller
                 'date' => $date,
                 'toko_id' => $tokoID,
                 'description' => $description,
-            ]), false);
+            ]), false, $lockManager);
             if ($kartu['status'] == 0) {
                 throw new \Exception($kartu['msg']);
             }
@@ -626,7 +626,7 @@ class InvoiceSaleController extends Controller
                 'title' => 'create mutation purchase',
                 'url_try_again' => null
 
-            ]), false);
+            ]), false, $lockManager);
             if ($st['status'] == 0) {
                 throw new \Exception($st['msg']);
             }

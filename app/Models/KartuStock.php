@@ -170,7 +170,7 @@ class KartuStock extends Model
             $kartu->save();
         }
     }
-    public static function mutationStore(Request $request, $useTransaction = true)
+    public static function mutationStore(Request $request, $useTransaction = true, $lockManager = null)
     {
 
 
@@ -306,7 +306,7 @@ class KartuStock extends Model
                     'title' => 'create mutation transaction',
                     'url_try_again' => 'try_again'
 
-                ]), false);
+                ]), false,$lockManager);
                 if ($st['status'] != 1) throw new \Exception($st['msg']);
                 $number = $st['journal_number'];
                 $journal = Journal::where('journal_number', $number)->whereIn('code_group', [140001, 140002])->first();
