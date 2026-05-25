@@ -482,7 +482,8 @@ class JournalController extends Controller
         $isBackDate = $request->input('is_backdate') ?? null;
         if ($isBackDate === null)
             $isBackDate = $dateDiff > 30 ? 1 : 0;
-
+        $time= microtime(true);
+        CustomLogger::log('invoicing','info','=== mulai buat jurnal');
         $key = JournalKey::orderBy('id', 'desc')->first();
         $isLockIntern = 0;
         if ($lockManager == null) {
@@ -502,7 +503,7 @@ class JournalController extends Controller
             ];
         }
 
-        $callback = function () use ($request, $isLockIntern, $urlTryAgain, $date, $lockManager, $isBackDate, $noRecalculate, $useTransaction) {
+        $callback = function () use ($request, $isLockIntern, $urlTryAgain, $date, $lockManager, $isBackDate, $noRecalculate, $useTransaction, $time) {
             $kredits = $request->input('kredits');
             $debets = $request->input('debets');
             $type = $request->input('type');
@@ -530,12 +531,14 @@ class JournalController extends Controller
             $kodeType .= ("-" . $tanggal);
 
             $lastJournalNumber = Journal::where('journal_number', 'like', $kodeType . '%')
-                ->groupBy('journal_number')
+                ->select('journal_number')
                 ->orderBy('journal_number', 'desc')
                 ->first();
 
             $count = $lastJournalNumber ? intval(explode('-', $lastJournalNumber->journal_number)[2]) + 1 : 1;
             $theJournalNumber = sprintf("%s-%06d", $kodeType, $count);
+
+            CustomLogger::log('invoicing','info','jurnal-perisiapan create jurnal. time: '.(microtime(true) - $time).' detik');
 
             $allLocks = [];
             $allJournals = [];
@@ -607,6 +610,7 @@ class JournalController extends Controller
                 $allJournals[] = $st['msg'];
             }
 
+            CustomLogger::log('invoicing','info','jurnal- selesai buat jurnal. time: '.(microtime(true) - $time).' detik');
 
             foreach ($allJournals as $journal) {
                 $journal->updateLawanCode();
@@ -622,6 +626,7 @@ class JournalController extends Controller
                 //lock manual dilepas setelah semua proses transaksi selesai
                 $lockManager->releaseAll();
             }
+            CustomLogger::log('invoicing','info','jurnal- selesai semua proses transaksi. time: '.(microtime(true) - $time).' detik');
             return [
                 'status' => 1,
                 'msg' => 'success',
