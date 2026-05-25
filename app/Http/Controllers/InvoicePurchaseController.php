@@ -109,8 +109,7 @@ class InvoicePurchaseController extends Controller
                             'quantity' => $val['quantity'],
                             'unit' => $val['satuan'],
                             'price' => $val['harga_pcs'],
-
-                            'total_price' => format_db($val['quantity']) * format_db($val['harga_pcs']) - format_db($val['diskon'] ?? 0),
+                            'total_price' => round(round(format_db($val['quantity']),2) * round(format_db($val['harga_pcs']),2) - round(format_db($val['diskon'] ?? 0),2),2),
                             'discount' => $val['diskon'] ?? 0,
                             'reference_id' => null,
                             'reference_type' => null,
