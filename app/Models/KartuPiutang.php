@@ -83,19 +83,13 @@ class KartuPiutang extends Model
                 $realAmount = $amount_debet - $amount_kredit;
                 $indexDate = self::getNextIndexDate($date);
 
-                $lastKartu = KartuPiutang::where('person_id', $personID)->where('person_type', $personType)
-                    ->where('invoice_pack_number', $invoiceNumber)->where('index_date', '<', $indexDate)->orderBy('index_date', 'desc')->first();
+                $lastKartu = KartuPiutang::where('index_date', '<', $indexDate)
+                    ->where('invoice_pack_number', $invoiceNumber)->orderBy('index_date', 'desc')->first();
                 $lastSaldo =  $lastKartu ? $lastKartu->amount_saldo_factur : 0;
                 $lastSaldoFactur = $lastSaldo;
 
 
-                $lastSaldoPerson = KartuPiutang::whereIn('index_date', function ($q) use ($personID, $personType, $indexDate) {
-                    $q->from('kartu_piutangs')->where('person_id', $personID)->where('person_type', $personType)
-                        ->where('index_date', '<', $indexDate)
-                        ->select(
-                            DB::raw('max(index_date) as maxid'),
-                        )->groupBy('invoice_pack_number');
-                })->sum('amount_saldo_factur');
+
                 $kartu = new KartuPiutang();
                 $kartu->type = $request->input('type');
                 $kartu->sales_order_number = $SONumber;
@@ -105,7 +99,7 @@ class KartuPiutang extends Model
                 $kartu->description = $request->input('description');
                 $kartu->amount_saldo_transaction = $lastSaldo + $realAmount;
                 $kartu->amount_saldo_factur = $lastSaldoFactur + $realAmount;
-                $kartu->amount_saldo_person = $lastSaldoPerson + $realAmount;
+                $kartu->amount_saldo_person = 0;
                 $kartu->amount_debet = $amount_debet;
                 $kartu->amount_kredit = $amount_kredit;
                 $kartu->reference_id = $request->input('reference_id');
@@ -413,23 +407,21 @@ class KartuPiutang extends Model
 
     public function recalculateSaldo()
     {
-        $kartus = KartuPiutang::where('person_id', $this->person_id)->where('person_type', $this->person_type)
-            ->where('invoice_pack_number', $this->invoice_pack_number)->where('index_date', '>', $this->index_date)->get();
+        $kartus = KartuPiutang::where('index_date', '>', $this->index_date)
+            ->where('invoice_pack_number', $this->invoice_pack_number)->select('id','amount_debet','amount_kredit')->get();
 
         $saldo = $this->amount_saldo_factur;
+        $data=[];
         foreach ($kartus as $kartu) {
             $saldo = $saldo + $kartu->amount_debet - $kartu->amount_kredit;
-            $kartu->amount_saldo_factur = $saldo;
-            $kartu->save();
+            // $kartu->amount_saldo_factur = $saldo;
+            // $kartu->save();
+            $data[]=[
+                'id'=>$kartu->id,
+                'amount_saldo_factur'=>$saldo,
+            ];
         }
+        upsertInChunks(KartuPiutang::class,$data,'id',['amount_saldo_factur']);
 
-        $kartuOrang = KartuPiutang::where('person_id', $this->person_id)->where('person_type', $this->person_type)
-            ->where('index_date', '>', $this->index_date)->get();
-        $saldoOrang = $this->amount_saldo_person;
-        foreach ($kartuOrang as $kartu) {
-            $saldoOrang = $saldoOrang + $kartu->amount_debet - $kartu->amount_kredit;
-            $kartu->amount_saldo_person = $saldoOrang;
-            $kartu->save();
-        }
     }
 }
