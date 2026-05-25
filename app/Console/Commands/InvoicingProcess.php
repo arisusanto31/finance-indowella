@@ -53,21 +53,24 @@ class InvoicingProcess extends Command
             $count = $sales->count();
             $this->info("Found $count sales order(s) to process for month: " . $date->format('F Y'));
             if ($count > 0) {
-                $backgroundProcess = BackgroundProcess::updateOrCreate(
-                    [
+                $backgroundProcess= BackgroundProcess::where('monitoring_url', 'admin/invoice/sales-order')
+                    ->where('book_journal_id', $bookid)
+                    ->where('description_process', "Processing invoicing for month: $month")
+                    ->first();
+                if(!$backgroundProcess){
+                    $backgroundProcess = BackgroundProcess::create([
                         'monitoring_url' => 'admin/invoice/sales-order',
                         'total_task' => $count,
                         'description_process' => "Processing invoicing for month: $month",
                         'status' => 'processing',
-                        'progress' => 0,
                         'book_journal_id' => $bookid,
-                    ],
-                    [
-                        'book_journal_id' => $bookid,
-                        'monitoring_url' => 'admin/invoice/sales-order',
-                        'description_process' => "Processing invoicing for month: $month",
-                    ]
-                );
+                    ]);
+                } else {
+                    $backgroundProcess->total_task = $count;
+                    $backgroundProcess->status = 'processing';
+                    $backgroundProcess->save();
+                }
+
 
 
                 $theBG = BackgroundProcess::find($backgroundProcess->id);

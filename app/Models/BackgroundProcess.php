@@ -17,6 +17,7 @@ class BackgroundProcess extends Model
         'success_task',
         'failed_task',
         'status',
+        'book_journal_id'
     ];
 
     protected static function booted()
