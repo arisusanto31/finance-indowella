@@ -549,11 +549,12 @@
                                     html=`
                                         <div style="max-width:300px; width:100%;" class="mt-2 div-bg-process" id="div-bg-process${process.id}">
                                             <p>${process.description_process}</p>
-                                            <span> <i class="fas fa-box colorblack ms-2" ></i>${process.total_task} 
+                                            <span id="span-resume-bg${process.id}"> 
+                                                   <i class="fas fa-box colorblack ms-2" ></i>${process.total_task} 
                                                    <i class="fas fa-box text-success ms-2" ></i>${process.success_task} 
                                                    <i class="fas fa-box text-danger ms-2" ></i>${process.failed_task}
                                                    <i class="fas fa-spinner fa-spin text-primary" style="margin-left: 20px;"></i> ${process.progress}%
-                                                   </span>
+                                            </span>
                                             <div class="progress progress-modern mb-3">
                                                 <div class="progress-bar" id="bg-process${process.id}" role="progressbar" style="width: ${process.progress}%;">
                                                     ${process.progress}%
@@ -565,6 +566,12 @@
                                 }
                                 else{
                                     $(`#bg-process${process.id}`).css('width', process.progress+'%').text(process.progress+'%');
+                                    $('#span-resume-bg'+process.id).html(
+                                        `<i class="fas fa-box colorblack ms-2" ></i>${process.total_task} 
+                                        <i class="fas fa-box text-success ms-2" ></i>${process.success_task} 
+                                        <i class="fas fa-box text-danger ms-2" ></i>${process.failed_task}
+                                        <i class="fas fa-spinner fa-spin text-primary" style="margin-left: 20px;"></i> ${process.progress}%
+                                    ` );
                                     if(process.progress>=100){
                                         $(`#bg-process${process.id}`).removeClass('bg-primary').addClass('bg-success');
                                         setTimeout(()=>{
