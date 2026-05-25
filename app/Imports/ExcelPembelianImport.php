@@ -4,10 +4,11 @@ namespace App\Imports;
 
 use App\Traits\ExcelHeaderDetect;
 use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 use Maatwebsite\Excel\Concerns\ToArray;
 use Maatwebsite\Excel\Concerns\ToCollection;
 
-class ExcelPembelianImport implements ToArray
+class ExcelPembelianImport implements ToArray,SkipsEmptyRows
 {
     use ExcelHeaderDetect;
 
