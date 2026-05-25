@@ -502,7 +502,6 @@ class JournalController extends Controller
                 'msg' => 'pembuatan jurnal tanggal segitu tidak bisa, karena sudah terkunci di ' . $key->key_at
             ];
         }
-
         $callback = function () use ($request, $isLockIntern, $urlTryAgain, $date, $lockManager, $isBackDate, $noRecalculate, $useTransaction, $time) {
             $kredits = $request->input('kredits');
             $debets = $request->input('debets');
@@ -510,7 +509,6 @@ class JournalController extends Controller
             $tokoid = $request->input('toko_id');
             $isAuto = $request->input('is_auto_generated');
             $userBackdate = $request->input('user_backdate_id');
-
             if (abs(collect($debets)->sum('amount') - collect($kredits)->sum('amount')) > 0.001) {
                 return [
                     'status' => 0,
@@ -519,27 +517,21 @@ class JournalController extends Controller
                     'kredits' => collect($kredits)->sum('amount')
                 ];
             }
-
             $kodeType = match ($type) {
                 'transaction' => 'JT',
                 'keuangan' => 'JK',
                 'purchasing' => 'JP',
                 default => 'JU',
             };
-
             $tanggal = createCarbon($date)->format("ym");
             $kodeType .= ("-" . $tanggal);
-
             $lastJournalNumber = Journal::where('journal_number', 'like', $kodeType . '%')
                 ->select('journal_number')
                 ->orderBy('journal_number', 'desc')
                 ->first();
-
             $count = $lastJournalNumber ? intval(explode('-', $lastJournalNumber->journal_number)[2]) + 1 : 1;
             $theJournalNumber = sprintf("%s-%06d", $kodeType, $count);
-
             CustomLogger::log('invoicing','info','jurnal-perisiapan create jurnal. time: '.(microtime(true) - $time).' detik');
-
             $allLocks = [];
             $allJournals = [];
             foreach ($debets as $debet) {
@@ -574,7 +566,6 @@ class JournalController extends Controller
                 }
                 $allJournals[] = $st['msg'];
             }
-
             foreach ($kredits as $kredit) {
                 $st = Journal::generateJournal(new Request([
                     'journal_number' => $theJournalNumber,
@@ -596,7 +587,6 @@ class JournalController extends Controller
 
                 ]), $lockManager);
                 // $allLocks[] = ['lock' => $st['lock'], 'name' => $st['lock_name']];
-
                 if ($st['status'] == 0) {
                     // self::releaseLocks($allLocks);
                     JournalJobFailed::create(new Request([
@@ -609,9 +599,7 @@ class JournalController extends Controller
                 }
                 $allJournals[] = $st['msg'];
             }
-
             CustomLogger::log('invoicing','info','jurnal- selesai buat jurnal. time: '.(microtime(true) - $time).' detik');
-
             foreach ($allJournals as $journal) {
                 $journal->updateLawanCode();
                 $st = $journal->createDetailKartuInvoice();
@@ -623,10 +611,9 @@ class JournalController extends Controller
                 }
             }
             if ($isLockIntern == 1) {
-                //lock manual dilepas setelah semua proses transaksi selesai
                 $lockManager->releaseAll();
             }
-            CustomLogger::log('invoicing','info','jurnal- selesai semua proses transaksi. time: '.(microtime(true) - $time).' detik');
+            CustomLogger::log('invoicing','info','jurnal- selesai semua proses transaksi. time: '.(microtime(true) - $time).' detik ======');
             return [
                 'status' => 1,
                 'msg' => 'success',
@@ -636,7 +623,6 @@ class JournalController extends Controller
                 'request' => $request->all()
             ];
         };
-
         try {
             return $useTransaction ? DB::transaction($callback) : $callback();
         } catch (\Throwable $e) {
