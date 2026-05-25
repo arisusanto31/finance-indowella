@@ -401,16 +401,11 @@ class Journal extends Model
     {
         $thejournal = $this;
         $codeGroup = $this->code_group;
-        $name = 'generate-journal' . $codeGroup;
-        if ($isLock == true) {
-            $lock = Cache::lock($name, 120);
-        }
+      
         // CustomLogger::log('journal', 'info', 'recalculate make lock ' . $name);
         try {
-            if ($isLock == true) {
-                $lock->block(20);
-            }
-            $mustEditJournal = Journal::where('code_group', strval($thejournal->code_group))->where('index_date', '>', $thejournal->index_date)->sortindex()->get();
+           
+            $mustEditJournal = Journal::where('code_group', strval($thejournal->code_group))->where('index_date', '>', $thejournal->index_date)->orderBy('index_date','asc')->get();
             $lastSaldo = $thejournal->amount_saldo;
             $newdata = [];
             $dataUpdate = [];
@@ -443,11 +438,10 @@ class Journal extends Model
             return [
                 'status' => 0,
                 'msg' => 'jurnal tidak berhasil masuk, antrian timeout',
-                'lock' => $lock
+               
             ];
         } finally {
-            if ($isLock == true)
-                $lock->release();
+          
             // CustomLogger::log('journal', 'info', 'recalculate release lock ' . $name);
         }
         return ['status' => 1, 'msg' => $dataUpdate, 'journal' => $this];
