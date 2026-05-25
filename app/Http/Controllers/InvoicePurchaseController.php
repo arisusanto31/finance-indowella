@@ -92,7 +92,6 @@ class InvoicePurchaseController extends Controller
             $defaultToko = Toko::first();
 
             $data = $importer->result;
-            throw new \Exception(json_encode($data));
             $idBuatan = 1;
             $allInvoice = collect($data)->pluck('no_invoice')->all();
             $existingInvoice = InvoicePack::whereIn('factur_supplier_number', $allInvoice)->pluck('factur_supplier_number')->all();
