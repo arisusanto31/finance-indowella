@@ -57,12 +57,11 @@ class KartuPiutang extends Model
 
         $personID = $request->input('person_id');
         $personType = $request->input('person_type');
-        $lock = Cache::lock('create-kartu-piutang' . $personType . '-' . $personID, 90);
         info('kartu piutang - trying to create kartu piutang');
         try {
 
             try {
-                $lock->block(30);
+              
                 $date = $request->input('date') ?? now();
                 self::proteksiBackdate($date);
                 $amount_debet = $request->input('amount_debet');
@@ -125,7 +124,7 @@ class KartuPiutang extends Model
                 $kartu->createDetailKartuInvoice();
             } catch (LockTimeoutException $e) {
             } finally {
-                $lock->release();
+                
             }
             info('kartu piutang - success create kartu piutang');
             return [
@@ -134,7 +133,7 @@ class KartuPiutang extends Model
                 'journal_number' => $kartu->journal_number,
             ];
         } catch (Throwable $th) {
-            $lock->release();
+           
             info('kartu - update kartu bermasalah' . $th->getMessage());
             return [
                 'status' => 0,
