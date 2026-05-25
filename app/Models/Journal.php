@@ -165,7 +165,7 @@ class Journal extends Model
         // CustomLogger::log('journal', 'info', $journal_number . ' make lock ' . $name);
         try {
             $lockManager->acquire($name, 50, 20);
-            Redis::expire($name, 50);
+            // Redis::expire($name, 50);
             try {
                 // CustomLogger::log('journal', 'info', $journal_number . ' get lock ' . $name);
                 $now = createCarbon($request->input('date'));
