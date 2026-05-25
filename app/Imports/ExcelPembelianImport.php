@@ -37,7 +37,8 @@ class ExcelPembelianImport implements ToArray
 
         $fillHeaders = [
         ];
-        $array = $this->extractData($headers, false, $fillHeaders);
+        $keyHeader='Kode Barang';
+        $array = $this->extractData($headers, false, $fillHeaders,$keyHeader);
 
         $this->result = $array;
     }
