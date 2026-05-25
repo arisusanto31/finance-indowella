@@ -543,6 +543,7 @@ class JournalController extends Controller
                 $st = Journal::generateJournal(new Request([
                     'journal_number' => $theJournalNumber,
                     'code_group' => $debet['code_group'],
+                    'lawan_code_group'=> collect($kredits)->where('amount', $debet['amount'])->first()['code_group'] ?? null,
                     'description' => $debet['description'],
                     'amount_debet' => floatval($debet['amount']),
                     'amount_kredit' => 0,
@@ -575,6 +576,7 @@ class JournalController extends Controller
                 $st = Journal::generateJournal(new Request([
                     'journal_number' => $theJournalNumber,
                     'code_group' => $kredit['code_group'],
+                    'lawan_code_group'=> collect($debets)->where('amount', $kredit['amount'])->first()['code_group'] ?? null,
                     'description' => $kredit['description'],
                     'amount_kredit' => floatval($kredit['amount']),
                     'amount_debet' => 0,
@@ -604,6 +606,8 @@ class JournalController extends Controller
                 }
                 $allJournals[] = $st['msg'];
             }
+
+
             foreach ($allJournals as $journal) {
                 $journal->updateLawanCode();
                 $st = $journal->createDetailKartuInvoice();
