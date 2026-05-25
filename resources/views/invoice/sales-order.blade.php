@@ -169,7 +169,7 @@
                         </option>
                         <option @if (getInput('status_kirim') == 1) selected @endif value="1">Terkirim
                         </option>
-                        <option @if (getInput('status_kirim') === 0) selected @endif value="0">Belum
+                        <option @if (getInput('status_kirim') === 0 || getInput('status_kirim') === "0") selected @endif value="0">Belum
                             Terkirim
                         </option>
                     </select>
