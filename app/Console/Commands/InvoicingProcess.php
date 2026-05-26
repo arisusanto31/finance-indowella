@@ -53,11 +53,11 @@ class InvoicingProcess extends Command
             $count = $sales->count();
             $this->info("Found $count sales order(s) to process for month: " . $date->format('F Y'));
             if ($count > 0) {
-                $backgroundProcess= BackgroundProcess::where('monitoring_url', 'admin/invoice/sales-order')
+                $backgroundProcess = BackgroundProcess::where('monitoring_url', 'admin/invoice/sales-order')
                     ->where('book_journal_id', $bookid)
                     ->where('description_process', "Processing invoicing for month: $month")
                     ->first();
-                if(!$backgroundProcess){
+                if (!$backgroundProcess) {
                     $backgroundProcess = BackgroundProcess::create([
                         'monitoring_url' => 'admin/invoice/sales-order',
                         'total_task' => $count,
@@ -66,6 +66,9 @@ class InvoicingProcess extends Command
                         'book_journal_id' => $bookid,
                     ]);
                 } else {
+                    $backgroundProcess->success_task = 0;
+                    $backgroundProcess->failed_task = 0;
+                    $backgroundProcess->progress = 0;
                     $backgroundProcess->total_task = $count;
                     $backgroundProcess->status = 'processing';
                     $backgroundProcess->save();
@@ -79,26 +82,11 @@ class InvoicingProcess extends Command
                 $failedTask = 0;
                 foreach ($sales as $sale) {
                     InvoicingProcessJob::dispatch($bookid, $sale->id, $theBG->id)->onQueue('default');
-                    // $st = SalesOrderController::processDagang(new Request(['id' => $sale->id]));
-                    // $iProgress++;
-                    // if ($st['status'] == 1) {
-                    //     $successTask++;
-                    //     $this->info("Successfully processed sales order ID: {$sale->id}");
-                    // } else {
-                    //     $failedTask++;
-                    //     $this->info("Failed to process sales order ID: {$sale->id}. Reason: " . $st['msg']);
-                    // }
-                    // $theBG->progress = ($iProgress / $count) * 100;
-                    // $theBG->success_task = $successTask;
-                    // $theBG->failed_task = $failedTask;
-                    // $theBG->save();
-                    // if ($iProgress % 10 == 0 || $iProgress == $count) {
-                    //     $this->info("Processed sales Progress: " . number_format(($iProgress / $count) * 100, 2) . "%");
-                    // }
+                    
                 }
-            
 
-                $this->info("Invoicing process completed. Total: $count, Success: $successTask, Failed: $failedTask");
+
+                $this->info("Invoicing process has queued on job. Total: $count, Success: $successTask, Failed: $failedTask");
             }
         } catch (\Exception $e) {
             $this->info("Error in InvoicingProcessJob: " . $e->getMessage());
