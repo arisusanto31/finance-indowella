@@ -41,6 +41,7 @@ class InvoicingProcessJob implements ShouldQueue
         $bookid = $this->bookid;
         $id = $this->id;
         $bgProcessID = $this->bgProcessID;
+        Session::put('book_journal_id', $bookid);
         $saleOrder = SalesOrder::find($id);
         if (!$saleOrder) {
             $this->info("Sales order with ID $id not found. Exiting job.");
