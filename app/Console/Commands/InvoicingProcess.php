@@ -78,29 +78,25 @@ class InvoicingProcess extends Command
                 $successTask = 0;
                 $failedTask = 0;
                 foreach ($sales as $sale) {
-
-                    $st = SalesOrderController::processDagang(new Request(['id' => $sale->id]));
-                    $iProgress++;
-                    if ($st['status'] == 1) {
-                        $successTask++;
-                        $this->info("Successfully processed sales order ID: {$sale->id}");
-                    } else {
-                        $failedTask++;
-                        $this->info("Failed to process sales order ID: {$sale->id}. Reason: " . $st['msg']);
-                    }
-                    $theBG->progress = ($iProgress / $count) * 100;
-                    $theBG->success_task = $successTask;
-                    $theBG->failed_task = $failedTask;
-                    $theBG->save();
-                    if ($iProgress % 10 == 0 || $iProgress == $count) {
-                        $this->info("Processed sales Progress: " . number_format(($iProgress / $count) * 100, 2) . "%");
-                    }
+                    InvoicingProcessJob::dispatch($bookid, $sale->id, $theBG->id)->onQueue('default');
+                    // $st = SalesOrderController::processDagang(new Request(['id' => $sale->id]));
+                    // $iProgress++;
+                    // if ($st['status'] == 1) {
+                    //     $successTask++;
+                    //     $this->info("Successfully processed sales order ID: {$sale->id}");
+                    // } else {
+                    //     $failedTask++;
+                    //     $this->info("Failed to process sales order ID: {$sale->id}. Reason: " . $st['msg']);
+                    // }
+                    // $theBG->progress = ($iProgress / $count) * 100;
+                    // $theBG->success_task = $successTask;
+                    // $theBG->failed_task = $failedTask;
+                    // $theBG->save();
+                    // if ($iProgress % 10 == 0 || $iProgress == $count) {
+                    //     $this->info("Processed sales Progress: " . number_format(($iProgress / $count) * 100, 2) . "%");
+                    // }
                 }
-                $theBG->status = 'finished';
-                $theBG->progress = 100;
-                $theBG->success_task = $successTask;
-                $theBG->failed_task = $failedTask;
-                $theBG->save();
+            
 
                 $this->info("Invoicing process completed. Total: $count, Success: $successTask, Failed: $failedTask");
             }

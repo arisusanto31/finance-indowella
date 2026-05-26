@@ -188,7 +188,7 @@ class InvoiceSaleController extends Controller
         return view('invoice.invoice-sales', compact('invoices', 'month', 'year', 'totalInvoice', 'totalInvoiceFinal', 'totalInvoiceMark', 'parent'));
     }
 
-    
+
 
     // public function showSales()
     // {
@@ -383,7 +383,7 @@ class InvoiceSaleController extends Controller
     }
 
     //fungsi ini untuk create invoice dari Sales Order
-    public static function createInvoices(Request $request,$timestart=null,$modeNoRecalculate=false)
+    public static function createInvoices(Request $request, $timestart = null, $modeNoRecalculate = false)
     {
         $lockManager = new LockManager();
         $lockManager->setModeNoRecalculate($modeNoRecalculate);
@@ -464,7 +464,7 @@ class InvoiceSaleController extends Controller
                 $data['invoice_pack_id'] = $invoicePack->id;
                 $details[] = InvoiceSaleDetail::create($data);
             }
-            CustomLogger::log('invoicing',"info","create invoice pack and details . proces time : ".(microtime(true)-$timestart)." seconds");
+            CustomLogger::log('invoicing', "info", "create invoice pack and details . proces time : " . (microtime(true) - $timestart) . " seconds");
             foreach ($salesDetailIDs as $i => $saleDetailID) {
                 $dataDetailSale = $realDataSales[$saleDetailID];
                 $person = $invoicePack->person;
@@ -479,11 +479,11 @@ class InvoiceSaleController extends Controller
                     'is_otomatis_jurnal' => 1,
                     'description' => 'penjualan ' . $person->name . ' ' . $invoicePack->invoice_number . ' item-' . ($i + 1),
                     'date' => $date,
-                ]),false, $lockManager);
+                ]), false, $lockManager);
                 if ($kartu['status'] == 0) {
                     throw new \Exception($kartu['msg']);
                 }
-                CustomLogger::log('invoicing',"info","create kartu piutang . proces time : ".(microtime(true)-$timestart)." seconds");
+                CustomLogger::log('invoicing', "info", "create kartu piutang . proces time : " . (microtime(true) - $timestart) . " seconds");
                 $journalNumber = $kartu['msg']->journal_number;
                 $journal = Journal::where('journal_number', $journalNumber)->where('code_group', $codeGroupPenjualans[$i])->first();
                 $journalID = $journal ? $journal->id : null;
@@ -518,7 +518,7 @@ class InvoiceSaleController extends Controller
                         'lawan_code_group' => 601000, //hpp
                         'is_otomatis_jurnal' => 1,
                         'date' => $date
-                    ]), false , $lockManager);
+                    ]), false, $lockManager);
                     if ($st['status'] == 0) {
                         throw new \Exception($st['msg']);
                     }
@@ -540,7 +540,7 @@ class InvoiceSaleController extends Controller
                         throw new \Exception($stStock['msg']);
                     }
                 }
-                CustomLogger::log('invoicing',"info","create kartu stock . proces time : ".(microtime(true)-$timestart)." seconds");
+                CustomLogger::log('invoicing', "info", "create kartu stock . proces time : " . (microtime(true) - $timestart) . " seconds");
             }
 
 
@@ -554,22 +554,23 @@ class InvoiceSaleController extends Controller
                     'description' => 'PPN Keluaran penjualan ' . $invoicePack->invoice_number,
                     'invoice_pack_id' => $invoicePack->id,
                     'date' => $date
-                ]),$lockManager);
-                CustomLogger::log('invoicing',"info","create kartu ppn keluaran . proces time : ".(microtime(true)-$timestart)." seconds");
+                ]), $lockManager);
+                CustomLogger::log('invoicing', "info", "create kartu ppn keluaran . proces time : " . (microtime(true) - $timestart) . " seconds");
             }
 
             DB::commit();
-            if($lockManager->getModeNoRecalculate()){
-            //nah mari kita recalculate semua jurnal yang terlibat
-            
-            $allJournals= $lockManager->getAllJournals();
-            
-            $allJournals= collect($allJournals)->groupBy('code_group')->map(function($items){
-                //kita ambil yang index paling muda
-                $item = collect($items)->sortBy('created_at')->first();
-                //jalankan recalculate untuk yang paling muda
-                $item->calculateJournalNext(false);
-            });
+            if($lockManager->getModeNoRecalculate()) {
+                //nah mari kita recalculate semua jurnal yang terlibat
+
+                $allJournals = $lockManager->getAllJournals();
+
+                $allJournals = collect($allJournals)->groupBy('code_group')->map(function ($items) {
+                    //kita ambil yang index paling muda
+                    $item = collect($items)->sortBy('created_at')->first();
+                    //jalankan recalculate untuk yang paling muda
+                    $item->calculateJournalNext(false);
+                });
+                CustomLogger::log('invoicing', "info", "recalculate jurnal from lockmanager . proces time : " . (microtime(true) - $timestart) . " seconds");
             }
 
             $lockManager->releaseAll();
@@ -654,7 +655,7 @@ class InvoiceSaleController extends Controller
         return $journalNumber;
     }
 
-    public static function submitBayarSalesInvoice(Request $request, $modeNoRecalculate=false)
+    public static function submitBayarSalesInvoice(Request $request, $modeNoRecalculate = false)
     {
         $lockManager = new LockManager();
         $lockManager->setModeNoRecalculate($modeNoRecalculate);
@@ -713,17 +714,17 @@ class InvoiceSaleController extends Controller
                 $kartuDPSales->createDetailKartuInvoice();
             }
             DB::commit();
-            if($lockManager->getModeNoRecalculate()){
-            //nah mari kita recalculate semua jurnal yang terlibat
-            
-            $allJournals= $lockManager->getAllJournals();
-            
-            $allJournals= collect($allJournals)->groupBy('code_group')->map(function($items){
-                //kita ambil yang index paling muda
-                $item = collect($items)->sortBy('created_at')->first();
-                //jalankan recalculate untuk yang paling muda
-                $item->calculateJournalNext(false);
-            });
+            if ($lockManager->getModeNoRecalculate()) {
+                //nah mari kita recalculate semua jurnal yang terlibat
+
+                $allJournals = $lockManager->getAllJournals();
+
+                $allJournals = collect($allJournals)->groupBy('code_group')->map(function ($items) {
+                    //kita ambil yang index paling muda
+                    $item = collect($items)->sortBy('created_at')->first();
+                    //jalankan recalculate untuk yang paling muda
+                    $item->calculateJournalNext(false);
+                });
             }
             $lockManager->releaseAll();
             return [
@@ -842,6 +843,4 @@ class InvoiceSaleController extends Controller
             return ['status' => 0, 'msg' => $e->getMessage()];
         }
     }
-
-    
 }
