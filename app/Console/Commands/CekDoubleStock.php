@@ -98,6 +98,18 @@ class CekDoubleStock extends Command
             foreach ($stockIdReadys as $stockIdReady) {
                 if ($sales->has($stockIdReady)) {
                     $this->info("Stock ID $stockIdReady terjual sebanyak " . $sales->get($stockIdReady) . " kali");
+                } else {
+                    //ini berati ga ada penjualannya ini bisa kita hapus aja stocknya, tapi kita pastikan kalo sama berati bener .
+                    $this->info("Stock ID $stockIdReady tidak terjual sama sekali, jadi aman untuk dihapus");
+                    $kartuStocks = KartuStock::where('stock_id', $stockIdReady)->get();
+                    if (count($kartuStocks) == 1) {
+                        $firstKartuStock = $kartuStocks->first();
+                        if ($firstKartuStock->sales_order_number == 'INITAWAL') {
+                            $firstKartuStock->delete();
+                            Stock::where('id', $stockIdReady)->delete();
+                            $this->info("Stock ID $stockIdReady dan kartu stock terkait berhasil dihapus");
+                        }
+                    }
                 }
             }
             $this->info("====================================================");
