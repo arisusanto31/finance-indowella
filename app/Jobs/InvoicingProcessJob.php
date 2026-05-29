@@ -57,10 +57,11 @@ class InvoicingProcessJob implements ShouldQueue
                 $backgroundProcess = BackgroundProcess::find($bgProcessID);
                 $backgroundProcess->success_task = $backgroundProcess->success_task + 1;
                 $backgroundProcess->progress = (($backgroundProcess->success_task + $backgroundProcess->failed_task) / $backgroundProcess->total_task) * 100;
-                $backgroundProcess->save();
+
                 if ($backgroundProcess->progress >= 100) {
                     $backgroundProcess->status = 'finished';
                 }
+                $backgroundProcess->save();
                 $lock->release();
             }
         } else {
