@@ -45,6 +45,6 @@ class cekUnitTransaction extends Command
 
                 ->whereIn('stock_id',$allStockID)
                 ->groupBy('stock_id');
-        })->
+        });
     }
 }
