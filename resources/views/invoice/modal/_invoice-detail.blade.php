@@ -1,7 +1,7 @@
 <div class="modal-header align-items-start flex-column">
     <div class="row">
         <div class="col-xs-12 col-md-12">
-            <h5 class="modal-title" id="exampleModalLabel">Detail Invoice {{ $data->invoice_number }} -
+            <h5 class="modal-title" id="exampleModalLabel">Detail Invoice {{ $data->invoice_number }} [{{$data->id}}] -
                 {{ $data->person->name }}
                 <span class="fs-8 px-2 rounded-1 bg-primary text-white"> {{ getModel($data->person_type) }} </span>
             </h5>

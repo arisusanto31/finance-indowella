@@ -158,7 +158,7 @@
                                         <td rowspan="{{ $rowspan }}">{{ $no++ }}</td>
                                         <td rowspan="{{ $rowspan }}">
                                             {{ createCarbon($item->created_at)->format('Y-m-d') }}</td>
-                                        <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }} <br> <i
+                                        <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }} [{{$item->parent->id}}] <br> <i
                                                 class="fas fa-user"></i>{{ $item->parent->factur_supplier_number }}
                                         </td>
                                         <td rowspan="{{ $rowspan }}">{{ $item->supplier->name ?? '-' }}</td>
