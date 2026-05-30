@@ -133,7 +133,9 @@ class InvoicePack extends Model
                 DB::raw('case WHEN account_code_group between 110000 and 120000 then "Kas"
                          WHEN account_code_group between 140000 and 150000 then "Persediaan" 
                          ELSE "Lain-lain" END as type_account')
-            )->groupBy('account_code_group')->get()->keyBy('type_account')->all();
+            )->groupBy( DB::raw('case WHEN account_code_group between 110000 and 120000 then "Kas"
+                         WHEN account_code_group between 140000 and 150000 then "Persediaan" 
+                         ELSE "Lain-lain" END'))->get()->keyBy('type_account')->all();
         // throw new \Exception(json_encode($journals));
         $persediaan = array_key_exists('Persediaan', $journals) ? $journals['Persediaan'] : null;
         $kas = array_key_exists('Kas', $journals) ? $journals['Kas'] : null;
