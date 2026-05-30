@@ -187,6 +187,7 @@
 
                                                                 <input type="hidden" class="detail-price"
                                                                     value="{{ $item->price }}" />
+                                                                <input type="hidden" class="detail-total-quantity" value="{{ $item->quantity }}" />
                                                             </div>
 
                                                             <div class="col-md-2 col-xs-12">
@@ -200,6 +201,7 @@
                                                                 <input class="form-control detail-nilai-mutasi "
                                                                     type="text" readonly name="nilai_mutasi"
                                                                     value="" />
+                                                                <input type="hidden" class="detail-total-nilai-mutasi" value="{{ $item->total_price }}" />
                                                             </div>
                                                             <div class="col-md-3 col-xs-12">
                                                                 <label>Akun Persediaan / Beban</Label>
@@ -343,7 +345,9 @@
         let parent = $(elem).closest('.parent-input-detail');
         let qty = parent.find('.detail-qty').val();
         let price = parent.find('.detail-price').val();
-        let total = qty * price;
+        let total_quantity = parent.find('.detail-total-quantity').val();
+        let total_nilai_mutasi = parent.find('.detail-total-nilai-mutasi').val();
+        let total = qty * (total_nilai_mutasi / total_quantity);
         parent.find('.detail-nilai-mutasi').val(formatRupiah(total));
     }
 

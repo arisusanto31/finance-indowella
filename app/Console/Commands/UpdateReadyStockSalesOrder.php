@@ -33,9 +33,6 @@ class UpdateReadyStockSalesOrder extends Command
         $endDate = createCarbon($monthyear)->endOfMonth();
         $bookid = $this->argument('bookid');
         Session::put('book_journal_id', $bookid);
-
-
-
         $salesOrders =  SalesOrder::where('created_at', '>=', $startDate)
             ->where('created_at', '<', $endDate)
             ->where('status_delivery', '<>', 'TERKIRIM 100%')
