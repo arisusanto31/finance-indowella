@@ -347,7 +347,7 @@
         let price = parent.find('.detail-price').val();
         let total_quantity = parent.find('.detail-total-quantity').val();
         let total_nilai_mutasi = parent.find('.detail-total-nilai-mutasi').val();
-        let total = qty * (total_nilai_mutasi / total_quantity);
+        let total = qty * total_nilai_mutasi / total_quantity;
         parent.find('.detail-nilai-mutasi').val(formatRupiah(total));
     }
 
