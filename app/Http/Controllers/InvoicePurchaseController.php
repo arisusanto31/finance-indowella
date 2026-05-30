@@ -358,7 +358,7 @@ class InvoicePurchaseController extends Controller
                 self::createPPNMasukan(new Request([
                     'code_group_debet' => 150500, //ppn masukan
                     'code_group_kredit' => $coaKredit,
-                    'nilai_mutasi' => $nilaiPPNM,
+                    'nilai_mutasi' => round($nilaiPPNM),
                     'toko_id' => $toko->id,
                     'description' => 'PPN Masukan pembelian ' . $invoicePack->invoice_number,
                     'invoice_pack_id' => $invoicePackID,
