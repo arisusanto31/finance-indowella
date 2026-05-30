@@ -34,8 +34,14 @@ class UpdateReadyStockSalesOrder extends Command
         $bookid = $this->argument('bookid');
         Session::put('book_journal_id', $bookid);
 
+
+
         $salesOrders =  SalesOrder::where('created_at', '>=', $startDate)
-            ->where('created_at', '<', $endDate)->get();
+            ->where('created_at', '<', $endDate)
+            ->where('status_delivery', '<>', 'TERKIRIM 100%')
+            ->get();
+
+        $this->info('kamu akan update sebanyak ' . count($salesOrders) . ' sales order');
         foreach ($salesOrders as $so) {
             $st = $so->updateReadyStock();
             $this->info(json_encode($st));
