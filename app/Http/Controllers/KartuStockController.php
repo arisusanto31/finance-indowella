@@ -332,6 +332,9 @@ class KartuStockController extends Controller
         $stock = Stock::where('reference_stock_id', intval($data['ref_id']))
             ->where('reference_stock_type', $bookModel)
             ->first();
+        if(!$stock){
+            throw new \Exception('stock tidak ditemukan dengan ref id dan book model tersebut');
+        }
         if (!$stock)
             $stock = Stock::where('name', $data['name'])->first();
       
