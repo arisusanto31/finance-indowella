@@ -1089,12 +1089,18 @@
             method: 'post',
             success: function(res) {
                 console.log(res);
-                getDataKartu();
-                $('#bayar-invoice-submit').html('<i class="fas fa-check"></i> berhasil');
-                $('#bayar-invoice-submit').removeClass('btn-primary').addClass('btn-success');
-                setTimeout(function() {
-                    updateStatusRow('{{ $data->id }}');
-                }, 1000);
+                if(res.status==1){
+                    getDataKartu();
+                    $('#bayar-invoice-submit').html('<i class="fas fa-check"></i> berhasil');
+                    $('#bayar-invoice-submit').removeClass('btn-primary').addClass('btn-success');
+                    setTimeout(function() {
+                        updateStatusRow('{{ $data->id }}');
+                    }, 1000);
+                }else{
+                    Swal.fire('ops', 'something error ' + res.msg, 'error');
+                    $('#bayar-invoice-submit').prop('disabled', false);
+                    $('#bayar-invoice-submit').html('submit');
+                }
             },
             error: function(res) {
                 $('#bayar-invoice-submit').prop('disabled', false);
