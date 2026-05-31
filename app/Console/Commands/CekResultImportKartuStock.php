@@ -62,6 +62,10 @@ class CekResultImportKartuStock extends Command
                 $thetask->status='queue';
                 $thetask->save();
 
+            }else{
+                    $thetask= TaskImportDetail::find($task->id);
+                    $thetask->status='success';
+                    $thetask->save();
             }
             $all[] = [
                 'ref_id' => $payload['ref_id'],
