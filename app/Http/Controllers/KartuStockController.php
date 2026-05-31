@@ -131,19 +131,19 @@ class KartuStockController extends Controller
         //     )
         //     ->orderBy('kartu_stocks.index_date', 'desc')
         //     ->first();
-        $kartu= KartuStock::where('index_date','<',$indexDate)
-            ->where('stock_id',$stockid)
-            ->orderBy('index_date','desc')->first();
-        $unit= StockUnit::where('stock_id',$stockid)->where('unit',$unit)->first();
-        $hpp= $kartu ? ($kartu->saldo_qty_backend != 0 ? ($kartu->saldo_rupiah_total / $kartu->saldo_qty_backend) : 0) : 0;
-        $data= new stdClass;
-        $data->hppbackend= $hpp;
-        $data->kartu_stock_id= $kartu ? $kartu->id : null;
-        $data->saldo_rupiah_total= $kartu ? $kartu->saldo_rupiah_total : 0;
-        $data->saldo_qty_backend= $kartu ? $kartu->saldo_qty_backend : 0;
-        $data->konversi= $unit ? $unit->konversi : 1;
-      
-        return ['status' => 1, 'msg' => $data,'indexdate'=>$indexDate];
+        $kartu = KartuStock::where('index_date', '<', $indexDate)
+            ->where('stock_id', $stockid)
+            ->orderBy('index_date', 'desc')->first();
+        $unit = StockUnit::where('stock_id', $stockid)->where('unit', $unit)->first();
+        $hpp = $kartu ? ($kartu->saldo_qty_backend != 0 ? ($kartu->saldo_rupiah_total / $kartu->saldo_qty_backend) : 0) : 0;
+        $data = new stdClass;
+        $data->hppbackend = $hpp;
+        $data->kartu_stock_id = $kartu ? $kartu->id : null;
+        $data->saldo_rupiah_total = $kartu ? $kartu->saldo_rupiah_total : 0;
+        $data->saldo_qty_backend = $kartu ? $kartu->saldo_qty_backend : 0;
+        $data->konversi = $unit ? $unit->konversi : 1;
+
+        return ['status' => 1, 'msg' => $data, 'indexdate' => $indexDate];
     }
 
     public function destroy($id)
@@ -332,16 +332,16 @@ class KartuStockController extends Controller
         $stock = Stock::where('reference_stock_id', intval($data['ref_id']))
             ->where('reference_stock_type', $bookModel)
             ->get();
-        if(count($stock)>1){
+        if (count($stock) > 1) {
             throw new \Exception('terdapat lebih dari 1 stock dengan reference stock id dan book model tersebut');
         }
-        $stock= $stock->first();
-        if(!$stock){
+        $stock = $stock->first();
+        if (!$stock) {
             throw new \Exception('stock tidak ditemukan dengan ref id dan book model tersebut');
         }
         if (!$stock)
             $stock = Stock::where('name', $data['name'])->first();
-      
+
         info('stock terdaftar:' . json_encode($stock));
 
         try {
@@ -367,10 +367,10 @@ class KartuStockController extends Controller
                     }
                 } else if ($task->book_journal_id == 2) {
 
-                    $retailStock = RetailStock::where('name', $data['name'])->with(['parentCategory', 'category'])->first();
+                    $retailStock = RetailStock::where('id', intval($data['ref_id']))->with(['parentCategory', 'category'])->first();
 
                     if (!$retailStock) {
-                        $retailStock = RetailStock::where('id', intval($data['ref_id']))->with(['parentCategory', 'category'])->first();
+                       throw new \Exception('retail stock tidak ditemukan dengan ref id tersebut, periksa ref id');
                     }
                     if ($retailStock) {
                         $retailStock['units_manual'] = $retailStock->getUnits();
@@ -428,7 +428,7 @@ class KartuStockController extends Controller
                 }
             }
             if ($stock && ($stock['unit_default'] == null || $stock['units_manual'] == null)) {
-                
+
                 $referenceStock = $bookModel::find(intval($data['ref_id']));
                 $referenceStock['units_manual'] = $referenceStock->getUnits();
                 $referenceStock['unit_default'] = $referenceStock->unit_info;
@@ -466,7 +466,7 @@ class KartuStockController extends Controller
                     'journal_number' => $journalNumber,
                     'is_custom_rupiah' => 1,
                     'mutasi_rupiah_total' => floatval($data['amount']),
-                    'tag'=>'init_import'.$data['date']
+                    'tag' => 'init_import' . $data['date']
 
                 ]), false);
                 info('hasil dari kartu stcok:' . json_encode($stStock));

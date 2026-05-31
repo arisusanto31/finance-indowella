@@ -308,7 +308,9 @@ class StockController extends Controller
             ];
             $thestock = Stock::find($stock_id);
             if (!$thestock) {
-                $thestock = Stock::where('name', $name)->first();
+                $thestock= Stock::where('reference_stock_id', $referenceStockID)->where('reference_stock_type', $bookModel)->first();
+                if(!$thestock)
+                    $thestock = Stock::where('name', $name)->first();
                 if ($thestock) {
                     $thestock->update($dataFix);
                     $stock = $thestock;
