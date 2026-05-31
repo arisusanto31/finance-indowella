@@ -38,6 +38,7 @@ class CekResultImportKartuStock extends Command
 
         $diff = [];
         $all=[];
+        $saldodiff=[];
         foreach ($taskimports as $task) {
             $payload = json_decode($task->payload, true);
             $ks = KartuStock::join('stocks', 'stocks.id', 'kartu_stocks.stock_id')
@@ -45,6 +46,9 @@ class CekResultImportKartuStock extends Command
                 ->whereDate('kartu_stocks.created_at', $task->request_date)
                 ->where('kartu_stocks.tag', 'init_import2025-12-31T23:59')
                 ->select('kartu_stocks.mutasi_rupiah_total', 'stocks.name', 'stocks.reference_stock_id')->first();
+            $saldo= KartuStock::join('stocks', 'stocks.id', 'kartu_stocks.stock_id')
+             ->where('stocks.reference_stock_id',$payload['ref_id'])->where('kartu_stocks.index_date','<',260101000000000)->orderBy('kartu_stocks.index_date','desc')
+             ->select('kartu_stocks.saldo_rupiah_total')->first()->saldo_rupiah_total ?? 0;
             $ksname = $ks ? $ks->name : 'not found';
             $ksamount = $ks ? $ks->mutasi_rupiah_total : 0;
             $payloadAmount= $payload['amount'] ?? 0;
@@ -75,6 +79,15 @@ class CekResultImportKartuStock extends Command
                 'amount_ks' => round($ksamount,2),
                 'selisih' => round($payloadAmount,2) - round($ksamount,2)
             ];
+
+            $saldodiff[]=[
+                'ref_id' => $payload['ref_id'],
+                'payload_name' => $payload['name'],
+                'ks_name' => $ksname,
+                'amount_import' => round($payloadAmount,2),
+                'saldo' => $saldo,
+                'selisih_saldo' => (round($payloadAmount,2) ?? 0) - $saldo
+            ];
         }
         tampilkanTableTerminal(
             $diff,
@@ -90,5 +103,20 @@ class CekResultImportKartuStock extends Command
         $this->info('total amount task '.array_sum(array_column($all,'amount_import')));
         $this->info('total amount kartu stock '.array_sum(array_column($all,'amount_ks')));
         $this->info('total amount diff '. array_sum(array_column($diff,'selisih')));
+
+        tampilkanTableTerminal(
+             collect($saldodiff)->filter(function($item){
+                return abs($item['selisih_saldo']) > 1;
+            })->all(),
+            [
+                'ref_id' => 'center',
+                'payload_name' => 'left',
+                'ks_name' => 'left',
+                'amount_import' => 'right',
+                'saldo' => 'right',
+                'selisih_saldo' => 'right'
+            ],$this
+        );
+        $this->info('total amount diff saldo '. array_sum(array_column($saldodiff,'selisih_saldo')));
     }
 }
