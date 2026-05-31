@@ -46,9 +46,11 @@ class CekResultImportKartuStock extends Command
                 ->whereDate('kartu_stocks.created_at', $task->request_date)
                 ->where('kartu_stocks.tag', 'init_import2025-12-31T23:59')
                 ->select('kartu_stocks.mutasi_rupiah_total', 'stocks.name', 'stocks.reference_stock_id')->first();
-            $saldo= KartuStock::join('stocks', 'stocks.id', 'kartu_stocks.stock_id')
+            $ksaldo= KartuStock::join('stocks', 'stocks.id', 'kartu_stocks.stock_id')
              ->where('stocks.reference_stock_id',$payload['ref_id'])->where('kartu_stocks.index_date','<',260101000000000)->orderBy('kartu_stocks.index_date','desc')
-             ->select('kartu_stocks.saldo_rupiah_total')->first()->saldo_rupiah_total ?? 0;
+             ->select('kartu_stocks.saldo_rupiah_total','kartu_stocks.stock_id')->first();
+            $saldo= $ksaldo ? $ksaldo->saldo_rupiah_total : 0;
+            $saldostockid= $ksaldo ? $ksaldo->stock_id : null;
             $ksname = $ks ? $ks->name : 'not found';
             $ksamount = $ks ? $ks->mutasi_rupiah_total : 0;
             $payloadAmount= $payload['amount'] ?? 0;
@@ -86,6 +88,7 @@ class CekResultImportKartuStock extends Command
                 'ks_name' => $ksname,
                 'amount_import' => round($payloadAmount,2),
                 'saldo' => $saldo,
+                'stock_id' => $saldostockid,
                 'selisih_saldo' => (round($payloadAmount,2) ?? 0) - $saldo
             ];
         }
@@ -110,6 +113,7 @@ class CekResultImportKartuStock extends Command
             })->all(),
             [
                 'ref_id' => 'center',
+                'stock_id' => 'center',
                 'payload_name' => 'left',
                 'ks_name' => 'left',
                 'amount_import' => 'right',
