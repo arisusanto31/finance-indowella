@@ -54,7 +54,7 @@ class CekDoubleStock extends Command
             $stockIds = explode(',', $stock->stock_ids);
             $stockIdReadys = [];
             $stockIdNotReadys = [];
-            $qtyReady = 0;
+            $qtyReady = [];
             foreach ($stockIds as $id) {
                 $ks = KartuStock::where('stock_id', $id)
                     ->orderBy('index_date', 'desc')
@@ -63,18 +63,19 @@ class CekDoubleStock extends Command
                 if ($ks) {
                     $saldo = $ks->saldo_qty_backend;
                 }
-                if ($saldo == 0) {
+                if ($saldo <= 0) {
+                    $qtyReady[$id] = $saldo;
                     $stockIdNotReadys[] = $id;
                 } else {
-                    $qtyReady = $saldo;
+                    $qtyReady[$id] = $saldo;
                     $stockIdReadys[] = $id;
                 }
             }
             foreach ($stockIdReadys as $stockIdReady) {
-                $this->info("Stock ID ready: $stockIdReady ($qtyReady)");
+                $this->info("Stock ID ready: $stockIdReady (" . $qtyReady[$stockIdReady] . ")");
             }
             foreach ($stockIdNotReadys as $stockIdNotReady) {
-                $this->info("Stock ID not ready: $stockIdNotReady");
+                $this->info("Stock ID not ready: $stockIdNotReady (" . $qtyReady[$stockIdNotReady] . ")");
             }
             $sales = SalesOrderDetail::whereIn('stock_id', $stockIds)
                 ->select(DB::raw('count(id) as total_count'), 'stock_id')
