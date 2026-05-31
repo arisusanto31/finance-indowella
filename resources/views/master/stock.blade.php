@@ -72,6 +72,7 @@
                             <th>No</th>
                             <th>Created</th>
                             <th>Name</th>
+                            <th>Reference </th>
                             <th>Category</th>
                             <th>Parent Category</th>
                             <th>Aksi</th>
@@ -259,6 +260,7 @@
                             <td> ${index + 1 }</td>
                             <td>${formatNormalDateTime(new Date(item.created_at))}</td>
                             <td>${item.name} [${item.id}]</td>
+                            <td>${item.reference_stock_type} : ${item.reference_stock_id}</td>
                             <td>${item.category.name}</td>
                             <td>${item.parent_category.name}
                             <div class="modal fade" id="editModal${item.id}" tabindex="-1"
