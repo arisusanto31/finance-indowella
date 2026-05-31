@@ -49,7 +49,7 @@ class CekResultImportKartuStock extends Command
             $ksamount = $ks ? $ks->mutasi_rupiah_total : 0;
             $payloadAmount= $payload['amount'] ?? 0;
             $payloadAmount= round($payloadAmount,2);
-            if (round($payloadAmount, 2) != round($ksamount, 2)) {
+            if (abs(round($payloadAmount, 2) - round($ksamount, 2))>1) {
                 $diff[] = [
                     'ref_id' => $payload['ref_id'],
                     'payload_name' => $payload['name'],
