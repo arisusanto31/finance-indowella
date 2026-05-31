@@ -326,7 +326,7 @@ class KartuStockController extends Controller
         $unit = $data['unit'];
         info('data :' . json_encode($data));
         $lawanCode = 301000;
-        $bookModel = $task->book_journal_id == 1 ? ManufStock::class : RetailStock::class;
+        $bookModel = $task->book_journal_id == 1 ? 'App\Models\ManufStock' : 'App\Models\RetailStock';
         info('ref_id:' . intval($data['ref_id']));
         info('book model:' . $bookModel);
         $stock = Stock::where('reference_stock_id', intval($data['ref_id']))
