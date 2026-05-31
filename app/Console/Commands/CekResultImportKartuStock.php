@@ -33,7 +33,7 @@ class CekResultImportKartuStock extends Command
         $importid = $this->argument('importid');
         Session::put('book_journal_id', $bookid);
         $taskimports = TaskImportDetail::where('task_import_id', $importid)->where('type', 'kartu_stock')
-            ->select('payload', 'request_date')
+            ->select('payload', 'request_date','id')
             ->get();
 
         $diff = [];
@@ -58,6 +58,10 @@ class CekResultImportKartuStock extends Command
                     'amount_ks' => round($ksamount,2),
                     'selisih' => round($payloadAmount,2) - round($ksamount,2)
                 ];
+                $thetask= TaskImportDetail::find($task->id);
+                $thetask->status='queue';
+                $thetask->save();
+
             }
             $all[] = [
                 'ref_id' => $payload['ref_id'],
