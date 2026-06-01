@@ -65,7 +65,7 @@
                     <th>{{ format_price($datas->last()->rupiah_saldo) }}</th>
                     <th></th>
                     <th>
-                        @if($model=='kartu-bdp' && $datas->last()->qty_saldo > 0)
+                        @if(($model=='kartu-bdp')&& $datas->last()->qty_saldo > 0)
                         <button onclick="bebankan('{{ $productionNumber }}', '{{ $stockId }}')">bebankan</button>
                         @endif
                     </th>
