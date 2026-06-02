@@ -14,16 +14,16 @@ class LockManager
 
     public function acquire($key, $ttl = 30, $wait = 10)
     {
-        $bookID= bookID();
-        $key=$bookID.'_'.$key;
-        if (!isset($this->locks[$key])) {
-            $lock = Cache::lock($key, $ttl);
-            $lock->block($wait);
-            $this->locks[$key] = $lock;
-            info('make lock '.$key);
-        }
+        // $bookID= bookID();
+        // $key=$bookID.'_'.$key;
+        // if (!isset($this->locks[$key])) {
+        //     $lock = Cache::lock($key, $ttl);
+        //     $lock->block($wait);
+        //     $this->locks[$key] = $lock;
+        //     info('make lock '.$key);
+        // }
 
-        return $this->locks[$key];
+        // return $this->locks[$key];
     }
   
 
@@ -34,7 +34,7 @@ class LockManager
     }
 
     public function addJournal($journal){
-        $this->journals[]=$journal;
+        // $this->journals[]=$journal;
     }
     public function getAllJournals(){
         return $this->journals;
