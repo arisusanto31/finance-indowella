@@ -367,7 +367,7 @@ class SalesOrderController extends Controller
     }
 
 
-    public function makeFinal(Request $request)
+    public static function makeFinal(Request $request)
     {
         $id = $request->id;
         $salesOrder = SalesOrder::find($id);

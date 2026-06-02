@@ -14,7 +14,7 @@ class InvoicingProcess extends Command
 {
     /**
      * The name and signature of the console command.
-     *
+
      * @var string
      */
     protected $signature = 'invoicing:process {bookid} {month}';
@@ -22,7 +22,7 @@ class InvoicingProcess extends Command
     /**
      * The console command description.
      *
-     * @var strinC
+     * @var string
      */
     protected $description = 'Process invoicing for a given month and year';
 
@@ -45,7 +45,6 @@ class InvoicingProcess extends Command
             Session::put('book_journal_id', $bookid);
             $sales = SalesOrder::where('created_at', '>=', $startDate)
                 ->where('created_at', '<=', $endDate)
-                ->where('is_final', 1)
                 ->where('status_delivery', '<>', 'terkirim 100%')
                 ->where('is_ready_stock', 1)
                 ->select('id')
