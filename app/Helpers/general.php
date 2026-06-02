@@ -254,6 +254,9 @@ class CustomLogger
 {
     public static function log($title, $level, $message, $context = [])
     {
+        if($title=='invoicing'){
+            return;
+        }
         try {
             Log::channel($title)->$level($message, $context);
         } catch (Throwable $th) {
