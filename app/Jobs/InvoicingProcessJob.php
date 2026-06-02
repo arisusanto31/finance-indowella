@@ -47,14 +47,25 @@ class InvoicingProcessJob implements ShouldQueue
             $this->info("Sales order with ID $id not found. Exiting job.");
             return;
         }
-        if ($saleOrder->is_final == 0){
+        if ($saleOrder->is_final == 0) {
             $st = SalesOrderController::makeFinal(new Request([
                 'id' => $id
             ]));
-            if($st['status'] == 1){
+            if ($st['status'] == 1) {
                 $this->info("Successfully marked sales order ID $id as final for book ID $bookid.");
             } else {
                 $this->info("Failed to mark sales order ID $id as final for book ID $bookid. Status: " . json_encode($st));
+                $lock = Cache::lock("update_bg_process_$bgProcessID", 10);
+                if ($lock->get()) {
+                    $backgroundProcess = BackgroundProcess::find($bgProcessID);
+                    $backgroundProcess->failed_task = $backgroundProcess->failed_task + 1;
+                    $backgroundProcess->progress = (($backgroundProcess->success_task + $backgroundProcess->failed_task) / $backgroundProcess->total_task) * 100;
+                    if ($backgroundProcess->progress >= 100) {
+                        $backgroundProcess->status = 'finished';
+                    }
+                    $backgroundProcess->save();
+                    $lock->release();
+                }
                 return;
             }
         }
