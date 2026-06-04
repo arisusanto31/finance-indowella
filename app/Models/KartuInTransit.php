@@ -42,7 +42,7 @@ class KartuInTransit extends Model
         });
     }
 
-    public static function create(Request $request)
+    public static function createData(Request $request)
     {
         info('TRYING UPLOAD ' . json_encode($request->all()));
         $lock = Cache::lock('kartu-bdp-' . $request->input('stock_id'), 40);
@@ -270,7 +270,7 @@ class KartuInTransit extends Model
                 throw new \Exception('qtybackend kartu BDP tidak boleh nol');
             }
             $mutasiRupiahUnit = money($mutasiRupiahTotal / $qtybackend);
-            $st = self::create(new Request([
+            $st = self::createData(new Request([
                 'stock_id' => $stockid,
                 'sales_order_number' => $SONumber,
                 'tag'=> $request->input('tag'),

@@ -278,6 +278,7 @@ class InvoicePackController extends Controller
         if (!$chartPersediaan || !$chartHutangKas) {
             return ['status' => 0, 'msg' => 'Chart account tidak ditemukan'];
         }
+         $thecard= $chartPersediaan->reference_model;
         //buat kartu stock
         //dari sini apa yang sudah dibuat harus disimpan dulu. trus kalo gagal ditengah jalan kita rollback atau delete
         DB::beginTransaction();
@@ -292,7 +293,7 @@ class InvoicePackController extends Controller
                 if ($stock->name == 'custom') {
                     throw new \Exception('Tidak bisa membuat kartu "stock custom"');
                 }
-                $thecard= $chartPersediaan->reference_model;
+               
                 $kartuStock = $thecard::mutationStore(new Request([
                     'stock_id' => $detail->stock_id,
                     'mutasi_quantity' => $detail->quantity,
@@ -311,6 +312,7 @@ class InvoicePackController extends Controller
                 $detail->fillKartuStockID();
             }
             info(json_encode($ks));
+          
             //oke sampek sini chat dan invoice sudah valid
             if ($coaHutangKas > 200000) {
                 //brati hutang, buat kartu hutang ya lur
@@ -375,7 +377,7 @@ class InvoicePackController extends Controller
                 ->where('code_group', $coaPersediaan)->first();
 
             foreach ($ks as $k) {
-                $kartu = KartuStock::find($k->id);
+                $kartu = $thecard::find($k->id);
                 $kartu->journal_id = $journalPersediaan->id;
                 $kartu->journal_number = $journalPersediaan->journal_number;
                 $kartu->save();

@@ -190,7 +190,7 @@ class KartuHutang extends Model
             $codeGroup = $request->input('code_group');
             $lawanCodeGroup = $request->input('lawan_code_group');
             $isOtomatisJurnal = $request->input('is_otomatis_jurnal') ?? 0;
-            $chartAccount = ChartAccount::where('code_group', $codeGroup)->first();
+            $chartAccount = ChartAccountAlias::where('code_group', $codeGroup)->first();
             if (!$chartAccount) {
                 throw new \Exception('chart account not found');
             }
