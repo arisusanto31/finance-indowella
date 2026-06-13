@@ -28,7 +28,7 @@
                     <input type="date" class="form-control" style="padding-left:60px;" id="dateakhir" placeholder="Tanggal Akhir">
                 </div>
                 <div class="col-md-2">
-                    <button onclick="searchData()" class="btn btn-primary btn-sm w-100">Cari</button>
+                    <button onclick="searchData()" id="btn-search" class="btn btn-primary btn-sm w-100">Cari</button>
                 </div>
             </div>
 
@@ -51,12 +51,13 @@
                 startdate = $('#dateawal').val();
                 enddate = $('#dateakhir').val();
                 coa = $('#coa option:selected').val();
-
+                $('#btn-search').attr('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...');
                 $.ajax({
                     url: '{{ url("admin/jurnal/get-buku-besar") }}?coa=' + coa + '&dateawal=' + startdate + '&dateakhir=' + enddate,
                     method: 'get',
                     success: function(res) {
                         console.log(res);
+                        $('#btn-search').attr('disabled', false).html('Cari');
                         if (res.status == 1) {
                             html = '';
                             Object.keys(res.msg).forEach(function eachKas(codeKas) {
@@ -150,6 +151,7 @@
                         }
                     },
                     error: function(res) {
+                        $('#btn-search').attr('disabled', false).html('Cari');
                         Swal.fire('opps', 'Gagal mendapatkan data', 'error');
                     }
                 });
