@@ -19,21 +19,13 @@
                     <select id="coa" class="form-select select-coa"></select>
 
                 </div>
-                <div class="col-md-2">
-                    <select name="bulan" id="month" class="form-select ">
-                        <option value="">-- Bulan --</option>
-                        @foreach (getListMonth() as $key => $month)
-                            <option value="{{ $key }}">{{ $month }}</option>
-                        @endforeach
-                    </select>
+                <div class="col-md-2 " style="position:relative;">
+                    <span style="position:absolute; left:19px; top:9px;">from:</span>
+                    <input type="date" class="form-control" style="padding-left:60px;" id="dateawal" placeholder="Tanggal Awal">
                 </div>
-                <div class="col-md-2">
-                    <select name="tahun" id="year" class="form-select ">
-                        <option value="">-- Tahun --</option>
-                        @for ($year = 0; $year < 3; $year++)
-                            <option value="{{ intval(Date('Y') - $year) }}">{{ intval(Date('Y') - $year) }}</option>
-                        @endfor
-                    </select>
+                <div class="col-md-2 " style="position:relative;">
+                    <span style="position:absolute; left:19px; top:9px;">to:</span>
+                    <input type="date" class="form-control" style="padding-left:60px;" id="dateakhir" placeholder="Tanggal Akhir">
                 </div>
                 <div class="col-md-2">
                     <button onclick="searchData()" class="btn btn-primary btn-sm w-100">Cari</button>
@@ -56,12 +48,12 @@
             initItemSelectManual('.select-coa', '{{ route("chart-account.get-item-all") }}', 'chart account');
 
             function searchData() {
-                month = $('#month').val();
-                year = $('#year').val();
+                startdate = $('#dateawal').val();
+                enddate = $('#dateakhir').val();
                 coa = $('#coa option:selected').val();
 
                 $.ajax({
-                    url: '{{ url("admin/jurnal/get-buku-besar") }}?coa=' + coa + '&month=' + month + '&year=' + year,
+                    url: '{{ url("admin/jurnal/get-buku-besar") }}?coa=' + coa + '&dateawal=' + startdate + '&dateakhir=' + enddate,
                     method: 'get',
                     success: function(res) {
                         console.log(res);
@@ -139,7 +131,7 @@
                                   </tbody>
                                   <tfoot>
                                       <tr>
-                                          <td colspan="5" class="text-end">Total</td>
+                                          <td colspan="6" class="text-end">Total</td>
                                           <td><strong>${formatRupiah(data.reduce((acc, item) => acc + parseFloat(item.amount_debet), 0))} </strong></td>
                                           <td><strong>${formatRupiah(data.reduce((acc, item) => acc + parseFloat(item.amount_kredit), 0))} </strong></td>
                                           <td><strong>${formatRupiah(lastSaldo)} </strong></td>

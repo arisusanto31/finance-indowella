@@ -285,17 +285,17 @@ class JournalController extends Controller
         $view->year = $year;
         return $view;
     }
-
     public function getListBukuBesar()
     {
         $code = getInput('coa');
-        $month = getInput('month');
-        $year = getInput('year');
+        $dateStart = getInput('dateawal')??Date('Y-m-d'); 
+        $dateEnd= getInput('dateakhir')??Date('Y-m-d');
+        $indexDateAwal = createCarbon($dateStart)->startOfDay()->format('ymdHis00');
+        $indexDateAkhir = createCarbon($dateEnd)->endOfDay()->format('ymdHis99');
 
-        $indexDate = createCarbon($year . '-' . $month . '-01')->format('ymdHis00');
 
         $coas = ChartAccount::aktif()->child()->where('code_group', 'like', Journal::getPrimaryCode($code) . '%')->pluck('code_group')->all();
-        $subData = Journal::select(DB::raw('max(index_date) as maxindex'), 'code_group')->where('index_date', '<', $indexDate)->whereIn('code_group', $coas)
+        $subData = Journal::select(DB::raw('max(index_date) as maxindex'), 'code_group')->where('index_date', '<', $indexDateAwal)->whereIn('code_group', $coas)
             ->groupBy('code_group');
         $lastSaldoJournal = Journal::joinSub($subData, 'sub_journals', function ($q) {
             $q->on('journals.index_date', '=', 'sub_journals.maxindex')
@@ -303,7 +303,7 @@ class JournalController extends Controller
         })->pluck('journals.amount_saldo', 'journals.code_group')->all();
         $key = JournalKey::orderBy('key_at', 'desc')->first();
         $indexKey = $key ? createCarbon($key->key_at)->format('ymdHis00') : '25010100000000';
-        $journals = Journal::searchCOA($code)->whereMonth('created_at', $month)->whereYear('created_at', $year)
+        $journals = Journal::searchCOA($code)->whereBetween('index_date', [$indexDateAwal, $indexDateAkhir])
             ->orderBy('index_date', 'asc')
             ->selectRaw(
                 'journals.*,
@@ -322,8 +322,10 @@ class JournalController extends Controller
             'status' => 1,
             'msg' => $journals,
             'chart_accounts' => $chartAccount,
-            'month' => $month,
-            'year' => $year,
+            'dateawal' => $dateStart,
+            'dateakhir' => $dateEnd,
+            'month'=> createCarbon($dateStart)->format('m'),
+            'year'=> createCarbon($dateStart)->format('Y'),
             'saldo_awal' => $lastSaldoJournal,
             'code_group' => $code,
             'key' => $key
