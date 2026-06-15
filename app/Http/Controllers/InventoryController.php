@@ -216,8 +216,15 @@ class InventoryController extends Controller
     }
 
     public function getItem()
-    {
-        $inv = Inventory::select('id', DB::raw('name as text'))->get();
+    {   $search= getInput('search');
+    
+        $inv = Inventory::query();
+        if($search){
+            foreach(explode(' ', $search) as $s){
+                $inv->where('name', 'like', '%' . $s . '%');
+            }
+        }
+        $inv=$inv->select('id', DB::raw('name as text'))->get();
         return [
             'results' => $inv
         ];
