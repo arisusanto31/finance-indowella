@@ -10,5 +10,5 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Schedule::command('app:fix-problem-saldo 1')->cron('*/6 * * * *');
-Schedule::command('app:fix-problem-saldo 2')->cron('*/5 * * * *');
+Schedule::command('app:fix-problem-saldo 1')->cron('*/11 * * * *');
+Schedule::command('app:fix-problem-saldo 2')->cron('*/9 * * * *');
