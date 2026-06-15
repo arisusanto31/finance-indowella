@@ -288,8 +288,8 @@ class JournalController extends Controller
     public function getListBukuBesar()
     {
         $code = getInput('coa');
-        $dateStart = getInput('dateawal')??Date('Y-m-d'); 
-        $dateEnd= getInput('dateakhir')??Date('Y-m-d');
+        $dateStart = getInput('dateawal') ?? Date('Y-m-d');
+        $dateEnd = getInput('dateakhir') ?? Date('Y-m-d');
         $indexDateAwal = createCarbon($dateStart)->startOfDay()->format('ymdHis00');
         $indexDateAkhir = createCarbon($dateEnd)->endOfDay()->format('ymdHis99');
 
@@ -324,8 +324,8 @@ class JournalController extends Controller
             'chart_accounts' => $chartAccount,
             'dateawal' => $dateStart,
             'dateakhir' => $dateEnd,
-            'month'=> createCarbon($dateStart)->format('m'),
-            'year'=> createCarbon($dateStart)->format('Y'),
+            'month' => createCarbon($dateStart)->format('m'),
+            'year' => createCarbon($dateStart)->format('Y'),
             'saldo_awal' => $lastSaldoJournal,
             'code_group' => $code,
             'key' => $key
@@ -359,7 +359,7 @@ class JournalController extends Controller
                 throw new \Exception('Journal sudah terkunci, tidak bisa diubah');
             }
             $lawanJournal->code_group = $lawanCodeGroup;
-        
+
             $lawanJournal->save();
             $lawanJournal->updateIndexDate();
             $journal->lawan_code_group = $lawanCodeGroup;
@@ -417,10 +417,8 @@ class JournalController extends Controller
                 $join->on('last.code_group', '=', 'journals.code_group')
                     ->on('last.max_index_date', '=', 'journals.index_date');
             })->select('journals.code_group', 'journals.index_date', 'journals.amount_debet', 'journals.amount_kredit', 'journals.amount_saldo', 'journals.journal_number', 'journals.id', 'journals.created_at')->get()->keyBy('code_group');
-
             foreach ($journals as $journal) {
                 // $last = Journal::where('code_group', $journal->code_group)->where('index_date', '<', $journal->index_date)->orderBy('index_date', 'desc')->first();
-
                 $last = $lastJournal[$journal->code_group] ?? null;
                 if (!$last) {
                     $last =  new Journal;
@@ -455,12 +453,53 @@ class JournalController extends Controller
         }
     }
 
+    public static function cariProblemJournal2()
+    {
+        $date= getInput('date') ? getInput('date') : carbonDate()->format('Y-m-d');
+        $indexAwal = createCarbon($date)->startOfDay()->format('ymdHis00');
+        $indexAkhir = createCarbon($date)->addMonths(12)->format('ymdHis00');
+        // try{
+        $journals = Journal::whereBetween('index_date', [$indexAwal, $indexAkhir])
+            ->select(
+                'id',
+                'book_journal_id',
+                'code_group',
+                'index_date',
+                'journal_number',
+                DB::raw('CASE WHEN code_group < 200000 THEN amount_debet-amount_kredit ELSE amount_kredit-amount_debet END as amount_journal'),
+                'amount_saldo',
+                DB::raw('LAG(amount_saldo) OVER (PARTITION BY code_group ORDER BY index_date) as last_saldo'),
+            );
+
+        $datamin = Journal::fromSub($journals, 'journals')
+            ->whereRaw('last_saldo + amount_journal != amount_saldo')
+            ->select('*', DB::raw('amount_journal + last_saldo - amount_saldo as selisih'))
+            ->get()->groupBy('code_group')->map(function ($group) {
+                return collect($group)->min('index_date');;
+            })->values()->all();
+
+        $journals = Journal::whereIn('index_date', $datamin)->get();
+        return [
+            'status' => 1,
+            'msg' => $journals,
+            'index_date'=> $indexAwal.' - '.$indexAkhir
+        ];
+
+        // }
+        // catch(Throwable $e){
+        //     return [
+        //         'status'=>0,'msg'=> $e->getMessage()
+        //     ];
+        // }
+
+    }
+
     public function recalculateJournal($id)
     {
         $journal = Journal::find($id);
         if ($journal) {
             return $journal->recalculateJournal();
-        }else{
+        } else {
             return [
                 'status' => 0,
                 'msg' => 'Journal tidak ditemukan'
@@ -484,8 +523,8 @@ class JournalController extends Controller
         $isBackDate = $request->input('is_backdate') ?? null;
         if ($isBackDate === null)
             $isBackDate = $dateDiff > 30 ? 1 : 0;
-        $time= microtime(true);
-        CustomLogger::log('invoicing','info','=== mulai buat jurnal');
+        $time = microtime(true);
+        CustomLogger::log('invoicing', 'info', '=== mulai buat jurnal');
         $key = JournalKey::orderBy('id', 'desc')->first();
         $isLockIntern = 0;
         if ($lockManager == null) {
@@ -533,14 +572,14 @@ class JournalController extends Controller
                 ->first();
             $count = $lastJournalNumber ? intval(explode('-', $lastJournalNumber->journal_number)[2]) + 1 : 1;
             $theJournalNumber = sprintf("%s-%06d", $kodeType, $count);
-            CustomLogger::log('invoicing','info','jurnal-perisiapan create jurnal. time: '.(microtime(true) - $time).' detik');
+            CustomLogger::log('invoicing', 'info', 'jurnal-perisiapan create jurnal. time: ' . (microtime(true) - $time) . ' detik');
             $allLocks = [];
             $allJournals = [];
             foreach ($debets as $debet) {
                 $st = Journal::generateJournal(new Request([
                     'journal_number' => $theJournalNumber,
                     'code_group' => $debet['code_group'],
-                    'lawan_code_group'=> collect($kredits)->where('amount', $debet['amount'])->first()['code_group'] ?? null,
+                    'lawan_code_group' => collect($kredits)->where('amount', $debet['amount'])->first()['code_group'] ?? null,
                     'description' => $debet['description'],
                     'amount_debet' => floatval($debet['amount']),
                     'amount_kredit' => 0,
@@ -572,7 +611,7 @@ class JournalController extends Controller
                 $st = Journal::generateJournal(new Request([
                     'journal_number' => $theJournalNumber,
                     'code_group' => $kredit['code_group'],
-                    'lawan_code_group'=> collect($debets)->where('amount', $kredit['amount'])->first()['code_group'] ?? null,
+                    'lawan_code_group' => collect($debets)->where('amount', $kredit['amount'])->first()['code_group'] ?? null,
                     'description' => $kredit['description'],
                     'amount_kredit' => floatval($kredit['amount']),
                     'amount_debet' => 0,
@@ -601,26 +640,26 @@ class JournalController extends Controller
                 }
                 $allJournals[] = $st['msg'];
             }
-            CustomLogger::log('invoicing','info','jurnal- selesai buat jurnal. time: '.(microtime(true) - $time).' detik');
+            CustomLogger::log('invoicing', 'info', 'jurnal- selesai buat jurnal. time: ' . (microtime(true) - $time) . ' detik');
             foreach ($allJournals as $journal) {
                 $journal->updateLawanCode();
-                CustomLogger::log('invoicing','info','jurnal- update lawan code '.$journal->code_group.'. time: '.(microtime(true) - $time).' detik');
-                
+                CustomLogger::log('invoicing', 'info', 'jurnal- update lawan code ' . $journal->code_group . '. time: ' . (microtime(true) - $time) . ' detik');
+
                 $st = $journal->createDetailKartuInvoice();
                 if ($st['status'] == 0) {
                     throw new \Exception('gagal membuat detail kartu invoice: ' . $st['msg']);
                 }
-                CustomLogger::log('invoicing','info','jurnal- selesai membuat detail kartu invoice '.$journal->code_group.'. time: '.(microtime(true) - $time).' detik');
-                
-                if ($isBackDate == 1 && $lockManager->getModeNoRecalculate()== false) {
+                CustomLogger::log('invoicing', 'info', 'jurnal- selesai membuat detail kartu invoice ' . $journal->code_group . '. time: ' . (microtime(true) - $time) . ' detik');
+
+                if ($isBackDate == 1 && $lockManager->getModeNoRecalculate() == false) {
                     $journal->calculateJournalNext(false);
                 }
-                CustomLogger::log('invoicing','info','jurnal- selesai recalculate journal '.$journal->code_group.'. time: '.(microtime(true) - $time).' detik');
+                CustomLogger::log('invoicing', 'info', 'jurnal- selesai recalculate journal ' . $journal->code_group . '. time: ' . (microtime(true) - $time) . ' detik');
             }
             if ($isLockIntern == 1) {
                 $lockManager->releaseAll();
             }
-            CustomLogger::log('invoicing','info','jurnal- selesai semua proses transaksi. time: '.(microtime(true) - $time).' detik ======');
+            CustomLogger::log('invoicing', 'info', 'jurnal- selesai semua proses transaksi. time: ' . (microtime(true) - $time) . ' detik ======');
             return [
                 'status' => 1,
                 'msg' => 'success',
@@ -1943,13 +1982,11 @@ class JournalController extends Controller
             $tableName = "kartu_stocks";
             $saldoKartu = KartuStock::getTotalSaldoRupiah($startDate, true);
             $saldoJournal = KartuStock::getTotalJournal($startDate);
-        }
-        else if($model=='KartuInTransit'){
-            $tableName= 'kartu_in_transits';
+        } else if ($model == 'KartuInTransit') {
+            $tableName = 'kartu_in_transits';
             $saldoKartu = KartuInTransit::getTotalSaldoRupiah($startDate, true);
             $saldoJournal = KartuInTransit::getTotalJournal($startDate);
-        }
-        else if ($model == 'KartuBDP') {
+        } else if ($model == 'KartuBDP') {
             $tableName = "kartu_bdps";
             $saldoKartu = KartuBDP::getTotalSaldoRupiah($startDate, true);
             $saldoJournal = KartuBDP::getTotalJournal($startDate);

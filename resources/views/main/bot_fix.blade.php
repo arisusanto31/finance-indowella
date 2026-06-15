@@ -57,28 +57,7 @@
         var allNextIndex = [];
         var originIndex = null;
 
-        function recalculate(id) {
-            $.ajax({
-                url: '{{ url("admin/recalculate-journal") }}/' + id,
-                method: 'get',
-                success: function(res) {
-                    console.log(res);
-                    if (res.status == 1) {
-                        $('#status' + id).html('<i class="fas fa-check colorgreen"></i> beres');
-                        // $('#indexdate').val(res.journal.index_date);
-                        allNextIndex.push(res.journal.index_date);
-                        startSearch();
-                    } else {
-                        $('#status' + id).html('<i class="fas fa-close colorred"></i> ajur');
 
-                        swal('oppss', 'something error');
-                    }
-                },
-                error: function(res) {
-                    swal('opps', 'something error');
-                }
-            });
-        }
 
         function startSearchKartu() {
             model = $('#model').val();
@@ -91,8 +70,8 @@
                     console.log(res);
                     if (res.status == 1) {
                         html = "";
-                        if(model == 'KartuStock' || model == 'KartuBDP' || model == 'KartuBahanJadi') {
-                        html = `
+                        if (model == 'KartuStock' || model == 'KartuBDP' || model == 'KartuBahanJadi') {
+                            html = `
                             <table class="table table-bordered">
                                 <thead>
                                     <tr>
@@ -113,7 +92,7 @@
                                 </tbody>
                             </table>
                         `;
-                        }else{
+                        } else {
                             html = `
                             <table class="table table-bordered">
                                 <thead>
@@ -135,8 +114,8 @@
                         $('#container-output-kartu').html(html);
                         html = "";
                         res.msg.forEach(function(data) {
-                            if(model == 'KartuStock' || model == 'KartuBDP' || model == 'KartuBahanJadi') {
-                            html += `
+                            if (model == 'KartuStock' || model == 'KartuBDP' || model == 'KartuBahanJadi') {
+                                html += `
                                 <tr>
                                     <td>${data.id}</td>
                                     <td>${data.index_date}</td>
@@ -153,8 +132,7 @@
                                     </td>
                                 </tr>
                             `;
-                            }
-                            else{
+                            } else {
                                 html += `
                                 <tr>
                                     <td>${data.id}</td>
@@ -176,7 +154,7 @@
                         for (i = 0; i < res.msg.length; i++) {
                             data = res.msg[i];
                             await fixProblemKartu(data.id, model);
-                            
+
                         }
 
                     } else {
@@ -189,67 +167,95 @@
             });
         }
 
-        function startSearch() {
+        async function startSearch() {
             loading(1);
             allNextIndex = [];
             originIndex = $('#indexdate').val();
-            $.ajax({
-                url: '{{ url("admin/cari-problem-journal") }}?index_date=' + $('#indexdate').val(),
+            res = await $.ajax({
+                url: '{{ url("admin/cari-problem-journal2") }}?date=' + $('#indexdate').val(),
                 method: 'get',
-                success: function(res) {
-                    loading(0);
-                    console.log(res);
-                    if (res.status == 1) {
-                        id = res.last.id;
-                        html = "";
-                        html += '<div class="row">';
-                        html += '   <div class="col-xs-4">';
-                        html += '        <p><i class="fas fa-circle" ></i> ' + res.last.journal_number +
-                            ' code:' +
-                            res.last.code_group + '</p>';
-                        html += '        <p class="ml-10">' + res.last.index_date + ' [' + res.last.id + ']</p>';
-                        html += '        <p class="ml-10">' + res.last.description + '</p>';
-
-                        // html += '        <p class="ml-10">debet: ' + res.last.amount_debet + '</p>';
-                        // html += '        <p class="ml-10">kredit: ' + res.last.amount_kredit + '</p>';
-                        html += '        <p class="ml-10">saldo: ' + res.last.amount_saldo + '</p>';
-                        html += '   </div>';
-                        html += '   <div class="col-xs-4" >';
-                        html += '        <p><i class="fas fa-circle" ></i> ' + res.now.journal_number +
-                            ' code:' +
-                            res.now.code_group + '</p>';
-                        html += '        <p class="ml-10">' + res.now.index_date + '[' + res.now.id + ']</p>';
-                        html += '        <p class="ml-10">' + res.now.description + '</p>';
-                        html += '        <p class="ml-10">debet: ' + res.last.amount_debet + '</p>';
-                        html += '        <p class="ml-10">kredit: ' + res.last.amount_kredit + '</p>';
-                        html += '        <p class="ml-10">saldo: ' + res.last.amount_saldo + '</p>';
-                        html += '   </div>';
-                        html += '   <div class="col-xs-1">'
-                        html += '        <p id="status' + res.now.id + '"> <i class="fas fa-spinner fa-spin"></i> fixing </p>';
-                        html += '   </div>';
-                        html += '   <div class="clearfix"  style="border-bottom:1px solid black"></div>';
-                        html += '</div>';
-                        $('#container-output').append(html);
-                        setTimeout(function() {
-                            recalculate(res.now.id);
-                        }, 100);
-
-                    } else {
-                        if (allNextIndex.length == 0) {
-                            loading(0);
-                            swalInfo('success', 'sudah tidak ada problem', 'success');
-                        } else {
-                            index = allNextIndex.shift();
-                            $('#indexdate').val(index);
-                            setTimeout(startSearch, 100);
-                        }
-                    }
-                },
-                error: function(res) {
-                    loading(0);
-                    Swal.fire('opps', 'something error','error');
-                }
             });
+
+            console.log('start sarch', res);
+            loading(0);
+            console.log(res);
+            if (res.status == 1) {
+             
+                html = "";
+                html += `
+                            <div class="mb-2 text-sm font-bold">index date : ${res.index_date}</div>
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>code group</th>
+                                        <th>index date</th>
+                                        <th>description</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="problem-journal-body">
+                               
+                        `;
+                res.msg.forEach(function(journal) {
+                    html += `
+                                <tr>
+                                    <td>${journal.code_group}</td>
+                                    <td>${journal.index_date}</td>
+                                    <td>${journal.description}</td>
+                                    <td id="status${journal.id}"></td>
+                                </tr>
+                            `;
+                });
+                html += `
+                                </tbody>
+                            </table>
+                        `;
+                $('#container-output').html(html);
+                keys = Object.keys(res.msg);
+                console.log('proses ',keys);
+                for (const i of keys) {
+                    console.log('recalculate iterasi - journal id  ',i, res.msg[i].id);
+                    journal = res.msg[i];
+
+                    $('#status' + journal.id).html('<i class="fas fa-spinner fa-spin"></i> recalculating');
+                    d = await recalculate(journal.id);
+                    if (d.status == 1) {
+                        $('#status' + journal.id).html('<i class="fas fa-check colorgreen"></i> beres');
+                    } else {
+                        $('#status' + journal.id).html('<i class="fas fa-close colorred"></i> ajur');
+                        swal('oppss', 'something error');
+                    }
+                }
+
+            } else {
+
+            }
+        }
+
+        function recalculate(id) {
+
+            return new Promise(function(resolve, reject) {
+                $.ajax({
+                    url: '{{ url("admin/recalculate-journal") }}/' + id,
+                    method: 'get',
+                    success: function(res) {
+                        console.log(res);
+                        if (res.status == 1) {
+                         
+                           
+                            resolve(res);
+                        } else {
+                          
+                            reject(res);
+                        }
+                    },
+                    error: function(res) {
+
+                        reject(res);
+                    }
+                });
+            });
+
         }
 
         function fixProblemKartu(id, model) {
@@ -270,13 +276,13 @@
                             resolve(res);
                         } else {
                             $('#status-kartu-' + id).html('<i class="fas fa-close colorred"></i> ajur');
-                            Swal.fire('oppss', 'something error','error');
+                            Swal.fire('oppss', 'something error', 'error');
                             reject(res);
                         }
                     },
                     error: function(res) {
                         $('#status-kartu-' + id).html('<i class="fas fa-close colorred"></i> ajur');
-                        Swal.fire('opps', 'something error','error');
+                        Swal.fire('opps', 'something error', 'error');
                         reject(res);
                     }
                 });

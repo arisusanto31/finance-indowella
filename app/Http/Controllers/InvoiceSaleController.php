@@ -592,6 +592,7 @@ class InvoiceSaleController extends Controller
         $description = $request->input('description');
         $invoicePackID = $request->input('invoice_pack_id');
         $date = $request->input('date');
+        $salesOrderNumber = $request->input('sales_order_number');
         $invoicePack = InvoicePack::find($invoicePackID);
         $invoicePackNumber = $invoicePack ? $invoicePack->invoice_number : '';
 
@@ -610,6 +611,7 @@ class InvoiceSaleController extends Controller
                 'date' => $date,
                 'toko_id' => $tokoID,
                 'description' => $description,
+                'sales_order_number'=> $salesOrderNumber
             ]), false, $lockManager);
             if ($kartu['status'] == 0) {
                 throw new \Exception($kartu['msg']);

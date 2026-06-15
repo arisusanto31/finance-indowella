@@ -7,6 +7,7 @@ use App\Services\LockManager;
 use App\Traits\HasModelDetailKartuInvoice;
 use CustomLogger;
 use Illuminate\Contracts\Cache\LockTimeoutException;
+use Illuminate\Contracts\Database\Query\Expression;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -71,12 +72,22 @@ class Journal extends Model
         });
         static::addGlobalScope('journal', function ($query) {
             $from = $query->getQuery()->from ?? 'journals'; // untuk dukung alias `j` kalau pakai from('journals as j')
-            if (Str::contains($from, ' as ')) {
-                [$table, $alias] = explode(' as ', $from);
-                $alias = trim($alias);
+            // if (Str::contains($from, ' as ')) {
+            //     [$table, $alias] = explode(' as ', $from);
+            //     $alias = trim($alias);
+            // } else {
+            //     $alias = $from;
+            // }
+              if ($from instanceof Expression) {
+                // fromSub biasanya alias-nya ada di SQL: (...) as `journals`
+                $alias = $query->getModel()->getTable(); // default: journals
+            } elseif (is_string($from) && Str::contains(strtolower($from), ' as ')) {
+                [$table, $alias] = preg_split('/\s+as\s+/i', $from);
+                $alias = trim($alias, '` ');
             } else {
-                $alias = $from;
+                $alias = trim((string) $from, '` ');
             }
+
 
             $query->where(function ($q) use ($alias) {
                 $q->whereNull("{$alias}.book_journal_id")
@@ -376,7 +387,7 @@ class Journal extends Model
         return $this;
     }
 
-    public function recalculateJournal($isLock = true)
+    public function recalculateJournal()
     {
         $thejournal = Journal::find($this->id);
         $tag = $this->tag;
@@ -395,7 +406,7 @@ class Journal extends Model
                 'msg' => 'tidak bisa recalculate journal opening balance'
             ];
         }
-        return $thejournal->calculateJournalNext($isLock);
+        return $thejournal->calculateJournalNext(false);
     }
 
     public function calculateJournalNext($isLock = true)

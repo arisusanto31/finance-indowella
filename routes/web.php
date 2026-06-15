@@ -80,6 +80,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
     Route::get('recalculate-journal/{id}', [JournalController::class, 'recalculateJournal'])->name('recalculate-journal');
     Route::get('bot-fix-journal', [JournalController::class, 'botFixJournal'])->name('bot-fix-journal');
     Route::get('cari-problem-journal', [JournalController::class, 'cariProblemJournal']);
+    Route::get('cari-problem-journal2', [JournalController::class, 'cariProblemJournal2']);
     Route::get('cari-problem-kartu', [JournalController::class, 'cariProblemKartu']);
     Route::post('fix-problem-kartu', [JournalController::class, 'fixProblemKartu']);
 

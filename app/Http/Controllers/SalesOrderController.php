@@ -1178,7 +1178,7 @@ class SalesOrderController extends Controller
         CustomLogger::log('invoicing',"info","create all sub invoice . proces time : ".(microtime(true)-$time)." seconds");
 
         $invoiceNumber = $st['pack']->invoice_number;
-        $amount = $st['pack']->total_price;
+        $amount = $st['pack']->total_price + $st['pack']->total_ppn_k;
         $date = $salesOrder->created_at;
         $toko = Toko::find($salesOrder->toko_id);
         if (!$toko) {
