@@ -434,14 +434,12 @@ class Journal extends Model
                 } else { //passiva
                     $journal->amount_saldo = round(($lastSaldo - $journal->amount_debet + $journal->amount_kredit), 2);
                 }
-                // $journal->save();
-                // $firsttag = explode(' ', $journal->tag)[0] ?? '';
-                // if ($firsttag != 'opening') {
+              
                     $dataUpdate[] = [
                         'id' => $journal->id,
                         'amount_saldo' => $journal->amount_saldo
                     ];
-                // }
+             
                 $lastSaldo = $journal->amount_saldo;
                 $newdata[] = collect($journal)->only(['id', 'description', 'index_date', 'amount_saldo', 'amount_debet', 'amount_kredit']);
             }

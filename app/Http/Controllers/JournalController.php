@@ -453,11 +453,20 @@ class JournalController extends Controller
         }
     }
 
-    public static function cariProblemJournal2()
+    public static function cariProblemJournal2($indexAwal = null, $indexAkhir = null)
     {
-        $date= getInput('date') ? getInput('date') : carbonDate()->format('Y-m-d');
-        $indexAwal = createCarbon($date)->startOfDay()->format('ymdHis00');
-        $indexAkhir = createCarbon($date)->addMonths(12)->format('ymdHis00');
+        if ($indexAwal == null && $indexAkhir == null) {
+            $date = getInput('date') ? getInput('date') : carbonDate()->format('Y-m-d');
+            $indexAwal = createCarbon($date)->startOfDay()->format('ymdHis00');
+            $indexAkhir = createCarbon($date)->addMonths(12)->format('ymdHis00');
+        } else {
+            if ($indexAwal == null || $indexAkhir == null) {
+                return [
+                    'status' => 0,
+                    'msg' => 'index awal dan akhir harus diisi berdua'
+                ];
+            }
+        }
         // try{
         $journals = Journal::whereBetween('index_date', [$indexAwal, $indexAkhir])
             ->select(
@@ -482,7 +491,7 @@ class JournalController extends Controller
         return [
             'status' => 1,
             'msg' => $journals,
-            'index_date'=> $indexAwal.' - '.$indexAkhir
+            'index_date' => $indexAwal . ' - ' . $indexAkhir
         ];
 
         // }
@@ -1663,11 +1672,17 @@ class JournalController extends Controller
         }
     }
 
-    public function cariProblemKartu()
+    public static function cariProblemKartu($model = null, $indexDate = null)
     {
-        $model = getInput('model');
-        $indexDate = getInput('index_date');
-        $indexDate = createCarbon($indexDate)->format('ymdHis000');
+
+        if ($model == null) {
+            $model = getInput('model');
+        }
+        if ($indexDate == null) {
+            $indexDate = getInput('index_date');
+
+            $indexDate = createCarbon($indexDate)->format('ymdHis000');
+        }
         $stocks = Stock::pluck('name', 'id')->all();
         if ($model == 'KartuStock' || $model == 'KartuBDP' || $model == 'KartuBahanJadi') {
             $model = 'App\\Models\\' . $model;
@@ -1841,7 +1856,7 @@ class JournalController extends Controller
         ];
     }
 
-    public function fixProblemKartu(Request $request)
+    public static function fixProblemKartu(Request $request)
     {
 
         try {
