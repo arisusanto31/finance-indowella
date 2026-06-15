@@ -475,10 +475,13 @@ class JournalController extends Controller
             ->whereRaw('last_saldo + amount_journal != amount_saldo')
             ->select('*', DB::raw('amount_journal + last_saldo - amount_saldo as selisih'))
             ->get()->groupBy('code_group')->map(function ($group) {
-                return collect($group)->min('index_date');;
+                return collect($group)->sortBy('index_date')->first();
             })->values()->all();
 
-        $journals = Journal::whereIn('index_date', $datamin)->get();
+        $journals = Journal::joinSub($datamin,'datamin',function($join){
+            $join->on('journals.code_group','=','datamin.code_group')
+                ->on('journals.index_date','=','datamin.index_date');
+        })->select('journals.*')->get();
         return [
             'status' => 1,
             'msg' => $journals,
