@@ -835,19 +835,17 @@ class JournalController extends Controller
             ]
         ];
     }
-    public static function destroy($id,$userid=null)
+    public static function destroy($id,$userid=null,$useTransaction=true)
     {
-
-        DB::beginTransaction();
+        if($useTransaction){
+            DB::beginTransaction();
+        }
         try {
             $journal = Journal::find($id);
             $key = JournalKey::orderBy('id', 'desc')->first();
             if ($key)
                 if ($journal->created_at < $key->key_at) {
-                    return [
-                        'status' => 0,
-                        'msg' => 'jurnal sudah terkunci'
-                    ];
+                    throw new \Exception('jurnal sudah terkunci');
                 }
             if($userid==null){
                 $user = user();
@@ -855,10 +853,7 @@ class JournalController extends Controller
                 $user= User::find($userid);
             }
             if (!$user->can('delete_data_journal')) {
-                return [
-                    'status' => 0,
-                    'msg' => 'anda tidak memiliki hak akses untuk menghapus jurnal ini'
-                ];
+                throw new \Exception('anda tidak memiliki hak akses untuk menghapus jurnal ini');
             }
             $journals = Journal::where('journal_number', $journal->journal_number)->get();
             // if (date_diff(createCarbon($journal->created_at), carbonDate())->days > 3) {
@@ -897,10 +892,14 @@ class JournalController extends Controller
             // }
             // }
 
-            DB::commit();
+            if($useTransaction){
+                DB::commit();
+            }
             return ['status' => 1, 'msg' => 'success'];
         } catch (\Throwable $e) {
-            DB::rollBack();
+            if($useTransaction){
+                DB::rollBack();
+            }
             return [
                 'status' => 0,
                 'msg' => $e->getMessage()

@@ -378,7 +378,7 @@ class SalesOrder extends Model
     public function lunaskanDagang()
     {
 
-        DB::BeginTransaction();
+        // DB::BeginTransaction();
         try {
             $invoicePack = InvoicePack::where('sales_order_id', $this->id)->first();
             if (!$invoicePack) {
@@ -423,13 +423,13 @@ class SalesOrder extends Model
                 return $st;
             }
             $this->updateStatus();
-            DB::commit();
+            // DB::commit();
             return [
                 'status' => 1,
                 'msg' => 'Sales order ' . $this->sales_order_number . ' berhasil dilunaskan'
             ];
         } catch (Throwable $th) {
-            DB::rollBack();
+            // DB::rollBack();
             return [
                 'status' => 0,
                 'msg' => $th->getMessage()
