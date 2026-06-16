@@ -4,6 +4,7 @@ namespace App\Traits;
 
 use App\Models\DetailKartuInvoice;
 use App\Models\InvoicePack;
+use App\Models\InvoiceSaleDetail;
 use App\Models\Journal;
 use App\Models\SalesOrder;
 use Illuminate\Http\Request;
@@ -42,6 +43,15 @@ trait HasModelDetailKartuInvoice
             $invoiceNumber = $kartu->invoice_pack_number;
             $invoice = InvoicePack::where('invoice_number', $invoiceNumber)->first();
             $invID = $invoice ? $invoice->id : null;
+            if($invoice->reference_model == InvoiceSaleDetail::class){
+                if(!$salesOrderNumber){
+                    $salesOrder= SalesOrder::find($invoice->sales_order_id);
+                    if($salesOrder){
+                        $saleOrderNumber=$salesOrder->sales_order_number;
+                        $SOID=$salesOrder->id;
+                    }
+                }
+            }
         }
 
         $dks = DetailKartuInvoice::storeData(new Request([

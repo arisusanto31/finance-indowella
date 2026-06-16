@@ -296,13 +296,13 @@ class SalesOrder extends Model
         $this->status_delivery = "draft";
         $this->status = "draft";
 
-
+        $totalBayar = $this->total_price + $this->total_ppn_k;
         if (array_key_exists('Uang Muka Penjualan', $total)) {
             $totalDP = $total['Uang Muka Penjualan'];
-            if ($totalDP >= $this->total_price) {
+            if ($totalDP >= $totalBayar) {
                 $this->status_payment = "DP LUNAS";
             } else if ($totalDP > 0) {
-                $prosen = round($totalDP / $this->total_price * 100);
+                $prosen = round($totalDP / $totalBayar * 100);
                 $this->status_payment = "DP " . $prosen . '%';
             }
             $this->status = "DP";

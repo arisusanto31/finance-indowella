@@ -553,6 +553,7 @@ class InvoiceSaleController extends Controller
                     'toko_id' => $invoicePack->toko_id,
                     'description' => 'PPN Keluaran penjualan ' . $invoicePack->invoice_number,
                     'invoice_pack_id' => $invoicePack->id,
+                    'sales_order_number' => $salesOrderNumber,
                     'date' => $date
                 ]), $lockManager);
                 CustomLogger::log('invoicing', "info", "create kartu ppn keluaran . proces time : " . (microtime(true) - $timestart) . " seconds");

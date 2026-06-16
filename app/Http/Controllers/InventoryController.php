@@ -196,8 +196,6 @@ class InventoryController extends Controller
 
     public function storeKartuInventory(Request $request)
     {
-
-
         try {
             $st = KartuInventory::createKartu($request);
             if ($st['status'] == 0) {
