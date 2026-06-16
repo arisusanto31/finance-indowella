@@ -37,4 +37,30 @@ class BackgroundProcess extends Model
             });
         });
     }
+
+    public static function make($bookid,$monitoring_url, $description_process, $total_task)
+    {
+        $backgroundProcess = BackgroundProcess::where('monitoring_url', 'admin/invoice/sales-order')
+            ->where('book_journal_id', $bookid)
+            ->where('description_process', $description_process)
+            ->first();
+        if (!$backgroundProcess) {
+            $backgroundProcess = BackgroundProcess::create([
+                'monitoring_url' => $monitoring_url,
+                'total_task' => $total_task,
+                'description_process' => $description_process,
+                'status' => 'processing',
+                'book_journal_id' => $bookid,
+            ]);
+        } else {
+            $backgroundProcess->success_task = 0;
+            $backgroundProcess->failed_task = 0;
+            $backgroundProcess->progress = 0;
+            $backgroundProcess->total_task = $total_task;
+            $backgroundProcess->status = 'processing';
+            $backgroundProcess->save();
+        }
+        $theBG = BackgroundProcess::find($backgroundProcess->id);
+        return $theBG;
+    }
 }

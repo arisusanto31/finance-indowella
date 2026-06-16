@@ -891,10 +891,10 @@ class JournalController extends Controller
                 }
                 $j->delete();
             }
-            foreach ($lj as $j) {
-                if ($j)
-                    $j->recalculateJournal();
-            }
+            // foreach ($lj as $j) {
+            //     if ($j)
+            //         $j->recalculateJournal();
+            // }
             // }
 
             DB::commit();

@@ -72,9 +72,6 @@ class InvoicingProcess extends Command
                     $backgroundProcess->status = 'processing';
                     $backgroundProcess->save();
                 }
-
-
-
                 $theBG = BackgroundProcess::find($backgroundProcess->id);
                 $iProgress = 0;
                 $successTask = 0;
