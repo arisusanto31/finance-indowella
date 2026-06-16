@@ -34,7 +34,7 @@ class RepairLinkPPNKeluaran extends Command
         $keluaran = DetailKartuInvoice::from('detail_kartu_invoices as di')
             ->join('invoice_packs as ip', 'ip.id', '=', 'di.invoice_pack_id')
             ->where('ip.reference_model', InvoiceSaleDetail::class)
-            ->whereNull('ip.sales_order_id')
+            ->whereNull('di.sales_order_id')
             ->select('di.*', 'ip.sales_order_id as real_sales_order_id')
             ->get();
         foreach ($keluaran as $k) {
