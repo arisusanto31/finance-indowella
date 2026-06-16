@@ -49,7 +49,7 @@ class repairPembayaranJob implements ShouldQueue
             $journal = Journal::where('description', 'pelunasan piutang dari invoice ' . $invoice->invoice_number)->first();
             if ($journal) {
 
-                $st = JournalController::destroy($journal->id, 1,false);
+                $st = JournalController::destroy($journal->id, 1);
                 if ($st['status'] == 1) {
                     info('Pembayaran invoice ' . $invoice->invoice_number . ' berhasil dibatalkan');
                 } else {
