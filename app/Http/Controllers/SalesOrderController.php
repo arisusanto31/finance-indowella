@@ -24,6 +24,7 @@ use Throwable;
 use App\Models\InvoiceSaleDetail;
 use App\Models\KartuBDP;
 use App\Models\KartuStock;
+use App\Models\LinkReferenceCashKind;
 use App\Models\LinkTokoParent;
 use App\Models\ManufStock;
 use App\Models\ManufToko;
@@ -1108,106 +1109,126 @@ class SalesOrderController extends Controller
 
     public static function processDagang(Request $request)
     {
-        $time=microtime(true);
+        $time = microtime(true);
 
-        //tanpa BDP, bahan jadi, langsung invoice dari barang dagang
-        $id = $request->input('id');
-        $modeNoRecalculate=true;
+        try {
+            DB::beginTransaction();
+            //tanpa BDP, bahan jadi, langsung invoice dari barang dagang
+            $id = $request->input('id');
+            $modeNoRecalculate = true;
 
-        $salesOrder = SalesOrder::find($id);
-        if (!$salesOrder) {
-            return [
-                'status' => 0,
-                'msg' => 'sales order ' . $id . ' tidak ditemukan'
-            ];
-        }
-        if (!$salesOrder->is_final) {
-            return [
-                'status' => 0,
-                'msg' => 'Sales order ' . $id . ' belum dalam status final'
-            ];
-        }
-        $salesOrderNumber = $salesOrder->sales_order_number;
+            $salesOrder = SalesOrder::find($id);
+            if (!$salesOrder) {
+                return [
+                    'status' => 0,
+                    'msg' => 'sales order ' . $id . ' tidak ditemukan'
+                ];
+            }
+            if (!$salesOrder->is_final) {
+                return [
+                    'status' => 0,
+                    'msg' => 'Sales order ' . $id . ' belum dalam status final'
+                ];
+            }
+            $salesOrderNumber = $salesOrder->sales_order_number;
 
-        //cek dulu aja jangan jangan udah difinalkan
-        $existingInv = InvoiceSaleDetail::where('sales_order_number', $salesOrderNumber)->count();
-        if ($existingInv > 0) {
-            return [
-                'status' => 0,
-                'msg' => 'sales order ' . $salesOrderNumber . ' sudah memiliki invoice. proses secara manual jika ingin memprosesnya'
-            ];
-        }
-        $data = [];
+            //cek dulu aja jangan jangan udah difinalkan
+            $existingInv = InvoiceSaleDetail::where('sales_order_number', $salesOrderNumber)->count();
+            if ($existingInv > 0) {
+                return [
+                    'status' => 0,
+                    'msg' => 'sales order ' . $salesOrderNumber . ' sudah memiliki invoice. proses secara manual jika ingin memprosesnya'
+                ];
+            }
+            $data = [];
 
-        $details = $salesOrder->details;
-        foreach ($details as $detail) {
-            $data[] = [
-                'stock_id' => $detail->stock_id,
-                'quantity' => $detail->quantity,
-                'unit' => $detail->unit,
-                'sales_detail_id' => $detail->id,
+            $details = $salesOrder->details;
+            foreach ($details as $detail) {
+                $data[] = [
+                    'stock_id' => $detail->stock_id,
+                    'quantity' => $detail->quantity,
+                    'unit' => $detail->unit,
+                    'sales_detail_id' => $detail->id,
+                    'sales_order_number' => $salesOrderNumber,
+                    'sales_order_id' => $salesOrder->id,
+                    'code_group_penjualan' => 401000,
+                    'code_group_persediaan' => 140001,
+                    'code_group_piutang' => 120001,
+                    'date' => $detail->date,
+                    'custom_stock_name' => null
+                ];
+            }
+            $dataFix = [
                 'sales_order_number' => $salesOrderNumber,
                 'sales_order_id' => $salesOrder->id,
-                'code_group_penjualan' => 401000,
-                'code_group_persediaan' => 140001,
-                'code_group_piutang' => 120001,
-                'date' => $detail->date,
-                'custom_stock_name' => null
+                'stock_id' => collect($data)->pluck('stock_id')->all(),
+                'quantity' => collect($data)->pluck('quantity')->all(),
+                'unit' => collect($data)->pluck('unit')->all(),
+                'sales_detail_id' => collect($data)->pluck('sales_detail_id')->all(),
+                'code_group_penjualan' => collect($data)->pluck('code_group_penjualan')->all(),
+                'code_group_persediaan' => collect($data)->pluck('code_group_persediaan')->all(),
+                'code_group_piutang' => collect($data)->pluck('code_group_piutang')->all(),
+                'date' => $salesOrder->created_at,
+                'custom_stock_name' => collect($data)->pluck('custom_stock_name')->all()
             ];
-        }
-        $dataFix = [
-            'sales_order_number' => $salesOrderNumber,
-            'sales_order_id' => $salesOrder->id,
-            'stock_id' => collect($data)->pluck('stock_id')->all(),
-            'quantity' => collect($data)->pluck('quantity')->all(),
-            'unit' => collect($data)->pluck('unit')->all(),
-            'sales_detail_id' => collect($data)->pluck('sales_detail_id')->all(),
-            'code_group_penjualan' => collect($data)->pluck('code_group_penjualan')->all(),
-            'code_group_persediaan' => collect($data)->pluck('code_group_persediaan')->all(),
-            'code_group_piutang' => collect($data)->pluck('code_group_piutang')->all(),
-            'date' => $salesOrder->created_at,
-            'custom_stock_name' => collect($data)->pluck('custom_stock_name')->all()
-        ];
 
-        CustomLogger::log('invoicing',"info","persiapan proses . proces time : ".(microtime(true)-$time)." seconds");
+            CustomLogger::log('invoicing', "info", "persiapan proses . proces time : " . (microtime(true) - $time) . " seconds");
 
-        $st = InvoiceSaleController::createInvoices(new Request($dataFix),$time,$modeNoRecalculate);
-        if ($st['status'] == 0) {
-            return $st;
-        }
-        CustomLogger::log('invoicing',"info","create all sub invoice . proces time : ".(microtime(true)-$time)." seconds");
+            $st = InvoiceSaleController::createInvoices(new Request($dataFix), $time, $modeNoRecalculate, false);
+            if ($st['status'] == 0) {
+                return $st;
+            }
+            CustomLogger::log('invoicing', "info", "create all sub invoice . proces time : " . (microtime(true) - $time) . " seconds");
 
-        $invoiceNumber = $st['pack']->invoice_number;
-        $amount = $st['pack']->total_price + $st['pack']->total_ppn_k;
-        $date = $salesOrder->created_at;
-        $toko = Toko::find($salesOrder->toko_id);
-        if (!$toko) {
+            $invoiceNumber = $st['pack']->invoice_number;
+            $amount = $st['pack']->total_price + $st['pack']->total_ppn_k;
+            $date = $salesOrder->created_at;
+            $codeBayar = null;
+            if ($salesOrder->ref_akun_cash_kind_name) {
+                $link = LinkReferenceCashKind::where('cash_kind_name', $salesOrder->ref_akun_cash_kind_name)->first();
+                if ($link) {
+                    $codeBayar = $link->code_group;
+                }
+            } else {
+                $toko = Toko::find($salesOrder->toko_id);
+                if (!$toko) {
+                    return [
+                        'status' => 0,
+                        'msg' => 'Toko tidak ditemukan'
+                    ];
+                }
+                $codeBayar = $toko->default_code_group_kas;
+            }
+            if (!$codeBayar) {
+                throw new \Exception('Kode bayar tidak ditemukan untuk toko ' . $salesOrder->toko_id);
+            }
+            $codeGroupPiutang = 120001;
+            $st = InvoiceSaleController::submitBayarSalesInvoice(new Request([
+                'invoice_number' => $invoiceNumber,
+                'amount' => $amount,
+                'date' => $date,
+                'codegroup_bayar' => $codeBayar,
+                'codegroup_piutang' => $codeGroupPiutang,
+            ]), $modeNoRecalculate, false);
+            CustomLogger::log('invoicing', "info", "submit bayar sales invoice . proces time : " . (microtime(true) - $time) . " seconds");
+
+
+            if ($st['status'] == 0) {
+                return $st;
+            }
+            $salesOrder->updateStatus();
+            DB::commit();
             return [
-                'status' => 0,
-                'msg' => 'Toko tidak ditemukan'
+                'status' => 1,
+                'msg' => $salesOrder
             ];
+        } catch (Throwable $e) {
+            DB::rollBack();
+            Log::error('Error in processDagang: ' . $e->getMessage());
+            return ['status' => 0, 'msg' => $e->getMessage()];
         }
-        $codeBayar = $toko->default_code_group_kas;
-        $codeGroupPiutang = 120001;
-        $st = InvoiceSaleController::submitBayarSalesInvoice(new Request([
-            'invoice_number' => $invoiceNumber,
-            'amount' => $amount,
-            'date' => $date,
-            'codegroup_bayar' => $codeBayar,
-            'codegroup_piutang' => $codeGroupPiutang,
-        ]),$modeNoRecalculate);
-        CustomLogger::log('invoicing',"info","submit bayar sales invoice . proces time : ".(microtime(true)-$time)." seconds");
-
-
-        if ($st['status'] == 0) {
-            return $st;
-        }
-        $salesOrder->updateStatus();
-        return [
-            'status' => 1,
-            'msg' => $salesOrder
-        ];
     }
+
 
     function destroy($number)
     {

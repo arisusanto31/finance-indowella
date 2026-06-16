@@ -2,8 +2,12 @@
 
 namespace App\Models;
 
+use App\Http\Controllers\InvoiceSaleController;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Throwable;
 
 class SalesOrder extends Model
 {
@@ -164,12 +168,12 @@ class SalesOrder extends Model
                 $detail->save();
             }
             $so->updateReadyStock();
-           return [
+            return [
                 'status' => 1,
                 'msg' => 'sales order ' . $so->sales_order_number . ' updated to ready stock at ' . $themaxDate
             ];
         } else {
-           return [
+            return [
                 'status' => 0,
                 'msg' => 'sales order ' . $so->sales_order_number . ' is not ready stock but no max date found'
             ];
@@ -369,5 +373,67 @@ class SalesOrder extends Model
             return $number;
         }
         return $this->sales_order_number;
+    }
+
+    public function lunaskanDagang()
+    {
+
+        DB::BeginTransaction();
+        try {
+            $invoicePack = InvoicePack::where('sales_order_id', $this->id)->first();
+            if (!$invoicePack) {
+                return [
+                    'status' => 0,
+                    'msg' => 'Invoice pack tidak ditemukan'
+                ];
+            }
+            $invoiceNumber = $invoicePack->invoice_number;
+            $amount = $invoicePack->total_price + $invoicePack->total_ppn_k;
+            $date = $this->created_at;
+            $codeBayar = null;
+            if ($this->ref_akun_cash_kind_name) {
+                $link = LinkReferenceCashKind::where('cash_kind_name', $this->ref_akun_cash_kind_name)->first();
+                if ($link) {
+                    $codeBayar = $link->code_group;
+                }
+            } else {
+                $toko = Toko::find($this->toko_id);
+                if (!$toko) {
+                    return [
+                        'status' => 0,
+                        'msg' => 'Toko tidak ditemukan'
+                    ];
+                }
+                $codeBayar = $toko->default_code_group_kas;
+            }
+            if (!$codeBayar) {
+                throw new \Exception('Kode bayar tidak ditemukan untuk toko ' . $this->toko_id);
+            }
+            $codeGroupPiutang = 120001;
+            $st = InvoiceSaleController::submitBayarSalesInvoice(new Request([
+                'invoice_number' => $invoiceNumber,
+                'amount' => $amount,
+                'date' => $date,
+                'codegroup_bayar' => $codeBayar,
+                'codegroup_piutang' => $codeGroupPiutang,
+            ]), false, false);
+
+
+            if ($st['status'] == 0) {
+                return $st;
+            }
+            $this->updateStatus();
+            DB::commit();
+            return [
+                'status' => 1,
+                'msg' => 'Sales order ' . $this->sales_order_number . ' berhasil dilunaskan'
+            ];
+        } catch (Throwable $th) {
+            DB::rollBack();
+            return [
+                'status' => 0,
+                'msg' => $th->getMessage()
+            ];
+        }
     }
 }

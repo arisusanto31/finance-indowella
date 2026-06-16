@@ -31,6 +31,7 @@ use App\Models\Stock;
 use App\Models\TaskImport;
 use App\Models\TaskImportDetail;
 use App\Models\Toko;
+use App\Models\User;
 use App\Services\LockManager;
 use Carbon\Carbon;
 use CustomLogger;
@@ -834,7 +835,7 @@ class JournalController extends Controller
             ]
         ];
     }
-    static function destroy($id)
+    public static function destroy($id,$userid=null)
     {
 
         DB::beginTransaction();
@@ -848,7 +849,12 @@ class JournalController extends Controller
                         'msg' => 'jurnal sudah terkunci'
                     ];
                 }
-            if (!user()->can('delete_data_journal')) {
+            if($userid==null){
+                $user = user();
+            }else{
+                $user= User::find($userid);
+            }
+            if (!$user->can('delete_data_journal')) {
                 return [
                     'status' => 0,
                     'msg' => 'anda tidak memiliki hak akses untuk menghapus jurnal ini'

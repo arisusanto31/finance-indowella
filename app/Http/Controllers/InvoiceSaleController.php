@@ -383,7 +383,7 @@ class InvoiceSaleController extends Controller
     }
 
     //fungsi ini untuk create invoice dari Sales Order
-    public static function createInvoices(Request $request, $timestart = null, $modeNoRecalculate = false)
+    public static function createInvoices(Request $request, $timestart = null, $modeNoRecalculate = false,$useTransaction=true)
     {
         $lockManager = new LockManager();
         $lockManager->setModeNoRecalculate($modeNoRecalculate);
@@ -403,7 +403,8 @@ class InvoiceSaleController extends Controller
         $salesDetailIDs = $request->input('sales_detail_id');
         $isPPN = $sales->is_ppn;
         // return $request->all();
-        DB::beginTransaction();
+        if($useTransaction)
+            DB::beginTransaction();
         try {
             $lastInv = InvoicePack::where('person_id', $sales->customer_id)
                 ->where('person_type', Customer::class)->orderBy('id', 'desc')->first();
@@ -559,7 +560,8 @@ class InvoiceSaleController extends Controller
                 CustomLogger::log('invoicing', "info", "create kartu ppn keluaran . proces time : " . (microtime(true) - $timestart) . " seconds");
             }
 
-            DB::commit();
+            if($useTransaction)
+                DB::commit();
             if($lockManager->getModeNoRecalculate()) {
                 //nah mari kita recalculate semua jurnal yang terlibat
 
@@ -578,7 +580,8 @@ class InvoiceSaleController extends Controller
             //buat jurnal penjualan
             return ['status' => 1, 'pack' => $invoicePack, 'details' => $details];
         } catch (Throwable $th) {
-            DB::rollBack();
+            if($useTransaction)
+                DB::rollBack();
             $lockManager->releaseAll();
             return ['status' => 0, 'msg' => $th->getMessage()];
         }
@@ -658,7 +661,7 @@ class InvoiceSaleController extends Controller
         return $journalNumber;
     }
 
-    public static function submitBayarSalesInvoice(Request $request, $modeNoRecalculate = false)
+    public static function submitBayarSalesInvoice(Request $request, $modeNoRecalculate = false,$useTransaction=true)
     {
         $lockManager = new LockManager();
         $lockManager->setModeNoRecalculate($modeNoRecalculate);
@@ -668,7 +671,8 @@ class InvoiceSaleController extends Controller
         $amount = $request->input('amount');
         $date = $request->input('date');
 
-        DB::beginTransaction();
+        if($useTransaction)
+            DB::beginTransaction();
         try {
             $invoicePack = InvoicePack::where('invoice_number', $invoiceNumber)->first();
             if (!$invoicePack) {
@@ -716,7 +720,8 @@ class InvoiceSaleController extends Controller
                 $kartuDPSales->save();
                 $kartuDPSales->createDetailKartuInvoice();
             }
-            DB::commit();
+            if($useTransaction)
+                DB::commit();
             if ($lockManager->getModeNoRecalculate()) {
                 //nah mari kita recalculate semua jurnal yang terlibat
 
@@ -735,7 +740,8 @@ class InvoiceSaleController extends Controller
                 'msg' => $kartu['msg'],
             ];
         } catch (Throwable $th) {
-            DB::rollBack();
+            if($useTransaction)
+                DB::rollBack();
             $lockManager->releaseAll();
             return ['status' => 0, 'msg' => $th->getMessage()];
         }

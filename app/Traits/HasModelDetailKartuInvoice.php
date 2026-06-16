@@ -44,7 +44,7 @@ trait HasModelDetailKartuInvoice
             $invoice = InvoicePack::where('invoice_number', $invoiceNumber)->first();
             $invID = $invoice ? $invoice->id : null;
             if($invoice->reference_model == InvoiceSaleDetail::class){
-                if(!$salesOrderNumber){
+                if(!$saleOrderNumber){
                     $salesOrder= SalesOrder::find($invoice->sales_order_id);
                     if($salesOrder){
                         $saleOrderNumber=$salesOrder->sales_order_number;
