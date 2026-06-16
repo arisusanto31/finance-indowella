@@ -42,22 +42,24 @@ class CancelAllPembayaranInvoice extends Command
             try {
                 $invoice = InvoicePack::where('sales_order_id', $saleOrder->id)->first();
                 if (!$invoice) {
-                    $this->error('Invoice tidak ditemukan untuk sales order id ' . $saleOrder->id);
-                    return;
+                    throw new \Exception('Invoice tidak ditemukan untuk sales order id ' . $saleOrder->id);
                 }
+
+
                 $journal = Journal::where('description', 'pelunasan piutang dari invoice ' . $invoice->invoice_number)->first();
-                if (!$journal) {
-                    $this->error('Journal tidak ditemukan untuk invoice ' . $invoice->invoice_number);
-                    return;
-                }
-                $st = JournalController::destroy($journal->id, 1);
-                if ($st['status'] == 1) {
-                    $this->info('Pembayaran invoice ' . $invoice->invoice_number . ' berhasil dibatalkan');
-                } else {
-                    $this->error('Gagal membatalkan pembayaran invoice ' . $invoice->invoice_number . '
+                if ($journal) {
+
+                    $st = JournalController::destroy($journal->id, 1);
+                    if ($st['status'] == 1) {
+                        $this->info('Pembayaran invoice ' . $invoice->invoice_number . ' berhasil dibatalkan');
+                    } else {
+
+                        throw new \Exception('Gagal membatalkan pembayaran invoice ' . $invoice->invoice_number . '
             Error: ' . $st['msg']);
-                    return;
+                    }
                 }
+
+
                 $st = $saleOrder->lunaskanDagang();
                 if ($st['status'] == 1) {
                     $this->info('Status pelunasan untuk sales order ' . $saleOrder->sales_order_number . ' berhasil diupdate');
