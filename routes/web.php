@@ -314,6 +314,11 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::post('/change-code-kas', [TokoController::class, 'changeCodeKas'])->name('change-code-kas');
         });
 
+         Route::prefix('jenis-kas')->name('jenis-kas.')->group(function(){
+            Route::get('show', [TokoController::class, 'showJenisKas'])->name('show');
+            Route::post('link', [TokoController::class, 'linkJenisKas'])->name('link');
+         });
+
 
         Route::prefix('other-person')->name('other-person.')->group(function () {
             Route::resource('main', OtherPersonController::class);

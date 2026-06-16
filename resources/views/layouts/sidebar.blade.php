@@ -282,6 +282,11 @@
                         <div data-i18n="toko">Toko</div>
                     </a>
                 </li>
+                 <li class="menu-item">
+                    <a href="{{url('admin/master/jenis-kas/show')}}" class="menu-link">
+                        <div data-i18n="jenis-kas">Jenis Kas</div>
+                    </a>
+                </li>
                 <li class="menu-item">
                     <a href="{{url('admin/master/stock/main')}}" class="menu-link">
                         <div data-i18n="stock">Stock</div>

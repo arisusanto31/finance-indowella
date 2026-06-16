@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\ChartAccount;
+use App\Models\ChartAccountAlias;
+use App\Models\LinkReferenceCashKind;
 use App\Models\LinkTokoParent;
 use App\Models\ManufToko;
 use App\Models\RetailToko;
+use App\Models\SalesOrder;
 use App\Models\Toko;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -93,7 +96,7 @@ class TokoController extends Controller
             'name' => 'required',
             'phone' => 'required',
             'address' => 'nullable',
-            'kode_toko'=>'nullable',
+            'kode_toko' => 'nullable',
             'book_journal_id' => 'required|integer'
         ]);
         $toko = Toko::create($data);
@@ -199,6 +202,62 @@ class TokoController extends Controller
                 'status' => 1,
                 'msg' => $toko
             ]);
+        } catch (ValidationException $ve) {
+            return response()->json([
+                'status' => 0,
+                'msg' => $ve->errors()
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 0,
+                'msg' => $e->getMessage()
+            ]);
+        }
+    }
+
+    function showJenisKas()
+    {
+        $salesOrder = SalesOrder::distinct('ref_akun_cash_kind_name')
+            ->pluck('ref_akun_cash_kind_name')->all();
+        $link = LinkReferenceCashKind::join('chart_account_aliases as ca', function ($join) {
+            $join->on('ca.code_group', '=', 'link_reference_cash_kinds.code_group')
+                ->where('ca.book_journal_id', bookID());
+        })->select('link_reference_cash_kinds.*', 'ca.name as account_name')->get()->keyBy('cash_kind_name');
+
+
+        foreach ($salesOrder as $name) {
+            if (!isset($link[$name])) {
+                $link[$name] = null;
+            }
+        }
+        $view = view('master.jenis-kas');
+        $view->cashkinds = $link;
+        return $view;
+    }
+    function linkJenisKas(Request $request)
+    {
+        try {
+            $data = $request->validate([
+                'code_group' => 'required|integer',
+                'name' => 'required|string'
+            ]);
+            $chartAccount = ChartAccountAlias::where('code_group', $data['code_group'])->first();
+            if (!$chartAccount) {
+                throw new \Exception('Akun dengan code group ' . $data['code_group'] . ' tidak ditemukan');
+            }
+            $link = LinkReferenceCashKind::updateOrCreate(
+                [
+                    'cash_kind_name' => $data['name'],
+                    'book_journal_id' => bookID(),
+                ],
+                [
+                    'code_group' => $data['code_group']
+                ]
+            );
+            return [
+                'status' => 1,
+                'msg' => $link
+            ];
         } catch (ValidationException $ve) {
             return response()->json([
                 'status' => 0,
