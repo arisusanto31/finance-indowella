@@ -31,7 +31,6 @@ class RepairInvoice extends Command
         $month = $this->argument('month');
         $bookid = $this->argument('bookid');
         Session::put('book_journal_id', $bookid);
-        $id = $this->argument('id');
         $month.= '-01';
         $dateAwal = createCarbon($month)->startOfMonth();
         $dateAkhir = createCarbon($month)->endOfMonth();
