@@ -190,13 +190,15 @@ class Journal extends Model
                     $counter = $lastIndexDate ? $lastIndexDate->maxindex % 100 : 0;
                     if ($counter >= 99) {
                         $now->addSecond();
+                        // $counter=0;
+                        // $indexDate=$now->format('ymdHis');
                     }
                 }
                 // info('counter:' . $counter);
                 $finalIndexDate = $indexDate . sprintf("%02d", ($counter + 1));
                 $codeGroup = $request->input('code_group');
-                $lastJournal = Journal::where('code_group', strval($codeGroup))->where('index_date', '<', $finalIndexDate)->orderBy('index_date', 'desc');
-                $lastJournal = $lastJournal->first();
+                // $lastJournal = Journal::where('code_group', strval($codeGroup))->where('index_date', '<', $finalIndexDate)->orderBy('index_date', 'desc');
+                // $lastJournal = $lastJournal->first();
                 info('get final index date for code group' . $codeGroup . ': ' . $finalIndexDate);
                 $journal = new Journal;
                 $caAlias = ChartAccountAlias::where('code_group', $codeGroup)->first();
@@ -223,12 +225,12 @@ class Journal extends Model
                 $journal->tag = $tag;
                 $journal->reference_id = $request->input('reference_id');
                 $journal->reference_type = $request->input('reference_type');
-                if ($request->input('custom_amount_saldo') != null) {
-                    $journal->amount_saldo = $request->input('custom_amount_saldo');
-                } else {
-                    $lastSaldo = $lastJournal ? $lastJournal->amount_saldo : 0;
-                    $journal->amount_saldo = round($lastSaldo + $theAmount, 2);
-                }
+                // if ($request->input('custom_amount_saldo') != null) {
+                //     $journal->amount_saldo = $request->input('custom_amount_saldo');
+                // } else {
+                //     $lastSaldo = $lastJournal ? $lastJournal->amount_saldo : 0;
+                //     $journal->amount_saldo = round($lastSaldo + $theAmount, 2);
+                // }
                 $journal->is_backdate = $isBackDate;
                 $journal->user_backdate_id = $request->input('user_backdate_id');
                 $journal->toko_id = $request->input('toko_id');
@@ -256,7 +258,7 @@ class Journal extends Model
                 }
                 info('success creating journal' . $codeGroup);
                 $journal->createKartuLink();
-                $journal->verifyJournal();
+                // $journal->verifyJournal();
                 // CustomLogger::log('invoicing','info','journal created '.$codeGroup.' with time '.(microtime(true)-$time).' seconds');
             } catch (Throwable $e) {
                 info('failed creating journal: ' . $e->getMessage());
