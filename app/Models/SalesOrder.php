@@ -443,6 +443,9 @@ class SalesOrder extends Model
     {
         $start=microtime(true);
         $saleOrder = $this;
+        if($this->status_payment=='LUNAS 100%'){
+            return true;
+        }
         try {
 
             $invoice = InvoicePack::where('sales_order_id', $saleOrder->id)->first();

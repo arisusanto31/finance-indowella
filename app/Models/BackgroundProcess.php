@@ -40,7 +40,7 @@ class BackgroundProcess extends Model
 
     public static function make($bookid,$monitoring_url, $description_process, $total_task)
     {
-        $backgroundProcess = BackgroundProcess::where('monitoring_url', 'admin/invoice/sales-order')
+        $backgroundProcess = BackgroundProcess::where('monitoring_url',$monitoring_url)
             ->where('book_journal_id', $bookid)
             ->where('description_process', $description_process)
             ->first();
