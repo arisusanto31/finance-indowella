@@ -468,16 +468,19 @@ class SalesOrder extends Model
                 info('repair '.$this->id.'- lunaskan dagang on '.(microtime(true)-$start).' seconds');
                 info('Status pelunasan untuk sales order ' . $saleOrder->sales_order_number . ' berhasil diupdate');
                 // $this->success();
+                return true;
             } else {
                 info('Gagal mengupdate status pelunasan untuk sales order ' . $saleOrder->sales_order_number . '
             // Error: ' . $st['msg']);
                 // $this->failed();
-            }
+                 return false;
+                }
 
         
         } catch (\Exception $e) {
             info('Error processing sales order ' . $saleOrder->sales_order_number . ': ' . $e->getMessage());
             // $this->failed();
+            return false;
         }
     }
 }

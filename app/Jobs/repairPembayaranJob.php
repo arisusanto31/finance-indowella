@@ -40,31 +40,38 @@ class repairPembayaranJob implements ShouldQueue
         try {
             Session::put('book_journal_id', $this->bookid);
             $saleOrder = SalesOrder::find($this->id);
-            $invoice = InvoicePack::where('sales_order_id', $saleOrder->id)->first();
-            if (!$invoice) {
-                throw new \Exception('Invoice tidak ditemukan untuk sales order id ' . $saleOrder->id);
-            }
-            $journal = Journal::where('description', 'pelunasan piutang dari invoice ' . $invoice->invoice_number)->first();
-            if ($journal) {
-                $st = JournalController::destroy($journal->id, 1);
-                if ($st['status'] == 1) {
-                    info('Pembayaran invoice ' . $invoice->invoice_number . ' berhasil dibatalkan');
-                } else {
-
-                    throw new \Exception('Gagal membatalkan pembayaran invoice ' . $invoice->invoice_number . '
-            Error: ' . $st['msg']);
-                }
-            }
-
-            $st = $saleOrder->lunaskanDagang();
-            if ($st['status'] == 1) {
-                info('Status pelunasan untuk sales order ' . $saleOrder->sales_order_number . ' berhasil diupdate');
+            $st=$saleOrder->repairPembayaran();
+            if($st){
                 $this->success();
-            } else {
-                info('Gagal mengupdate status pelunasan untuk sales order ' . $saleOrder->sales_order_number . '
-            Error: ' . $st['msg']);
-            $this->failed();
             }
+            else{
+                $this->failed();
+            }
+            // $invoice = InvoicePack::where('sales_order_id', $saleOrder->id)->first();
+            // if (!$invoice) {
+            //     throw new \Exception('Invoice tidak ditemukan untuk sales order id ' . $saleOrder->id);
+            // }
+            // $journal = Journal::where('description', 'pelunasan piutang dari invoice ' . $invoice->invoice_number)->first();
+            // if ($journal) {
+            //     $st = JournalController::destroy($journal->id, 1);
+            //     if ($st['status'] == 1) {
+            //         info('Pembayaran invoice ' . $invoice->invoice_number . ' berhasil dibatalkan');
+            //     } else {
+
+            //         throw new \Exception('Gagal membatalkan pembayaran invoice ' . $invoice->invoice_number . '
+            // Error: ' . $st['msg']);
+            //     }
+            // }
+
+            // $st = $saleOrder->lunaskanDagang();
+            // if ($st['status'] == 1) {
+            //     info('Status pelunasan untuk sales order ' . $saleOrder->sales_order_number . ' berhasil diupdate');
+            //     $this->success();
+            // } else {
+            //     info('Gagal mengupdate status pelunasan untuk sales order ' . $saleOrder->sales_order_number . '
+            // Error: ' . $st['msg']);
+            // $this->failed();
+            // }
         } catch (\Exception $e) {
             info('Error processing sales order ' . $saleOrder->sales_order_number . ': ' . $e->getMessage());
             $this->failed();
