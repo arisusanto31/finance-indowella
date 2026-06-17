@@ -586,10 +586,15 @@ class JournalController extends Controller
             $allLocks = [];
             $allJournals = [];
             foreach ($debets as $debet) {
+                $lawanCode= collect($kredits)->where('amount', $debet['amount'])->first()['code_group'] ?? null;
+                if(!$lawanCode){
+                     CustomLogger::log('invoicing', 'info', 'jurnal- g dapat lawan code dari '.$debet['code_group'].' time: ' . (microtime(true) - $time) . ' detik');
+
+                }
                 $st = Journal::generateJournal(new Request([
                     'journal_number' => $theJournalNumber,
                     'code_group' => $debet['code_group'],
-                    'lawan_code_group' => collect($kredits)->where('amount', $debet['amount'])->first()['code_group'] ?? null,
+                    'lawan_code_group' => $lawanCode,
                     'description' => $debet['description'],
                     'amount_debet' => floatval($debet['amount']),
                     'amount_kredit' => 0,
@@ -618,10 +623,14 @@ class JournalController extends Controller
                 $allJournals[] = $st['msg'];
             }
             foreach ($kredits as $kredit) {
+                $lawanCode= collect($debets)->where('amount', $kredit['amount'])->first()['code_group'] ?? null;
+                if(!$lawanCode){
+                        CustomLogger::log('invoicing', 'info', 'jurnal- g dapat lawan code dari '.$kredit['code_group'].' time: ' . (microtime(true) - $time) . ' detik');
+                }
                 $st = Journal::generateJournal(new Request([
                     'journal_number' => $theJournalNumber,
                     'code_group' => $kredit['code_group'],
-                    'lawan_code_group' => collect($debets)->where('amount', $kredit['amount'])->first()['code_group'] ?? null,
+                    'lawan_code_group' => $lawanCode,
                     'description' => $kredit['description'],
                     'amount_kredit' => floatval($kredit['amount']),
                     'amount_debet' => 0,
