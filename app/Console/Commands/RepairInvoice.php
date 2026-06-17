@@ -13,7 +13,7 @@ class RepairInvoice extends Command
      *
      * @var string
      */
-    protected $signature = 'app:repair-invoice {bookid} {id}';
+    protected $signature = 'app:repair-invoice {bookid} {month}';
 
     /**
      * The console command description.
@@ -28,19 +28,26 @@ class RepairInvoice extends Command
     public function handle()
     {
         //
+        $month = $this->argument('month');
         $bookid = $this->argument('bookid');
         Session::put('book_journal_id', $bookid);
         $id = $this->argument('id');
-        $salesOrder = SalesOrder::find($id);
-        if(!$salesOrder){
-            $this->error('Sales order not found');
-            return;
+        $month.= '-01';
+        $dateAwal = createCarbon($month)->startOfMonth();
+        $dateAkhir = createCarbon($month)->endOfMonth();
+        $sales = SalesOrder::whereBetween('created_at', [$dateAwal, $dateAkhir])->get();
+        $this->info('Found ' . $sales->count() . ' sales orders for month: ' . $month);
+        foreach ($sales as $salesOrder) {
+            if (!$salesOrder) {
+                $this->error('Sales order not found');
+                return;
+            }
+            $st = $salesOrder->repairInvoice();
+            if (!$st) {
+                $this->error('Failed to repair invoice for sales order ' . $salesOrder->sales_order_number);
+                return;
+            }
+            $this->info('Invoice repaired successfully for sales order ' . $salesOrder->sales_order_number);
         }
-        $st = $salesOrder->repairInvoice();
-        if(!$st){
-            $this->error('Failed to repair invoice for sales order ' . $salesOrder->sales_order_number);
-            return;
-        }
-        $this->info('Invoice repaired successfully for sales order ' . $salesOrder->sales_order_number);
     }
 }
