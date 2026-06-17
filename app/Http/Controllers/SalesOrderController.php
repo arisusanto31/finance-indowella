@@ -1065,14 +1065,7 @@ class SalesOrderController extends Controller
             Log::error('Error in kebutuhanProduksiMarked: ' . $e->getMessage());
             return ['status' => 0, 'msg' => $e->getMessage()];
         }
-        // $view = view('invoice.kebutuhan-produksi');
-        // $view->kebutuhanProduksi = $sales->values()->all();
-        // $view->sisaStock = $sisaStock;
-
-        // return $view;
-        // ->groupBy('stock_id')->map(function ($val) {
-        //disini itung jumlah. tapi pastikan satuannya sama ya lur.
-        // });
+     
     }
 
     public function showKebutuhanProduksiMarked($token)
