@@ -30,10 +30,10 @@ trait HasModelDetailKartuInvoice
         if (get_class($kartu) == Journal::class) {
             $kartu->journal_id = $kartu->id;
         }
-        if (isset($kartu->purchase_order_number)) {
-            $purchaseOrderNumber = $kartu->purchase_order_number;
-            $POID = $kartu->purchase_order_id;
-        }
+        // if (isset($kartu->purchase_order_number)) {
+        //     $purchaseOrderNumber = $kartu->purchase_order_number;
+        //     $POID = $kartu->purchase_order_id;
+        // }
         if (isset($kartu->sales_order_number)) {
             $saleOrderNumber = $kartu->sales_order_number;
             $salesOrder = SalesOrder::where('sales_order_number', $saleOrderNumber)->first();

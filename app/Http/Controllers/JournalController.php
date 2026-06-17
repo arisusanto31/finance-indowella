@@ -661,8 +661,8 @@ class JournalController extends Controller
             }
             CustomLogger::log('invoicing', 'info', 'jurnal- selesai buat jurnal. time: ' . (microtime(true) - $time) . ' detik');
             foreach ($allJournals as $journal) {
-                $journal->updateLawanCode();
-                CustomLogger::log('invoicing', 'info', 'jurnal- update lawan code ' . $journal->code_group . '. time: ' . (microtime(true) - $time) . ' detik');
+                // $journal->updateLawanCode();
+                // CustomLogger::log('invoicing', 'info', 'jurnal- update lawan code ' . $journal->code_group . '. time: ' . (microtime(true) - $time) . ' detik');
 
                 $st = $journal->createDetailKartuInvoice();
                 if ($st['status'] == 0) {
