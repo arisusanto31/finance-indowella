@@ -34,7 +34,7 @@ class RepairInvoice extends Command
         $month.= '-01';
         $dateAwal = createCarbon($month)->startOfMonth();
         $dateAkhir = createCarbon($month)->endOfMonth();
-        $sales = SalesOrder::whereBetween('created_at', [$dateAwal, $dateAkhir])->get();
+        $sales = SalesOrder::whereBetween('created_at', [$dateAwal, $dateAkhir])->where('status_delivery','<>','TERKIRIM 100%')->get();
         $this->info('Found ' . $sales->count() . ' sales orders for month: ' . $month);
         foreach ($sales as $salesOrder) {
             if (!$salesOrder) {
