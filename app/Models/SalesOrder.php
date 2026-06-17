@@ -505,6 +505,7 @@ class SalesOrder extends Model
             if ($st['status'] == 0){
                return false;
             }
+            $this->updateStatus();
             return true;
     }
 
