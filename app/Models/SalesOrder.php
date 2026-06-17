@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Http\Controllers\InvoiceSaleController;
+use App\Http\Controllers\JournalController;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -13,7 +14,6 @@ class SalesOrder extends Model
 {
     //
     protected $table = 'sales_orders';
-
     protected $fillable = [
         'book_journal_id',
         'sales_order_number',
@@ -282,7 +282,6 @@ class SalesOrder extends Model
 
     public function updateStatus()
     {
-
         $total = collect($this->getTotalKartu())->map(function ($value, $key) {
             $keys = explode(' ', $key);
             if ($keys[0] == 'Piutang') {
@@ -434,6 +433,51 @@ class SalesOrder extends Model
                 'status' => 0,
                 'msg' => $th->getMessage()
             ];
+        }
+    }
+
+    public function repairPembayaran()
+    {
+        $start=microtime(true);
+        $saleOrder = $this;
+        try {
+
+            $invoice = InvoicePack::where('sales_order_id', $saleOrder->id)->first();
+            if (!$invoice) {
+                throw new \Exception('Invoice tidak ditemukan untuk sales order id ' . $saleOrder->id);
+            }
+            // $journal = Journal::where('description', 'pelunasan piutang dari invoice ' . $invoice->invoice_number)->first();
+            $detail= DetailKartuInvoice::where('sales_order_number',$saleOrder->sales_order_number)
+              ->whereBetween('account_code_group',[110000,119999])->first();
+            
+            info('repair '.$this->id.'- get jurnal on '.(microtime(true)-$start).' seconds');
+            if ($detail) {
+                $st = JournalController::destroy($detail->journal_id, 1);
+                if ($st['status'] == 1) {
+                    // info('Pembayaran invoice ' . $invoice->invoice_number . ' berhasil dibatalkan');
+                    info('repair '.$this->id.'- destroy jurnal on '.(microtime(true)-$start).' seconds');
+                } else {
+
+                    throw new \Exception('Gagal membatalkan pembayaran invoice ' . $invoice->invoice_number . '
+            Error: ' . $st['msg']);
+                }
+            }
+
+            $st = $saleOrder->lunaskanDagang();
+            if ($st['status'] == 1) {
+                info('repair '.$this->id.'- lunaskan dagang on '.(microtime(true)-$start).' seconds');
+                info('Status pelunasan untuk sales order ' . $saleOrder->sales_order_number . ' berhasil diupdate');
+                // $this->success();
+            } else {
+                info('Gagal mengupdate status pelunasan untuk sales order ' . $saleOrder->sales_order_number . '
+            // Error: ' . $st['msg']);
+                // $this->failed();
+            }
+
+        
+        } catch (\Exception $e) {
+            info('Error processing sales order ' . $saleOrder->sales_order_number . ': ' . $e->getMessage());
+            // $this->failed();
         }
     }
 }

@@ -44,11 +44,8 @@ class repairPembayaranJob implements ShouldQueue
             if (!$invoice) {
                 throw new \Exception('Invoice tidak ditemukan untuk sales order id ' . $saleOrder->id);
             }
-
-
             $journal = Journal::where('description', 'pelunasan piutang dari invoice ' . $invoice->invoice_number)->first();
             if ($journal) {
-
                 $st = JournalController::destroy($journal->id, 1);
                 if ($st['status'] == 1) {
                     info('Pembayaran invoice ' . $invoice->invoice_number . ' berhasil dibatalkan');
@@ -58,7 +55,6 @@ class repairPembayaranJob implements ShouldQueue
             Error: ' . $st['msg']);
                 }
             }
-
 
             $st = $saleOrder->lunaskanDagang();
             if ($st['status'] == 1) {
