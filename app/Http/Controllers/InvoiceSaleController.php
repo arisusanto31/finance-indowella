@@ -722,18 +722,16 @@ class InvoiceSaleController extends Controller
             }
             if($useTransaction)
                 DB::commit();
-            if ($lockManager->getModeNoRecalculate()) {
-                //nah mari kita recalculate semua jurnal yang terlibat
-
-                $allJournals = $lockManager->getAllJournals();
-
-                $allJournals = collect($allJournals)->groupBy('code_group')->map(function ($items) {
-                    //kita ambil yang index paling muda
-                    $item = collect($items)->sortBy('created_at')->first();
-                    //jalankan recalculate untuk yang paling muda
-                    $item->calculateJournalNext(false);
-                });
-            }
+            // if ($lockManager->getModeNoRecalculate()) {
+            //     //nah mari kita recalculate semua jurnal yang terlibat
+            //     $allJournals = $lockManager->getAllJournals();
+            //     $allJournals = collect($allJournals)->groupBy('code_group')->map(function ($items) {
+            //         //kita ambil yang index paling muda
+            //         $item = collect($items)->sortBy('created_at')->first();
+            //         //jalankan recalculate untuk yang paling muda
+            //         $item->calculateJournalNext(false);
+            //     });
+            // }
             $lockManager->releaseAll();
             return [
                 'status' => 1,
