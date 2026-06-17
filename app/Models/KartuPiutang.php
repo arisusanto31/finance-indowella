@@ -119,10 +119,10 @@ class KartuPiutang extends Model
                 $kartu->index_date_group = createCarbon($date)->format('ymdHis');
                 $kartu->save();
                 // CustomLogger::log('invoicing','info','kp- berhasil simpan kartu piutang. time '.(microtime(true)-$time).' seconds');
-                if (self::isBackdate($date)) {
-                    $kartu->recalculateSaldo();
-                    // CustomLogger::log('invoicing','info','kp- kartu piutang backdate, berhasil recalculate saldo. time '.(microtime(true)-$time).' seconds');
-                }
+                // if (self::isBackdate($date)) {
+                //     $kartu->recalculateSaldo();
+                //     // CustomLogger::log('invoicing','info','kp- kartu piutang backdate, berhasil recalculate saldo. time '.(microtime(true)-$time).' seconds');
+                // }
 
 
 
