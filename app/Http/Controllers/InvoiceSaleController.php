@@ -663,6 +663,7 @@ class InvoiceSaleController extends Controller
 
     public static function submitBayarSalesInvoice(Request $request, $modeNoRecalculate = false,$useTransaction=true)
     {
+        $starttime=microtime(true);
         $lockManager = new LockManager();
         $lockManager->setModeNoRecalculate($modeNoRecalculate);
         $codeGroupPiutang = $request->input('codegroup_piutang');
@@ -679,6 +680,8 @@ class InvoiceSaleController extends Controller
                 throw new \Exception('Invoice tidak ditemukan');
             }
             $sales = SalesOrder::find($invoicePack->sales_order_id);
+            info('repair-submit - '.$invoicePack->sales_order_id.'- cari sales order '.(microtime(true)-$starttime).' seconds');
+
             $kartu = KartuPiutang::createPelunasan(new Request([
                 'invoice_pack_number' => $invoiceNumber,
                 'amount_bayar' => $amount,
@@ -694,6 +697,7 @@ class InvoiceSaleController extends Controller
             if ($kartu['status'] == 0) {
                 throw new \Exception($kartu['msg']);
             }
+            info('repair-submit - '.$invoicePack->sales_order_id.'- create kartu piutang '.(microtime(true)-$starttime).' seconds');
             $journalNumber = $kartu['journal_number'];
             $journal = Journal::where('journal_number', $journalNumber)->where('code_group', $codeGroupBayar)->first();
             $journalID = $journal ? $journal->id : null;
@@ -719,6 +723,7 @@ class InvoiceSaleController extends Controller
                 $kartuDPSales->journal_number = $journalNumber;
                 $kartuDPSales->save();
                 $kartuDPSales->createDetailKartuInvoice();
+                info('repair-submit - '.$invoicePack->sales_order_id.'- create kartu dp sales '.(microtime(true)-$starttime).' seconds');
             }
             if($useTransaction)
                 DB::commit();

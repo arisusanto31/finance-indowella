@@ -376,7 +376,7 @@ class SalesOrder extends Model
 
     public function lunaskanDagang()
     {
-
+       $starttime= microtime(true);
         DB::BeginTransaction();
         try {
             $invoicePack = InvoicePack::where('sales_order_id', $this->id)->first();
@@ -386,6 +386,8 @@ class SalesOrder extends Model
                     'msg' => 'Invoice pack tidak ditemukan'
                 ];
             }
+            info('repairlunas - '.$this->id.'- cari invoice pack '.(microtime(true)-$starttime).' seconds');
+
             $invoiceNumber = $invoicePack->invoice_number;
             $amount = $invoicePack->total_price + $invoicePack->total_ppn_k;
             $date = $this->created_at;
@@ -408,6 +410,7 @@ class SalesOrder extends Model
             if (!$codeBayar) {
                 throw new \Exception('Kode bayar tidak ditemukan untuk toko ' . $this->toko_id);
             }
+            info('repairlunas - '.$this->id.'- cari code bayar '.(microtime(true)-$starttime).' seconds');
             $codeGroupPiutang = 120001;
             $st = InvoiceSaleController::submitBayarSalesInvoice(new Request([
                 'invoice_number' => $invoiceNumber,
@@ -416,7 +419,7 @@ class SalesOrder extends Model
                 'codegroup_bayar' => $codeBayar,
                 'codegroup_piutang' => $codeGroupPiutang,
             ]), false, false);
-
+            info('repairlunas - '.$this->id.'- submit bayar '.(microtime(true)-$starttime).' seconds');
 
             if ($st['status'] == 0) {
                 return $st;
