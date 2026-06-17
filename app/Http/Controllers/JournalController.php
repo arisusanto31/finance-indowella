@@ -661,9 +661,9 @@ class JournalController extends Controller
                 }
                 CustomLogger::log('invoicing', 'info', 'jurnal- selesai membuat detail kartu invoice ' . $journal->code_group . '. time: ' . (microtime(true) - $time) . ' detik');
 
-                if ($isBackDate == 1 && $lockManager->getModeNoRecalculate() == false) {
-                    $journal->calculateJournalNext(false);
-                }
+                // if ($isBackDate == 1 && $lockManager->getModeNoRecalculate() == false) {
+                //     $journal->calculateJournalNext(false);
+                // }
                 CustomLogger::log('invoicing', 'info', 'jurnal- selesai recalculate journal ' . $journal->code_group . '. time: ' . (microtime(true) - $time) . ' detik');
             }
             if ($isLockIntern == 1) {
