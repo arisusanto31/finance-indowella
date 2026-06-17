@@ -506,6 +506,7 @@
                 <thead>
                     <tr>
                         <th class="p-1"> Tanggal </th>
+                        <th class="p-1"> kode </th>
                         <th class="p-1"> akun jurnal </th>
                         <th class="p-1"> journal number </th>
                         <th class="p-1"> Kartu </th>
@@ -519,6 +520,7 @@
                 ${data['history'].map(item => `
                     <tr>
                         <td class="p-1"> ${formatNormalDateTime(new Date(item.date_journal))} </td>
+                        <td class="p-1"> ${item.account_code_group} </td>
                         <td class="p-1"> ${item.code_group_name} </td>
                         <td class="p-1"> ${item.journal_number} </td>
                         <td class="p-1"> ${item.kartu_type? item.kartu_type+' : '+ item.kartu_id: 'tidak ada kartu'} </td>
