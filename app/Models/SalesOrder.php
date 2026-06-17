@@ -439,6 +439,75 @@ class SalesOrder extends Model
         }
     }
 
+    public function repairInvoice(){
+            $time= microtime(true);
+
+
+            $salesOrder = $this;
+            $salesOrderNumber = $salesOrder->sales_order_number;
+
+            //hapus dulu aja yang ga sip
+            $detailKartu = DetailKartuInvoice::where('sales_order_number',$salesOrderNumber)
+                ->whereIn('account_code_group',[140001,401000,212500])->get();
+            foreach($detailKartu as $detail){
+                $st= JournalController::destroy($detail->journal_id,1);
+                if($st['status']==0){
+                    return [
+                        'status'=>0,
+                        'msg'=>'gagal menghapus jurnal '.$detail->journal_id.' untuk sales order '.$salesOrderNumber.' karena '.$st['msg']
+                    ];
+                }
+            }
+
+
+            //cek dulu aja jangan jangan udah difinalkan
+            $existingInv = InvoiceSaleDetail::where('sales_order_number', $salesOrderNumber)->count();
+            if ($existingInv > 0) {
+                return [
+                    'status' => 0,
+                    'msg' => 'sales order ' . $salesOrderNumber . ' sudah memiliki invoice. proses secara manual jika ingin memprosesnya'
+                ];
+            }
+            $data = [];
+
+            $details = $salesOrder->details;
+            foreach ($details as $detail) {
+                $data[] = [
+                    'stock_id' => $detail->stock_id,
+                    'quantity' => $detail->quantity,
+                    'unit' => $detail->unit,
+                    'sales_detail_id' => $detail->id,
+                    'sales_order_number' => $salesOrderNumber,
+                    'sales_order_id' => $salesOrder->id,
+                    'code_group_penjualan' => 401000,
+                    'code_group_persediaan' => 140001,
+                    'code_group_piutang' => 120001,
+                    'date' => $detail->date,
+                    'custom_stock_name' => null
+                ];
+            }
+            $dataFix = [
+                'sales_order_number' => $salesOrderNumber,
+                'sales_order_id' => $salesOrder->id,
+                'stock_id' => collect($data)->pluck('stock_id')->all(),
+                'quantity' => collect($data)->pluck('quantity')->all(),
+                'unit' => collect($data)->pluck('unit')->all(),
+                'sales_detail_id' => collect($data)->pluck('sales_detail_id')->all(),
+                'code_group_penjualan' => collect($data)->pluck('code_group_penjualan')->all(),
+                'code_group_persediaan' => collect($data)->pluck('code_group_persediaan')->all(),
+                'code_group_piutang' => collect($data)->pluck('code_group_piutang')->all(),
+                'date' => $salesOrder->created_at,
+                'custom_stock_name' => collect($data)->pluck('custom_stock_name')->all()
+            ];
+
+
+            $st = InvoiceSaleController::createInvoices(new Request($dataFix), $time, false, false);
+            if ($st['status'] == 0){
+               return false;
+            }
+            return true;
+    }
+
     public function repairPembayaran()
     {
         $start=microtime(true);
