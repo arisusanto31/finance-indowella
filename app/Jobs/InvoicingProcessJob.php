@@ -56,8 +56,8 @@ class InvoicingProcessJob implements ShouldQueue
                     $this->info("Successfully marked sales order ID $id as final for book ID $bookid.");
                 } else {
                     $this->info("Failed to mark sales order ID $id as final for book ID $bookid. Status: " . json_encode($st));
-                    $lock = Cache::lock("update_bg_process_$bgProcessID", 10);
-                    if ($lock->get()) {
+                    // $lock = Cache::lock("update_bg_process_$bgProcessID", 10);
+                    // if ($lock->get()) {
                         $backgroundProcess = BackgroundProcess::find($bgProcessID);
                         $backgroundProcess->failed_task = $backgroundProcess->failed_task + 1;
                         $backgroundProcess->progress = (($backgroundProcess->success_task + $backgroundProcess->failed_task) / $backgroundProcess->total_task) * 100;
@@ -65,8 +65,8 @@ class InvoicingProcessJob implements ShouldQueue
                             $backgroundProcess->status = 'finished';
                         }
                         $backgroundProcess->save();
-                        $lock->release();
-                    }
+                    //     $lock->release();
+                    // }
                     return;
                 }
             }
@@ -75,8 +75,8 @@ class InvoicingProcessJob implements ShouldQueue
             ]));
             if ($st['status'] == 1) {
                 $this->info("Successfully processed sales order ID $id for book ID $bookid.");
-                $lock = Cache::lock("update_bg_process_$bgProcessID", 10);
-                if ($lock->get()) {
+                // $lock = Cache::lock("update_bg_process_$bgProcessID", 10);
+                // if ($lock->get()) {
                     $backgroundProcess = BackgroundProcess::find($bgProcessID);
                     $backgroundProcess->success_task = $backgroundProcess->success_task + 1;
                     $backgroundProcess->progress = (($backgroundProcess->success_task + $backgroundProcess->failed_task) / $backgroundProcess->total_task) * 100;
@@ -85,11 +85,11 @@ class InvoicingProcessJob implements ShouldQueue
                         $backgroundProcess->status = 'finished';
                     }
                     $backgroundProcess->save();
-                    $lock->release();
-                }
+                    // $lock->release();
+                // }
             } else {
-                $lock = Cache::lock("update_bg_process_$bgProcessID", 10);
-                if ($lock->get()) {
+                // $lock = Cache::lock("update_bg_process_$bgProcessID", 10);
+                // if ($lock->get()) {
                     $backgroundProcess = BackgroundProcess::find($bgProcessID);
                     $backgroundProcess->failed_task = $backgroundProcess->failed_task + 1;
                     $backgroundProcess->progress = (($backgroundProcess->success_task + $backgroundProcess->failed_task) / $backgroundProcess->total_task) * 100;
@@ -97,8 +97,8 @@ class InvoicingProcessJob implements ShouldQueue
                         $backgroundProcess->status = 'finished';
                     }
                     $backgroundProcess->save();
-                    $lock->release();
-                }
+                //     $lock->release();
+                // }
 
                 $this->info("Failed to process sales order ID $id for book ID $bookid. Status: " . json_encode($st));
             }
