@@ -35,7 +35,7 @@ class UpdateAfterCreateJournalJob implements ShouldQueue
             $journal->updateAfterCreate();
         }
         else{
-            throw new \Exception("Journal with ID {$this->journalID} not found.");
+            throw new \Exception("Journal with ID {$this->journalID} not found. on book ID $bookID");
         }
     }
 }
