@@ -385,6 +385,7 @@ class InvoiceSaleController extends Controller
     //fungsi ini untuk create invoice dari Sales Order
     public static function createInvoices(Request $request, $timestart = null, $modeNoRecalculate = false,$useTransaction=true)
     {
+        $thetime= microtime(true);
         $lockManager = new LockManager();
         $lockManager->setModeNoRecalculate($modeNoRecalculate);
         // return ['status' => 0, 'msg' => $request->all()];
@@ -437,6 +438,7 @@ class InvoiceSaleController extends Controller
 
                 ];
             }
+            CustomLogger::log('invoicing', "info", "*on create invoice* create invoice pack and details ".$sales->sales_order_number." . proces time : " . (microtime(true) - $thetime) . " seconds");
             $invoicePack = InvoicePack::create([
                 'invoice_number' => $invoiceNumber,
                 'book_journal_id' => bookID(),
@@ -465,7 +467,7 @@ class InvoiceSaleController extends Controller
                 $data['invoice_pack_id'] = $invoicePack->id;
                 $details[] = InvoiceSaleDetail::create($data);
             }
-            CustomLogger::log('invoicing', "info", "create invoice pack and details . proces time : " . (microtime(true) - $timestart) . " seconds");
+            CustomLogger::log('invoicing', "info", "*on create invoice* create invoice pack and details ".$sales->sales_order_number." . proces time : " . (microtime(true) - $thetime) . " seconds");
             foreach ($salesDetailIDs as $i => $saleDetailID) {
                 $dataDetailSale = $realDataSales[$saleDetailID];
                 $person = $invoicePack->person;
@@ -484,7 +486,7 @@ class InvoiceSaleController extends Controller
                 if ($kartu['status'] == 0) {
                     throw new \Exception($kartu['msg']);
                 }
-                CustomLogger::log('invoicing', "info", "create kartu piutang . proces time : " . (microtime(true) - $timestart) . " seconds");
+                CustomLogger::log('invoicing', "info", "*on create invoice* create kartu piutang ".$sales->sales_order_number." . proces time : " . (microtime(true) - $thetime) . " seconds");
                 $journalNumber = $kartu['msg']->journal_number;
                 $journal = Journal::where('journal_number', $journalNumber)->where('code_group', $codeGroupPenjualans[$i])->first();
                 $journalID = $journal ? $journal->id : null;
@@ -497,6 +499,7 @@ class InvoiceSaleController extends Controller
                 $dataSaleDetail->journal_number = $journalNumber;
                 $dataSaleDetail->save();
                 $dataSaleDetail->createDetailkartuInvoice();
+                CustomLogger::log('invoicing', "info", "*on create invoice* create detail kartu invoice ".$sales->sales_order_number." . proces time : " . (microtime(true) - $thetime) . " seconds");
 
                 //disini harusnya udah jadi jurnal piutang dan penjualannya
                 //tinggal hubungkan jurnal penjualannya ke kartu penjualannya
@@ -541,7 +544,7 @@ class InvoiceSaleController extends Controller
                         throw new \Exception($stStock['msg']);
                     }
                 }
-                CustomLogger::log('invoicing', "info", "create kartu stock . proces time : " . (microtime(true) - $timestart) . " seconds");
+                CustomLogger::log('invoicing', "info", "*on create invoice* create kartu stock ".$sales->sales_order_number." . proces time : " . (microtime(true) - $thetime) . " seconds");
             }
 
 
@@ -557,24 +560,24 @@ class InvoiceSaleController extends Controller
                     'sales_order_number' => $salesOrderNumber,
                     'date' => $date
                 ]), $lockManager);
-                CustomLogger::log('invoicing', "info", "create kartu ppn keluaran . proces time : " . (microtime(true) - $timestart) . " seconds");
+                CustomLogger::log('invoicing', "info", "*on create invoice* create kartu ppn keluaran ".$sales->sales_order_number." . proces time : " . (microtime(true) - $thetime) . " seconds");
             }
 
             if($useTransaction)
                 DB::commit();
-            if($lockManager->getModeNoRecalculate()) {
-                //nah mari kita recalculate semua jurnal yang terlibat
+            // if($lockManager->getModeNoRecalculate()) {
+            //     //nah mari kita recalculate semua jurnal yang terlibat
 
-                $allJournals = $lockManager->getAllJournals();
+            //     $allJournals = $lockManager->getAllJournals();
 
-                $allJournals = collect($allJournals)->groupBy('code_group')->map(function ($items) {
-                    //kita ambil yang index paling muda
-                    $item = collect($items)->sortBy('created_at')->first();
-                    //jalankan recalculate untuk yang paling muda
-                    $item->calculateJournalNext(false);
-                });
-                CustomLogger::log('invoicing', "info", "recalculate jurnal from lockmanager . proces time : " . (microtime(true) - $timestart) . " seconds");
-            }
+            //     $allJournals = collect($allJournals)->groupBy('code_group')->map(function ($items) {
+            //         //kita ambil yang index paling muda
+            //         $item = collect($items)->sortBy('created_at')->first();
+            //         //jalankan recalculate untuk yang paling muda
+            //         $item->calculateJournalNext(false);
+            //     });
+            //     CustomLogger::log('invoicing', "info", "*on create invoice* recalculate jurnal from lockmanager ".$sales->sales_order_number." . proces time : " . (microtime(true) - $thetime) . " seconds");
+            // }
 
             $lockManager->releaseAll();
             //buat jurnal penjualan
