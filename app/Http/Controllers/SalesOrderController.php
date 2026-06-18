@@ -1203,7 +1203,7 @@ class SalesOrderController extends Controller
                 'codegroup_bayar' => $codeBayar,
                 'codegroup_piutang' => $codeGroupPiutang,
             ]), $modeNoRecalculate, false);
-            CustomLogger::log('invoicing', "info", "submit bayar sales invoice . proces time : " . (microtime(true) - $time) . " seconds");
+            CustomLogger::log('invoicing', "info", "submit bayar sales ".$salesOrder->sales_order_number.". proces time : " . (microtime(true) - $time) . " seconds");
 
 
             if ($st['status'] == 0) {
