@@ -29,7 +29,9 @@ class RecalculateKartuStockRequest extends Command
     {
         //
         $requestcalculate = Redis::get('request_kartu_stock') ?? '[]';
+        info('request recalculate kartu stock count ' . strlen($requestcalculate).' '.$requestcalculate);
         $requestcalculate = json_decode($requestcalculate, true);
+
         $kartuStocks = KartuStock::whereIn('id',$requestcalculate)->groupBy('stock_id')->map(function($q){
             return collect($q)->sortBy('index_date')->first();
         });
