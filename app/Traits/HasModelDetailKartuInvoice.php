@@ -53,7 +53,6 @@ trait HasModelDetailKartuInvoice
                 }
             }
         }
-
         $dks = DetailKartuInvoice::storeData(new Request([
             'kartu_type' => get_class($kartu),
             'kartu_id' => $kartu->id,

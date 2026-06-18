@@ -14,8 +14,7 @@ class UpdateAfterCreateJournalJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    protected $journalID;
-    protected $bookID;
+    protected $journalID,$bookID;
     public function __construct($journalID,$bookID)
     {
         //
