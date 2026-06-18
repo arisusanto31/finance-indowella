@@ -30,6 +30,7 @@ class RecalculateKartuStockRequest extends Command
         //
         $requestcalculate = Redis::get('request_kartu_stock') ?? '[]';
         info('request recalculate kartu stock count ' . strlen($requestcalculate).' '.$requestcalculate);
+        $this->info('request recalculate kartu stock count ' . strlen($requestcalculate).' '.$requestcalculate);
         $requestcalculate = json_decode($requestcalculate, true);
 
         $kartuStocks = KartuStock::whereIn('id',$requestcalculate)->groupBy('stock_id')->map(function($q){
@@ -39,6 +40,7 @@ class RecalculateKartuStockRequest extends Command
         foreach($kartuStocks as $kartuStock){
             $kartuStock->recalculateSaldo();
             info('request recalculate kartu stock '.$kartuStock->stock_id. ' at '.$kartuStock->index_date);
+            $this->info('request recalculate kartu stock '.$kartuStock->stock_id. ' at '.$kartuStock->index_date);
         }
     }
 }
