@@ -587,10 +587,9 @@ class JournalController extends Controller
             $allLocks = [];
             $allJournals = [];
             foreach ($debets as $debet) {
-                $lawanCode= collect($kredits)->where('amount', $debet['amount'])->first()['code_group'] ?? null;
-                if(!$lawanCode){
-                     CustomLogger::log('invoicing', 'info', 'jurnal- g dapat lawan code dari '.$debet['code_group'].' time: ' . (microtime(true) - $time) . ' detik');
-
+                $lawanCode = collect($kredits)->where('amount', $debet['amount'])->first()['code_group'] ?? null;
+                if (!$lawanCode) {
+                    CustomLogger::log('invoicing', 'info', 'jurnal- g dapat lawan code dari ' . $debet['code_group'] . ' time: ' . (microtime(true) - $time) . ' detik');
                 }
                 $st = Journal::generateJournal(new Request([
                     'journal_number' => $theJournalNumber,
@@ -611,12 +610,12 @@ class JournalController extends Controller
                     'custom_amount_saldo' => array_key_exists('custom_amount_saldo', $debet) ? $debet['custom_amount_saldo'] : null
                 ]), $lockManager);
                 // $allLocks[] = ['lock' => $st['lock'], 'name' => $st['lock_name']];
-                $allJournals[]= safeModelToArrayAll($st);
+                $allJournals[] = safeModelToArrayAll($st);
             }
             foreach ($kredits as $kredit) {
-                $lawanCode= collect($debets)->where('amount', $kredit['amount'])->first()['code_group'] ?? null;
-                if(!$lawanCode){
-                        CustomLogger::log('invoicing', 'info', 'jurnal- g dapat lawan code dari '.$kredit['code_group'].' time: ' . (microtime(true) - $time) . ' detik');
+                $lawanCode = collect($debets)->where('amount', $kredit['amount'])->first()['code_group'] ?? null;
+                if (!$lawanCode) {
+                    CustomLogger::log('invoicing', 'info', 'jurnal- g dapat lawan code dari ' . $kredit['code_group'] . ' time: ' . (microtime(true) - $time) . ' detik');
                 }
                 $st = Journal::generateJournal(new Request([
                     'journal_number' => $theJournalNumber,
@@ -638,28 +637,30 @@ class JournalController extends Controller
 
                 ]), $lockManager);
                 // $allLocks[] = ['lock' => $st['lock'], 'name' => $st['lock_name']];
-                $allJournals[]= safeModelToArrayAll($st);
+                $allJournals[] = safeModelToArrayAll($st);
             }
 
             //insert journal bulk
             DB::table('journals')->insert($allJournals);
             $theallJournals = Journal::where('journal_number', $theJournalNumber)->pluck('id')->all();
-            foreach($theallJournals as $journalID){
-                UpdateAfterCreateJournalJob::dispatch($journalID, bookID())->onQueue('journal');
-            }
+            DB::afterCommit(function () use ($theallJournals) {
+                foreach ($theallJournals as $journalID) {
+                    UpdateAfterCreateJournalJob::dispatch($journalID, bookID())->onQueue('journal');
+                }
+            });
 
             CustomLogger::log('invoicing', 'info', 'jurnal- selesai buat jurnal. time: ' . (microtime(true) - $time) . ' detik');
             // foreach ($allJournals as $journal) {
-                // $journal->updateLawanCode();
-                // CustomLogger::log('invoicing', 'info', 'jurnal- update lawan code ' . $journal->code_group . '. time: ' . (microtime(true) - $time) . ' detik');
+            // $journal->updateLawanCode();
+            // CustomLogger::log('invoicing', 'info', 'jurnal- update lawan code ' . $journal->code_group . '. time: ' . (microtime(true) - $time) . ' detik');
 
-               
-                // CustomLogger::log('invoicing', 'info', 'jurnal- selesai membuat detail kartu invoice ' . $journal->code_group . '. time: ' . (microtime(true) - $time) . ' detik');
 
-                // if ($isBackDate == 1 && $lockManager->getModeNoRecalculate() == false) {
-                //     $journal->calculateJournalNext(false);
-                // }
-                // CustomLogger::log('invoicing', 'info', 'jurnal- selesai recalculate journal ' . $journal->code_group . '. time: ' . (microtime(true) - $time) . ' detik');
+            // CustomLogger::log('invoicing', 'info', 'jurnal- selesai membuat detail kartu invoice ' . $journal->code_group . '. time: ' . (microtime(true) - $time) . ' detik');
+
+            // if ($isBackDate == 1 && $lockManager->getModeNoRecalculate() == false) {
+            //     $journal->calculateJournalNext(false);
+            // }
+            // CustomLogger::log('invoicing', 'info', 'jurnal- selesai recalculate journal ' . $journal->code_group . '. time: ' . (microtime(true) - $time) . ' detik');
             // }
             if ($isLockIntern == 1) {
                 $lockManager->releaseAll();
@@ -830,9 +831,9 @@ class JournalController extends Controller
             ]
         ];
     }
-    public static function destroy($id,$userid=null,$useTransaction=true)
+    public static function destroy($id, $userid = null, $useTransaction = true)
     {
-        if($useTransaction){
+        if ($useTransaction) {
             DB::beginTransaction();
         }
         try {
@@ -842,10 +843,10 @@ class JournalController extends Controller
                 if ($journal->created_at < $key->key_at) {
                     throw new \Exception('jurnal sudah terkunci');
                 }
-            if($userid==null){
+            if ($userid == null) {
                 $user = user();
-            }else{
-                $user= User::find($userid);
+            } else {
+                $user = User::find($userid);
             }
             if (!$user->can('delete_data_journal')) {
                 throw new \Exception('anda tidak memiliki hak akses untuk menghapus jurnal ini');
@@ -887,12 +888,12 @@ class JournalController extends Controller
             // }
             // }
 
-            if($useTransaction){
+            if ($useTransaction) {
                 DB::commit();
             }
             return ['status' => 1, 'msg' => 'success'];
         } catch (\Throwable $e) {
-            if($useTransaction){
+            if ($useTransaction) {
                 DB::rollBack();
             }
             return [

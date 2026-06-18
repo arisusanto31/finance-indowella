@@ -31,7 +31,7 @@ class UpdateAfterCreateJournalJob implements ShouldQueue
         try {
             $bookID = $this->bookID ?? 2;
             Session::put('book_journal_id', $bookID);
-            $journal = Journal::withoutGlobalScopes()->where('id', intval($this->journalID))->first();
+            $journal = Journal::find($this->journalID);
             $journal->updateAfterCreate();
             info('journal-job: success');
         } catch (\Exception $e) {
