@@ -35,8 +35,8 @@ class RecalculateKartuStockRequest extends Command
             $requestcalculate = Redis::get('request_kartu_stock' . $bookid) ?? '[]';
             $arrrequestcalculate = json_decode($requestcalculate, true);
 
-            info('request recalculate kartu stock count ' . count($arrrequestcalculate) . ' ' . $requestcalculate);
-            $this->info('request recalculate kartu stock count ' . count($arrrequestcalculate) . ' ' . $requestcalculate);
+            info('request recalculate kartu stock '.$bookid.' count ' . count($arrrequestcalculate) . ' ' . $requestcalculate);
+            $this->info('request recalculate kartu stock '.$bookid.' count ' . count($arrrequestcalculate) . ' ' . $requestcalculate);
 
             $kartuStocks = KartuStock::whereIn('id', $arrrequestcalculate)->get()->groupBy('stock_id')->map(function ($q) {
                 return collect($q)->sortBy('index_date')->first();
@@ -45,8 +45,8 @@ class RecalculateKartuStockRequest extends Command
             Redis::set('request_kartu_stock' . $bookid, '[]');
             foreach ($kartuStocks as $stockid => $kartuStock) {
                 $kartuStock->recalculateSaldo();
-                info('request recalculate kartu stock ' . $kartuStock->stock_id . ' at ' . $kartuStock->index_date);
-                $this->info('request recalculate kartu stock ' . $kartuStock->stock_id . ' at ' . $kartuStock->index_date);
+                info('request recalculate kartu stock '.$bookid.' stock ' . $kartuStock->stock_id . ' at ' . $kartuStock->index_date);
+                $this->info('request recalculate kartu stock '.$bookid.' stock ' . $kartuStock->stock_id . ' at ' . $kartuStock->index_date);
             }
         }
     }
