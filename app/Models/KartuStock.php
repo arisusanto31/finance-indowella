@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Str;
 use Throwable;
 
@@ -130,9 +131,13 @@ class KartuStock extends Model
                 ];
             }
             $kartu->save();
-            // if (self::isBackdate($date)) {
-            //     $kartu->recalculateSaldo();
-            // }
+            if (self::isBackdate($date)) {
+                //     $kartu->recalculateSaldo();
+                $requestcalculate = Redis::get('request_kartu_stock') ?? '[]';
+                $requestcalculate = json_decode($requestcalculate, true);
+                $requestcalculate[] = $kartu->id;
+                Redis::set('request_kartu_stock', json_encode($requestcalculate));
+            }
         } catch (LockTimeoutException $e) {
             info('kartu stock timeout on md' . $request->input('mutation_detail_id'));
             return [

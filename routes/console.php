@@ -12,3 +12,4 @@ Artisan::command('inspire', function () {
 
 Schedule::command('app:fix-problem-saldo 1')->cron('*/11 * * * *');
 Schedule::command('app:fix-problem-saldo 2')->cron('*/9 * * * *');
+Schedule::command('app:recalculate-kartu-stock-request')->cron('* * * * *');
