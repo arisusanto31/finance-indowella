@@ -580,6 +580,7 @@ class InvoiceSaleController extends Controller
             // }
 
             $lockManager->releaseAll();
+            CustomLogger::log('invoicing', "info", "*on create invoice* finished ".$sales->sales_order_number." . proces time : " . (microtime(true) - $thetime) . " seconds");
             //buat jurnal penjualan
             return ['status' => 1, 'pack' => $invoicePack, 'details' => $details];
         } catch (Throwable $th) {
