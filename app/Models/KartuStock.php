@@ -77,10 +77,10 @@ class KartuStock extends Model
                 $lastCard->saldo_rupiah_total = 0;
             }
 
-            $stock= Stock::find($kartu->stock_id);
+            $stock = Stock::find($kartu->stock_id);
             if ($lastCard->saldo_qty_backend == 0 && $flow == 1) {
                 //kalo keluar
-                throw new \Exception('tidak ada saldo qty barang '.$stock->name);
+                throw new \Exception('tidak ada saldo qty barang ' . $stock->name);
             }
 
             if ($isCustom == 0 && $flow == 1) {
@@ -130,9 +130,9 @@ class KartuStock extends Model
                 ];
             }
             $kartu->save();
-            if (self::isBackdate($date)) {
-                $kartu->recalculateSaldo();
-            }
+            // if (self::isBackdate($date)) {
+            //     $kartu->recalculateSaldo();
+            // }
         } catch (LockTimeoutException $e) {
             info('kartu stock timeout on md' . $request->input('mutation_detail_id'));
             return [
@@ -157,18 +157,23 @@ class KartuStock extends Model
     public function recalculateSaldo()
     {
         $kartus = KartuStock::where('stock_id', $this->stock_id)->where('index_date', '>', $this->index_date)
+            ->select('mutasi_qty_backend', 'mutasi_rupiah_total', 'id')
             ->orderBy('index_date', 'asc')->get();
 
         $saldoQty = $this->saldo_qty_backend;
         $saldoRupiah = $this->saldo_rupiah_total;
+        $data = [];
         foreach ($kartus as $kartu) {
 
             $saldoQty = moneyAdd($saldoQty, $kartu->mutasi_qty_backend);
             $saldoRupiah = moneyAdd($saldoRupiah, $kartu->mutasi_rupiah_total);
-            $kartu->saldo_qty_backend = $saldoQty;
-            $kartu->saldo_rupiah_total = $saldoRupiah;
-            $kartu->save();
+            $data[] = [
+                'id' => $kartu->id,
+                'saldo_qty_backend' => $saldoQty,
+                'saldo_rupiah_total' => $saldoRupiah
+            ];
         }
+        upsertInChunks(KartuStock::class, $data, 'id', ['saldo_qty_backend', 'saldo_rupiah_total']);
     }
     public static function mutationStore(Request $request, $useTransaction = true, $lockManager = null)
     {
@@ -188,14 +193,14 @@ class KartuStock extends Model
             $PONumber = $request->input('purchase_order_number');
             $SONumber = $request->input('sales_order_number');
 
-            $POID= $request->input('purchase_order_id');
+            $POID = $request->input('purchase_order_id');
             $invoiceNumber = $request->input('invoice_pack_number');
             $isOtomatisJurnal = $request->input('is_otomatis_jurnal') == 'on' ? true : false;
             $desc = $request->input('description');
             $lawanCodeGroup = $request->input('lawan_code_group');
 
-             $SOID = $invID = null;
-        
+            $SOID = $invID = null;
+
             if ($SONumber) {
                 $SO = SalesOrder::where('sales_order_number', $SONumber)->first();
                 $SOID = $SO ? $SO->id : null;
@@ -306,7 +311,7 @@ class KartuStock extends Model
                     'title' => 'create mutation transaction',
                     'url_try_again' => 'try_again'
 
-                ]), false,$lockManager);
+                ]), false, $lockManager);
                 if ($st['status'] != 1) throw new \Exception($st['msg']);
                 $number = $st['journal_number'];
                 $journal = Journal::where('journal_number', $number)->whereIn('code_group', [140001, 140002])->first();
