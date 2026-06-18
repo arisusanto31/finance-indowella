@@ -8,6 +8,7 @@ use App\Imports\MultiSheetImport;
 use App\Jobs\ImportKartuStockJob;
 use App\Jobs\ImportSaldoNLJob;
 use App\Jobs\RecalculateJournalJob;
+use App\Jobs\UpdateAfterCreateJournalJob;
 use App\Jobs\UpdateLawanCodeJournalJob;
 use App\Models\BookJournal;
 use App\Models\BookTheme;
@@ -610,17 +611,7 @@ class JournalController extends Controller
                     'custom_amount_saldo' => array_key_exists('custom_amount_saldo', $debet) ? $debet['custom_amount_saldo'] : null
                 ]), $lockManager);
                 // $allLocks[] = ['lock' => $st['lock'], 'name' => $st['lock_name']];
-                if ($st['status'] == 0) {
-                    // self::releaseLocks($allLocks);
-                    JournalJobFailed::create(new Request([
-                        'type' => $request->input('title'),
-                        'request' => json_encode($request),
-                        'response' => json_encode($st['msg']),
-                        'url_try_again' => $urlTryAgain
-                    ]));
-                    throw new \Exception($st['msg']);
-                }
-                $allJournals[] = $st['msg'];
+                $allJournals[]= safeModelToArrayAll($st);
             }
             foreach ($kredits as $kredit) {
                 $lawanCode= collect($debets)->where('amount', $kredit['amount'])->first()['code_group'] ?? null;
@@ -647,34 +638,29 @@ class JournalController extends Controller
 
                 ]), $lockManager);
                 // $allLocks[] = ['lock' => $st['lock'], 'name' => $st['lock_name']];
-                if ($st['status'] == 0) {
-                    // self::releaseLocks($allLocks);
-                    JournalJobFailed::create(new Request([
-                        'type' => $request->input('title'),
-                        'request' => json_encode($request),
-                        'response' => json_encode($st['msg']),
-                        'url_try_again' => $urlTryAgain
-                    ]));
-                    throw new \Exception($st['msg']);
-                }
-                $allJournals[] = $st['msg'];
+                $allJournals[]= safeModelToArrayAll($st);
             }
+
+            //insert journal bulk
+            DB::table('journals')->insert($allJournals);
+            $theallJournals = Journal::where('journal_number', $theJournalNumber)->pluck('id')->all();
+            foreach($theallJournals as $journalID){
+                UpdateAfterCreateJournalJob::dispatch($journalID, bookID())->onQueue('journal');
+            }
+
             CustomLogger::log('invoicing', 'info', 'jurnal- selesai buat jurnal. time: ' . (microtime(true) - $time) . ' detik');
-            foreach ($allJournals as $journal) {
+            // foreach ($allJournals as $journal) {
                 // $journal->updateLawanCode();
                 // CustomLogger::log('invoicing', 'info', 'jurnal- update lawan code ' . $journal->code_group . '. time: ' . (microtime(true) - $time) . ' detik');
 
-                $st = $journal->createDetailKartuInvoice();
-                if ($st['status'] == 0) {
-                    throw new \Exception('gagal membuat detail kartu invoice: ' . $st['msg']);
-                }
-                CustomLogger::log('invoicing', 'info', 'jurnal- selesai membuat detail kartu invoice ' . $journal->code_group . '. time: ' . (microtime(true) - $time) . ' detik');
+               
+                // CustomLogger::log('invoicing', 'info', 'jurnal- selesai membuat detail kartu invoice ' . $journal->code_group . '. time: ' . (microtime(true) - $time) . ' detik');
 
                 // if ($isBackDate == 1 && $lockManager->getModeNoRecalculate() == false) {
                 //     $journal->calculateJournalNext(false);
                 // }
-                CustomLogger::log('invoicing', 'info', 'jurnal- selesai recalculate journal ' . $journal->code_group . '. time: ' . (microtime(true) - $time) . ' detik');
-            }
+                // CustomLogger::log('invoicing', 'info', 'jurnal- selesai recalculate journal ' . $journal->code_group . '. time: ' . (microtime(true) - $time) . ' detik');
+            // }
             if ($isLockIntern == 1) {
                 $lockManager->releaseAll();
             }

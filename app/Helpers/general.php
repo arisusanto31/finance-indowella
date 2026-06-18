@@ -5,6 +5,7 @@ use App\Models\BookTheme;
 use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
 use App\Services\ContextService;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Request as FacadeRequest;
 
@@ -126,6 +127,21 @@ function getMaxStringLen($arrayString)
         return strlen(strval($item));
     })->max();
     return $max;
+}
+
+function safeModelToArrayAll(Model $model)
+{
+    $data = [];
+
+    foreach ($model->getAttributes() as $key => $value) {
+        if ($value instanceof Carbon) {
+            $data[$key] = $value->toDateTimeString();
+        } else {
+            $data[$key] = $value;
+        }
+    }
+
+    return $data;
 }
 
 function makeStringTableTerminal($data, $setting = [])

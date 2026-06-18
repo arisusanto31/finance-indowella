@@ -78,7 +78,7 @@ class Journal extends Model
             // } else {
             //     $alias = $from;
             // }
-              if ($from instanceof Expression) {
+            if ($from instanceof Expression) {
                 // fromSub biasanya alias-nya ada di SQL: (...) as `journals`
                 $alias = $query->getModel()->getTable(); // default: journals
             } elseif (is_string($from) && Str::contains(strtolower($from), ' as ')) {
@@ -150,7 +150,7 @@ class Journal extends Model
         $isBackDate = $request->input('is_backdate');
         $tokoID = $request->input('toko_id');
         $tag = $request->input('tag');
-        $time=microtime(true);
+        $time = microtime(true);
         if (!$tokoID) {
             $tokoID = Toko::first()->id ?? throw new \Exception('tidak ada data toko. silakan buat dulu data toko');
         }
@@ -176,8 +176,8 @@ class Journal extends Model
 
         // CustomLogger::log('journal', 'info', $journal_number . ' make lock ' . $name);
         try {
-            $lockManager->acquire($name, 50, 20);
-            $lockManager->addCodeGroup($codeGroup); 
+            // $lockManager->acquire($name, 50, 20);
+            // $lockManager->addCodeGroup($codeGroup); 
             // Redis::expire($name, 50);
             try {
                 // CustomLogger::log('journal', 'info', $journal_number . ' get lock ' . $name);
@@ -190,8 +190,6 @@ class Journal extends Model
                     $counter = $lastIndexDate ? $lastIndexDate->maxindex % 100 : 0;
                     if ($counter >= 99) {
                         $now->addSecond();
-                        // $counter=0;
-                        // $indexDate=$now->format('ymdHis');
                     }
                 }
                 // info('counter:' . $counter);
@@ -238,27 +236,8 @@ class Journal extends Model
                 $journal->is_auto_generated = $request->input('is_auto_generated');
                 $journal->book_journal_id = bookID() ?? $request->Input('book_journal_id');
                 $journal->toko_id = $request->input('toko_id');
-                $journal->save();
-                $reference = null;
-                if ($journal->reference_type != null)
-                    $reference = $journal->reference;
+                return $journal;
 
-
-                if ($reference) {
-                    if (get_class($reference) != 'App\Models\\Journal') {
-                        $reference->journal_number = $journal->journal_number;
-                        $reference->save();
-                        if (get_class($reference) == 'App\Models\PembayaranPiutang') {
-                            foreach ($reference->details as $detail) {
-                                $detail->journal_number = $reference->journal_number;
-                                $detail->save();
-                            }
-                        }
-                    }
-                }
-                info('success creating journal' . $codeGroup);
-                $journal->createKartuLink();
-                // $journal->verifyJournal();
                 // CustomLogger::log('invoicing','info','journal created '.$codeGroup.' with time '.(microtime(true)-$time).' seconds');
             } catch (Throwable $e) {
                 info('failed creating journal: ' . $e->getMessage());
@@ -287,6 +266,32 @@ class Journal extends Model
             // 'lock_name' => $name,
 
         ];
+    }
+
+    public function updateAfterCreate()
+    {
+        $journal= $this;
+        $reference = null;
+        if ($journal->reference_type != null)
+            $reference = $journal->reference;
+
+
+        if ($reference) {
+            if (get_class($reference) != 'App\Models\\Journal') {
+                $reference->journal_number = $journal->journal_number;
+                $reference->save();
+                if (get_class($reference) == 'App\Models\PembayaranPiutang') {
+                    foreach ($reference->details as $detail) {
+                        $detail->journal_number = $reference->journal_number;
+                        $detail->save();
+                    }
+                }
+            }
+        }
+       
+        $journal->createKartuLink();
+        $journal->verifyJournal();
+        $journal->createDetailKartuInvoice();
     }
 
     public function updateIndexDate()
@@ -415,17 +420,17 @@ class Journal extends Model
     {
         $thejournal = $this;
         $codeGroup = $this->code_group;
-      
+
         // CustomLogger::log('journal', 'info', 'recalculate make lock ' . $name);
         try {
-           
+
             $mustEditJournal = Journal::where('code_group', strval($thejournal->code_group))->where('index_date', '>', $thejournal->index_date)
-            ->where(function($q){
-                $q->whereNull('tag')
-                ->orWhere('tag', 'not like', 'opening%');
-            })
-             ->orderBy('index_date','asc')
-             ->select('amount_debet','amount_kredit','id','code_group')->get();
+                ->where(function ($q) {
+                    $q->whereNull('tag')
+                        ->orWhere('tag', 'not like', 'opening%');
+                })
+                ->orderBy('index_date', 'asc')
+                ->select('amount_debet', 'amount_kredit', 'id', 'code_group')->get();
             $lastSaldo = $thejournal->amount_saldo;
             $newdata = [];
             $dataUpdate = [];
@@ -436,12 +441,12 @@ class Journal extends Model
                 } else { //passiva
                     $journal->amount_saldo = round(($lastSaldo - $journal->amount_debet + $journal->amount_kredit), 2);
                 }
-              
-                    $dataUpdate[] = [
-                        'id' => $journal->id,
-                        'amount_saldo' => $journal->amount_saldo
-                    ];
-             
+
+                $dataUpdate[] = [
+                    'id' => $journal->id,
+                    'amount_saldo' => $journal->amount_saldo
+                ];
+
                 $lastSaldo = $journal->amount_saldo;
                 $newdata[] = collect($journal)->only(['id', 'description', 'index_date', 'amount_saldo', 'amount_debet', 'amount_kredit']);
             }
@@ -456,10 +461,10 @@ class Journal extends Model
             return [
                 'status' => 0,
                 'msg' => 'jurnal tidak berhasil masuk, antrian timeout',
-               
+
             ];
         } finally {
-          
+
             // CustomLogger::log('journal', 'info', 'recalculate release lock ' . $name);
         }
         return ['status' => 1, 'msg' => $dataUpdate, 'journal' => $this];
