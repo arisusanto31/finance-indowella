@@ -74,7 +74,7 @@ class InvoicingProcessJob implements ShouldQueue
                 'id' => $id
             ]));
             if ($st['status'] == 1) {
-                $this->info("Successfully processed sales order ID $id for book ID $bookid.");
+              
                 // $lock = Cache::lock("update_bg_process_$bgProcessID", 10);
                 // if ($lock->get()) {
                     $backgroundProcess = BackgroundProcess::find($bgProcessID);
@@ -85,6 +85,7 @@ class InvoicingProcessJob implements ShouldQueue
                         $backgroundProcess->status = 'finished';
                     }
                     $backgroundProcess->save();
+                      info("Successfully processed sales order ID $id for book ID $bookid.");
                     // $lock->release();
                 // }
             } else {
@@ -97,6 +98,8 @@ class InvoicingProcessJob implements ShouldQueue
                         $backgroundProcess->status = 'finished';
                     }
                     $backgroundProcess->save();
+                    info("Failed to process sales order ID $id for book ID $bookid. Status: " . json_encode($st));
+
                 //     $lock->release();
                 // }
 
