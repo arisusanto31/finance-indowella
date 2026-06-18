@@ -28,7 +28,8 @@ class UpdateAfterCreateJournalJob implements ShouldQueue
     public function handle(): void
     {
         //
-        Session::put('book_journal_id', $this->bookID);
+        $bookID= $this->bookID??2;
+        Session::put('book_journal_id', $bookID);
         $journal= Journal::find($this->journalID);
         if($journal){
             $journal->updateAfterCreate();
