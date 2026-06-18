@@ -99,7 +99,6 @@ class InvoicingProcessJob implements ShouldQueue
                     }
                     $backgroundProcess->save();
                     info("Failed to process sales order ID $id for book ID $bookid. Status: " . json_encode($st));
-
                     $lock->release();
                 }
 

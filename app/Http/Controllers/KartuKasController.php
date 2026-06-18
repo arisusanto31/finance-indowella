@@ -16,7 +16,7 @@ class KartuKasController extends Controller
         $view = view('kartu.kartu-kas');
         $kindKas = ChartAccount::where('code_group', '>', 110000)
             ->where('code_group', '<', 120000)
-            ->whereRaw('code_group%1000=0')->pluck('name', 'code_group')->all();
+            ->pluck('name', 'code_group')->all();
         $view->kind_kas = $kindKas;
         $view->month = getInput('month') ? toDigit(getInput('month'), 2) : Date('m');
         $view->year = getInput('year') ?? Date('Y');
@@ -26,20 +26,23 @@ class KartuKasController extends Controller
     public function getBukuKas()
     {
         $kindCodeGroup = getInput('kind');
-        $month = getInput('month') ?? Date('m');
-        $year = getInput('year') ?? Date('Y');
+         $dateStart = getInput('dateawal') ?? Date('Y-m-d');
+        $dateEnd = getInput('dateakhir') ?? Date('Y-m-d');
+        $indexDateAwal = createCarbon($dateStart)->startOfDay()->format('ymdHis00');
+        $indexDateAkhir = createCarbon($dateEnd)->endOfDay()->format('ymdHis99');
 
-        $indexDate = createCarbon($year . '-' . $month . '-01')->format('ymdHis00');
+
+      
         $coas = ChartAccount::aktif()->child()->where('code_group', 'like', Journal::getPrimaryCode($kindCodeGroup) . '%')->pluck('code_group')->all();
 
-        $subData = Journal::select(DB::raw('max(index_date) as maxindex'), 'code_group')->where('index_date', '<', $indexDate)->whereIn('code_group', $coas)
+        $subData = Journal::select(DB::raw('max(index_date) as maxindex'), 'code_group')->where('index_date', '<', $indexDateAwal)->whereIn('code_group', $coas)
             ->groupBy('code_group');
         $lastSaldoJournal = Journal::joinSub($subData, 'sub_journals', function ($q) {
             $q->on('journals.index_date', '=', 'sub_journals.maxindex')
                 ->on('journals.code_group', '=', 'sub_journals.code_group');
         })->pluck('journals.amount_saldo', 'journals.code_group')->all();
 
-        $journals = Journal::searchCOA($kindCodeGroup)->whereMonth('created_at', $month)->whereYear('created_at', $year)->with(['lawanCode:name,code_group'])
+        $journals = Journal::searchCOA($kindCodeGroup)->whereBetween('index_date', [$indexDateAwal, $indexDateAkhir])->with(['lawanCode:name,code_group'])
             ->orderBy('index_date', 'asc')->get()->groupBy('code_group');
 
         $chartAccount = ChartAccount::aktif()->withAlias()->pluck('alias_name', 'code_group');
@@ -52,8 +55,8 @@ class KartuKasController extends Controller
             'status' => 1,
             'msg' => $journals,
             'chart_accounts' => $chartAccount,
-            'month' => $month,
-            'year' => $year,
+            'dateawal' => $dateStart,
+            'dateakhir' => $dateEnd,
             'code_group' => $kindCodeGroup,
             'saldo_awal' => $lastSaldoJournal,
         ];

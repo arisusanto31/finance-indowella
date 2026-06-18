@@ -2,7 +2,7 @@
 
     <div class="card shadow-sm mb-4">
         <h5 class="text-primary-dark card-header" style="padding-bottom:0px;"> 💳 <strong>KARTU KAS</strong>
-            <div class="d-flex justify-content mt-1 pe-4 mb-3">
+            <!-- <div class="d-flex justify-content mt-1 pe-4 mb-3">
                 <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="prevMonth()">
                     << </button>
                         <span class="badge bg-primary d-flex justify-content-center align-items-center">
@@ -10,7 +10,7 @@
                         <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="nextMonth()">
                             >></button>
 
-            </div>
+            </div> -->
         </h5>
         <div class="card-body">
             <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
@@ -18,11 +18,22 @@
             </div>
             <div class="row">
                 <div class="col-md-2">
-                    <select onchange="searchBuku()" id="select-kind-kas" class="form-select">
+                    <select id="select-kind-kas" class="form-select">
                         @foreach ($kind_kas as $code => $item)
                             <option value="{{ $code }}">{{ $item }}</option>
                         @endforeach
                     </select>
+                </div>
+                  <div class="col-md-2 " style="position:relative;">
+                    <span style="position:absolute; left:19px; top:9px;">from:</span>
+                    <input type="date" class="form-control" style="padding-left:60px;" id="dateawal" placeholder="Tanggal Awal">
+                </div>
+                <div class="col-md-2 " style="position:relative;">
+                    <span style="position:absolute; left:19px; top:9px;">to:</span>
+                    <input type="date" class="form-control" style="padding-left:60px;" id="dateakhir" placeholder="Tanggal Akhir">
+                </div>
+                <div class="col-md-2">
+                    <button onclick="searchBuku()" id="btn-search" class="btn btn-primary btn-sm w-100">Cari</button>
                 </div>
             </div>
             <div class="row mt-2">
@@ -35,16 +46,13 @@
     @push('scripts')
         <script>
             initItemSelectManual('.select-coa', '{{ route("chart-account.get-item-keuangan") }}?kind=kas', 'chart account');
-            setTimeout(() => {
-                searchBuku();
-            }, 200);
-
+           
             function searchBuku() {
-                month = '{{ $month }}';
-                year = '{{ $year }}';
+                       startdate = $('#dateawal').val();
+                enddate = $('#dateakhir').val();
                 kindKas = $('#select-kind-kas option:selected').val();
                 $.ajax({
-                    url: '{{ route("kartu-kas.get-buku-kas") }}?kind=' + kindKas + '&month=' + month + '&year=' + year,
+                    url: '{{ route("kartu-kas.get-buku-kas") }}?kind=' + kindKas +  '&dateawal=' + startdate + '&dateakhir=' + enddate,
                     method: 'get',
                     success: function(res) {
                         console.log(res);
