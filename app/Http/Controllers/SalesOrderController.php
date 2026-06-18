@@ -1165,13 +1165,13 @@ class SalesOrderController extends Controller
                 'custom_stock_name' => collect($data)->pluck('custom_stock_name')->all()
             ];
 
-            CustomLogger::log('invoicing', "info", "persiapan proses . proces time : " . (microtime(true) - $time) . " seconds");
+            CustomLogger::log('invoicing', "info", "*proses utama* persiapan proses ".$salesOrder->sales_order_number.". proces time : " . (microtime(true) - $time) . " seconds");
 
             $st = InvoiceSaleController::createInvoices(new Request($dataFix), $time, $modeNoRecalculate, false);
             if ($st['status'] == 0) {
                 return $st;
             }
-            CustomLogger::log('invoicing', "info", "create all sub invoice . proces time : " . (microtime(true) - $time) . " seconds");
+            CustomLogger::log('invoicing', "info", "*proses utama* create all sub invoice ".$salesOrder->sales_order_number.". proces time : " . (microtime(true) - $time) . " seconds");
 
             $invoiceNumber = $st['pack']->invoice_number;
             $amount = $st['pack']->total_price + $st['pack']->total_ppn_k;
@@ -1203,7 +1203,7 @@ class SalesOrderController extends Controller
                 'codegroup_bayar' => $codeBayar,
                 'codegroup_piutang' => $codeGroupPiutang,
             ]), $modeNoRecalculate, false);
-            CustomLogger::log('invoicing', "info", "submit bayar sales ".$salesOrder->sales_order_number.". proces time : " . (microtime(true) - $time) . " seconds");
+            CustomLogger::log('invoicing', "info", "*proses utama* submit bayar sales ".$salesOrder->sales_order_number.". proces time : " . (microtime(true) - $time) . " seconds");
 
 
             if ($st['status'] == 0) {
