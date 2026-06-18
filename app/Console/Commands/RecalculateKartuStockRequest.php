@@ -37,8 +37,9 @@ class RecalculateKartuStockRequest extends Command
         $kartuStocks = KartuStock::whereIn('id',$arrrequestcalculate)->get()->groupBy('stock_id')->map(function($q){
             return collect($q)->sortBy('index_date')->first();
         });
+        $this->info(json_encode($kartuStocks));
         Redis::set('request_kartu_stock', '[]');
-        foreach($kartuStocks as $kartuStock){
+        foreach($kartuStocks as $stockid => $kartuStock){
             $kartuStock->recalculateSaldo();
             info('request recalculate kartu stock '.$kartuStock->stock_id. ' at '.$kartuStock->index_date);
             $this->info('request recalculate kartu stock '.$kartuStock->stock_id. ' at '.$kartuStock->index_date);
