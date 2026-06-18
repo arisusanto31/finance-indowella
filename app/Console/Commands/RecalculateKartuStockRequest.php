@@ -33,7 +33,7 @@ class RecalculateKartuStockRequest extends Command
             Session::put('book_journal_id', $bookid);
             Redis::set('request_kartu_stock' . $bookid, '[]');
 
-            $requestcalculate = Redis::get('request_kartu_stock') ?? '[]';
+            $requestcalculate = Redis::get('request_kartu_stock' . $bookid) ?? '[]';
             $arrrequestcalculate = json_decode($requestcalculate, true);
 
             info('request recalculate kartu stock count ' . count($arrrequestcalculate) . ' ' . $requestcalculate);
