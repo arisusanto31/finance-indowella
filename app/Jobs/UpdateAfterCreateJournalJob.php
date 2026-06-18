@@ -14,8 +14,8 @@ class UpdateAfterCreateJournalJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    protected $journalID,$bookID;
-    public function __construct($journalID,$bookID)
+    protected $journalID, $bookID;
+    public function __construct($journalID, $bookID)
     {
         //
         $this->journalID = $journalID;
@@ -28,14 +28,9 @@ class UpdateAfterCreateJournalJob implements ShouldQueue
     public function handle(): void
     {
         //
-        $bookID= intval($this->bookID)??2;
+        $bookID = intval($this->bookID) ?? 2;
         Session::put('book_journal_id', $bookID);
-        $journal= Journal::withoutGlobalScopes()->where('id',intval($this->journalID))->first();
-        if($journal){
-            $journal->updateAfterCreate();
-        }
-        else{
-            throw new \Exception("Journal with ID {$this->journalID} not found. on book ID $bookID");
-        }
+        $journal = Journal::withoutGlobalScopes()->where('id', intval($this->journalID))->first();
+        $journal->updateAfterCreate();
     }
 }
