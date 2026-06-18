@@ -51,11 +51,13 @@
                        startdate = $('#dateawal').val();
                 enddate = $('#dateakhir').val();
                 kindKas = $('#select-kind-kas option:selected').val();
+                $('#btn-search').html('Loading...').attr('disabled', true);
                 $.ajax({
                     url: '{{ route("kartu-kas.get-buku-kas") }}?kind=' + kindKas +  '&dateawal=' + startdate + '&dateakhir=' + enddate,
                     method: 'get',
                     success: function(res) {
                         console.log(res);
+                        $('#btn-search').html('Cari').attr('disabled', false);
                         if (res.status == 1) {
                             html = '';
 
@@ -148,6 +150,7 @@
                         }
                     },
                     error: function(res) {
+                        $('#btn-search').html('Cari').attr('disabled', false);
                         Swal.fire('opps', 'Gagal mendapatkan data', 'error');
                     }
                 });
