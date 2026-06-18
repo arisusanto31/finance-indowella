@@ -84,11 +84,11 @@ class KartuPiutang extends Model
                 $realAmount = $amount_debet - $amount_kredit;
                 $indexDate = self::getNextIndexDate($date);
 
-                $lastKartu = KartuPiutang::where('invoice_pack_number', $invoiceNumber)
-                    ->where('index_date', '<', $indexDate)
-                    ->orderBy('index_date', 'desc')->first();
-                $lastSaldo =  $lastKartu ? $lastKartu->amount_saldo_factur : 0;
-                $lastSaldoFactur = $lastSaldo;
+                // $lastKartu = KartuPiutang::where('invoice_pack_number', $invoiceNumber)
+                //     ->where('index_date', '<', $indexDate)
+                //     ->orderBy('index_date', 'desc')->first();
+                // $lastSaldo =  $lastKartu ? $lastKartu->amount_saldo_factur : 0;
+                // $lastSaldoFactur = $lastSaldo;
                 // CustomLogger::log('invoicing','info','kp- cari last kartu piutang. time '.(microtime(true)-$time).' seconds');
 
 
@@ -99,8 +99,8 @@ class KartuPiutang extends Model
                 $kartu->sales_order_id = $SOID;
                 $kartu->invoice_pack_id = $invoiceID;
                 $kartu->description = $request->input('description');
-                $kartu->amount_saldo_transaction = $lastSaldo + $realAmount;
-                $kartu->amount_saldo_factur = $lastSaldoFactur + $realAmount;
+                // $kartu->amount_saldo_transaction = $lastSaldo + $realAmount;
+                // $kartu->amount_saldo_factur = $lastSaldoFactur + $realAmount;
                 $kartu->amount_saldo_person = 0;
                 $kartu->amount_debet = $amount_debet;
                 $kartu->amount_kredit = $amount_kredit;
