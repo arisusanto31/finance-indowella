@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\KartuStock;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Facades\Session;
 
 class RecalculateKartuStockRequest extends Command
 {
@@ -28,21 +29,26 @@ class RecalculateKartuStockRequest extends Command
     public function handle()
     {
         //
-        $requestcalculate = Redis::get('request_kartu_stock') ?? '[]';
-        $arrrequestcalculate = json_decode($requestcalculate, true);
+        for ($bookid = 1; $bookid <= 2; $bookid++) {
+            Session::put('book_journal_id', $bookid);
+            Redis::set('request_kartu_stock' . $bookid, '[]');
 
-        info('request recalculate kartu stock count ' .count($arrrequestcalculate).' '.$requestcalculate);
-        $this->info('request recalculate kartu stock count ' .count($arrrequestcalculate).' '.$requestcalculate);
-        
-        $kartuStocks = KartuStock::whereIn('id',$arrrequestcalculate)->get()->groupBy('stock_id')->map(function($q){
-            return collect($q)->sortBy('index_date')->first();
-        });
-        $this->info(json_encode($kartuStocks));
-        Redis::set('request_kartu_stock', '[]');
-        foreach($kartuStocks as $stockid => $kartuStock){
-            $kartuStock->recalculateSaldo();
-            info('request recalculate kartu stock '.$kartuStock->stock_id. ' at '.$kartuStock->index_date);
-            $this->info('request recalculate kartu stock '.$kartuStock->stock_id. ' at '.$kartuStock->index_date);
+            $requestcalculate = Redis::get('request_kartu_stock') ?? '[]';
+            $arrrequestcalculate = json_decode($requestcalculate, true);
+
+            info('request recalculate kartu stock count ' . count($arrrequestcalculate) . ' ' . $requestcalculate);
+            $this->info('request recalculate kartu stock count ' . count($arrrequestcalculate) . ' ' . $requestcalculate);
+
+            $kartuStocks = KartuStock::whereIn('id', $arrrequestcalculate)->get()->groupBy('stock_id')->map(function ($q) {
+                return collect($q)->sortBy('index_date')->first();
+            });
+            $this->info(json_encode($kartuStocks));
+            Redis::set('request_kartu_stock' . $bookid, '[]');
+            foreach ($kartuStocks as $stockid => $kartuStock) {
+                $kartuStock->recalculateSaldo();
+                info('request recalculate kartu stock ' . $kartuStock->stock_id . ' at ' . $kartuStock->index_date);
+                $this->info('request recalculate kartu stock ' . $kartuStock->stock_id . ' at ' . $kartuStock->index_date);
+            }
         }
     }
 }

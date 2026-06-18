@@ -133,10 +133,10 @@ class KartuStock extends Model
             $kartu->save();
             if (self::isBackdate($date)) {
                 //     $kartu->recalculateSaldo();
-                $requestcalculate = Redis::get('request_kartu_stock') ?? '[]';
+                $requestcalculate = Redis::get('request_kartu_stock'.bookID()) ?? '[]';
                 $requestcalculate = json_decode($requestcalculate, true);
                 $requestcalculate[] = $kartu->id;
-                Redis::set('request_kartu_stock', json_encode($requestcalculate));
+                Redis::set('request_kartu_stock'.bookID(), json_encode($requestcalculate));
             }
         } catch (LockTimeoutException $e) {
             info('kartu stock timeout on md' . $request->input('mutation_detail_id'));
