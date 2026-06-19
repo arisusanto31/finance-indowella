@@ -1233,6 +1233,7 @@ class SalesOrderController extends Controller
             ];
         } catch (Throwable $e) {
             DB::rollBack();
+            info('error in process dagang '. $e->getMessage());
             Log::error('Error in processDagang: ' . $e->getMessage());
             return ['status' => 0, 'msg' => $e->getMessage()];
         }
