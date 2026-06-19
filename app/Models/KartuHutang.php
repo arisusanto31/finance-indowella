@@ -75,7 +75,7 @@ class KartuHutang extends Model
         try {
 
             try {
-                $lock->block(30);
+                // $lock->block(30);
                 $date = $request->input('date') ?? now();
                 self::proteksiBackdate($date);
 
