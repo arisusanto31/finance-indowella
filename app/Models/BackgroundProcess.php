@@ -41,7 +41,7 @@ class BackgroundProcess extends Model
 
     public static function make($bookid, $monitoring_url, $description_process, $total_task)
     {
-        $lock = Cache::lock('bg_process_' . $bookid . '_' . $description_process, 10);
+        $lock = Cache::lock('bg_process_' . $bookid . '_' . $description_process, 20);
         if ($lock->get()) {
             $backgroundProcess = BackgroundProcess::where('monitoring_url', $monitoring_url)
                 ->where('book_journal_id', $bookid)
@@ -139,5 +139,9 @@ class BackgroundProcess extends Model
     public function hitungProgress()
     {
         $this->progress = ($this->success_task + $this->failed_task) / $this->total_task * 100;
+        if ($this->progress >= 100) {
+            $this->progress = 100;
+            $this->status = 'finished';
+        }
     }
 }
