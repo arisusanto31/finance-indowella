@@ -39,6 +39,7 @@ class ImportSalesJob implements ShouldQueue
             $bg->success();
         } else {
             $bg->failed();
+            info("Import sales order failed for book ID {$this->bookID}. Status: " . json_encode($st));
         }
     }
 }
