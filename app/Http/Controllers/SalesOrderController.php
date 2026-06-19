@@ -172,17 +172,19 @@ class SalesOrderController extends Controller
         //nah ini kita buat antrian ya lur 
         $alldata = $request->input('data');
         $alldata = json_decode($alldata, true);
-
+        $thecreated = createCarbon($alldata[0]['created_at']);
+        $month = $thecreated->format('Y-m');
+        $descProcess = 'import-sales-' . $month;
+        $bgProcess =     BackgroundProcess::where('monitoring_url', 'admin/invoice/sales-order')
+                    ->where('book_journal_id', bookID())
+                    ->where('description_process', $descProcess)
+                    ->first();
+        if(!$bgProcess){
+            $bgProcess= BackgroundProcess::make(bookID(), 'admin/invoice/sales-order', $descProcess, null);
+        }
+        $bgProcess->addTask(count($alldata));
         foreach ($alldata as $data) {
-            $thecreated = createCarbon($data['created_at']);
-            $month = $thecreated->format('Y-m');
-            $descProcess = 'import-sales-' . $month;
-            $bgProcess = BackgroundProcess::make(
-                bookID(),
-                'admin/invoice/sales-order',
-                $descProcess,
-                null
-            );
+       
             $dataRequest = json_encode($data);
             ImportSalesJob::dispatch(bookID(), $dataRequest, $bgProcess->id)->onQueue('default');
         }

@@ -303,7 +303,7 @@
         group30id = [];
         for (const el of elems) {
             let id = $(el).data('id');
-            if (group30id.length < 10) {
+            if (group30id.length < 20) {
 
                 group30id.push(id);
             } else {

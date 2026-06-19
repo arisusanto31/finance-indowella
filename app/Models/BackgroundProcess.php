@@ -41,8 +41,9 @@ class BackgroundProcess extends Model
 
     public static function make($bookid, $monitoring_url, $description_process, $total_task)
     {
-        $lock = Cache::lock('bg_process_' . $bookid . '_' . $description_process, 20);
-        if ($lock->get()) {
+        // $lock = Cache::lock('bg_process_' . $bookid . '_' . $description_process, 20);
+        // if ($lock->block(5)) {
+        try {
             $backgroundProcess = BackgroundProcess::where('monitoring_url', $monitoring_url)
                 ->where('book_journal_id', $bookid)
                 ->where('description_process', $description_process)
@@ -50,7 +51,7 @@ class BackgroundProcess extends Model
             if (!$backgroundProcess) {
                 $backgroundProcess = BackgroundProcess::create([
                     'monitoring_url' => $monitoring_url,
-                    'total_task' => $total_task ?? 1,
+                    'total_task' => $total_task ?? 0,
                     'description_process' => $description_process,
                     'status' => 'processing',
                     'book_journal_id' => $bookid,
@@ -62,16 +63,25 @@ class BackgroundProcess extends Model
                 if ($total_task !== null) {
                     $backgroundProcess->total_task = $total_task;
                 } else {
-                    $backgroundProcess->increment('total_task');
-                    $backgroundProcess->refresh();
+                    $backgroundProcess->total_task = 0;
+                
                 }
                 $backgroundProcess->status = 'processing';
                 $backgroundProcess->save();
             }
-            $lock->release();
+        } finally {
+            //    $lock->release();
         }
+
         $theBG = BackgroundProcess::find($backgroundProcess->id);
         return $theBG;
+    }
+    public function addTask($nilai)
+    {
+        $this->increment('total_task', $nilai);
+        $this->refresh();
+        $this->hitungProgress();
+        $this->save();
     }
 
     public static function failedTask($bookid, $description_process)
