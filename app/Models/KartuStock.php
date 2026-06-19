@@ -47,7 +47,7 @@ class KartuStock extends Model
 
     public static function create(Request $request)
     {
-        $lock = Cache::lock('kartu-stock-' . $request->input('stock_id'), 40);
+        // $lock = Cache::lock('kartu-stock-' . $request->input('stock_id'), 40);
         try {
             $date = $request->input('date') ?? now();
             kartuStock::proteksiBackdate($date);
@@ -145,14 +145,14 @@ class KartuStock extends Model
                 'msg' => 'kartu stock timeout'
             ];
         } catch (Throwable $th) {
-            $lock->release();
+            // $lock->release();
             return [
                 'status' => 0,
                 'msg' => $th->getMessage()
             ];
         } finally {
         }
-        $lock->release();
+        // $lock->release();
         return [
             'status' => 1,
             'msg' => $kartu

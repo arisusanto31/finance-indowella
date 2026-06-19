@@ -47,7 +47,7 @@ class KartuBahanJadi extends Model
     public static function create(Request $request)
     {
         info('TRYING UPLOAD BHJ ' . json_encode($request->all()));
-        $lock = Cache::lock('kartu-bahanjadi-' . $request->input('stock_id'), 40);
+        // $lock = Cache::lock('kartu-bahanjadi-' . $request->input('stock_id'), 40);
         try {
             $date = $request->input('date') ?? now();
             self::proteksiBackdate($date);
@@ -134,13 +134,13 @@ class KartuBahanJadi extends Model
                 'msg' => 'kartu stock timeout'
             ];
         } catch (Throwable $th) {
-            $lock->release();
+            // $lock->release();
             return [
                 'status' => 0,
                 'msg' => $th->getMessage()
             ];
         } finally {
-            $lock->release();
+           // $lock->release();
         }
         return [
             'status' => 1,

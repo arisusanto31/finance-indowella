@@ -45,7 +45,7 @@ class KartuBDP extends Model
     public static function create(Request $request)
     {
         info('TRYING UPLOAD ' . json_encode($request->all()));
-        $lock = Cache::lock('kartu-bdp-' . $request->input('stock_id'), 40);
+      //  $lock = Cache::lock('kartu-bdp-' . $request->input('stock_id'), 40);
         try {
             $date = $request->input('date') ?? now();
             self::proteksiBackdate($date);
@@ -139,13 +139,13 @@ class KartuBDP extends Model
                 'msg' => 'kartu stock timeout'
             ];
         } catch (Throwable $th) {
-            $lock->release();
+            // $lock->release();
             return [
                 'status' => 0,
                 'msg' => $th->getMessage()
             ];
         } finally {
-            $lock->release();
+           // $lock->release();
         }
         return [
             'status' => 1,

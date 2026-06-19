@@ -61,11 +61,11 @@ class KartuDPSales extends Model
         $SOID = $request->input('sales_order_id');
         $invoiceNumber = $request->input('invoice_pack_number');
         $invoiceID = $request->input('invoice_pack_id');
-        $lock = Cache::lock('create-kartu-piutang' . $personType . '-' . $personID, 90);
+        // $lock = Cache::lock('create-kartu-piutang' . $personType . '-' . $personID, 90);
         info('kartu piutang - trying to create kartu piutang');
         try {
             try {
-                $lock->block(30);
+                // $lock->block(30);
                 $date = $request->input('date') ?? now();
                 self::proteksiBackdate($date);
 
@@ -132,7 +132,7 @@ class KartuDPSales extends Model
                 //wes sudah terhitung sema tinggal pudate
             } catch (LockTimeoutException $e) {
             } finally {
-                $lock->release();
+                // $lock->release();
             }
             info('kartu piutang - success create kartu piutang');
             return [
@@ -140,7 +140,7 @@ class KartuDPSales extends Model
                 'msg' => $kartu
             ];
         } catch (Throwable $th) {
-            $lock->release();
+            // $lock->release();
             info('kartu - update kartu bermasalah' . $th->getMessage());
             return [
                 'status' => 0,

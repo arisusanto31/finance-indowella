@@ -72,10 +72,10 @@ class KartuInventory extends Model
     {
 
         $invID = $request->input('inventory_id');
-        $lock = Cache::lock('inventory-' . $invID, 30);
+        // $lock = Cache::lock('inventory-' . $invID, 30);
         //diini kita ambil dulu kartu yang lama
         try {
-            $lock->block(15);
+            // $lock->block(15);
             $date = $request->input('date') ?? now();
             self::proteksiBackdate($date);
             $inv= Inventory::find($invID);
@@ -186,22 +186,22 @@ class KartuInventory extends Model
             //masukkan data baru dengan nilai buku yang baru yaa..
             return ['status' => 1, 'msg' => $ki];
         } catch (ValidationException $e) {
-            $lock->release();
+            // $lock->release();
             return [
                 'status' => 0,
                 'msg' => getErrorValidation($e)
             ];
         } catch (LockTimeoutException $e) {
-            $lock->release();
+            // $lock->release();
             return ['status' => 0, 'msg' => 'lock time error'];
         } catch (Throwable $th) {
-            $lock->release();
+            // $lock->release();
             return [
                 'status' => 0,
                 'msg' => $th->getMessage()
             ];
         } finally {
-            $lock->release();
+            // $lock->release();
         }
         return [
             'status' => 0,

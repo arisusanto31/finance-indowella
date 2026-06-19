@@ -70,7 +70,7 @@ class KartuHutang extends Model
         $personID = $request->input('person_id');
         $personType = $request->input('person_type');
         $facturNumber = $request->input('factur_supplier_number');
-        $lock = Cache::lock('create-kartu-utang' . $personType . '-' . $personID, 90);
+        // $lock = Cache::lock('create-kartu-utang' . $personType . '-' . $personID, 90);
         info('kartu utang - trying to create kartu utang');
         try {
 
@@ -145,14 +145,14 @@ class KartuHutang extends Model
 
             } catch (LockTimeoutException $e) {
             } finally {
-                $lock->release();
+                // $lock->release();
             }
             return [
                 'status' => 1,
                 'msg' => $kartu
             ];
         } catch (Throwable $th) {
-            $lock->release();
+            // $lock->release();
             info('kartu - update kartu bermasalah' . $th->getMessage());
             return [
                 'status' => 0,
