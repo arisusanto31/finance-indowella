@@ -170,18 +170,21 @@ class SalesOrderController extends Controller
     public function storeQueue(Request $request)
     {
         //nah ini kita buat antrian ya lur 
-        $thecreated = createCarbon($request->input('created_at'));
-
-        $month = $thecreated->format('Y-m');
-        $descProcess='import-sales-' . $month;
-        $bgProcess = BackgroundProcess::make(
-            bookID(),
-            'admin/invoice/sales-order',
-            $descProcess,
-            null
-        );
-        $dataRequest = json_encode($request->all());
-        ImportSalesJob::dispatch(bookID(), $dataRequest,$bgProcess->id)->onQueue('default');
+        $alldata = $request->input('data');
+        $alldata = json_decode($alldata, true);
+        foreach ($alldata as $data) {
+            $thecreated = createCarbon($data['created_at']);
+            $month = $thecreated->format('Y-m');
+            $descProcess = 'import-sales-' . $month;
+            $bgProcess = BackgroundProcess::make(
+                bookID(),
+                'admin/invoice/sales-order',
+                $descProcess,
+                null
+            );
+            $dataRequest = json_encode($data);
+            ImportSalesJob::dispatch(bookID(), $dataRequest, $bgProcess->id)->onQueue('default');
+        }
         return [
             'status' => 1,
             'msg' => $bgProcess
@@ -1233,7 +1236,7 @@ class SalesOrderController extends Controller
             ];
         } catch (Throwable $e) {
             DB::rollBack();
-            info('error in process dagang '. $e->getMessage());
+            info('error in process dagang ' . $e->getMessage());
             Log::error('Error in processDagang: ' . $e->getMessage());
             return ['status' => 0, 'msg' => $e->getMessage()];
         }

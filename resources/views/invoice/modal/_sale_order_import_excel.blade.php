@@ -145,7 +145,7 @@
                 }
                 allTrans = collect(res.data).keyBy('id').all();
                 console.log(allTrans);
-                
+
                 res.data.forEach(function(item, i) {
                     let detailsHtml = '';
                     jumlah = item.details.length;
@@ -300,11 +300,19 @@
         $('#btn-close-modal').prop('disabled', true);
         totalProgress = 0;
         elems = $('.select-row-checkbox:checked');
-
+        group30id = [];
         for (const el of elems) {
             let id = $(el).data('id');
-            await importData(id, isPPN);
-            totalProgress++;
+            if (group30id.length < 30) {
+
+                group30id.push(id);
+            } else {
+
+                await importData(group30id, isPPN);
+                totalProgress += group30id.length;
+                group30id = [];
+            }
+
             let progressPercent = Math.round((totalProgress / totalCount) * 100);
             $('#progress-import').css('width', progressPercent + '%');
             $('#progress-import').html(progressPercent + '%');
@@ -332,7 +340,7 @@
     var tokoParents = @json($toko_parents);
 
     function importDataSingle(id, isPPN = 0) {
-        importData(id, isPPN).then(function(res) {
+        importData([id], isPPN).then(function(res) {
             console.log(res);
             if (res.status == 0) {
                 swalInfo('opps', res.msg, 'error');
@@ -343,66 +351,74 @@
         });
     }
 
-    function importData(id, isPPN = 0) {
+    function importData(ids, isPPN = 0) {
 
         return new Promise((resolve, reject) => {
-            let data = allTrans[id];
-            var date = null;
-            var tokoid = null;
-            isCustomImport = $('#is-custom-import').is(':checked');
-            if (isCustomImport) {
-                tokoid = $('#select-toko option:selected').val();
-                if (!tokoid) {
-                    swalInfo('opps', 'tolong pilih toko', 'info');
-                    return reject(new Error('Toko belum dipilih'));
+
+            var dataPosts = [];
+            for (const id of ids) {
+                let data = allTrans[id];
+                var date = null;
+                var tokoid = null;
+                isCustomImport = $('#is-custom-import').is(':checked');
+                if (isCustomImport) {
+                    tokoid = $('#select-toko option:selected').val();
+                    if (!tokoid) {
+                        swalInfo('opps', 'tolong pilih toko', 'info');
+                        return reject(new Error('Toko belum dipilih'));
+                    }
+                    date = $('#select-date').val();
+                    if (!date) {
+                        swalInfo('opps', 'tolong pilih tanggal import', 'info');
+                        return reject(new Error('Tanggal belum dipilih'));
+                    }
+                } else {
+                    tokoid = null;
+                    date = null;
+                    //cek dulu jangan2 ada toko_id ynang belum ada linknya 
+                    if (tokoParents[data.toko_id] == undefined || tokoParents[data.toko_id] == null) {
+                        swalInfo('opps', `Toko ${data.toko_id} belum ada link ke parent toko`, 'info');
+                        return reject(new Error('Toko belum ada link ke parent toko'));
+                    }
                 }
-                date = $('#select-date').val();
-                if (!date) {
-                    swalInfo('opps', 'tolong pilih tanggal import', 'info');
-                    return reject(new Error('Tanggal belum dipilih'));
-                }
-            } else {
-                tokoid = null;
-                date = null;
-                //cek dulu jangan2 ada toko_id ynang belum ada linknya 
-                if (tokoParents[data.toko_id] == undefined || tokoParents[data.toko_id] == null) {
-                    swalInfo('opps', `Toko ${data.toko_id} belum ada link ke parent toko`, 'info');
-                    return reject(new Error('Toko belum ada link ke parent toko'));
-                }
+
+                let dataPost = {
+                    created_at: date ? date : data.created_at,
+                    customer_name: data.customer_name,
+                    is_ppn: isPPN,
+                    sales_order_number: data.package_number,
+                    custom_stock_name: data.details.map(item => item.stock_name),
+                    reference_stock_id: data.details.map(item => item.stock_id),
+                    reference_stock_type: data.stock_type,
+                    quantity: data.details.map(item => item.quantity),
+                    qtyjadi: data.details.map(item => item.qtyjadi == undefined ? item.quantity : item.qtyjadi),
+                    price_unit: data.details.map(item => isPPN ? (item.price / 1.11) : item.price),
+                    pricejadi: data.details.map(item => isPPN ? (item.pricejadi > 0 ? item.pricejadi / 1.11 : item.price / 1.11) : (item.pricejadi > 0 ? item.pricejadi : item.price)),
+                    ppn_unit: data.details.map(item => isPPN ? (item.price / 1.11 * 0.11) : 0),
+                    unit: data.details.map(item => item.unit),
+                    unitjadi: data.details.map(item => item.unitjadi),
+                    total_price: data.details.map(item => isPPN ? (item.total_price / 1.11) : item.total_price),
+                    akun_cash_kind_name: data.akun_cash_kind_name,
+                    toko_id: tokoid ? tokoid : tokoParents[data.toko_id],
+                    detail_reference_id: data.details.map(item => item.reference_id),
+                    detail_reference_type: data.details.map(item => item.reference_type),
+                    reference_id: data.id,
+                    reference_type: data.reference_type,
+                    reassign_number: true,
+                };
+                dataPosts.push(dataPost);
             }
 
-            let dataPost = {
-                created_at: date ? date : data.created_at,
-                customer_name: data.customer_name,
-                is_ppn: isPPN,
-                sales_order_number: data.package_number,
-                custom_stock_name: data.details.map(item => item.stock_name),
-                reference_stock_id: data.details.map(item => item.stock_id),
-                reference_stock_type: data.stock_type,
-                quantity: data.details.map(item => item.quantity),
-                qtyjadi: data.details.map(item => item.qtyjadi == undefined ? item.quantity : item.qtyjadi),
-                price_unit: data.details.map(item => isPPN ? (item.price / 1.11) : item.price),
-                pricejadi: data.details.map(item => isPPN ? (item.pricejadi > 0 ? item.pricejadi / 1.11 : item.price / 1.11) : (item.pricejadi > 0 ? item.pricejadi : item.price)),
-                ppn_unit: data.details.map(item => isPPN ? (item.price / 1.11 * 0.11) : 0),
-                unit: data.details.map(item => item.unit),
-                unitjadi: data.details.map(item => item.unitjadi),
-                total_price: data.details.map(item => isPPN ? (item.total_price / 1.11) : item.total_price),
-                akun_cash_kind_name: data.akun_cash_kind_name,
-                toko_id: tokoid ? tokoid : tokoParents[data.toko_id],
-                detail_reference_id: data.details.map(item => item.reference_id),
-                detail_reference_type: data.details.map(item => item.reference_type),
-                reference_id: data.id,
-                reference_type: data.reference_type,
-                reassign_number:true,
-                _token: '{{ csrf_token() }}'
-            };
 
-            console.log(dataPost);
 
             $.ajax({
                 url: '{{ route("invoice.sales-order.store-queue") }}',
-                data: dataPost,
+                data: {
+                    data: JSON.stringify(dataPosts),
+                    _token: '{{ csrf_token() }}'
+                },
                 method: 'post',
+                contentType: 'application/json',
                 success: function(res) {
                     if (res.status == 1) {
                         $('#status' + id).html(

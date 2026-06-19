@@ -59,7 +59,12 @@ class BackgroundProcess extends Model
                 $backgroundProcess->success_task = 0;
                 $backgroundProcess->failed_task = 0;
                 $backgroundProcess->progress = 0;
-                $backgroundProcess->total_task = $total_task == null ? $backgroundProcess->total_task + 1 : $total_task;
+                if ($total_task !== null) {
+                    $backgroundProcess->total_task = $total_task;
+                } else {
+                    $backgroundProcess->increment('total_task');
+                    $backgroundProcess->refresh();
+                }
                 $backgroundProcess->status = 'processing';
                 $backgroundProcess->save();
             }
