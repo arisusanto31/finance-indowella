@@ -303,7 +303,7 @@
         group30id = [];
         for (const el of elems) {
             let id = $(el).data('id');
-            if (group30id.length < 30) {
+            if (group30id.length < 10) {
 
                 group30id.push(id);
             } else {
@@ -410,7 +410,7 @@
             }
 
 
-
+            console.log('dataPosts', dataPosts);
             $.ajax({
                 url: '{{ route("invoice.sales-order.store-queue") }}',
                 data: {
@@ -418,7 +418,6 @@
                     _token: '{{ csrf_token() }}'
                 },
                 method: 'post',
-                contentType: 'application/json',
                 success: function(res) {
                     if (res.status == 1) {
                         $('#status' + id).html(
