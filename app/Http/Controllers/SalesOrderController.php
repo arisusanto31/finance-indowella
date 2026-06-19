@@ -1125,33 +1125,25 @@ class SalesOrderController extends Controller
         $time = microtime(true);
 
         try {
-            DB::beginTransaction();
+         
             //tanpa BDP, bahan jadi, langsung invoice dari barang dagang
             $id = $request->input('id');
             $modeNoRecalculate = true;
 
             $salesOrder = SalesOrder::find($id);
             if (!$salesOrder) {
-                return [
-                    'status' => 0,
-                    'msg' => 'sales order ' . $id . ' tidak ditemukan'
-                ];
+                throw new \Exception('Sales order tidak ditemukan');
             }
             if (!$salesOrder->is_final) {
-                return [
-                    'status' => 0,
-                    'msg' => 'Sales order ' . $id . ' belum dalam status final'
-                ];
+                throw new \Exception('Sales order ' . $id . ' belum dalam status final');
             }
             $salesOrderNumber = $salesOrder->sales_order_number;
 
             //cek dulu aja jangan jangan udah difinalkan
             $existingInv = InvoiceSaleDetail::where('sales_order_number', $salesOrderNumber)->count();
             if ($existingInv > 0) {
-                return [
-                    'status' => 0,
-                    'msg' => 'sales order ' . $salesOrderNumber . ' sudah memiliki invoice. proses secara manual jika ingin memprosesnya'
-                ];
+                throw new \Exception('Sales order ' . $salesOrderNumber . ' sudah memiliki invoice. proses secara manual jika ingin memprosesnya');
+            
             }
             $data = [];
             $details = $salesOrder->details;
@@ -1185,10 +1177,10 @@ class SalesOrderController extends Controller
             ];
 
             CustomLogger::log('invoicing', "info", "*proses utama* persiapan proses " . $salesOrder->sales_order_number . ". proces time : " . (microtime(true) - $time) . " seconds");
-
+            DB::beginTransaction();
             $st = InvoiceSaleController::createInvoices(new Request($dataFix), $time, $modeNoRecalculate, false);
             if ($st['status'] == 0) {
-                return $st;
+                throw new \Exception($st['msg']);
             }
             CustomLogger::log('invoicing', "info", "*proses utama* create all sub invoice " . $salesOrder->sales_order_number . ". proces time : " . (microtime(true) - $time) . " seconds");
 
@@ -1204,10 +1196,7 @@ class SalesOrderController extends Controller
             } else {
                 $toko = Toko::find($salesOrder->toko_id);
                 if (!$toko) {
-                    return [
-                        'status' => 0,
-                        'msg' => 'Toko tidak ditemukan'
-                    ];
+                    throw new \Exception('Toko tidak ditemukan untuk toko id ' . $salesOrder->toko_id);
                 }
                 $codeBayar = $toko->default_code_group_kas;
             }
@@ -1226,7 +1215,7 @@ class SalesOrderController extends Controller
 
 
             if ($st['status'] == 0) {
-                return $st;
+               throw new \Exception($st['msg']);
             }
             $salesOrder->updateStatus();
             DB::commit();

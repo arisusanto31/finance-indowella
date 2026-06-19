@@ -421,8 +421,10 @@
                 method: 'post',
                 success: function(res) {
                     if (res.status == 1) {
-                        $('#status' + id).html(
-                            `<i class="fas fa-check color-primary"></i> terimport`);
+                        for (id of ids) {
+                            $('#status' + id).html(
+                                `<i class="fas fa-check color-primary"></i> terimport`);
+                        }
                     }
 
                     resolve(res); // kasih tahu "await" kalau sudah selesai

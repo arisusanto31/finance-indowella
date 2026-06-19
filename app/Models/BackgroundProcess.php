@@ -104,6 +104,7 @@ class BackgroundProcess extends Model
 
         $bg->hitungProgress();
         $bg->save();
+        info('background process ' . $bg->id . ' failed incremented.');
     }
 
     public static function successTask($bookid, $description_process)
