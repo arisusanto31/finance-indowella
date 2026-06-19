@@ -311,11 +311,12 @@
                 await importData(group30id, isPPN);
                 totalProgress += group30id.length;
                 group30id = [];
+                let progressPercent = Math.round((totalProgress / totalCount) * 100);
+                $('#progress-import').css('width', progressPercent + '%');
+                $('#progress-import').html(progressPercent + '%');
             }
 
-            let progressPercent = Math.round((totalProgress / totalCount) * 100);
-            $('#progress-import').css('width', progressPercent + '%');
-            $('#progress-import').html(progressPercent + '%');
+
 
         }
         $('#btn-close-modal').prop('disabled', false);
