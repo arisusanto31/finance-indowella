@@ -47,6 +47,8 @@ class InvoicingProcessJob implements ShouldQueue
             $saleOrder = SalesOrder::find($id);
             if (!$saleOrder) {
                 $this->info("Sales order with ID $id not found. Exiting job.");
+                $bg->failed();
+                info('error on processing invoicing job for sales order ID ' . $this->id . ' and book ID ' . $this->bookid . '. Sales order not found.');
                 return;
             }
             if ($saleOrder->is_final == 0) {
@@ -58,6 +60,7 @@ class InvoicingProcessJob implements ShouldQueue
                 } else {
                     $this->info("Failed to mark sales order ID $id as final for book ID $bookid. Status: " . json_encode($st));
                     $bg->failed();
+                    info('error on processing invoicing job for sales order ID ' . $this->id . ' and book ID ' . $this->bookid . '. Status: ' . json_encode($st));
                     return;
                 }
             }
@@ -68,6 +71,7 @@ class InvoicingProcessJob implements ShouldQueue
                 $bg->success();
             } else {
                 $bg->failed();
+                info('error on processing invoicing job for sales order ID ' . $this->id . ' and book ID ' . $this->bookid . '. Status: ' . json_encode($st));
                 $this->info("Failed to process sales order ID $id for book ID $bookid. Status: " . json_encode($st));
             }
         } catch (\Exception $e) {
