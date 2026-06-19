@@ -172,6 +172,7 @@ class SalesOrderController extends Controller
         //nah ini kita buat antrian ya lur 
         $alldata = $request->input('data');
         $alldata = json_decode($alldata, true);
+
         foreach ($alldata as $data) {
             $thecreated = createCarbon($data['created_at']);
             $month = $thecreated->format('Y-m');
@@ -210,7 +211,7 @@ class SalesOrderController extends Controller
                 'unit' => 'required|array',
                 'unit.*' => 'required|string',
                 'total_price' => 'required|array',
-                'total_price.*' => 'required|string',
+                'total_price.*' => 'required|numeric',
                 'toko_id' => 'required|integer',
                 'reference_id' => 'nullable|integer',
                 'reference_type' => 'nullable|string',
@@ -1125,7 +1126,7 @@ class SalesOrderController extends Controller
         $time = microtime(true);
 
         try {
-         
+
             //tanpa BDP, bahan jadi, langsung invoice dari barang dagang
             $id = $request->input('id');
             $modeNoRecalculate = true;
@@ -1143,7 +1144,6 @@ class SalesOrderController extends Controller
             $existingInv = InvoiceSaleDetail::where('sales_order_number', $salesOrderNumber)->count();
             if ($existingInv > 0) {
                 throw new \Exception('Sales order ' . $salesOrderNumber . ' sudah memiliki invoice. proses secara manual jika ingin memprosesnya');
-            
             }
             $data = [];
             $details = $salesOrder->details;
@@ -1215,7 +1215,7 @@ class SalesOrderController extends Controller
 
 
             if ($st['status'] == 0) {
-               throw new \Exception($st['msg']);
+                throw new \Exception($st['msg']);
             }
             $salesOrder->updateStatus();
             DB::commit();
