@@ -78,7 +78,6 @@ class InvoicingProcess extends Command
                 $failedTask = 0;
                 foreach ($sales as $sale) {
                     InvoicingProcessJob::dispatch($bookid, $sale->id, $theBG->id)->onQueue('default');
-                    
                 }
 
 

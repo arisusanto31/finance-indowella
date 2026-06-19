@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class BackgroundProcess extends Model
@@ -38,29 +39,88 @@ class BackgroundProcess extends Model
         });
     }
 
-    public static function make($bookid,$monitoring_url, $description_process, $total_task)
+    public static function make($bookid, $monitoring_url, $description_process, $total_task)
     {
-        $backgroundProcess = BackgroundProcess::where('monitoring_url',$monitoring_url)
-            ->where('book_journal_id', $bookid)
-            ->where('description_process', $description_process)
-            ->first();
-        if (!$backgroundProcess) {
-            $backgroundProcess = BackgroundProcess::create([
-                'monitoring_url' => $monitoring_url,
-                'total_task' => $total_task,
-                'description_process' => $description_process,
-                'status' => 'processing',
-                'book_journal_id' => $bookid,
-            ]);
-        } else {
-            $backgroundProcess->success_task = 0;
-            $backgroundProcess->failed_task = 0;
-            $backgroundProcess->progress = 0;
-            $backgroundProcess->total_task = $total_task;
-            $backgroundProcess->status = 'processing';
-            $backgroundProcess->save();
+        $lock = Cache::lock('bg_process_' . $bookid . '_' . $description_process, 10);
+        if ($lock->get()) {
+            $backgroundProcess = BackgroundProcess::where('monitoring_url', $monitoring_url)
+                ->where('book_journal_id', $bookid)
+                ->where('description_process', $description_process)
+                ->first();
+            if (!$backgroundProcess) {
+                $backgroundProcess = BackgroundProcess::create([
+                    'monitoring_url' => $monitoring_url,
+                    'total_task' => $total_task ?? 1,
+                    'description_process' => $description_process,
+                    'status' => 'processing',
+                    'book_journal_id' => $bookid,
+                ]);
+            } else {
+                $backgroundProcess->success_task = 0;
+                $backgroundProcess->failed_task = 0;
+                $backgroundProcess->progress = 0;
+                $backgroundProcess->total_task = $total_task == null ? $backgroundProcess->total_task + 1 : $total_task;
+                $backgroundProcess->status = 'processing';
+                $backgroundProcess->save();
+            }
+            $lock->release();
         }
         $theBG = BackgroundProcess::find($backgroundProcess->id);
         return $theBG;
+    }
+
+    public static function failedTask($bookid, $description_process)
+    {
+        $lock = Cache::lock('bg_process_' . $bookid . '_' . $description_process, 10);
+        if ($lock->get()) {
+            $bg = BackgroundProcess::where('description_process', $description_process)->first();
+            $bg->failed_task = $bg->failed_task + 1;
+            $bg->hitungProgress();
+            $bg->save();
+            $lock->release();
+        }
+    }
+
+    public function failed()
+    {
+        $lock = Cache::lock('bg_process_' . $this->book_journal_id . '_' . $this->description_process, 10);
+        if ($lock->get()) {
+            $bg = BackgroundProcess::find($this->id);
+            $bg->failed_task = $bg->failed_task + 1;
+            $bg->hitungProgress();
+            $bg->save();
+            $lock->release();
+        }
+    }
+
+    public static function successTask($bookid, $description_process)
+    {
+        $lock = Cache::lock('bg_process_' . $bookid . '_' . $description_process, 10);
+        if ($lock->get()) {
+            $bg = BackgroundProcess::where('description_process', $description_process)->first();
+            $bg->success_task = $bg->success_task + 1;
+            $bg->hitungProgress();
+            $bg->save();
+            $lock->release();
+        }
+    }
+
+
+    public function success()
+    {
+        $lock = Cache::lock('bg_process_' . $this->book_journal_id . '_' . $this->description_process, 10);
+        if ($lock->get()) {
+            $bg = BackgroundProcess::find($this->id);
+            $bg->success_task = $bg->success_task + 1;
+            $bg->hitungProgress();
+            $bg->save();
+            $lock->release();
+        }
+    }
+
+
+    public function hitungProgress()
+    {
+        $this->progress = ($this->success_task + $this->failed_task) / $this->total_task * 100;
     }
 }

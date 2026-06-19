@@ -400,7 +400,7 @@
             console.log(dataPost);
 
             $.ajax({
-                url: '{{ route("invoice.sales-order.store") }}',
+                url: '{{ route("invoice.sales-order.store-queue") }}',
                 data: dataPost,
                 method: 'post',
                 success: function(res) {

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Imports\excel_kartu_stock\_stock_keluar_import;
 use App\Imports\ExcelPenjualanImport;
+use App\Jobs\ImportSalesJob;
 use App\Models\BackgroundProcess;
 use App\Models\BookJournal;
 use App\Models\Customer;
@@ -166,8 +167,27 @@ class SalesOrderController extends Controller
     }
 
 
+    public function storeQueue(Request $request)
+    {
+        //nah ini kita buat antrian ya lur 
+        $thecreated = createCarbon($request->input('created_at'));
 
-    public function store(Request $request)
+        $month = $thecreated->format('Y-m');
+        $descProcess='import-sales-' . $month;
+        $bgProcess = BackgroundProcess::make(
+            bookID(),
+            'admin/invoice/sales-order',
+            $descProcess,
+            null
+        );
+        $dataRequest = json_encode($request->all());
+        ImportSalesJob::dispatch(bookID(), $dataRequest,$bgProcess->id)->onQueue('default');
+        return [
+            'status' => 1,
+            'msg' => $bgProcess
+        ];
+    }
+    public static function store(Request $request)
     {
         DB::beginTransaction();
         try {
@@ -201,7 +221,6 @@ class SalesOrderController extends Controller
 
             ]);
 
-
             if ($request->input('is_ppn') == 'on') {
                 $isPPN = 1;
             } else if ($request->input('is_ppn') == 1) {
@@ -220,7 +239,6 @@ class SalesOrderController extends Controller
                     'msg' => 'sudah terupdate'
                 ];
             }
-
 
             //cek agar tidak ada duplikasi global number
             $cek = SalesOrder::where('sales_order_number', $salesOrderNumber . '-draft')->first();
@@ -1065,7 +1083,6 @@ class SalesOrderController extends Controller
             Log::error('Error in kebutuhanProduksiMarked: ' . $e->getMessage());
             return ['status' => 0, 'msg' => $e->getMessage()];
         }
-     
     }
 
     public function showKebutuhanProduksiMarked($token)
@@ -1134,7 +1151,6 @@ class SalesOrderController extends Controller
                 ];
             }
             $data = [];
-
             $details = $salesOrder->details;
             foreach ($details as $detail) {
                 $data[] = [
@@ -1165,13 +1181,13 @@ class SalesOrderController extends Controller
                 'custom_stock_name' => collect($data)->pluck('custom_stock_name')->all()
             ];
 
-            CustomLogger::log('invoicing', "info", "*proses utama* persiapan proses ".$salesOrder->sales_order_number.". proces time : " . (microtime(true) - $time) . " seconds");
+            CustomLogger::log('invoicing', "info", "*proses utama* persiapan proses " . $salesOrder->sales_order_number . ". proces time : " . (microtime(true) - $time) . " seconds");
 
             $st = InvoiceSaleController::createInvoices(new Request($dataFix), $time, $modeNoRecalculate, false);
             if ($st['status'] == 0) {
                 return $st;
             }
-            CustomLogger::log('invoicing', "info", "*proses utama* create all sub invoice ".$salesOrder->sales_order_number.". proces time : " . (microtime(true) - $time) . " seconds");
+            CustomLogger::log('invoicing', "info", "*proses utama* create all sub invoice " . $salesOrder->sales_order_number . ". proces time : " . (microtime(true) - $time) . " seconds");
 
             $invoiceNumber = $st['pack']->invoice_number;
             $amount = $st['pack']->total_price + $st['pack']->total_ppn_k;
@@ -1203,7 +1219,7 @@ class SalesOrderController extends Controller
                 'codegroup_bayar' => $codeBayar,
                 'codegroup_piutang' => $codeGroupPiutang,
             ]), $modeNoRecalculate, false);
-            CustomLogger::log('invoicing', "info", "*proses utama* submit bayar sales ".$salesOrder->sales_order_number.". proces time : " . (microtime(true) - $time) . " seconds");
+            CustomLogger::log('invoicing', "info", "*proses utama* submit bayar sales " . $salesOrder->sales_order_number . ". proces time : " . (microtime(true) - $time) . " seconds");
 
 
             if ($st['status'] == 0) {
