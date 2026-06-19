@@ -132,6 +132,7 @@ class BackgroundProcess extends Model
 
         $bg->hitungProgress();
         $bg->save();
+        info('background process ' . $bg->id . ' success incremented.');
     }
 
 
