@@ -17,6 +17,7 @@ class SalesOrder extends Model
     protected $fillable = [
         'book_journal_id',
         'sales_order_number',
+        'draft_number',
         'toko_id',
         'customer_id',
         'total_price',
@@ -376,7 +377,7 @@ class SalesOrder extends Model
 
     public function lunaskanDagang()
     {
-       $starttime= microtime(true);
+        $starttime = microtime(true);
         DB::BeginTransaction();
         try {
             $invoicePack = InvoicePack::where('sales_order_id', $this->id)->first();
@@ -386,7 +387,7 @@ class SalesOrder extends Model
                     'msg' => 'Invoice pack tidak ditemukan'
                 ];
             }
-            info('repairlunas - '.$this->id.'- cari invoice pack '.(microtime(true)-$starttime).' seconds');
+            info('repairlunas - ' . $this->id . '- cari invoice pack ' . (microtime(true) - $starttime) . ' seconds');
 
             $invoiceNumber = $invoicePack->invoice_number;
             $amount = $invoicePack->total_price + $invoicePack->total_ppn_k;
@@ -410,7 +411,7 @@ class SalesOrder extends Model
             if (!$codeBayar) {
                 throw new \Exception('Kode bayar tidak ditemukan untuk toko ' . $this->toko_id);
             }
-            info('repairlunas - '.$this->id.'- cari code bayar '.(microtime(true)-$starttime).' seconds');
+            info('repairlunas - ' . $this->id . '- cari code bayar ' . (microtime(true) - $starttime) . ' seconds');
             $codeGroupPiutang = 120001;
             $st = InvoiceSaleController::submitBayarSalesInvoice(new Request([
                 'invoice_number' => $invoiceNumber,
@@ -419,7 +420,7 @@ class SalesOrder extends Model
                 'codegroup_bayar' => $codeBayar,
                 'codegroup_piutang' => $codeGroupPiutang,
             ]), false, false);
-            info('repairlunas - '.$this->id.'- submit bayar '.(microtime(true)-$starttime).' seconds');
+            info('repairlunas - ' . $this->id . '- submit bayar ' . (microtime(true) - $starttime) . ' seconds');
 
             if ($st['status'] == 0) {
                 return $st;
@@ -439,81 +440,82 @@ class SalesOrder extends Model
         }
     }
 
-    public function repairInvoice(){
-            $time= microtime(true);
+    public function repairInvoice()
+    {
+        $time = microtime(true);
 
 
-            $salesOrder = $this;
-            $salesOrderNumber = $salesOrder->sales_order_number;
+        $salesOrder = $this;
+        $salesOrderNumber = $salesOrder->sales_order_number;
 
-            //hapus dulu aja yang ga sip
-            $detailKartu = DetailKartuInvoice::where('sales_order_number',$salesOrderNumber)
-                ->whereIn('account_code_group',[140001,401000,212500])->get();
-            foreach($detailKartu as $detail){
-                $st= JournalController::destroy($detail->journal_id,1);
-                if($st['status']==0){
-                    return [
-                        'status'=>0,
-                        'msg'=>'gagal menghapus jurnal '.$detail->journal_id.' untuk sales order '.$salesOrderNumber.' karena '.$st['msg']
-                    ];
-                }
-            }
-
-
-            //cek dulu aja jangan jangan udah difinalkan
-            $existingInv = InvoiceSaleDetail::where('sales_order_number', $salesOrderNumber)->count();
-            if ($existingInv > 0) {
+        //hapus dulu aja yang ga sip
+        $detailKartu = DetailKartuInvoice::where('sales_order_number', $salesOrderNumber)
+            ->whereIn('account_code_group', [140001, 401000, 212500])->get();
+        foreach ($detailKartu as $detail) {
+            $st = JournalController::destroy($detail->journal_id, 1);
+            if ($st['status'] == 0) {
                 return [
                     'status' => 0,
-                    'msg' => 'sales order ' . $salesOrderNumber . ' sudah memiliki invoice. proses secara manual jika ingin memprosesnya'
+                    'msg' => 'gagal menghapus jurnal ' . $detail->journal_id . ' untuk sales order ' . $salesOrderNumber . ' karena ' . $st['msg']
                 ];
             }
-            $data = [];
+        }
 
-            $details = $salesOrder->details;
-            foreach ($details as $detail) {
-                $data[] = [
-                    'stock_id' => $detail->stock_id,
-                    'quantity' => $detail->quantity,
-                    'unit' => $detail->unit,
-                    'sales_detail_id' => $detail->id,
-                    'sales_order_number' => $salesOrderNumber,
-                    'sales_order_id' => $salesOrder->id,
-                    'code_group_penjualan' => 401000,
-                    'code_group_persediaan' => 140001,
-                    'code_group_piutang' => 120001,
-                    'date' => $detail->date,
-                    'custom_stock_name' => null
-                ];
-            }
-            $dataFix = [
+
+        //cek dulu aja jangan jangan udah difinalkan
+        $existingInv = InvoiceSaleDetail::where('sales_order_number', $salesOrderNumber)->count();
+        if ($existingInv > 0) {
+            return [
+                'status' => 0,
+                'msg' => 'sales order ' . $salesOrderNumber . ' sudah memiliki invoice. proses secara manual jika ingin memprosesnya'
+            ];
+        }
+        $data = [];
+
+        $details = $salesOrder->details;
+        foreach ($details as $detail) {
+            $data[] = [
+                'stock_id' => $detail->stock_id,
+                'quantity' => $detail->quantity,
+                'unit' => $detail->unit,
+                'sales_detail_id' => $detail->id,
                 'sales_order_number' => $salesOrderNumber,
                 'sales_order_id' => $salesOrder->id,
-                'stock_id' => collect($data)->pluck('stock_id')->all(),
-                'quantity' => collect($data)->pluck('quantity')->all(),
-                'unit' => collect($data)->pluck('unit')->all(),
-                'sales_detail_id' => collect($data)->pluck('sales_detail_id')->all(),
-                'code_group_penjualan' => collect($data)->pluck('code_group_penjualan')->all(),
-                'code_group_persediaan' => collect($data)->pluck('code_group_persediaan')->all(),
-                'code_group_piutang' => collect($data)->pluck('code_group_piutang')->all(),
-                'date' => $salesOrder->created_at,
-                'custom_stock_name' => collect($data)->pluck('custom_stock_name')->all()
+                'code_group_penjualan' => 401000,
+                'code_group_persediaan' => 140001,
+                'code_group_piutang' => 120001,
+                'date' => $detail->date,
+                'custom_stock_name' => null
             ];
+        }
+        $dataFix = [
+            'sales_order_number' => $salesOrderNumber,
+            'sales_order_id' => $salesOrder->id,
+            'stock_id' => collect($data)->pluck('stock_id')->all(),
+            'quantity' => collect($data)->pluck('quantity')->all(),
+            'unit' => collect($data)->pluck('unit')->all(),
+            'sales_detail_id' => collect($data)->pluck('sales_detail_id')->all(),
+            'code_group_penjualan' => collect($data)->pluck('code_group_penjualan')->all(),
+            'code_group_persediaan' => collect($data)->pluck('code_group_persediaan')->all(),
+            'code_group_piutang' => collect($data)->pluck('code_group_piutang')->all(),
+            'date' => $salesOrder->created_at,
+            'custom_stock_name' => collect($data)->pluck('custom_stock_name')->all()
+        ];
 
 
-            $st = InvoiceSaleController::createInvoices(new Request($dataFix), $time, false, false);
-            if ($st['status'] == 0){
-               return false;
-            }
-            $this->updateStatus();
-            return true;
+        $st = InvoiceSaleController::createInvoices(new Request($dataFix), $time, false, false);
+        if ($st['status'] == 0) {
+            return false;
+        }
+        $this->updateStatus();
+        return true;
     }
 
     public function repairPembayaran()
     {
-        $start=microtime(true);
+        $start = microtime(true);
         $saleOrder = $this;
-        if($this->status_payment=='LUNAS 100%'){
+        if ($this->status_payment == 'LUNAS 100%') {
             return true;
         }
         try {
@@ -523,15 +525,15 @@ class SalesOrder extends Model
                 throw new \Exception('Invoice tidak ditemukan untuk sales order id ' . $saleOrder->id);
             }
             // $journal = Journal::where('description', 'pelunasan piutang dari invoice ' . $invoice->invoice_number)->first();
-            $detail= DetailKartuInvoice::where('sales_order_number',$saleOrder->sales_order_number)
-              ->whereBetween('account_code_group',[110000,119999])->first();
-            
-            info('repair '.$this->id.'- get jurnal on '.(microtime(true)-$start).' seconds');
+            $detail = DetailKartuInvoice::where('sales_order_number', $saleOrder->sales_order_number)
+                ->whereBetween('account_code_group', [110000, 119999])->first();
+
+            info('repair ' . $this->id . '- get jurnal on ' . (microtime(true) - $start) . ' seconds');
             if ($detail) {
                 $st = JournalController::destroy($detail->journal_id, 1);
                 if ($st['status'] == 1) {
                     // info('Pembayaran invoice ' . $invoice->invoice_number . ' berhasil dibatalkan');
-                    info('repair '.$this->id.'- destroy jurnal on '.(microtime(true)-$start).' seconds');
+                    info('repair ' . $this->id . '- destroy jurnal on ' . (microtime(true) - $start) . ' seconds');
                 } else {
 
                     throw new \Exception('Gagal membatalkan pembayaran invoice ' . $invoice->invoice_number . '
@@ -541,7 +543,7 @@ class SalesOrder extends Model
 
             $st = $saleOrder->lunaskanDagang();
             if ($st['status'] == 1) {
-                info('repair '.$this->id.'- lunaskan dagang on '.(microtime(true)-$start).' seconds');
+                info('repair ' . $this->id . '- lunaskan dagang on ' . (microtime(true) - $start) . ' seconds');
                 info('Status pelunasan untuk sales order ' . $saleOrder->sales_order_number . ' berhasil diupdate');
                 // $this->success();
                 return true;
@@ -549,14 +551,50 @@ class SalesOrder extends Model
                 info('Gagal mengupdate status pelunasan untuk sales order ' . $saleOrder->sales_order_number . '
             // Error: ' . $st['msg']);
                 // $this->failed();
-                 return false;
-                }
-
-        
+                return false;
+            }
         } catch (\Exception $e) {
             info('Error processing sales order ' . $saleOrder->sales_order_number . ': ' . $e->getMessage());
             // $this->failed();
             return false;
         }
+    }
+
+    public function removeAllProcess()
+    {
+        DB::beginTransaction();
+        $berhasil = 1;
+        try {
+            $details = DetailKartuInvoice::where('sales_order_number', $this->sales_order_number)->get();
+            foreach ($details as $detail) {
+                // $journal= Journal::find($detail->journal_id);
+                // if($journal){
+                //     throw new \Exception('ada kok jurnal nya '.$journal->journal_number);
+                // }
+                $journal = Journal::find($detail->journal_id);
+                if ($journal) {
+                    $st = JournalController::destroy($detail->journal_id, 1, false);
+                    if ($st['status'] == 0) {
+                        throw new \Exception($st['msg']);
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            $berhasil = 0;
+            DB::rollBack();
+
+            return [
+                'status' => 0,
+                'msg' => 'Gagal menghapus proses untuk sales order ' . $this->sales_order_number . '. Error: ' . $e->getMessage()
+            ];
+        } finally {
+            if ($berhasil) {
+                DB::commit();
+            }
+        }
+        return [
+            'status' => 1,
+            'msg' => 'Berhasil menghapus semua proses untuk sales order ' . $this->sales_order_number
+        ];
     }
 }

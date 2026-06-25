@@ -877,7 +877,6 @@ class JournalController extends Controller
                 }
                 $details = DetailKartuInvoice::where('journal_id', $j->id)->get();
                 foreach ($details as $detail) {
-
                     $detail->delete();
                 }
                 $j->delete();

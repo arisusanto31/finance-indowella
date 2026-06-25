@@ -222,7 +222,7 @@
                                         <td rowspan="${jumlah}">
                                             <input type="checkbox" class="select-row-checkbox" data-id="${item.id}" onchange="updateTotalSelected()" />
                                         </td>
-                                        <td rowspan="${jumlah}">${i+1}</td>
+                                        <td rowspan="${jumlah}">${item.id}</td>
                                         <td rowspan="${jumlah}">${formatNormalDate(new Date(item.created_at))}</td>
                                         <td rowspan="${jumlah}">${item.package_number} (${item.customer_name})</td>
                                         <td rowspan="${jumlah}">${detail.toko}</td>
@@ -306,7 +306,9 @@
             if (group30id.length < 20) {
 
                 group30id.push(id);
-            } else {
+            } 
+            
+            if(group30id.length == 20 || totalProgress + group30id.length == totalCount) {
 
                 await importData(group30id, isPPN);
                 totalProgress += group30id.length;

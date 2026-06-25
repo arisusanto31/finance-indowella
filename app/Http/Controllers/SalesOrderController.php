@@ -176,15 +176,15 @@ class SalesOrderController extends Controller
         $month = $thecreated->format('Y-m');
         $descProcess = 'import-sales-' . $month;
         $bgProcess =     BackgroundProcess::where('monitoring_url', 'admin/invoice/sales-order')
-                    ->where('book_journal_id', bookID())
-                    ->where('description_process', $descProcess)
-                    ->first();
-        if(!$bgProcess){
-            $bgProcess= BackgroundProcess::make(bookID(), 'admin/invoice/sales-order', $descProcess, null);
+            ->where('book_journal_id', bookID())
+            ->where('description_process', $descProcess)
+            ->first();
+        if (!$bgProcess) {
+            $bgProcess = BackgroundProcess::make(bookID(), 'admin/invoice/sales-order', $descProcess, null);
         }
         $bgProcess->addTask(count($alldata));
         foreach ($alldata as $data) {
-       
+
             $dataRequest = json_encode($data);
             ImportSalesJob::dispatch(bookID(), $dataRequest, $bgProcess->id)->onQueue('default');
         }
@@ -240,6 +240,7 @@ class SalesOrderController extends Controller
             $existSale = SalesOrder::where('sales_order_number', $salesOrderNumber . '-draft')
                 ->where('created_at', $created)->first();
             if ($existSale) {
+                DB::commit();
                 return [
                     'status' => 1,
                     'msg' => 'sudah terupdate'
@@ -295,16 +296,16 @@ class SalesOrderController extends Controller
                                 if ($stat['status'] == 1) {
                                     $stock = $stat['msg'];
                                 } else {
-                                    return ['status' => 0, 'msg' => 'pembuatan stock ' . $refStock->name . ' gagal,' . $stat['msg']];
+                                    throw new \Exception('Pembuatan stock ' . $refStock->name . ' gagal,' . $stat['msg']);
                                 }
                             } else {
-                                return ['status' => 0, 'msg' => 'Stock tidak ditemukan'];
+                                throw new \Exception('Stock dengan reference stock ID ' . $refStockID . ' dan reference stock type ' . $refType . ' tidak ditemukan');
                             }
                         }
                         $arrayStockID[] = $stock->id;
                     }
                 } else {
-                    return ['status' => 0, 'msg' => 'Stock harus diisi'];
+                    throw new \Exception('Stock harus diisi');
                 }
             } else {
                 $arrayStockID = $request->stock_id;
@@ -321,7 +322,7 @@ class SalesOrderController extends Controller
                     }
                     $customerID = $customer->id;
                 } else {
-                    return ['status' => 0, 'msg' => 'Customer harus diisi'];
+                    throw new \Exception('Customer harus diisi');
                 }
             } else {
                 $customerID = $request->customer_id;
@@ -366,6 +367,7 @@ class SalesOrderController extends Controller
 
             $invoicePack = SalesOrder::create([
                 'sales_order_number' => $sales_order_number,
+                'draft_number' => $sales_order_number,
                 'book_journal_id' => bookID(),
                 'customer_id' => $customerID,
                 'total_ppn_k' => collect($grouped)->sum('total_ppn_k'),
@@ -399,9 +401,11 @@ class SalesOrderController extends Controller
         if ($salesOrder->is_final == 1) {
             return ['status' => 0, 'msg' => 'Sales Order ' . $salesOrder->sales_order_number . ' sudah dalam status final'];
         }
+        if($salesOrder->draft_number==null){
+            $salesOrder->draft_number = $salesOrder->sales_order_number;
+        }
         $details = SalesOrderDetail::where('sales_order_number', $salesOrder->sales_order_number)->get();
         $salesOrder->is_final = 1;
-        $salesOrder->draft_number = $salesOrder->sales_order_number;
         $salesOrder->sales_order_number = $salesOrder->getCodeFix();
         foreach ($details as $detail) {
             //cek data
@@ -575,7 +579,7 @@ class SalesOrderController extends Controller
         })->values()->all();
         $dateAwal = createCarbon($year . '-' . $month . '-01')->startOfMonth();
         $dateAkhir = createCarbon($year . '-' . $month . '-01')->endOfMonth();
-        $sales = SalesOrder::where('created_at', '>=', $dateAwal)->where('created_at', '<=', $dateAkhir)->pluck(DB::raw('total_price+total_ppn_k as total_nota'), 'sales_order_number')->all();
+        $sales = SalesOrder::where('created_at', '>=', $dateAwal)->where('created_at', '<=', $dateAkhir)->pluck(DB::raw('total_price+total_ppn_k as total_nota'), 'draft_number')->all();
         $problem = [];
         foreach ($data as $pack) {
             $number =  trim($pack['package_number']) . '-draft';
@@ -611,8 +615,6 @@ class SalesOrderController extends Controller
                 'id' => $item->id,
             ];
         })->pluck('id', 'name')->all();
-
-
         $data = $importer->result;
         $idBuatan = 1;
         $data = collect($data)->groupBy('no_transaksi')->map(function ($item, $key) use ($refToko, &$idBuatan, $stockType) {
@@ -635,7 +637,6 @@ class SalesOrderController extends Controller
                         'reference_id' => null,
                         'reference_type' => null,
                         'toko' => $val['nama_toko'] ?? null,
-
                     ];
                 }),
                 'stock_type' => $stockType,
