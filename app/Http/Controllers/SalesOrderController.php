@@ -75,8 +75,8 @@ class SalesOrderController extends Controller
 
         //cek inv pack yang ga valid, ga ada detailnya itu kan sama aja ga valid ya
         $trashSO= SalesOrder::whereBetween('created_at', [$startDate, $endDate]);
-        $trashSO= SalesOrder::fromSub($trashSO,'so')->leftJoin('sales_order_details as detail','detail.sales_order_id','=','so.id')
-         ->select(DB::raw('count(*) as total_detail'),'so.id')->groupBy('so.id')->having('total_detail','=',0)->pluck('id');
+        $trashSO= SalesOrder::fromSub($trashSO,'sales_orders')->leftJoin('sales_order_details as detail','detail.sales_order_id','=','sales_orders.id')
+         ->select(DB::raw('count(*) as total_detail'),'sales_orders.id')->groupBy('sales_orders.id')->having('total_detail','=',0)->pluck('id');
         $invPackFilter = SalesOrder::whereBetween('created_at', [$startDate, $endDate])->whereNotIn('id',$trashSO);
         if ($salesOrderNumber) {
             $invPackFilter = $invPackFilter->where('sales_order_number', 'like',  $salesOrderNumber . '%');
