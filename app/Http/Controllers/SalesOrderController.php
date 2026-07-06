@@ -150,6 +150,7 @@ class SalesOrderController extends Controller
         $parent = [];
         return view('invoice.sales-order', compact(
             'salesOrders',
+            'batchedNumber',
             'month',
             'year',
             'totalInvoice',
