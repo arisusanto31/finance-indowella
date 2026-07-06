@@ -66,7 +66,7 @@ class cekUnitTransaction extends Command
                 $hppUnit= ($hpp[$sale->stock_id]??0) * $konversi;
                 $margin= abs($price - $hppUnit) / ($price == 0 ? 1 : $price) * 100;
                 $this->info("Stock ID: {$sale->stock_id}, Unit: {$unit}, Price: {$price}, HPP Unit: {$hppUnit}\n, Margin:".$margin);
-                if($margin > 3 && $margin < 80){
+                if($margin > 0 && $margin < 80){
                     $choosenMargin= $unit;
                   
                 }
