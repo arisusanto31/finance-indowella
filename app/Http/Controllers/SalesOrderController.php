@@ -120,7 +120,7 @@ class SalesOrderController extends Controller
 
 
 
-        $invPackFilter = $invPackFilter->select('is_final', 'is_mark', 'total_price', 'sales_order_number')->get();
+        $invPackFilter = $invPackFilter->select('is_final', 'is_mark', 'total_price','id', 'sales_order_number')->get();
         $invPack = SalesOrder::whereBetween('created_at', [$startDate, $endDate])
             ->select(
                 DB::raw('sum(total_price) as total_invoice'),
@@ -142,7 +142,7 @@ class SalesOrderController extends Controller
         if ($page > $totalPage) $page = $totalPage;
         $firstNumber = ($page - 1) * $perPage + 1;
 
-        $batchedNumber = collect($invPackFilter)->pluck('sales_order_id')->chunk($perPage);
+        $batchedNumber = collect($invPackFilter)->pluck('id')->chunk($perPage);
         $salesOrders = SalesOrderDetail::whereIn('sales_order_id', $batchedNumber->get($page - 1, collect([]))->values())
             ->with('customer:name,id', 'stock:name,id', 'parent:sales_order_number,id,is_final,total_ppn_k,is_mark,total_price,ref_akun_cash_kind_name,status,status_payment,status_delivery')
             ->orderBy('created_at', 'asc')

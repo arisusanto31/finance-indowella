@@ -471,7 +471,8 @@
             initItemSelectManual('.select2-customer', '{{ url("admin/master/customer/get-item") }}', '-- Pilih Customer --');
             initItemSelectManual('.select2-toko', '{{ url("admin/master/toko/get-item") }}', '-- Pilih Toko --');
 
-            console.log('batchedNumber:', '{{ $batchedNumber }}');
+            batchedNumber = <?php echo json_encode($batchedNumber); ?>;
+            console.log('batchedNumber:', batchedNumber);
             function lihatDetailInvoice(invoiceNumber) {
                 showDetailOnModal('{{ url("admin/invoice/show-sales-detail") }}/' + invoiceNumber, 'xl');
             }
