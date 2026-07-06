@@ -107,7 +107,6 @@ class CekDataPenjualanImport extends Command
             }
         }
 
-
         //yang ga ada di file import tapi ada di database
         $diffNumber = [];
         foreach ($sosKey as $key) {
