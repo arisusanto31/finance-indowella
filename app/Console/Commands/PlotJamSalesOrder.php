@@ -47,6 +47,9 @@ class PlotJamSalesOrder extends Command
             $countMax = SalesOrder::where('created_at', '>=', $date->format('Y-m-d 00:00:00'))->where('created_at', '<=', $date->format('Y-m-d 23:59:59'))
               ->where('status_delivery', '<>', 'TERKIRIM 100%')->count();
             $countPerjam = round($countMax / 12);
+            if($countPerjam < 1){
+              $countPerjam = 1;
+            }
             $this->info('count max ' . $countMax . ', count per jam ' . $countPerjam);
             $salesOrders = SalesOrder::where('created_at', '>=', $date->format('Y-m-d 00:00:00'))->where('created_at', '<=', $date->format('Y-m-d 23:59:59'))
               ->where('status_delivery', '<>', 'TERKIRIM 100%')->orderBy('created_at')->get();
