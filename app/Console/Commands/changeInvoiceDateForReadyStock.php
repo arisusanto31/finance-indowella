@@ -44,7 +44,7 @@ class changeInvoiceDateForReadyStock extends Command
         foreach ($salesOrders as $so) {
             $so->updateReadyStock();
             if ($so->is_ready_stock == 0) {
-                $st = $so->findDateReadyStock($allConversion);
+                $st = $so->findDateReadyStock($endDate,$allConversion);
                 $this->info($st['msg']);
             }
         }

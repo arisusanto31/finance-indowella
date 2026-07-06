@@ -44,10 +44,12 @@ class PlotJamSalesOrder extends Command
         );
         foreach ($period as $date) {
             $this->info('Plotting tanggal ' . $date->format('Y-m-d'));
-            $countMax = SalesOrder::where('created_at', '>=', $date->format('Y-m-d 00:00:00'))->where('created_at', '<=', $date->format('Y-m-d 23:59:59'))->count();
+            $countMax = SalesOrder::where('created_at', '>=', $date->format('Y-m-d 00:00:00'))->where('created_at', '<=', $date->format('Y-m-d 23:59:59'))
+              ->where('status_delivery', '<>', 'TERKIRIM 100%')->count();
             $countPerjam = round($countMax / 12);
             $this->info('count max ' . $countMax . ', count per jam ' . $countPerjam);
-            $salesOrders = SalesOrder::where('created_at', '>=', $date->format('Y-m-d 00:00:00'))->where('created_at', '<=', $date->format('Y-m-d 23:59:59'))->orderBy('created_at')->get();
+            $salesOrders = SalesOrder::where('created_at', '>=', $date->format('Y-m-d 00:00:00'))->where('created_at', '<=', $date->format('Y-m-d 23:59:59'))
+              ->where('status_delivery', '<>', 'TERKIRIM 100%')->orderBy('created_at')->get();
             $lastJam = -1;
             $iMinutes = 0;
             $randMinutes = [];

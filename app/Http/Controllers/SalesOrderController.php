@@ -471,6 +471,7 @@ class SalesOrderController extends Controller
     public function showDetail($number)
     {
         $data = SalesOrder::where('sales_order_number', $number)->first();
+        $data->updateReadyStock();
         $reference = $data->getReference();
         if ($reference) {
             $dateFinished = $reference->delivery_at ?? $data->created_at;
