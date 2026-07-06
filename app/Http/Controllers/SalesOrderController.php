@@ -77,8 +77,9 @@ class SalesOrderController extends Controller
         $trashSO= SalesOrder::whereBetween('created_at', [$startDate, $endDate]);
         $trashSO= SalesOrder::fromSub($trashSO,'sales_orders')->leftJoin('sales_order_details as detail','detail.sales_order_id','=','sales_orders.id')
          ->select(DB::raw('count(detail.id) as total_detail'),'sales_orders.id')->groupBy('sales_orders.id')->havingRaw('total_detail = 0')->pluck('id');
+         SalesOrder::whereIn('id',$trashSO)->delete();
 
-        $invPackFilter = SalesOrder::whereBetween('created_at', [$startDate, $endDate])->whereNotIn('id',$trashSO);
+        $invPackFilter = SalesOrder::whereBetween('created_at', [$startDate, $endDate]);
         if ($salesOrderNumber) {
             $invPackFilter = $invPackFilter->where('sales_order_number', 'like',  $salesOrderNumber . '%');
         }
