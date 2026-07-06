@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Http\Controllers\InvoiceSaleController;
 use App\Http\Controllers\JournalController;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Expression;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -69,12 +70,23 @@ class SalesOrder extends Model
     {
         static::addGlobalScope('journal', function ($query) {
             $from = $query->getQuery()->from ?? 'sales_orders'; // untuk dukung alias `j` kalau pakai from('journals as j')
-            if (Str::contains($from, ' as ')) {
-                [$table, $alias] = explode(' as ', $from);
-                $alias = trim($alias);
+            // if (Str::contains($from, ' as ')) {
+            //     [$table, $alias] = explode(' as ', $from);
+            //     $alias = trim($alias);
+            // } else {
+            //     $alias = $from;
+            // }
+
+               if ($from instanceof Expression) {
+                // fromSub biasanya alias-nya ada di SQL: (...) as `journals`
+                $alias = $query->getModel()->getTable(); // default: journals
+            } elseif (is_string($from) && Str::contains(strtolower($from), ' as ')) {
+                [$table, $alias] = preg_split('/\s+as\s+/i', $from);
+                $alias = trim($alias, '` ');
             } else {
-                $alias = $from;
+                $alias = trim((string) $from, '` ');
             }
+
 
             $query->where(function ($q) use ($alias) {
                 $q->whereNull("{$alias}.book_journal_id")
