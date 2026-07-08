@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ChartAccount;
+use App\Models\ChartAccountAlias;
 use App\Models\Journal;
 use App\Models\Toko;
 use Illuminate\Http\Request;
@@ -14,7 +15,7 @@ class KartuKasController extends Controller
     public function index()
     {
         $view = view('kartu.kartu-kas');
-        $kindKas = ChartAccount::where('code_group', '>', 110000)
+        $kindKas = ChartAccountAlias::aktif()->where('code_group', '>', 110000)
             ->where('code_group', '<', 120000)
             ->pluck('name', 'code_group')->all();
         $view->kind_kas = $kindKas;
