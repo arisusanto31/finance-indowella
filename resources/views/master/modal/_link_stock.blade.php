@@ -98,7 +98,8 @@
                 data: {
                     _token: '{{ csrf_token() }}',
                     data: stock,
-                    stock_id: id
+                    stock_id: id,
+                  
                 },
                 success: function(response) {
                     console.log(response);
