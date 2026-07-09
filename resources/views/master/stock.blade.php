@@ -1,25 +1,25 @@
 <x-app-layout>
 
     @push('styles')
-        <style>
-            .btn-custom-blue {
-                background-color: #3490dc;
-                color: white;
-            }
-        </style>
+    <style>
+        .btn-custom-blue {
+            background-color: #3490dc;
+            color: white;
+        }
+    </style>
     @endpush
 
 
     <div class="card shadow-sm mb-4">
         <h5 class="text-primary-dark card-header" style="padding-bottom:0px;"> 🍱 <strong>STOCK</strong> </h5>
-        
+
         @if($problemsUnit->count() > 0)
         <div class="card-body pa-2">
             <div class="alert alert-warning mb-0" role="alert">
                 <strong> {{ $problemsUnit->count() }} stock </strong> belum memiliki unit default!
                 <ul>
                     @foreach ($problemsUnit as $item)
-                        <li>{{ $item->name }}</li>
+                    <li>{{ $item->name }}</li>
                     @endforeach
                 </ul>
                 <button onclick="fixNullUnitDefault()"> <i class="fas fa-wrench"></i> Fix them! </button>
@@ -49,13 +49,13 @@
                 </div>
                 <div class="clearfix"></div>
                 @if (book()->name == 'Buku Toko')
-                    <div class="col-md-4">
-                        <button id="btn-show-link" onclick="showLink()" class="btn-primary"> Sinkronkan dengan stock TOKO</button>
-                    </div>
+                <div class="col-md-4">
+                    <button id="btn-show-link" onclick="showLink()" class="btn-primary"> Sinkronkan dengan stock TOKO</button>
+                </div>
                 @elseif(book()->name == 'Buku Manufaktur')
-                    <div class="col-md-4">
-                        <button id="btn-show-link" onclick="showLink()" class="btn-primary"> Sinkronkan dengan stock MANUF</button>
-                    </div>
+                <div class="col-md-4">
+                    <button id="btn-show-link" onclick="showLink()" class="btn-primary"> Sinkronkan dengan stock MANUF</button>
+                </div>
                 @endif
 
             </div>
@@ -162,100 +162,103 @@
     </div>
 
     @push('scripts')
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <script>
-            initItemSelectManual('#parent-id', '{{ route("stock.category-get-item") }}', 'parent category', '#createCategory');
-            initItemSelectManual('#category-id', '{{ route("stock.category-get-item") }}', 'category', '#createModal');
-            initItemSelectManual('#parent-category-id', '{{ route("stock.category-get-item") }}', 'parent category',
-                '#createModal');
-            $('.edit-modal').each(function each(i, elem) {
-                id = getNumID($(elem).attr('id'));
-                initItemSelectManual($(elem), '{{ route("stock.category-get-item") }}', 'category', '#editModal' + id);
-            });
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        initItemSelectManual('#parent-id', '{{ route("stock.category-get-item") }}', 'parent category', '#createCategory');
+        initItemSelectManual('#category-id', '{{ route("stock.category-get-item") }}', 'category', '#createModal');
+        initItemSelectManual('#parent-category-id', '{{ route("stock.category-get-item") }}', 'parent category',
+            '#createModal');
+        $('.edit-modal').each(function each(i, elem) {
+            id = getNumID($(elem).attr('id'));
+            initItemSelectManual($(elem), '{{ route("stock.category-get-item") }}', 'category', '#editModal' + id);
+        });
 
-            function showLink() {
-                $('#btn-show-link').attr('disabled', true);
-                loading(1);
-                id = '{{ book()->id }}';
-                finalUrl = '{{ route('stock.open-sinkron', ['id' => 'idreplace']) }}';
-                finalUrl = finalUrl.replace('idreplace', id);
-                showDetailOnModal(finalUrl, 'xl');
+        function showLink() {
+            $('#btn-show-link').attr('disabled', true);
+            loading(1);
+            id = '{{ book()->id }}';
+            finalUrl = '{{ route('
+            stock.open - sinkron ', ['
+            id ' => '
+            idreplace ']) }}';
+            finalUrl = finalUrl.replace('idreplace', id);
+            showDetailOnModal(finalUrl, 'xl');
 
-            }
+        }
 
-            function fixNullUnitDefault() {
-                $.ajax({
-                    url: '{{ route("stock.fix-null-unit-default") }}',
-                    method: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}'
-                    },
-                    success: function(res) {
-                        console.log(res);
-                        if (res.status == 1) {
-                            Swal.fire('Berhasil', 'berhasil memperbaiki stock dengan unit default null', 'success');
-                            location.reload();
-                        } else {
-                            Swal.fire('Gagal', 'gagal memperbaiki stock dengan unit default null:' + res.msg, 'error');
-                        }
-                    },
-                    error: function(err) {
-                        console.log(err);
-                        Swal.fire('opps', "Gagal memperbaiki stock dengan unit default null", 'error');
+        function fixNullUnitDefault() {
+            $.ajax({
+                url: '{{ route("stock.fix-null-unit-default") }}',
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(res) {
+                    console.log(res);
+                    if (res.status == 1) {
+                        Swal.fire('Berhasil', 'berhasil memperbaiki stock dengan unit default null', 'success');
+                        location.reload();
+                    } else {
+                        Swal.fire('Gagal', 'gagal memperbaiki stock dengan unit default null:' + res.msg, 'error');
                     }
-                });
-            }
-
-            function tambahSatuan(id) {
-                $.ajax({
-                    url: '{{ route("stock.unit-store") }}',
-                    method: 'POST',
-                    data: $('#create-unit' + id).serialize(),
-                    success: function(res) {
-                        console.log(res);
-                        if (res.status == 1) {
-                            Swal.fire('Berhasil', 'satuan berhasil ditambah', 'success');
-                            updateContainerUnit(id, res.msg, res.stock);
-                        } else {
-                            Swal.fire('Gagal', 'satuan gagal ditambah:' + res.msg, 'error');
-                        }
-                    },
-                    error: function(err) {
-                        console.log(err);
-                        Swal.fire('opps', "Gagal menambah satuan", 'error');
-                    }
-                });
-            }
-            initItemSelectManual('#category-search', '{{ route("stock.category-get-item") }}', 'category');
-
-            function getStock() {
-                category = $('#category-search option:selected').val();
-                if (category == null || category == undefined) {
-                    category = '';
+                },
+                error: function(err) {
+                    console.log(err);
+                    Swal.fire('opps', "Gagal memperbaiki stock dengan unit default null", 'error');
                 }
-                console.log(category);
-                $.ajax({
-                    url: '{{ url("admin/master/stock/get-stock") }}?search=' + $('#stock-search').val() +
-                        '&category_id=' + category,
-                    method: 'GET',
-                    success: function(res) {
-                        console.log(res);
-                        if (res.status == 1) {
-                            thehtml = "";
-                            res.msg.forEach(function(item, index) {
-                                thehtml += renderStock(item, index);
-                            });
-                            $('#tbody-stock').html(thehtml);
-                        } else {
-                            Swal.fire('Gagal', 'Gagal mendapatkan data stock:' + res.msg, 'error');
-                        }
-                    },
-                })
-            }
+            });
+        }
 
-            function renderStock(item, index) {
-                stockid = item.id;
-                html = `
+        function tambahSatuan(id) {
+            $.ajax({
+                url: '{{ route("stock.unit-store") }}',
+                method: 'POST',
+                data: $('#create-unit' + id).serialize(),
+                success: function(res) {
+                    console.log(res);
+                    if (res.status == 1) {
+                        Swal.fire('Berhasil', 'satuan berhasil ditambah', 'success');
+                        updateContainerUnit(id, res.msg, res.stock);
+                    } else {
+                        Swal.fire('Gagal', 'satuan gagal ditambah:' + res.msg, 'error');
+                    }
+                },
+                error: function(err) {
+                    console.log(err);
+                    Swal.fire('opps', "Gagal menambah satuan", 'error');
+                }
+            });
+        }
+        initItemSelectManual('#category-search', '{{ route("stock.category-get-item") }}', 'category');
+
+        function getStock() {
+            category = $('#category-search option:selected').val();
+            if (category == null || category == undefined) {
+                category = '';
+            }
+            console.log(category);
+            $.ajax({
+                url: '{{ url("admin/master/stock/get-stock") }}?search=' + $('#stock-search').val() +
+                    '&category_id=' + category,
+                method: 'GET',
+                success: function(res) {
+                    console.log(res);
+                    if (res.status == 1) {
+                        thehtml = "";
+                        res.msg.forEach(function(item, index) {
+                            thehtml += renderStock(item, index);
+                        });
+                        $('#tbody-stock').html(thehtml);
+                    } else {
+                        Swal.fire('Gagal', 'Gagal mendapatkan data stock:' + res.msg, 'error');
+                    }
+                },
+            })
+        }
+
+        function renderStock(item, index) {
+            stockid = item.id;
+            html = `
                         <tr>
                             <td> ${index + 1 }</td>
                             <td>${formatNormalDateTime(new Date(item.created_at))}</td>
@@ -396,84 +399,106 @@
                             </td>
                         </tr>                    
                 `;
-                return html;
-            }
+            return html;
+        }
 
-            function updateKonversi(id,value){
-                $.ajax({
-                    url: '{{ route("stock.update-konversi-unit") }}',
-                    method: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        unit_id: id,
-                        konversi: value
-                    },
-                    success: function(res) {
-                        console.log(res);
-                        if (res.status == 1) {
-                            notification('Berhasil', 'Konversi berhasil diupdate', 'success');
-                        } else {
-                            notification('Gagal', 'Konversi gagal diupdate:' + res.msg, 'error');
-                        }
-                    },
-                    error: function(err) {
-                        console.log(err);
-                        notification('opps', "Gagal mengupdate konversi", 'error');
+        function updateKonversi(id, value) {
+            $.ajax({
+                url: '{{ route("stock.update-konversi-unit") }}',
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    unit_id: id,
+                    konversi: value
+                },
+                success: function(res) {
+                    console.log(res);
+                    if (res.status == 1) {
+                        notification('Berhasil', 'Konversi berhasil diupdate', 'success');
+                    } else {
+                        notification('Gagal', 'Konversi gagal diupdate:' + res.msg, 'error');
                     }
-                });
-            }
+                },
+                error: function(err) {
+                    console.log(err);
+                    notification('opps', "Gagal mengupdate konversi", 'error');
+                }
+            });
+        }
 
 
-            function deleteKonversi(id){
-                $.ajax({
-                    url: '{{ route("stock.delete-konversi-unit") }}',
-                    method: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        unit_id: id
-                    },
-                    success: function(res) {
-                        console.log(res);
-                        if (res.status == 1) {
-                            notification('Berhasil', 'Konversi berhasil dihapus', 'success');
-                            location.reload();
-                        } else {
-                            notification('Gagal', 'Konversi gagal dihapus:' + res.msg, 'error');
-                        }
-                    },
-                    error: function(err) {
-                        console.log(err);
-                        notification('opps', "Gagal menghapus konversi", 'error');
+        function deleteKonversi(id) {
+            Swal.fire({
+                'title': 'Apakah anda yakin?',
+                'text': 'Konversi yang dihapus tidak bisa dikembalikan',
+                'icon': 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    $('.swal2-container').css('z-index', 2000);
+                },
+                preConfirm: () => {
+                    deleteKonversiAjax(id);
+                }
+            });
+
+
+        }
+
+        function deleteKonversiAjax(id) {
+            $.ajax({
+                url: '{{ route("stock.delete-konversi-unit") }}',
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    unit_id: id
+                },
+                success: function(res) {
+                    console.log(res);
+                    if (res.status == 1) {
+                        notification('Berhasil', 'Konversi berhasil dihapus', 'success');
+                        getStock();
+                      
+                    } else {
+                        notification('Gagal', 'Konversi gagal dihapus:' + res.msg, 'error');
                     }
-                });
-            }
-            function updateStock(id) {
-                console.log($('#form-edit-stock' + id).serialize());
-                $.ajax({
-                    url: '{{ url("admin/master/stock/main") }}/' + id,
-                    method: 'POST',
-                    data: $('#form-edit-stock' + id).serialize(),
-                    success: function(res) {
-                        console.log(res);
-                        if (res.status == 1) {
-                            $('#editModal' + id).modal('hide');
-                            Swal.fire('Berhasil', 'Stock berhasil diupdate', 'success');
-                            $('.unit-form' + id).html(res.msg.unit_backend);
-                        } else {
-                            Swal.fire('Gagal', 'Stock gagal diupdate:' + res.msg, 'error');
-                        }
-                    },
-                    error: function(err) {
-                        console.log(err);
-                        Swal.fire('opps', "Gagal mengupdate stock", 'error');
-                    }
-                });
-            }
+                },
+                error: function(err) {
+                    console.log(err);
+                    notification('opps', "Gagal menghapus konversi", 'error');
+                }
+            });
+        }
 
-            function updateContainerUnit(id, data, stock = "") {
-                html = '';
-                data.forEach((item, index) => {
-                    html += `
+        function updateStock(id) {
+            console.log($('#form-edit-stock' + id).serialize());
+            $.ajax({
+                url: '{{ url("admin/master/stock/main") }}/' + id,
+                method: 'POST',
+                data: $('#form-edit-stock' + id).serialize(),
+                success: function(res) {
+                    console.log(res);
+                    if (res.status == 1) {
+                        $('#editModal' + id).modal('hide');
+                        Swal.fire('Berhasil', 'Stock berhasil diupdate', 'success');
+                        $('.unit-form' + id).html(res.msg.unit_backend);
+                    } else {
+                        Swal.fire('Gagal', 'Stock gagal diupdate:' + res.msg, 'error');
+                    }
+                },
+                error: function(err) {
+                    console.log(err);
+                    Swal.fire('opps', "Gagal mengupdate stock", 'error');
+                }
+            });
+        }
+
+        function updateContainerUnit(id, data, stock = "") {
+            html = '';
+            data.forEach((item, index) => {
+                html += `
                 <div class="row mb-2">
                     <div class="col-md-4">
                         <input class="form-control" placeholder="nama satuan" value="${item.unit}" />
@@ -491,34 +516,36 @@
                     </div>
                 </div>
                 `;
-                });
-                $('#container-unit' + id).html(html);
-                html = '';
-                data.forEach((item, index) => {
-                    html += `<option value="${item.unit}">${item.unit}</option>`;
-                });
-                $('#unit-default' + id).html(html);
-            }
-        </script>
-        @if (session('success'))
-            <script>
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil!',
-                    text: '{{ session('success') }}',
-                    confirmButtonText: 'OK'
-                });
-            </script>
-        @elseif(session('error'))
-            <script>
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal!',
-                    text: '{{ session('error') }}',
-                    confirmButtonText: 'OK'
-                });
-            </script>
-        @endif
+            });
+            $('#container-unit' + id).html(html);
+            html = '';
+            data.forEach((item, index) => {
+                html += `<option value="${item.unit}">${item.unit}</option>`;
+            });
+            $('#unit-default' + id).html(html);
+        }
+    </script>
+    @if (session('success'))
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            text: '{{ session('
+            success ') }}',
+            confirmButtonText: 'OK'
+        });
+    </script>
+    @elseif(session('error'))
+    <script>
+        Swal.fire({
+            icon: 'error',
+            title: 'Gagal!',
+            text: '{{ session('
+            error ') }}',
+            confirmButtonText: 'OK'
+        });
+    </script>
+    @endif
 
 
     @endpush
