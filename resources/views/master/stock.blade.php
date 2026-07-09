@@ -341,12 +341,13 @@
                                                                                 <span class="unit-form${item.id}" style="position:absolute; right:20px; top:7px; color:#bbb"> ${item.unit_backend}</span>
                                                                                 <input class="form-control" placeholder="konversi" value="${unit.konversi}" onchange="updateKonversi(${unit.id}, this.value)" />
                                                                                 
-                                                                                <button style="position:absolute: right:5px; top:10px;" onclick="deleteKonversi(${unit.id})"> <i class="fas fa-close"></i></button>
+                                                                               
                                                                             </div>
                                                                         </div>
                                                                     </div>
                                                                     <div class="col-md-3">
-                                                                        ${item.unit_default == unit.unit ? '<div class="bg-primary  colorwhite px-2 rounded-1"> default</div>' : ''}
+                                                                        ${item.unit_default == unit.unit ? '<div class="bg-primary  colorwhite px-2 rounded-1"> default</div>' : 
+                                                                        '<button onclick="deleteKonversi(${unit.id})"> <i class="fas fa-close"></i></button>'}
                                                                     </div>
                                                                 </div>
                                                                 `).join('')}
