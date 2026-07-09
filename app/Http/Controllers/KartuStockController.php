@@ -119,7 +119,7 @@ class KartuStockController extends Controller
         $hpp = $lastKartu ? ($lastKartu->saldo_rupiah_total / $lastKartu->saldo_qty_backend) : 0;
         $kartus = KartuStock::where('stock_id', $kartu->stock_id)->where('index_date', '>=', $kartu->index_date)->orderBy('index_date', 'asc')->get();
         foreach ($kartus as $kartu) {
-            if ($kartu->mutasi_qty_backend < 0) {
+            if ($kartu->mutasi_quantity < 0) {
                 $mutasiQTYBackend = $kartu->mutasi_quantity * $konversi[$kartu->unit];
                 $mutasiRupiahOnUnit = $hpp * -1;
                 $mutasiRupiahTotal = abs($mutasiQTYBackend * $mutasiRupiahOnUnit) * -1;
