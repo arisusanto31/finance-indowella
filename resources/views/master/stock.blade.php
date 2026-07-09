@@ -340,6 +340,7 @@
                                                                             <div class="col-xs-12" style="position:relative; width:100%">
                                                                                 <span class="unit-form${item.id}" style="position:absolute; right:20px; top:7px; color:#bbb"> ${item.unit_backend}</span>
                                                                                 <input class="form-control" placeholder="konversi" value="${unit.konversi}" onchange="updateKonversi(${unit.id}, this.value)" />
+                                                                                <button onclick="deleteKonversi(${unit.id})"> <i class="fas fa-close"></i></button>
                                                                             </div>
                                                                         </div>
                                                                     </div>
@@ -416,6 +417,31 @@
                     error: function(err) {
                         console.log(err);
                         notification('opps', "Gagal mengupdate konversi", 'error');
+                    }
+                });
+            }
+
+
+            function deleteKonversi(id){
+                $.ajax({
+                    url: '{{ route("stock.delete-konversi-unit") }}',
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        unit_id: id
+                    },
+                    success: function(res) {
+                        console.log(res);
+                        if (res.status == 1) {
+                            notification('Berhasil', 'Konversi berhasil dihapus', 'success');
+                            location.reload();
+                        } else {
+                            notification('Gagal', 'Konversi gagal dihapus:' + res.msg, 'error');
+                        }
+                    },
+                    error: function(err) {
+                        console.log(err);
+                        notification('opps', "Gagal menghapus konversi", 'error');
                     }
                 });
             }

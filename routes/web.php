@@ -348,6 +348,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('open-sinkron-stock/{id}', [StockController::class, 'openSinkron'])->name('open-sinkron');
             Route::post('sync', [StockController::class, 'sync'])->name('sync');
             Route::post('update-konversi-unit', [StockController::class, 'updateKonversiUnit'])->name('update-konversi-unit');
+            Route::post('delete-konversi-unit', [StockController::class, 'deleteKonversiUnit'])->name('delete-konversi-unit');
             Route::post('fix-null-unit-default', [StockController::class, 'fixNullUnitDefault'])->name('fix-null-unit-default');
             // Route::get('/produk/get-item', [StockController::class, 'getItem'])->name('stock.produk-get-item');
         });

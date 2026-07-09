@@ -65,7 +65,7 @@ class StockController extends Controller
             $unit->konversi = $request->input('konversi');
             $unit->save();
 
-           return [
+            return [
                 'status' => 1,
                 'msg' => 'Konversi unit berhasil diperbarui',
                 'unit' => $unit
@@ -74,6 +74,25 @@ class StockController extends Controller
             return [
                 'status' => 0,
                 'msg' => 'Gagal memperbarui konversi unit: ' . $th->getMessage()
+            ];
+        }
+    }
+
+    public function deleteKonversiUnit(Request $request)
+    {
+        $unitId = $request->input('unit_id');
+        try {
+            $unit = StockUnit::findOrFail($unitId);
+            $unit->delete();
+            return [
+                'status' => 1,
+                'msg' => 'Konversi unit berhasil dihapus',
+               
+            ];
+        } catch (Throwable $th) {
+            return [
+                'status' => 0,
+                'msg' => 'Gagal menghapus konversi unit: ' . $th->getMessage()
             ];
         }
     }
