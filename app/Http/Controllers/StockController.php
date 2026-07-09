@@ -53,6 +53,30 @@ class StockController extends Controller
         }
     }
 
+    public function updateKonversiUnit(Request $request)
+    {
+        $request->validate([
+            'unit_id' => 'required|integer',
+            'konversi' => 'required|numeric'
+        ]);
+
+        try {
+            $unit = StockUnit::findOrFail($request->input('unit_id'));
+            $unit->konversi = $request->input('konversi');
+            $unit->save();
+
+           return [
+                'status' => 1,
+                'msg' => 'Konversi unit berhasil diperbarui',
+                'unit' => $unit
+            ];
+        } catch (Throwable $th) {
+            return [
+                'status' => 0,
+                'msg' => 'Gagal memperbarui konversi unit: ' . $th->getMessage()
+            ];
+        }
+    }
     public function getData()
     {
         // $view->stocks = Stock::with(['category', 'parentCategory'])->get();

@@ -339,7 +339,7 @@
                                                                         <div class="row">
                                                                             <div class="col-xs-12" style="position:relative; width:100%">
                                                                                 <span class="unit-form${item.id}" style="position:absolute; right:20px; top:7px; color:#bbb"> ${item.unit_backend}</span>
-                                                                                <input class="form-control" placeholder="konversi" value="${unit.konversi}" />
+                                                                                <input class="form-control" placeholder="konversi" value="${unit.konversi}" onchange="updateKonversi(${unit.id}, this.value)" />
                                                                             </div>
                                                                         </div>
                                                                     </div>
@@ -396,6 +396,29 @@
                 return html;
             }
 
+            function updateKonversi(id,value){
+                $.ajax({
+                    url: '{{ route("stock.update-konversi-unit") }}',
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        unit_id: id,
+                        konversi: value
+                    },
+                    success: function(res) {
+                        console.log(res);
+                        if (res.status == 1) {
+                            notification('Berhasil', 'Konversi berhasil diupdate', 'success');
+                        } else {
+                            notification('Gagal', 'Konversi gagal diupdate:' + res.msg, 'error');
+                        }
+                    },
+                    error: function(err) {
+                        console.log(err);
+                        notification('opps', "Gagal mengupdate konversi", 'error');
+                    }
+                });
+            }
             function updateStock(id) {
                 console.log($('#form-edit-stock' + id).serialize());
                 $.ajax({
