@@ -29,7 +29,7 @@ class StockController extends Controller
         try {
             $stocks = Stock::whereNull('stocks.unit_default')->leftJoin('stock_units as su', 'stocks.id', '=', 'su.stock_id')
                 ->select('stocks.id', 'stocks.name', 'su.konversi', 'su.unit')->orderBy('su.konversi', 'asc')->get()->groupBy('id');
-            
+
             $statestock = null;
             foreach ($stocks as $stockid => $dataunits) {
 
@@ -253,8 +253,8 @@ class StockController extends Controller
                     ->where('st.reference_stock_type', '=', $stockModelClass);
             })->where(function ($q) {
                 $q->where('st.id', null)->orWhere('st.updated_at', '<', DB::raw('rst.updated_at'));
-            })->whereNull('rst.deleted')->where('rst.is_stock', 1)->where(function($q){
-                $q->where('rst.is_ppn',1)->orWhere('rst.is_ppn',5);
+            })->whereNull('rst.deleted')->where('rst.is_stock', 1)->where(function ($q) {
+                $q->where('rst.is_ppn', 1)->orWhere('rst.is_ppn', 5);
             })->with('category:id,name')->with('parentCategory:id,name')
             ->select(
                 'rst.name',
@@ -308,18 +308,17 @@ class StockController extends Controller
             ];
             $thestock = Stock::find($stock_id);
             if (!$thestock) {
-                $thestock= Stock::where('reference_stock_id', $referenceStockID)->where('reference_stock_type', $bookModel)->first();
-                if(!$thestock)
+                $thestock = Stock::where('reference_stock_id', $referenceStockID)->where('reference_stock_type', $bookModel)->first();
+                if (!$thestock)
                     $thestock = Stock::where('name', $name)->first();
-                if ($thestock) {
-                    $thestock->update($dataFix);
-                    $stock = $thestock;
-                }
             }
-            $stock= $thestock;
             if (!$thestock) {
                 $stock = Stock::create($dataFix);
+            } else {
+                $thestock->update($dataFix);
+                $stock = $thestock;
             }
+
 
             $stock->refresh();
 
