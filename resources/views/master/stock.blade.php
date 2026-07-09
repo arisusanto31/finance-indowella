@@ -337,10 +337,11 @@
                                                                     </div>
                                                                     <div class="col-md-4">
                                                                         <div class="row">
-                                                                            <div class="col-xs-12" style="position:relative; width:100%">
+                                                                            <div class="col-xs-12" style="position:relative; width:100%; padding-right:50px;">
                                                                                 <span class="unit-form${item.id}" style="position:absolute; right:20px; top:7px; color:#bbb"> ${item.unit_backend}</span>
-                                                                                <input class="" placeholder="konversi" value="${unit.konversi}" onchange="updateKonversi(${unit.id}, this.value)" />
-                                                                                <button onclick="deleteKonversi(${unit.id})"> <i class="fas fa-close"></i></button>
+                                                                                <input class="form-control" placeholder="konversi" value="${unit.konversi}" onchange="updateKonversi(${unit.id}, this.value)" />
+                                                                                
+                                                                                <button style="position:absolute: right:5px; top:10px;" onclick="deleteKonversi(${unit.id})"> <i class="fas fa-close"></i></button>
                                                                             </div>
                                                                         </div>
                                                                     </div>
