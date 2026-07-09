@@ -347,7 +347,7 @@
                                                                     </div>
                                                                     <div class="col-md-3">
                                                                         ${item.unit_default == unit.unit ? '<div class="bg-primary  colorwhite px-2 rounded-1"> default</div>' : 
-                                                                        '<button onclick="deleteKonversi(${unit.id})"> <i class="fas fa-close"></i></button>'}
+                                                                        `<button onclick="deleteKonversi(${unit.id})"> <i class="fas fa-close"></i></button>`}
                                                                     </div>
                                                                 </div>
                                                                 `).join('')}
