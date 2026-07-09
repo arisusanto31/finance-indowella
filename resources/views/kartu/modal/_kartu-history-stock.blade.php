@@ -50,6 +50,10 @@
                             <i class="fas fa-refresh"></i> recalculate
                         </button>
 
+                        <button class="btn btn-primary btn-sm" onclick="reEvaluateHPP('{{ $data->id }}')">
+                            <i class="fas fa-coins"></i> re-evaluate HPP
+                        </button>
+
                     </td>
                 </tr>
                 @endforeach
@@ -114,6 +118,30 @@
             onSuccess: function(response) {
                 // Handle success response
                 console.log("Recalculation successful:", response);
+                notification('success', 'Recalculation successful', 'success');
+                // Optionally, you can refresh the modal or update the UI
+            },
+        });
+    }
+
+    function reEvaluateHPP(id){
+        // Call your API or perform your calculation logic here
+        console.log("Re-evaluating HPP for ID:", id);
+        swalConfirmAndSubmit({
+            url: '{{ url("admin/kartu/".$model."/re-evaluate-hpp") }}',
+            data: {
+                _token: '{{ csrf_token() }}',
+                id: id
+            },
+            onSuccess: function(res) {
+                // Handle success response
+                console.log("Re-evaluation of HPP successful:", res);
+                if(res.status==1){
+                
+                    notification('success', 'Re-evaluation of HPP successful', 'success');
+                }else{
+                    notification('error', 'Re-evaluation of HPP failed', 'error');
+                }
                 // Optionally, you can refresh the modal or update the UI
             },
         });

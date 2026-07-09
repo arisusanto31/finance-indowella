@@ -110,6 +110,33 @@ class KartuStockController extends Controller
         ];
     }
 
+    public function reEvaluateHPP(Request $request)
+    {
+        $id = $request->input('id');
+        $kartu = KartuStock::find($id);
+        $konversi = StockUnit::where('stock_id', $kartu->stock_id)->pluck('konversi', 'unit')->all();
+        $lastKartu = KartuStock::where('stock_id', $kartu->stock_id)->where('index_date', '<', $kartu->index_date)->orderBy('index_date', 'desc')->first();
+        $hpp = $lastKartu ? ($lastKartu->saldo_rupiah_total / $lastKartu->saldo_qty_backend) : 0;
+        $kartus = KartuStock::where('stock_id', $kartu->stock_id)->where('index_date', '>=', $kartu->index_date)->orderBy('index_date', 'asc')->get();
+        foreach ($kartus as $kartu) {
+            if ($kartu->mutasi_qty_backend < 0) {
+                $mutasiQTYBackend = $kartu->mutasi_quantity * $konversi[$kartu->unit] * -1;
+                $mutasiRupiahOnUnit = $hpp * -1;
+                $mutasiRupiahTotal = abs($mutasiQTYBackend * $mutasiRupiahOnUnit) * -1;
+                $kartu->mutasi_qty_backend = $mutasiQTYBackend;
+                $kartu->mutasi_rupiah_on_unit = $mutasiRupiahOnUnit;
+                $kartu->mutasi_rupiah_total = $mutasiRupiahTotal;
+            } else {
+                //ga perlu diganti ya kalo mutasi masuk
+            }
+            $kartu->saldo_qty_backend = $lastKartu ? $lastKartu->saldo_qty_backend + $kartu->mutasi_qty_backend : $kartu->mutasi_qty_backend;
+            $kartu->saldo_rupiah_total = $lastKartu ? $lastKartu->saldo_rupiah_total + $kartu->mutasi_rupiah_total : $kartu->mutasi_rupiah_total;
+            $kartu->save();
+            $lastKartu = $kartu;
+        }
+        return ['status' => 1, 'msg' => 'Re-evaluation of HPP successful'];
+    }
+
     public function getHPP()
     {
         $date = getInput('date') ?? date('Y-m-d H:i:s');
@@ -370,7 +397,7 @@ class KartuStockController extends Controller
                     $retailStock = RetailStock::where('id', intval($data['ref_id']))->with(['parentCategory', 'category'])->first();
 
                     if (!$retailStock) {
-                       throw new \Exception('retail stock tidak ditemukan dengan ref id tersebut, periksa ref id');
+                        throw new \Exception('retail stock tidak ditemukan dengan ref id tersebut, periksa ref id');
                     }
                     if ($retailStock) {
                         $retailStock['units_manual'] = $retailStock->getUnits();

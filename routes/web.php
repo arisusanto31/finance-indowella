@@ -186,6 +186,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('kartu-mutasi/{id}', [KartuStockController::class, 'kartuMutasi'])->name('kartu-mutasi');
             Route::get('show-history-stock/{id}', [KartuStockController::class, 'showHistoryStock'])->name('show-history-stock');
             Route::post('recalculate', [KartuStockController::class, 'recalculate'])->name('recalculate');
+            Route::post('re-evaluate-hpp', [KartuStockController::class, 'reEvaluateHPP'])->name('re-evaluate-hpp');
             Route::get('process-task-import/{id}', [KartuStockController::class, 'processTaskImport'])->name('process-task-import');
         });
 
