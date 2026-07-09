@@ -316,6 +316,7 @@ class StockController extends Controller
                     $stock = $thestock;
                 }
             }
+            $stock= $thestock;
             if (!$thestock) {
                 $stock = Stock::create($dataFix);
             }
