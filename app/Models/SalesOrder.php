@@ -77,7 +77,7 @@ class SalesOrder extends Model
             //     $alias = $from;
             // }
 
-               if ($from instanceof Expression) {
+            if ($from instanceof Expression) {
                 // fromSub biasanya alias-nya ada di SQL: (...) as `journals`
                 $alias = $query->getModel()->getTable(); // default: journals
             } elseif (is_string($from) && Str::contains(strtolower($from), ' as ')) {
@@ -154,21 +154,21 @@ class SalesOrder extends Model
         }
     }
 
-    public function findDateReadyStock($endDate,$allConversion)
+    public function findDateReadyStock($endDate, $allConversion)
     {
-      $so = $this;
+        $so = $this;
         $maxDate = [];
         foreach ($so->details as $detail) {
             if ($detail->is_ready_stock == 0) {
                 //kita cari stock itu ready pertanggal apa bung.
                 $qtyJualBackend = $detail->quantity * ($allConversion[$detail->stock_id][$detail->unit] ?? 1);
                 $indexDate = createCarbon($so->created_at)->format('ymdHis000');
-                $indexEnd= createCarbon($endDate)->format('ymdHis999');
+                $indexEnd = createCarbon($endDate)->format('ymdHis999');
                 $lastDate = KartuStock::where('index_date', '>', $indexDate)
-                  ->where('index_date','<',$indexEnd)
+                    ->where('index_date', '<', $indexEnd)
                     ->where('stock_id', $detail->stock_id)
                     ->where('saldo_qty_backend', '>', $qtyJualBackend)->orderBy('index_date', 'asc')
-                    
+
                     ->first();
                 if ($lastDate) {
                     $maxDate[] = createCarbon($lastDate->created_at)->addDay()->format('Y-m-d') . ' ' . createCarbon($detail->created_at)->format('H:i:s');
@@ -383,9 +383,13 @@ class SalesOrder extends Model
         if ($this->index == null) {
             //menandakan bahwa sales order ini belum pernah dapat fix code
             $salesOrder = SalesOrder::where('is_final', 1)->where('customer_id', $this->customer_id)->orderBy('index', 'desc')->first();
-            $lastNumber=$salesOrder->sales_order_number;
-            $splitted= explode('-',$lastNumber);
-            $lastCount= $splitted[count($splitted)-1] ?? 0;
+            $lastNumber = $salesOrder->sales_order_number ?? null;
+            if ($lastNumber != null) {
+                $splitted = explode('-', $lastNumber);
+                $lastCount = $splitted[count($splitted) - 1] ?? 0;
+            } else {
+                $lastCount = 0;
+            }
             $count = $lastCount + 1;
             $this->index = $count;
             $number = 'SO-' . date('Y') . '-' . toDigit($this->customer_id, 4) . '-' . toDigit($count, 4);

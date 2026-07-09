@@ -74,10 +74,10 @@ class SalesOrderController extends Controller
         $salesOrderNumber = getInput('sales_order_number');
 
         //cek inv pack yang ga valid, ga ada detailnya itu kan sama aja ga valid ya
-        $trashSO= SalesOrder::whereBetween('created_at', [$startDate, $endDate]);
-        $trashSO= SalesOrder::fromSub($trashSO,'sales_orders')->leftJoin('sales_order_details as detail','detail.sales_order_id','=','sales_orders.id')
-         ->select(DB::raw('count(detail.id) as total_detail'),'sales_orders.id')->groupBy('sales_orders.id')->havingRaw('total_detail = 0')->pluck('id');
-         SalesOrder::whereIn('id',$trashSO)->delete();
+        $trashSO = SalesOrder::whereBetween('created_at', [$startDate, $endDate]);
+        $trashSO = SalesOrder::fromSub($trashSO, 'sales_orders')->leftJoin('sales_order_details as detail', 'detail.sales_order_id', '=', 'sales_orders.id')
+            ->select(DB::raw('count(detail.id) as total_detail'), 'sales_orders.id')->groupBy('sales_orders.id')->havingRaw('total_detail = 0')->pluck('id');
+        SalesOrder::whereIn('id', $trashSO)->delete();
 
         $invPackFilter = SalesOrder::whereBetween('created_at', [$startDate, $endDate]);
         if ($salesOrderNumber) {
@@ -405,41 +405,48 @@ class SalesOrderController extends Controller
 
     public static function makeFinal(Request $request)
     {
-        $id = $request->id;
-        $salesOrder = SalesOrder::find($id);
-        if ($salesOrder->is_final == 1) {
-            return ['status' => 0, 'msg' => 'Sales Order ' . $salesOrder->sales_order_number . ' sudah dalam status final'];
-        }
-        if($salesOrder->draft_number==null){
-            $salesOrder->draft_number = $salesOrder->sales_order_number;
-        }
-        $details = SalesOrderDetail::where('sales_order_number', $salesOrder->sales_order_number)->get();
-        $salesOrder->is_final = 1;
-        $salesOrder->sales_order_number = $salesOrder->getCodeFix();
-        foreach ($details as $detail) {
-            //cek data
-            if ($detail->qtyjadi == 0 && $detail->unitjadi == '??' && $detail->pricejadi == 0) {
-                //brati ini data lama
-                $typeSales = bookID() == 1 ? ManufSales::class : RetailSales::class;
-                $referenceSale = $typeSales::where('package_id', $salesOrder->reference_id)
-                    ->where('stock_name', $detail->custom_stock_name)->first();
-                if ($referenceSale) {
-                    $detail->reference_id = $referenceSale->id;
-                    $detail->qtyjadi = $referenceSale->qtyjadi;
-                    $detail->unitjadi = $referenceSale->unitjadi;
-                    $detail->pricejadi = $referenceSale->pricejadi;
-                    $detail->reference_type = $typeSales;
-                } else {
-                    return ['status' => 0, 'msg' => 'Tidak ditemukan data penjualan untuk stock ' . $detail->custom_stock_name];
-                }
+        try {
+            $id = $request->id;
+            $salesOrder = SalesOrder::find($id);
+            if (!$salesOrder) {
+                throw new \Exception('Sales Order tidak ditemukan');
             }
-            $detail->draft_number = $salesOrder->draft_number;
-            $detail->sales_order_number = $salesOrder->sales_order_number;
-            $detail->save();
+            if ($salesOrder->is_final == 1) {
+                throw new \Exception('Sales Order ' . $salesOrder->sales_order_number . ' sudah dalam status final');
+            }
+            if ($salesOrder->draft_number == null) {
+                $salesOrder->draft_number = $salesOrder->sales_order_number;
+            }
+            $details = SalesOrderDetail::where('sales_order_number', $salesOrder->sales_order_number)->get();
+            $salesOrder->is_final = 1;
+            $salesOrder->sales_order_number = $salesOrder->getCodeFix();
+            foreach ($details as $detail) {
+                //cek data
+                if ($detail->qtyjadi == 0 && $detail->unitjadi == '??' && $detail->pricejadi == 0) {
+                    //brati ini data lama
+                    $typeSales = bookID() == 1 ? ManufSales::class : RetailSales::class;
+                    $referenceSale = $typeSales::where('package_id', $salesOrder->reference_id)
+                        ->where('stock_name', $detail->custom_stock_name)->first();
+                    if ($referenceSale) {
+                        $detail->reference_id = $referenceSale->id;
+                        $detail->qtyjadi = $referenceSale->qtyjadi;
+                        $detail->unitjadi = $referenceSale->unitjadi;
+                        $detail->pricejadi = $referenceSale->pricejadi;
+                        $detail->reference_type = $typeSales;
+                    } else {
+                        throw new \Exception('Tidak ditemukan data penjualan untuk stock ' . $detail->custom_stock_name);
+                    }
+                }
+                $detail->draft_number = $salesOrder->draft_number;
+                $detail->sales_order_number = $salesOrder->sales_order_number;
+                $detail->save();
+            }
+            $salesOrder->save();
+            $salesOrder->updateStatus();
+            return ['status' => 1, 'msg' => $salesOrder];
+        } catch (\Exception $e) {
+            return ['status' => 0, 'msg' => $e->getMessage()];
         }
-        $salesOrder->save();
-        $salesOrder->updateStatus();
-        return ['status' => 1, 'msg' => $salesOrder];
     }
 
 
