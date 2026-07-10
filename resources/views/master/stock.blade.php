@@ -177,7 +177,7 @@
             $('#btn-show-link').attr('disabled', true);
             loading(1);
             id = '{{ book()->id }}';
-            finalUrl = '{{ route("stock.open - sinkron ", ["id" => "idreplace"])}}';
+            finalUrl = '{{ route("stock.open-sinkron", ["id" => "idreplace"])}}';
             finalUrl = finalUrl.replace('idreplace', id);
             showDetailOnModal(finalUrl, 'xl');
 
