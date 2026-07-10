@@ -1209,7 +1209,7 @@ class SalesOrderController extends Controller
             $date = $salesOrder->created_at;
             $codeBayar = null;
             if ($salesOrder->ref_akun_cash_kind_name) {
-                $link = LinkReferenceCashKind::where('cash_kind_name', $salesOrder->ref_akun_cash_kind_name)->first();
+                $link = LinkReferenceCashKind::where('cash_kind_name', trim($salesOrder->ref_akun_cash_kind_name))->first();
                 if ($link) {
                     $codeBayar = $link->code_group;
                 }
