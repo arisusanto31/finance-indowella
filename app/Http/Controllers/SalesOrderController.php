@@ -1221,7 +1221,7 @@ class SalesOrderController extends Controller
                 $codeBayar = $toko->default_code_group_kas;
             }
             if (!$codeBayar) {
-                throw new \Exception('Kode bayar tidak ditemukan untuk toko ' . $salesOrder->toko_id);
+                throw new \Exception('Kode bayar tidak ditemukan untuk toko ' . $salesOrder->toko_id.' dan ref akun cash kind name '.$salesOrder->ref_akun_cash_kind_name);
             }
             $codeGroupPiutang = 120001;
             $st = InvoiceSaleController::submitBayarSalesInvoice(new Request([
