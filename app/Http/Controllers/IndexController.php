@@ -308,5 +308,11 @@ class IndexController extends Controller
 
             return $kartuStock;
         }
+
+        if(getInput('type')=='sales-ready-stock'){
+           $so= SalesOrder::find(getInput('id'));
+           $so->updateReadyStock();
+           return $so;
+        }
     }
 }
