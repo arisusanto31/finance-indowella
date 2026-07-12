@@ -126,7 +126,7 @@
         Swal.fire({
             title: 'Pindahkan stock',
             html: `
-                    <input id="swal-date" class="swal2-input" type="date" placeholder="Tanggal">
+                    <input id="swal-date" class="swal2-input" type="datetime-local" placeholder="Tanggal">
                     <select id="swal-account" class="swal2-select">
                         <option value="">Pilih Akun</option>
                         ${collect(accountPersediaan).map((account,key) => `<option value="${account.code_group}">${account.name}</option>`).join('')}
