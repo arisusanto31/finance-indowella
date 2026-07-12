@@ -225,7 +225,7 @@ class KartuInTransitController extends Controller
                 'saldo_rupiah_total as rupiah_saldo',
                 'ks.journal_number',
             )->get();
-        $accountPersediaan= ChartAccountAlias::whereBetween('code_group',[140000,150000])->select('code_group',DB::raw('concat(code_group," - ",name) as name'))->get();
+        $accountPersediaan= ChartAccountAlias::whereBetween('code_group',[140001,149999])->select('code_group',DB::raw('concat(code_group," - ",name) as name'))->get();
         $view->productionNumber = $productionNumber;
         $view->title = $name . ' [' . $stock->id . ']';
         $view->datas = $dataHistory;
