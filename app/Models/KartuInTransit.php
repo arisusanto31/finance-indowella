@@ -75,7 +75,7 @@ class KartuInTransit extends Model
             //mutasi terakhir sebelum mutasi id yg diinput oleh user
             $lastCard = KartuInTransit::where('stock_id', $kartu->stock_id)->where('production_number', $kartu->production_number)
                 ->where('index_date', '<', $indexDate)->orderBy('index_date', 'desc')->first();
-            info('BDP LAST CARD ' . json_encode($lastCard));
+            info('katu int transit LAST CARD ' . json_encode($lastCard));
             if (!$lastCard) {
                 $lastCard = new KartuInTransit;
                 $lastCard->saldo_qty_backend = 0;
@@ -83,7 +83,7 @@ class KartuInTransit extends Model
             }
             if ($lastCard->saldo_qty_backend == 0 && $flow == 1) {
                 //kalo keluar
-                throw new \Exception('tidak ada saldo qty barang pada BDP nomer ' . $kartu->production_number);
+                throw new \Exception('tidak ada saldo qty barang pada Intransit nomer ' . $kartu->production_number);
             }
             if ($isCustom == 0 || $flow == 1) {
                 //ini ngambil hpp yang lama.

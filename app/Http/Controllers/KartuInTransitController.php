@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ChartAccountAlias;
+use App\Models\InvoicePack;
 use App\Models\Journal;
 use App\Models\KartuBahanJadi;
 use App\Models\KartuBDP;
@@ -50,166 +52,102 @@ class KartuInTransitController extends Controller
         return $view;
     }
 
-    public function createMutations(Request $request)
+    public function pindahkan(Request $request)
     {
-        $stockIDs = $request->input('stock_id');
-        $quantitys = $request->input('quantity');
-        $spkNumbers = $request->input('spk_number');
-        $productionNumber = $request->input('production_number');
-        $units = $request->input('unit');
-        $flows = $request->input('flow'); //harusnya ini 1 atau 0
-        $codeGroup = 140003;
 
-        $date = $request->input('date');
-        $saleOrderId = $request->input('sales_order_id');
-        $salesOrderNumber = $request->input('sales_order_number');
-        $lawanCodeGroups = $request->input('lawan_code_group');
-        $salesOrder = SalesOrder::where('sales_order_number', $salesOrderNumber)->first();
-        $customer = $salesOrder->customer ? $salesOrder->customer->name : "";
+            try {
+             DB::transaction( function() use($request){
+                $lockManager = new LockManager();
+                $date=$request->input('date');
 
-
-        $allSt = [];
-        try {
-            DB::beginTransaction();
-            $lockManager = new LockManager();
-            foreach ($stockIDs as $row => $stock_id) {
-                $qty = format_db($quantitys[$row]);
-                $unit = $units[$row];
-                $flow = $flows[$row];
-                $lawanCodeGroup = $lawanCodeGroups[$row];
-                if ($lawanCodeGroup == $codeGroup) {
-                    throw new \Exception('Lawan code group tidak boleh sama dengan code group');
+              
+                $kartuId= $request->input('kartu_id');
+                $lastKartu= KartuInTransit::find($kartuId);
+                if(!$lastKartu){
+                    throw new \Exception('Kartu in transit tidak ditemukan');
                 }
-                if ($flow == 0)
-                    $desc = 'produksi ' . $customer . ' - ' . $productionNumber . ' dalam proses';
-                else {
-                    $desc = 'produksi ' . $customer . ' - ' . $productionNumber . ' selesai';
+                $productionNumber = $lastKartu->production_number;
+                if(!$productionNumber){
+                    throw new \Exception('Production number tidak ditemukan');
                 }
-                $isCustomRupiah = 0;
-                $mutasiRupiahTotal = 0;
-                if ($flow == 0) {
-                    $typekartulawan = "stock";
-                    if ($lawanCodeGroup == 140004) {
-                        $typekartulawan = "barang jadi";
-                    }
-                    $hpp = Stock::find($stock_id)->getLastHPP($unit, $typekartulawan, $spkNumbers[$row], $date);
-
-                    $mutasiRupiahTotal = $hpp * $qty;
-                    $isCustomRupiah = 1;
+                $stock= Stock::find($lastKartu->stock_id);
+                if(!$stock){
+                    throw new \Exception('tidak ada kartu stock');
                 }
-                $stStock = null;
-                if ($lawanCodeGroup == 140001 || $lawanCodeGroup == 140002) {
-                    //kalo bahan baku atau barang dagang
-                    $stStock = KartuStock::mutationStore(new Request([
-                        'stock_id' => $stock_id,
-                        'mutasi_qty_backend' => $qty,
-                        'unit_backend' => $unit,
-                        'mutasi_quantity' => $qty,
-                        'unit' => $unit,
-                        'flow' => $flow == 1 ? 0 : 1,
-                        'sales_order_number' =>  $salesOrderNumber,
-                        'production_number' => $spkNumbers[$row],
-                        'sales_order_id' => $saleOrderId,
-                        'code_group' => $lawanCodeGroup,
-                        'lawan_code_group' => $codeGroup,
-                        'is_otomatis_jurnal' => 0,
-                        'is_custom_rupiah' => $isCustomRupiah,
-                        'mutasi_rupiah_total' => $mutasiRupiahTotal,
-                        'date' => $date,
-                        'description' => $desc,
-
-
-                    ]), false);
-                    if ($stStock['status'] == 0) {
-                        throw new \Exception($stStock['msg']);
-                    }
-                } else if ($lawanCodeGroup == 140004) {
-                    //kalo barang jadi
-                    $stStock = KartuBahanJadi::mutationStore(new Request([
-                        'stock_id' => $stock_id,
-                        'mutasi_qty_backend' => $qty,
-                        'unit_backend' => $unit,
-                        'mutasi_quantity' => $qty,
-                        'unit' => $unit,
-                        'flow' => $flow == 1 ? 0 : 1,
-                        'sales_order_number' => $salesOrderNumber,
-                        'production_number' => $spkNumbers[$row],
-                        'sales_order_id' => $saleOrderId,
-                        'code_group' => $lawanCodeGroup,
-                        'lawan_code_group' => $codeGroup,
-                        'is_otomatis_jurnal' => 0,
-                        'is_custom_rupiah' => $isCustomRupiah,
-                        'mutasi_rupiah_total' => $mutasiRupiahTotal,
-                        'date' => $date,
-                        'description' => $desc
-                    ]), false, $lockManager);
-                    if ($stStock['status'] == 0) {
-                        throw new \Exception($stStock['msg']);
-                    }
-                } else if ($lawanCodeGroup == 140003) {
-                    $st = KartuBDP::mutationStore(new Request([
-                        'stock_id' => $stock_id,
-                        'mutasi_qty_backend' => $qty,
-                        'unit_backend' => $unit,
-                        'mutasi_quantity' => $qty,
-                        'unit' => $unit,
-                        'flow' => $flow == 1 ? 0 : 1,
-                        'production_number' => $productionNumber,
-                        'sales_order_number' => $salesOrderNumber,
-                        'sales_order_id' => $saleOrderId,
-                        'code_group' => $codeGroup,
-                        'lawan_code_group' => $lawanCodeGroup,
-                        'is_otomatis_jurnal' => 1,
-                        'is_custom_rupiah' => $isCustomRupiah,
-                        'mutasi_rupiah_total' => $mutasiRupiahTotal,
-                        'date' => $date,
-                        'description' => $desc
-                    ]), false, $lockManager);
+                $lawanAkunKode= $request->input('account_code');
+                $lawanAkun= ChartAccountAlias::where('code_group',$lawanAkunKode)->first();
+                if(!$lawanAkun){
+                    throw new \Exception('Akun lawan tidak ditemukan');
                 }
-                $st = KartuInTransit::mutationStore(new Request([
-                    'stock_id' => $stock_id,
-                    'mutasi_qty_backend' => $qty,
-                    'unit_backend' => $unit,
-                    'mutasi_quantity' => $qty,
-                    'unit' => $unit,
-                    'flow' => $flow,
+                $akun= ChartAccountAlias::where('reference_model','App\Models\KartuInTransit')->first();
+                if(!$akun){
+                    throw new \Exception('Akun Kartu in transit tidak ditemukan');
+                }
+                $lawanModel= $lawanAkun->reference_model;
+                $invoicePack= InvoicePack::where('invoice_number',$lastKartu->production_number)->first();
+                if(!$invoicePack){
+                    throw new \Exception('Invoice pack tidak ditemukan');
+                }
+               
+                 $st = KartuInTransit::mutationStore(new Request([
+                    'stock_id' => $lastKartu->stock_id,
+                    'mutasi_qty_backend' => $lastKartu->saldo_qty_backend,
+                    'unit_backend' => $lastKartu->unit_backend,
+                    'mutasi_quantity' => $lastKartu->saldo_qty_backend*($lastKartu->mutasi_quantity/$lastKartu->mutasi_qty_backend),
+                    'unit' => $lastKartu->unit,
+                    'flow' => 1,// keluar
                     'production_number' => $productionNumber,
-                    'sales_order_number' => $salesOrderNumber,
-                    'sales_order_id' => $saleOrderId,
-                    'code_group' => $codeGroup,
-                    'lawan_code_group' => $lawanCodeGroup,
+                    'sales_order_number' => null,
+                    'sales_order_id' => null,
+                    'invoice_pack_number' => $invoicePack->invoice_number,
+                    'code_group' => $akun->code_group,
+                    'lawan_code_group' => $lawanAkun->code_group,
                     'is_otomatis_jurnal' => 1,
-                    'is_custom_rupiah' => $isCustomRupiah,
-                    'mutasi_rupiah_total' => $mutasiRupiahTotal,
+                    'is_custom_rupiah' => 0,
+                    'mutasi_rupiah_total' => $lastKartu->saldo_rupiah_total,
                     'date' => $date,
-                    'description' => $desc
+                    'description' => 'Pindahkan '.$stock->name.' ['.$productionNumber.'] ke '.$lawanAkun->name,
                 ]), false, $lockManager);
-                $allSt[] = $st;
-                if ($st['status'] == 0) {
+                if($st['status']==0){
                     throw new \Exception($st['msg']);
                 }
-                if ($stStock) {
-                    $kartuStock = $stStock['msg'];
-                    $thejournal = Journal::where('journal_number', $st['journal_number'])->where('code_group', $lawanCodeGroup)->first();
-                    $kartuStock->journal_id = $thejournal->id;
-                    $kartuStock->journal_number = $st['journal_number'];
-                    $kartuStock->save();
-                    $kartuStock->createDetailKartuInvoice();
-                }
-            }
-        } catch (Throwable $th) {
-            $lockManager->releaseAll();
-            DB::rollBack();
+                $journalNumber= $st['journal_number'];
+                 $stLawan = $lawanModel::mutationStore(new Request([
+                        'stock_id' => $lastKartu->stock_id,
+                        'mutasi_qty_backend' => $lastKartu->saldo_qty_backend,
+                        'unit_backend' => $lastKartu->unit_backend,
+                        'mutasi_quantity' => $lastKartu->saldo_qty_backend*($lastKartu->mutasi_quantity/$lastKartu->mutasi_qty_backend),
+                        'unit' => $lastKartu->unit,
+                        'flow' => 0,
+                        'production_number' => $productionNumber,
+                        'sales_order_number' => null,
+                        'sales_order_id' => null,
+                        'code_group' => $lawanAkun->code_group,
+                        'lawan_code_group' => $akun->code_group,
+                        'is_otomatis_jurnal' => 1,
+                        'is_custom_rupiah' =>0,
+                        'mutasi_rupiah_total' => $lastKartu->saldo_rupiah_total,
+                        'date' => $date,
+                        'description' => 'Pindahan '.$stock->name.' ['.$productionNumber.'] dari '.$akun->name,
+                    ]), false, $lockManager);
+                $resultLawan= $stLawan['msg'];
+                $resultLawan->journal_number= $journalNumber;
+                $resultLawan->save();
+                $resultLawan->createDetailKartuInvoice();
+             });
+
+            
+        } catch (Throwable $th) {         
+     
             return [
                 'status' => 0,
                 'msg' => $th->getMessage()
             ];
         }
-        $lockManager->releaseAll();
-        DB::commit();
+       
         return [
             'status' => 1,
-            'msg' => $allSt
+            'msg' => 'success'
         ];
     }
     public function getMutasiMasuk()
@@ -287,10 +225,12 @@ class KartuInTransitController extends Controller
                 'saldo_rupiah_total as rupiah_saldo',
                 'ks.journal_number',
             )->get();
+        $accountPersediaan= ChartAccountAlias::whereBetween('code_group',[140000,150000])->select('code_group',DB::raw('concat(code_group," - ",name) as name'))->get();
         $view->productionNumber = $productionNumber;
         $view->title = $name . ' [' . $stock->id . ']';
         $view->datas = $dataHistory;
         $view->model = 'kartu-in-transit';
+        $view->accountPersediaan = $accountPersediaan;
         return $view;
     }
 

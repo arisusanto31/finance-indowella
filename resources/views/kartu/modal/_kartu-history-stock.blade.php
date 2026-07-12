@@ -50,8 +50,12 @@
                             <i class="fas fa-refresh"></i> recalculate
                         </button>
 
-                        <button class="btn btn-primary btn-sm" onclick="reEvaluateHPP('{{ $data->id }}')">
+                        <button class="btn btn-primary btn-sm mt-2" onclick="reEvaluateHPP('{{ $data->id }}')">
                             <i class="fas fa-coins"></i> re-evaluate HPP
+                        </button>
+
+                        <button class="btn btn-danger btn-sm mt-2" onclick="pindahkan('{{ $data->id }}')">
+                            <i class="fas fa-money-bill-wave"></i> Pindahkan
                         </button>
 
                     </td>
@@ -95,15 +99,77 @@
             onSuccess: function(response) {
                 // Handle success response
                 console.log("Bebankan successful:", response);
-                if(response.status==1){
+                if (response.status == 1) {
 
-                }else{
-                    
+                } else {
+
                 }
                 // Optionally, you can refresh the modal or update the UI
             },
         });
 
+    }
+
+    accountPersediaan = <?php echo json_encode($accountPersediaan ?? []); ?>;
+
+    function pindahkan(kartuId) {
+
+        const oldEnforceFocus = $.fn.modal.Constructor.prototype._enforceFocus;
+
+        $.fn.modal.Constructor.prototype._enforceFocus = function() {};
+        console.log('version modal',$.fn.modal.Constructor.VERSION)
+        console.log('version swal',Swal.version)
+        const modal = bootstrap.Modal.getInstance(document.getElementById('global-modal'));
+
+        modal._focustrap.deactivate();
+
+        Swal.fire({
+            title: 'Pindahkan stock',
+            html: `
+                    <input id="swal-date" class="swal2-input" type="date" placeholder="Tanggal">
+                    <select id="swal-account" class="swal2-select">
+                        <option value="">Pilih Akun</option>
+                        ${collect(accountPersediaan).map((account,key) => `<option value="${account.code_group}">${account.name}</option>`).join('')}
+                    </select>
+                `,
+            didClose: () => {
+                $.fn.modal.Constructor.prototype._enforceFocus = oldEnforceFocus;
+            },
+            showCancelButton: true,
+            confirmButtonText: 'Pindahkan',
+            cancelButtonText: 'Batal',
+            showLoaderOnConfirm: true,
+            focusConfirm: false,
+            preConfirm: () => {
+                return {
+                    date: document.getElementById('swal-date').value,
+                    account_code: document.getElementById('swal-account').value
+                };
+            }
+        }).then((result) => {
+             modal._focustrap.activate();
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '{{ url("admin/kartu/".$model."/pindahkan") }}',
+                    method: 'post',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        kartu_id: kartuId,
+                        account_code: result.value.account_code,
+                        date: result.value.date
+                    },
+                    success: function(res) {
+                        console.log(res);
+                        if (res.status == 1) {
+                            notification('success', 'pindah akun berhasil disimpan');
+                            refreshIsiModal();
+                        } else {
+                            notification('error', 'pindah akun gagal disimpan');
+                        }
+                    }
+                });
+            }
+        });
     }
 
     function recalculate(id) {
@@ -124,7 +190,7 @@
         });
     }
 
-    function reEvaluateHPP(id){
+    function reEvaluateHPP(id) {
         // Call your API or perform your calculation logic here
         console.log("Re-evaluating HPP for ID:", id);
         swalConfirmAndSubmit({
@@ -136,10 +202,10 @@
             onSuccess: function(res) {
                 // Handle success response
                 console.log("Re-evaluation of HPP successful:", res);
-                if(res.status==1){
-                
+                if (res.status == 1) {
+
                     notification('success', 'Re-evaluation of HPP successful', 'success');
-                }else{
+                } else {
                     notification('error', 'Re-evaluation of HPP failed', 'error');
                 }
                 // Optionally, you can refresh the modal or update the UI

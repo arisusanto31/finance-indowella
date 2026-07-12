@@ -217,6 +217,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::post('create-mutations', [KartuInTransitController::class, 'createMutations'])->name('create-mutations');
             Route::post('refresh-kartu', [KartuInTransitController::class, 'refreshKartu'])->name('refresh-kartu');
             Route::get('show-history-stock/{id}', [KartuInTransitController::class, 'showHistoryStock'])->name('show-history-stock');
+            Route::post('pindahkan', [KartuInTransitController::class, 'pindahkan'])->name('pindahkan');
             Route::post('recalculate', [KartuInTransitController::class, 'recalculate'])->name('recalculate');
             Route::post('delete-mutation', [KartuInTransitController::class, 'deleteMutation'])->name('delete-mutation');
         });
