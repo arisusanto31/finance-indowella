@@ -56,6 +56,7 @@ trait HasModelDetailKartuInvoice
         $dks = DetailKartuInvoice::storeData(new Request([
             'kartu_type' => get_class($kartu),
             'kartu_id' => $kartu->id,
+            'journal_number'=> $kartu->journal_number??null,
             'journal_id' => $kartu->journal_id,
             'sales_order_number' => $saleOrderNumber,
             'sales_order_id' => $SOID,
@@ -63,7 +64,6 @@ trait HasModelDetailKartuInvoice
             'purchase_order_id' => $POID,
             'invoice_pack_number' => $invoiceNumber,
             'invoice_pack_id' => $invID,
-
         ]));
         if ($dks['status'] == 0) {
             return $dks;

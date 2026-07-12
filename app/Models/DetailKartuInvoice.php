@@ -82,6 +82,15 @@ class DetailKartuInvoice extends Model
             if (!$journal && $request->input('journal_id') != null) {
                 return ['status' => 0, 'msg' => 'jurnal tidak ditemukan'];
             }
+            if (!$journal && $request->input('journal_number') != null) {
+                $codeGroups = ChartAccountAlias::where('reference_model', $kartuType)->pluck('code_group');
+                $journal = Journal::where('journal_number', $request->input('journal_number'))
+                    ->whereIn('code_group', $codeGroups)
+                    ->first();
+                if($journal){
+                    $kartuType::where('id',$kartuId)->update(['journal_id'=>$journal->id]);
+                }
+            }
             $created = null;
             if ($kartuType == Journal::class) {
                 $kartuType = null;

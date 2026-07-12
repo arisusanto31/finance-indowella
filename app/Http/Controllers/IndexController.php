@@ -300,5 +300,13 @@ class IndexController extends Controller
             }
             return $repair;
         }
+
+        if(getInput('type')=='kartu-stock-link'){
+            $id= getInput('id');
+            $kartuStock= KartuStock::find($id);
+            $kartuStock->createDetailKartuInvoice();
+
+            return $kartuStock;
+        }
     }
 }
