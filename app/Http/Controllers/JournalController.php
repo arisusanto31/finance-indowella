@@ -479,7 +479,7 @@ class JournalController extends Controller
                 'journal_number',
                 DB::raw('CASE WHEN code_group < 200000 THEN amount_debet-amount_kredit ELSE amount_kredit-amount_debet END as amount_journal'),
                 'amount_saldo',
-                DB::raw('LAG(amount_saldo) OVER (PARTITION BY code_group ORDER BY index_date) as last_saldo'),
+                DB::raw('coalesce(LAG(amount_saldo) OVER (PARTITION BY code_group ORDER BY index_date), 0) as last_saldo'),
             );
 
         $datamin = Journal::fromSub($journals, 'journals')
@@ -492,6 +492,7 @@ class JournalController extends Controller
         $journals = Journal::whereIn('id', $datamin)->get();
         return [
             'status' => 1,
+            'datamin' => $datamin,
             'msg' => $journals,
             'index_date' => $indexAwal . ' - ' . $indexAkhir
         ];

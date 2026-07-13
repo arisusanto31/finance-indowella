@@ -180,7 +180,7 @@
             loading(0);
             console.log(res);
             if (res.status == 1) {
-             
+
                 html = "";
                 html += `
                             <div class="mb-2 text-sm font-bold">index date : ${res.index_date}</div>
@@ -196,8 +196,15 @@
                                 <tbody id="problem-journal-body">
                                
                         `;
-                res.msg.forEach(function(journal) {
+                if (res.msg.length == 0) {
                     html += `
+                                <tr>
+                                    <td colspan="4" class="text-center">tidak ada problem</td>
+                                </tr>
+                            `;
+                } else {
+                    res.msg.forEach(function(journal) {
+                        html += `
                                 <tr>
                                     <td>${journal.code_group}</td>
                                     <td>${journal.index_date}</td>
@@ -205,16 +212,17 @@
                                     <td id="status${journal.id}"></td>
                                 </tr>
                             `;
-                });
+                    });
+                }
                 html += `
                                 </tbody>
                             </table>
                         `;
                 $('#container-output').html(html);
                 keys = Object.keys(res.msg);
-                console.log('proses ',keys);
+                console.log('proses ', keys);
                 for (const i of keys) {
-                    console.log('recalculate iterasi - journal id  ',i, res.msg[i].id);
+                    console.log('recalculate iterasi - journal id  ', i, res.msg[i].id);
                     journal = res.msg[i];
                     $('#status' + journal.id).html('<i class="fas fa-spinner fa-spin"></i> recalculating');
                     d = await recalculate(journal.id);
@@ -239,11 +247,11 @@
                     success: function(res) {
                         console.log(res);
                         if (res.status == 1) {
-                         
-                           
+
+
                             resolve(res);
                         } else {
-                          
+
                             reject(res);
                         }
                     },
