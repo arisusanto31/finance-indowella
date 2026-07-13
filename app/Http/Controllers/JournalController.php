@@ -471,6 +471,7 @@ class JournalController extends Controller
         }
         // try{
         $journals = Journal::whereBetween('index_date', [$indexAwal, $indexAkhir])
+            ->whereNot('tag','opening 01/2026')            
             ->select(
                 'id',
                 'book_journal_id',
