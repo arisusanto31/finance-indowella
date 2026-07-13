@@ -37,6 +37,7 @@ class BatalkanProsesSalesOrder extends Command
             return;
         }
         $sales->removeAllProcess();
+        $sales->updateStatus();
         $this->info('Proses sales order berhasil dibatalkan.');
     }
 }
