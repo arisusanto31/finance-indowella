@@ -216,7 +216,6 @@
                 for (const i of keys) {
                     console.log('recalculate iterasi - journal id  ',i, res.msg[i].id);
                     journal = res.msg[i];
-
                     $('#status' + journal.id).html('<i class="fas fa-spinner fa-spin"></i> recalculating');
                     d = await recalculate(journal.id);
                     if (d.status == 1) {
@@ -226,7 +225,6 @@
                         swal('oppss', 'something error');
                     }
                 }
-
             } else {
 
             }

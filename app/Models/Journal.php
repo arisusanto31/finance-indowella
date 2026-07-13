@@ -270,7 +270,7 @@ class Journal extends Model
 
     public function updateAfterCreate()
     {
-        $journal= $this;
+        $journal = $this;
         $reference = null;
         if ($journal->reference_type != null)
             $reference = $journal->reference;
@@ -288,7 +288,7 @@ class Journal extends Model
                 }
             }
         }
-       
+
         $journal->createKartuLink();
         $journal->verifyJournal();
         $journal->createDetailKartuInvoice();
@@ -423,40 +423,43 @@ class Journal extends Model
 
         // CustomLogger::log('journal', 'info', 'recalculate make lock ' . $name);
         try {
-
+            $lastSaldo = $thejournal->amount_saldo;
+            $allDataUpdate=[];
             $mustEditJournal = Journal::where('code_group', strval($thejournal->code_group))->where('index_date', '>', $thejournal->index_date)
                 ->where(function ($q) {
                     $q->whereNull('tag')
                         ->orWhere('tag', 'not like', 'opening%');
                 })
                 ->orderBy('index_date', 'asc')
-                ->select('amount_debet', 'amount_kredit', 'id', 'code_group')->get();
-            $lastSaldo = $thejournal->amount_saldo;
-            $newdata = [];
-            $dataUpdate = [];
-            foreach ($mustEditJournal as $journal) {
+                ->select('amount_debet', 'index_date', 'amount_kredit', 'id', 'code_group')
+                ->chunkById(2000, function ($journals) use (&$lastSaldo,&$allDataUpdate) {
+                    $newdata = [];
+                    $dataUpdate = [];
+                    foreach ($journals as $journal) {
 
-                if ($journal->code_group < 200000) { //aktiva
-                    $journal->amount_saldo = round(($lastSaldo + $journal->amount_debet - $journal->amount_kredit), 2);
-                } else { //passiva
-                    $journal->amount_saldo = round(($lastSaldo - $journal->amount_debet + $journal->amount_kredit), 2);
-                }
+                        if ($journal->code_group < 200000) { //aktiva
+                            $journal->amount_saldo = round(($lastSaldo + $journal->amount_debet - $journal->amount_kredit), 2);
+                        } else { //passiva
+                            $journal->amount_saldo = round(($lastSaldo - $journal->amount_debet + $journal->amount_kredit), 2);
+                        }
 
-                $dataUpdate[] = [
-                    'id' => $journal->id,
-                    'amount_saldo' => $journal->amount_saldo
-                ];
+                        $dataUpdate[] = [
+                            'id' => $journal->id,
+                            'amount_saldo' => $journal->amount_saldo
+                        ];
+                        $lastSaldo = $journal->amount_saldo;
+                        $newdata[] = collect($journal)->only(['id', 'description', 'index_date', 'amount_saldo', 'amount_debet', 'amount_kredit']);
+                    }
+                    $allDataUpdate=array_merge($allDataUpdate,$dataUpdate);
 
-                $lastSaldo = $journal->amount_saldo;
-                $newdata[] = collect($journal)->only(['id', 'description', 'index_date', 'amount_saldo', 'amount_debet', 'amount_kredit']);
-            }
-
-            upsertInChunks(
-                Journal::class,
-                $dataUpdate,
-                'id',
-                ['amount_saldo']
-            );
+                    upsertInChunks(
+                        Journal::class,
+                        $dataUpdate,
+                        'id',
+                        ['amount_saldo']
+                    );
+                }, 'index_date');
+            
         } catch (LockTimeoutException $e) {
             return [
                 'status' => 0,
@@ -467,7 +470,7 @@ class Journal extends Model
 
             // CustomLogger::log('journal', 'info', 'recalculate release lock ' . $name);
         }
-        return ['status' => 1, 'msg' => $dataUpdate, 'journal' => $this];
+        return ['status' => 1, 'msg' => $allDataUpdate, 'journal' => $this];
     }
 
     public function scopeSearchNote($q, $search)
