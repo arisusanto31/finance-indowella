@@ -204,6 +204,7 @@ class Journal extends Model
                 $journal->index_date = $finalIndexDate;
                 $journal->index_date_group = $indexDate; //nilai ymdHis
                 $journal->chart_account_id = $coaID;
+                $journal->journal_identifier=$codeGroup.$finalIndexDate;
                 $journal->reference_model = $caAlias->reference_model;
                 $journal->journal_number = $journal_number;
                 $journal->lawan_code_group = $lawanCodeGroup;
