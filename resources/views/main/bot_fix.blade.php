@@ -234,7 +234,7 @@
                     }
                 }
             } else {
-
+                Swal.fire('error','ada masalah pada proses pencarian problem journal','error');
             }
         }
 

@@ -469,8 +469,13 @@ class JournalController extends Controller
                 ];
             }
         }
-        // try{
-        $journals = Journal::whereBetween('index_date', [$indexAwal, $indexAkhir])        
+        try{
+        $journals = Journal::
+            where(function($q){
+                $q->whereNull('tag')
+                 ->orWhere('tag','<>','opening 01/2026');
+            })
+            ->whereBetween('index_date', [$indexAwal, $indexAkhir])        
             ->select(
                 'id',
                 'book_journal_id',
@@ -487,10 +492,7 @@ class JournalController extends Controller
             ->whereRaw('last_saldo + amount_journal != amount_saldo')
             ->select('*', DB::raw('amount_journal + last_saldo - amount_saldo as selisih'))
             ->get()->groupBy('code_group')->map(function ($group) {
-                return collect($group)->filter(function($val){
-                    if($val->tag=='opening 01/2026')return false;
-                    return true;
-                })->sortBy('index_date')->first()->id;
+                return collect($group)->sortBy('index_date')->first()->id??null;
             })->values()->all();
 
         $journals = Journal::whereIn('id', $datamin)->get();
@@ -501,12 +503,11 @@ class JournalController extends Controller
             'index_date' => $indexAwal . ' - ' . $indexAkhir
         ];
 
-        // }
-        // catch(Throwable $e){
-        //     return [
-        //         'status'=>0,'msg'=> $e->getMessage()
-        //     ];
-        // }
+        } catch(Throwable $e){
+            return [
+                'status'=>0,'msg'=> $e->getMessage()
+            ];
+        }
 
     }
 
