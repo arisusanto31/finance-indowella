@@ -70,9 +70,9 @@ class SearchManualJournalProblem extends Command
                         $journal->lag_seharusnya = $journal->amount_journal + $journal->last_saldo;
                         $problemsLag[$journal->code_group] = $journal;
                     }
-                    // $strProblemLag = $amanLag ? '✅' : '❌';
-                    // $strProblemManual = $amanManual ? '✅' : '❌';
-                    // $this->info("Journal: {$journal->journal_identifier} | Problem Lag: {$strProblemLag} | Problem Manual: {$strProblemManual}");
+                    $strProblemLag = $amanLag ? '✅' : '❌';
+                    $strProblemManual = $amanManual ? '✅' : '❌';
+                    $this->info("Journal: {$journal->journal_identifier} | Problem Lag: {$strProblemLag} | Problem Manual: {$strProblemManual}");
                 }
             }
         }, 'journal_identifier');
