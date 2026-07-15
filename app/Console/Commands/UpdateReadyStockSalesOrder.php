@@ -13,7 +13,7 @@ class UpdateReadyStockSalesOrder extends Command
      *
      * @var string
      */
-    protected $signature = 'update:ready-stock-sales-order {bookid} {monthyear}';
+    protected $signature = 'update:ready-stock-sales-order {bookid} {monthyear} {onlynotready=0}';
 
     /**
      * The console command description.
@@ -28,6 +28,7 @@ class UpdateReadyStockSalesOrder extends Command
     public function handle()
     {
         //
+        $onlyNotReady = $this->argument('onlynotready') ;
         $monthyear = $this->argument('monthyear') . '-01';
         $startDate = createCarbon($monthyear)->startOfMonth();
         $endDate = createCarbon($monthyear)->endOfMonth();
@@ -35,8 +36,12 @@ class UpdateReadyStockSalesOrder extends Command
         Session::put('book_journal_id', $bookid);
         $salesOrders =  SalesOrder::where('created_at', '>=', $startDate)
             ->where('created_at', '<', $endDate)
-            ->where('status_delivery', '<>', 'TERKIRIM 100%')
-            ->get();
+            ->where('status_delivery', '<>', 'TERKIRIM 100%');
+
+        if ($onlyNotReady==1) {
+            $salesOrders = $salesOrders->where('is_ready_stock', 0);
+        }
+        $salesOrders = $salesOrders->get();
 
         $this->info('kamu akan update sebanyak ' . count($salesOrders) . ' sales order');
         foreach ($salesOrders as $so) {
