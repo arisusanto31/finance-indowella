@@ -476,6 +476,7 @@ class JournalController extends Controller
                 'book_journal_id',
                 'code_group',
                 'index_date',
+                'tag',
                 'journal_number',
                 DB::raw('CASE WHEN code_group < 200000 THEN amount_debet-amount_kredit ELSE amount_kredit-amount_debet END as amount_journal'),
                 'amount_saldo',
