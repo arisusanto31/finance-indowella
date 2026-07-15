@@ -230,7 +230,7 @@
                         $('#status' + journal.id).html('<i class="fas fa-check colorgreen"></i> beres');
                     } else {
                         $('#status' + journal.id).html('<i class="fas fa-close colorred"></i> ajur');
-                        swal('oppss', 'something error');
+                      
                     }
                 }
             } else {
@@ -252,12 +252,12 @@
                             resolve(res);
                         } else {
 
-                            reject(res);
+                            resolve(res);
                         }
                     },
                     error: function(res) {
 
-                        reject(res);
+                        resolve(res);
                     }
                 });
             });
