@@ -57,7 +57,8 @@ class CekSalesNotReady extends Command
         }
         foreach($salesOrders as $so) {
             $this->call('split:nota-command', [
-                'salesid' => $so->id
+                'salesid' => $so->id,
+                'autonota' => 4
             ]);
         }
     }
