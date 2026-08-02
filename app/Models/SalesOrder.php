@@ -620,4 +620,12 @@ class SalesOrder extends Model
             'msg' => 'Berhasil menghapus semua proses untuk sales order ' . $this->sales_order_number
         ];
     }
+
+    public function updateTotalPrice(){
+        $this->total_price = collect($this->details)->sum('total_price');
+        $this->total_ppn_k= collect($this->details)->sum('total_ppn_k');
+        $this->save();
+    }
+
 }
+
