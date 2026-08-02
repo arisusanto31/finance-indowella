@@ -81,6 +81,7 @@ class SplitNotaCommand extends Command
                 $thesale->draft_number = $sale->draft_number . '-' . ($i + 2);
                 $thesale->sales_order_number = $thesale->draft_number;
                 $thesale->customer_id = $sale->customer_id;
+                $thesale->created_at = $sale->created_at;
                 $thesale->save();
                 $newsales[] = $thesale;
             }
