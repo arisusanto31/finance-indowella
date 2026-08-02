@@ -124,7 +124,7 @@ class SplitNotaCommand extends Command
             } else {
                 $this->info('total price dan total ppn sama, proses BERHASIL');
             }
-            DB::rollBack(); // hanya untuk checker dulu aja hehe..
+            DB::commit(); // hanya untuk checker dulu aja hehe..
         } catch (\Exception $e) {
             DB::rollBack();
             $this->error('Terjadi kesalahan: ' . $e->getMessage());
