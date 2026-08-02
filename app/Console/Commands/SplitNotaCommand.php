@@ -16,7 +16,7 @@ class SplitNotaCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'split:nota-command {salesid}';
+    protected $signature = 'split:nota-command {salesid} {autonota=0}';
 
     /**
      * The console command description.
@@ -33,7 +33,7 @@ class SplitNotaCommand extends Command
 
         try {
             DB::beginTransaction();
-
+            $autonota = $this->argument('autonota');
             $sale = DB::table('sales_orders')->where('id', $this->argument('salesid'))->first();
 
             //kita cari invice detail nya yaa 
@@ -54,13 +54,18 @@ class SplitNotaCommand extends Command
             $this->info('------------------------------------------');
             $this->info('checking price = ' . $sale->total_price . ' vs sum detail = ' . collect($details)->sum('total_price'));
             $this->info('checking ppn = ' . $sale->total_ppn_k . ' vs sum detail = ' . collect($details)->sum('total_ppn_k'));
-            if (!$this->confirm('Apakah kamu yakin ingin membagi nota ini menjadi beberapa nota?')) {
-                $this->info('Proses dibatalkan');
-                return;
+            if ($autonota == 0) {
+                if (!$this->confirm('Apakah kamu yakin ingin membagi nota ini menjadi beberapa nota?')) {
+                    $this->info('Proses dibatalkan');
+                    return;
+                }
             }
             $totalPriceAwall = $sale->total_price;
             $totalPPNAwal = $sale->total_ppn_k;
-            $countNota = $this->ask('mau jadi berapa nota lur ? (masukkan angka, misal 2,3,4 dst)');
+            if ($autonota == 0)
+                $countNota = $this->ask('mau jadi berapa nota lur ? (masukkan angka, misal 2,3,4 dst)');
+            else
+                $countNota = $autonota;
             $countNota = (int)$countNota;
             //kita bagi jadi 5 item aja 
             $newsales = [];
