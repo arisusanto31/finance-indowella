@@ -39,6 +39,7 @@ class CekSalesNotReady extends Command
         $salesOrders = SalesOrder::fromSub($salesOrders, 'sales_orders')->leftJoin('sales_order_details', 'sales_orders.id', '=', 'sales_order_details.sales_order_id')
             ->select('sales_orders.id', 'sales_orders.sales_order_number', DB::raw('count(sales_order_details.id) as total_detail'))
             ->groupBy('sales_orders.id')
+            ->havingRaw('total_detail > 15')
             ->get();
         tampilkanTableTerminal(
             $salesOrders,
