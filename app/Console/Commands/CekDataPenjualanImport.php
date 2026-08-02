@@ -19,14 +19,14 @@ class CekDataPenjualanImport extends Command
      *
      * @var string
      */
-    protected $signature = 'app:cek-data-penjualan-import {namafile} {monthyear}';
+    protected $signature = 'compare:penjualan-import {namafile} {monthyear}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'compare penjualan import dan data di database';
 
     /**
      * Execute the console command.
