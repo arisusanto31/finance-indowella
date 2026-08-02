@@ -90,8 +90,9 @@ class SplitNotaCommand extends Command
             $stage = 0;
             $maxCount = ceil(count($details) / $countNota);
             foreach ($details as $detail) {
-                $detail->sales_order_id = $newsales[$stage];
+                $detail->sales_order_id = $newsales[$stage]->id;
                 $detail->sales_order_number = $newsales[$stage]->sales_order_number;
+                $detail->draft_number = $newsales[$stage]->draft_number;
                 $detail->save();
                 $count++;
                 if ($count >= $maxCount) {
