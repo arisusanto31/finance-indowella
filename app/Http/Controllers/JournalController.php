@@ -799,7 +799,7 @@ class JournalController extends Controller
         foreach ($journals as $j) {
             //kalo disini langsung hapus aja, biar lebih clean datanya
             $lj[] = Journal::where('code_group', $j->code_group)->where('index_date', '<', $j->index_date)->orderBy('index_date', 'desc')->first();
-            if ($j->reference_model != null) {
+            if ($j->reference_model !== null) {
 
                 //menghapus relasi di model yang di link ke jurnal ini
                 $model = $j->reference_model::where('journal_number', $j->journal_number)->get();
@@ -866,7 +866,7 @@ class JournalController extends Controller
             foreach ($journals as $j) {
                 //kalo disini langsung hapus aja, biar lebih clean datanya
                 $lj[] = Journal::where('code_group', $j->code_group)->where('index_date', '<', $j->index_date)->orderBy('index_date', 'desc')->first();
-                if ($j->reference_model != null) {
+                if ($j->reference_model !== null) {
                     //menghapus relasi di model yang di link ke jurnal ini
                     $model = $j->reference_model::where('journal_number', $j->journal_number)->get();
                     if ($model->count() > 0) {
@@ -1322,10 +1322,6 @@ class JournalController extends Controller
             return KartuInTransitController::processTaskImport($id);
         }
 
-        // $taskDetail = TaskImportDetail::find($id);
-        // if ($taskDetail->type == 'kartu_stock') {
-        //     ImportKartuStockJob::dispatch($id);
-        // }
         return ['status' => 1, 'msg' => 'success'];
     }
 
