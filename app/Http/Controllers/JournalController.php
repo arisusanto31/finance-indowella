@@ -799,6 +799,11 @@ class JournalController extends Controller
         foreach ($journals as $j) {
             //kalo disini langsung hapus aja, biar lebih clean datanya
             $lj[] = Journal::where('code_group', $j->code_group)->where('index_date', '<', $j->index_date)->orderBy('index_date', 'desc')->first();
+            
+            if($j->reference_model==="null"){
+                $j->reference_model=null;
+                $j->save();
+            }
             if ($j->reference_model !== null) {
 
                 //menghapus relasi di model yang di link ke jurnal ini
