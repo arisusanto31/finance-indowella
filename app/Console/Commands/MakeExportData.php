@@ -66,7 +66,7 @@ class MakeExportData extends Command
             $bgprocess->save();
             $this->info('process data neraca..');
 
-            $neraca = ExcelExportController::getDataNeraca($month, $year);
+            $neraca = Cache::get('export_data_neraca_' . $bookid . '_' . $year . '_' . $month);
             if (!$neraca || $force) {
                 $neraca = ExcelExportController::getDataNeraca($month, $year);
             }
@@ -78,11 +78,11 @@ class MakeExportData extends Command
             $this->info('process data NL..');
             $bgprocess->stage_process = 'process data nl..';
             $bgprocess->save();
-            $nl = Cache::get('export_data_nl_' . $bookid . '_' . $year . '_' . $month);
+            $nl = json_decode(Cache::get('export_data_nl_' . $bookid . '_' . $year . '_' . $month) ?? '[]', true);
             if (!$nl || $force) {
                 $nl = ExcelExportController::getDataNL($month, $year);
             }
-            Cache::set('export_data_nl_' . $bookid . '_' . $year . '_' . $month, $nl, $timeout);
+            Cache::set('export_data_nl_' . $bookid . '_' . $year . '_' . $month, json_encode($nl), $timeout);
 
             $bgprocess->success();
             $this->info('process data NL finished.');
@@ -90,55 +90,55 @@ class MakeExportData extends Command
             $this->info('process data laporan rugi laba..');
             $bgprocess->stage_process = 'process data lr..';
             $bgprocess->save();
-            $lr = Cache::get('export_data_lr_' . $bookid . '_' . $year . '_' . $month);
+            $lr = json_decode(Cache::get('export_data_lr_' . $bookid . '_' . $year . '_' . $month)??'[]', true);
             if (!$lr || $force) {
                 $lr = ExcelExportController::getDataLR($month, $year);
             }
-            Cache::set('export_data_lr_' . $bookid . '_' . $year . '_' . $month, $lr, $timeout);
+            Cache::set('export_data_lr_' . $bookid . '_' . $year . '_' . $month, json_encode($lr), $timeout);
             $bgprocess->success();
             $this->info('process data laporan rugi laba finished.');
 
             $this->info('process data kas..');
             $bgprocess->stage_process = 'process data kas..';
             $bgprocess->save();
-            $kas = Cache::get('export_data_kas_' . $bookid . '_' . $year . '_' . $month);
+            $kas = json_decode(Cache::get('export_data_kas_' . $bookid . '_' . $year . '_' . $month) ?? '[]', true);
             if (!$kas || $force) {
                 $kas = ExcelExportController::getBukuKas($month, $year);
             }
-            Cache::set('export_data_kas_' . $bookid . '_' . $year . '_' . $month, $kas, $timeout);
+            Cache::set('export_data_kas_' . $bookid . '_' . $year . '_' . $month, json_encode($kas), $timeout);
             $bgprocess->success();
             $this->info('process data kas finished.');
 
             $this->info('process data memo..');
             $bgprocess->stage_process = 'process data memo..';
             $bgprocess->save();
-            $memo = Cache::get('export_data_memo_' . $bookid . '_' . $year . '_' . $month);
+            $memo = json_decode(Cache::get('export_data_memo_' . $bookid . '_' . $year . '_' . $month) ?? '[]', true);
             if (!$memo || $force) {
                 $memo = ExcelExportController::getBukuMemo($month, $year, $singkat);
             }
-            Cache::set('export_data_memo_' . $bookid . '_' . $year . '_' . $month, $memo, $timeout);
+            Cache::set('export_data_memo_' . $bookid . '_' . $year . '_' . $month, json_encode($memo), $timeout);
             $bgprocess->success();
             $this->info('process data memo finished.');
 
             $this->info('process data pembelian..');
             $bgprocess->stage_process = 'process data pembelian..';
             $bgprocess->save();
-            $pembelian = Cache::get('export_data_pembelian_' . $bookid . '_' . $year . '_' . $month);
+            $pembelian = json_decode(Cache::get('export_data_pembelian_' . $bookid . '_' . $year . '_' . $month) ?? '[]', true);
             if (!$pembelian || $force) {
                 $pembelian = ExcelExportController::getPembelian($month, $year);
             }
-            Cache::set('export_data_pembelian_' . $bookid . '_' . $year . '_' . $month, $pembelian, $timeout);
+            Cache::set('export_data_pembelian_' . $bookid . '_' . $year . '_' . $month, json_encode($pembelian), $timeout);
             $bgprocess->success();
             $this->info('process data pembelian finished.');
 
             $this->info('process data penjualan..');
             $bgprocess->stage_process = 'process data penjualan..';
             $bgprocess->save();
-            $penjualan = Cache::get('export_data_penjualan_' . $bookid . '_' . $year . '_' . $month);
+            $penjualan = json_decode(Cache::get('export_data_penjualan_' . $bookid . '_' . $year . '_' . $month) ?? '[]', true);
             if (!$penjualan || $force) {
                 $penjualan = ExcelExportController::getPenjualan($month, $year);
             }
-            Cache::set('export_data_penjualan_' . $bookid . '_' . $year . '_' . $month, $penjualan, $timeout);
+            Cache::set('export_data_penjualan_' . $bookid . '_' . $year . '_' . $month, json_encode($penjualan), $timeout);
             $bgprocess->success();
             $this->info('process data penjualan finished.');
 
@@ -147,22 +147,22 @@ class MakeExportData extends Command
             $bgprocess->stage_process = 'process data kartu piutang..';
             $bgprocess->save();
 
-            $kartuPiutang = Cache::get('export_data_kartu_piutang_' . $bookid . '_' . $year . '_' . $month);
+            $kartuPiutang = json_decode(Cache::get('export_data_kartu_piutang_' . $bookid . '_' . $year . '_' . $month) ?? '[]', true);
             if (!$kartuPiutang || $force) {
                 $kartuPiutang = ExcelExportController::getKartuPiutang($month, $year);
             }
-            Cache::set('export_data_kartu_piutang_' . $bookid . '_' . $year . '_' . $month, $kartuPiutang, $timeout);
+            Cache::set('export_data_kartu_piutang_' . $bookid . '_' . $year . '_' . $month, json_encode($kartuPiutang), $timeout);
             $bgprocess->success();
             $this->info('process data kartu piutang finished.');
 
             $this->info('process data kartu hutang..');
             $bgprocess->stage_process = 'process data kartu hutang..';
             $bgprocess->save();
-            $kartuHutang = Cache::get('export_data_kartu_hutang_' . $bookid . '_' . $year . '_' . $month);
+            $kartuHutang = json_decode(Cache::get('export_data_kartu_hutang_' . $bookid . '_' . $year . '_' . $month) ?? '[]', true);
             if (!$kartuHutang || $force) {
                 $kartuHutang = ExcelExportController::getKartuHutang($month, $year);
             }
-            Cache::set('export_data_kartu_hutang_' . $bookid . '_' . $year . '_' . $month, $kartuHutang, $timeout);
+            Cache::set('export_data_kartu_hutang_' . $bookid . '_' . $year . '_' . $month, json_encode($kartuHutang), $timeout);
             $bgprocess->success();
             $this->info('process data kartu hutang finished.');
 
@@ -170,11 +170,11 @@ class MakeExportData extends Command
             $bgprocess->stage_process = 'process data kartu dp sales..';
             $bgprocess->save();
 
-            $kartuDPSales = Cache::get('export_data_kartu_dp_sales_' . $bookid . '_' . $year . '_' . $month);
+            $kartuDPSales = json_decode(Cache::get('export_data_kartu_dp_sales_' . $bookid . '_' . $year . '_' . $month) ?? '[]', true);
             if (!$kartuDPSales || $force) {
                 $kartuDPSales = ExcelExportController::getKartuDPSales($month, $year);
             }
-            Cache::set('export_data_kartu_dp_sales_' . $bookid . '_' . $year . '_' . $month, $kartuDPSales, $timeout);
+            Cache::set('export_data_kartu_dp_sales_' . $bookid . '_' . $year . '_' . $month, json_encode($kartuDPSales), $timeout);
             $bgprocess->success();
             $this->info('process data kartu dp sales finished.');
 
@@ -182,11 +182,11 @@ class MakeExportData extends Command
             $bgprocess->stage_process = 'process data kartu inventory..';
             $bgprocess->save();
 
-            $kartuInventory = Cache::get('export_data_kartu_inventory_' . $bookid . '_' . $year);
+            $kartuInventory = json_decode(Cache::get('export_data_kartu_inventory_' . $bookid . '_' . $year) ?? '[]', true);
             if (!$kartuInventory || $force) {
                 $kartuInventory = ExcelExportController::getKartuInventory($year);
             }
-            Cache::set('export_data_kartu_inventory_' . $bookid . '_' . $year, $kartuInventory, $timeout);
+            Cache::set('export_data_kartu_inventory_' . $bookid . '_' . $year, json_encode($kartuInventory), $timeout);
             $bgprocess->success();
             $this->info('process data kartu inventory finished.');
 
@@ -194,22 +194,22 @@ class MakeExportData extends Command
             $bgprocess->stage_process = 'process data kartu bdd..';
             $bgprocess->save();
 
-            $kartuBDD = Cache::get('export_data_kartu_bdd_' . $bookid . '_' . $year);
+            $kartuBDD = json_decode(Cache::get('export_data_kartu_bdd_' . $bookid . '_' . $year) ?? '[]', true);
             if (!$kartuBDD || $force) {
                 $kartuBDD = ExcelExportController::getKartuBDD($year);
             }
-            Cache::set('export_data_kartu_bdd_' . $bookid . '_' . $year, $kartuBDD, $timeout);
+            Cache::set('export_data_kartu_bdd_' . $bookid . '_' . $year, json_encode($kartuBDD), $timeout);
             $bgprocess->success();
             $this->info('process data kartu bdd finished.');
 
             $this->info('process data kartu stock..');
             $bgprocess->stage_process = 'process data kartu stock..';
             $bgprocess->save();
-            $kartuStock = Cache::get('export_data_kartu_stock_' . $bookid . '_' . $year . '_' . $month);
+            $kartuStock = json_decode(Cache::get('export_data_kartu_stock_' . $bookid . '_' . $year . '_' . $month) ?? '[]', true);
             if (!$kartuStock || $force) {
                 $kartuStock = ExcelExportController::getKartuStock($month, $year);
             }
-            Cache::set('export_data_kartu_stock_' . $bookid . '_' . $year . '_' . $month, $kartuStock, $timeout);
+            Cache::set('export_data_kartu_stock_' . $bookid . '_' . $year . '_' . $month, json_encode($kartuStock), $timeout);
 
             $bgprocess->success();
             $this->info('process data kartu stock finished.');
@@ -218,11 +218,11 @@ class MakeExportData extends Command
             $bgprocess->stage_process = 'process data kartu bdp..';
             $bgprocess->save();
 
-            $kartuBDP = Cache::get('export_data_kartu_bdp_' . $bookid . '_' . $year . '_' . $month);
+            $kartuBDP = json_decode(Cache::get('export_data_kartu_bdp_' . $bookid . '_' . $year . '_' . $month) ?? '[]', true);
             if (!$kartuBDP || $force) {
                 $kartuBDP = ExcelExportController::getKartuBDP($month, $year);
             }
-            Cache::set('export_data_kartu_bdp_' . $bookid . '_' . $year . '_' . $month, $kartuBDP, $timeout);
+            Cache::set('export_data_kartu_bdp_' . $bookid . '_' . $year . '_' . $month, json_encode($kartuBDP), $timeout);
             $bgprocess->success();
             $this->info('process data kartu bdp finished.');
 
@@ -230,11 +230,11 @@ class MakeExportData extends Command
             $bgprocess->stage_process = 'process data kartu bahan jadi..';
             $bgprocess->save();
 
-            $kartuBahanJadi = Cache::get('export_data_kartu_bahan_jadi_' . $bookid . '_' . $year . '_' . $month);
+            $kartuBahanJadi = json_decode(Cache::get('export_data_kartu_bahan_jadi_' . $bookid . '_' . $year . '_' . $month) ?? '[]', true);
             if (!$kartuBahanJadi || $force) {
                 $kartuBahanJadi = ExcelExportController::getKartuBahanJadi($month, $year);
             }
-            Cache::set('export_data_kartu_bahan_jadi_' . $bookid . '_' . $year . '_' . $month, $kartuBahanJadi, $timeout);
+            Cache::set('export_data_kartu_bahan_jadi_' . $bookid . '_' . $year . '_' . $month, json_encode($kartuBahanJadi), $timeout);
             $bgprocess->success();
             $this->info('process data kartu bahan jadi finished.');
 
@@ -242,11 +242,11 @@ class MakeExportData extends Command
             $bgprocess->stage_process = 'process data kartu in transit..';
             $bgprocess->save();
 
-            $kartuInTransit = Cache::get('export_data_kartu_in_transit_' . $bookid . '_' . $year . '_' . $month);
+            $kartuInTransit = json_decode(Cache::get('export_data_kartu_in_transit_' . $bookid . '_' . $year . '_' . $month) ?? '[]', true);
             if (!$kartuInTransit || $force) {
                 $kartuInTransit = ExcelExportController::getKartuInTransit($month, $year);
             }
-            Cache::set('export_data_kartu_in_transit_' . $bookid . '_' . $year . '_' . $month, $kartuInTransit, $timeout);
+            Cache::set('export_data_kartu_in_transit_' . $bookid . '_' . $year . '_' . $month, json_encode($kartuInTransit), $timeout);
             $bgprocess->success();
             $this->info('process data kartu in transit finished.');
 
