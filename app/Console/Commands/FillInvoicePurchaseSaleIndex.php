@@ -14,7 +14,7 @@ class FillInvoicePurchaseSaleIndex extends Command
      *
      * @var string
      */
-    protected $signature = 'fill:invoice-purchase-sale-index';
+    protected $signature = 'fill:invoice-purchase-sale-index {bookid} {monthyear}';
 
     /**
      * The console command description.
@@ -30,30 +30,36 @@ class FillInvoicePurchaseSaleIndex extends Command
     {
         //
 
-        try{
-        Session::put('book_journal_id', 1);
-        $invSales = InvoiceSaleDetail::whereNull('index_date')->get();
-        foreach ($invSales as $invSale) {
-            $invSale->fillIndexDate();
-            $invSale->refresh();
-            if($invSale->index_date){
-                $this->info('Updated Invoice Sale Detail ID: ' . $invSale->id . ' with index date: ' . $invSale->index_date);
-            }else{
-                $this->error('Failed to update Invoice Sale Detail ID: ' . $invSale->id . ' - Index date not found');
-            }
-        }
+        try {
+            $bookid = $this->argument('bookid');
+            $monthyear = $this->argument('monthyear');
 
-        $this->info('sekarang untuk yang purchase ya');
-        $invPurchases = InvoicePurchaseDetail::whereNull('kartu_stock_id')->get();
-        foreach ($invPurchases as $invPurchase) {
-            $invPurchase->fillKartuStockID();
-            if($invPurchase->kartu_stock_id){
-                $this->info('Updated Invoice Purchase Detail ID: ' . $invPurchase->id . ' with Kartu Stock ID: ' . $invPurchase->kartu_stock_id);
-            }else{
-                $this->error('Failed to update Invoice Purchase Detail ID: ' . $invPurchase->id . ' - Kartu Stock ID not found');
+            Session::put('book_journal_id', $bookid);
+            $startdate = createCarbon($monthyear . '-01')->startOfMonth();
+            $enddate = createCarbon($monthyear . '-01')->endOfMonth();
+            $this->info('Processing Invoice Sale Details...');
+            $invSales = InvoiceSaleDetail::whereNull('index_date')->whereBetween('created_at', [$startdate, $enddate])->get();
+            foreach ($invSales as $invSale) {
+                $invSale->fillIndexDate();
+                $invSale->refresh();
+                if ($invSale->index_date) {
+                    $this->info('Updated Invoice Sale Detail ID: ' . $invSale->id . ' with index date: ' . $invSale->index_date);
+                } else {
+                    $this->error('Failed to update Invoice Sale Detail ID: ' . $invSale->id . ' - Index date not found');
+                }
             }
-        }
-        }catch(\Exception $e){
+
+            $this->info('sekarang untuk yang purchase ya');
+            $invPurchases = InvoicePurchaseDetail::whereNull('kartu_stock_id')->whereBetween('created_at', [$startdate, $enddate])->get();
+            foreach ($invPurchases as $invPurchase) {
+                $invPurchase->fillKartuStockID();
+                if ($invPurchase->kartu_stock_id) {
+                    $this->info('Updated Invoice Purchase Detail ID: ' . $invPurchase->id . ' with Kartu Stock ID: ' . $invPurchase->kartu_stock_id);
+                } else {
+                    $this->error('Failed to update Invoice Purchase Detail ID: ' . $invPurchase->id . ' - Kartu Stock ID not found');
+                }
+            }
+        } catch (\Exception $e) {
             $this->error('Error: ' . $e->getMessage());
         }
     }

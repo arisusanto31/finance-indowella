@@ -147,28 +147,18 @@ class InvoicePurchaseController extends Controller
 
     public function editInvoicePurchase($invoiceNumber)
     {
-
-
-
         $data = InvoicePack::where('invoice_number', $invoiceNumber)->first();
 
         $details = InvoicePurchaseDetail::with('stock')
             ->where('invoice_pack_id', $data->id)
             ->get();
-
-
-
-
         $data['details'] = $details;
-
-
         $view = view('invoice.modal._edit-purchase', [
             'invoiceNumber' => $invoiceNumber,
             'data' => $data,
         ]);
         $view->invoiceNumber = $invoiceNumber;
         $view->data = $data;
-
         return $view;
     }
 
