@@ -2166,9 +2166,11 @@ class JournalController extends Controller
     {
         try {
             $singkat = bookID() == 2 ? 1 : 0;
+            $month=intval(getInput('month'));
+            $year=intval(getInput('year'));
             Artisan::call('make:export-data', [
-                'month' => getInput('month'),
-                'year' => getInput('year'),
+                'month' => $month,
+                'year' => $year,
                 'bookid' => bookID(),
                 'singkat' => $singkat,
                 'force' => 1
