@@ -6,7 +6,7 @@ use App\Models\ChartAccount;
 use App\Models\ChartAccountAlias;
 use App\Models\Journal;
 use Illuminate\Support\Facades\DB;
-
+    
 trait HasModelSaldoAset
 {
 

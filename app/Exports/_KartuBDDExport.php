@@ -3,8 +3,7 @@
 namespace App\Exports;
 
 use Maatwebsite\Excel\Concerns\FromCollection;
-
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithTitle;
@@ -13,7 +12,7 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 
 use function Laravel\Prompts\form;
 
-class _KartuBDDExport implements FromCollection, WithTitle, WithEvents, ShouldAutoSize
+class _KartuBDDExport implements FromCollection, WithTitle, WithEvents, WithColumnWidths
 {
     /**
      * @return \Illuminate\Support\Collection
@@ -26,17 +25,17 @@ class _KartuBDDExport implements FromCollection, WithTitle, WithEvents, ShouldAu
         $this->data = $data;
         $this->headingsStart = [
             'No',
-            'Nama Aset',
-            'Qty',
+            'Nama ',
+            // 'Qty',
             'Periode',
             'Nilai Perolehan',
-            'Mutasi Pembelian'
+            'Mutasi Pembayaran'
         ];
         for ($i = 1; $i <= 12; $i++) {
-            $this->headingsStart[] = 'Penyusutan ' . $data['year'] . '-' . toDigit($i, 2);
+            $this->headingsStart[] = 'Amortisasi ' . $data['year'] . '-' . toDigit($i, 2);
         }
-        $this->headingsStart[] = 'Akumulasi Penyusutan';
-        $this->headingsStart[] = 'Nilai Buku';
+        $this->headingsStart[] = 'Total  Amortisasi';
+        $this->headingsStart[] = 'Nilai Akhir';
         $this->kotakKolom = [];
     }
     public function collection()
@@ -57,7 +56,7 @@ class _KartuBDDExport implements FromCollection, WithTitle, WithEvents, ShouldAu
                 $dataBaris = [
                     $i,
                     $item['name'],
-                    $item['keterangan_qty_unit'],
+                    // $item['keterangan_qty_unit'],
                     $item['periode'] . ' tahun',
                     format_price($item['nilai_perolehan']),
                     format_price($item['total_pembelian']),
@@ -111,6 +110,32 @@ class _KartuBDDExport implements FromCollection, WithTitle, WithEvents, ShouldAu
                     $sheet->getStyle('E' . ($m['start'] + 1) . ':T' . $m['end'])->getAlignment()->setHorizontal('right');
                 }
             },
+        ];
+    }
+
+    public function columnWidths(): array
+    {
+        return [
+            'A' => 7,
+            'B' => 40,
+            'C' => 15,
+            'D' => 20,
+            'E' => 20,
+            'F' => 20,
+            'G' => 20,
+            'H' => 20,
+            'I' => 20,
+            'J' => 20,
+            'K' => 20,
+            'L' => 20,
+            'M' => 20,
+            'N' => 20,
+            'O' => 20,
+            'P' => 20,
+            'Q' => 20,
+            'R' => 20,
+            'S' => 20,
+            'T' => 20
         ];
     }
 }

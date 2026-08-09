@@ -5,12 +5,12 @@ namespace App\Exports;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\FromView;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\AfterSheet;
 
-class _BukuBesarKasExport implements FromView, WithTitle, WithEvents, ShouldAutoSize
+class _BukuBesarKasExport implements FromView, WithTitle, WithEvents, WithColumnWidths
 {
     /**
      * @return \Illuminate\Support\Collection
@@ -52,5 +52,19 @@ class _BukuBesarKasExport implements FromView, WithTitle, WithEvents, ShouldAuto
                 }
             },
         ];
+    }
+    public function columnWidths(): array
+    {
+        return // Kas / Memo
+            [
+                'A' => 8,
+                'B' => 20, // tanggal
+                'C' => 17, // no jurnal
+                'D' => 32, // lawan COA
+                'E' => 38, // deskripsi
+                'F' => 16,
+                'G' => 16,
+                'H' => 16,
+            ];
     }
 }

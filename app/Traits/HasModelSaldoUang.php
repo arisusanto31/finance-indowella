@@ -48,12 +48,15 @@ trait HasModelSaldoUang
 
     public static function getSummary($year, $month, $kolomGroup = 'invoice_pack_number')
     {
+
         $date = $year . '-' . $month . '-01 00:00:00';
         $indexDate = intval(createCarbon($date)->format('ymdHis000'));
+    
         $kartuPiutangAwal = static::query()->whereIn('index_date', function ($q) use ($indexDate, $kolomGroup) {
-            $q->from(with(new static)->getTable())->select(DB::raw('max(index_date)'))->where('index_date', '<', $indexDate)->groupBy($kolomGroup);
-        })->where('amount_saldo_factur', '<>', 0)->select($kolomGroup, 'invoice_date', 'type', 'amount_saldo_factur', 'person_id', 'person_type')->get();
-        $kartuPiutangBaru = static::query()->whereMonth('created_at', $month)->whereYear('created_at', $year)
+            $q->from(with(new static)->getTable())->select(DB::raw('max(index_date)'))->where('index_date', '<', $indexDate)->where('book_journal_id',book()->id)->groupBy($kolomGroup);
+        })->where('amount_saldo_factur', '<>', 0)->select($kolomGroup, 'invoice_date', 'type', 'amount_saldo_factur', 'person_id', 'person_type')->get()->keyBy($kolomGroup);
+          
+       $kartuPiutangBaru = static::query()->whereMonth('created_at', $month)->whereYear('created_at', $year)
             ->select(
                 DB::raw('sum(amount_debet-amount_kredit) as total_amount '),
                 $kolomGroup,
@@ -61,15 +64,20 @@ trait HasModelSaldoUang
                 'person_id',
                 'invoice_date',
                 'person_type',
-            )->groupBy($kolomGroup, 'type')->get();
+            )->groupBy($kolomGroup, 'type')->get()->groupBy($kolomGroup)->map(function($vals){
+                return collect($vals)->groupBy('type')->all();
+            });
 
-        $allFactur = collect($kartuPiutangAwal)->pluck($kolomGroup)->merge(collect($kartuPiutangBaru)->pluck($kolomGroup))->unique()->all();
+        // return $kartuPiutangBaru;
+
+        $allFactur = collect($kartuPiutangAwal)->keys()->merge(collect($kartuPiutangBaru)->keys())->unique()->all();
         $customTable = [];
         foreach ($allFactur as $factur) {
-            $dataAktif = $kartuPiutangAwal->where($kolomGroup, $factur)->first();
-            $dataBaru = $kartuPiutangBaru->where($kolomGroup, $factur)->first();
-            $dataMutasi = optional($kartuPiutangBaru->where($kolomGroup, $factur)->where('type', 'mutasi')->first())->total_amount ?? 0;
-            $dataPelunasan = optional($kartuPiutangBaru->where($kolomGroup, $factur)->where('type', 'pelunasan')->first())->total_amount ?? 0;
+            $dataAktif= $kartuPiutangAwal[$factur] ?? null;
+            $kpbaru= $kartuPiutangBaru[$factur] ?? null;
+            $dataBaru = $kpbaru? collect($kpbaru)->values()->flatten(1)->first(): null;
+            $dataMutasi = isset($kpbaru['mutasi']) ? collect($kpbaru['mutasi'])->sum('total_amount') : 0;
+            $dataPelunasan = isset($kpbaru['pelunasan']) ? collect($kpbaru['pelunasan'])->sum('total_amount') : 0;
             $saldoAwal = (optional($dataAktif)->amount_saldo_factur ?? 0);
             $dataFix = $dataAktif ? $dataAktif : $dataBaru;
             $data = [
@@ -77,6 +85,7 @@ trait HasModelSaldoUang
                 'person_type' => $dataFix->person_type,
                 'invoice_date' => $dataFix->invoice_date,
                 $kolomGroup => $factur,
+                'number'=>$factur,
                 'saldo_awal' => $saldoAwal,
                 'mutasi' => $dataMutasi,
                 'pelunasan' => abs($dataPelunasan),

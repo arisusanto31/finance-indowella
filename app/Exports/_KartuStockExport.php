@@ -4,8 +4,8 @@ namespace App\Exports;
 
 use Maatwebsite\Excel\Concerns\FromCollection;
 
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithTitle;
@@ -14,7 +14,7 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 
 use function Laravel\Prompts\form;
 
-class _KartuStockExport implements FromCollection, WithTitle, WithEvents, ShouldAutoSize,WithColumnFormatting
+class _KartuStockExport implements FromCollection, WithTitle, WithEvents, WithColumnFormatting, WithColumnWidths
 {
     /**
      * @return \Illuminate\Support\Collection
@@ -43,6 +43,28 @@ class _KartuStockExport implements FromCollection, WithTitle, WithEvents, Should
             'Saldo Akhir',
             "",
             "",
+        ];
+    }
+
+    public function columnWidths(): array
+    {
+        return [
+            'A' => 7,
+            'B' => 10,
+            'C' => 40, // nama barang
+            'D' => 10, // satuan
+            'E' => 10, // saldo awal qty
+            'F' => 15, // saldo awal rp/unit
+            'G' => 15, // saldo awal total
+            'H' => 10, // mutasi masuk qty
+            'I' => 15, // mutasi masuk rp/unit
+            'J' => 15, // mutasi masuk total
+            'K' => 10, // mutasi keluar qty
+            'L' => 15, // mutasi keluar rp/unit
+            'M' => 15, // mutasi keluar total
+            'N' => 10, // saldo akhir qty
+            'O' => 15, // saldo akhir rp/unit
+            'P' => 15, // saldo akhir total
         ];
     }
     public function collection()

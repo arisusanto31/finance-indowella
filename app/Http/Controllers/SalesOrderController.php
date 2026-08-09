@@ -46,24 +46,7 @@ class SalesOrderController extends Controller
 
         $month = getInput('month') ? toDigit(getInput('month'), 2) : date('m');
         $year = getInput('year') ? getInput('year') : date('Y');
-        // $salesOrders = SalesOrderDetail::from('sales_order_details as sds')->join('sales_orders as so', 'so.sales_order_number', '=', 'sds.sales_order_number')
-        //     ->where(function ($q) use ($month, $year) {
-        //         $q->whereMonth('sds.created_at', $month)->whereYear('sds.created_at', $year)->orWhere(function ($que) use ($month, $year) {
-        //             $date = createCarbon($year . '-' . $month . '-01');
-        //             $que->where('so.status_delivery', '<>', 'TERKIRIM 100%')->where('so.created_at', '<', $date);
-        //         });
-        //     })
-        //     ->select('sds.*')
-        //     ->with('customer:name,id', 'stock:name,id', 'parent:sales_order_number,id,is_final,total_ppn_k,is_mark,total_price,ref_akun_cash_kind_name,status,status_payment,status_delivery')
-        //     ->orderBy('sds.created_at', 'asc')
-        //     ->paginate(20)
-        //     ->groupBy('sales_order_number');
-        // $invPack = SalesOrder::whereIn('sales_order_number', $salesOrders->keys()->all())
-        //     ->select('is_final', 'is_mark', 'total_price')->get();
-        // $totalInvoice = collect($invPack)->sum('total_price');
-        // $totalInvoiceFinal = collect($invPack)->where('is_final', 1)->sum('total_price');
-        // $totalInvoiceMark = collect($invPack)->where('is_mark', 1)->sum('total_price');
-        $startDate = createCarbon($year . '-' . $month . '-01')->startOfMonth();
+          $startDate = createCarbon($year . '-' . $month . '-01')->startOfMonth();
         $endDate = createCarbon($year . '-' . $month . '-01')->endOfMonth();
         $draftNumber = getInput('draft_number');
         $statusFinal = getInput('status_final');
@@ -1293,19 +1276,5 @@ class SalesOrderController extends Controller
         return ['status' => 1, 'msg' => 'Detail berhasil dihapus'];
     }
 
-    function getBackgroundProcess()
-    {
-        $followedIds = getInput('followed_ids')
-            ? explode(',', getInput('followed_ids')) : [];
-        $bgs = BackgroundProcess::where('monitoring_url', 'admin/invoice/sales-order')
-            ->where('status', '<>', 'finished')
-            ->orWhere(function ($q) use ($followedIds) {
-                $q->whereIn('id', $followedIds);
-            })
-            ->get();
-        return [
-            'status' => 1,
-            'msg' => $bgs
-        ];
-    }
+    
 }

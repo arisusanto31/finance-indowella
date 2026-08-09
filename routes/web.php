@@ -76,6 +76,9 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::get('/inspect-jurnal', [IndexController::class, 'inspectJurnal'])->name('inspect-jurnal');
     });
     Route::get('show-detail-pencocokan', [JournalController::class, 'detailPencocokan'])->name('show-detail-pencocokan');
+    Route::get('get-background-process', [IndexController::class, 'getBackgroundProcess'])->name('get-background-process');
+    Route::post('set-confirm-background-process', [IndexController::class, 'setConfirmBackgroundProcess'])->name('set-confirm-background-process');
+
 
     Route::get('recalculate-journal/{id}', [JournalController::class, 'recalculateJournal'])->name('recalculate-journal');
     Route::get('bot-fix-journal', [JournalController::class, 'botFixJournal'])->name('bot-fix-journal');
@@ -111,7 +114,9 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::get('/update-not-valid', [JournalController::class, 'updateNotValid'])->name('update-not-valid');
         Route::post('/change-lawan-code', [JournalController::class, 'changeLawanCode'])->name('change-lawan-code');
         Route::get('cek-before-export', [JournalController::class, 'cekBeforeExport'])->name('cek-before-export');
-
+        Route::get('search-data-export', [JournalController::class, 'searchDataExport'])->name('search-data-export');
+        Route::get('renew-data-export', [JournalController::class, 'renewDataExport'])->name('renew-data-export');
+        Route::get('download-data-export', [JournalController::class, 'downloadDataExport']);
         Route::post('get-import-saldo', [JournalController::class, 'getImportSaldo'])->name('get-import-saldo');
         Route::post('import-saldo', [JournalController::class, 'importSaldo'])->name('import-saldo');
         Route::get('get-import-saldo-followup/{id}', [JournalController::class, 'getImportSaldoFollowup']);
@@ -316,10 +321,10 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::post('/change-code-kas', [TokoController::class, 'changeCodeKas'])->name('change-code-kas');
         });
 
-         Route::prefix('jenis-kas')->name('jenis-kas.')->group(function(){
+        Route::prefix('jenis-kas')->name('jenis-kas.')->group(function () {
             Route::get('show', [TokoController::class, 'showJenisKas'])->name('show');
             Route::post('link', [TokoController::class, 'linkJenisKas'])->name('link');
-         });
+        });
 
 
         Route::prefix('other-person')->name('other-person.')->group(function () {
@@ -385,7 +390,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
 
         Route::get('sales-order', [SalesOrderController::class, 'index'])->name('sales-order.index');
         Route::post('sales-order-store', [SalesOrderController::class, 'store'])->name('sales-order.store');
-        Route::post('sales-order-store-queue',[SalesOrderController::class,'storeQueue'])->name('sales-order.store-queue');
+        Route::post('sales-order-store-queue', [SalesOrderController::class, 'storeQueue'])->name('sales-order.store-queue');
         Route::get('sales-open-import/{id}', [SalesOrderController::class, 'openImport'])->name('sales-open-import');
         Route::get('sales-get-data-import/{id}', [SalesOrderController::class, 'getDataImport'])->name('sales-get-data-import');
         Route::post('sales-get-data-import-excel', [SalesOrderController::class, 'getDataImportExcel'])->name('sales-get-data-import-excel');
@@ -398,8 +403,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::post('sales-mark', [SalesOrderController::class, 'mark'])->name('sales-mark');
         Route::post('sales-process-dagang', [SalesOrderController::class, 'processDagang'])->name('sales-process-dagang');
         Route::delete('sales-delete-detail', [SalesOrderController::class, 'deleteDetail'])->name('sales-delete-detail');
-        Route::get('sales-get-background-process', [SalesOrderController::class, 'getBackgroundProcess'])->name('sales-get-background-process');
-        
+
         Route::get('purchase-open-import-excel/{id}', [InvoicePurchaseController::class, 'openImportExcel'])->name('purchase-open-import-excel');
         Route::post('purchase-get-data-import-excel', [InvoicePurchaseController::class, 'getDataImportExcel'])->name('purchase-get-data-import-excel');
 
@@ -418,8 +422,6 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::delete('sales-order-delete/{id}', [SalesOrderController::class, 'destroy']);
         Route::get('sales-update-status/{id}', [SalesOrderController::class, 'updateStatus']);
         Route::get('get-data-kartu/{number}', [SalesOrderController::class, 'getDataKartu'])->name('get-data-kartu');
-
-
     });
 });
 

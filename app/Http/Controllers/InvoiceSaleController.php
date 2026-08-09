@@ -126,16 +126,10 @@ class InvoiceSaleController extends Controller
     public function editInvoiceSales($invoiceNumber)
     {
         $data = InvoicePack::where('invoice_number', $invoiceNumber)->first();
-
         $details = InvoiceSaleDetail::with('stock')
             ->where('invoice_pack_id', $data->id)
             ->get();
-
-
-
         $data['details'] = $details;
-
-
         $view = view('invoice.modal._edit-sales');
         $view->data = $data;
 
@@ -165,27 +159,113 @@ class InvoiceSaleController extends Controller
 
     public function showSales()
     {
+      
         $month = getInput('month') ? toDigit(getInput('month'), 2) : date('m');
         $year = getInput('year') ? getInput('year') : date('Y');
 
-        $firstDate = createCarbon("$year-$month-01")->startOfMonth()->format('Y-m-d');
-        $lastDate = createCarbon("$year-$month-01")->endOfMonth()->format('Y-m-d');
-        $invoices = InvoiceSaleDetail::leftJoin('invoice_packs as inv', 'inv.invoice_number', '=', 'invoice_sale_details.invoice_pack_number')
-            // ->where('invoice_sale_details.created_at', '>=', $firstDate)
-            // ->where('invoice_sale_details.created_at', '<=', $lastDate)
-            ->whereMonth('invoice_sale_details.created_at', $month)
-            ->whereYear('invoice_sale_details.created_at', $year)
-            ->with('customer', 'stock', 'parent')
-            ->select('invoice_sale_details.*', 'inv.is_final', 'inv.is_mark')
-            ->get();        // $invPack = InvoicePack::whereMonth('created_at', $month)->whereYear('created_at', $year)->where('reference_model', InvoiceSaleDetail::class)
-        //     ->select('is_final', 'is_mark', 'total_price')->get();
-        $totalInvoice = collect($invoices)->sum('total_price');
-        $totalInvoiceFinal = collect($invoices)->where('is_final', 1)->sum('total_price');
-        $totalInvoiceMark = collect($invoices)->where('is_mark', 1)->sum('total_price');
+        $indexStartDate = createCarbon("$year-$month-01")->startOfMonth()->format('ymdHis000');
+        $indexEndDate = createCarbon("$year-$month-01")->endOfMonth()->format('ymdHis999');
+        
+        $dataSub= InvoiceSaleDetail::whereBetween('index_date', [$indexStartDate, $indexEndDate]);
+
+        $dataTotal = InvoiceSaleDetail::fromSub($dataSub,'invoice_sale_details')->leftJoin('invoice_packs as inv', 'inv.invoice_number', '=', 'invoice_sale_details.invoice_pack_number')
+            ->whereBetween('invoice_sale_details.index_date', [$indexStartDate, $indexEndDate])
+            ->select(
+                DB::raw('SUM(coalesce(invoice_sale_details.total_price,0)) as total_invoice'),
+                DB::raw('SUM(CASE WHEN inv.is_final = 1 THEN coalesce(invoice_sale_details.total_price,0) ELSE 0 END) as total_invoice_final'),
+                DB::raw('SUM(CASE WHEN inv.is_mark = 1 THEN coalesce(invoice_sale_details.total_price,0) ELSE 0 END) as total_invoice_mark'),
+            )->first();
+   
+        $invoiceNumber = getInput('invoice_number');
+        $statusFinal = getInput('status_final');
+        $statusPayment = getInput('status_payment');
+        $statusKirim = getInput('status_kirim');
+        $statusMark = getInput('status_mark');
+        $statusReadyStock = getInput('status_ready_stock');
+        $salesOrderNumber = getInput('sales_order_number');
+        $invPackFilter = InvoiceSaleDetail::whereBetween('index_date', [$indexStartDate, $indexEndDate]);
+        if ($salesOrderNumber) {
+            $invPackFilter = $invPackFilter->where('sales_order_number', 'like',  $salesOrderNumber . '%');
+        }
+
+        if ($invoiceNumber) {
+            $invPackFilter = $invPackFilter->where('invoice_pack_number', 'like',  $invoiceNumber . '%');
+        }
+        if ($statusFinal != "") {
+            $invPackFilter = $invPackFilter->where('is_final', $statusFinal);
+        }
+        // if ($statusPayment != "") {
+        //     if ($statusPayment) {
+        //         $invPackFilter = $invPackFilter->where(function ($q) {
+        //             $q->where('status_payment', 'LUNAS 100%')->orWhere('status_payment', 'DP LUNAS');
+        //         });
+        //     } else {
+        //         $invPackFilter = $invPackFilter->where(function ($q) {
+        //             $q->where('status_payment', '<>', 'LUNAS 100%')->where('status_payment', '<>', 'DP LUNAS');
+        //         });
+        //     }
+        // }
+        // if ($statusKirim != "") {
+        //     if ($statusKirim) {
+        //         $invPackFilter = $invPackFilter->where('status_delivery', 'terkirim 100%');
+        //     } else {
+        //         $invPackFilter = $invPackFilter->where('status_delivery', '<>', 'terkirim 100%');
+        //     }
+        // }
+
+        // if ($statusReadyStock != "") {
+        //     if ($statusReadyStock) {
+        //         $invPackFilter = $invPackFilter->where('is_ready_stock', 1);
+        //     } else {
+        //         $invPackFilter = $invPackFilter->where('is_ready_stock', 0);
+        //     }
+        // }
+        if ($statusMark != "") {
+            if ($statusMark == 0) {
+                $invPackFilter = $invPackFilter->where(function ($q) {
+                    $q->whereNull('is_mark')->orWhere('is_mark', 0);
+                });
+            } else
+                $invPackFilter = $invPackFilter->where('is_mark', $statusMark);
+        }
+        $invPackFilter = $invPackFilter->select('invoice_pack_number')->get();
+
+
+        $perPage = getInput('perpage') ? getInput('perpage') : 20;
+        $page = getInput('page') ? getInput('page') : 1;
+        $totalPage = ceil(collect($invPackFilter)->count() / $perPage);
+        if ($page > $totalPage) $page = $totalPage;
+        $firstNumber = ($page - 1) * $perPage + 1;
+
+        $batchedNumber = collect($invPackFilter)->pluck('invoice_pack_number')->chunk($perPage);
+        $invoices = InvoiceSaleDetail::whereIn('invoice_pack_number', $batchedNumber[$page - 1] ?? [])
+            ->with('customer:name,id', 'stock:name,id', 'parent')
+            ->get()->groupBy('invoice_pack_number');
+
+
+
+
+
+        $totalInvoice = $dataTotal->total_invoice ?? 0;
+        $totalInvoiceFinal = $dataTotal->total_invoice_final ?? 0;
+        $totalInvoiceMark = $dataTotal->total_invoice_mark ?? 0;
         $parent = [];
-        $invoices = collect($invoices)->groupBy('invoice_pack_number');
-        // dd($invoices);
-        return view('invoice.invoice-sales', compact('invoices', 'month', 'year', 'totalInvoice', 'totalInvoiceFinal', 'totalInvoiceMark', 'parent'));
+
+        return view('invoice.invoice-sales', compact(
+            'invoices',
+            'month',
+            'year',
+            'totalInvoice',
+            'totalInvoiceFinal',
+            'totalInvoiceMark',
+            'parent',
+            'invoices',
+            'firstNumber',
+            'page',
+            'perPage',
+            'totalPage',
+            'batchedNumber'
+        ));
     }
 
 
@@ -383,9 +463,9 @@ class InvoiceSaleController extends Controller
     }
 
     //fungsi ini untuk create invoice dari Sales Order
-    public static function createInvoices(Request $request, $timestart = null, $modeNoRecalculate = false,$useTransaction=true)
+    public static function createInvoices(Request $request, $timestart = null, $modeNoRecalculate = false, $useTransaction = true)
     {
-        $thetime= microtime(true);
+        $thetime = microtime(true);
         $lockManager = new LockManager();
         $lockManager->setModeNoRecalculate($modeNoRecalculate);
         // return ['status' => 0, 'msg' => $request->all()];
@@ -404,7 +484,7 @@ class InvoiceSaleController extends Controller
         $salesDetailIDs = $request->input('sales_detail_id');
         $isPPN = $sales->is_ppn;
         // return $request->all();
-        if($useTransaction)
+        if ($useTransaction)
             DB::beginTransaction();
         try {
             $lastInv = InvoicePack::where('person_id', $sales->customer_id)
@@ -438,7 +518,7 @@ class InvoiceSaleController extends Controller
 
                 ];
             }
-            CustomLogger::log('invoicing', "info", "*on create invoice* create invoice pack and details ".$sales->sales_order_number." . proces time : " . (microtime(true) - $thetime) . " seconds");
+            CustomLogger::log('invoicing', "info", "*on create invoice* create invoice pack and details " . $sales->sales_order_number . " . proces time : " . (microtime(true) - $thetime) . " seconds");
             $invoicePack = InvoicePack::create([
                 'invoice_number' => $invoiceNumber,
                 'book_journal_id' => bookID(),
@@ -467,7 +547,7 @@ class InvoiceSaleController extends Controller
                 $data['invoice_pack_id'] = $invoicePack->id;
                 $details[] = InvoiceSaleDetail::create($data);
             }
-            CustomLogger::log('invoicing', "info", "*on create invoice* create invoice pack and details ".$sales->sales_order_number." . proces time : " . (microtime(true) - $thetime) . " seconds");
+            CustomLogger::log('invoicing', "info", "*on create invoice* create invoice pack and details " . $sales->sales_order_number . " . proces time : " . (microtime(true) - $thetime) . " seconds");
             foreach ($salesDetailIDs as $i => $saleDetailID) {
                 $dataDetailSale = $realDataSales[$saleDetailID];
                 $person = $invoicePack->person;
@@ -486,7 +566,7 @@ class InvoiceSaleController extends Controller
                 if ($kartu['status'] == 0) {
                     throw new \Exception($kartu['msg']);
                 }
-                CustomLogger::log('invoicing', "info", "*on create invoice* create kartu piutang ".$sales->sales_order_number." . proces time : " . (microtime(true) - $thetime) . " seconds");
+                CustomLogger::log('invoicing', "info", "*on create invoice* create kartu piutang " . $sales->sales_order_number . " . proces time : " . (microtime(true) - $thetime) . " seconds");
                 $journalNumber = $kartu['msg']->journal_number;
                 $journal = Journal::where('journal_number', $journalNumber)->where('code_group', $codeGroupPenjualans[$i])->first();
                 $journalID = $journal ? $journal->id : null;
@@ -499,7 +579,9 @@ class InvoiceSaleController extends Controller
                 $dataSaleDetail->journal_number = $journalNumber;
                 $dataSaleDetail->save();
                 $dataSaleDetail->createDetailkartuInvoice();
-                CustomLogger::log('invoicing', "info", "*on create invoice* create detail kartu invoice ".$sales->sales_order_number." . proces time : " . (microtime(true) - $thetime) . " seconds");
+                $dataSaleDetail->fillIndexDate();
+
+                CustomLogger::log('invoicing', "info", "*on create invoice* create detail kartu invoice " . $sales->sales_order_number . " . proces time : " . (microtime(true) - $thetime) . " seconds");
 
                 //disini harusnya udah jadi jurnal piutang dan penjualannya
                 //tinggal hubungkan jurnal penjualannya ke kartu penjualannya
@@ -544,7 +626,7 @@ class InvoiceSaleController extends Controller
                         throw new \Exception($stStock['msg']);
                     }
                 }
-                CustomLogger::log('invoicing', "info", "*on create invoice* create kartu stock ".$sales->sales_order_number." . proces time : " . (microtime(true) - $thetime) . " seconds");
+                CustomLogger::log('invoicing', "info", "*on create invoice* create kartu stock " . $sales->sales_order_number . " . proces time : " . (microtime(true) - $thetime) . " seconds");
             }
 
 
@@ -560,10 +642,10 @@ class InvoiceSaleController extends Controller
                     'sales_order_number' => $salesOrderNumber,
                     'date' => $date
                 ]), $lockManager);
-                CustomLogger::log('invoicing', "info", "*on create invoice* create kartu ppn keluaran ".$sales->sales_order_number." . proces time : " . (microtime(true) - $thetime) . " seconds");
+                CustomLogger::log('invoicing', "info", "*on create invoice* create kartu ppn keluaran " . $sales->sales_order_number . " . proces time : " . (microtime(true) - $thetime) . " seconds");
             }
 
-            if($useTransaction)
+            if ($useTransaction)
                 DB::commit();
             // if($lockManager->getModeNoRecalculate()) {
             //     //nah mari kita recalculate semua jurnal yang terlibat
@@ -580,11 +662,11 @@ class InvoiceSaleController extends Controller
             // }
 
             $lockManager->releaseAll();
-            CustomLogger::log('invoicing', "info", "*on create invoice* finished ".$sales->sales_order_number." . proces time : " . (microtime(true) - $thetime) . " seconds");
+            CustomLogger::log('invoicing', "info", "*on create invoice* finished " . $sales->sales_order_number . " . proces time : " . (microtime(true) - $thetime) . " seconds");
             //buat jurnal penjualan
             return ['status' => 1, 'pack' => $invoicePack, 'details' => $details];
         } catch (Throwable $th) {
-            if($useTransaction)
+            if ($useTransaction)
                 DB::rollBack();
             $lockManager->releaseAll();
             return ['status' => 0, 'msg' => $th->getMessage()];
@@ -619,7 +701,7 @@ class InvoiceSaleController extends Controller
                 'date' => $date,
                 'toko_id' => $tokoID,
                 'description' => $description,
-                'sales_order_number'=> $salesOrderNumber
+                'sales_order_number' => $salesOrderNumber
             ]), false, $lockManager);
             if ($kartu['status'] == 0) {
                 throw new \Exception($kartu['msg']);
@@ -665,9 +747,9 @@ class InvoiceSaleController extends Controller
         return $journalNumber;
     }
 
-    public static function submitBayarSalesInvoice(Request $request, $modeNoRecalculate = false,$useTransaction=true)
+    public static function submitBayarSalesInvoice(Request $request, $modeNoRecalculate = false, $useTransaction = true)
     {
-        $starttime=microtime(true);
+        $starttime = microtime(true);
         $lockManager = new LockManager();
         $lockManager->setModeNoRecalculate($modeNoRecalculate);
         $codeGroupPiutang = $request->input('codegroup_piutang');
@@ -676,7 +758,7 @@ class InvoiceSaleController extends Controller
         $amount = $request->input('amount');
         $date = $request->input('date');
 
-        if($useTransaction)
+        if ($useTransaction)
             DB::beginTransaction();
         try {
             $invoicePack = InvoicePack::where('invoice_number', $invoiceNumber)->first();
@@ -684,7 +766,7 @@ class InvoiceSaleController extends Controller
                 throw new \Exception('Invoice tidak ditemukan');
             }
             $sales = SalesOrder::find($invoicePack->sales_order_id);
-            info('repair-submit - '.$invoicePack->sales_order_id.'- cari sales order '.(microtime(true)-$starttime).' seconds');
+            info('repair-submit - ' . $invoicePack->sales_order_id . '- cari sales order ' . (microtime(true) - $starttime) . ' seconds');
 
             $kartu = KartuPiutang::createPelunasan(new Request([
                 'invoice_pack_number' => $invoiceNumber,
@@ -701,7 +783,7 @@ class InvoiceSaleController extends Controller
             if ($kartu['status'] == 0) {
                 throw new \Exception($kartu['msg']);
             }
-            info('repair-submit - '.$invoicePack->sales_order_id.'- create kartu piutang '.(microtime(true)-$starttime).' seconds');
+            info('repair-submit - ' . $invoicePack->sales_order_id . '- create kartu piutang ' . (microtime(true) - $starttime) . ' seconds');
             $journalNumber = $kartu['journal_number'];
             $journal = Journal::where('journal_number', $journalNumber)->where('code_group', $codeGroupBayar)->first();
             $journalID = $journal ? $journal->id : null;
@@ -727,9 +809,9 @@ class InvoiceSaleController extends Controller
                 $kartuDPSales->journal_number = $journalNumber;
                 $kartuDPSales->save();
                 $kartuDPSales->createDetailKartuInvoice();
-                info('repair-submit - '.$invoicePack->sales_order_id.'- create kartu dp sales '.(microtime(true)-$starttime).' seconds');
+                info('repair-submit - ' . $invoicePack->sales_order_id . '- create kartu dp sales ' . (microtime(true) - $starttime) . ' seconds');
             }
-            if($useTransaction)
+            if ($useTransaction)
                 DB::commit();
             // if ($lockManager->getModeNoRecalculate()) {
             //     //nah mari kita recalculate semua jurnal yang terlibat
@@ -747,7 +829,7 @@ class InvoiceSaleController extends Controller
                 'msg' => $kartu['msg'],
             ];
         } catch (Throwable $th) {
-            if($useTransaction)
+            if ($useTransaction)
                 DB::rollBack();
             $lockManager->releaseAll();
             return ['status' => 0, 'msg' => $th->getMessage()];

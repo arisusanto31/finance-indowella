@@ -179,3 +179,7 @@ div.relative-pos {
 div.absolute-pos, span.absolute-pos {
   position: absolute;
 }
+
+.text-gray {
+  color: #6c757d;
+}

@@ -26,6 +26,12 @@ if (! function_exists('dayInMonthQuantity')) {
     }
 }
 
+if (!function_exists('pathUrl')) {
+    function pathUrl()
+    {
+        return request()->path();
+    }
+}
 
 if (!function_exists('user')) {
     function user()

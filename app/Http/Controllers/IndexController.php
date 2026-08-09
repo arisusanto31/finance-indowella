@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\ImportSaldoNLJob;
+use App\Models\BackgroundProcess;
 use App\Models\ChartAccount;
 use App\Models\InvoicePack;
 use App\Models\InvoicePurchaseDetail;
@@ -186,6 +187,33 @@ class IndexController extends Controller
         ];
     }
 
+    function getBackgroundProcess()
+    {
+        $followedIds = getInput('followed_ids')
+            ? explode(',', getInput('followed_ids')) : [];
+        $pathUrl = getInput('path_url');
+        $bgs = BackgroundProcess::where('monitoring_url', $pathUrl)
+            ->where(function ($q) use ($followedIds) {
+                $q->where('is_confirmed', false);
+            })->get();
+        return [
+            'status' => 1,
+            'msg' => $bgs
+        ];
+    }
+
+    function setConfirmBackgroundProcess(Request $request)
+    {
+        $id= $request->input('id');
+        $bg = BackgroundProcess::find($id);
+        $bg->is_confirmed = true;
+        $bg->save();
+        return [
+            'status' => 1,
+            'msg' => $bg
+        ];
+    }
+
     public function areaDeveloper()
     {
 
@@ -301,18 +329,18 @@ class IndexController extends Controller
             return $repair;
         }
 
-        if(getInput('type')=='kartu-stock-link'){
-            $id= getInput('id');
-            $kartuStock= KartuStock::find($id);
+        if (getInput('type') == 'kartu-stock-link') {
+            $id = getInput('id');
+            $kartuStock = KartuStock::find($id);
             $kartuStock->createDetailKartuInvoice();
 
             return $kartuStock;
         }
 
-        if(getInput('type')=='sales-ready-stock'){
-           $so= SalesOrder::find(getInput('id'));
-           $so->updateReadyStock();
-           return $so;
+        if (getInput('type') == 'sales-ready-stock') {
+            $so = SalesOrder::find(getInput('id'));
+            $so->updateReadyStock();
+            return $so;
         }
     }
 }

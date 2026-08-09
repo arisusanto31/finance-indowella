@@ -3,8 +3,7 @@
 namespace App\Exports;
 
 use Maatwebsite\Excel\Concerns\FromCollection;
-
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithTitle;
@@ -13,7 +12,7 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 
 use function Laravel\Prompts\form;
 
-class _KartuDPSalesExport implements FromCollection, WithHeadings, WithTitle, WithEvents, ShouldAutoSize
+class _KartuDPSalesExport implements FromCollection, WithHeadings, WithTitle, WithEvents, WithColumnWidths
 {
     /**
      * @return \Illuminate\Support\Collection
@@ -109,6 +108,21 @@ class _KartuDPSalesExport implements FromCollection, WithHeadings, WithTitle, Wi
                 //menge Cell
                 $sheet->mergeCells($this->rangeMerge);
             },
+        ];
+    }
+
+    public function columnWidths(): array
+    {
+        return [
+            'A' => 7,
+            'B' => 40,
+            'C' => 15,
+            'D' => 20,
+            'E' => 20,
+            'F' => 20,
+            'G' => 20,
+            'H' => 20,
+            'I' => 20,
         ];
     }
 }

@@ -18,6 +18,7 @@ class BackgroundProcess extends Model
         'success_task',
         'failed_task',
         'status',
+        'stage_process',
         'book_journal_id'
     ];
 
@@ -54,6 +55,7 @@ class BackgroundProcess extends Model
                     'total_task' => $total_task ?? 0,
                     'description_process' => $description_process,
                     'status' => 'processing',
+                    'stage_process'=>'memproses..',
                     'book_journal_id' => $bookid,
                 ]);
             } else {
@@ -115,6 +117,19 @@ class BackgroundProcess extends Model
         $bg->hitungProgress();
         $bg->save();
         info('background process ' . $bg->id . ' failed incremented.');
+    }
+
+    public function failure(){
+        
+        $bg = BackgroundProcess::find($this->id);
+
+        if (!$bg) {
+            return;
+        }
+        $bg->failed_task = $bg->total_task- $bg->success_task;
+        $bg->progress = 100;
+        $bg->status = 'failed';
+        $bg->save();
     }
 
     public static function successTask($bookid, $description_process)

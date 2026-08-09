@@ -4,7 +4,6 @@ namespace App\Exports;
 
 use Maatwebsite\Excel\Concerns\FromCollection;
 
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithTitle;
@@ -13,7 +12,7 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 
 use function Laravel\Prompts\form;
 
-class _KartuHutangExport implements FromCollection, WithHeadings, WithTitle, WithEvents, ShouldAutoSize
+class _KartuHutangExport implements FromCollection, WithHeadings, WithTitle, WithEvents
 {
     /**
      * @return \Illuminate\Support\Collection

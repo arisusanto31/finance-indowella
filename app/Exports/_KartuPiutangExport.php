@@ -3,8 +3,7 @@
 namespace App\Exports;
 
 use Maatwebsite\Excel\Concerns\FromCollection;
-
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithTitle;
@@ -13,7 +12,7 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 
 use function Laravel\Prompts\form;
 
-class _KartuPiutangExport implements FromCollection, WithHeadings, WithTitle, WithEvents, ShouldAutoSize
+class _KartuPiutangExport implements FromCollection, WithHeadings, WithTitle, WithEvents, WithColumnWidths
 {
     /**
      * @return \Illuminate\Support\Collection
@@ -62,6 +61,7 @@ class _KartuPiutangExport implements FromCollection, WithHeadings, WithTitle, Wi
         info($this->rangeMerge);
         return $data;
     }
+
     public function headings(): array
     {
         return [
@@ -77,6 +77,20 @@ class _KartuPiutangExport implements FromCollection, WithHeadings, WithTitle, Wi
         ];
     }
 
+    public function columnWidths(): array
+    {
+        return [
+            'A' => 7,
+            'B' => 30,
+            'C' => 15,
+            'D' => 20,
+            'E' => 15,
+            'F' => 15,
+            'G' => 15,
+            'H' => 15,
+            'I' => 20
+        ];
+    }
     public function title(): string
     {
         return 'Piutang ' . $this->data['year'] . '-' . $this->data['month'];

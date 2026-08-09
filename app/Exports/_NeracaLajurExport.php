@@ -3,21 +3,22 @@
 namespace App\Exports;
 
 use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\AfterSheet;
+use Override;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 
 class _NeracaLajurExport implements
     FromCollection,
     WithHeadings,
     WithTitle,
-    ShouldAutoSize,
     WithEvents,
-    WithColumnFormatting
+    WithColumnFormatting,
+    WithColumnWidths
 
 {
     /**
@@ -31,12 +32,24 @@ class _NeracaLajurExport implements
         $this->barisParent = [];
         $this->baris = count($this->data['msg']);
     }
+
+    public function columnWidths(): array
+    {
+        return [
+            'A' => 12,
+            'B' => 36,
+            'C' => 18,
+            'D' => 18,
+            'E' => 18,
+            'F' => 18,
+        ];
+    }
     public function collection()
     {
         //
         $baris = 1;
-        $fixData=[];
-        foreach( $this->data['msg'] as $item){
+        $fixData = [];
+        foreach ($this->data['msg'] as $item) {
             $baris++;
             if ($item['is_child'] == 1) {
                 $fixData[] = [
@@ -48,10 +61,10 @@ class _NeracaLajurExport implements
                     $item['saldo_akhir'],
                 ];
             } else {
-                if($item['level']==0){
+                if ($item['level'] == 0) {
                     //mbah e..
-                    
-                    $fixData[]=[""];
+
+                    $fixData[] = [""];
                     $baris++;
                 }
                 $this->barisParent[] = $baris;
@@ -119,8 +132,8 @@ class _NeracaLajurExport implements
                 $sheet->getStyle('A1:F1')->getAlignment()->setVertical('center');
                 $sheet->getStyle('C2:F' . $this->baris)->getAlignment()->setHorizontal('right');
 
-                foreach($this->barisParent as $bp){
-                    $sheet->getStyle('A'.$bp.':F'.$bp)->getFont()->setBold(true);
+                foreach ($this->barisParent as $bp) {
+                    $sheet->getStyle('A' . $bp . ':F' . $bp)->getFont()->setBold(true);
                 }
             },
         ];

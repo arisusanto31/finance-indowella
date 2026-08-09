@@ -3,8 +3,7 @@
 namespace App\Exports;
 
 use Maatwebsite\Excel\Concerns\FromCollection;
-
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithTitle;
@@ -13,7 +12,7 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 
 use function Laravel\Prompts\form;
 
-class _KartuBDPExport implements FromCollection, WithEvents, WithTitle, ShouldAutoSize
+class _KartuBDPExport implements FromCollection, WithEvents, WithTitle, WithColumnWidths
 {
     /**
      * @return \Illuminate\Support\Collection
@@ -204,6 +203,27 @@ class _KartuBDPExport implements FromCollection, WithEvents, WithTitle, ShouldAu
                 $sheet->getStyle($this->resumeKolom['startNum'] . ':' . $this->resumeKolom['end'])->getAlignment()->setHorizontal('right');
                 
             },
+        ];
+    }
+
+    public function columnWidths(): array
+    {
+        return [
+            'A' => 7,
+            'B' => 40,
+            'C' => 10,
+            'D' => 15,
+            'E' => 15,
+            'F' => 15,
+            'G' => 15,
+            'H' => 15,
+            'I' => 15,
+            'J' => 15,
+            'K' => 15,
+            'L' => 15,
+            'M' => 15,
+            'N' => 15,
+            'O' => 15
         ];
     }
 

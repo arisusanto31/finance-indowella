@@ -9,8 +9,8 @@ use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Border;
-
-class _LabaRugiExport implements FromView, WithTitle, ShouldAutoSize, WithEvents
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
+class _LabaRugiExport implements FromView, WithTitle, WithEvents, ShouldAutoSize
 {
     /**
      * @return \Illuminate\Support\Collection
@@ -27,6 +27,7 @@ class _LabaRugiExport implements FromView, WithTitle, ShouldAutoSize, WithEvents
             'data' => $this->data,
         ]);
     }
+
 
     public function title(): string
     {

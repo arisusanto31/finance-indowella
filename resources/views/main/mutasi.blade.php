@@ -57,24 +57,32 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-2 col-xs-4">
-                        <select class="form-control" id="month-export">
+                        <select class="form-control" id="month-export" onchange="searchDataExport()">
                             @foreach (getListMonth() as $key => $value)
-                                <option value="{{ $key }}" {{ $key == $month ? 'selected' : '' }}>
-                                    {{ $value }}</option>
+                            <option value="{{ $key }}" {{ $key == $month ? 'selected' : '' }}>
+                                {{ $value }}
+                            </option>
                             @endforeach
                         </select>
                     </div>
                     <div class="col-md-2 col-xs-2">
-                        <select class="form-control" id="year-export">
+                        <select class="form-control" id="year-export" onchange="searchDataExport()">
                             @foreach (getListYear() as $value)
-                                <option value="{{ $value }}" {{ $value == $year ? 'selected' : '' }}>
-                                    {{ $value }}</option>
+                            <option value="{{ $value }}" {{ $value == $year ? 'selected' : '' }}>
+                                {{ $value }}
+                            </option>
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-3 col-xs-3">
+                    <!-- <div class="col-md-3 col-xs-3">
                         <button class="btn btn-primary w-100" id="btn-export" onclick="exportData()">Export
                             Data</button>
+                    </div> -->
+                    <div class="clearfix"></div>
+                    <div class="col-md-12 col-xs-12 mt-3">
+                        <div class="bg-primary-lightest p-3 rounded-3" id="div-export" style="max-width:600px">
+                            <i class="fas fa-circle-notch fa-spin"></i> mencari data export...
+                        </div>
                     </div>
                 </div>
             </div>
@@ -270,99 +278,171 @@
     </div>
 
     @push('scripts')
-        <script>
-            var iRowDebet = 1;
-            var iRowKredit = 1;
-            setTimeout(() => {
-                initItemSelectManual('.select-coa', '{{ url("admin/master/chart-account/get-item") }}',
-                    'chart account');
-            }, 100);
+    <script>
+        var iRowDebet = 1;
+        var iRowKredit = 1;
+        setTimeout(() => {
+            initItemSelectManual('.select-coa', '{{ url("admin/master/chart-account/get-item") }}',
+                'chart account');
+            searchDataExport();
+        }, 100);
 
-            function downloadTemplateSaldoAwal() {
+        function downloadTemplateSaldoAwal() {
+            url = "{{ url('admin/jurnal/download-template-saldo-awal') }}";
+            var win = window.open(url, '_blank');
 
-                url = "{{ url('admin/jurnal/download-template-saldo-awal') }}";
-                var win = window.open(url, '_blank');
-               
+        }
 
-            }
 
-            function changeDateClosingJournal() {
-                date = new Date($('#date-closing-journal').val());
-                console.log(date);
-                const pad = (n) => n.toString().padStart(2, '0');
-                const year = date.getFullYear();
-                const month = pad(date.getMonth() + 1); // bulan dimulai dari 0
-                const day = '01';
-                date = (`${year}-${month}-${day}`);
-                console.log(date);
-                $('#date-closing-journal').val(date);
+        function searchDataExport() {
+            month = $('#month-export').val();
+            year = $('#year-export').val();
+            url = '{{ url("admin/jurnal/search-data-export") }}?month=' + month + '&year=' + year;
+            $('#div-export').html(`<i class="fas fa-circle-notch fa-spin"></i> mencari data export...`);
+            $.ajax({
+                url: url,
+                method: 'get',
+                success: function(res) {
+                    console.log(res);
+                    if (res.status == 1) {
+                        html = "";
+                        isExist = res.is_exist;
+                        fileName = isExist ? res.msg.file_path.split('/').pop() : '';
+                        html += `
+                                <div class="row" >
+                                    <div class="col-md-6">
+                                        <div class="d-flex justify-content-center align-items-center" style="height:100%">
+                                            <div class="text-center">
+                                            <p style="font-size: 50px; line-height:1.3; margin:0px;" class="${isExist?"text-success":"text-muted"}"> <i class="fas fa-file-excel "></i> </p>
+                                            <p style="line-height:1.3; margin:0px;"> ${isExist?` ${fileName}`: 'belum ada data'}</p>
+                                                ${isExist?`<small> <i class="fas fa-clock"></i> ${formatNormalDateTime(new Date(res.msg.created_at))}</small><br>`:''}
+                                                ${isExist?`<a href="{{ url('admin/jurnal/download-data-export') }}?key_file=${res.msg.key_file}" class="btn mt-2 btn-success">Download</a>`:''}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 text-end" style="border-left: 1px solid #ccc;">
+                                       <div class="d-flex justify-content-center align-items-center" style="height:100%">
+                                        <button class="btn btn-primary" onclick="renewDataExport()">Perbarui Data</button>
+                                       </div>
+                                    </div>
+                                </div>
 
-                $.ajax({
-                    url: '{{ url("admin/jurnal/get-closing-journal") }}?date=' + date,
-                    method: 'get',
-                    success: function(res) {
-                        console.log(res);
-                        if (res.status == 1) {
-                            if (res.msg == null) {
-                                $('#keterangan-closing').html('Tidak ada jurnal penutup di bulan ini');
-                                $('#btn-closing').prop('disabled', false);
-                            } else {
-                                $('#keterangan-closing').html('sudah ada jurnal penutup  bulan ini di ' + res.msg+ ` <button class="btn btn-sm btn-danger" onclick="hapusTutupJurnal('${res.monthyear}')"> <i class="fas fa-trash"></i> </button>`);
-                                $('#btn-closing').prop('disabled', true);
-                            }
+                            `;
+                        $('#div-export').html(html);
+                    } else {
+                        $('#div-export').html(`search error `);
+                    }
+                },
+                error: function(err) {
+                    $('#div-export').html(`search error`);
+                }
+            });
+        }
+
+        function renewDataExport() {
+            month = $('#month-export').val();
+            year = $('#year-export').val();
+            url = '{{ url("admin/jurnal/renew-data-export") }}?month=' + month + '&year=' + year;
+            $('#div-export').html(`<i class="fas fa-circle-notch fa-spin"></i> memperbarui data export, refresh jika progresbar selesai`);
+            $.ajax({
+                url: url,
+                method: 'get',
+                success: function(res) {
+                    console.log(res);
+                    if (res.status == 0) {
+                        Swal.fire(
+                            'Error',
+                            res.msg,
+                            'error'
+                        );
+                        searchDataExport();
+                    }
+
+                },
+                error: function(err) {
+                    $('#div-export').html(`something error`);
+                }
+            });
+        }
+
+        function changeDateClosingJournal() {
+            date = new Date($('#date-closing-journal').val());
+            console.log(date);
+            const pad = (n) => n.toString().padStart(2, '0');
+            const year = date.getFullYear();
+            const month = pad(date.getMonth() + 1); // bulan dimulai dari 0
+            const day = '01';
+            date = (`${year}-${month}-${day}`);
+            console.log(date);
+            $('#date-closing-journal').val(date);
+
+            $.ajax({
+                url: '{{ url("admin/jurnal/get-closing-journal") }}?date=' + date,
+                method: 'get',
+                success: function(res) {
+                    console.log(res);
+                    if (res.status == 1) {
+                        if (res.msg == null) {
+                            $('#keterangan-closing').html('Tidak ada jurnal penutup di bulan ini');
+                            $('#btn-closing').prop('disabled', false);
                         } else {
-
+                            $('#keterangan-closing').html('sudah ada jurnal penutup  bulan ini di ' + res.msg + ` <button class="btn btn-sm btn-danger" onclick="hapusTutupJurnal('${res.monthyear}')"> <i class="fas fa-trash"></i> </button>`);
+                            $('#btn-closing').prop('disabled', true);
                         }
-                    },
-                    error: function(err) {
+                    } else {
 
                     }
-                });
-            }
+                },
+                error: function(err) {
+
+                }
+            });
+        }
 
 
-            function hapusTutupJurnal(monthyear){
-                swalConfirmAndSubmit({
-                    url: '{{ url("admin/jurnal/hapus-tutup-jurnal") }}',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        monthyear: monthyear
-                    },
-                    onSuccess: (res) => {
-                        if (res.status == 1) {
-                            changeDateClosingJournal();
-                        } else {
+        function hapusTutupJurnal(monthyear) {
+            swalConfirmAndSubmit({
+                url: '{{ url("admin/jurnal/hapus-tutup-jurnal") }}',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    monthyear: monthyear
+                },
+                onSuccess: (res) => {
+                    if (res.status == 1) {
+                        changeDateClosingJournal();
+                    } else {
 
-                        }
                     }
-                });
+                }
+            });
 
-            }
-            function submitClosingJournal() {
-                swalConfirmAndSubmit({
-                    url: '{{ url("admin/jurnal/tutup-jurnal") }}',
-                    data: {
-                        monthyear: $('#date-closing-journal').val(),
-                        aksi: 1,
-                        _token: '{{ csrf_token() }}'
-                    },
-                    onSuccess: (res) => {
-                        if (res.status == 1) {
+        }
 
-                        } else {
+        function submitClosingJournal() {
+            swalConfirmAndSubmit({
+                url: '{{ url("admin/jurnal/tutup-jurnal") }}',
+                data: {
+                    monthyear: $('#date-closing-journal').val(),
+                    aksi: 1,
+                    _token: '{{ csrf_token() }}'
+                },
+                onSuccess: (res) => {
+                    if (res.status == 1) {
 
-                        }
+                    } else {
+
                     }
-                });
-            }
-            changeBackdate();
-            document.getElementById('addDebit').addEventListener('click', function() {
-                const debitWrapper = document.getElementById('div-debet');
-                const newRow = document.createElement('div');
-                iRowDebet++;
-                newRow.id = 'debet' + (iRowDebet);
-                newRow.classList.add('row', 'g-2', 'mb-2', 'rowdebet');
-                newRow.innerHTML = `
+                }
+            });
+        }
+        changeBackdate();
+        document.getElementById('addDebit').addEventListener('click', function() {
+            const debitWrapper = document.getElementById('div-debet');
+            const newRow = document.createElement('div');
+            iRowDebet++;
+            newRow.id = 'debet' + (iRowDebet);
+            newRow.classList.add('row', 'g-2', 'mb-2', 'rowdebet');
+            newRow.innerHTML = `
             <div class="col-md-4 ">
               <select id="dcodegroup${iRowDebet}" onchange="changeCode('debet','${iRowDebet}')" class="form-select select-coa"> ">
                
@@ -375,19 +455,19 @@
               <input id="damount${iRowDebet}" type="text" class="form-control currency-input" placeholder="Amount">
             </div>
           `;
-                debitWrapper.appendChild(newRow);
-                initItemSelectManual('.select-coa', '{{ url("admin/master/chart-account/get-item") }}',
-                    'chart account');
+            debitWrapper.appendChild(newRow);
+            initItemSelectManual('.select-coa', '{{ url("admin/master/chart-account/get-item") }}',
+                'chart account');
 
-            });
+        });
 
-            document.getElementById('addKredit').addEventListener('click', function() {
-                const kreditWrapper = document.getElementById('div-kredit');
-                const newRow = document.createElement('div');
-                iRowKredit++;
-                newRow.id = 'kredit' + (iRowKredit);
-                newRow.classList.add('row', 'g-2', 'mb-2', 'rowkredit');
-                newRow.innerHTML = `
+        document.getElementById('addKredit').addEventListener('click', function() {
+            const kreditWrapper = document.getElementById('div-kredit');
+            const newRow = document.createElement('div');
+            iRowKredit++;
+            newRow.id = 'kredit' + (iRowKredit);
+            newRow.classList.add('row', 'g-2', 'mb-2', 'rowkredit');
+            newRow.innerHTML = `
             <div class="col-md-4">
               <select id="kcodegroup${iRowKredit}" onchange="changeCode('kredit','${iRowKredit}')" class="form-select select-coa">
                
@@ -401,225 +481,225 @@
             </div>
           `;
             kreditWrapper.appendChild(newRow);
-                initItemSelectManual('.select-coa', '{{ url("admin/master/chart-account/get-item") }}',
-                    'chart account');
+            initItemSelectManual('.select-coa', '{{ url("admin/master/chart-account/get-item") }}',
+                'chart account');
+        });
+
+
+        function changeBackdate() {
+            if ($('#is_backdate').is(':checked')) {
+                $('.d-backdate').removeClass('hidden');
+            } else {
+                $('.d-backdate').addClass('hidden');
+            }
+
+        }
+
+        function openCardCreate() {
+            $('#card-create').toggleClass('open');
+            $('#icon-create').toggleClass('open');
+        }
+
+        function openCardImport() {
+            $('#card-import').toggleClass('open');
+            $('#icon-import').toggleClass('open');
+        }
+
+        function openCardExport() {
+            $('#card-export').toggleClass('open');
+            $('#icon-export').toggleClass('open');
+        }
+
+        function openCardClosing() {
+            $('#card-closing').toggleClass('open');
+            $('#icon-closing').toggleClass('open');
+        }
+
+        function changeCode(type, id) {
+            nametype = type == 'debet' ? 'd' : 'k';
+            codeGroup = $('#' + nametype + 'codegroup' + id + ' option:selected').val();
+            console.log(codeGroup);
+            if (codeGroup > 400000) {
+                //kita tambahkan toko_id kalau codegroup >400000
+                html = `<div class="col-md-3 col-toko form-contorl"> <select id="${nametype}toko_id${id}" ></select></div>`;
+                if (type == 'debet') {
+                    $('#debet' + id).find('.col-md-4').addClass('col-md-3').removeClass('col-md-4');
+                    if ($('#debet' + id).find('.col-toko').length == 0) {
+                        $('#debet' + id).append(html);
+                    }
+                } else {
+                    $('#kredit' + id).find('.col-md-4').addClass('col-md-3').removeClass('col-md-4');
+                    if ($('#kredit' + id).find('.col-toko').length == 0) {
+                        $('#kredit' + id).append(html);
+                    }
+                }
+                initItemSelectManual('#' + nametype + 'toko_id' + id, '{{ url("admin/master/toko/get-item") }}',
+                    'Pilih Toko');
+            }
+
+        }
+
+        setTimeout(getListMutasiJurnal, 100);
+
+
+        function prevMonth() {
+            month = '{{ $month }}';
+            year = '{{ $year }}';
+            month--;
+            if (month < 1) {
+                month = 12;
+                year--;
+            }
+            window.location.href = '{{ url("admin/jurnal/mutasi") }}?month=' + month + '&year=' + year;
+        }
+
+        function nextMonth() {
+            month = '{{ $month }}';
+            year = '{{ $year }}';
+            month++;
+            if (month > 12) {
+                month = 1;
+                year++;
+            }
+            window.location.href = '{{ url("admin/jurnal/mutasi") }}?month=' + month + '&year=' + year;
+        }
+
+        function submitJournalManual() {
+            isBackdate = $('#is_backdate').is(':checked') == true ? 1 : 0;
+            date = isBackdate == 1 ? $('#date-mutasi-journal').val() : $('#date-mutasi').val();
+            type = null;
+            debets = [];
+            kredits = [];
+            $('.rowdebet').each(function(i, elem) {
+                id = getNumID($(elem).attr('id'));
+                codeGroup = $('#dcodegroup' + id + ' option:selected').val();
+                note = $('#dnote' + id).val();
+                amount = formatDB($('#damount' + id).val());
+                toko_id = $('#dtoko_id' + id).val();
+                if (toko_id == undefined) {
+                    toko_id = null;
+                }
+                debets.push({
+                    code_group: codeGroup,
+                    description: note,
+                    amount: amount,
+                    reference_id: null,
+                    reference_type: null,
+                    toko_id: toko_id
+                });
+            });
+            $('.rowkredit').each(function(i, elem) {
+                id = getNumID($(elem).attr('id'));
+                codeGroup = $('#kcodegroup' + id + ' option:selected').val();
+                note = $('#knote' + id).val();
+                amount = formatDB($('#kamount' + id).val());
+                toko_id = $('#ktoko_id' + id).val();
+                if (toko_id == undefined) {
+                    toko_id = null;
+                }
+                kredits.push({
+                    code_group: codeGroup,
+                    description: note,
+                    amount: amount,
+                    reference_id: null,
+                    reference_type: null,
+                    toko_id: toko_id
+                });
+            });
+            data = {
+                date: date,
+                type: type,
+                debets: debets,
+                kredits: kredits,
+                is_auto_geterated: 0,
+                is_backdate: isBackdate,
+                user_backdate_id: '{{ user()->id }}',
+                url_try_again: "tidak tersedia",
+                _token: '{{ csrf_token() }}'
+            };
+            console.log(data);
+
+            Swal.fire({
+                title: "Apakah kamu yakin?",
+                text: "Data akan diproses!",
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonText: "Yes",
+                cancelButtonText: "No",
+                allowOutsideClick: false,
+                showLoaderOnConfirm: true, // Loader muncul saat klik Yes
+                preConfirm: () => {
+                    return new Promise((resolve, reject) => {
+                        $.ajax({
+                            url: '{{ url("admin/jurnal/submit-manual") }}',
+                            method: 'post',
+                            data: data,
+                            success: function(res) {
+                                console.log(res);
+                                if (res.status == 1) {
+                                    Swal.fire('success', 'journal sudah tercreate on ' + res
+                                        .journal_number, 'success');
+                                } else {
+                                    Swal.fire('opps', res.msg, 'error');
+                                }
+                            },
+                            error: function(res) {
+                                Swal.fire("opps", "something error", 'error');
+                            }
+                        });
+                    });
+                },
+                // allowOutsideClick: () => !Swal.isLoading() // Mencegah klik di luar saat loading
             });
 
 
-            function changeBackdate() {
-                if ($('#is_backdate').is(':checked')) {
-                    $('.d-backdate').removeClass('hidden');
-                } else {
-                    $('.d-backdate').addClass('hidden');
-                }
+        }
 
-            }
+        function halamanChange() {
+            page = $('#halaman-input').val();
+            getListMutasiJurnal(page);
+        }
 
-            function openCardCreate() {
-                $('#card-create').toggleClass('open');
-                $('#icon-create').toggleClass('open');
-            }
-
-            function openCardImport() {
-                $('#card-import').toggleClass('open');
-                $('#icon-import').toggleClass('open');
-            }
-
-            function openCardExport() {
-                $('#card-export').toggleClass('open');
-                $('#icon-export').toggleClass('open');
-            }
-
-            function openCardClosing() {
-                $('#card-closing').toggleClass('open');
-                $('#icon-closing').toggleClass('open');
-            }
-
-            function changeCode(type, id) {
-                nametype = type == 'debet' ? 'd' : 'k';
-                codeGroup = $('#' + nametype + 'codegroup' + id + ' option:selected').val();
-                console.log(codeGroup);
-                if (codeGroup > 400000) {
-                    //kita tambahkan toko_id kalau codegroup >400000
-                    html = `<div class="col-md-3 col-toko form-contorl"> <select id="${nametype}toko_id${id}" ></select></div>`;
-                    if (type == 'debet') {
-                        $('#debet' + id).find('.col-md-4').addClass('col-md-3').removeClass('col-md-4');
-                        if ($('#debet' + id).find('.col-toko').length == 0) {
-                            $('#debet' + id).append(html);
-                        }
+        function getListMutasiJurnal(page = "") {
+            description = $('#search-description').val();
+            journal_number = $('#search-journal_number').val();
+            name_coa = $('#search-name_coa').val();
+            coa = $('#search-coa').val();
+            loading(1);
+            $.ajax({
+                url: '{{ url("admin/jurnal/get-list-mutasi") }}?search=' + description + '&coa=' + coa + '&page=' +
+                    page + '&month={{ getInput("month") }}&year={{ getInput("year") }}&journal_number=' +
+                    journal_number + '&namaCOA=' + name_coa,
+                type: 'GET',
+                success: function(res) {
+                    loading(0);
+                    if (res.status == 1) {
+                        renderListMutasiJurnal(res);
                     } else {
-                        $('#kredit' + id).find('.col-md-4').addClass('col-md-3').removeClass('col-md-4');
-                        if ($('#kredit' + id).find('.col-toko').length == 0) {
-                            $('#kredit' + id).append(html);
-                        }
-                    }
-                    initItemSelectManual('#' + nametype + 'toko_id' + id, '{{ url("admin/master/toko/get-item") }}',
-                        'Pilih Toko');
-                }
-
-            }
-
-            setTimeout(getListMutasiJurnal, 100);
-
-
-            function prevMonth() {
-                month = '{{ $month }}';
-                year = '{{ $year }}';
-                month--;
-                if (month < 1) {
-                    month = 12;
-                    year--;
-                }
-                window.location.href = '{{ url("admin/jurnal/mutasi") }}?month=' + month + '&year=' + year;
-            }
-
-            function nextMonth() {
-                month = '{{ $month }}';
-                year = '{{ $year }}';
-                month++;
-                if (month > 12) {
-                    month = 1;
-                    year++;
-                }
-                window.location.href = '{{ url("admin/jurnal/mutasi") }}?month=' + month + '&year=' + year;
-            }
-
-            function submitJournalManual() {
-                isBackdate = $('#is_backdate').is(':checked') == true ? 1 : 0;
-                date = isBackdate == 1 ? $('#date-mutasi-journal').val() : $('#date-mutasi').val();
-                type = null;
-                debets = [];
-                kredits = [];
-                $('.rowdebet').each(function(i, elem) {
-                    id = getNumID($(elem).attr('id'));
-                    codeGroup = $('#dcodegroup' + id + ' option:selected').val();
-                    note = $('#dnote' + id).val();
-                    amount = formatDB($('#damount' + id).val());
-                    toko_id = $('#dtoko_id' + id).val();
-                    if (toko_id == undefined) {
-                        toko_id = null;
-                    }
-                    debets.push({
-                        code_group: codeGroup,
-                        description: note,
-                        amount: amount,
-                        reference_id: null,
-                        reference_type: null,
-                        toko_id: toko_id
-                    });
-                });
-                $('.rowkredit').each(function(i, elem) {
-                    id = getNumID($(elem).attr('id'));
-                    codeGroup = $('#kcodegroup' + id + ' option:selected').val();
-                    note = $('#knote' + id).val();
-                    amount = formatDB($('#kamount' + id).val());
-                    toko_id = $('#ktoko_id' + id).val();
-                    if (toko_id == undefined) {
-                        toko_id = null;
-                    }
-                    kredits.push({
-                        code_group: codeGroup,
-                        description: note,
-                        amount: amount,
-                        reference_id: null,
-                        reference_type: null,
-                        toko_id: toko_id
-                    });
-                });
-                data = {
-                    date: date,
-                    type: type,
-                    debets: debets,
-                    kredits: kredits,
-                    is_auto_geterated: 0,
-                    is_backdate: isBackdate,
-                    user_backdate_id: '{{ user()->id }}',
-                    url_try_again: "tidak tersedia",
-                    _token: '{{ csrf_token() }}'
-                };
-                console.log(data);
-
-                Swal.fire({
-                    title: "Apakah kamu yakin?",
-                    text: "Data akan diproses!",
-                    icon: "question",
-                    showCancelButton: true,
-                    confirmButtonText: "Yes",
-                    cancelButtonText: "No",
-                    allowOutsideClick: false,
-                    showLoaderOnConfirm: true, // Loader muncul saat klik Yes
-                    preConfirm: () => {
-                        return new Promise((resolve, reject) => {
-                            $.ajax({
-                                url: '{{ url("admin/jurnal/submit-manual") }}',
-                                method: 'post',
-                                data: data,
-                                success: function(res) {
-                                    console.log(res);
-                                    if (res.status == 1) {
-                                        Swal.fire('success', 'journal sudah tercreate on ' + res
-                                            .journal_number, 'success');
-                                    } else {
-                                        Swal.fire('opps', res.msg, 'error');
-                                    }
-                                },
-                                error: function(res) {
-                                    Swal.fire("opps", "something error", 'error');
-                                }
-                            });
-                        });
-                    },
-                    // allowOutsideClick: () => !Swal.isLoading() // Mencegah klik di luar saat loading
-                });
-
-
-            }
-
-            function halamanChange() {
-                page = $('#halaman-input').val();
-                getListMutasiJurnal(page);
-            }
-
-            function getListMutasiJurnal(page = "") {
-                description = $('#search-description').val();
-                journal_number = $('#search-journal_number').val();
-                name_coa = $('#search-name_coa').val();
-                coa = $('#search-coa').val();
-                loading(1);
-                $.ajax({
-                    url: '{{ url("admin/jurnal/get-list-mutasi") }}?search=' + description + '&coa=' + coa + '&page=' +
-                        page + '&month={{ getInput('month') }}&year={{ getInput('year') }}&journal_number=' +
-                        journal_number + '&namaCOA=' + name_coa,
-                    type: 'GET',
-                    success: function(res) {
-                        loading(0);
-                        if (res.status == 1) {
-                            renderListMutasiJurnal(res);
-                        } else {
-                            swalInfo('error', 'something error', 'error');
-
-                        }
-                    },
-                    error: function(err) {
-                        loading(0);
-                        console.log(err);
                         swalInfo('error', 'something error', 'error');
+
                     }
-                });
+                },
+                error: function(err) {
+                    loading(0);
+                    console.log(err);
+                    swalInfo('error', 'something error', 'error');
+                }
+            });
 
-            }
+        }
 
-            function renderListMutasiJurnal(res) {
-                html = "";
-                console.log(res);
-                $('#max-page').html('of ' + res.max_page);
-                Object.keys(res.msg).forEach(function eachJournalNumber(journalNumber, i) {
-                    rowspan = res.msg[journalNumber].length;
-                    journals= res.msg[journalNumber];
-                    journals.forEach(function eachJournal(journal, j) {
-                        tanggal = formatNormalDateTime(new Date(journal.created_at));
-                        if (j == 0) {
-                            html += `
+        function renderListMutasiJurnal(res) {
+            html = "";
+            console.log(res);
+            $('#max-page').html('of ' + res.max_page);
+            Object.keys(res.msg).forEach(function eachJournalNumber(journalNumber, i) {
+                rowspan = res.msg[journalNumber].length;
+                journals = res.msg[journalNumber];
+                journals.forEach(function eachJournal(journal, j) {
+                    tanggal = formatNormalDateTime(new Date(journal.created_at));
+                    if (j == 0) {
+                        html += `
                                     <tr>
                                         <td class="text-center" rowspan="${rowspan}">${i+1}</td>
                                         <td rowspan="${rowspan}">${tanggal}</td>
@@ -636,8 +716,8 @@
                                     
                                     </tr>
                                     `;
-                                                } else {
-                                                    html += `
+                    } else {
+                        html += `
                                     <tr>
                                         <td>${journal.code_group} - ${res.chart_accounts[journal.code_group]}</td>
                                         <td>${journal.description}</td>
@@ -651,24 +731,24 @@
                                         </td>
                                     </tr>
                                     `;
-                        }
-                    });
+                    }
                 });
-                $('#body-mutasi-jurnal').html(html);
-            }
+            });
+            $('#body-mutasi-jurnal').html(html);
+        }
 
-            async function deleteJournal(id) {
-                url = '{{ route('jurnal.delete', ['id' => '__id__']) }}';
-                url = url.replace('__id__', id);
-                console.log(url);
-                preview = await previewDestroyJournal(id);
-                console.log(preview);
-                if (preview.status != 1) {
-                    swalInfo('error', preview.msg, 'error');
-                    return;
-                }
-                data = preview.msg;
-                html = `
+        async function deleteJournal(id) {
+            url = '{{ route("jurnal.delete", ["id" => "__id__"]) }}';
+            url = url.replace('__id__', id);
+            console.log(url);
+            preview = await previewDestroyJournal(id);
+            console.log(preview);
+            if (preview.status != 1) {
+                swalInfo('error', preview.msg, 'error');
+                return;
+            }
+            data = preview.msg;
+            html = `
                     <div>
                         <h6>Preview Hapus Jurnal</h6>
                         <p>aktivitas ini akan menghapus semua  data terkait jurnal ini </p>
@@ -696,155 +776,156 @@
                         </div>
                     </div>
                 `;
-                swalQuestionHtml({
-                    title: "Yakin menghapus jurnal ini?",
-                    html: html,
-                    confirmButtonText: "Yes, Delete it!",
-                    proses: () => {
-                        swalDelete({
-                            url: url,
-                            successText: "Delete berhasil!",
-                            onSuccess: (res) => {
-                                getListMutasiJurnal();
-                            },onError: (err) => {
-                                console.log('masuk error sini padahal');
-                                swalInfo('error', err, 'error');
-                            }
-                        });
-                    }
-                });
-
-            }
-
-            function previewDestroyJournal(id) {
-                return new Promise((resolve, reject) => {
-                    $.ajax({
-                        url: '{{ url("admin/jurnal/preview-destroy") }}/' + id,
-                        type: 'get',
-                        success: function(res) {
-                            if (res.status == 1) {
-                                resolve(res);
-                            } else {
-                                reject(res.msg);
-                                Swal.fire('opps', res.msg, 'error');
-                            }
+            swalQuestionHtml({
+                title: "Yakin menghapus jurnal ini?",
+                html: html,
+                confirmButtonText: "Yes, Delete it!",
+                proses: () => {
+                    swalDelete({
+                        url: url,
+                        successText: "Delete berhasil!",
+                        onSuccess: (res) => {
+                            getListMutasiJurnal();
                         },
-                        error: function(err) {
-                            console.log(err);
-                            reject('something error');
+                        onError: (err) => {
+                            console.log('masuk error sini padahal');
+                            swalInfo('error', err, 'error');
                         }
                     });
-                });
-            }
+                }
+            });
 
-            function verifyJournal(id) {
+        }
+
+        function previewDestroyJournal(id) {
+            return new Promise((resolve, reject) => {
                 $.ajax({
-                    url: '{{ url("admin/jurnal/verify") }}/' + id,
+                    url: '{{ url("admin/jurnal/preview-destroy") }}/' + id,
                     type: 'get',
                     success: function(res) {
                         if (res.status == 1) {
-                            Swal.fire('success', 'journal sudah terverifikasi', 'success');
-                            getListMutasiJurnal();
+                            resolve(res);
                         } else {
+                            reject(res.msg);
                             Swal.fire('opps', res.msg, 'error');
                         }
                     },
                     error: function(err) {
                         console.log(err);
+                        reject('something error');
                     }
                 });
-            }
+            });
+        }
 
-            setTimeout(getTaskImport, 100);
-
-            // function exportData() {
-            //     month = $('#month-export').val();
-            //     year = $('#year-export').val();
-            //     $('#btn-export').prop('disabled', true).html('processing...');
-            //     url = '{{ url("admin/export-data") }}?month=' + month + '&year=' + year;
-            //     // window.location.href = url;
-            //     $.ajax({
-            //         url:url,
-            //         method:'get',
-            //         success:function(res){
-            //            Swal.fire('success', 'export data berhasil, silahkan cek email anda', 'success');
-            //               $('#btn-export').prop('disabled', false).html('export data');
-            //         },error:function(err){
-            //             Swal.fire('opps', 'something error', 'error');
-            //               $('#btn-export').prop('disabled', false).html('export data');
-            //         }
-            //     });
-            // }
-
-            function exportData() {
-                let month = $('#month-export').val();
-                let year = $('#year-export').val();
-
-                $('#btn-export')
-                    .prop('disabled', true)
-                    .html('processing...');
-
-                let url = '{{ url("admin/export-data") }}?month=' + month + '&year=' + year;
-
-                $.ajax({
-                    url: url,
-                    method: 'GET',
-                    xhrFields: {
-                        responseType: 'blob'
-                    },
-
-                    success: function (data, status, xhr) {
-
-                        // ambil nama file dari header jika ada
-                        let filename = "export.xlsx";
-
-                        let disposition = xhr.getResponseHeader('Content-Disposition');
-                        if (disposition && disposition.indexOf('filename=') !== -1) {
-                            filename = disposition.split('filename=')[1].replace(/"/g, '');
-                        }
-
-                        // bikin link download
-                        let link = document.createElement('a');
-                        let blob = new Blob([data]);
-                        let downloadUrl = window.URL.createObjectURL(blob);
-
-                        link.href = downloadUrl;
-                        link.download = filename;
-                        document.body.appendChild(link);
-                        link.click();
-                        link.remove();
-
-                        window.URL.revokeObjectURL(downloadUrl);
-
-                        Swal.fire('Success', 'File berhasil didownload', 'success');
-                    },
-
-                    error: function () {
-                        Swal.fire('Oops', 'Something error', 'error');
-                    },
-
-                    complete: function () {
-                        $('#btn-export')
-                            .prop('disabled', false)
-                            .html('export data');
+        function verifyJournal(id) {
+            $.ajax({
+                url: '{{ url("admin/jurnal/verify") }}/' + id,
+                type: 'get',
+                success: function(res) {
+                    if (res.status == 1) {
+                        Swal.fire('success', 'journal sudah terverifikasi', 'success');
+                        getListMutasiJurnal();
+                    } else {
+                        Swal.fire('opps', res.msg, 'error');
                     }
-                });
-            }
+                },
+                error: function(err) {
+                    console.log(err);
+                }
+            });
+        }
 
-            function trySearch() {
-                getListMutasiJurnal();
-            }
+        setTimeout(getTaskImport, 100);
 
-            function getTaskImport() {
-                $.ajax({
-                    url: '{{ url("admin/jurnal/get-task-import-aktif") }}',
-                    method: 'get',
-                    success: function(res) {
-                        console.log(res);
-                        if (res.status == 1) {
-                            html = "";
-                            res.msg.forEach(function(item) {
-                                html += ` <div class="row p-2">
+        // function exportData() {
+        //     month = $('#month-export').val();
+        //     year = $('#year-export').val();
+        //     $('#btn-export').prop('disabled', true).html('processing...');
+        //     url = '{{ url("admin/export-data") }}?month=' + month + '&year=' + year;
+        //     // window.location.href = url;
+        //     $.ajax({
+        //         url:url,
+        //         method:'get',
+        //         success:function(res){
+        //            Swal.fire('success', 'export data berhasil, silahkan cek email anda', 'success');
+        //               $('#btn-export').prop('disabled', false).html('export data');
+        //         },error:function(err){
+        //             Swal.fire('opps', 'something error', 'error');
+        //               $('#btn-export').prop('disabled', false).html('export data');
+        //         }
+        //     });
+        // }
+
+        function exportData() {
+            let month = $('#month-export').val();
+            let year = $('#year-export').val();
+
+            $('#btn-export')
+                .prop('disabled', true)
+                .html('processing...');
+
+            let url = '{{ url("admin/export-data") }}?month=' + month + '&year=' + year;
+
+            $.ajax({
+                url: url,
+                method: 'GET',
+                xhrFields: {
+                    responseType: 'blob'
+                },
+
+                success: function(data, status, xhr) {
+
+                    // ambil nama file dari header jika ada
+                    let filename = "export.xlsx";
+
+                    let disposition = xhr.getResponseHeader('Content-Disposition');
+                    if (disposition && disposition.indexOf('filename=') !== -1) {
+                        filename = disposition.split('filename=')[1].replace(/"/g, '');
+                    }
+
+                    // bikin link download
+                    let link = document.createElement('a');
+                    let blob = new Blob([data]);
+                    let downloadUrl = window.URL.createObjectURL(blob);
+
+                    link.href = downloadUrl;
+                    link.download = filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+
+                    window.URL.revokeObjectURL(downloadUrl);
+
+                    Swal.fire('Success', 'File berhasil didownload', 'success');
+                },
+
+                error: function() {
+                    Swal.fire('Oops', 'Something error', 'error');
+                },
+
+                complete: function() {
+                    $('#btn-export')
+                        .prop('disabled', false)
+                        .html('export data');
+                }
+            });
+        }
+
+        function trySearch() {
+            getListMutasiJurnal();
+        }
+
+        function getTaskImport() {
+            $.ajax({
+                url: '{{ url("admin/jurnal/get-task-import-aktif") }}',
+                method: 'get',
+                success: function(res) {
+                    console.log(res);
+                    if (res.status == 1) {
+                        html = "";
+                        res.msg.forEach(function(item) {
+                            html += ` <div class="row p-2">
                <a href="{{ url('admin/jurnal/get-import-saldo-followup') }}/${item.id}">
                   <div class="col-xs-12 bg-primary p-2 rounded-3">
                   <p class="text-white fs-5 mb-0"><strong>${item.description}</strong></p> 
@@ -853,18 +934,18 @@
                 </a>
 
               </div>`;
-                            });
-                            $('#container-task').html(html);
-                        } else {
-
-                        }
-                    },
-                    error: function(res) {
-
+                        });
+                        $('#container-task').html(html);
+                    } else {
 
                     }
-                });
-            }
-        </script>
+                },
+                error: function(res) {
+
+
+                }
+            });
+        }
+    </script>
     @endpush
 </x-app-layout>

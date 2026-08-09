@@ -6,6 +6,7 @@ use App\Traits\HasIndexDate;
 use App\Traits\HasModelDetailKartuInvoice;
 use App\Traits\HasModelSaldoUang;
 use Carbon\Carbon;
+use Illuminate\Contracts\Database\Query\Expression;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -40,13 +41,18 @@ class InvoiceSaleDetail extends Model
     protected static function booted()
     {
         static::addGlobalScope('journal', function ($query) {
-            $from = $query->getQuery()->from ?? 'invoice_sale_details'; // untuk dukung alias `j` kalau pakai from('journals as j')
-            if (Str::contains($from, ' as ')) {
-                [$table, $alias] = explode(' as ', $from);
-                $alias = trim($alias);
+            $from = $query->getQuery()->from ?? 'journals'; // untuk dukung alias `j` kalau pakai from('journals as j')
+         
+            if ($from instanceof Expression) {
+                // fromSub biasanya alias-nya ada di SQL: (...) as `journals`
+                $alias = $query->getModel()->getTable(); // default: journals
+            } elseif (is_string($from) && Str::contains(strtolower($from), ' as ')) {
+                [$table, $alias] = preg_split('/\s+as\s+/i', $from);
+                $alias = trim($alias, '` ');
             } else {
-                $alias = $from;
+                $alias = trim((string) $from, '` ');
             }
+
 
             $query->where(function ($q) use ($alias) {
                 $q->whereNull("{$alias}.book_journal_id")

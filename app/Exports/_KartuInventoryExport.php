@@ -4,8 +4,8 @@ namespace App\Exports;
 
 use Maatwebsite\Excel\Concerns\FromCollection;
 
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithTitle;
@@ -14,7 +14,7 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 
 use function Laravel\Prompts\form;
 
-class _KartuInventoryExport implements FromCollection, WithTitle, WithEvents, ShouldAutoSize, WithColumnFormatting
+class _KartuInventoryExport implements FromCollection, WithTitle, WithEvents, WithColumnFormatting, WithColumnWidths
 {
     /**
      * @return \Illuminate\Support\Collection
@@ -62,6 +62,35 @@ class _KartuInventoryExport implements FromCollection, WithTitle, WithEvents, Sh
             'T' => '#,##0.00',
             'U' => '#,##0.00',
             'V' => '#,##0.00',
+
+        ];
+    }
+
+    public function columnWidths(): array
+    {
+        return [
+            'A' => 7,
+            'B' => 10,
+            'C' => 40, // nama barang
+            'D' => 15, // tanggal perolehan
+            'E' => 15, // periode
+            'F' => 15, // nilai perolehan
+            'G' => 15, // mutasi pembelian
+            'H' => 15, // penyusutan jan
+            'I' => 15, // penyusutan feb
+            'J' => 15, // penyusutan mar
+            'K' => 15, // penyusutan apr
+            'L' => 15, // penyusutan mei
+            'M' => 15, // penyusutan jun
+            'N' => 15, // penyusutan jul
+            'O' => 15, // penyusutan ags
+            'P' => 15, // penyusutan sep
+            'Q' => 15, // penyusutan okt
+            'R' => 15, // penyusutan nov
+            'S' => 15, // penyusutan des
+            'T' => 20, // total penyusutan
+            'U' => 20, // akumulasi akhir penyusutan
+            'V' => 20, // nilai buku
 
         ];
     }

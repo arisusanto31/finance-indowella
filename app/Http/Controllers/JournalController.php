@@ -15,6 +15,7 @@ use App\Models\BookTheme;
 use App\Models\ChartAccount;
 use App\Models\ChartAccountAlias;
 use App\Models\DetailKartuInvoice;
+use App\Models\FinalReport;
 use App\Models\InvoiceSaleDetail;
 use App\Models\Journal;
 use App\Models\JournalJobFailed;
@@ -38,6 +39,7 @@ use Carbon\Carbon;
 use CustomLogger;
 use Illuminate\Console\View\Components\Task;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Redis;
@@ -469,46 +471,44 @@ class JournalController extends Controller
                 ];
             }
         }
-        try{
-        $journals = Journal::
-            where(function($q){
+        try {
+            $journals = Journal::where(function ($q) {
                 $q->whereNull('tag')
-                 ->orWhere('tag','<>','opening 01/2026');
+                    ->orWhere('tag', '<>', 'opening 01/2026');
             })
-            ->whereBetween('index_date', [$indexAwal, $indexAkhir])        
-            ->select(
-                'id',
-                'book_journal_id',
-                'code_group',
-                'index_date',
-                'tag',
-                'journal_number',
-                DB::raw('CASE WHEN code_group < 200000 THEN amount_debet-amount_kredit ELSE amount_kredit-amount_debet END as amount_journal'),
-                'amount_saldo',
-                DB::raw('coalesce(LAG(amount_saldo) OVER (PARTITION BY code_group ORDER BY index_date), 0) as last_saldo'),
-            );
+                ->whereBetween('index_date', [$indexAwal, $indexAkhir])
+                ->select(
+                    'id',
+                    'book_journal_id',
+                    'code_group',
+                    'index_date',
+                    'tag',
+                    'journal_number',
+                    DB::raw('CASE WHEN code_group < 200000 THEN amount_debet-amount_kredit ELSE amount_kredit-amount_debet END as amount_journal'),
+                    'amount_saldo',
+                    DB::raw('coalesce(LAG(amount_saldo) OVER (PARTITION BY code_group ORDER BY index_date), 0) as last_saldo'),
+                );
 
-        $datamin = Journal::fromSub($journals, 'journals')
-            ->whereRaw('last_saldo + amount_journal != amount_saldo')
-            ->select('*', DB::raw('amount_journal + last_saldo - amount_saldo as selisih'))
-            ->get()->groupBy('code_group')->map(function ($group) {
-                return collect($group)->sortBy('index_date')->first()->id??null;
-            })->values()->all();
+            $datamin = Journal::fromSub($journals, 'journals')
+                ->whereRaw('last_saldo + amount_journal != amount_saldo')
+                ->select('*', DB::raw('amount_journal + last_saldo - amount_saldo as selisih'))
+                ->get()->groupBy('code_group')->map(function ($group) {
+                    return collect($group)->sortBy('index_date')->first()->id ?? null;
+                })->values()->all();
 
-        $journals = Journal::whereIn('id', $datamin)->get();
-        return [
-            'status' => 1,
-            'datamin' => $datamin,
-            'msg' => $journals,
-            'index_date' => $indexAwal . ' - ' . $indexAkhir
-        ];
-
-        } catch(Throwable $e){
+            $journals = Journal::whereIn('id', $datamin)->get();
             return [
-                'status'=>0,'msg'=> $e->getMessage()
+                'status' => 1,
+                'datamin' => $datamin,
+                'msg' => $journals,
+                'index_date' => $indexAwal . ' - ' . $indexAkhir
+            ];
+        } catch (Throwable $e) {
+            return [
+                'status' => 0,
+                'msg' => $e->getMessage()
             ];
         }
-
     }
 
     public function recalculateJournal($id)
@@ -799,9 +799,9 @@ class JournalController extends Controller
         foreach ($journals as $j) {
             //kalo disini langsung hapus aja, biar lebih clean datanya
             $lj[] = Journal::where('code_group', $j->code_group)->where('index_date', '<', $j->index_date)->orderBy('index_date', 'desc')->first();
-            
-            if($j->reference_model==="null"){
-                $j->reference_model=null;
+
+            if ($j->reference_model === "null") {
+                $j->reference_model = null;
                 $j->save();
             }
             if ($j->reference_model !== null) {
@@ -1072,19 +1072,20 @@ class JournalController extends Controller
 
     public function getSaldoHighlight()
     {
-        $saldoPenjualan = self::getSaldoJournal(400000);
-        $saldoHutang = self::getSaldoJournal(200000);
-        $saldoPiutang = self::getSaldoJournal(120000);
-        $saldoLaba = ChartAccount::getLabaBulanAt(getInput('date'));
-        return [
-            'status' => 1,
-            'msg' => [
-                'saldo_penjualan' => $saldoPenjualan,
-                'saldo_hutang' => $saldoHutang,
-                'saldo_piutang' => $saldoPiutang,
-                'saldo_laba' => $saldoLaba
-            ]
-        ];
+            // $saldoPenjualan = self::getSaldoJournal(400000);
+            // $saldoHutang = self::getSaldoJournal(200000);
+            // $saldoPiutang = self::getSaldoJournal(120000);
+            // $saldoLaba = ChartAccount::getLabaBulanAt(getInput('date'));
+            // return [
+            //     'status' => 1,
+            //     'msg' => [
+            //         'saldo_penjualan' => $saldoPenjualan,
+            //         'saldo_hutang' => $saldoHutang,
+            //         'saldo_piutang' => $saldoPiutang,
+            //         'saldo_laba' => $saldoLaba
+            //     ]
+            // ]
+        ;
     }
 
     public function getSaldoCustom($codeGroup)
@@ -2123,6 +2124,65 @@ class JournalController extends Controller
         $view->indexStart = $indexStart;
         $view->indexEnd = $indexEnd;
         return $view;
+    }
+
+    function searchDataExport()
+    {
+        $month = intval(getInput('month'));
+        $year = intval(getInput('year'));
+        $bookid = bookID();
+        $keyfile = getInput('key_file');
+        if (!$keyfile) {
+            $keyfile = $bookid . '-' . $month . '-' . $year;
+        }
+        $file = FinalReport::where('key_file', $keyfile)->where('book_journal_id', $bookid)->first();
+        $isExist = $file ? true : false;
+        return [
+            'status' => 1,
+            'msg' => $file,
+            'is_exist' => $isExist,
+        ];
+    }
+
+    function downloadDataExport()
+    {
+        $keyfile = getInput('key_file');
+        $finalReport = FinalReport::where('book_journal_id', bookID())->where('key_file', $keyfile)->first();
+        // return $finalReport;
+        if (!$finalReport) {
+            abort(404, 'File tidak ditemukan');
+        }
+        $path = public_path('storage/' . $finalReport->file_path);
+       
+        if (!file_exists($path)) {
+            return "ga ketemu lur file nya";
+            abort(404, 'File tidak ditemukan');
+        }
+
+        return response()->download($path);
+    }
+
+    function renewDataExport()
+    {
+        try {
+            $singkat = bookID() == 2 ? 1 : 0;
+            Artisan::call('make:export-data', [
+                'month' => getInput('month'),
+                'year' => getInput('year'),
+                'bookid' => bookID(),
+                'singkat' => $singkat,
+                'force' => 1
+            ]);
+            return [
+                'status' => 1,
+                'msg' => 'success',
+            ];
+        } catch (\Exception $e) {
+            return [
+                'status' => 0,
+                'msg' => $e->getMessage(),
+            ];
+        }
     }
 
     function cekBeforeExport()

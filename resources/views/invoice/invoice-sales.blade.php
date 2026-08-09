@@ -1,29 +1,27 @@
 <x-app-layout>
     @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
     @endif
 
     <form id="form-invoice">
         @csrf
-
         <div class=" mb-4 card shadow-sm">
             <h5 class="text-primary-dark card-header"> <a href="javascript:void(openCardCreate())">⚒️ <strong>BUAT INVOICE
                         SALE</strong>
                     <i id="icon-create" class="bx bx-caret-down toggle-icon"></i> </a>
             </h5>
             <div id="card-create" class="container tree-toggle">
-
                 <div class="mb-3 mt-2">
                     <button type="button" class="btn btn-primary" onclick="addrow()" id="addDebit">+Tambah</button>
                     @if (book()->name == 'Buku Toko')
-                        <button type="button" class="btn btn-primary" onclick="openImport('{{ book()->id }}')"
-                            id="btn-import">Import dari Toko</button>
+                    <button type="button" class="btn btn-primary" onclick="openImport('{{ book()->id }}')"
+                        id="btn-import">Import dari Toko</button>
                     @else
-                        <button type="button" class="btn btn-primary" onclick="openImport('{{ book()->id }}')"
-                            id="btn-import">Import dari Manuf</button>
+                    <button type="button" class="btn btn-primary" onclick="openImport('{{ book()->id }}')"
+                        id="btn-import">Import dari Manuf</button>
                     @endif
                 </div>
 
@@ -92,331 +90,480 @@
                 <strong>Rp{{ format_price($totalInvoiceMark) }}</strong>
             </p>
         </div>
-        @if ($invoices->isNotEmpty())
-            <div class="table-responsive">
-                <table class="table table-bordered">
-                    <thead class="table-primary text-center">
-                        <tr>
-                            <th>No</th>
-                            <th>TGL</th>
-                            <th>Invoice</th>
-                            <th>Customer</th>
-                            <th>Produk</th>
-                            <th>Qty</th>
-                            <th>Unit</th>
-                            <th>Harga Satuan</th>
-                            <th>Diskon</th>
-                            <th>Sub-Total</th>
-                            <th>Total</th>
-                            <th>Status</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @php
-                            $no = 1;
-                            $parent = [];
-                        @endphp
-                        @foreach ($invoices as $invoiceNumber => $items)
-                            @php
-                                $theparent = $items->first()->parent;
-                                $parent[$theparent->id] = $theparent;
-                                $rowspan = $items->count();
-                                $invoiceSubtotal = $items->sum(
-                                    fn($item) => $item->quantity * $item->price - $item->discount,
-                                );
-                            @endphp
 
-                            @foreach ($items as $index => $item)
-                                <tr>
-                                    @if ($index === 0)
-                                        <td rowspan="{{ $rowspan }}">{{ $no++ }}</td>
-                                        <td rowspan="{{ $rowspan }}">
-                                            {{ createCarbon($item->created_at)->format('Y-m-d') }}</td>
-                                        <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }}</td>
-                                        <td rowspan="{{ $rowspan }}">{{ $item->customer->name ?? '-' }}</td>
-                                    @endif
+        <div class="bg-primary-lightest p-2 brtr-2 brtl-2 ">
+            <label> <i class="fas fa-filter"></i> <strong>Filter </strong> </label>
+            <div class="row mb-4">
+                <div class="col-md-2">
+                    <label>Invoice number</label>
+                    <input class="form-control" type="text" placeholder="invoice number" id="invoice-number"
+                        value="{{ getInput('invoice_number') }}" />
+                </div>
+                <div class="col-md-2">
+                    <label>Sales Order Number</label>
+                    <input class="form-control" type="text" placeholder="sales order number" id="sales-order-number"
+                        value="{{ getInput('sales_order_number') }}" />
+                </div>
+                <div class="col-md-1">
+                    <label> Final </label>
+                    <select id="status-final" autocomplete="off" class="form-control">
+                        <option @if (!getInput('status_final')) selected @endif value="">Semua</option>
+                        <option @if (getInput('status_final')==1) selected @endif value="1">Final</option>
+                        <option @if (getInput('status_final')===0) selected @endif value="0">Belum Final
+                        </option>
+                    </select>
+                </div>
+                <!-- <div class="col-md-1">
+                    <label> Payment </label>
+                    <select id="status-payment" class="form-control">
+                        <option @if (!getInput('status_payment')) selected @endif value="">Semua</option>
+                        <option @if (getInput('status_payment')==1) selected @endif value="1">Lunas</option>
+                        <option @if (getInput('status_payment')===0) selected @endif value="0">Belum Lunas
+                        </option>
+                    </select>
+                </div>
 
-                                    <td>{{ $item->stock->name ?? '-' }}</td>
-                                    <td class="text-end">{{ $item->quantity }}</td>
-                                    <td>{{ $item->unit }}</td>
-                                    <td class="text-end">Rp{{ number_format($item->price) }}</td>
-                                    <td class="text-end">Rp{{ number_format($item->discount) }}</td>
+                <div class="col-md-1">
+                    <label> Kirim </label>
+                    <select id="status-kirim" class="form-control">
+                        <option @if (getInput('status_kirim')==="" || getInput('status_kirim')===null) selected @endif value="">Semua
+                        </option>
+                        <option @if (getInput('status_kirim')==1) selected @endif value="1">Terkirim
+                        </option>
+                        <option @if (getInput('status_kirim')===0 || getInput('status_kirim')==="0" ) selected @endif value="0">Belum
+                            Terkirim
+                        </option>
+                    </select>
+                </div> -->
 
-                                    @php
-                                        $subtotal = $item->quantity * $item->price - $item->discount;
-                                    @endphp
-                                    <td class="text-end">Rp{{ number_format($subtotal) }}</td>
+                <div class="col-md-1">
+                    <label> Mark </label>
+                    <select id="status-mark" class="form-control">
+                        <option @if (getInput('status_mark')==="" || getInput('status_mark')===null) selected @endif value="">Semua
+                        </option>
+                        <option @if (getInput('status_mark')==1) selected @endif value="1">Mark
+                        </option>
+                        <option @if (getInput('status_mark')===0) selected @endif value="0">Belum Mark
+                        </option>
 
-                                    @if ($index === 0)
-                                        <td rowspan="{{ $rowspan }}">
-                                            <strong>Rp{{ number_format($invoiceSubtotal) }}</strong>
-                                        </td>
-                                        <td rowspan="{{ $rowspan }}">
-                                            @php
-                                                $status = $item->parent ? strtoupper($item->parent->status) : '??';
+                    </select>
+                </div>
 
-                                            @endphp
-                                            <p class="colorblack text-center" style="width:100%;line-height:120%;">
-                                                <strong>{{ $status }}</strong>
-                                            </p>
-                                        </td>
-                                        <td id="action{{ $item->parent->id }}" rowspan="{{ $rowspan }}">
-
-                                            @if ($item->parent)
-                                                @if ($item->parent->is_final == 1)
-                                                    <a href="javascript:void(lihatDetailInvoice('{{ $item->invoice_pack_number }}'))"
-                                                        class="btn btn-sm btn-outline-primary" title="Lihat Invoice">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                @endif
-                                                @if ($item->parent->is_final == 0)
-                                                    <a href="javascript:void(makeFinal('{{ $item->invoice_pack_id }}'))"
-                                                        class="btn btn-sm btn-outline-primary" title="make final"
-                                                        id="btn-final{{ $item->invoice_pack_id }}">
-                                                        <i class="fas fa-upload"></i>
-                                                    </a>
-
-                                                    <a href="javascript:void(editInvoiceSales('{{ $item->invoice_pack_number }}'))"
-                                                        class="btn btn-sm btn-outline-primary" title="Edit Invoice">
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>
-                                                @endif
-                                                <a href="javascript:void(makeMark('{{ $item->parent->id }}'))"
-                                                    class="btn btn-sm btn-outline-primary">
-                                                    <i class="fas fa-paw"></i>
-                                                </a>
-                                            @endif
-                                        </td>
-                                    @endif
-
-                                </tr>
-                            @endforeach
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        @else
-            <div class="container px-0">
-                <div class="alert alert-warning text-center">
-                    Belum ada data Sales order.
+                <div class="col-md-1">
+                    <label> data/page </label>
+                    <input class="form-control" type="number" placeholder="data/page" id="perPage"
+                        value="{{ getInput('perpage') ? getInput('perpage') : 20 }}" />
+                </div>
+                <div class="col-md-1">
+                    <label> Aksi <label>
+                            <button class="form-control btn btn-primary" onclick="applyFilter()">Apply</button>
                 </div>
             </div>
+
+
+
+            <div class="d-flex align-item-center justify-content-center">
+                <div>
+                    <button @if ($page <=1) disabled @endif onclick="prevPage()"> <i
+                            class="fas fa-chevron-left"></i></button>
+                    <span> halaman <input style="width: 50px; text-align: center;" type="number"
+                            value="{{ $page }}" onchange="goToPage(this.value)" />
+                        /
+                        {{ $totalPage }}</span>
+                    <button type="button" @if ($page>= $totalPage) disabled @endif onclick="nextPage()">
+                        <i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+
+
+        </div>
+
+
+        @if ($invoices->isNotEmpty())
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead class="table-primary text-center">
+                    <tr>
+                        <th>No</th>
+                        <th>TGL</th>
+                        <th>Invoice</th>
+                        <th>Sales Number </th>
+                        <th>Customer</th>
+                        <th>Produk</th>
+                        <th>Qty</th>
+                        <th>Unit</th>
+                        <th>Harga Satuan</th>
+                        <th>Diskon</th>
+                        <th>Sub-Total</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @php
+                    $no = 1;
+                    $parent = [];
+                    @endphp
+                    @foreach ($invoices as $invoiceNumber => $items)
+                    @php
+                    $theparent = $items->first()->parent;
+                    $parent[$theparent->id] = $theparent;
+                    $rowspan = $items->count();
+
+                    @endphp
+
+                    @foreach ($items as $index => $item)
+                    <tr>
+                        @if ($index === 0)
+                        <td rowspan="{{ $rowspan }}">{{ $no++ }}</td>
+                        <td rowspan="{{ $rowspan }}">
+                            {{ createCarbon($item->created_at)->format('Y-m-d') }}
+                        </td>
+                        <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }}</td>
+                        <td rowspan="{{ $rowspan }}">{{ $item->sales_order_number ?? '-' }}</td>
+                        <td rowspan="{{ $rowspan }}">{{ $item->customer->name ?? '-' }}</td>
+                        @endif
+
+                        <td>{{ $item->stock->name ?? '-' }}</td>
+                        <td class="text-end">{{ $item->quantity }}</td>
+                        <td>{{ $item->unit }}</td>
+                        <td class="text-end">Rp{{ number_format($item->price) }}</td>
+                        <td class="text-end">Rp{{ number_format($item->discount) }}</td>
+
+                        <td class="text-end">Rp{{ number_format($item->total_price) }}
+                            @if ($item->total_ppn_k > 0)
+                            <br>
+                            <div class="bg-danger p-2 rounded-2 text-white " style="font-size:11px;">
+                                <i
+                                    class="fas fa-hand-holding-usd"></i>{{ format_price($item->total_ppn_k) }}
+                            </div>
+                            @endif
+
+                        </td>
+
+                        @if ($index === 0)
+                        <td rowspan="{{ $rowspan }}">
+                            <strong>Rp{{ number_format($theparent->total_price) }}</strong>
+                            @if ($item->parent->total_ppn_k > 0)
+                            <br>
+                            <div class="bg-danger text-end p-2 rounded-2 text-white"
+                                style="font-size:11px;">
+                                <i
+                                    class="fas fa-hand-holding-usd"></i>{{ format_price($item->parent->total_ppn_k) }}
+                            </div>
+                            @endif
+
+                        </td>
+                        <td rowspan="{{ $rowspan }}">
+                            @php
+                            $status = $item->parent ? strtoupper($item->parent->status) : '??';
+
+                            @endphp
+                            <p class="colorblack text-center" style="width:100%;line-height:120%;">
+                                <strong>{{ $status }}</strong>
+                            </p>
+                        </td>
+                        <td id="action{{ $item->parent->id }}" rowspan="{{ $rowspan }}">
+
+                            @if ($item->parent)
+                            @if ($item->parent->is_final == 1)
+                            <a href="javascript:void(lihatDetailInvoice('{{ $item->invoice_pack_number }}'))"
+                                class="btn btn-sm btn-outline-primary" title="Lihat Invoice">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            @endif
+                            @if ($item->parent->is_final == 0)
+                            <a href="javascript:void(makeFinal('{{ $item->invoice_pack_id }}'))"
+                                class="btn btn-sm btn-outline-primary" title="make final"
+                                id="btn-final{{ $item->invoice_pack_id }}">
+                                <i class="fas fa-upload"></i>
+                            </a>
+
+                            <a href="javascript:void(editInvoiceSales('{{ $item->invoice_pack_number }}'))"
+                                class="btn btn-sm btn-outline-primary" title="Edit Invoice">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            @endif
+                            <a href="javascript:void(makeMark('{{ $item->parent->id }}'))"
+                                class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-paw"></i>
+                            </a>
+                            @endif
+                        </td>
+                        @endif
+
+                    </tr>
+                    @endforeach
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+
+        <div class="d-flex align-item-center justify-content-center">
+            <div>
+                <button @if ($page <=1) disabled @endif onclick="prevPage()"> <i
+                        class="fas fa-chevron-left"></i></button>
+                <span> halaman <input style="width: 50px; text-align: center;" type="number"
+                        value="{{ $page }}" onchange="goToPage(this.value)" />
+                    / {{ $totalPage }} </span>
+                <button @if ($page>= $totalPage) disabled @endif onclick="nextPage()"> <i
+                        class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+        @else
+        <div class="container px-0">
+            <div class="alert alert-warning text-center">
+                Belum ada data invoice sales.
+            </div>
+        </div>
         @endif
     </div>
 
 
 
     @push('styles')
-        <style>
-            .btn-close-card {
-                position: absolute;
-                top: -12px;
-                right: -12px;
-                width: 30px;
-                height: 30px !important;
-                background-color: red;
-                border: none;
-                border-radius: 50%;
-                font-size: 23px;
-                font-weight: bold;
-                cursor: pointer;
-                color: #fff;
-                z-index: 10;
-            }
+    <style>
+        .btn-close-card {
+            position: absolute;
+            top: -12px;
+            right: -12px;
+            width: 30px;
+            height: 30px !important;
+            background-color: red;
+            border: none;
+            border-radius: 50%;
+            font-size: 23px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #fff;
+            z-index: 10;
+        }
 
-            .centered-flex {
-                display: flex;
-                justify-content: center;
-                /* Horizontal */
-                align-items: center;
-                height: 30px;
-                width: 30px;
-                /* Vertical */
-                /* Kalau mau vertikal tengah terhadap layar penuh */
-            }
-        </style>
+        .centered-flex {
+            display: flex;
+            justify-content: center;
+            /* Horizontal */
+            align-items: center;
+            height: 30px;
+            width: 30px;
+            /* Vertical */
+            /* Kalau mau vertikal tengah terhadap layar penuh */
+        }
+    </style>
     @endpush
 
     @push('scripts')
-        <script>
-            initItemSelectManual('.select2-stock', '{{ url("admin/master/stock/get-item") }}', '-- Pilih Produk --');
-            initItemSelectManual('.select2-customer', '{{ url("admin/master/customer/get-item") }}', '-- Pilih Customer --');
-            initItemSelectManual('.select2-toko', '{{ url("admin/master/toko/get-item") }}', '-- Pilih Toko --');
+    <script>
+        initItemSelectManual('.select2-stock', '{{ url("admin/master/stock/get-item") }}', '-- Pilih Produk --');
+        initItemSelectManual('.select2-customer', '{{ url("admin/master/customer/get-item") }}', '-- Pilih Customer --');
+        initItemSelectManual('.select2-toko', '{{ url("admin/master/toko/get-item") }}', '-- Pilih Toko --');
 
-            function lihatDetailInvoice(invoiceNumber) {
-                showDetailOnModal('{{ url("admin/invoice/show-detail") }}/' + invoiceNumber, 'xl');
+        function lihatDetailInvoice(invoiceNumber) {
+            showDetailOnModal('{{ url("admin/invoice/show-detail") }}/' + invoiceNumber, 'xl');
+        }
+
+        function editInvoiceSales(invoiceNumber) {
+            console.log("ari data :" + invoiceNumber);
+            showDetailOnModal('{{ url("/admin/invoice/invoice-sales/edit") }}/' + invoiceNumber, 'xl');
+        }
+
+
+
+
+        function openImport(bookID) {
+            showDetailOnModal('{{ url("admin/invoice/open-import") }}/' + bookID, 'xl');
+        }
+
+        function openCardCreate() {
+            $('#card-create').toggleClass('open');
+            $('#icon-create').toggleClass('open');
+        }
+
+        function removeDebetRow(btn) {
+            const card = btn.closest('.rowdebet');
+            const totalRows = document.querySelectorAll('.rowdebet').length;
+            console.log(totalRows);
+            if (totalRows > 1) {
+                card.remove();
+            } else {
+                Swal.fire('Oops!', 'Minimal harus ada satu baris lur 😈!', 'warning');
             }
+        }
 
-            function editInvoiceSales(invoiceNumber) {
-                console.log("ari data :" + invoiceNumber);
-                showDetailOnModal('{{ url("/admin/invoice/invoice-sales/edit") }}/' + invoiceNumber, 'xl');
-            }
-
-
-
-
-            function openImport(bookID) {
-                showDetailOnModal('{{ url("admin/invoice/open-import") }}/' + bookID, 'xl');
-            }
-
-            function openCardCreate() {
-                $('#card-create').toggleClass('open');
-                $('#icon-create').toggleClass('open');
-            }
-
-            function removeDebetRow(btn) {
-                const card = btn.closest('.rowdebet');
-                const totalRows = document.querySelectorAll('.rowdebet').length;
-                console.log(totalRows);
-                if (totalRows > 1) {
-                    card.remove();
-                } else {
-                    Swal.fire('Oops!', 'Minimal harus ada satu baris lur 😈!', 'warning');
-                }
-            }
-
-            function submitInvoice() {
-                swalConfirmAndSubmit({
-                    url: '{{ route("invoice.sales.store") }}',
-                    data: $('#form-invoice').serialize(),
-                    onSuccess: function(res) {
-                        if (res.status == 1) {
-                            window.location.reload();
-                        }
-                    },
-                });
-            }
-
-
-            function prevMonth() {
-                month = '{{ $month }}';
-                year = '{{ $year }}';
-                month--;
-                if (month < 1) {
-                    month = 12;
-                    year--;
-                }
-                window.location.href = '{{ url("admin/invoice/invoice-sales") }}?month=' + month + '&year=' + year;
-            }
-
-            function nextMonth() {
-                month = '{{ $month }}';
-                year = '{{ $year }}';
-                month++;
-                if (month > 12) {
-                    month = 1;
-                    year++;
-                }
-                window.location.href = '{{ url("admin/invoice/invoice-sales") }}?month=' + month + '&year=' + year;
-            }
-
-
-            function updateHarga(el) {
-                const card = el.closest('.rowdebet');
-                const quantity = card.querySelector('.quantity').value;
-                const price = card.querySelector('.price').value;
-                const discount = card.querySelector('.diskon').value;
-
-                const subTotal = (quantity * price) - discount;
-                card.querySelector('.sub-total').value = formatRupiah(subTotal.toFixed(2));
-                updateTotalInvoice();
-            }
-
-            function updateTotalInvoice() {
-                totalInvoice = 0;
-                $('.sub-total').each(function() {
-                    const total = parseFloat(formatDB($(this).val()));
-                    if (!isNaN(total)) {
-                        totalInvoice += total;
+        function submitInvoice() {
+            swalConfirmAndSubmit({
+                url: '{{ route("invoice.sales.store") }}',
+                data: $('#form-invoice').serialize(),
+                onSuccess: function(res) {
+                    if (res.status == 1) {
+                        window.location.reload();
                     }
-                });
-                $('#total-invoice').val(formatRupiah(totalInvoice.toFixed(2)));
-            }
+                },
+            });
+        }
 
-            function makeFinal(id) {
-                swalConfirmAndSubmit({
-                    url: '{{ url("admin/invoice/invoice-make-final") }}',
-                    data: {
-                        id: id,
-                        _token: '{{ csrf_token() }}'
-                    },
-                    onSuccess: function(res) {
-                        html = ` <a href="javascript:void(lihatDetailInvoice('${res.msg.invoice_pack_number}')))"
+        var currentPage = '{{ $page }}';
+
+        function applyFilter() {
+            window.location.href =
+                '{{ url("admin/invoice/invoice-sales") }}?month={{ $month }}&year={{ $year }}&page=' + (
+                    currentPage) + '&invoice_number=' + $('#invoice-number').val() +
+                '&sales_order_number=' + $('#sales-order-number').val() + '&status_final=' + $('#status-final').val() + '&status_payment=' + $('#status-payment').val() +
+                '&status_kirim=' +
+                $('#status-kirim').val() + '&status_ready_stock=' + $('#status-ready-stock').val() + '&status_mark=' + $('#status-mark').val() + '&perpage=' + $('#perPage').val();
+        }
+
+        function prevPage() {
+            currentPage = '{{ getInput("page") ? getInput("page") : 1 }}';
+            if (currentPage > 1) {
+                currentPage--;
+                applyFilter();
+            }
+        }
+
+        function nextPage() {
+            currentPage = '{{ getInput("page") ? getInput("page") : 1 }}';
+            if (currentPage < '{{ $totalPage }}') {
+                currentPage++;
+                applyFilter();
+            }
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            applyFilter();
+        }
+
+
+        function prevMonth() {
+            month = '{{ $month }}';
+            year = '{{ $year }}';
+            month--;
+            if (month < 1) {
+                month = 12;
+                year--;
+            }
+            window.location.href = '{{ url("admin/invoice/invoice-sales") }}?month=' + month + '&year=' + year;
+        }
+
+        function nextMonth() {
+            month = '{{ $month }}';
+            year = '{{ $year }}';
+            month++;
+            if (month > 12) {
+                month = 1;
+                year++;
+            }
+            window.location.href = '{{ url("admin/invoice/invoice-sales") }}?month=' + month + '&year=' + year;
+        }
+
+
+        function updateHarga(el) {
+            const card = el.closest('.rowdebet');
+            const quantity = card.querySelector('.quantity').value;
+            const price = card.querySelector('.price').value;
+            const discount = card.querySelector('.diskon').value;
+
+            const subTotal = (quantity * price) - discount;
+            card.querySelector('.sub-total').value = formatRupiah(subTotal.toFixed(2));
+            updateTotalInvoice();
+        }
+
+        function updateTotalInvoice() {
+            totalInvoice = 0;
+            $('.sub-total').each(function() {
+                const total = parseFloat(formatDB($(this).val()));
+                if (!isNaN(total)) {
+                    totalInvoice += total;
+                }
+            });
+            $('#total-invoice').val(formatRupiah(totalInvoice.toFixed(2)));
+        }
+
+        function makeFinal(id) {
+            swalConfirmAndSubmit({
+                url: '{{ url("admin/invoice/invoice-make-final") }}',
+                data: {
+                    id: id,
+                    _token: '{{ csrf_token() }}'
+                },
+                onSuccess: function(res) {
+                    html = ` <a href="javascript:void(lihatDetailInvoice('${res.msg.invoice_pack_number}')))"
                                     class="btn btn-sm btn-outline-primary" title="Lihat Invoice">
                                     <i class="fas fa-eye"></i>
                                 </a>`;
-                        $('#action' + id).html(html);
-                        parents[id].is_final = 1;
-                        updateTotalMarked();
-                    },
-                });
-            }
+                    $('#action' + id).html(html);
+                    parents[id].is_final = 1;
+                    updateTotalMarked();
+                },
+            });
+        }
 
-            function makeMark(id) {
-                $.ajax({
-                    url: '{{ url("admin/invoice/invoice-mark") }}',
-                    method: 'post',
-                    data: {
-                        id: id,
-                        _token: '{{ csrf_token() }}'
-                    },
-                    success: function(res) {
-                        $('.parent' + id).addClass('bg-primary-lightest');
-                        parents[id].is_mark = res.msg.is_mark;
-                        updateTotalMarked();
-                    },
-                });
-            }
+        function makeMark(id) {
+            $.ajax({
+                url: '{{ url("admin/invoice/invoice-mark") }}',
+                method: 'post',
+                data: {
+                    id: id,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(res) {
+                    $('.parent' + id).addClass('bg-primary-lightest');
+                    parents[id].is_mark = res.msg.is_mark;
+                    updateTotalMarked();
+                },
+            });
+        }
 
-            function updateTotalMarked() {
-                totalMarked = collect(parents).where('is_mark', 1).sum('total_price');
-                totalFinal = collect(parents).where('is_final', 1).sum('total_price');
-                $('#total-mark').html('Total Invoice Mark: <strong>Rp' + formatRupiah(totalMarked) + '</strong>');
-                $('#total-final').html('Total Invoice Final: <strong>Rp' + formatRupiah(totalFinal) + '</strong>');
-                collect(parents).each(function(item) {
-                    if (item.is_mark == 1)
-                        $('.parent' + item.id).addClass('bg-primary-lightest');
-                    if (item.is_mark == 0)
-                        $('.parent' + item.id).removeClass('bg-primary-lightest');
-                });
-            }
+        function updateTotalMarked() {
+            totalMarked = collect(parents).where('is_mark', 1).sum('total_price');
+            totalFinal = collect(parents).where('is_final', 1).sum('total_price');
+            $('#total-mark').html('Total Invoice Mark: <strong>Rp' + formatRupiah(totalMarked) + '</strong>');
+            $('#total-final').html('Total Invoice Final: <strong>Rp' + formatRupiah(totalFinal) + '</strong>');
+            collect(parents).each(function(item) {
+                if (item.is_mark == 1)
+                    $('.parent' + item.id).addClass('bg-primary-lightest');
+                if (item.is_mark == 0)
+                    $('.parent' + item.id).removeClass('bg-primary-lightest');
+            });
+        }
 
 
-            function updateStockUnit(el) {
-                const card = el.closest('.rowdebet');
-                const selectedOption = el.options[el.selectedIndex];
-                const unitSelect = card.querySelector('.unit');
-                const id = selectedOption.value;
-                console.log('searching for ' + id);
-                $.ajax({
-                    url: '{{ url("admin/master/stock/get-unit") }}/' + id,
-                    method: 'get',
-                    success: function(res) {
-                        console.log(res);
-                        if (res.status == 1) {
-                            html = "";
-                            res.msg.forEach(function(item) {
-                                html += `<option value="${item.unit}">${item.unit}</option>`;
-                            });
-                            unitSelect.innerHTML = html;
-                        }
-                    },
-                    error: function(res) {
-
+        function updateStockUnit(el) {
+            const card = el.closest('.rowdebet');
+            const selectedOption = el.options[el.selectedIndex];
+            const unitSelect = card.querySelector('.unit');
+            const id = selectedOption.value;
+            console.log('searching for ' + id);
+            $.ajax({
+                url: '{{ url("admin/master/stock/get-unit") }}/' + id,
+                method: 'get',
+                success: function(res) {
+                    console.log(res);
+                    if (res.status == 1) {
+                        html = "";
+                        res.msg.forEach(function(item) {
+                            html += `<option value="${item.unit}">${item.unit}</option>`;
+                        });
+                        unitSelect.innerHTML = html;
                     }
-                });
-                const unit = selectedOption.getAttribute('data-unit');
-                card.querySelector('.unit').value = unit;
-            }
+                },
+                error: function(res) {
 
-            //         $.get('/admin/invoice/invoice-sales/' + id + '/edit', function(res) {
-            //              showOnModal(res.html);
-            // });
+                }
+            });
+            const unit = selectedOption.getAttribute('data-unit');
+            card.querySelector('.unit').value = unit;
+        }
+
+        //         $.get('/admin/invoice/invoice-sales/' + id + '/edit', function(res) {
+        //              showOnModal(res.html);
+        // });
 
 
-            function addrow() {
-                newRow = `
+        function addrow() {
+            newRow = `
                 <div class="card border shadow-sm rounded p-3 mb-3 position-relative rowdebet">
                     <div type="button" class="btn-close-card" onclick="removeDebetRow(this)"><div class="centered-flex"><i class="fas fa-close"></i></div></div>
                     <div class="row g-2">
@@ -449,16 +596,16 @@
                     </div>
                 </div>
                     `;
-                $('#invoice-wrapper').append(newRow);
-                initItemSelectManual('.select2-stock', '{{ url("admin/master/stock/get-item") }}', '-- Pilih Produk --');
+            $('#invoice-wrapper').append(newRow);
+            initItemSelectManual('.select2-stock', '{{ url("admin/master/stock/get-item") }}', '-- Pilih Produk --');
 
 
-            }
-            var parents = [];
-            $(document).ready(function() {
-                addrow();
-                parents = {!! json_encode($parent) !!};
-            });
-        </script>
+        }
+        var parents = [];
+        $(document).ready(function() {
+            addrow();
+            parents = <?php echo json_encode($parent); ?>;
+        });
+    </script>
     @endpush
 </x-app-layout>

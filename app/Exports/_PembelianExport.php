@@ -3,15 +3,15 @@
 namespace App\Exports;
 
 use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 
-class _PembelianExport implements FromCollection, WithHeadings, WithTitle, WithEvents, ShouldAutoSize,WithColumnFormatting
+class _PembelianExport implements FromCollection, WithHeadings, WithTitle, WithEvents,WithColumnFormatting, WithColumnWidths
 {
     /**
      * @return \Illuminate\Support\Collection
@@ -23,6 +23,26 @@ class _PembelianExport implements FromCollection, WithHeadings, WithTitle, WithE
     {
         $this->data = $data;
         $this->mergeKolom = [];
+    }
+
+    public function columnWidths(): array
+    {
+        return [
+            'A' => 7,
+            'B' => 12,
+            'C' => 30,
+            'D' => 15,
+            'E' => 15,
+            'F' => 15,
+            'G' => 15,
+            'H' => 15,
+            'I' => 15,
+            'J' => 15,
+            'K' => 15,
+            'L' => 15,
+            'M' => 15,
+            'N' => 15
+        ];
     }
 
 

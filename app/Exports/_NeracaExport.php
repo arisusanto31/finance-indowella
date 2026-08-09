@@ -4,11 +4,11 @@ namespace App\Exports;
 
 use Maatwebsite\Excel\Concerns\FromView;
 use Illuminate\Contracts\View\View;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithTitle;
 
-class _NeracaExport implements FromView,WithTitle,ShouldAutoSize,WithColumnFormatting
+class _NeracaExport implements FromView, WithTitle, WithColumnFormatting, WithColumnWidths
 {
 
     protected $data;
@@ -16,6 +16,18 @@ class _NeracaExport implements FromView,WithTitle,ShouldAutoSize,WithColumnForma
     public function __construct($jsdata)
     {
         $this->data = $jsdata;
+    }
+
+    public function columnWidths(): array
+    {
+        return [
+            'A' => 12,
+            'B' => 36,
+            'C' => 18,
+            'D' => 18,
+            'E' => 18,
+            'F' => 18,
+        ];
     }
     public function view(): View
     {
@@ -35,7 +47,7 @@ class _NeracaExport implements FromView,WithTitle,ShouldAutoSize,WithColumnForma
         ]);
     }
 
-     public function columnFormats(): array
+    public function columnFormats(): array
     {
         return [
             'B' => '#,##0.00',
@@ -43,6 +55,6 @@ class _NeracaExport implements FromView,WithTitle,ShouldAutoSize,WithColumnForma
     }
     public function title(): string
     {
-        return 'Neraca '.$this->data['year'].'-'.$this->data['month'];
+        return 'Neraca ' . $this->data['year'] . '-' . $this->data['month'];
     }
 }

@@ -22,7 +22,7 @@ class ChartAccountAlias extends Model
         'account_type',
     ];
 
-      public function parent()
+    public function parent()
     {
         return $this->belongsTo('App\Models\ChartAccountAlias', 'parent_id');
     }
@@ -31,11 +31,12 @@ class ChartAccountAlias extends Model
         return $this->hasMany('App\Models\ChartAccountAlias', 'parent_id');
     }
 
-    public function scopeAktif($q){
+    public function scopeAktif($q)
+    {
 
-    return $q;
+        return $q;
     }
-      public function scopeChild($q)
+    public function scopeChild($q)
     {
         $q->where('chart_account_aliases.is_child', true);
     }
@@ -73,7 +74,7 @@ class ChartAccountAlias extends Model
         });
     }
 
-     public function updateLevel()
+    public function updateLevel()
     {
         $level = 0;
         $parent = $this->parent;
@@ -95,7 +96,7 @@ class ChartAccountAlias extends Model
 
 
 
-    
+
     public static function createOrUpdate(Request $request)
     {
         $coaID = $request->input('chart_account_id');

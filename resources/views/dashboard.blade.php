@@ -754,11 +754,13 @@
                 dateCocok = $('#date-cocok').val();
                 url = '{{ url("admin/get-summary-balance") }}?date=' + dateCocok;
                 console.log('get summary balance :'+url);
+                loading(1);
                 $.ajax({
                     url: url,
                     method: 'get',
                     success: function(res) {
-                        console.log(res);
+                        loading(0);
+                        console.log('summary balance',res);
                         if (res.status == 1) {
                             var isCocokStock = (Math.abs(res.kartu_stock.saldo - res.kartu_stock.journal)<0.01)?1:0;
                             var isCocokBdp = (Math.abs(res.kartu_bdp.saldo - res.kartu_bdp.journal)<0.01)?1:0;
@@ -813,6 +815,7 @@
                         }
                     },
                     error: function(res) {
+                        loading(0);
                         swalInfo('opps', 'something error', 'error');
                     }
 

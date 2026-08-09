@@ -138,7 +138,9 @@
         <!-- Overlay -->
         <div class="layout-overlay layout-menu-toggle"></div>
     </div>
-    <!-- Modal -->
+
+    @include('layouts.background_process')
+    <!-- Modal --> 
     @include('layouts.modal')
 
 

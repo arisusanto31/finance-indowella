@@ -3,15 +3,15 @@
 namespace App\Exports;
 
 use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 
-class _PenjualanExport implements FromCollection, WithHeadings, WithTitle, WithEvents, ShouldAutoSize,WithColumnFormatting
+class _PenjualanExport implements FromCollection, WithHeadings, WithTitle, WithEvents, WithColumnFormatting, WithColumnWidths
 {
     /**
      * @return \Illuminate\Support\Collection
@@ -26,12 +26,32 @@ class _PenjualanExport implements FromCollection, WithHeadings, WithTitle, WithE
         $this->mergeFooter = [];
     }
 
-      public function columnFormats(): array
+    public function columnFormats(): array
     {
         return [
             'J' => '#,##0.00',
             'K' => '#,##0.00',
             'L' => '#,##0.00',
+        ];
+    }
+
+    public function columnWidths(): array
+    {
+        return [
+            'A' => 7,
+            'B' => 13,
+            'C' => 28, // customer
+            'D' => 21, // invoice
+            'E' => 20, // faktur pajak
+            'F' => 13,
+            'G' => 30, // nama barang kalau memang ini nama
+            'H' => 10,
+            'I' => 15,
+            'J' => 15,
+            'K' => 15,
+            'L' => 15,
+            'M' => 15,
+            'N' => 15,
         ];
     }
 

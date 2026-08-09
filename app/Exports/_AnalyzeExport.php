@@ -4,8 +4,8 @@ namespace App\Exports;
 
 use Maatwebsite\Excel\Concerns\FromCollection;
 
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithTitle;
@@ -14,7 +14,7 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 
 use function Laravel\Prompts\form;
 
-class _AnalyzeExport implements FromCollection, WithHeadings, WithTitle, WithEvents, ShouldAutoSize, WithColumnFormatting
+class _AnalyzeExport implements FromCollection, WithHeadings, WithTitle, WithEvents, WithColumnFormatting,WithColumnWidths
 {
     /**
      * @return \Illuminate\Support\Collection
@@ -91,6 +91,15 @@ class _AnalyzeExport implements FromCollection, WithHeadings, WithTitle, WithEve
             //         //menge Cell
             //         $sheet->mergeCells($this->rangeMerge);
             // },
+        ];
+    }
+    public function columnWidths(): array
+    {
+        return [
+            'A' => 30,
+            'B' => 15,
+            'C' => 15,
+            'D' => 15,
         ];
     }
 }
