@@ -291,10 +291,12 @@ class MakeExportData extends Command
             $bgprocess->stage_process = 'final report saved..';
             $bgprocess->status = 'finished';
             $bgprocess->save();
+            $this->info('final report successfully created..');
         } catch (\Exception $e) {
             $this->info('error make export data: ' . $e->getMessage());
             if ($bgprocess) {
                 $bgprocess->stage_process = 'error make export data: ' . $e->getMessage();
+                $bgprocess->save();
                 $bgprocess->failure();
             }
         }

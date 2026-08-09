@@ -31,7 +31,7 @@ class FinalReport extends Model
                 'key_file' => 'nullable|string'
             ]);
 
-            if ($data['key_file'] == null) {
+            if (!array_key_exists('key_file', $data) || $data['key_file'] == null) {
                 $data['key_file'] = $data['book_journal_id'] . '-' . $data['month'] . '-' . $data['year'];
             }
 
