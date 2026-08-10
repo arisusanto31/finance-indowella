@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Jobs\ImportSaldoNLJob;
 use App\Models\BackgroundProcess;
 use App\Models\ChartAccount;
+use App\Models\FinalReport;
 use App\Models\InvoicePack;
 use App\Models\InvoicePurchaseDetail;
 use App\Models\InvoiceSaleDetail;
@@ -204,7 +205,7 @@ class IndexController extends Controller
 
     function setConfirmBackgroundProcess(Request $request)
     {
-        $id= $request->input('id');
+        $id = $request->input('id');
         $bg = BackgroundProcess::find($id);
         $bg->is_confirmed = true;
         $bg->save();
@@ -342,5 +343,36 @@ class IndexController extends Controller
             $so->updateReadyStock();
             return $so;
         }
+    }
+
+    public function backgroundProcess()
+    {
+        $backgroundProcess = BackgroundProcess::where('is_confirmed', 0)->orderBy('updated_at', 'desc')->get();
+
+        return view('main.background-process', compact('backgroundProcess'));
+    }
+
+    public function deleteBackgroundProcess(Request $request)
+    {
+        $id = $request->input('id');
+        $bg = BackgroundProcess::find($id);
+        if ($bg) {
+            $bg->delete();
+            return [
+                'status' => 'success',
+                'msg' => 'Background process berhasil dihapus'
+            ];
+        } else {
+            return [
+                'status' => 'error',
+                'msg' => 'Background process tidak ditemukan'
+            ];
+        }
+    }
+
+    public function fileArsip()
+    {
+        $files = FinalReport::where('book_journal_id', bookID())->orderBy('key_file', 'desc')->get();
+        return view('main.file-arsip',compact('files'));
     }
 }

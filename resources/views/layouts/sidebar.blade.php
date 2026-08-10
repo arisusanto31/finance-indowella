@@ -310,9 +310,24 @@
         <a href="{{url('admin/bot-fix-journal')}}" class="menu-link">
             <i class="menu-icon tf-icons bx bx-refresh"></i>
             <div data-i18n="recalculate">BOT FIX</div>
-            <input type="hidden" class="url-active" value="bot fix" />
+            <input type="hidden" class="url-active" value="bot-fix-journal" />
         </a>
     </li>
+    <li class="menu-item">
+        <a href="{{url('admin/background-process')}}" class="menu-link">
+            <i class="menu-icon tf-icons bx bx-cog"></i>
+            <div data-i18n="recalculate">BG-PROSES</div>
+            <input type="hidden" class="url-active" value="background-process" />
+        </a>
+    </li>
+    <li class="menu-item">
+        <a href="{{url('admin/file-arsip')}}" class="menu-link">
+            <i class="menu-icon tf-icons bx bx-archive"></i>
+            <div data-i18n="recalculate">FILE ARSIP</div>
+            <input type="hidden" class="url-active" value="file-arsip" />
+        </a>
+    </li>
+
 
 
 
