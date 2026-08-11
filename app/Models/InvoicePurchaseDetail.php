@@ -111,10 +111,10 @@ class InvoicePurchaseDetail extends Model
     {
         $dateAwal = createCarbon($date)->startOfMonth()->format('ymdHis00');
         $dateAkhir = createCarbon($date)->format('ymdHis99');
-        $coa = [];
-        $coa = array_merge($coa, ChartAccountAlias::where('reference_model', KartuStock::class)->pluck('code_group')->all());
-        $coa = array_merge($coa, ChartAccountAlias::where('reference_model', KartuInTransit::class)->pluck('code_group')->all());
-        $total = Journal::where('index_date', '>', $dateAwal)->where('index_date', '<', $dateAkhir)->whereIn('code_group', $coa)->where('amount_debet', '>', 0)->sum(DB::raw('amount_debet-amount_kredit'));
+        $coastock= ChartAccountAlias::where('reference_model', KartuStock::class)->pluck('code_group')->all();
+        $coaintransit= ChartAccountAlias::where('reference_model', KartuInTransit::class)->pluck('code_group')->all();
+        $total = Journal::where('index_date', '>=', $dateAwal)->where('index_date', '<', $dateAkhir)->whereIn('code_group', $coastock)->where('amount_debet', '>', 0)->sum(DB::raw('amount_debet-amount_kredit'));
+        $total+= Journal::where('index_date', '>=', $dateAwal)->where('index_date', '<', $dateAkhir)->whereIn('code_group', $coaintransit)->sum(DB::raw('amount_debet-amount_kredit'));
         return $total ? ($total) : 0;
     }
 
