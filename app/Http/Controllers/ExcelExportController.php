@@ -419,6 +419,9 @@ class ExcelExportController extends Controller
         $sumKartuLR = collect($lr['msg'])->sum(function ($tahun) {
             return collect($tahun)->sum('saldo_akhir');
         });
+
+        //totalpembelian
+        //totalmasukstock
         $data = [];
         $data[] = [
             'keterangan' => 'Total Pembelian vs Total Kartu Masuk',
@@ -426,60 +429,91 @@ class ExcelExportController extends Controller
             'data2' => $mutasiMasukStock,
             'hasil' => abs($totalPembelian - $mutasiMasukStock) > 0.01 ? 'TIDAK SESUAI (' . ($totalPembelian - $mutasiMasukStock) . ')' : 'SESUAI'
         ];
+
+        //total penjualan vs sum nl penjualan
         $data[] = [
             'keterangan' => 'Total Penjualan vs NL Sum penjualan',
             'data1' => $totalPenjualan,
             'data2' => $sumNLPenjualan,
             'hasil' => abs($totalPenjualan - $sumNLPenjualan) > 0.01 ? 'TIDAK SESUAI (' . ($totalPenjualan - $sumNLPenjualan) . ')' : 'SESUAI'
         ];
+
+        //total persediaan
+        //total nl sum persediaan
         $data[] = [
             'keterangan' => 'Total Persediaan vs NL Sum persediaan',
             'data1' => $totalPersediaan,
             'data2' => $NLSumPersediaan,
             'hasil' => abs($totalPersediaan - $NLSumPersediaan) > 0.01 ? 'TIDAK SESUAI (' . ($totalPersediaan - $NLSumPersediaan) . ')' : 'SESUAI'
         ];
+
+        //total kartu stock
+        //total nl persediaan stock
         $data[] = [
             'keterangan' => 'Total K.Stock vs NL Persediaan Stock',
             'data1' => $saldoAkhirStock,
             'data2' => $NLPersediaanBahanDagang + $NLPersediaanBahanBaku,
             'hasil' => abs($saldoAkhirStock - ($NLPersediaanBahanDagang + $NLPersediaanBahanBaku)) > 0.01 ? 'TIDAK SESUAI (' . ($saldoAkhirStock - ($NLPersediaanBahanDagang + $NLPersediaanBahanBaku)) . ')' : 'SESUAI'
         ];
+
+        //total bdp
+        //nl persediaan bdp
         $data[] = [
             'keterangan' => 'Total BDP vs NL Persediaan BDP',
             'data1' => $saldoAkhirBDP,
             'data2' => $NLPersediaanBDP,
             'hasil' => abs($saldoAkhirBDP - $NLPersediaanBDP) > 0.01 ? 'TIDAK SESUAI (' . ($saldoAkhirBDP - $NLPersediaanBDP) . ')' : 'SESUAI'
         ];
+
+
+        //total bahan jadi 
+        //nl persediaan bahdahn jadi
         $data[] = [
             'keterangan' => 'Total Bahan Jadi vs NL Persediaan Bahan Jadi',
             'data1' => $saldoAkhirBahanJadi,
             'data2' => $NLPersediaanBahanJadi,
             'hasil' => abs($saldoAkhirBahanJadi - $NLPersediaanBahanJadi) > 0.01 ? 'TIDAK SESUAI (' . ($saldoAkhirBahanJadi - $NLPersediaanBahanJadi) . ')' : 'SESUAI'
         ];
+
+        //totalkas 
+        //nl total kas
+        
         $data[] = [
             'keterangan' => 'Total Kas vs NL Total Kas',
             'data1' => $totalKas,
             'data2' => $NLtotalKas,
             'hasil' => abs($totalKas - $NLtotalKas) > 0.01 ? 'TIDAK SESUAI (' . ($totalKas - $NLtotalKas) . ')' : 'SESUAI'
         ];
+
+        //saldo akhir piutang
+        //nl sum piutang
         $data[] = [
             'keterangan' => 'Saldo Akhir Piutang vs NL sum piutang',
             'data1' => $saldoAkhirPiutang,
             'data2' => $NLSumPiutang,
             'hasil' => abs($saldoAkhirPiutang - $NLSumPiutang) > 0.01 ? 'TIDAK SESUAI (' . ($saldoAkhirPiutang - $NLSumPiutang) . ')' : 'SESUAI'
         ];
+
+        //total saldo akhir utang
+        //nl utang usaha
         $data[] = [
             'keterangan' => 'Saldo Akhir Utang vs NL Utang Usaha',
             'data1' => $saldoAkhirUtang,
             'data2' => $NLUtangUsaha,
             'hasil' => abs($saldoAkhirUtang - $NLUtangUsaha) > 0.01 ? 'TIDAK SESUAI (' . ($saldoAkhirUtang - $NLUtangUsaha) . ')' : 'SESUAI'
         ];
+
+        //saldo dp
+        //nl saldo dp
         $data[] = [
             'keterangan' => 'Saldo DP vs NL Saldo DP',
             'data1' => $saldoDP,
             'data2' => $NLSaldoDP,
             'hasil' => abs($saldoDP - $NLSaldoDP) > 0.01 ? 'TIDAK SESUAI (' . ($saldoDP - $NLSaldoDP) . ')' : 'SESUAI'
         ];
+
+        //nlsum kewajdiab
+        //neraca kewajiban
         $data[] = [
             'keterangan' => 'Kewajiban vs NL sum utang',
             'data1' => $NLSumKewajiban,

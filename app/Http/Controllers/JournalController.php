@@ -16,6 +16,7 @@ use App\Models\ChartAccount;
 use App\Models\ChartAccountAlias;
 use App\Models\DetailKartuInvoice;
 use App\Models\FinalReport;
+use App\Models\InvoicePurchaseDetail;
 use App\Models\InvoiceSaleDetail;
 use App\Models\Journal;
 use App\Models\JournalJobFailed;
@@ -2153,7 +2154,7 @@ class JournalController extends Controller
             abort(404, 'File tidak ditemukan');
         }
         $path = public_path('storage/' . $finalReport->file_path);
-       
+
         if (!file_exists($path)) {
             return "ga ketemu lur file nya";
             abort(404, 'File tidak ditemukan');
@@ -2166,8 +2167,8 @@ class JournalController extends Controller
     {
         try {
             $singkat = bookID() == 2 ? 1 : 0;
-            $month=intval(getInput('month'));
-            $year=intval(getInput('year'));
+            $month = intval(getInput('month'));
+            $year = intval(getInput('year'));
             Artisan::call('make:export-data', [
                 'month' => $month,
                 'year' => $year,
@@ -2191,60 +2192,301 @@ class JournalController extends Controller
     {
         $month = getInput('month');
         $year = getInput('year');
-        $neraca = ExcelExportController::getDataNeraca($month, $year);
-        $nl = ExcelExportController::getDataNL($month, $year);
-        $lr = ExcelExportController::getDataLR($month, $year);
-        $kas = ExcelExportController::getBukuKas($month, $year);
-        $memo = ExcelExportController::getBukuMemo($month, $year);
-        $pembelian = ExcelExportController::getPembelian($month, $year);
-        $penjualan = ExcelExportController::getPenjualan($month, $year);
-        $kartuPiutang = ExcelExportController::getKartuPiutang($month, $year);
-        $kartuHutang = ExcelExportController::getKartuHutang($month, $year);
-        $kartuDPSales = ExcelExportController::getKartuDPSales($month, $year);
-        $kartuInventory = ExcelExportController::getKartuInventory($year);
-        $kartuBDD = ExcelExportController::getKartuBDD($year);
-        $kartuStock = ExcelExportController::getKartuStock($month, $year);
-        $kartuBDP = ExcelExportController::getKartuBDP($month, $year);
-        $kartuBahanJadi = ExcelExportController::getKartuBahanJadi($month, $year);
-        $analyze = ExcelExportController::analyze(new Request(
-            [
-                'month' => $month,
-                'year' => $year,
-                'neraca' => $neraca,
-                'neraca_lajur' => $nl,
-                'laba_rugi' => $lr,
-                'kas' => $kas,
-                'pembelian' => $pembelian,
-                'penjualan' => $penjualan,
-                'kartu_piutang' => $kartuPiutang,
-                'kartu_hutang' => $kartuHutang,
-                'kartu_dpsales' => $kartuDPSales,
-                'kartu_inventory' => $kartuInventory,
-                'kartu_bdd' => $kartuBDD,
-                'kartu_stock' => $kartuStock,
-                'kartu_bdp' => $kartuBDP,
-                'kartu_bahan_jadi' => $kartuBahanJadi,
-            ]
-        ));
+
+
+        $startIndex = createCarbon($year . '-' . $month . '-01')->startOfMonth()->format('ymdHis000');
+        $endIndex = createCarbon($year . '-' . $month . '-01')->endOfMonth()->format('ymdHis999');
+        $startIndexJournal = createCarbon($year . '-' . $month . '-01')->startOfMonth()->format('ymdHis00');
+        $endIndexJournal = createCarbon($year . '-' . $month . '-01')->endOfMonth()->format('ymdHis99');
+        //totalpembelian
+        //totalmasukstock
+
+        $data = [];
+        $totalPembelian = InvoicePurchaseDetail::whereBetween('index_date', [$startIndex, $endIndex])->sum('total_price');
+        $mutasiMasukStock = KartuStock::whereBetween('index_date', [$startIndex, $endIndex])->where('mutasi_qty_backend', '>', 0)->sum('mutasi_rupiah_total');
+        $data[] = [
+            'keterangan' => 'Total Pembelian vs Total Kartu Masuk',
+            'data1' => $totalPembelian,
+            'data2' => $mutasiMasukStock,
+            'hasil' => abs($totalPembelian - $mutasiMasukStock) > 0.01 ? 'TIDAK SESUAI (' . ($totalPembelian - $mutasiMasukStock) . ')' : 'SESUAI'
+        ];
+
+        //total penjualan vs sum nl penjualan
+        $totalPenjualan = InvoiceSaleDetail::whereBetween('index_date', [$startIndex, $endIndex])->sum('total_price');
+        $codePenjualan = [400000, 500000];
+        $sumNLPenjualan = Journal::where('index_date', '<', $endIndexJournal)
+            ->whereIn('code_group', $codePenjualan)
+            ->select(DB::raw('max(index_date) as max_index_date'), 'code_group')
+            ->groupBy('code_group');
+        $sumNLPenjualan = Journal::joinSub($sumNLPenjualan, 'j2', function ($join) {
+            $join->on('journals.code_group', '=', 'j2.code_group')
+                ->on('journals.index_date', '=', 'j2.max_index_date');
+        })->sum('journals.amount_saldo');
+
+
+        $data[] = [
+            'keterangan' => 'Total Penjualan vs NL Sum penjualan',
+            'data1' => $totalPenjualan,
+            'data2' => $sumNLPenjualan,
+            'hasil' => abs($totalPenjualan - $sumNLPenjualan) > 0.01 ? 'TIDAK SESUAI (' . ($totalPenjualan - $sumNLPenjualan) . ')' : 'SESUAI'
+        ];
+
+        //total persediaan
+        //total nl sum persediaan
+        $stockAkhir = KartuStock::whereIn('index_date', function ($q) use ($endIndex) {
+            $q->select(DB::raw('max(index_date)'))
+                ->from('kartu_stocks')
+                ->where('index_date', '<=', $endIndex)->groupBy('stock_id');
+        })->sum('mutasi_rupiah_total');
+        $bdpAkhir = KartuBDP::whereIn('index_date', function ($q) use ($endIndex) {
+            $q->select(DB::raw('max(index_date)'))
+                ->from('kartu_bdps')
+                ->where('index_date', '<=', $endIndex)->groupBy('stock_id', 'production_number');
+        })->sum('mutasi_rupiah_total');
+        $bahanJadiAkhir = KartuBahanJadi::whereIn('index_date', function ($q) use ($endIndex) {
+            $q->select(DB::raw('max(index_date)'))
+                ->from('kartu_bahan_jadis')
+                ->where('index_date', '<=', $endIndex)->groupBy('stock_id', 'production_number');
+        })->sum('mutasi_rupiah_total');
+        $inTransitAkhir = KartuInTransit::whereIn('index_date', function ($q) use ($endIndex) {
+            $q->select(DB::raw('max(index_date)'))
+                ->from('kartu_in_transits')
+                ->where('index_date', '<=', $endIndex)->groupBy('stock_id', 'production_number');
+        })->sum('mutasi_rupiah_total');
+        $totalPersediaan = $stockAkhir + $bdpAkhir + $bahanJadiAkhir + $inTransitAkhir;
+        $codePersiediaan = [140000, 150000];
+        $NLSumPersediaan = Journal::where('index_date', '<', $endIndex)
+            ->where('code_group', '>=', $codePersiediaan[0])
+            ->where('code_group', '<', $codePersiediaan[1])
+            ->select(DB::raw('max(index_date) as max_index_date'), 'code_group')->groupBy('code_group');
+        $NLSumPersediaan = Journal::joinSub($NLSumPersediaan, 'j2', function ($join) {
+            $join->on('journals.code_group', '=', 'j2.code_group')
+                ->on('journals.index_date', '=', 'j2.max_index_date');
+        })->sum('journals.amount_saldo');
+        $data[] = [
+            'keterangan' => 'Total Persediaan vs NL Sum persediaan',
+            'data1' => $totalPersediaan,
+            'data2' => $NLSumPersediaan,
+            'hasil' => abs($totalPersediaan - $NLSumPersediaan) > 0.01 ? 'TIDAK SESUAI (' . ($totalPersediaan - $NLSumPersediaan) . ')' : 'SESUAI'
+        ];
+
+        //total kartu stock
+        //total nl persediaan stock
+
+        $codePersediaan = ChartAccountAlias::where('reference_model', KartuStock::class)->pluck('code_group')->toArray();
+        $NLpersidaanStock = Journal::where('index_date', '<', $endIndex)
+            ->whereIn('code_group', $codePersediaan)
+            ->select(DB::raw('max(index_date) as max_index_date'), 'code_group')->groupBy('code_group');
+        $NLPersediaan = Journal::joinSub($NLpersidaanStock, 'j2', function ($join) {
+            $join->on('journals.code_group', '=', 'j2.code_group')
+                ->on('journals.index_date', '=', 'j2.max_index_date');
+        })->sum('journals.amount_saldo');
+        $data[] = [
+            'keterangan' => 'Total K.Stock vs NL Persediaan Stock',
+            'data1' => $stockAkhir,
+            'data2' => $NLPersediaan,
+            'hasil' => abs($stockAkhir - $NLPersediaan) > 0.01 ? 'TIDAK SESUAI (' . ($stockAkhir - $NLPersediaan) . ')' : 'SESUAI'
+        ];
+
+        //total bdp
+        //nl persediaan bdp
+        $codeBDP = ChartAccountAlias::where('reference_model', KartuBDP::class)->pluck('code_group')->toArray();
+        $NLPersediaanBDP = Journal::where('index_date', '<', $endIndex)
+            ->whereIn('code_group', $codeBDP)
+            ->select(DB::raw('max(index_date) as max_index_date'), 'code_group')->groupBy('code_group');
+        $NLPersediaanBDP = Journal::joinSub($NLPersediaanBDP, 'j2', function ($join) {
+            $join->on('journals.code_group', '=', 'j2.code_group')
+                ->on('journals.index_date', '=', 'j2.max_index_date');
+        })->sum('journals.amount_saldo');
+        $data[] = [
+            'keterangan' => 'Total BDP vs NL Persediaan BDP',
+            'data1' => $bdpAkhir,
+            'data2' => $NLPersediaanBDP,
+            'hasil' => abs($bdpAkhir - $NLPersediaanBDP) > 0.01 ? 'TIDAK SESUAI (' . ($bdpAkhir - $NLPersediaanBDP) . ')' : 'SESUAI'
+        ];
+
+
+        //total bahan jadi 
+        //nl persediaan bahdahn jadi
+        $codeBahanJadi = ChartAccountAlias::where('reference_model', KartuBahanJadi::class)->pluck('code_group')->toArray();
+        $NLPersediaanBahanJadi = Journal::where('index_date', '<', $endIndex)
+            ->whereIn('code_group', $codeBahanJadi)
+            ->select(DB::raw('max(index_date) as max_index_date'), 'code_group')->groupBy('code_group');
+        $NLPersediaanBahanJadi = Journal::joinSub($NLPersediaanBahanJadi, 'j2', function ($join) {
+            $join->on('journals.code_group', '=', 'j2.code_group')
+                ->on('journals.index_date', '=', 'j2.max_index_date');
+        })->sum('journals.amount_saldo');
+        $data[] = [
+            'keterangan' => 'Total Bahan Jadi vs NL Persediaan Bahan Jadi',
+            'data1' => $bahanJadiAkhir,
+            'data2' => $NLPersediaanBahanJadi,
+            'hasil' => abs($bahanJadiAkhir - $NLPersediaanBahanJadi) > 0.01 ? 'TIDAK SESUAI (' . ($bahanJadiAkhir - $NLPersediaanBahanJadi) . ')' : 'SESUAI'
+        ];
+
+        //totalkas 
+        //nl total kas
+
+        $codeInTransit = ChartAccountAlias::where('reference_model', KartuInTransit::class)->pluck('code_group')->toArray();
+        $NLInTransit = Journal::where('index_date', '<', $endIndex)
+            ->whereIn('code_group', $codeInTransit)
+            ->select(DB::raw('max(index_date) as max_index_date'), 'code_group')->groupBy('code_group');
+        $NLInTransit = Journal::joinSub($NLInTransit, 'j2', function ($join) {
+            $join->on('journals.code_group', '=', 'j2.code_group')
+                ->on('journals.index_date', '=', 'j2.max_index_date');
+        })->sum('journals.amount_saldo');
+        $data[] = [
+            'keterangan' => 'Total In Transit vs NL Persediaan In Transit',
+            'data1' => $inTransitAkhir,
+            'data2' => $NLInTransit,
+            'hasil' => abs($inTransitAkhir - $NLInTransit) > 0.01 ? 'TIDAK SESUAI (' . ($inTransitAkhir - $NLInTransit) . ')' : 'SESUAI'
+        ];
+
+
+                    
+        // $data[] = [
+        //     'keterangan' => 'Total Kas vs NL Total Kas',
+        //     'data1' => $totalKas,
+        //     'data2' => $NLtotalKas,
+        //     'hasil' => abs($totalKas - $NLtotalKas) > 0.01 ? 'TIDAK SESUAI (' . ($totalKas - $NLtotalKas) . ')' : 'SESUAI'
+        // ];
+
+        //saldo akhir piutang
+        //nl sum piutang
+        $saldoAkhirPiutang = KartuPiutang::whereIn('index_date', function ($q) use ($endIndex) {
+            $q->select(DB::raw('max(index_date)'))
+                ->from('kartu_piutangs')
+                ->where('index_date', '<=', $endIndex)->groupBy('invoice_pack_number');
+        })->sum('amount_saldo_factur');
+        $codePiutang = ChartAccountAlias::where('reference_model', KartuPiutang::class)->pluck('code_group')->toArray();
+        $NLSumPiutang = Journal::where('index_date', '<', $endIndex)
+            ->whereIn('code_group', $codePiutang)
+            ->select(DB::raw('max(index_date) as max_index_date'), 'code_group')->groupBy('code_group');
+        $NLSumPiutang = Journal::joinSub($NLSumPiutang, 'j2', function ($join) {
+            $join->on('journals.code_group', '=', 'j2.code_group')
+                ->on('journals.index_date', '=', 'j2.max_index_date');
+        })->sum('journals.amount_saldo');
+        $data[] = [
+            'keterangan' => 'Saldo Akhir Piutang vs NL sum piutang',
+            'data1' => $saldoAkhirPiutang,
+            'data2' => $NLSumPiutang,
+            'hasil' => abs($saldoAkhirPiutang - $NLSumPiutang) > 0.01 ? 'TIDAK SESUAI (' . ($saldoAkhirPiutang - $NLSumPiutang) . ')' : 'SESUAI'
+        ];
+
+        //total saldo akhir utang
+        //nl utang usaha
+        $saldoAkhirUtang = KartuHutang::whereIn('index_date', function ($q) use ($endIndex) {
+            $q->select(DB::raw('max(index_date)'))
+                ->from('kartu_hutangs')
+                ->where('index_date', '<=', $endIndex)->groupBy('factur_supplier_number');
+        })->sum('amount_saldo_factur');
+        $codeUtang = ChartAccountAlias::where('reference_model', KartuHutang::class)->pluck('code_group')->toArray();
+        $NLUtangUsaha = Journal::where('index_date', '<', $endIndex)
+            ->whereIn('code_group', $codeUtang)
+            ->select(DB::raw('max(index_date) as max_index_date'), 'code_group')->groupBy('code_group');
+        $NLUtangUsaha = Journal::joinSub($NLUtangUsaha, 'j2', function ($join) {
+            $join->on('journals.code_group', '=', 'j2.code_group')
+                ->on('journals.index_date', '=', 'j2.max_index_date');
+        })->sum('journals.amount_saldo');
+        $data[] = [
+            'keterangan' => 'Saldo Akhir Utang vs NL Utang Usaha',
+            'data1' => $saldoAkhirUtang,
+            'data2' => $NLUtangUsaha,
+            'hasil' => abs($saldoAkhirUtang - $NLUtangUsaha) > 0.01 ? 'TIDAK SESUAI (' . ($saldoAkhirUtang - $NLUtangUsaha) . ')' : 'SESUAI'
+        ];
+
+        //saldo dp
+        //nl saldo dp
+        $saldoDP = KartuDPSales::whereIn('index_date', function ($q) use ($endIndex) {
+            $q->select(DB::raw('max(index_date)'))
+                ->from('kartu_dp_sales')
+                ->where('index_date', '<=', $endIndex)->groupBy('sales_order_number');
+        })->sum('amount_saldo_factur');
+        $codeDP = ChartAccountAlias::where('reference_model', KartuDPSales::class)->pluck('code_group')->toArray();
+        $NLSaldoDP = Journal::where('index_date', '<', $endIndex)
+            ->whereIn('code_group', $codeDP)
+            ->select(DB::raw('max(index_date) as max_index_date'), 'code_group')->groupBy('code_group');
+        $NLSaldoDP = Journal::joinSub($NLSaldoDP, 'j2', function ($join) {
+            $join->on('journals.code_group', '=', 'j2.code_group')
+                ->on('journals.index_date', '=', 'j2.max_index_date');
+        })->sum('journals.amount_saldo');
+
+        $data[] = [
+            'keterangan' => 'Saldo DP vs NL Saldo DP',
+            'data1' => $saldoDP,
+            'data2' => $NLSaldoDP,
+            'hasil' => abs($saldoDP - $NLSaldoDP) > 0.01 ? 'TIDAK SESUAI (' . ($saldoDP - $NLSaldoDP) . ')' : 'SESUAI'
+        ];
+
+        //nlsum kewajdiab
+        //neraca kewajiban
+        // $data[] = [
+        //     'keterangan' => 'Kewajiban vs NL sum utang',
+        //     'data1' => $NLSumKewajiban,
+        //     'data2' => $neracaKewajiban,
+        //     'hasil' => abs($NLSumKewajiban - $neracaKewajiban) > 0.01 ? 'TIDAK SESUAI (' . ($NLSumKewajiban - $neracaKewajiban) . ')' : 'SESUAI'
+        // ];
+        // $data[] = [
+        //     'keterangan' => 'Laba kartu LR vs Laba Neraca',
+        //     'data1' => $labaKartuLR,
+        //     'data2' => $neracaLabaBulan,
+        //     'hasil' => abs($neracaLabaBulan - ($labaKartuLR)) > 0.01 ? 'TIDAK SESUAI (' . ($neracaLabaBulan - ($labaKartuLR)) . ')' : 'SESUAI'
+        // ];
+        $penambahanPiutang = KartuPiutang::whereBetween('index_date', [$startIndex, $endIndex])->sum('amount_debet');
+        $data[] = [
+            'keterangan' => 'penambahan piutang vs total penjualan',
+            'data1' => $penambahanPiutang,
+            'data2' => $totalPenjualan,
+            'hasil' => abs($penambahanPiutang - $totalPenjualan) > 0.01 ? 'TIDAK SESUAI (' . ($penambahanPiutang - $totalPenjualan) . ')' : 'SESUAI'
+        ];
+
+        // $data[] = [
+        //     'keterangan' => 'sum neraca laba vs sum kartu LR',
+        //     'data1' => $sumNeracaLaba,
+        //     'data2' => $sumKartuLR,
+        //     'hasil' => abs($sumNeracaLaba - $sumKartuLR) > 0.01 ? 'TIDAK SESUAI (' . ($sumNeracaLaba - $sumKartuLR) . ')' : 'SESUAI'
+        // ];
+        $stockAwal = KartuStock::whereIn('index_date', function ($q) use ($startIndex) {
+            $q->select(DB::raw('max(index_date)'))
+                ->from('kartu_stocks')
+                ->where('index_date', '<=', $startIndex)->groupBy('stock_id');
+        })->sum('mutasi_rupiah_total');
+        $bdpAwal = KartuBDP::whereIn('index_date', function ($q) use ($startIndex) {
+            $q->select(DB::raw('max(index_date)'))
+                ->from('kartu_bdps')
+                ->where('index_date', '<=', $startIndex)->groupBy('stock_id', 'production_number');
+        })->sum('mutasi_rupiah_total');
+        $bahanJadiAwal = KartuBahanJadi::whereIn('index_date', function ($q) use ($startIndex) {
+            $q->select(DB::raw('max(index_date)'))
+                ->from('kartu_bahan_jadis')
+                ->where('index_date', '<=', $startIndex)->groupBy('stock_id', 'production_number');
+        })->sum('mutasi_rupiah_total');
+        $inTransitAwal = KartuInTransit::whereIn('index_date', function ($q) use ($startIndex) {
+            $q->select(DB::raw('max(index_date)'))
+                ->from('kartu_in_transits')
+                ->where('index_date', '<=', $startIndex)->groupBy('stock_id', 'production_number');
+        })->sum('mutasi_rupiah_total');
+
+        $totalPersediaanAwal=$stockAwal +  $bdpAwal + $bahanJadiAwal + $inTransitAwal;
+        $codeHPP= [600000, 700000];
+        $NLSumHPP = Journal::where('index_date', '<', $endIndex)
+            ->where('code_group', '>=', $codeHPP[0])
+            ->where('code_group', '<', $codeHPP[1])
+            ->select(DB::raw('max(index_date) as max_index_date'), 'code_group')->groupBy('code_group');
+        $NLSumHPP = Journal::joinSub($NLSumHPP, 'j2', function ($join) {
+            $join->on('journals.code_group', '=', 'j2.code_group')
+                ->on('journals.index_date', '=', 'j2.max_index_date');
+        })->sum('journals.amount_saldo');
+        $data[] = [
+            'keterangan' => "AwalStock +pembelian- akhir stock vs HPP",
+            'data1' => $totalPersediaanAwal + $totalPembelian - $totalPersediaan,
+            'data2' => $NLSumHPP,
+            'hasil' => abs(($totalPersediaanAwal + $totalPembelian - $totalPersediaan) + $NLSumHPP) > 0.01 ? 'TIDAK SESUAI (' . (($totalPersediaanAwal + $totalPembelian - $totalPersediaan) + $NLSumHPP) . ')' : 'SESUAI'
+        ];
         return [
             'status' => 1,
-            'msg' => 'success',
-            'neraca' => $neraca,
-            'nl' => $nl,
-            'lr' => $lr,
-            'kas' => $kas,
-            'memo' => $memo,
-            'pembelian' => $pembelian,
-            'penjualan' => $penjualan,
-            'kartuPiutang' => $kartuPiutang,
-            'kartuHutang' => $kartuHutang,
-            'kartuDPSales' => $kartuDPSales,
-            'kartuInventory' => $kartuInventory,
-            'kartuBDD' => $kartuBDD,
-            'kartuStock' => $kartuStock,
-            'kartuBDP' => $kartuBDP,
-            'kartuBahanJadi' => $kartuBahanJadi,
-            'analyze' => $analyze['msg']
+            'msg' => $data,
+            'month' => $month,
+            'year' => $year,
         ];
     }
 }
