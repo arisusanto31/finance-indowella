@@ -63,7 +63,7 @@ class KartuInTransit extends Model
             $kartu->invoice_pack_id = $request->input('invoice_pack_id');
             $kartu->custom_stock_name = $request->input('custom_stock_name');
             $kartu->tag= $request->input('tag');
-
+            $kartu->purchase_order_id= $request->input('purchase_order_id');
             $kartu->production_number = $request->input('production_number');
             if (!$kartu->production_number) {
                 $kartu->production_number = $request->input('sales_order_number');
@@ -171,6 +171,7 @@ class KartuInTransit extends Model
             }
             $unit = $request->input('unit');
             $flow = $request->input('flow');
+            $purchaseOrderId= $request->input('purchase_order_id');
             $codeGroup = $request->input('code_group');
             $chart = ChartAccount::where('code_group', $codeGroup)->first();
             $customStockName = $request->input('custom_stock_name');
@@ -279,6 +280,7 @@ class KartuInTransit extends Model
                 'invoice_pack_id' => $invID,
                 'mutasi_qty_backend' => $qtybackend,
                 'unit_backend' => $unitbackend,
+                'purchase_order_id'=> $purchaseOrderId,
                 'mutasi_quantity' => $qty,
                 'unit' => $unit,
                 'flow' => $flow,

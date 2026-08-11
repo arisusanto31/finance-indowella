@@ -12,7 +12,7 @@ use Illuminate\Support\Str;
 class InvoicePurchaseDetail extends Model
 {
 
-   
+
     protected $fillable = [
         'invoice_pack_number',
         'invoice_pack_id',
@@ -30,6 +30,9 @@ class InvoicePurchaseDetail extends Model
         'total_ppn_m',
         'factur_supplier_number',
         'fp_number',
+        'kartu_stock_type',
+        'kartu_stock_id',
+        'index_date',
 
     ];
 
@@ -108,19 +111,21 @@ class InvoicePurchaseDetail extends Model
     {
         $dateAwal = createCarbon($date)->startOfMonth()->format('ymdHis00');
         $dateAkhir = createCarbon($date)->format('ymdHis99');
-        $coa = ChartAccountAlias::where('reference_model', KartuStock::class)->pluck('code_group')->all();
+        $coa = [];
+        $coa = array_merge($coa, ChartAccountAlias::where('reference_model', KartuStock::class)->pluck('code_group')->all());
+        $coa = array_merge($coa, ChartAccountAlias::where('reference_model', KartuInTransit::class)->pluck('code_group')->all());
         $total = Journal::where('index_date', '>', $dateAwal)->where('index_date', '<', $dateAkhir)->whereIn('code_group', $coa)->where('amount_debet', '>', 0)->sum(DB::raw('amount_debet-amount_kredit'));
         return $total ? ($total) : 0;
     }
 
-     public static function getNextIndexDate($inputDate)
+    public static function getNextIndexDate($inputDate)
     {
         $date = createCarbon($inputDate)->format('ymdHis');
 
         $lastData = static::query()->where('index_date_group', $date)
             ->select(DB::raw('MAX(index_date) as maxindex'))
             ->first();
-        info('last index date from '.$date.' : ' . ($lastData ? $lastData->maxindex : 'null'));
+        info('last index date from ' . $date . ' : ' . ($lastData ? $lastData->maxindex : 'null'));
 
         $lastIndex = $lastData && $lastData->maxindex ? ((int) substr($lastData->maxindex, -3)) : 0;
 
@@ -132,7 +137,14 @@ class InvoicePurchaseDetail extends Model
     public function fillKartuStockID()
     {
         try {
-            $ks = KartuStock::where('purchase_order_id', $this->id)->first();
+            //cari dulu aja dari intransit. karena yang awal adalah intransit lur
+            $ks = KartuInTransit::where('invoice_pack_number', $this->invoice_pack_number)
+                ->where('stock_id', $this->stock_id)
+                ->where('mutasi_rupiah_total', '>', 0)
+                ->first();
+            if (!$ks) {
+                $ks = KartuStock::where('purchase_order_id', $this->id)->first();
+            }
             if ($ks) {
                 $ks->kartu_stock_id = $ks->id;
             }
@@ -150,15 +162,22 @@ class InvoicePurchaseDetail extends Model
                 }
             }
             if ($ks) {
+                $theks = get_class($ks)::find($ks->kartu_stock_id);
+                $theks->purchase_order_id = $this->id;
+                $theks->save();
                 $this->kartu_stock_id = $ks->kartu_stock_id;
+                $this->kartu_stock_type = get_class($ks);
                 $this->index_date = self::getNextIndexDate(Carbon::createFromFormat('ymdHis', $ks->index_date_group));
+                info('update this index date ' . $this->index_date . ' for invoice purchase detail id ' . $this->id);
                 $this->index_date_group = $ks->index_date_group;
                 $this->journal_id = $ks->journal_id;
                 $this->journal_number = $ks->journal_number;
                 $this->save();
             }
         } catch (\Exception $e) {
+
             info('gagal isi kartu stock id untuk invoice purchase detail id ' . $this->id . ' dengan error ' . $e->getMessage());
+            throw new \Exception('Gagal isi kartu stock id untuk invoice purchase detail id ' . $this->id . ' dengan error ' . $e->getMessage());
         }
     }
 }
