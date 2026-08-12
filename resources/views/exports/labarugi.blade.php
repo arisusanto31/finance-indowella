@@ -49,6 +49,7 @@
 
             <?php $t = 0; ?>
             @foreach ($data['year_month'] as $yearmonth)
+                @if(array_key_exists($yearmonth,$data['msg']) && array_key_exists($chart->code_group,$data['msg'][$yearmonth]))
                 <?php
                 $d = $data['msg'][$yearmonth][$chart->code_group];
                 $t += $d['saldo_akhir'];
@@ -57,6 +58,7 @@
                 ?>
                 <td style="text-align:right;">{{ format_price($d['saldo_akhir']) }}</td>
                 <td style="text-align:right;">{{ $d['prosen'] }} %</td>
+                @endif
             @endforeach
             <td style="text-align:right;"> <strong>{{ format_price($t) }}</strong></td>
             <td><strong> {{ getProsen($t, $data['total_penjualan']) }} %</strong></td>
