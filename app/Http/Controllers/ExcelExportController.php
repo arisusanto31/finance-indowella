@@ -19,6 +19,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Chart\Chart;
+use Throwable;
 
 class ExcelExportController extends Controller
 {
@@ -125,6 +126,7 @@ class ExcelExportController extends Controller
                 'journals.code_group',
                 'journals.lawan_code_group',
                 'journals.created_at',
+                'journals.index_date',
                 'journals.description',
                 'journals.amount_debet',
                 'journals.amount_kredit',
@@ -148,15 +150,13 @@ class ExcelExportController extends Controller
                         $thefirstdata->amount_debet = collect($items)->sum('amount_debet');
                         $thefirstdata->amount_kredit = collect($items)->sum('amount_kredit');
                         return [$thefirstdata];
-                    } 
-                    else if(preg_match('/ppn keluaran penjualan/i', $type)){
+                    } else if (preg_match('/ppn keluaran penjualan/i', $type)) {
                         $thefirstdata = collect($items)->first();
                         $thefirstdata->description = $type;
                         $thefirstdata->amount_debet = collect($items)->sum('amount_debet');
                         $thefirstdata->amount_kredit = collect($items)->sum('amount_kredit');
                         return [$thefirstdata];
-                    }
-                    else {
+                    } else {
                         return $items;
                     }
                 });
@@ -291,7 +291,7 @@ class ExcelExportController extends Controller
 
     public static function getKartuInTransit($month, $year)
     {
-        return KartuInTransit::getSummaryProduction($year,$month);
+        return KartuInTransit::getSummaryProduction($year, $month);
     }
 
 
@@ -302,254 +302,284 @@ class ExcelExportController extends Controller
 
     public static function analyze(Request $request)
     {
-        $month = $request->input('month');
-        $year = $request->input('year');
-        $neracaLajur = $request->input('neraca_lajur');
-        $neraca = $request->input('neraca');
-        $pembelian = $request->input('pembelian');
-        $penjualan = $request->input('penjualan');
-        $kartuPiutang = $request->input('kartu_piutang');
-        $kartuHutang = $request->input('kartu_hutang');
-        $kartuDPSales = $request->input('kartu_dpsales');
-        $kartuInventory = $request->input('kartu_inventory');
-        $kartuBDD = $request->input('kartu_bdd');
-        $kartuStock = $request->input('kartu_stock');
-        $kartuBDP = $request->input('kartu_bdp');
-        $kartuBahanJadi = $request->input('kartu_bahan_jadi');
-        $lr = $request->input('laba_rugi');
-        $kas = $request->input('kas');
-        //PROSES catatan kartu NL
-        $totalPembelian = collect($pembelian['msg'])->sum(function ($item) {
-            return collect($item)->sum('total_price');
-        });
-        $totalPenjualan = collect($penjualan['msg'])->sum(function ($item) {
-            return collect($item)->sum('total_price');
-        });
-        $saldoAkhirPiutang = collect($kartuPiutang['msg'])->sum('saldo');
-        $penambahanPiutang = collect($kartuPiutang['msg'])->sum('mutasi');
-        $saldoAkhirUtang = collect($kartuHutang['msg'])->sum('saldo');
-        $saldoDP = collect($kartuDPSales['msg'])->sum('saldo');
-        $totalBebanInventory = collect($kartuInventory['msg'])->sum(function ($category) use ($month, $year) {
-            return collect($category)->sum(function ($item) use ($month, $year) {
-                return $item['penyusutan'][$year . '-' . $month] ?? 0;
+
+
+        try {
+            $month = $request->input('month');
+            $year = $request->input('year');
+            $neracaLajur = $request->input('neraca_lajur');
+            $neraca = $request->input('neraca');
+            $pembelian = $request->input('pembelian');
+            $penjualan = $request->input('penjualan');
+            $kartuPiutang = $request->input('kartu_piutang');
+            $kartuHutang = $request->input('kartu_hutang');
+            $kartuDPSales = $request->input('kartu_dpsales');
+            $kartuInventory = $request->input('kartu_inventory');
+            $kartuBDD = $request->input('kartu_bdd');
+            $kartuStock = $request->input('kartu_stock');
+            $kartuBDP = $request->input('kartu_bdp');
+            $kartuInTransit= $request->input('kartu_in_transit');
+            $kartuBahanJadi = $request->input('kartu_bahan_jadi');
+            $lr = $request->input('laba_rugi');
+            $kas = $request->input('kas');
+
+            
+            //PROSES catatan kartu NL
+            $totalPembelian = collect($pembelian['msg'])->sum(function ($item) {
+                return collect($item)->sum('total_price');
             });
-        });
-        $totalBebanBDD = collect($kartuBDD['msg'])->sum(function ($category) use ($month, $year) {
-            return collect($category)->sum(function ($item) use ($month, $year) {
-                return $item['penyusutan'][$year . '-' . $month] ?? 0;
+            $totalPenjualan = collect($penjualan['msg'])->sum(function ($item) {
+                return collect($item)->sum('total_price');
             });
-        });
-        $saldoAwalStock = collect($kartuStock['msg'])->sum('awal_rupiah');
-        $saldoAkhirStock = collect($kartuStock['msg'])->sum('akhir_rupiah');
-        $saldoAwalBDP = collect($kartuBDP['msg'])->sum(function ($category) {
-            return collect($category)->sum(function ($item) {
-                return $item['saldo_rupiah_awal'] ?? 0;
+            $totalPPNK = collect($penjualan['msg'])->flatten(1)->sum('total_ppn_k');
+            $saldoAkhirPiutang = collect($kartuPiutang['msg'])->sum('saldo');
+            $penambahanPiutang = collect($kartuPiutang['msg'])->sum('mutasi');
+            $saldoAkhirUtang = collect($kartuHutang['msg'])->sum('saldo');
+            $saldoDP = collect($kartuDPSales['msg'])->sum('saldo');
+            $totalBebanInventory = collect($kartuInventory['msg'])->sum(function ($category) use ($month, $year) {
+                return collect($category)->sum(function ($item) use ($month, $year) {
+                    return $item['penyusutan'][$year . '-' . $month] ?? 0;
+                });
             });
-        });
-        $saldoAkhirBDP = collect($kartuBDP['msg'])->sum(function ($category) {
-            return collect($category)->sum(function ($item) {
-                return $item['saldo_rupiah_akhir'] ?? 0;
+            $totalBebanBDD = collect($kartuBDD['msg'])->sum(function ($category) use ($month, $year) {
+                return collect($category)->sum(function ($item) use ($month, $year) {
+                    return $item['penyusutan'][$year . '-' . $month] ?? 0;
+                });
             });
-        });
-        $saldoAwalBahanJadi = collect($kartuBahanJadi['msg'])->sum(function ($category) {
-            return collect($category)->sum(function ($item) {
-                return $item['saldo_rupiah_awal'] ?? 0;
+
+
+            $saldoAwalStock = collect($kartuStock['msg'])->sum('awal_rupiah');
+            $saldoAkhirStock = collect($kartuStock['msg'])->sum('akhir_rupiah');
+            $saldoAwalBDP = collect($kartuBDP['msg'])->sum(function ($category) {
+                return collect($category)->sum(function ($item) {
+                    return $item['saldo_rupiah_awal'] ?? 0;
+                });
             });
-        });
-        $saldoAkhirBahanJadi = collect($kartuBahanJadi['msg'])->sum(function ($category) {
-            return collect($category)->sum(function ($item) {
-                return $item['saldo_rupiah_akhir'] ?? 0;
+
+            $saldoAwalInTransit= collect($kartuInTransit['msg'])->flatten(1)->sum('saldo_rupiah_awal');
+            $saldoAkhirBDP = collect($kartuBDP['msg'])->sum(function ($category) {
+                return collect($category)->sum(function ($item) {
+                    return $item['saldo_rupiah_akhir'] ?? 0;
+                });
             });
-        });
-
-        $mutasiMasukStock = collect($kartuStock['mutasi_masuk'])->sum('total');
-        $codePenjualan = ChartAccount::where('is_child', 1)->where('code_group', 'like', '4%')->pluck('code_group')->all();
-        $sumNLPenjualan = collect($neracaLajur['msg'])->filter(function ($item) use ($codePenjualan) {
-            return in_array($item['code_group'], $codePenjualan);
-        })->sum('saldo_akhir');
-
-        $codePersediaan = ChartAccount::where('is_child', 1)->where('code_group', 'like', '14%')->pluck('code_group')->all();
-        $NLSumPersediaan = collect($neracaLajur['msg'])->filter(function ($item) use ($codePersediaan) {
-            return in_array($item['code_group'], $codePersediaan);
-        })->sum('saldo_akhir');
-        $totalPersediaanAwal = $saldoAwalStock + $saldoAwalBDP + $saldoAwalBahanJadi;
-        $totalPersediaan = $saldoAkhirStock + $saldoAkhirBDP + $saldoAkhirBahanJadi;
-        $NLPersediaanBahanDagang = collect($neracaLajur['msg'])->where('code_group', 140001)->first()['saldo_akhir'] ?? 0;
-        $NLPersediaanBahanBaku = collect($neracaLajur['msg'])->where('code_group', 140002)->first()['saldo_akhir'] ?? 0;
-        $NLPersediaanBDP = collect($neracaLajur['msg'])->where('code_group', 140003)->first()['saldo_akhir'] ?? 0;
-        $NLPersediaanBahanJadi = collect($neracaLajur['msg'])->where('code_group', 140004)->first()['saldo_akhir'] ?? 0;
-        $codeKas = ChartAccount::where('is_child', 1)->where('code_group', 'like', '11%')->pluck('code_group')->all();
-        $NLtotalKas = collect($neracaLajur['msg'])->filter(function ($item) use ($codeKas) {
-            return in_array($item['code_group'], $codeKas);
-        })->sum('saldo_akhir');
-        $totalKas = collect($kas)->sum(function ($code) {
-            return collect($code)->sum(function ($item) {
-                return collect($item)->sortByDesc('index_date')->first()['amount_saldo'] ?? 0;
+            $saldoAwalBahanJadi = collect($kartuBahanJadi['msg'])->sum(function ($category) {
+                return collect($category)->sum(function ($item) {
+                    return $item['saldo_rupiah_awal'] ?? 0;
+                });
             });
-        });
-        $codePiutang = ChartAccount::where('is_child', 1)->where('code_group', 'like', '12%')->pluck('code_group')->all();
-        $NLSumPiutang = collect($neracaLajur['msg'])->filter(function ($item) use ($codePiutang) {
-            return in_array($item['code_group'], $codePiutang);
-        })->sum('saldo_akhir');
-        $codeUtang = ChartAccount::where('code_group', '211000')->pluck('code_group')->all();
-        $NLUtangUsaha = collect($neracaLajur['msg'])->filter(function ($item) use ($codeUtang) {
-            return in_array($item['code_group'], $codeUtang);
-        })->sum('saldo_akhir');
-        $codeDP = ChartAccount::where('is_child', 1)->where('code_group', 'like', '214000')->pluck('code_group')->all();
-        $NLSaldoDP = collect($neracaLajur['msg'])->filter(function ($item) use ($codeDP) {
-            return in_array($item['code_group'], $codeDP);
-        })->sum('saldo_akhir');
-
-        $codeKewajiban = ChartAccount::where('is_child', 1)->where('code_group', 'like', '2%')->pluck('code_group')->all();
-        $NLSumKewajiban = collect($neracaLajur['msg'])->filter(function ($item) use ($codeKewajiban) {
-            return in_array($item['code_group'], $codeKewajiban);
-        })->sum('saldo_akhir');
-
-        $neracaKewajiban = $neraca['Kewajiban'] ?? 0;
-        $neracaLabaBulan = $neraca['laba_bulan'] ?? 0;
-        $labaKartuLR = collect($lr['msg'][$year . '-' . toDigit($month, 2)])->sum('saldo_akhir');
-
-        $codeHPP = ChartAccount::where('is_child', 1)->where('code_group', 'like', '6%')->pluck('code_group')->all();
-        $NLSumHPP = collect($neracaLajur['msg'])->filter(function ($item) use ($codeHPP) {
-            return in_array($item['code_group'], $codeHPP);
-        })->sum('saldo_akhir');
-
-        $saldoLaba = collect($neraca['msg']['Ekuitas'])->where('code_group', 302000)->first()['saldo'] ?? 0;
-        $sumNeracaLaba = $neracaLabaBulan + $saldoLaba;
-        $sumKartuLR = collect($lr['msg'])->sum(function ($tahun) {
-            return collect($tahun)->sum('saldo_akhir');
-        });
-
-        //totalpembelian
-        //totalmasukstock
-        $data = [];
-        $data[] = [
-            'keterangan' => 'Total Pembelian vs Total Kartu Masuk',
-            'data1' => $totalPembelian,
-            'data2' => $mutasiMasukStock,
-            'hasil' => abs($totalPembelian - $mutasiMasukStock) > 0.01 ? 'TIDAK SESUAI (' . ($totalPembelian - $mutasiMasukStock) . ')' : 'SESUAI'
-        ];
-
-        //total penjualan vs sum nl penjualan
-        $data[] = [
-            'keterangan' => 'Total Penjualan vs NL Sum penjualan',
-            'data1' => $totalPenjualan,
-            'data2' => $sumNLPenjualan,
-            'hasil' => abs($totalPenjualan - $sumNLPenjualan) > 0.01 ? 'TIDAK SESUAI (' . ($totalPenjualan - $sumNLPenjualan) . ')' : 'SESUAI'
-        ];
-
-        //total persediaan
-        //total nl sum persediaan
-        $data[] = [
-            'keterangan' => 'Total Persediaan vs NL Sum persediaan',
-            'data1' => $totalPersediaan,
-            'data2' => $NLSumPersediaan,
-            'hasil' => abs($totalPersediaan - $NLSumPersediaan) > 0.01 ? 'TIDAK SESUAI (' . ($totalPersediaan - $NLSumPersediaan) . ')' : 'SESUAI'
-        ];
-
-        //total kartu stock
-        //total nl persediaan stock
-        $data[] = [
-            'keterangan' => 'Total K.Stock vs NL Persediaan Stock',
-            'data1' => $saldoAkhirStock,
-            'data2' => $NLPersediaanBahanDagang + $NLPersediaanBahanBaku,
-            'hasil' => abs($saldoAkhirStock - ($NLPersediaanBahanDagang + $NLPersediaanBahanBaku)) > 0.01 ? 'TIDAK SESUAI (' . ($saldoAkhirStock - ($NLPersediaanBahanDagang + $NLPersediaanBahanBaku)) . ')' : 'SESUAI'
-        ];
-
-        //total bdp
-        //nl persediaan bdp
-        $data[] = [
-            'keterangan' => 'Total BDP vs NL Persediaan BDP',
-            'data1' => $saldoAkhirBDP,
-            'data2' => $NLPersediaanBDP,
-            'hasil' => abs($saldoAkhirBDP - $NLPersediaanBDP) > 0.01 ? 'TIDAK SESUAI (' . ($saldoAkhirBDP - $NLPersediaanBDP) . ')' : 'SESUAI'
-        ];
+            $saldoAkhirBahanJadi = collect($kartuBahanJadi['msg'])->sum(function ($category) {
+                return collect($category)->sum(function ($item) {
+                    return $item['saldo_rupiah_akhir'] ?? 0;
+                });
+            });
+            $saldoAkhirInTransit= collect($kartuInTransit['msg'])->flatten(1)->sum('saldo_rupiah_akhir');
 
 
-        //total bahan jadi 
-        //nl persediaan bahdahn jadi
-        $data[] = [
-            'keterangan' => 'Total Bahan Jadi vs NL Persediaan Bahan Jadi',
-            'data1' => $saldoAkhirBahanJadi,
-            'data2' => $NLPersediaanBahanJadi,
-            'hasil' => abs($saldoAkhirBahanJadi - $NLPersediaanBahanJadi) > 0.01 ? 'TIDAK SESUAI (' . ($saldoAkhirBahanJadi - $NLPersediaanBahanJadi) . ')' : 'SESUAI'
-        ];
+            //harusnya disini kita tambah dengan kartu in transit
+            $mutasiMasukStock = collect($kartuStock['mutasi_masuk'])->sum('total');
+            
+            $mutasiInTransit = collect($kartuInTransit['mutasi_masuk'])->flatten(1)->sum('total')+ collect($kartuInTransit['mutasi_keluar'])->flatten(1)->sum('total');
+            $mutasiMasukStock+= $mutasiInTransit;
+             $codePenjualan = ChartAccount::where('is_child', 1)->where('code_group', 'like', '4%')->pluck('code_group')->all();
+            $sumNLPenjualan = collect($neracaLajur['msg'])->filter(function ($item) use ($codePenjualan) {
+                return in_array($item['code_group'], $codePenjualan);
+            })->sum('saldo_akhir');
 
-        //totalkas 
-        //nl total kas
-        
-        $data[] = [
-            'keterangan' => 'Total Kas vs NL Total Kas',
-            'data1' => $totalKas,
-            'data2' => $NLtotalKas,
-            'hasil' => abs($totalKas - $NLtotalKas) > 0.01 ? 'TIDAK SESUAI (' . ($totalKas - $NLtotalKas) . ')' : 'SESUAI'
-        ];
+            $codePersediaan = ChartAccount::where('is_child', 1)->where('code_group', 'like', '14%')->pluck('code_group')->all();
+            $NLSumPersediaan = collect($neracaLajur['msg'])->filter(function ($item) use ($codePersediaan) {
+                return in_array($item['code_group'], $codePersediaan);
+            })->sum('saldo_akhir');
+            $totalPersediaanAwal = $saldoAwalStock + $saldoAwalBDP + $saldoAwalBahanJadi+ $saldoAwalInTransit;
+            $totalPersediaan = $saldoAkhirStock + $saldoAkhirBDP + $saldoAkhirBahanJadi + $saldoAkhirInTransit;
+            $NLPersediaanBahanDagang = collect($neracaLajur['msg'])->where('code_group', 140001)->first()['saldo_akhir'] ?? 0;
+            $NLPersediaanBahanBaku = collect($neracaLajur['msg'])->where('code_group', 140002)->first()['saldo_akhir'] ?? 0;
+            $NLPersediaanBDP = collect($neracaLajur['msg'])->where('code_group', 140003)->first()['saldo_akhir'] ?? 0;
+            $NLPersediaanBahanJadi = collect($neracaLajur['msg'])->where('code_group', 140004)->first()['saldo_akhir'] ?? 0;
+            $codeKas = ChartAccountAlias::aktif()->where('is_child', 1)->where('code_group', '<', 120000)->pluck('code_group')->all();
 
-        //saldo akhir piutang
-        //nl sum piutang
-        $data[] = [
-            'keterangan' => 'Saldo Akhir Piutang vs NL sum piutang',
-            'data1' => $saldoAkhirPiutang,
-            'data2' => $NLSumPiutang,
-            'hasil' => abs($saldoAkhirPiutang - $NLSumPiutang) > 0.01 ? 'TIDAK SESUAI (' . ($saldoAkhirPiutang - $NLSumPiutang) . ')' : 'SESUAI'
-        ];
+            $NLtotalKas = collect($neracaLajur['msg'])->filter(function ($item) use ($codeKas) {
+                return in_array($item['code_group'], $codeKas);
+            })->sum('saldo_akhir');
+            $totalKas = collect($kas)->sum(function ($code) {
+                return collect($code)->sum(function ($item) {
+                    return collect($item)->sortByDesc('index_date')->first()['amount_saldo'] ?? 0;
+                });
+            });
+            $codePiutang = ChartAccount::where('is_child', 1)->where('code_group', 'like', '12%')->pluck('code_group')->all();
+            $NLSumPiutang = collect($neracaLajur['msg'])->filter(function ($item) use ($codePiutang) {
+                return in_array($item['code_group'], $codePiutang);
+            })->sum('saldo_akhir');
+            $codeUtang = ChartAccount::where('code_group', '211000')->pluck('code_group')->all();
+            $NLUtangUsaha = collect($neracaLajur['msg'])->filter(function ($item) use ($codeUtang) {
+                return in_array($item['code_group'], $codeUtang);
+            })->sum('saldo_akhir');
+            $codeDP = ChartAccount::where('is_child', 1)->where('code_group', 'like', '214000')->pluck('code_group')->all();
+            $NLSaldoDP = collect($neracaLajur['msg'])->filter(function ($item) use ($codeDP) {
+                return in_array($item['code_group'], $codeDP);
+            })->sum('saldo_akhir');
 
-        //total saldo akhir utang
-        //nl utang usaha
-        $data[] = [
-            'keterangan' => 'Saldo Akhir Utang vs NL Utang Usaha',
-            'data1' => $saldoAkhirUtang,
-            'data2' => $NLUtangUsaha,
-            'hasil' => abs($saldoAkhirUtang - $NLUtangUsaha) > 0.01 ? 'TIDAK SESUAI (' . ($saldoAkhirUtang - $NLUtangUsaha) . ')' : 'SESUAI'
-        ];
+            $codeKewajiban = ChartAccount::where('is_child', 1)->where('code_group', 'like', '2%')->pluck('code_group')->all();
+            $NLSumKewajiban = collect($neracaLajur['msg'])->filter(function ($item) use ($codeKewajiban) {
+                return in_array($item['code_group'], $codeKewajiban);
+            })->sum('saldo_akhir');
 
-        //saldo dp
-        //nl saldo dp
-        $data[] = [
-            'keterangan' => 'Saldo DP vs NL Saldo DP',
-            'data1' => $saldoDP,
-            'data2' => $NLSaldoDP,
-            'hasil' => abs($saldoDP - $NLSaldoDP) > 0.01 ? 'TIDAK SESUAI (' . ($saldoDP - $NLSaldoDP) . ')' : 'SESUAI'
-        ];
+            $neracaKewajiban = $neraca['Kewajiban'] ?? 0;
+            $neracaLabaBulan = $neraca['laba_bulan'] ?? 0;
+            $labaKartuLR = collect($lr['msg'][$year . '-' . toDigit($month, 2)])->sum('saldo_akhir');
 
-        //nlsum kewajdiab
-        //neraca kewajiban
-        $data[] = [
-            'keterangan' => 'Kewajiban vs NL sum utang',
-            'data1' => $NLSumKewajiban,
-            'data2' => $neracaKewajiban,
-            'hasil' => abs($NLSumKewajiban - $neracaKewajiban) > 0.01 ? 'TIDAK SESUAI (' . ($NLSumKewajiban - $neracaKewajiban) . ')' : 'SESUAI'
-        ];
-        $data[] = [
-            'keterangan' => 'Laba kartu LR vs Laba Neraca',
-            'data1' => $labaKartuLR,
-            'data2' => $neracaLabaBulan,
-            'hasil' => abs($neracaLabaBulan - ($labaKartuLR)) > 0.01 ? 'TIDAK SESUAI (' . ($neracaLabaBulan - ($labaKartuLR)) . ')' : 'SESUAI'
-        ];
-        $data[] = [
-            'keterangan' => 'penambahan piutang vs total penjualan',
-            'data1' => $penambahanPiutang,
-            'data2' => $totalPenjualan,
-            'hasil' => abs($penambahanPiutang - $totalPenjualan) > 0.01 ? 'TIDAK SESUAI (' . ($penambahanPiutang - $totalPenjualan) . ')' : 'SESUAI'
-        ];
-        $data[] = [
-            'keterangan' => 'sum neraca laba vs sum kartu LR',
-            'data1' => $sumNeracaLaba,
-            'data2' => $sumKartuLR,
-            'hasil' => abs($sumNeracaLaba - $sumKartuLR) > 0.01 ? 'TIDAK SESUAI (' . ($sumNeracaLaba - $sumKartuLR) . ')' : 'SESUAI'
-        ];
-        $data[] = [
-            'keterangan' => "AwalStock +pembelian- akhir stock vs HPP",
-            'data1' => $totalPersediaanAwal + $totalPembelian - $totalPersediaan,
-            'data2' => $NLSumHPP,
-            'hasil' => abs(($totalPersediaanAwal + $totalPembelian - $totalPersediaan) + $NLSumHPP) > 0.01 ? 'TIDAK SESUAI (' . (($totalPersediaanAwal + $totalPembelian - $totalPersediaan) + $NLSumHPP) . ')' : 'SESUAI'
-        ];
-        return [
-            'status' => 1,
-            'msg' => $data,
-            'month' => $month,
-            'year' => $year,
-        ];
+            $codeHPP = ChartAccount::where('is_child', 1)->where('code_group', 'like', '6%')->pluck('code_group')->all();
+            $NLSumHPP = collect($neracaLajur['msg'])->filter(function ($item) use ($codeHPP) {
+                return in_array($item['code_group'], $codeHPP);
+            })->sum('saldo_akhir');
+
+            $indAwalTahun=createCarbon($year.'-01-01')->startOfYear()->format('ymdHis99');
+            $thecode= ChartAccountAlias::whereIn('code_group',[302000,302100])->where('is_child',1)->pluck('code_group')->all();
+            $saldoLabaAwalTahun= Journal::whereIn('code_group',$thecode)->where('index_date','<=',$indAwalTahun)->orderBy('index_date','desc')->first()->amount_saldo ?? 0;
+            $saldoLaba = collect($neraca['msg']['Ekuitas'])->where('code_group', 302000)->first()['saldo'] ?? 0;
+            $saldoLaba -= $saldoLabaAwalTahun;
+            $sumNeracaLaba = $neracaLabaBulan + $saldoLaba;
+            $sumKartuLR = collect($lr['msg'])->sum(function ($tahun) {
+                return collect($tahun)->sum('saldo_akhir');
+            });
+
+            //totalpembelian
+            //totalmasukstock
+            $data = [];
+            $data[] = [
+                'keterangan' => 'Total Pembelian vs Total Kartu Masuk',
+                'data1' => $totalPembelian,
+                'data2' => $mutasiMasukStock,
+                'hasil' => abs($totalPembelian - $mutasiMasukStock) > 0.01 ? 'TIDAK SESUAI (' . ($totalPembelian - $mutasiMasukStock) . ')' : 'SESUAI'
+            ];
+
+            //total penjualan vs sum nl penjualan
+            $data[] = [
+                'keterangan' => 'Total Penjualan vs NL Sum penjualan',
+                'data1' => $totalPenjualan,
+                'data2' => $sumNLPenjualan,
+                'hasil' => abs($totalPenjualan - $sumNLPenjualan) > 0.01 ? 'TIDAK SESUAI (' . ($totalPenjualan - $sumNLPenjualan) . ')' : 'SESUAI'
+            ];
+
+            //total persediaan
+            //total nl sum persediaan
+            $data[] = [
+                'keterangan' => 'Total Persediaan vs NL Sum persediaan',
+                'data1' => $totalPersediaan,
+                'data2' => $NLSumPersediaan,
+                'hasil' => abs($totalPersediaan - $NLSumPersediaan) > 0.01 ? 'TIDAK SESUAI (' . ($totalPersediaan - $NLSumPersediaan) . ')' : 'SESUAI'
+            ];
+
+            //total kartu stock
+            //total nl persediaan stock
+            $data[] = [
+                'keterangan' => 'Total K.Stock vs NL Persediaan Stock',
+                'data1' => $saldoAkhirStock+ $saldoAkhirInTransit,
+                'data2' => $NLPersediaanBahanDagang + $NLPersediaanBahanBaku,
+                'hasil' => abs(($saldoAkhirStock + $saldoAkhirInTransit) - ($NLPersediaanBahanDagang + $NLPersediaanBahanBaku)) > 0.01 ? 'TIDAK SESUAI (' . (($saldoAkhirStock + $saldoAkhirInTransit) - ($NLPersediaanBahanDagang + $NLPersediaanBahanBaku)) . ')' : 'SESUAI'
+            ];
+
+            //total bdp
+            //nl persediaan bdp
+            $data[] = [
+                'keterangan' => 'Total BDP vs NL Persediaan BDP',
+                'data1' => $saldoAkhirBDP,
+                'data2' => $NLPersediaanBDP,
+                'hasil' => abs($saldoAkhirBDP - $NLPersediaanBDP) > 0.01 ? 'TIDAK SESUAI (' . ($saldoAkhirBDP - $NLPersediaanBDP) . ')' : 'SESUAI'
+            ];
+
+
+            //total bahan jadi 
+            //nl persediaan bahdahn jadi
+            $data[] = [
+                'keterangan' => 'Total Bahan Jadi vs NL Persediaan Bahan Jadi',
+                'data1' => $saldoAkhirBahanJadi,
+                'data2' => $NLPersediaanBahanJadi,
+                'hasil' => abs($saldoAkhirBahanJadi - $NLPersediaanBahanJadi) > 0.01 ? 'TIDAK SESUAI (' . ($saldoAkhirBahanJadi - $NLPersediaanBahanJadi) . ')' : 'SESUAI'
+            ];
+
+            //totalkas 
+            //nl total kas
+
+            $data[] = [
+                'keterangan' => 'Total Kas vs NL Total Kas',
+                'data1' => $totalKas,
+                'data2' => $NLtotalKas,
+                'hasil' => abs($totalKas - $NLtotalKas) > 0.01 ? 'TIDAK SESUAI (' . ($totalKas - $NLtotalKas) . ')' : 'SESUAI'
+            ];
+
+            //saldo akhir piutang
+            //nl sum piutang
+            $data[] = [
+                'keterangan' => 'Saldo Akhir Piutang vs NL sum piutang',
+                'data1' => $saldoAkhirPiutang,
+                'data2' => $NLSumPiutang,
+                'hasil' => abs($saldoAkhirPiutang - $NLSumPiutang) > 0.01 ? 'TIDAK SESUAI (' . ($saldoAkhirPiutang - $NLSumPiutang) . ')' : 'SESUAI'
+            ];
+
+            //total saldo akhir utang
+            //nl utang usaha
+            $data[] = [
+                'keterangan' => 'Saldo Akhir Utang vs NL Utang Usaha',
+                'data1' => $saldoAkhirUtang,
+                'data2' => $NLUtangUsaha,
+                'hasil' => abs($saldoAkhirUtang - $NLUtangUsaha) > 0.01 ? 'TIDAK SESUAI (' . ($saldoAkhirUtang - $NLUtangUsaha) . ')' : 'SESUAI'
+            ];
+
+            //saldo dp
+            //nl saldo dp
+            $data[] = [
+                'keterangan' => 'Saldo DP vs NL Saldo DP',
+                'data1' => $saldoDP,
+                'data2' => $NLSaldoDP,
+                'hasil' => abs($saldoDP - $NLSaldoDP) > 0.01 ? 'TIDAK SESUAI (' . ($saldoDP - $NLSaldoDP) . ')' : 'SESUAI'
+            ];
+
+            //nlsum kewajdiab
+            //neraca kewajiban
+            $data[] = [
+                'keterangan' => 'Kewajiban vs NL sum utang',
+                'data1' => $NLSumKewajiban,
+                'data2' => $neracaKewajiban,
+                'hasil' => abs($NLSumKewajiban - $neracaKewajiban) > 0.01 ? 'TIDAK SESUAI (' . ($NLSumKewajiban - $neracaKewajiban) . ')' : 'SESUAI'
+            ];
+            $data[] = [
+                'keterangan' => 'Laba kartu LR vs Laba Neraca',
+                'data1' => $labaKartuLR,
+                'data2' => $neracaLabaBulan,
+                'hasil' => abs($neracaLabaBulan - ($labaKartuLR)) > 0.01 ? 'TIDAK SESUAI (' . ($neracaLabaBulan - ($labaKartuLR)) . ')' : 'SESUAI'
+            ];
+            $data[] = [
+                'keterangan' => 'penambahan piutang vs total penjualan + ppn keluaran',
+                'data1' => $penambahanPiutang,
+                'data2' => $totalPenjualan + $totalPPNK,
+                'hasil' => abs($penambahanPiutang - ($totalPenjualan+ $totalPPNK)) > 0.01 ? 'TIDAK SESUAI (' . ($penambahanPiutang - $totalPenjualan) . ')' : 'SESUAI'
+            ];
+            $data[] = [
+                'keterangan' => 'sum neraca laba vs sum kartu LR',
+                'data1' => $sumNeracaLaba,
+                'data2' => $sumKartuLR,
+                'hasil' => abs($sumNeracaLaba - $sumKartuLR) > 0.01 ? 'TIDAK SESUAI (' . ($sumNeracaLaba - $sumKartuLR) . ')' : 'SESUAI'
+            ];
+            $data[] = [
+                'keterangan' => "AwalStock +pembelian- akhir stock vs HPP",
+                'data1' => $totalPersediaanAwal + $totalPembelian - $totalPersediaan,
+                'data2' => $NLSumHPP,
+                'hasil' => abs(($totalPersediaanAwal + $totalPembelian - $totalPersediaan) + $NLSumHPP) > 0.01 ? 'TIDAK SESUAI (' . (($totalPersediaanAwal + $totalPembelian - $totalPersediaan) + $NLSumHPP) . ')' : 'SESUAI'
+            ];
+            return [
+                'status' => 1,
+                'msg' => $data,
+                'month' => $month,
+                'year' => $year,
+            ];
+        } catch (Throwable $e) {
+            return [
+                'status' => 0,
+                'msg' => $e->getMessage(),
+                'month' => $month ?? null,
+                'year' => $year ?? null,
+            ];
+        }
     }
     public function exportData()
     {

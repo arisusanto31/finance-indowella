@@ -120,8 +120,6 @@ class ComparePurchaseAndKartuStock extends Command
             'amount_journal',
             'journal_index_date',
             'journal_code_group',
-
-
         ];
         $datas[] = $keys;
         foreach ($inv as $i) {
