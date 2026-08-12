@@ -2178,7 +2178,7 @@ class JournalController extends Controller
             ]);
             return [
                 'status' => 1,
-                'msg' => 'success',
+                'msg' => 'artisan renew:success',
             ];
         } catch (\Exception $e) {
             return [

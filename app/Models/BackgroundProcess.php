@@ -68,6 +68,7 @@ class BackgroundProcess extends Model
                     $backgroundProcess->total_task = 0;
                 
                 }
+                $backgroundProcess->is_confirmed=0;
                 $backgroundProcess->status = 'processing';
                 $backgroundProcess->save();
             }

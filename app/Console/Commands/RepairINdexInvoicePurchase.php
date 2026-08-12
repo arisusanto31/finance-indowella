@@ -26,7 +26,7 @@ class RepairINdexInvoicePurchase extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+        public function handle()
     {
         //
         Session::put('book_journal_id',2);

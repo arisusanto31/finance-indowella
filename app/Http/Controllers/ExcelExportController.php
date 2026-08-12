@@ -84,7 +84,7 @@ class ExcelExportController extends Controller
             $lr['penjualan'] = $penjualan;
             $data[$year . '-' . toDigit($i, 2)] = $lr;
         }
-        $charts = ChartAccount::aktif()->child()->withAlias()->where('chart_accounts.code_group', '>=', 400000)->select('chart_accounts.code_group', DB::raw('coalesce(ca.name,chart_accounts.name) as alias_name'))->get();
+        $charts = ChartAccountAlias::aktif()->child()->where('chart_account_aliases.code_group', '>=', 400000)->select('chart_account_aliases.code_group', DB::raw('name as alias_name'))->get();
         return [
             'all_charts' => $charts,
             'msg' => $data,
