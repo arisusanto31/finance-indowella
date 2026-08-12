@@ -7,6 +7,7 @@ use App\Imports\excel_saldo_awal_stock_jurnal\ExcelSaldoAwalImport;
 use App\Imports\MultiSheetImport;
 use App\Jobs\ImportKartuStockJob;
 use App\Jobs\ImportSaldoNLJob;
+use App\Jobs\MakeExportDataJob;
 use App\Jobs\RecalculateJournalJob;
 use App\Jobs\UpdateAfterCreateJournalJob;
 use App\Jobs\UpdateLawanCodeJournalJob;
@@ -2169,13 +2170,14 @@ class JournalController extends Controller
             $singkat = bookID() == 2 ? 1 : 0;
             $month = intval(getInput('month'));
             $year = intval(getInput('year'));
-            Artisan::call('make:export-data', [
-                'month' => $month,
-                'year' => $year,
-                'bookid' => bookID(),
-                'singkat' => $singkat,
-                'force' => 1
-            ]);
+            // Artisan::call('make:export-data', [
+            //     'month' => $month,
+            //     'year' => $year,
+            //     'bookid' => bookID(),
+            //     'singkat' => $singkat,
+            //     'force' => 1
+            // ]);
+            MakeExportDataJob::dispatch($month, $year, bookID(), $singkat, 1);
             return [
                 'status' => 1,
                 'msg' => 'artisan renew:success',
