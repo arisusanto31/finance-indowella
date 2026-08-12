@@ -2170,14 +2170,14 @@ class JournalController extends Controller
             $singkat = bookID() == 2 ? 1 : 0;
             $month = intval(getInput('month'));
             $year = intval(getInput('year'));
-            // Artisan::call('make:export-data', [
-            //     'month' => $month,
-            //     'year' => $year,
-            //     'bookid' => bookID(),
-            //     'singkat' => $singkat,
-            //     'force' => 1
-            // ]);
-            MakeExportDataJob::dispatch($month, $year, bookID(), $singkat, 1);
+            Artisan::call('make:export-data', [
+                'month' => $month,
+                'year' => $year,
+                'bookid' => bookID(),
+                'singkat' => $singkat,
+                'force' => 1
+            ]);
+            // MakeExportDataJob::dispatch($month, $year, bookID(), $singkat, 1);
             return [
                 'status' => 1,
                 'msg' => 'artisan renew:success',
@@ -2344,7 +2344,7 @@ class JournalController extends Controller
         ];
 
 
-                    
+
         // $data[] = [
         //     'keterangan' => 'Total Kas vs NL Total Kas',
         //     'data1' => $totalKas,
@@ -2468,8 +2468,8 @@ class JournalController extends Controller
                 ->where('index_date', '<=', $startIndex)->groupBy('stock_id', 'production_number');
         })->sum('mutasi_rupiah_total');
 
-        $totalPersediaanAwal=$stockAwal +  $bdpAwal + $bahanJadiAwal + $inTransitAwal;
-        $codeHPP= [600000, 700000];
+        $totalPersediaanAwal = $stockAwal +  $bdpAwal + $bahanJadiAwal + $inTransitAwal;
+        $codeHPP = [600000, 700000];
         $NLSumHPP = Journal::where('index_date', '<', $endIndex)
             ->where('code_group', '>=', $codeHPP[0])
             ->where('code_group', '<', $codeHPP[1])
