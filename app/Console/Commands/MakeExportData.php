@@ -10,6 +10,7 @@ use App\Models\FinalReport;
 use Illuminate\Console\Command;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Session;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -66,11 +67,11 @@ class MakeExportData extends Command
             $bgprocess->save();
             $this->info('process data neraca..');
 
-            $neraca = Cache::get('export_data_neraca_' . $bookid . '_' . $year . '_' . $month);
+            $neraca = Redis::get('export_data_neraca_' . $bookid . '_' . $year . '_' . $month);
             if (!$neraca || $force) {
                 $neraca = ExcelExportController::getDataNeraca($month, $year);
             }
-            Cache::set('export_data_neraca_' . $bookid . '_' . $year . '_' . $month, $neraca, $timeout);
+            Redis::setex('export_data_neraca_' . $bookid . '_' . $year . '_' . $month, $timeout, $neraca);
             $bgprocess->success();
             $this->info('process data neraca finished.');
 
@@ -78,11 +79,11 @@ class MakeExportData extends Command
             $this->info('process data NL..');
             $bgprocess->stage_process = 'process data nl..';
             $bgprocess->save();
-            $nl = Cache::get('export_data_nl_' . $bookid . '_' . $year . '_' . $month) ?? null;
+            $nl = Redis::get('export_data_nl_' . $bookid . '_' . $year . '_' . $month) ?? null;
             if (!$nl || $force) {
                 $nl = ExcelExportController::getDataNL($month, $year);
             }
-            Cache::set('export_data_nl_' . $bookid . '_' . $year . '_' . $month, $nl, $timeout);
+            Redis::setex('export_data_nl_' . $bookid . '_' . $year . '_' . $month, $timeout, $nl);
 
             $bgprocess->success();
             $this->info('process data NL finished.');
@@ -90,55 +91,55 @@ class MakeExportData extends Command
             $this->info('process data laporan rugi laba..');
             $bgprocess->stage_process = 'process data lr..';
             $bgprocess->save();
-            $lr = Cache::get('export_data_lr_' . $bookid . '_' . $year . '_' . $month) ?? null;
+            $lr = Redis::get('export_data_lr_' . $bookid . '_' . $year . '_' . $month) ?? null;
             if (!$lr || $force) {
                 $lr = ExcelExportController::getDataLR($month, $year);
             }
-            Cache::set('export_data_lr_' . $bookid . '_' . $year . '_' . $month, $lr, $timeout);
+            Redis::setex('export_data_lr_' . $bookid . '_' . $year . '_' . $month, $timeout, $lr);
             $bgprocess->success();
             $this->info('process data laporan rugi laba finished.');
 
             $this->info('process data kas..');
             $bgprocess->stage_process = 'process data kas..';
             $bgprocess->save();
-            $kas = Cache::get('export_data_kas_' . $bookid . '_' . $year . '_' . $month) ?? null;
+            $kas = Redis::get('export_data_kas_' . $bookid . '_' . $year . '_' . $month) ?? null;
             if (!$kas || $force) {
                 $kas = ExcelExportController::getBukuKas($month, $year);
             }
-            Cache::set('export_data_kas_' . $bookid . '_' . $year . '_' . $month, $kas, $timeout);
+            Redis::setex('export_data_kas_' . $bookid . '_' . $year . '_' . $month, $timeout, $kas);
             $bgprocess->success();
             $this->info('process data kas finished.');
 
             $this->info('process data memo..');
             $bgprocess->stage_process = 'process data memo..';
             $bgprocess->save();
-            $memo = Cache::get('export_data_memo_' . $bookid . '_' . $year . '_' . $month) ?? null;
+            $memo = Redis::get('export_data_memo_' . $bookid . '_' . $year . '_' . $month) ?? null;
             if (!$memo || $force) {
                 $memo = ExcelExportController::getBukuMemo($month, $year, $singkat);
             }
-            Cache::set('export_data_memo_' . $bookid . '_' . $year . '_' . $month, $memo, $timeout);
+            Redis::setex('export_data_memo_' . $bookid . '_' . $year . '_' . $month, $timeout, $memo);
             $bgprocess->success();
             $this->info('process data memo finished.');
 
             $this->info('process data pembelian..');
             $bgprocess->stage_process = 'process data pembelian..';
             $bgprocess->save();
-            $pembelian = Cache::get('export_data_pembelian_' . $bookid . '_' . $year . '_' . $month) ?? null;
+            $pembelian = Redis::get('export_data_pembelian_' . $bookid . '_' . $year . '_' . $month) ?? null;
             if (!$pembelian || $force) {
                 $pembelian = ExcelExportController::getPembelian($month, $year);
             }
-            Cache::set('export_data_pembelian_' . $bookid . '_' . $year . '_' . $month, $pembelian, $timeout);
+            Redis::setex('export_data_pembelian_' . $bookid . '_' . $year . '_' . $month, $timeout, $pembelian);
             $bgprocess->success();
             $this->info('process data pembelian finished.');
 
             $this->info('process data penjualan..');
             $bgprocess->stage_process = 'process data penjualan..';
             $bgprocess->save();
-            $penjualan = Cache::get('export_data_penjualan_' . $bookid . '_' . $year . '_' . $month) ?? null;
+            $penjualan = Redis::get('export_data_penjualan_' . $bookid . '_' . $year . '_' . $month) ?? null;
             if (!$penjualan || $force) {
                 $penjualan = ExcelExportController::getPenjualan($month, $year);
             }
-            Cache::set('export_data_penjualan_' . $bookid . '_' . $year . '_' . $month, $penjualan, $timeout);
+            Redis::setex('export_data_penjualan_' . $bookid . '_' . $year . '_' . $month, $timeout, $penjualan);
             $bgprocess->success();
             $this->info('process data penjualan finished.');
 
@@ -147,22 +148,22 @@ class MakeExportData extends Command
             $bgprocess->stage_process = 'process data kartu piutang..';
             $bgprocess->save();
 
-            $kartuPiutang = Cache::get('export_data_kartu_piutang_' . $bookid . '_' . $year . '_' . $month) ?? null;
+            $kartuPiutang = Redis::get('export_data_kartu_piutang_' . $bookid . '_' . $year . '_' . $month) ?? null;
             if (!$kartuPiutang || $force) {
                 $kartuPiutang = ExcelExportController::getKartuPiutang($month, $year);
             }
-            Cache::set('export_data_kartu_piutang_' . $bookid . '_' . $year . '_' . $month, $kartuPiutang, $timeout);
+            Redis::setex('export_data_kartu_piutang_' . $bookid . '_' . $year . '_' . $month, $timeout, $kartuPiutang);
             $bgprocess->success();
             $this->info('process data kartu piutang finished.');
 
             $this->info('process data kartu hutang..');
             $bgprocess->stage_process = 'process data kartu hutang..';
             $bgprocess->save();
-            $kartuHutang = Cache::get('export_data_kartu_hutang_' . $bookid . '_' . $year . '_' . $month) ?? null;
+            $kartuHutang = Redis::get('export_data_kartu_hutang_' . $bookid . '_' . $year . '_' . $month) ?? null;
             if (!$kartuHutang || $force) {
                 $kartuHutang = ExcelExportController::getKartuHutang($month, $year);
             }
-            Cache::set('export_data_kartu_hutang_' . $bookid . '_' . $year . '_' . $month, $kartuHutang, $timeout);
+            Redis::setex('export_data_kartu_hutang_' . $bookid . '_' . $year . '_' . $month, $timeout, $kartuHutang);
             $bgprocess->success();
             $this->info('process data kartu hutang finished.');
 
@@ -170,11 +171,11 @@ class MakeExportData extends Command
             $bgprocess->stage_process = 'process data kartu dp sales..';
             $bgprocess->save();
 
-            $kartuDPSales = Cache::get('export_data_kartu_dp_sales_' . $bookid . '_' . $year . '_' . $month) ?? null;
+            $kartuDPSales = Redis::get('export_data_kartu_dp_sales_' . $bookid . '_' . $year . '_' . $month) ?? null;
             if (!$kartuDPSales || $force) {
                 $kartuDPSales = ExcelExportController::getKartuDPSales($month, $year);
             }
-            Cache::set('export_data_kartu_dp_sales_' . $bookid . '_' . $year . '_' . $month, $kartuDPSales, $timeout);
+            Redis::setex('export_data_kartu_dp_sales_' . $bookid . '_' . $year . '_' . $month, $timeout, $kartuDPSales);
             $bgprocess->success();
             $this->info('process data kartu dp sales finished.');
 
@@ -182,11 +183,11 @@ class MakeExportData extends Command
             $bgprocess->stage_process = 'process data kartu inventory..';
             $bgprocess->save();
 
-            $kartuInventory = Cache::get('export_data_kartu_inventory_' . $bookid . '_' . $year) ?? null;
+            $kartuInventory = Redis::get('export_data_kartu_inventory_' . $bookid . '_' . $year) ?? null;
             if (!$kartuInventory || $force) {
                 $kartuInventory = ExcelExportController::getKartuInventory($year);
             }
-            Cache::set('export_data_kartu_inventory_' . $bookid . '_' . $year, $kartuInventory, $timeout);
+            Redis::setex('export_data_kartu_inventory_' . $bookid . '_' . $year, $timeout, $kartuInventory);
             $bgprocess->success();
             $this->info('process data kartu inventory finished.');
 
@@ -194,22 +195,22 @@ class MakeExportData extends Command
             $bgprocess->stage_process = 'process data kartu bdd..';
             $bgprocess->save();
 
-            $kartuBDD = Cache::get('export_data_kartu_bdd_' . $bookid . '_' . $year) ?? null;
+            $kartuBDD = Redis::get('export_data_kartu_bdd_' . $bookid . '_' . $year) ?? null;
             if (!$kartuBDD || $force) {
                 $kartuBDD = ExcelExportController::getKartuBDD($year);
             }
-            Cache::set('export_data_kartu_bdd_' . $bookid . '_' . $year, $kartuBDD, $timeout);
+            Redis::setex('export_data_kartu_bdd_' . $bookid . '_' . $year, $timeout, $kartuBDD);
             $bgprocess->success();
             $this->info('process data kartu bdd finished.');
 
             $this->info('process data kartu stock..');
             $bgprocess->stage_process = 'process data kartu stock..';
             $bgprocess->save();
-            $kartuStock = Cache::get('export_data_kartu_stock_' . $bookid . '_' . $year . '_' . $month) ?? null;
+            $kartuStock = Redis::get('export_data_kartu_stock_' . $bookid . '_' . $year . '_' . $month) ?? null;
             if (!$kartuStock || $force) {
                 $kartuStock = ExcelExportController::getKartuStock($month, $year);
             }
-            Cache::set('export_data_kartu_stock_' . $bookid . '_' . $year . '_' . $month, $kartuStock, $timeout);
+            Redis::setex('export_data_kartu_stock_' . $bookid . '_' . $year . '_' . $month, $timeout, $kartuStock);
 
             $bgprocess->success();
             $this->info('process data kartu stock finished.');
@@ -218,11 +219,11 @@ class MakeExportData extends Command
             $bgprocess->stage_process = 'process data kartu bdp..';
             $bgprocess->save();
 
-            $kartuBDP = Cache::get('export_data_kartu_bdp_' . $bookid . '_' . $year . '_' . $month) ?? null;
+            $kartuBDP = Redis::get('export_data_kartu_bdp_' . $bookid . '_' . $year . '_' . $month) ?? null;
             if (!$kartuBDP || $force) {
                 $kartuBDP = ExcelExportController::getKartuBDP($month, $year);
             }
-            Cache::set('export_data_kartu_bdp_' . $bookid . '_' . $year . '_' . $month, $kartuBDP, $timeout);
+            Redis::setex('export_data_kartu_bdp_' . $bookid . '_' . $year . '_' . $month, $timeout, $kartuBDP);
             $bgprocess->success();
             $this->info('process data kartu bdp finished.');
 
@@ -230,11 +231,11 @@ class MakeExportData extends Command
             $bgprocess->stage_process = 'process data kartu bahan jadi..';
             $bgprocess->save();
 
-            $kartuBahanJadi = Cache::get('export_data_kartu_bahan_jadi_' . $bookid . '_' . $year . '_' . $month) ?? null;
+            $kartuBahanJadi = Redis::get('export_data_kartu_bahan_jadi_' . $bookid . '_' . $year . '_' . $month) ?? null;
             if (!$kartuBahanJadi || $force) {
                 $kartuBahanJadi = ExcelExportController::getKartuBahanJadi($month, $year);
             }
-            Cache::set('export_data_kartu_bahan_jadi_' . $bookid . '_' . $year . '_' . $month, $kartuBahanJadi, $timeout);
+            Redis::setex('export_data_kartu_bahan_jadi_' . $bookid . '_' . $year . '_' . $month, $timeout, $kartuBahanJadi);
             $bgprocess->success();
             $this->info('process data kartu bahan jadi finished.');
 
@@ -242,11 +243,11 @@ class MakeExportData extends Command
             $bgprocess->stage_process = 'process data kartu in transit..';
             $bgprocess->save();
 
-            $kartuInTransit = Cache::get('export_data_kartu_in_transit_' . $bookid . '_' . $year . '_' . $month) ?? null;
+            $kartuInTransit = Redis::get('export_data_kartu_in_transit_' . $bookid . '_' . $year . '_' . $month) ?? null;
             if (!$kartuInTransit || $force) {
                 $kartuInTransit = ExcelExportController::getKartuInTransit($month, $year);
             }
-            Cache::set('export_data_kartu_in_transit_' . $bookid . '_' . $year . '_' . $month, $kartuInTransit, $timeout);
+            Redis::setex('export_data_kartu_in_transit_' . $bookid . '_' . $year . '_' . $month, $timeout, $kartuInTransit);
             $bgprocess->success();
             $this->info('process data kartu in transit finished.');
 
