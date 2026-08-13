@@ -427,7 +427,7 @@ class ExcelExportController extends Controller
             $neracaLabaBulan = $neraca['laba_bulan'] ?? 0;
             $labaKartuLR = collect($lr['msg'][$year . '-' . toDigit($month, 2)])->sum('saldo_akhir');
 
-            $codeHPP = ChartAccountAlias::aktif()->where('is_child', 1)->where('code_group', 'like', '6%')->pluck('code_group')->all();
+            $codeHPP = ChartAccountAlias::aktif()->where('is_child', 1)->where('code_group', '>',600000)->where('code_group','<',7000)->pluck('code_group')->all();
             $NLSumHPP = collect($neracaLajur['msg'])->filter(function ($item) use ($codeHPP) {
                 return in_array($item['code_group'], $codeHPP);
             })->sum('saldo_akhir');
