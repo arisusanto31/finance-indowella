@@ -45,6 +45,7 @@ class CompareJournalAndPiutang extends Command
             $join->on('kp.id', '=', 'dk.kartu_id')->where('dk.kartu_type', KartuPiutang::class);
         })->select(
             'journals.id',
+            'journals.tag',
             'journals.journal_number',
             'journals.index_date',
             'journals.code_group',
@@ -52,7 +53,7 @@ class CompareJournalAndPiutang extends Command
             'kp.id as kartu_piutang_id',
             DB::raw('kp.amount_debet-kp.amount_kredit as amount_kartu_piutang'),
             'kp.index_date as kartu_piutang_index_date',
-        )->get();
+        )->whereNull('journals.tag')->get();
 
         $keys = ['journal_id', 'journal_index_date', 'code_group', 'amount_journal', 'kartu_piutang_id', 'amount_kartu_piutang', 'kartu_piutang_index_date'];
         $datas = [];
@@ -76,6 +77,7 @@ class CompareJournalAndPiutang extends Command
 
         tampilkanTableTerminal($problems, [
             'id' => 'center',
+            'tag' => 'center',
             'index_date' => 'center',
             'journal_number' => 'center',
             'code_group' => 'center',
