@@ -88,16 +88,17 @@ class CompareJournalAndPiutang extends Command
 
         ], $this);
 
-        // if ($this->confirm('apa mau delete yang ga ada kartu_piutangnya')) {
-            // foreach ($problems as $p) {
-            //     $st = JournalController::destroy($p->id,1);
-            //     if ($st['status'] == 1) {
-            //         $this->info('deleted journal id: ' . $p->id);
-            //     } else {
-            //         $this->error('failed to delete journal id: ' . $p->id.':'.$st['msg']);
-            //     }
-            // }
-        // }
+        $this->info('total problem '.collect($problems)->sum('amount_journal').' from journal count '.count($journals));
+        if ($this->confirm('apa mau delete yang ga ada kartu_piutangnya')) {
+            foreach ($problems as $p) {
+                $st = JournalController::destroy($p->id,1);
+                if ($st['status'] == 1) {
+                    $this->info('deleted journal id: ' . $p->id);
+                } else {
+                    $this->error('failed to delete journal id: ' . $p->id.':'.$st['msg']);
+                }
+            }
+        }
 
 
         if (count($journals) > 0) {
