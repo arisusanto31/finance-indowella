@@ -405,20 +405,20 @@ class ExcelExportController extends Controller
                     return collect($item)->sortByDesc('index_date')->first()['amount_saldo'] ?? 0;
                 });
             });
-            $codePiutang = ChartAccount::where('is_child', 1)->where('code_group', 'like', '12%')->pluck('code_group')->all();
+            $codePiutang = ChartAccountAlias::aktif()->where('is_child', 1)->where('code_group', 'like', '12%')->pluck('code_group')->all();
             $NLSumPiutang = collect($neracaLajur['msg'])->filter(function ($item) use ($codePiutang) {
                 return in_array($item['code_group'], $codePiutang);
             })->sum('saldo_akhir');
-            $codeUtang = ChartAccount::where('code_group', '211000')->pluck('code_group')->all();
+            $codeUtang = ChartAccountAlias::aktif()->where('code_group', '211000')->pluck('code_group')->all();
             $NLUtangUsaha = collect($neracaLajur['msg'])->filter(function ($item) use ($codeUtang) {
                 return in_array($item['code_group'], $codeUtang);
             })->sum('saldo_akhir');
-            $codeDP = ChartAccount::where('is_child', 1)->where('code_group', 'like', '214000')->pluck('code_group')->all();
+            $codeDP = ChartAccountAlias::aktif()->where('is_child', 1)->where('code_group', 'like', '214000')->pluck('code_group')->all();
             $NLSaldoDP = collect($neracaLajur['msg'])->filter(function ($item) use ($codeDP) {
                 return in_array($item['code_group'], $codeDP);
             })->sum('saldo_akhir');
 
-            $codeKewajiban = ChartAccount::where('is_child', 1)->where('code_group', 'like', '2%')->pluck('code_group')->all();
+            $codeKewajiban = ChartAccountAlias::aktif()->where('is_child', 1)->where('code_group', 'like', '2%')->pluck('code_group')->all();
             $NLSumKewajiban = collect($neracaLajur['msg'])->filter(function ($item) use ($codeKewajiban) {
                 return in_array($item['code_group'], $codeKewajiban);
             })->sum('saldo_akhir');
@@ -427,13 +427,13 @@ class ExcelExportController extends Controller
             $neracaLabaBulan = $neraca['laba_bulan'] ?? 0;
             $labaKartuLR = collect($lr['msg'][$year . '-' . toDigit($month, 2)])->sum('saldo_akhir');
 
-            $codeHPP = ChartAccount::where('is_child', 1)->where('code_group', 'like', '6%')->pluck('code_group')->all();
+            $codeHPP = ChartAccountAlias::aktif()->where('is_child', 1)->where('code_group', 'like', '6%')->pluck('code_group')->all();
             $NLSumHPP = collect($neracaLajur['msg'])->filter(function ($item) use ($codeHPP) {
                 return in_array($item['code_group'], $codeHPP);
             })->sum('saldo_akhir');
 
             $indAwalTahun=createCarbon($year.'-01-01')->startOfYear()->format('ymdHis99');
-            $thecode= ChartAccountAlias::whereIn('code_group',[302000,302100])->where('is_child',1)->pluck('code_group')->all();
+            $thecode= ChartAccountAlias::aktif()->whereIn('code_group',[302000,302100])->where('is_child',1)->pluck('code_group')->all();
             $saldoLabaAwalTahun= Journal::whereIn('code_group',$thecode)->where('index_date','<=',$indAwalTahun)->orderBy('index_date','desc')->first()->amount_saldo ?? 0;
             $saldoLaba = collect($neraca['msg']['Ekuitas'])->where('code_group', 302000)->first()['saldo'] ?? 0;
             $saldoLaba -= $saldoLabaAwalTahun;
