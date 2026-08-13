@@ -415,7 +415,7 @@ class JournalController extends Controller
         $indexAwal = intval(createCarbon($indexAwal)->format('ymdHis00'));
         $indexAkhir = Carbon::createFromFormat('ymdHis00', $indexAwal)->addMonths(12)->format('ymdHis00');
 
-        //ari 3 bulan kedepan
+        //cari 3 bulan kedepan
         try {
             $journals = Journal::whereBetween('index_date', [$indexAwal, $indexAkhir])->select('index_date', 'journal_number', 'description', 'amount_kredit', 'amount_debet', 'code_group', 'amount_saldo', 'id')->orderBy('index_date', 'asc')->get();
             $sub = Journal::select(DB::raw('max(index_date) as max_index_date'), 'code_group')->where('index_date', '<', $indexAwal)->groupBy('code_group');
@@ -474,11 +474,7 @@ class JournalController extends Controller
             }
         }
         try {
-            $journals = Journal::where(function ($q) {
-                $q->whereNull('tag')
-                    ->orWhere('tag', '<>', 'opening 01/2026');
-            })
-                ->whereBetween('index_date', [$indexAwal, $indexAkhir])
+            $journals = Journal::whereBetween('index_date', [$indexAwal, $indexAkhir])
                 ->select(
                     'id',
                     'book_journal_id',
@@ -489,10 +485,12 @@ class JournalController extends Controller
                     DB::raw('CASE WHEN code_group < 200000 THEN amount_debet-amount_kredit ELSE amount_kredit-amount_debet END as amount_journal'),
                     'amount_saldo',
                     DB::raw('coalesce(LAG(amount_saldo) OVER (PARTITION BY code_group ORDER BY index_date), 0) as last_saldo'),
+                    DB::raw('ROW_NUMBER() OVER (PARTITION BY code_group ORDER BY index_date) as row_number')
                 );
 
             $datamin = Journal::fromSub($journals, 'journals')
                 ->whereRaw('last_saldo + amount_journal != amount_saldo')
+                ->where('row_number', '>', 1)
                 ->select('*', DB::raw('amount_journal + last_saldo - amount_saldo as selisih'))
                 ->get()->groupBy('code_group')->map(function ($group) {
                     return collect($group)->sortBy('index_date')->first()->id ?? null;
