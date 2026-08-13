@@ -178,8 +178,8 @@ class ChartAccount extends Model
     public function updateAlias()
     {
         $alias = ChartAccountAlias::where('code_group', intval($this->code_group))->first();
-        if(!$alias){
-           return ;
+        if (!$alias) {
+            return;
         }
         if ($alias->parent_id == null && $this->parent_id != null) {
             $parentChart = ChartAccount::find($this->parent_id);
@@ -543,8 +543,11 @@ class ChartAccount extends Model
     public static function _rincianMutationNeracaLajur($firstdate, $lastdate)
     {
         $starttime = microtime(true);
+        info('mutasinl:proses rincan mutasi dimulai');
+
         $chartAccount = ChartAccountAlias::select('id', 'code_group', 'is_child', 'level')->get();
-        $subquery = Journal::from('journals as j')->whereBetween('j.index_date', [(float)$firstdate, (float)$lastdate]);
+        $subquery = Journal::from('journals as j')->whereBetween('j.index_date', [(float)$firstdate, (float)$lastdate])
+            ->select('j.code_group', 'j.amount_kredit', 'j.amount_debet');
         $mutasi_ = ChartAccountAlias::from('chart_account_aliases as c')
             ->leftJoinSub($subquery, 'j', function ($join) {
                 $join->on('j.code_group', '=', 'c.code_group');
@@ -556,7 +559,8 @@ class ChartAccount extends Model
                 'c.id',
                 'c.is_child',
                 'c.name'
-            )->orderBy('c.code_group')->groupBy('c.code_group', 'c.id', 'c.is_child', 'c.name')->get();
+            )->orderBy('c.code_group')->groupBy('c.code_group')->get()->keyBy('code_group')->all();
+        info('mutasinl:ambil semua rekap bahan sudah selesai , waktunyamemasak. on ' . (microtime(true) - $starttime));
         $fixMutasi = [];
         foreach ($chartAccount as $data) {
             $newdata = [];
@@ -568,10 +572,17 @@ class ChartAccount extends Model
                 $idchilds = [$data->code_group];
             }
             $newdata['code_group'] = $data->code_group;
-            $newdata['total_debet'] = money(round($mutasi_->whereIn('code_group', $idchilds)->sum('total_debet'), 2));
-            $newdata['total_kredit'] = money(round($mutasi_->whereIn('code_group', $idchilds)->sum('total_kredit'), 2));
+            $totaldebet = collect($idchilds)->sum(function ($code) use ($mutasi_) {
+                return array_key_exists($code, $mutasi_) ? $mutasi_[$code]->total_debet : 0;
+            });
+            $totalkredit = collect($idchilds)->sum(function ($code) use ($mutasi_) {
+                return array_key_exists($code, $mutasi_) ? $mutasi_[$code]->total_kredit : 0;
+            });
+            $newdata['total_debet'] = money(round($totaldebet, 2));
+            $newdata['total_kredit'] = money(round($totalkredit, 2));
             $fixMutasi[$data->code_group] = $newdata;
         }
+        info('mutasinl:memasak sudah selesai on '. (microtime(true) - $starttime));
 
 
         return [
