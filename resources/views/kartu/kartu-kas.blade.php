@@ -1,5 +1,11 @@
 <x-app-layout>
-
+    @push('styles')
+    <style>
+        .row-danger {
+            background-color: #f6bec3;
+        }
+    </style>
+    @endpush
     <div class="card shadow-sm mb-4">
         <h5 class="text-primary-dark card-header" style="padding-bottom:0px;"> 💳 <strong>KARTU KAS</strong>
             <!-- <div class="d-flex justify-content mt-1 pe-4 mb-3">
@@ -104,7 +110,7 @@
                                 tanggal = formatNormalDateTime(new Date(item.created_at));
                                 lastSaldo = parseFloat(item.amount_saldo);
                                 html += `
-                                    <tr>
+                                    <tr class="${item.amount_saldo<0 ?'row-danger':''}">
                                         <td>${index+1}</td>
                                         <td>${item.is_locked ? `🔒 ${tanggal}` :  `<input type="datetime-local" class="form-control" id="date${item.id}" onchange="updateDateJournal('${item.id}')" value="${tanggal}" />`}</td>
                                         <td>${item.journal_number} </td>
