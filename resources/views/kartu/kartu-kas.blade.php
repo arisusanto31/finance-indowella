@@ -4,6 +4,12 @@
         .row-danger {
             background-color: #f6bec3 !important;
         }
+        .row-danger.odd {
+            background-color: #f6bec3 !important;
+        }
+        .row-danger.even {
+            background-color: #f6bec3 !important;
+        }
     </style>
     @endpush
     <div class="card shadow-sm mb-4">
