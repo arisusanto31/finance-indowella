@@ -722,7 +722,65 @@ class JournalController extends Controller
             }
         }
     }
+    public function updateDateJournal(Request $request)
+    {
+        $journalId = $request->input('journal_id');
+        $date = $request->input('date');
+        $indexDateGroup = createCarbon($date)->format('ymdHis');
+        $journal = Journal::find($journalId);
+        $allJournals = Journal::where('journal_number', $journal->journal_number)->get();
+        foreach ($allJournals as $j) {
+            $j->created_at = $date;
+            $j->index_date_group = $indexDateGroup;
+            $j->index_date = Journal::getNextIndexDate($date,$j->code_group);
+            $j->save();
+            $j->recalculateJournal();
 
+            //kita cari kartutnya lalu ubah jua ya
+            $dk = DetailKartuInvoice::where('journal_id', $j->id)->get();
+            foreach ($dk as $d) {
+                $d->created_at = $date;
+                $d->save();
+                if ($d->kartu_type && $d->kartu_id && $d->kartu_type != Journal::class) {
+                    $kartu = $d->kartu_type::find($d->kartu_id);
+                    $kartu->index_date = $d->kartu_type::getNextIndexDate($date);
+                    $kartu->created_at = $date;
+                    $kartu->save();
+                }
+            }
+        }
+
+        return [
+            'status' => 1,
+            'msg' => 'success'
+        ];
+    }
+
+
+    public function updateDescriptionJournal(Request $request)
+    {
+        $journalId = $request->input('journal_id');
+        $description = $request->input('description');
+        $journal = Journal::find($journalId);
+        if (!$journal) {
+            return [
+                'status' => 0,
+                'msg' => 'jurnal tidak ditemukan'
+            ];
+        }
+        if ($journal->is_locked) {
+            return [
+                'status' => 0,
+                'msg' => 'jurnal sudah terkunci, tidak bisa diubah'
+            ];
+        }
+        $journal->description = $description;
+        $journal->save();
+        return [
+            'status' => 1,
+            'msg' => 'success'
+        ];
+    }
     function searchError()
     {
         $codeGroup = getInput('code_group');

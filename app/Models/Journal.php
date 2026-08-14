@@ -204,7 +204,7 @@ class Journal extends Model
                 $journal->index_date = $finalIndexDate;
                 $journal->index_date_group = $indexDate; //nilai ymdHis
                 $journal->chart_account_id = $coaID;
-                $journal->journal_identifier=$codeGroup.$finalIndexDate;
+                $journal->journal_identifier = $codeGroup . $finalIndexDate;
                 $journal->reference_model = $caAlias->reference_model;
                 $journal->journal_number = $journal_number;
                 $journal->lawan_code_group = $lawanCodeGroup;
@@ -267,6 +267,25 @@ class Journal extends Model
             // 'lock_name' => $name,
 
         ];
+    }
+
+    public static function getNextIndexDate($date,$codegroup)
+    {
+        $counter = 9999;
+        $now = createCarbon($date);
+        $codeGroup = $codegroup;
+        $indexDate = $now->format('ymdHis');
+        while ($counter >= 99) {
+            $indexDate = $now->format('ymdHis');
+            $lastIndexDate = Journal::where('code_group', strval($codeGroup))->where('index_date_group', $indexDate)->select(DB::raw('max(index_date) as maxindex'))->first();
+            $counter = $lastIndexDate ? $lastIndexDate->maxindex % 100 : 0;
+            if ($counter >= 99) {
+                $now->addSecond();
+            }
+        }
+        // info('counter:' . $counter);
+        $finalIndexDate = $indexDate . sprintf("%02d", ($counter + 1));
+        return $finalIndexDate;
     }
 
     public function updateAfterCreate()
@@ -425,7 +444,7 @@ class Journal extends Model
         // CustomLogger::log('journal', 'info', 'recalculate make lock ' . $name);
         try {
             $lastSaldo = $thejournal->amount_saldo;
-            $allDataUpdate=[];
+            $allDataUpdate = [];
             $mustEditJournal = Journal::where('code_group', strval($thejournal->code_group))->where('index_date', '>', $thejournal->index_date)
                 ->where(function ($q) {
                     $q->whereNull('tag')
@@ -433,7 +452,7 @@ class Journal extends Model
                 })
                 ->orderBy('index_date', 'asc')
                 ->select('amount_debet', 'index_date', 'amount_kredit', 'id', 'code_group')
-                ->chunkById(2000, function ($journals) use (&$lastSaldo,&$allDataUpdate) {
+                ->chunkById(2000, function ($journals) use (&$lastSaldo, &$allDataUpdate) {
                     $newdata = [];
                     $dataUpdate = [];
                     foreach ($journals as $journal) {
@@ -451,7 +470,7 @@ class Journal extends Model
                         $lastSaldo = $journal->amount_saldo;
                         $newdata[] = collect($journal)->only(['id', 'description', 'index_date', 'amount_saldo', 'amount_debet', 'amount_kredit']);
                     }
-                    $allDataUpdate=array_merge($allDataUpdate,$dataUpdate);
+                    $allDataUpdate = array_merge($allDataUpdate, $dataUpdate);
 
                     upsertInChunks(
                         Journal::class,
@@ -460,7 +479,6 @@ class Journal extends Model
                         ['amount_saldo']
                     );
                 }, 'index_date');
-            
         } catch (LockTimeoutException $e) {
             return [
                 'status' => 0,

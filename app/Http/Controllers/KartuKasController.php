@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ChartAccount;
 use App\Models\ChartAccountAlias;
 use App\Models\Journal;
+use App\Models\JournalKey;
 use App\Models\Toko;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -33,7 +34,9 @@ class KartuKasController extends Controller
         $indexDateAkhir = createCarbon($dateEnd)->endOfDay()->format('ymdHis99');
 
 
-      
+        $journalKey= JournalKey::where('book_journal_id',bookID())->orderByDesc('key_at')->first();
+        $keyAt = $journalKey ? createCarbon($journalKey->key_at) : createCarbon('2025-01-01');
+        $indexKeyAt = $keyAt ? $keyAt->format('ymdHis00') : 0   ;
         $coas = ChartAccount::aktif()->child()->where('code_group', 'like', Journal::getPrimaryCode($kindCodeGroup) . '%')->pluck('code_group')->all();
 
         $subData = Journal::select(DB::raw('max(index_date) as maxindex'), 'code_group')->where('index_date', '<', $indexDateAwal)->whereIn('code_group', $coas)
@@ -44,7 +47,9 @@ class KartuKasController extends Controller
         })->pluck('journals.amount_saldo', 'journals.code_group')->all();
 
         $journals = Journal::searchCOA($kindCodeGroup)->whereBetween('index_date', [$indexDateAwal, $indexDateAkhir])->with(['lawanCode:name,code_group'])
-            ->orderBy('index_date', 'asc')->get()->groupBy('code_group');
+            ->orderBy('index_date', 'asc')
+            ->select('journals.*',DB::raw('CASE WHEN journals.index_date < "'.$indexKeyAt.'" THEN 1 ELSE 0 END as is_locked'))
+            ->get()->groupBy('code_group');
 
         $chartAccount = ChartAccount::aktif()->withAlias()->pluck('alias_name', 'code_group');
         foreach ($coas as $coa) {
@@ -52,6 +57,7 @@ class KartuKasController extends Controller
                 $journals[$coa] = [];
             }
         }
+
         return [
             'status' => 1,
             'msg' => $journals,

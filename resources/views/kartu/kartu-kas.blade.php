@@ -20,11 +20,11 @@
                 <div class="col-md-2">
                     <select id="select-kind-kas" class="form-select">
                         @foreach ($kind_kas as $code => $item)
-                            <option value="{{ $code }}">{{ $item }}</option>
+                        <option value="{{ $code }}">{{ $item }}</option>
                         @endforeach
                     </select>
                 </div>
-                  <div class="col-md-2 " style="position:relative;">
+                <div class="col-md-2 " style="position:relative;">
                     <span style="position:absolute; left:19px; top:9px;">from:</span>
                     <input type="date" class="form-control" style="padding-left:60px;" id="dateawal" placeholder="Tanggal Awal">
                 </div>
@@ -44,25 +44,25 @@
     </div>
 
     @push('scripts')
-        <script>
-            initItemSelectManual('.select-coa', '{{ route("chart-account.get-item-keuangan") }}?kind=kas', 'chart account');
-           
-            function searchBuku() {
-                       startdate = $('#dateawal').val();
-                enddate = $('#dateakhir').val();
-                kindKas = $('#select-kind-kas option:selected').val();
-                $('#btn-search').html('Loading...').attr('disabled', true);
-                $.ajax({
-                    url: '{{ route("kartu-kas.get-buku-kas") }}?kind=' + kindKas +  '&dateawal=' + startdate + '&dateakhir=' + enddate,
-                    method: 'get',
-                    success: function(res) {
-                        console.log(res);
-                        $('#btn-search').html('Cari').attr('disabled', false);
-                        if (res.status == 1) {
-                            html = '';
+    <script>
+        initItemSelectManual('.select-coa', '{{ route("chart-account.get-item-keuangan") }}?kind=kas', 'chart account');
 
-                            Object.keys(res.msg).forEach(function eachKas(codeKas) {
-                                html += `
+        function searchBuku() {
+            startdate = $('#dateawal').val();
+            enddate = $('#dateakhir').val();
+            kindKas = $('#select-kind-kas option:selected').val();
+            $('#btn-search').html('Loading...').attr('disabled', true);
+            $.ajax({
+                url: '{{ route("kartu-kas.get-buku-kas") }}?kind=' + kindKas + '&dateawal=' + startdate + '&dateakhir=' + enddate,
+                method: 'get',
+                success: function(res) {
+                    console.log(res);
+                    $('#btn-search').html('Cari').attr('disabled', false);
+                    if (res.status == 1) {
+                        html = '';
+
+                        Object.keys(res.msg).forEach(function eachKas(codeKas) {
+                            html += `
                             <p class="text-primary-dark fs-5 mt-3 mb-0 "> ${codeKas} - ${res.chart_accounts[codeKas]} </p>
                             <div class="table-responsive mt-1">
                                 <table id="kartuKasTable" class="table table-bordered table-striped table-hover align-middle">
@@ -72,7 +72,7 @@
                                             <th>📅 Tanggal</th>
                                             <th>#️⃣ No Jurnal</th>
                                             <th>🔢 LAWAN COA</th>
-                                            <th>📎 Description</th>
+                                            <th style="width:30%;">📎 Description</th>
                                             <th>🔃 Debet</th>
                                             <th>🔃 Kredit</th>
                                             <th>💲saldo</th>
@@ -81,7 +81,7 @@
                                     <tbody id="body-mutasi-bukubesar">
                             `;
 
-                                html += `
+                            html += `
                                     <tr>
                                         <td colspan="5" class="text-center">Saldo Awal </td>
                                         <td>0</td>
@@ -90,33 +90,33 @@
                                         
                                     </tr>
                                     `;
-                                data = res.msg[codeKas];
-                                if (data.length == 0) {
-                                    html += `
+                            data = res.msg[codeKas];
+                            if (data.length == 0) {
+                                html += `
                             <tr>
                                 <td colspan="8" class="text-center">🤷‍♂️ Tidak ada data</td>
                             </tr>
                             `;
-                                }
-                                lastSaldo = res.saldo_awal[codeKas];
+                            }
+                            lastSaldo = res.saldo_awal[codeKas];
 
-                                data.forEach((item, index) => {
-                                    tanggal = formatNormalDateTime(new Date(item.created_at));
-                                    lastSaldo = parseFloat(item.amount_saldo);
-                                    html += `
+                            data.forEach((item, index) => {
+                                tanggal = formatNormalDateTime(new Date(item.created_at));
+                                lastSaldo = parseFloat(item.amount_saldo);
+                                html += `
                                     <tr>
                                         <td>${index+1}</td>
-                                        <td>${tanggal}</td>
+                                        <td>${item.is_locked ? `🔒 ${tanggal}` :  `<input type="datetime-local" class="form-control" id="date${item.id}" onchange="updateDateJournal('${item.id}')" value="${tanggal}" />`}</td>
                                         <td>${item.journal_number} </td>
                                         <td>${item.lawan_code_group} - ${res.chart_accounts[item.lawan_code_group]}</td>
-                                        <td>${item.description}</td>
+                                        <td>${item.is_locked ? item.description:`<input type="text" class="form-control" id="description${item.id}" value="${item.description}" onchange="updateDescriptionJournal('${item.id}')" />`}</td>
                                         <td>${formatRupiah(item.amount_debet)}</td>
                                         <td>${formatRupiah(item.amount_kredit)}</td>
                                         <td>${formatRupiah(item.amount_saldo)}</td>
                                     </tr>
                                     `;
-                                });
-                                html += `
+                            });
+                            html += `
 
                                     <tr>
                                         <td>+</td>
@@ -140,74 +140,143 @@
                                 </table>
                             </div>
                             `;
-                            });
+                        });
 
-                            $('#container-kas').html(html);
-                            initItemSelectManual('.select-coa-table', '{{ route("chart-account.get-item") }}');
+                        $('#container-kas').html(html);
+                        initItemSelectManual('.select-coa-table', '{{ route("chart-account.get-item") }}');
 
-                        } else {
-                            Swal.fire('opps', res.msg, 'error');
+                    } else {
+                        Swal.fire('opps', res.msg, 'error');
+                    }
+                },
+                error: function(res) {
+                    $('#btn-search').html('Cari').attr('disabled', false);
+                    Swal.fire('opps', 'Gagal mendapatkan data', 'error');
+                }
+            });
+        }
+
+        function updateDateJournal(journalid) {
+            dateJournal = $('#date' + journalid).val();
+            Swal.fire({
+                title: 'Apakah anda yakin ingin mengubah tanggal jurnal ini?',
+                text: "Tanggal jurnal akan diubah menjadi " + dateJournal,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, ubah!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    loading(1);
+                    data = {
+                        date: dateJournal,
+                        journal_id: journalid,
+                        _token: '{{ csrf_token() }}'
+                    };
+                    $.ajax({
+                        url: '{{ route("jurnal.update-date-journal") }}',
+                        data: data,
+                        method: 'POST',
+                        success: function(res) {
+                            loading(0);
+                            notification('success', 'Tanggal jurnal berhasil diubah', 'success');
+                            searchBuku();
+                        },
+                        error: function(res) {
+                            loading(0);
+                            Swal.fire('opps', 'Gagal mengubah tanggal jurnal', 'error');
                         }
-                    },
-                    error: function(res) {
-                        $('#btn-search').html('Cari').attr('disabled', false);
-                        Swal.fire('opps', 'Gagal mendapatkan data', 'error');
-                    }
-                });
-            }
-
-            function prevMonth() {
-                month = '{{ $month }}';
-                year = '{{ $year }}';
-                month--;
-                if (month < 1) {
-                    month = 12;
-                    year--;
+                    });
                 }
-                window.location.href = '{{ url("admin/kartu/kartu-kas/main") }}?month=' + month + '&year=' + year;
-            }
+            })
+        }
 
-            function nextMonth() {
-                month = '{{ $month }}';
-                year = '{{ $year }}';
-                month++;
-                if (month > 12) {
-                    month = 1;
-                    year++;
+        function updateDescriptionJournal(journalid) {
+            descriptionJournal = $('#description' + journalid).val();
+            Swal.fire({
+                title: 'Apakah anda yakin ingin mengubah description jurnal ini?',
+                text: "Description jurnal akan diubah menjadi " + descriptionJournal,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, ubah!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    data = {
+                        description: descriptionJournal,
+                        journal_id: journalid,
+                        _token: '{{ csrf_token() }}'
+                    };
+                    $.ajax({
+                        url: '{{ route("jurnal.update-description-journal") }}',
+                        method: 'POST',
+                        data: data,
+                        success: function(res) {
+                            notification('success', 'Description jurnal berhasil diubah', 'success');
+                            // searchBuku();
+                        },
+                        error: function(res) {
+                            Swal.fire('opps', 'Gagal mengubah description jurnal', 'error');
+                        }
+                    });
                 }
-                window.location.href = '{{ url("admin/kartu/kartu-kas/main") }}?month=' + month + '&year=' + year;
-            }
+            })
+        }
 
-            function addKas(codeKas) {
-                date = formatNormalDateTime(new Date($('#date-' + codeKas).val()));
-                coa = $('#coa-' + codeKas + ' option:selected').val();
-                description = $('#description-' + codeKas).val();
-                amountDebet = $('#amount-debet' + codeKas).val();
-                amountKredit = $('#amount-kredit' + codeKas).val();
-                if (date == '' || coa == '' || description == '' || amountDebet == '' || amountKredit == '') {
-                    Swal.fire('opps', 'Semua field harus diisi', 'error');
-                    return;
+        function prevMonth() {
+            month = '{{ $month }}';
+            year = '{{ $year }}';
+            month--;
+            if (month < 1) {
+                month = 12;
+                year--;
+            }
+            window.location.href = '{{ url("admin/kartu/kartu-kas/main") }}?month=' + month + '&year=' + year;
+        }
+
+        function nextMonth() {
+            month = '{{ $month }}';
+            year = '{{ $year }}';
+            month++;
+            if (month > 12) {
+                month = 1;
+                year++;
+            }
+            window.location.href = '{{ url("admin/kartu/kartu-kas/main") }}?month=' + month + '&year=' + year;
+        }
+
+        function addKas(codeKas) {
+            date = formatNormalDateTime(new Date($('#date-' + codeKas).val()));
+            coa = $('#coa-' + codeKas + ' option:selected').val();
+            description = $('#description-' + codeKas).val();
+            amountDebet = $('#amount-debet' + codeKas).val();
+            amountKredit = $('#amount-kredit' + codeKas).val();
+            if (date == '' || coa == '' || description == '' || amountDebet == '' || amountKredit == '') {
+                Swal.fire('opps', 'Semua field harus diisi', 'error');
+                return;
+            }
+            data = {
+                date: date,
+                lawan_code_group: coa,
+                description: description,
+                amount_debet: amountDebet,
+                amount_kredit: amountKredit,
+                code_group: codeKas,
+                _token: '{{ csrf_token() }}'
+            };
+            console.log(data);
+            swalConfirmAndSubmit({
+                url: '{{ route("kartu-kas.add-kas") }}',
+                data: data,
+                onSuccess: function(res) {
+                    searchBuku();
                 }
-                data = {
-                    date: date,
-                    lawan_code_group: coa,
-                    description: description,
-                    amount_debet: amountDebet,
-                    amount_kredit: amountKredit,
-                    code_group: codeKas,
-                    _token: '{{ csrf_token() }}'
-                };
-                console.log(data);
-                swalConfirmAndSubmit({
-                    url: '{{ route("kartu-kas.add-kas") }}',
-                    data: data,
-                    onSuccess: function(res) {
-                        searchBuku();
-                    }
-                });
+            });
 
-            }
-        </script>
+        }
+    </script>
     @endpush
 
 </x-app-layout>
