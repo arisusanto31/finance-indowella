@@ -2,7 +2,7 @@
     @push('styles')
     <style>
         .row-danger {
-            background-color: #f6bec3;
+            background-color: #f6bec3 !important;
         }
     </style>
     @endpush
