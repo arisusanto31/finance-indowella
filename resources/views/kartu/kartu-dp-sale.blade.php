@@ -348,11 +348,10 @@
                 type = $('#person_type option:selected').val();
                 if (type === 'App\\Models\\Customer') {
                     console.log('init oy ' + type);
-                    initItemSelectManual('#person_id', '{{ route("customer.get-item") }}', 'Person Name ..', );
+                    initItemSelectManual('#person_id', '{{ route("customer.get-item") }}', 'Person Name ..', '#basicModal');
                 } else {
-                    initItemSelectManual('#person_id', '{{ route("other-person.get-item") }}', 'Person Name ..',
-                    );
-
+                    initItemSelectManual('#person_id', '{{ route("other-person.get-item") }}', 'Person Name ..','#basicModal');
+ 
                 }
             }
 
@@ -360,20 +359,20 @@
                 type = $('#pelunasan-person_type option:selected').val();
                 if (type === 'App\\Models\\Customer') {
                     console.log('init oy ' + type);
-                    initItemSelectManual('#pelunasan-person_id', '{{ route("customer.get-item") }}', 'Person Name ..' );
+                    initItemSelectManual('#pelunasan-person_id', '{{ route("customer.get-item") }}', 'Person Name ..','#pelunasanModal' );
                 } else {
-                    initItemSelectManual('#pelunasan-person_id', '{{ route("other-person.get-item") }}', 'Person Name ..');
+                    initItemSelectManual('#pelunasan-person_id', '{{ route("other-person.get-item") }}', 'Person Name ..','#pelunasanModal');
 
                 }
             }
             initSelectPerson();
             initSelectPersonPelunasan();
-            initItemSelectManual('#pelunasan-akun-lawan', '{{ route("chart-account.get-item") }}', 'akun lawan ..');
+            initItemSelectManual('#pelunasan-akun-lawan', '{{ route("chart-account.get-item") }}', 'akun lawan ..','#pelunasanModal');
             initItemSelectManual('#pelunasan-akun-piutang', '{{ route("chart-account.get-item-keuangan") }}?kind=piutang',
-                'akun piutang ..');
+                'akun piutang ..','#pelunasanModal');
             initItemSelectManual('#akun-piutang', '{{ route("chart-account.get-item-keuangan") }}?kind=piutang',
-                'akun piutang ..');
-            initItemSelectManual('#akun-lawan', '{{ route("chart-account.get-item") }}', 'akun lawan ..');
+                'akun piutang ..','#basicModal');
+            initItemSelectManual('#akun-lawan', '{{ route("chart-account.get-item") }}', 'akun lawan ..','#basicModal');
 
             function getSummary() {
                 month = '{{ $month }}';
