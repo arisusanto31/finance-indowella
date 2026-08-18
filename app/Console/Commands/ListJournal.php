@@ -47,7 +47,7 @@ class ListJournal extends Command
             'journals.book_journal_id',
             'journals.code_group',
             'journals.index_date',
-            'journals.tag',
+            DB::raw('COALESCE(journals.tag, "") as tag'),
             'journals.journal_number',
             DB::raw('CASE WHEN journals.code_group < 200000 THEN journals.amount_debet-journals.amount_kredit ELSE journals.amount_kredit-journals.amount_debet END as amount_journal'),
             'journals.amount_saldo'
@@ -58,7 +58,7 @@ class ListJournal extends Command
                 'book_journal_id',
                 'code_group',
                 'index_date',
-                'tag',
+                DB::raw('COALESCE(tag, "") as tag'),
                 'journal_number',
                 DB::raw('CASE WHEN code_group < 200000 THEN amount_debet-amount_kredit ELSE amount_kredit-amount_debet END as amount_journal'),
                 'amount_saldo',
@@ -68,13 +68,17 @@ class ListJournal extends Command
             ->select(
                 'journals.*',
                 DB::raw('COALESCE(LAG(amount_saldo) OVER (PARTITION BY code_group ORDER BY index_date),0) as last_saldo')
-            )->get();
+            );
+        $journals = Journal::fromSub($journals, 'journals')
+            ->where('tag', '<>', 'opening 01/2026')
+            ->where('index_date', '>=', $indexAwal)
+            ->get();
 
         $file = public_path('files/list_journal.csv');
         $handle = fopen($file, 'w');
-        
-        $data=[];
-        $data[]=['id','book_journal_id','code_group','index_date','tag','journal_number','amount_journal','amount_saldo','last_saldo'];        
+
+        $data = [];
+        $data[] = ['id', 'book_journal_id', 'code_group', 'index_date', 'tag', 'journal_number', 'amount_journal', 'amount_saldo', 'last_saldo'];
         foreach ($journals as $journal) {
             $data[] = [
                 $journal->id,

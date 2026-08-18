@@ -485,7 +485,7 @@ class JournalController extends Controller
                 'journals.book_journal_id',
                 'journals.code_group',
                 'journals.index_date',
-                'journals.tag',
+                DB::raw('COALESCE(journals.tag, "") as tag'),
                 'journals.journal_number',
                 DB::raw('CASE WHEN journals.code_group < 200000 THEN journals.amount_debet-journals.amount_kredit ELSE journals.amount_kredit-journals.amount_debet END as amount_journal'),
                 'journals.amount_saldo'
@@ -496,7 +496,7 @@ class JournalController extends Controller
                     'book_journal_id',
                     'code_group',
                     'index_date',
-                    'tag',
+                    DB::raw('COALESCE(tag, "") as tag'),
                     'journal_number',
                     DB::raw('CASE WHEN code_group < 200000 THEN amount_debet-amount_kredit ELSE amount_kredit-amount_debet END as amount_journal'),
                     'amount_saldo',
@@ -510,6 +510,7 @@ class JournalController extends Controller
             $datamin = Journal::fromSub($journals, 'journals')
                 ->whereRaw('last_saldo + amount_journal != amount_saldo')
                 ->where('tag','<>','opening 01/2026')
+                ->where('index_date', '>=', $indexAwal)
                 ->select('*', DB::raw('amount_journal + last_saldo - amount_saldo as selisih'))
                 ->get()->groupBy('code_group')->map(function ($group) {
                     return collect($group)->sortBy('index_date')->first()->id ?? null;
