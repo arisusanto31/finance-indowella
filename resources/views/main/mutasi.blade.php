@@ -738,8 +738,7 @@
         }
 
         async function deleteJournal(id) {
-            url = '{{ route("jurnal.delete", ["id" => "__id__"]) }}';
-            url = url.replace('__id__', id);
+            url = '{{url("admin/jurnal/delete")}}/'+id;
             console.log(url);
             preview = await previewDestroyJournal(id);
             console.log(preview);
