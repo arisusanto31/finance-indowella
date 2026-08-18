@@ -474,6 +474,22 @@ class JournalController extends Controller
             }
         }
         try {
+            $lastJournal = Journal::where('index_date', '<', $indexAwal)
+                ->select(DB::raw('max(index_date) as max_index_date'), 'code_group')
+                ->groupBy('code_group');
+            $theLastJournal = Journal::joinSub($lastJournal, 'last', function ($join) {
+                $join->on('last.code_group', '=', 'journals.code_group')
+                    ->on('last.max_index_date', '=', 'journals.index_date');
+            })->select(
+                'journals.id',
+                'journals.book_journal_id',
+                'journals.code_group',
+                'journals.index_date',
+                'journals.tag',
+                'journals.journal_number',
+                DB::raw('CASE WHEN journals.code_group < 200000 THEN journals.amount_debet-journals.amount_kredit ELSE journals.amount_kredit-journals.amount_debet END as amount_journal'),
+                'journals.amount_saldo'
+            );
             $journals = Journal::whereBetween('index_date', [$indexAwal, $indexAkhir])
                 ->select(
                     'id',
@@ -484,13 +500,16 @@ class JournalController extends Controller
                     'journal_number',
                     DB::raw('CASE WHEN code_group < 200000 THEN amount_debet-amount_kredit ELSE amount_kredit-amount_debet END as amount_journal'),
                     'amount_saldo',
-                    DB::raw('coalesce(LAG(amount_saldo) OVER (PARTITION BY code_group ORDER BY index_date), 0) as last_saldo'),
-                    DB::raw('ROW_NUMBER() OVER (PARTITION BY code_group ORDER BY index_date) as row_number')
-                );
-
+                    )->union($theLastJournal);
+            
+            $journals= Journal::fromSub($journals,'journals')
+              ->select(
+                'journals.*',
+                DB::raw('COALESCE(LAG(amount_saldo) OVER (PARTITION BY code_group ORDER BY index_date),0) as last_saldo')
+              );
             $datamin = Journal::fromSub($journals, 'journals')
                 ->whereRaw('last_saldo + amount_journal != amount_saldo')
-                ->where('row_number', '>', 1)
+                ->where('tag','<>','opening 01/2026')
                 ->select('*', DB::raw('amount_journal + last_saldo - amount_saldo as selisih'))
                 ->get()->groupBy('code_group')->map(function ($group) {
                     return collect($group)->sortBy('index_date')->first()->id ?? null;
@@ -732,7 +751,7 @@ class JournalController extends Controller
         foreach ($allJournals as $j) {
             $j->created_at = $date;
             $j->index_date_group = $indexDateGroup;
-            $j->index_date = Journal::getNextIndexDate($date,$j->code_group);
+            $j->index_date = Journal::getNextIndexDate($date, $j->code_group);
             $j->save();
             $j->recalculateJournal();
 

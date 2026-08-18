@@ -359,7 +359,7 @@ class ChartAccount extends Model
                     }
                     return $val;
                 });
-            return [];
+            
             return $revisiSaldo;
         }
     }
