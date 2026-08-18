@@ -738,8 +738,7 @@
         }
 
         async function deleteJournal(id) {
-            url = '{{url("admin/jurnal/delete")}}/'+id;
-            console.log(url);
+
             preview = await previewDestroyJournal(id);
             console.log(preview);
             if (preview.status != 1) {
@@ -780,6 +779,8 @@
                 html: html,
                 confirmButtonText: "Yes, Delete it!",
                 proses: () => {
+                    url = '{{url("admin/jurnal/delete")}}/' + id;
+                    console.log(url);
                     swalDelete({
                         url: url,
                         successText: "Delete berhasil!",
