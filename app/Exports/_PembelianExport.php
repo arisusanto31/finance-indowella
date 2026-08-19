@@ -190,7 +190,7 @@ class _PembelianExport implements FromCollection, WithHeadings, WithTitle, WithE
 
                 //menge Cell
                 foreach ($this->mergeKolom as $m) {
-                    $allKolomMerge = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'N'];
+                    $allKolomMerge = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'O'];
                     foreach ($allKolomMerge as $kolom) {
                         $rangeMerge = $kolom . $m['start'] . ':' . $kolom . $m['end'];
                         $sheet->mergeCells($rangeMerge);
