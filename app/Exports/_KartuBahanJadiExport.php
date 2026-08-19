@@ -73,11 +73,11 @@ class _KartuBahanJadiExport implements FromCollection, WithEvents, WithTitle, Wi
             $totalRupiahAkhir = 0;
             foreach ($items as $i => $item) {
 
-                $mutasiMasuk = data_get($this->data, 'mutasi_masuk.' . $numProd . '.' . $item['id'] . '.qty', 0);
-                $rupiahMasuk = data_get($this->data, 'mutasi_masuk.' . $numProd . '.' . $item['id'] . '.total', 0);
+                $mutasiMasuk = $this->data['mutasi_masuk'][$numProd][$item['id']]['qty'] ?? 0;
+                $rupiahMasuk = $this->data['mutasi_masuk'][$numProd][$item['id']]['total'] ?? 0;
                 $hargaMasuk = $mutasiMasuk > 0 ? $rupiahMasuk / $mutasiMasuk : 0;
-                $mutasiKeluar = data_get($this->data, 'mutasi_keluar.' . $numProd . '.' . $item['id'] . '.qty', 0);
-                $rupiahKeluar = data_get($this->data, 'mutasi_keluar.' . $numProd . '.' . $item['id'] . '.total', 0);
+                $mutasiKeluar = $this->data['mutasi_keluar'][$numProd][$item['id']]['qty'] ?? 0;
+                $rupiahKeluar = $this->data['mutasi_keluar'][$numProd][$item['id']]['total'] ?? 0;
                 $hargaKeluar = $mutasiKeluar > 0 ? $rupiahKeluar / $mutasiKeluar : 0;
 
                 $totalQtyAwal += ($item['saldo_qty_awal'] / $item['konversi']);

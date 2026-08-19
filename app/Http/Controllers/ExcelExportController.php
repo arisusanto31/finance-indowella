@@ -14,6 +14,7 @@ use App\Models\KartuDPSales;
 use App\Models\KartuHutang;
 use App\Models\KartuInTransit;
 use App\Models\KartuPiutang;
+use App\Models\Stock;
 use App\Services\ContextService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -318,12 +319,12 @@ class ExcelExportController extends Controller
             $kartuBDD = $request->input('kartu_bdd');
             $kartuStock = $request->input('kartu_stock');
             $kartuBDP = $request->input('kartu_bdp');
-            $kartuInTransit= $request->input('kartu_in_transit');
+            $kartuInTransit = $request->input('kartu_in_transit');
             $kartuBahanJadi = $request->input('kartu_bahan_jadi');
             $lr = $request->input('laba_rugi');
             $kas = $request->input('kas');
 
-            
+
             //PROSES catatan kartu NL
             $totalPembelian = collect($pembelian['msg'])->sum(function ($item) {
                 return collect($item)->sum('total_price');
@@ -356,7 +357,7 @@ class ExcelExportController extends Controller
                 });
             });
 
-            $saldoAwalInTransit= collect($kartuInTransit['msg'])->flatten(1)->sum('saldo_rupiah_awal');
+            $saldoAwalInTransit = collect($kartuInTransit['msg'])->flatten(1)->sum('saldo_rupiah_awal');
             $saldoAkhirBDP = collect($kartuBDP['msg'])->sum(function ($category) {
                 return collect($category)->sum(function ($item) {
                     return $item['saldo_rupiah_akhir'] ?? 0;
@@ -372,16 +373,16 @@ class ExcelExportController extends Controller
                     return $item['saldo_rupiah_akhir'] ?? 0;
                 });
             });
-            $saldoAkhirInTransit= collect($kartuInTransit['msg'])->flatten(1)->sum('saldo_rupiah_akhir');
+            $saldoAkhirInTransit = collect($kartuInTransit['msg'])->flatten(1)->sum('saldo_rupiah_akhir');
 
 
             //harusnya disini kita tambah dengan kartu in transit
             $mutasiMasukStock = collect($kartuStock['mutasi_masuk'])->sum('total');
-            $kartuTransitKeluar= collect($kartuInTransit['mutasi_keluar'])->flatten(1)->sum('total');
-            $kartuTransitMasuk= collect($kartuInTransit['mutasi_masuk'])->flatten(1)->sum('total');
+            $kartuTransitKeluar = collect($kartuInTransit['mutasi_keluar'])->flatten(1)->sum('total');
+            $kartuTransitMasuk = collect($kartuInTransit['mutasi_masuk'])->flatten(1)->sum('total');
             $mutasiInTransit = $kartuTransitMasuk + $kartuTransitKeluar;
-            $mutasiMasukStock+= $mutasiInTransit;
-             $codePenjualan = ChartAccount::where('is_child', 1)->where('code_group', 'like', '4%')->pluck('code_group')->all();
+            $mutasiMasukStock += $mutasiInTransit;
+            $codePenjualan = ChartAccount::where('is_child', 1)->where('code_group', 'like', '4%')->pluck('code_group')->all();
             $sumNLPenjualan = collect($neracaLajur['msg'])->filter(function ($item) use ($codePenjualan) {
                 return in_array($item['code_group'], $codePenjualan);
             })->sum('saldo_akhir');
@@ -390,7 +391,7 @@ class ExcelExportController extends Controller
             $NLSumPersediaan = collect($neracaLajur['msg'])->filter(function ($item) use ($codePersediaan) {
                 return in_array($item['code_group'], $codePersediaan);
             })->sum('saldo_akhir');
-            $totalPersediaanAwal = $saldoAwalStock + $saldoAwalBDP + $saldoAwalBahanJadi+ $saldoAwalInTransit;
+            $totalPersediaanAwal = $saldoAwalStock + $saldoAwalBDP + $saldoAwalBahanJadi + $saldoAwalInTransit;
             $totalPersediaan = $saldoAkhirStock + $saldoAkhirBDP + $saldoAkhirBahanJadi + $saldoAkhirInTransit;
             $NLPersediaanBahanDagang = collect($neracaLajur['msg'])->where('code_group', 140001)->first()['saldo_akhir'] ?? 0;
             $NLPersediaanBahanBaku = collect($neracaLajur['msg'])->where('code_group', 140002)->first()['saldo_akhir'] ?? 0;
@@ -428,7 +429,7 @@ class ExcelExportController extends Controller
             $neracaLabaBulan = $neraca['laba_bulan'] ?? 0;
             $labaKartuLR = collect($lr['msg'][$year . '-' . toDigit($month, 2)])->sum('saldo_akhir');
 
-            $codeHPP = ChartAccountAlias::aktif()->where('is_child', 1)->where('code_group', '>',600000)->where('code_group','<',700000)->pluck('code_group')->all();
+            $codeHPP = ChartAccountAlias::aktif()->where('is_child', 1)->where('code_group', '>', 600000)->where('code_group', '<', 700000)->pluck('code_group')->all();
             // $resume=[];
             // foreach($codeHPP as $code){
             //     $resume[$code] = collect($neracaLajur['msg'])->where('code_group',$code)->first()['saldo_akhir'] ?? 0;
@@ -438,9 +439,9 @@ class ExcelExportController extends Controller
                 return in_array($item['code_group'], $codeHPP);
             })->sum('saldo_akhir');
 
-            $indAwalTahun=createCarbon($year.'-01-01')->startOfYear()->format('ymdHis99');
-            $thecode= ChartAccountAlias::aktif()->whereIn('code_group',[302000,302100])->where('is_child',1)->pluck('code_group')->all();
-            $saldoLabaAwalTahun= Journal::whereIn('code_group',$thecode)->where('index_date','<=',$indAwalTahun)->orderBy('index_date','desc')->first()->amount_saldo ?? 0;
+            $indAwalTahun = createCarbon($year . '-01-01')->startOfYear()->format('ymdHis99');
+            $thecode = ChartAccountAlias::aktif()->whereIn('code_group', [302000, 302100])->where('is_child', 1)->pluck('code_group')->all();
+            $saldoLabaAwalTahun = Journal::whereIn('code_group', $thecode)->where('index_date', '<=', $indAwalTahun)->orderBy('index_date', 'desc')->first()->amount_saldo ?? 0;
             $saldoLaba = collect($neraca['msg']['Ekuitas'])->where('code_group', 302000)->first()['saldo'] ?? 0;
             $saldoLaba -= $saldoLabaAwalTahun;
             $sumNeracaLaba = $neracaLabaBulan + $saldoLaba;
@@ -448,22 +449,16 @@ class ExcelExportController extends Controller
                 return collect($tahun)->sum('saldo_akhir');
             });
 
-            
+
 
             //totalpembelian
             //totalmasukstock
             $data = [];
-            
-            
-            $data[]=[
-                'keterangan'=>'Total Kartu Transit Keluar vs Total Kartu Transit Masuk',
-                'data1'=>$kartuTransitKeluar,
-                'data2'=>$kartuTransitMasuk, 
-                'hasil'=>abs($kartuTransitKeluar - $kartuTransitMasuk) > 0.01 ? 'TIDAK SESUAI (' . ($kartuTransitKeluar - $kartuTransitMasuk) . ')' : 'SESUAI'
-            ];
-            
+
+
+
             $data[] = [
-                'keterangan' => 'Total Pembelian vs Total Kartu Masuk',
+                'keterangan' => 'Total Pembelian vs K.StockIn + K.TransIn - K.TransOut',
                 'data1' => $totalPembelian,
                 'data2' => $mutasiMasukStock,
                 'hasil' => abs($totalPembelian - $mutasiMasukStock) > 0.01 ? 'TIDAK SESUAI (' . ($totalPembelian - $mutasiMasukStock) . ')' : 'SESUAI'
@@ -490,7 +485,7 @@ class ExcelExportController extends Controller
             //total nl persediaan stock
             $data[] = [
                 'keterangan' => 'Total K.Stock vs NL Persediaan Stock',
-                'data1' => $saldoAkhirStock+ $saldoAkhirInTransit,
+                'data1' => $saldoAkhirStock + $saldoAkhirInTransit,
                 'data2' => $NLPersediaanBahanDagang + $NLPersediaanBahanBaku,
                 'hasil' => abs(($saldoAkhirStock + $saldoAkhirInTransit) - ($NLPersediaanBahanDagang + $NLPersediaanBahanBaku)) > 0.01 ? 'TIDAK SESUAI (' . (($saldoAkhirStock + $saldoAkhirInTransit) - ($NLPersediaanBahanDagang + $NLPersediaanBahanBaku)) . ')' : 'SESUAI'
             ];
@@ -552,8 +547,8 @@ class ExcelExportController extends Controller
             ];
 
             //totalnilai neraca Aset vs total nilai NL Aset
-            $neracaAset= collect($neraca['msg']['Aset'])->sum('saldo') ?? 0;
-            $nlAset= collect($neracaLajur['msg'])->filter(function($item){
+            $neracaAset = collect($neraca['msg']['Aset'])->sum('saldo') ?? 0;
+            $nlAset = collect($neracaLajur['msg'])->filter(function ($item) {
                 return $item['code_group'] < 200000 && $item['is_child'] == 1;
             })->sum('saldo_akhir');
             $data[] = [
@@ -564,8 +559,8 @@ class ExcelExportController extends Controller
             ];
 
             //total neraca pasiva vs total nl pasiva
-            $neracaPasiva= collect($neraca['msg']['Kewajiban'])->sum('saldo') + collect($neraca['msg']['Ekuitas'])->sum('saldo') + $neraca['laba_bulan'] ?? 0;
-            $nlPasiva= collect($neracaLajur['msg'])->filter(function($item){
+            $neracaPasiva = collect($neraca['msg']['Kewajiban'])->sum('saldo') + collect($neraca['msg']['Ekuitas'])->sum('saldo') + $neraca['laba_bulan'] ?? 0;
+            $nlPasiva = collect($neracaLajur['msg'])->filter(function ($item) {
                 return $item['code_group'] >= 200000 && $item['is_child'] == 1;
             })->sum('saldo_akhir');
             $data[] = [
@@ -592,7 +587,7 @@ class ExcelExportController extends Controller
                 'keterangan' => 'penambahan piutang vs total penjualan + ppn keluaran',
                 'data1' => $penambahanPiutang,
                 'data2' => $totalPenjualan + $totalPPNK,
-                'hasil' => abs($penambahanPiutang - ($totalPenjualan+ $totalPPNK)) > 0.01 ? 'TIDAK SESUAI (' . ($penambahanPiutang - $totalPenjualan) . ')' : 'SESUAI'
+                'hasil' => abs($penambahanPiutang - ($totalPenjualan + $totalPPNK)) > 0.01 ? 'TIDAK SESUAI (' . ($penambahanPiutang - $totalPenjualan) . ')' : 'SESUAI'
             ];
             $data[] = [
                 'keterangan' => 'sum neraca laba vs sum kartu LR',
