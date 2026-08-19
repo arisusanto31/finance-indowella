@@ -55,6 +55,19 @@ class InvoicePurchaseController extends Controller
     }
 
 
+    function changeTaxNumber(Request $request)
+    {
+        $id = $request->input('id');
+        $fpNumber = $request->input('fp_number');
+        $invoice = InvoicePack::find($id);
+        $invoice->fp_number = $fpNumber;
+        $invoice->save();
+        return [
+            'status' => 1,
+            'msg' => $invoice
+        ];
+    }
+
     function openImportExcel()
     {
         $view = view('invoice.modal._purchase_import_excel');
@@ -109,7 +122,7 @@ class InvoicePurchaseController extends Controller
                             'quantity' => $val['quantity'],
                             'unit' => $val['satuan'],
                             'price' => $val['harga_pcs'],
-                            'total_price' => round(round(format_db($val['quantity']),2) * round(format_db($val['harga_pcs']),2) - round(format_db($val['diskon'] ?? 0),2),2),
+                            'total_price' => round(round(format_db($val['quantity']), 2) * round(format_db($val['harga_pcs']), 2) - round(format_db($val['diskon'] ?? 0), 2), 2),
                             'discount' => $val['diskon'] ?? 0,
                             'reference_id' => null,
                             'reference_type' => null,
@@ -211,8 +224,8 @@ class InvoicePurchaseController extends Controller
     {
         $coaDebet = $request->input('code_group_debet');
         $coaKredit = $request->input('code_group_kredit');
-        $toko = Toko::first();  
-        $poID= $request->input('invoice_purchase_detail_id');
+        $toko = Toko::first();
+        $poID = $request->input('invoice_purchase_detail_id');
 
         $invoicePackID = $request->input('invoice_pack_id');
         $invoicePackNumber = $request->input('invoice_pack_number');
@@ -239,16 +252,16 @@ class InvoicePurchaseController extends Controller
         try {
             $ks = [];
             if ($coaDebet > 140000 && $coaDebet < 150000) {
-              
-                $chart= ChartAccountAlias::where('code_group',$coaDebet)->first();
-                $thecard= $chart->reference_model;
+
+                $chart = ChartAccountAlias::where('code_group', $coaDebet)->first();
+                $thecard = $chart->reference_model;
 
                 $kartuStock = $thecard::mutationStore(new Request([
                     'stock_id' => $stockId,
                     'mutasi_quantity' => $quantity,
                     'unit' => $unit,
                     'flow' => 0,
-                    'purchase_order_id'=>$poID,
+                    'purchase_order_id' => $poID,
                     'production_number' => $invoicePackNumber,
                     'invoice_pack_number' => $invoicePackNumber,
                     'sales_order_number' => null,
@@ -356,7 +369,7 @@ class InvoicePurchaseController extends Controller
                 ]));
             }
 
-            $invp= InvoicePurchaseDetail::find($poID);
+            $invp = InvoicePurchaseDetail::find($poID);
             $invp->fillKartuStockID();
 
             DB::commit();
@@ -557,7 +570,7 @@ class InvoicePurchaseController extends Controller
                 $thestock = Stock::find($stockId);
                 $nilaiPPN = $isPPN ? round(format_db($request->total_price[$i]) * 11 / 100) : 0;
                 $totalPrice = round(format_db($request->total_price[$i]));
-               
+
                 $grouped[] = [
                     'factur_supplier_number' => $facturSupplier,
                     'fp_number' => $facturPajak,

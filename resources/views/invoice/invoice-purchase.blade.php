@@ -162,7 +162,8 @@
                                         <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }} [{{$item->parent->id}}] <br> <i
                                                 class="fas fa-user"></i>{{ $item->parent->factur_supplier_number }}
                                         </td>
-                                        <td rowspan="{{ $rowspan }}">{{ $item->fp_number ?? '-' }}</td>
+                                        <td rowspan="{{ $rowspan }}"> <a href="javascript:void(changeTaxNumber('{{$item->invoice_pack_id}}','{{$item->fp_number}}'))">{{ $item->fp_number ?? 'belum ada'  }}</a>
+                                        </td>
                                         <td rowspan="{{ $rowspan }}">{{ $item->supplier->name ?? '-' }}</td>
                                     @endif
 
@@ -331,7 +332,42 @@
                     elem: '#TR' + id
                 });
             }
-
+            function changeTaxNumber(id, currentValue = '') {
+                Swal.fire({
+                    title: 'Ubah Nomor Pajak',
+                    input: 'text',
+                    inputLabel: 'Nomor Pajak',
+                    inputValue: currentValue, // nilai default dari code
+                    showCancelButton: true,
+                    confirmButtonText: 'Simpan',
+                    cancelButtonText: 'Batal',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        console.log(result.value);
+                        $.ajax({
+                            url: '{{ url("admin/invoice/change-tax-number") }}',
+                            method: 'post',
+                            data: {
+                                _token: '{{ csrf_token() }}',
+                                fp_number: result.value,
+                                id: id
+                            },
+                            success: function(res) {
+                                if (res.status == 1) {
+                                    Swal.fire('Berhasil', res.msg, 'success');
+                                    // update nomor pajak di tabel
+                                    $('#TR' + id + ' td:nth-child(4)').html(res.msg.fp_number);
+                                } else {
+                                    Swal.fire('Gagal', res.msg, 'error');
+                                }
+                            },
+                            error: function(res) {
+                                Swal.fire('Gagal', 'Terjadi kesalahan saat mengubah nomor pajak.', 'error');
+                            }
+                        });
+                    }
+                });
+            }
 
             function openCardCreate() {
                 $('#card-create').toggleClass('open');

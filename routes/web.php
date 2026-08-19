@@ -376,6 +376,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
         Route::post('invoice-sales', [InvoiceSaleController::class, 'store'])->name('sales.store');
         Route::post('invoice-purchase', [InvoicePurchaseController::class, 'store'])->name('purchase.store');
         Route::post('purchase-create-mutations', [InvoicePurchaseController::class, 'createMutations'])->name('purchase.create-mutations');
+        Route::post('change-tax-number', [InvoicePurchaseController::class, 'changeTaxNumber'])->name('change-tax-number');
 
         Route::get('show-detail/{id}', [InvoicePackController::class, 'showDetail'])->name('detail');
         Route::get('update-status-invoice/{id}', [InvoicePackController::class, 'updateStatus'])->name('update-status-invoice');
