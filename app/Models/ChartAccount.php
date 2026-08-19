@@ -490,6 +490,7 @@ class ChartAccount extends Model
             ->select(
                 'ca.name',
                 'ca.id',
+                'ca.level',
                 'ca.code_group',
                 DB::raw('coalesce(j.amount_saldo,0) as saldo_akhir'),
                 'ca.is_child',
@@ -507,11 +508,9 @@ class ChartAccount extends Model
                 return $val;
             })->keyBy('code_group');
 
-        $isChild = ChartAccount::select('level', 'is_child', 'code_group')->get()->keyBy('code_group')->all();
+        // isChild = ChartAccount::select('level', 'is_child', 'code_group')->get()->keyBy('code_group')->all();
         $fixdatas = ChartAccountAlias::where('is_deleted', false)->select('name', 'account_type', 'id', 'code_group', 'level')->orderBy('code_group')->get()
-            ->map(function ($val) use ($saldoAkhir, $saldoAwal, $isChild) {
-                $val['is_child'] = array_key_exists($val->code_group, $isChild) ? $isChild[$val->code_group]->is_child : 1;
-                $val['level'] = array_key_exists($val->code_group, $isChild) ? $isChild[$val->code_group]->level : 1;
+            ->map(function ($val) use ($saldoAkhir, $saldoAwal) {
                 $val['saldo_awal'] = array_key_exists($val->code_group, $saldoAwal->all()) ? money($saldoAwal[$val->code_group]->saldo_akhir) : 0;
                 $val['saldo_akhir'] = array_key_exists($val->code_group, $saldoAkhir->all()) ? money($saldoAkhir[$val->code_group]->saldo_akhir) : 0;
                 return $val;

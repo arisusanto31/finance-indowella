@@ -122,6 +122,7 @@
                             <th>No</th>
                             <th>tanggal</th>
                             <th>Invoice</th>
+                            <th>No Pajak </th>
                             <th>Supplier</th>
                             <th>Produk</th>
                             <th>Qty</th>
@@ -161,6 +162,7 @@
                                         <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }} [{{$item->parent->id}}] <br> <i
                                                 class="fas fa-user"></i>{{ $item->parent->factur_supplier_number }}
                                         </td>
+                                        <td rowspan="{{ $rowspan }}">{{ $item->fp_number ?? '-' }}</td>
                                         <td rowspan="{{ $rowspan }}">{{ $item->supplier->name ?? '-' }}</td>
                                     @endif
 

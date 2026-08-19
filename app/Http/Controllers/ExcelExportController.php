@@ -539,7 +539,30 @@ class ExcelExportController extends Controller
                 'hasil' => abs($saldoDP - $NLSaldoDP) > 0.01 ? 'TIDAK SESUAI (' . ($saldoDP - $NLSaldoDP) . ')' : 'SESUAI'
             ];
 
-            //nlsum kewajdiab
+            //totalnilai neraca Aset vs total nilai NL Aset
+            $neracaAset= collect($neraca['msg']['Aset'])->sum('saldo') ?? 0;
+            $nlAset= collect($neracaLajur['msg'])->filter(function($item){
+                return $item['code_group'] < 200000 && $item['is_child'] == 1;
+            })->sum('saldo_akhir');
+            $data[] = [
+                'keterangan' => 'Total Aset Neraca vs Total NL Aset',
+                'data1' => $neracaAset,
+                'data2' => $nlAset,
+                'hasil' => abs($neracaAset - $nlAset) > 0.01 ? 'TIDAK SESUAI (' . ($neracaAset - $nlAset) . ')' : 'SESUAI'
+            ];
+
+            //total neraca pasiva vs total nl pasiva
+            $neracaPasiva= collect($neraca['msg']['Kewajiban'])->sum('saldo') + collect($neraca['msg']['Ekuitas'])->sum('saldo') + $neraca['laba_bulan'] ?? 0;
+            $nlPasiva= collect($neracaLajur['msg'])->filter(function($item){
+                return $item['code_group'] >= 200000 && $item['is_child'] == 1;
+            })->sum('saldo_akhir');
+            $data[] = [
+                'keterangan' => 'Total Pasiva Neraca vs Total NL Pasiva',
+                'data1' => $neracaPasiva,
+                'data2' => $nlPasiva,
+                'hasil' => abs($neracaPasiva - $nlPasiva) > 0.01 ? 'TIDAK SESUAI (' . ($neracaPasiva - $nlPasiva) . ')' : 'SESUAI'
+            ];
+
             //neraca kewajiban
             $data[] = [
                 'keterangan' => 'Kewajiban vs NL sum utang',
