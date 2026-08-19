@@ -377,8 +377,9 @@ class ExcelExportController extends Controller
 
             //harusnya disini kita tambah dengan kartu in transit
             $mutasiMasukStock = collect($kartuStock['mutasi_masuk'])->sum('total');
-            
-            $mutasiInTransit = collect($kartuInTransit['mutasi_masuk'])->flatten(1)->sum('total')+ collect($kartuInTransit['mutasi_keluar'])->flatten(1)->sum('total');
+            $kartuTransitKeluar= collect($kartuInTransit['mutasi_keluar'])->flatten(1)->sum('total');
+            $kartuTransitMasuk= collect($kartuInTransit['mutasi_masuk'])->flatten(1)->sum('total');
+            $mutasiInTransit = $kartuTransitMasuk + $kartuTransitKeluar;
             $mutasiMasukStock+= $mutasiInTransit;
              $codePenjualan = ChartAccount::where('is_child', 1)->where('code_group', 'like', '4%')->pluck('code_group')->all();
             $sumNLPenjualan = collect($neracaLajur['msg'])->filter(function ($item) use ($codePenjualan) {
@@ -447,9 +448,20 @@ class ExcelExportController extends Controller
                 return collect($tahun)->sum('saldo_akhir');
             });
 
+            
+
             //totalpembelian
             //totalmasukstock
             $data = [];
+            
+            
+            $data[]=[
+                'keterangan'=>'Total Kartu Transit Keluar vs Total Kartu Transit Masuk',
+                'data1'=>$kartuTransitKeluar,
+                'data2'=>$kartuTransitMasuk, 
+                'hasil'=>abs($kartuTransitKeluar - $kartuTransitMasuk) > 0.01 ? 'TIDAK SESUAI (' . ($kartuTransitKeluar - $kartuTransitMasuk) . ')' : 'SESUAI'
+            ];
+            
             $data[] = [
                 'keterangan' => 'Total Pembelian vs Total Kartu Masuk',
                 'data1' => $totalPembelian,
