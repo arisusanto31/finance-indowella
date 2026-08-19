@@ -11,7 +11,7 @@ use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 
-class _PembelianExport implements FromCollection, WithHeadings, WithTitle, WithEvents,WithColumnFormatting, WithColumnWidths
+class _PembelianExport implements FromCollection, WithHeadings, WithTitle, WithEvents, WithColumnFormatting, WithColumnWidths
 {
     /**
      * @return \Illuminate\Support\Collection
@@ -41,7 +41,8 @@ class _PembelianExport implements FromCollection, WithHeadings, WithTitle, WithE
             'K' => 15,
             'L' => 15,
             'M' => 15,
-            'N' => 15
+            'N' => 15,
+            'O' => 15
         ];
     }
 
@@ -52,6 +53,7 @@ class _PembelianExport implements FromCollection, WithHeadings, WithTitle, WithE
             'L' => '#,##0.00',
             'M' => '#,##0.00',
             'N' => '#,##0.00',
+            'O'=> '#,##0.00',
         ];
     }
     public function collection()
@@ -83,6 +85,7 @@ class _PembelianExport implements FromCollection, WithHeadings, WithTitle, WithE
                         $d->unit,
                         $d->price,
                         $d->total_price,
+                        $d->total_ppn_m,
                         collect($detail)->sum('total_price')
                     ];
                 } else {
@@ -100,6 +103,7 @@ class _PembelianExport implements FromCollection, WithHeadings, WithTitle, WithE
                         $d->unit,
                         $d->price,
                         $d->total_price,
+                        $d->total_ppn_m,
                         ""
                     ];
                 }
@@ -123,6 +127,8 @@ class _PembelianExport implements FromCollection, WithHeadings, WithTitle, WithE
             "",
             "",
             "",
+            "",
+    
             $totalPembelian
         ];
 
@@ -149,6 +155,7 @@ class _PembelianExport implements FromCollection, WithHeadings, WithTitle, WithE
             'satuan',
             'Harga',
             'DPP',
+            'PPN',
             'Total'
         ];
     }
@@ -175,10 +182,10 @@ class _PembelianExport implements FromCollection, WithHeadings, WithTitle, WithE
                         ],
                     ],
                 ]);
-                $sheet->getStyle('A1:N1')->getFont()->setBold(true);
-                $sheet->getStyle('A1:N1')->getAlignment()->setHorizontal('center');
-                $sheet->getStyle('A1:N1')->getAlignment()->setVertical('center');
-                $sheet->getStyle('J2:N' . $highestRow)->getAlignment()->setHorizontal('right');
+                $sheet->getStyle('A1:O1')->getFont()->setBold(true);
+                $sheet->getStyle('A1:O1')->getAlignment()->setHorizontal('center');
+                $sheet->getStyle('A1:O1')->getAlignment()->setVertical('center');
+                $sheet->getStyle('J2:O' . $highestRow)->getAlignment()->setHorizontal('right');
 
 
                 //menge Cell
