@@ -162,11 +162,10 @@
                                         <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }} [{{$item->parent->id}}] <br> <i
                                                 class="fas fa-user"></i>{{ $item->parent->factur_supplier_number }}
                                         </td>
-                                        <td rowspan="{{ $rowspan }}"> <a href="javascript:void(changeTaxNumber('{{$item->invoice_pack_id}}','{{$item->fp_number}}'))">{{ $item->fp_number ?? 'belum ada'  }}</a>
+                                        <td rowspan="{{ $rowspan }}"> <a href="javascript:void(changeTaxNumber('{{$item->invoice_pack_id}}','{{$item->fp_number}}'))">{{ $item->parent->fp_number ?? 'belum ada'  }}</a>
                                         </td>
                                         <td rowspan="{{ $rowspan }}">{{ $item->supplier->name ?? '-' }}</td>
                                     @endif
-
                                     <td>{{ $item->custom_stock_name != '??' ? $item->custom_stock_name : $item->stock->name }}
                                     </td>
                                     <td class="text-end">{{ $item->quantity }}</td>
@@ -353,6 +352,8 @@
                                 id: id
                             },
                             success: function(res) {
+                                console.log('change tax number',res);
+
                                 if (res.status == 1) {
                                     Swal.fire('Berhasil', res.msg, 'success');
                                     // update nomor pajak di tabel

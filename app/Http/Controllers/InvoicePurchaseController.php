@@ -57,15 +57,23 @@ class InvoicePurchaseController extends Controller
 
     function changeTaxNumber(Request $request)
     {
-        $id = $request->input('id');
-        $fpNumber = $request->input('fp_number');
-        $invoice = InvoicePack::find($id);
-        $invoice->fp_number = $fpNumber;
-        $invoice->save();
-        return [
-            'status' => 1,
-            'msg' => $invoice
-        ];
+        try {
+            $id = $request->input('id');
+            $fpNumber = $request->input('fp_number');
+            $invoice = InvoicePack::find($id);
+            $invoice->fp_number = $fpNumber;
+            $invoice->save();
+            $details= InvoicePurchaseDetail::where('invoice_pack_id',$id)->update(['fp_number'=>$fpNumber]);
+            return [
+                'status' => 1,
+                'msg' => $invoice
+            ];
+        } catch (Throwable $e) {
+            return [
+                'status' => 0,
+                'msg' => $e->getMessage()
+            ];
+        }
     }
 
     function openImportExcel()
