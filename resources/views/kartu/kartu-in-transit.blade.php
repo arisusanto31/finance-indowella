@@ -116,7 +116,15 @@
                                         </thead>
                                         <tbody id="body-mutasi-masuk">
                                         </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th colspan=7 class="text-center">Total</th>
+                                                <th id="total-mutasi-masuk">0</th>
+                                                <th colspan=2></th>
+                                            </tr>
+                                        </tfoot>
                                     </table>
+
                                 </div>
                             </div>
                             <div class="tab-pane fade" id="navs-pills-top-messages" role="tabpanel">
@@ -144,6 +152,12 @@
                                         </thead>
                                         <tbody id="body-mutasi-keluar">
                                         </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th colspan=7 class="text-center">Total</th>
+                                                <th id="total-mutasi-keluar">0</th>
+                                                <th colspan=2></th>
+                                            </tr>
                                     </table>
                                 </div>
                             </div>
@@ -432,6 +446,8 @@
                                 </tr>`;
                             });
                             $('#body-mutasi-masuk').html(html);
+                            totalMutasiMasuk = res.msg.reduce((acc, item) => acc + parseFloat(item.mutasi_rupiah_total), 0);
+                            $('#total-mutasi-masuk').html(formatRupiah(totalMutasiMasuk));
                         } else {
 
                         }
@@ -512,6 +528,8 @@
                                 </tr>`;
                             });
                             $('#body-mutasi-keluar').html(html);
+                            totalMutasiKeluar = res.msg.reduce((acc, item) => acc + parseFloat(item.mutasi_rupiah_total), 0);
+                            $('#total-mutasi-keluar').html(formatRupiah(totalMutasiKeluar));
                         } else {
 
                         }
