@@ -77,14 +77,14 @@ trait HasModelSaldoStock
             )->get();
         $summary = collect($summary)->merge(collect($saldoAkhir))->merge(collect($mutasi));
      
-        $dataStock = DB::table('stocks')->whereIn('stocks.id', $summary->pluck('stock_id')->all())->join('stock_categories', 'stocks.category_id', '=', 'stock_categories.id')
-            ->join('stock_units', function ($join) {
+        $dataStock = DB::table('stocks')->whereIn('stocks.id', $summary->pluck('stock_id')->all())->leftJoin('stock_categories', 'stocks.category_id', '=', 'stock_categories.id')
+            ->leftJoin('stock_units', function ($join) {
                 $join->on('stocks.id', '=', 'stock_units.stock_id')
                     ->on('stock_units.unit','=', DB::raw('coalesce(stocks.unit_default,stocks.unit_backend)'));
             })->select(
                 'stocks.*',
-                'stock_units.konversi as konversi',
-                'stock_categories.name as category_name',
+                DB::raw('coalesce(stock_units.konversi, 1) as konversi'),
+                DB::raw('COALESCE(stock_categories.name,"undefined") as category_name'),
             )->get()->keyBy('id');
         $summary = $summary->groupBy('production_number')
             ->map(function ($dataspk, $number) use ($dataStock) {
