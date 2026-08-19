@@ -46,11 +46,11 @@ class ChartAccountController extends Controller
         if (getInput('search')) {
             $searchs = explode(' ', getInput('search'));
         }
-        $charts = ChartAccount::aktif()->child()->withAlias();
+        $charts = ChartAccountAlias::aktif()->child();
         foreach ($searchs as $search) {
-            $charts = $charts->whereRaw('coalesce(ca.name,chart_accounts.name) like?', ['%' . $search . '%']);
+            $charts = $charts->whereRaw('name like?', ['%' . $search . '%']);
         }
-        $charts = $charts->select(DB::raw('chart_accounts.code_group as id'), DB::raw('coalesce(ca.name,chart_accounts.name) as text'))->get();
+        $charts = $charts->select(DB::raw('code_group as id'), DB::raw('concat(code_group, " - ", name) as text'))->get();
         return [
             'results' => $charts
         ];
