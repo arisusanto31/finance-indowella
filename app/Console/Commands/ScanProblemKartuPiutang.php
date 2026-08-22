@@ -35,7 +35,7 @@ class ScanProblemKartuPiutang extends Command
         $indexStart = createCarbon($monthyear . '-01')->startOfMonth()->format('ymdHis000');
         $indexEnd = createCarbon($monthyear . '-01')->endOfMonth()->format('ymdHis999');
         $kps = KartuPiutang::whereBetween('index_date', [$indexStart, $indexEnd])
-            ->select(DB::raw('sum(amount_debet-amount_kredit) as total_amount'), 'invoice_pack_number', 'sales_order_id')
+            ->select(DB::raw('sum(amount_debet-amount_kredit) as total_amount'), 'invoice_pack_number','id', 'sales_order_id')
             ->groupBy('invoice_pack_number')
             ->havingRaw('total_amount <> 0')
             ->get();
