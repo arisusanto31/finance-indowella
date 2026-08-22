@@ -665,6 +665,21 @@ class JournalController extends Controller
                 // $allLocks[] = ['lock' => $st['lock'], 'name' => $st['lock_name']];
                 $allJournals[] = safeModelToArrayAll($st);
             }
+            $uniqueindex=[];
+            foreach($allJournals as $row => $j){
+                if(array_key_exists($j['code_group'],$uniqueindex)){
+                    if(!in_array($j['index_date'],$uniqueindex[$j['code_group']])){
+                        $uniqueindex[$j['code_group']][]=$j['index_date'];
+                    }else{
+                        //brati ini duplikat. langsnung kita tambah aja
+                        $allJournals[$row]['index_date']= $j['index_date']+1;
+                        $uniqueindex[$j['code_group']][]=$allJournals[$row]['index_date'];
+                    }
+                }else{
+                    $uniqueindex[$j['code_group']]=[];
+                    $uniqueindex[$j['code_group']][]=$j['index_date'];
+                }
+            }
 
             //insert journal bulk
             DB::table('journals')->insert($allJournals);
