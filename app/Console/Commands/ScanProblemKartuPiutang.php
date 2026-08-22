@@ -45,9 +45,8 @@ class ScanProblemKartuPiutang extends Command
         ], $this);
 
         foreach ($kps as $kp) {
-            $this->info('Checking invoice pack number: ' . $kp->invoice_pack_number . ' with ' . $kp->total_amount);
+            $this->info('Checking kpid:'.$kp->id.' invoice pack number: ' . $kp->invoice_pack_number . ' with ' . $kp->total_amount);
             $so = SalesOrder::find($kp->sales_order_id);
-
             $problem = KartuPiutang::where('invoice_pack_number', $kp->invoice_pack_number)
                 ->where('amount_kredit', '<>', ($so->total_price + $so->total_ppn_k))
                 ->where('type','pelunasan')
