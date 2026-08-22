@@ -32,9 +32,11 @@ class _KartuInventoryExport implements FromCollection, WithTitle, WithEvents, Wi
             'Tanggal Perolehan',
             'Periode',
             'Nilai Perolehan',
+            'Saldo Awal ' . $data['year'],
             'Mutasi Pembelian'
+
         ];
-        for ($i = 1; $i <= 12; $i++) {
+        for ($i = 1; $i <= $data['month']; $i++) {
             $this->headingsStart[] = 'Penyusutan ' . $data['year'] . '-' . toDigit($i, 2);
         }
         $this->headingsStart[] = 'Total Penyusutan';
@@ -62,6 +64,7 @@ class _KartuInventoryExport implements FromCollection, WithTitle, WithEvents, Wi
             'T' => '#,##0.00',
             'U' => '#,##0.00',
             'V' => '#,##0.00',
+            'W' => '#,##0.00',
 
         ];
     }
@@ -70,13 +73,13 @@ class _KartuInventoryExport implements FromCollection, WithTitle, WithEvents, Wi
     {
         return [
             'A' => 7,
-            'B' => 10,
-            'C' => 40, // nama barang
+            'B' => 40, //nama barang
+            'C' => 10, // nama barang
             'D' => 15, // tanggal perolehan
             'E' => 15, // periode
             'F' => 15, // nilai perolehan
-            'G' => 15, // mutasi pembelian
-            'H' => 15, // penyusutan jan
+            'G' => 15, // saldo awal
+            'H' => 15, //  mutasi pembelian
             'I' => 15, // penyusutan feb
             'J' => 15, // penyusutan mar
             'K' => 15, // penyusutan apr
@@ -88,9 +91,10 @@ class _KartuInventoryExport implements FromCollection, WithTitle, WithEvents, Wi
             'Q' => 15, // penyusutan okt
             'R' => 15, // penyusutan nov
             'S' => 15, // penyusutan des
-            'T' => 20, // total penyusutan
+            'T' => 15, // total penyusutan
             'U' => 20, // akumulasi akhir penyusutan
             'V' => 20, // nilai buku
+            'W' => 20, // nilai buku
 
         ];
     }
@@ -101,6 +105,8 @@ class _KartuInventoryExport implements FromCollection, WithTitle, WithEvents, Wi
         $baris = 1;
         $fixData = [];
         $globalSusut = 0;
+        $totalAset=0;
+        $totalBuku=0;
         foreach ($this->data['msg'] as $jenis => $data) {
             $fixData[] = [$jenis];
             $baris++;
@@ -117,21 +123,25 @@ class _KartuInventoryExport implements FromCollection, WithTitle, WithEvents, Wi
                     $item['date'],
                     $item['periode'] . ' tahun',
                     ($item['nilai_perolehan']),
+                    ($this->data['saldo_buku_awal'][$id]->nilai_buku ?? 0),
                     ($item['total_pembelian']),
                 ];
                 $totalSusut = 0;
-                for ($j = 1; $j <= 12; $j++) {
+                for ($j = 1; $j <= $this->data['month']; $j++) {
                     $nilai = $item['penyusutan'] ?
                         ($item['penyusutan'][$this->data['year'] . '-' . toDigit($j, 2)] ?? 0) :
                         0;
                     $dataBaris[] = $nilai == 0 ? '-' : ($nilai);
                     $totalSusut += $nilai;
                 }
-                $dataBaris[] = ($totalSusut);
+                $bukuAkhir = ($this->data['saldo_buku_akhir'][$id]->nilai_buku ?? 0);
                 $dataBaris[] = ($item['total_penyusutan']);
-                $dataBaris[] = ($this->data['saldo_buku_akhir'][$id]->nilai_buku ?? 0);
+                $dataBaris[] = $item['nilai_perolehan'] - $bukuAkhir;
+                $dataBaris[] = $bukuAkhir;
                 $fixData[] = $dataBaris;
                 $globalSusut += $totalSusut;
+                $totalAset += $item['nilai_perolehan'];
+                $totalBuku += $bukuAkhir;
             }
             $end = $baris;
             $fixData[] = [""];
@@ -139,31 +149,38 @@ class _KartuInventoryExport implements FromCollection, WithTitle, WithEvents, Wi
             $this->kotakKolom[] = ['start' => $start, 'end' => $end];
         }
         $fixData[] = [
-            'Resume Keseluruhan ' . $this->data['year']
+            'Resume ' . $this->data['year'].'-'.$this->data['month'],
         ];
         $baris++;
-        $bukuAkhir = collect($this->data['saldo_buku_akhir'])->sum('nilai_buku');
-        $akumulasiAkhir =collect($this->data['msg'])->sum(function($item) {
-            return collect($item)->sum('total_penyusutan');
-        });
+        $bukuAkhir = $totalBuku;
+        $akumulasiAkhir = $totalAset - $bukuAkhir;
         $start = $baris;
-      
-      
+
+
         $fixData[] = [
+            ' ',
+            'Total Aset',
+            format_price($totalAset)
+        ];
+
+        $fixData[] = [
+            ' ',
             'Total Penyusutan',
             format_price($globalSusut)
         ];
-      
-        $fixData[] = [
+
+        $fixData[] = [ 
+            ' ',
             'Saldo Akhir Akumulasi Penyusutan',
             format_price($akumulasiAkhir)
         ];
-          $fixData[] = [
+        $fixData[] = [
+            ' ',
             'Nilai Buku Akhir',
             format_price($bukuAkhir)
         ];
-        $end = $baris + 3;
-       
+        $end = $baris + 4;
+
 
         return collect($fixData);
     }

@@ -64,20 +64,20 @@
 
     .sticky-col-3 {
       left: 260px;
-      width: 100px;
-      min-width: 100px;
-      max-width: 100px;
+      width: 200px;
+      min-width: 200px;
+      max-width: 200px;
     }
 
     .sticky-col-4 {
-      left: 360px;
+      left: 460px;
       width: 150px;
       min-width: 150px;
       max-width: 150px;
     }
 
     .sticky-col-5 {
-      left: 510px;
+      left: 610px;
       width: 150px;
       min-width: 150px;
       max-width: 150px;
@@ -92,6 +92,15 @@
         <!-- <a href="#" class="btn btn-primary btn-big-custom rounded-0">Tambah Jurnal Umum</a> -->
       </div>
 
+      <div class="d-flex justify-content pe-4 mb-3">
+        <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="prevMonth()">
+          << </button>
+            <span class="badge bg-primary d-flex justify-content-center align-items-center">
+              {{ getListMonth()[$month] }} {{ $year }}</span>
+            <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="nextMonth()">
+              >>
+            </button>
+      </div>
       <div class="row">
         <div class="col-xl-12 col-md-12">
 
@@ -267,7 +276,7 @@
     }
 
     var dataMutasi = [];
-    var page="kartu";
+    var page = "kartu";
 
     function arrayPad(arr, length, padValue) {
       const diff = Math.abs(length) - arr.length;
@@ -292,26 +301,47 @@
       // Normalisasi subtotal
       table.subtotal = arrayPad(table.subtotal, count, '-');
     }
+
+    function prevMonth() {
+      month = '{{ $month }}';
+      year = '{{ $year }}';
+      month--;
+      if (month < 1) {
+        month = 12;
+        year--;
+      }
+      window.location.href = '{{ url("admin/daftar/bdd") }}?month=' + month + '&year=' + year;
+    }
+
+    function nextMonth() {
+      month = '{{ $month }}';
+      year = '{{ $year }}';
+      month++;
+      if (month > 12) {
+        month = 1;
+        year++;
+      }
+      window.location.href = '{{ url("admin/daftar/bdd") }}?month=' + month + '&year=' + year;
+    }
+
     var year = '{{$year}}';
+    var month = '{{$month}}';
+    headerSusut = [];
+    monthSusut = [];
+    for (var i = 1; i <= month; i++) {
+      headerSusut.push('Amortisasi ' + year + '-' + (i < 10 ? '0' + i : i));
+      monthSusut.push(year + '-' + (i < 10 ? '0' + i : i));
+    }
+
     var headerTabel = [
       'No',
       'NAMA aset',
       'Periode',
       'Nilai Perolehan',
+      'Saldo Awal ' + year+'-01',
       'Mutasi Pembelian',
-      'Penyusutan ' + year + '-' + '01',
-      'Penyusutan ' + year + '-' + '02',
-      'Penyusutan ' + year + '-' + '03',
-      'Penyusutan ' + year + '-' + '04',
-      'Penyusutan ' + year + '-' + '05',
-      'Penyusutan ' + year + '-' + '06',
-      'Penyusutan ' + year + '-' + '07',
-      'Penyusutan ' + year + '-' + '08',
-      'Penyusutan ' + year + '-' + '09',
-      'Penyusutan ' + year + '-' + '10',
-      'Penyusutan ' + year + '-' + '11',
-      'Penyusutan ' + year + '-' + '12',
-      'Akumulasi Penyusutan',
+      ...headerSusut,
+      'Total Amortisasi',
       'Nilai Buku'
     ];
 
@@ -319,49 +349,51 @@
       page = "kartu";
       $('#div-table').html('');
       $.ajax({
-        url: '{{route("bdd.get-summary")}}',
+        url: '{{route("bdd.get-summary")}}?year=' + year + '&month=' + month,
         method: 'get',
         success: function(res) {
           console.log(res);
           if (res.status == 1) {
+            totalPenyusutan = 0;
+            totalNilaiBuku = 0;
             Object.keys(res.msg).forEach(function eachData(type) {
               dataType = res.msg[type];
               varHeader = headerTabel;
               stringHeader = "";
               varHeader.forEach(function eachHeader(header, i) {
-                sticky = i < 4 ? 'sticky-col-' + (i + 1) + ' bg-primary-dark' : 'bg-primary-light';
-                stringHeader += '<th class="' + sticky + ' text-white">' + header + '</th>';
+                sticky = i < 4 ? 'sticky-col-' + (i + 1) + ' bg-primary-dark' :
+                  'bg-primary-light';
+                stringHeader += '<th class="' + sticky + ' text-white">' +
+                  header + '</th>';
               });
               stringData = "";
               Object.keys(dataType).forEach(function eachInv(invID, indexInv) {
                 dataInv = dataType[invID];
+                bukuAkhir = array_key_exists(invID, res.saldo_buku_akhir) ? res.saldo_buku_akhir[invID].nilai_buku : 0;
                 stringData += `
-                <tr>
-                  <td class="sticky-col-1">${indexInv + 1}</td>
-                  <td class="sticky-col-2">${dataInv.name}</td>
-                  <td class="sticky-col-3">${dataInv.periode} tahun</td>
-                  <td class="sticky-col-4">${formatRupiah(dataInv.nilai_perolehan)}</td>
-                  <td>${formatRupiah(dataInv.total_pembelian)}</td>
-                  <td>${array_key_exists(year+'-01',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-01']) : '-'}</td>
-                  <td>${array_key_exists(year+'-02',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-02']) : '-'}</td>
-                  <td>${array_key_exists(year+'-03',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-03']) : '-'}</td>
-                  <td>${array_key_exists(year+'-04',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-04']) : '-'}</td>
-                  <td>${array_key_exists(year+'-05',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-05']) : '-'}</td>
-                  <td>${array_key_exists(year+'-06',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-06']) : '-'}</td>
-                  <td>${array_key_exists(year+'-07',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-07']) : '-'}</td>
-                  <td>${array_key_exists(year+'-08',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-08']) : '-'}</td>
-                  <td>${array_key_exists(year+'-09',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-09']) : '-'}</td>
-                  <td>${array_key_exists(year+'-10',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-10']) : '-'}</td>
-                  <td>${array_key_exists(year+'-11',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-11']) : '-'}</td>
-                  <td>${array_key_exists(year+'-12',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-12']) : '-'}</td>
-                  <td>${formatRupiah(dataInv.total_penyusutan)}</td>
-                  <td>${array_key_exists(invID,res.saldo_buku_akhir)?formatRupiah(res.saldo_buku_akhir[invID].nilai_buku):0}</td>
-                </tr>`;
+                                    <tr>
+                                    <td class="sticky-col-1">${indexInv + 1}</td>
+                                    <td class="sticky-col-2"><div class="wrapper-scroll-horizontal">
+                                        ${dataInv.name} [id:${invID}] </div></td>
+                                
+                                    <td class="sticky-col-3">${dataInv.date} <br> ${dataInv.periode} tahun</td>
+                                    <td class="sticky-col-4">${formatRupiah(dataInv.nilai_perolehan)}</td>
+                                    <td >${array_key_exists(invID,res.saldo_buku_awal)?formatRupiah(res.saldo_buku_awal[invID].nilai_buku):0}</td>
+                                    <td>${formatRupiah(dataInv.total_pembelian)}</td>
+                                    ${collect(monthSusut).map(month => `<td>${array_key_exists(month,dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[month]) : '-'}</td>`).join('')}
+                                    <td>${formatRupiah(dataInv.total_penyusutan)}</td>
+                                    <td>${formatRupiah(bukuAkhir)}
+                                            <button class="btn btn-sm btn-outline-primary" onclick="showDetailOnModal('{{ url("admin/daftar/aset-tetap/kartu-mutasi") }}/${invID}','xl')">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
 
-
+                                    </td>
+                                    </tr>`;
+                totalPenyusutan += parseFloat(dataInv.total_penyusutan);
+                totalNilaiBuku += parseFloat(bukuAkhir);
               });
               stringTable = `
-                      <h5 class="mb-1 mt-2 text-primary-dark"><strong>${type}</strong></h4>
+                      <h5 class="mb-1 mt-2 text-primary-dark"><strong>${type}</strong></h5>
                       <div style="max-height: 400px; overflow-x: auto; overflow-y: auto;">
                                     <table class="table sticky-table table-bordered">
                                       <thead class="table-light">
@@ -377,6 +409,13 @@
                       </div>`;
               $('#div-table').append(stringTable);
             });
+            $('#div-table').append(`
+                            <div class="mt-2">
+                                <h5 class=" mt-3 text-primary-dark"><strong>Ringkasan</strong></h5>
+                                <p>Total Amortisasi : ${formatRupiah(totalPenyusutan)}</p>
+                                <p>Nilai Buku : ${formatRupiah(totalNilaiBuku)}</p>
+                            </div>
+                        `);
           } else {
             Swal.fire('ops', 'something error ' + res.msg, 'error');
           }

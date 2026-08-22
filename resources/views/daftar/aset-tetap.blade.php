@@ -2,89 +2,89 @@
 
 
     @push('styles')
-        <style>
-            table.table.sticky-table {
-                border-collapse: separate;
-                border-spacing: 0;
-                width: max-content;
-                min-width: 1500px;
-                table-layout: fixed;
-                background-color: white;
-            }
+    <style>
+        table.table.sticky-table {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: max-content;
+            min-width: 1500px;
+            table-layout: fixed;
+            background-color: white;
+        }
 
-            table.sticky-table th,
-            table.sticky-table td {
-                border: 1px solid #dee2e6;
-                box-sizing: border-box;
-                padding: 0.5rem;
-                white-space: nowrap;
-                vertical-align: middle;
-                text-align: center;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
+        table.sticky-table th,
+        table.sticky-table td {
+            border: 1px solid #dee2e6;
+            box-sizing: border-box;
+            padding: 0.5rem;
+            white-space: nowrap;
+            vertical-align: middle;
+            text-align: center;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
-            thead.table-light {
-                color: white;
-            }
+        thead.table-light {
+            color: white;
+        }
 
-            /* Sticky columns */
-            .sticky-col-1,
-            .sticky-col-2,
-            .sticky-col-3,
-            .sticky-col-4,
-            .sticky-col-5,
-            .sticky-col-6 {
-                position: sticky;
+        /* Sticky columns */
+        .sticky-col-1,
+        .sticky-col-2,
+        .sticky-col-3,
+        .sticky-col-4,
+        .sticky-col-5,
+        .sticky-col-6 {
+            position: sticky;
 
-                z-index: 30;
-                border-right: 1px solid #dee2e6;
-            }
+            z-index: 30;
+            border-right: 1px solid #dee2e6;
+        }
 
-            td.sticky-col-1,
-            td.sticky-col-2,
-            td.sticky-col-3,
-            td.sticky-col-4,
-            td.sticky-col-5,
-            td.sticky-col-6 {
-                background-color: #f8f9fa !important;
-            }
+        td.sticky-col-1,
+        td.sticky-col-2,
+        td.sticky-col-3,
+        td.sticky-col-4,
+        td.sticky-col-5,
+        td.sticky-col-6 {
+            background-color: #f8f9fa !important;
+        }
 
-            .sticky-col-1 {
-                left: 0px;
-                width: 60px;
-                min-width: 60px;
-                max-width: 60px;
-            }
+        .sticky-col-1 {
+            left: 0px;
+            width: 60px;
+            min-width: 60px;
+            max-width: 60px;
+        }
 
-            .sticky-col-2 {
-                left: 60px;
-                width: 200px;
-                min-width: 200px;
-                max-width: 200px;
-            }
+        .sticky-col-2 {
+            left: 60px;
+            width: 200px;
+            min-width: 200px;
+            max-width: 200px;
+        }
 
-            .sticky-col-3 {
-                left: 260px;
-                width: 100px;
-                min-width: 100px;
-                max-width: 100px;
-            }
+        .sticky-col-3 {
+            left: 260px;
+            width: 100px;
+            min-width: 100px;
+            max-width: 100px;
+        }
 
-            .sticky-col-4 {
-                left: 360px;
-                width: 150px;
-                min-width: 150px;
-                max-width: 150px;
-            }
+        .sticky-col-4 {
+            left: 360px;
+            width: 150px;
+            min-width: 150px;
+            max-width: 150px;
+        }
 
-            .sticky-col-5 {
-                left: 510px;
-                width: 150px;
-                min-width: 150px;
-                max-width: 150px;
-            }
-        </style>
+        .sticky-col-5 {
+            left: 510px;
+            width: 150px;
+            min-width: 150px;
+            max-width: 150px;
+        }
+    </style>
     @endpush
 
     <div class="card shadow-sm mb-4">
@@ -94,7 +94,7 @@
                 <!-- <a href="#" class="btn btn-primary btn-big-custom rounded-0">Tambah Jurnal Umum</a> -->
             </div>
 
-            <div class="row p-1 mb-3">
+            <!-- <div class="row p-1 mb-3">
                 <div class="col-md-3 col-xs-6">
                     <select class="form-control" id="year-select" onchange="location = this.value;">
                         @for ($y = date('Y'); $y >= 2020; $y--)
@@ -103,7 +103,18 @@
                         @endfor
                     </select>
                 </div>
+            </div> -->
+            <div class="d-flex justify-content pe-4 mb-3">
+                <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="prevMonth()">
+                    << </button>
+                        <span class="badge bg-primary d-flex justify-content-center align-items-center">
+                            {{ getListMonth()[$month] }} {{ $year }}</span>
+                        <button type="button" class="btn colorblack btn-primary-lightest px-2" onclick="nextMonth()">
+                            >>
+                        </button>
             </div>
+
+
             <div class="row">
                 <div class="col-xl-12 col-md-12">
 
@@ -254,131 +265,144 @@
 
 
     @push('scripts')
-        <script>
-            var page = "kartu";
+    <script>
+        var page = "kartu";
 
-            function showModalInventory() {
-                showDetailOnModal('{{ route("aset-tetap.create") }}');
+        function showModalInventory() {
+            showDetailOnModal('{{ route("aset-tetap.create") }}');
+        }
+
+        function showModalEditInventory(id) {
+            showDetailOnModal('{{ url("admin/daftar/aset-tetap/edit-data") }}/' + id);
+        }
+
+        function showModalKartuInventory() {
+            showDetailOnModal('{{ route("aset-tetap.create-kartu") }}');
+        }
+
+
+        function arrayPad(arr, length, padValue) {
+            const diff = Math.abs(length) - arr.length;
+            if (diff <= 0) return arr.slice(); // sudah cukup panjang
+
+            const padding = new Array(diff).fill(padValue);
+
+            return length > 0 ?
+                arr.concat(padding) // pad ke kanan
+                :
+                padding.concat(arr); // pad ke kiri
+        }
+
+        function normalizeTable(table) {
+            const count = table.headers.length;
+
+            // Normalisasi setiap row di 'data'
+            table.data = table.data.map(row => {
+                return arrayPad(row, count, '-');
+            });
+
+            // Normalisasi subtotal
+            table.subtotal = arrayPad(table.subtotal, count, '-');
+        }
+
+        function prevMonth() {
+            month = '{{ $month }}';
+            year = '{{ $year }}';
+            month--;
+            if (month < 1) {
+                month = 12;
+                year--;
             }
+            window.location.href = '{{ url("admin/daftar/aset-tetap") }}?month=' + month + '&year=' + year;
+        }
 
-            function showModalEditInventory(id) {
-                showDetailOnModal('{{ url("admin/daftar/aset-tetap/edit-data") }}/' + id);
+        function nextMonth() {
+            month = '{{ $month }}';
+            year = '{{ $year }}';
+            month++;
+            if (month > 12) {
+                month = 1;
+                year++;
             }
+            window.location.href = '{{ url("admin/daftar/aset-tetap") }}?month=' + month + '&year=' + year;
+        }
 
-            function showModalKartuInventory() {
-                showDetailOnModal('{{ route("aset-tetap.create-kartu") }}');
-            }
+        var year = '{{ $year }}';
+        var month= parseInt('{{ $month }}');
+        headerSusut=[];
+        monthSusut=[];
+        for(var i=1; i<= month; i++){
+            headerSusut.push('Penyusutan ' + year + '-' + (i < 10 ? '0' + i : i));
+            monthSusut.push(year + '-' + (i < 10 ? '0' + i : i));
+        }
+        var headerTabel = [
+            'No',
+            'NAMA aset',
+            'Qty',
+            'Periode',
+            'Nilai Perolehan',
+            'Saldo Awal ' + year + '-01',
+            'Mutasi Pembelian',
+            ...headerSusut,
+            'Total Penyusutan',
+            'Akumulasi akhir Penyusutan',
+            'Nilai Buku'
+        ];
 
+        var dataMutasi = [];
 
-            function arrayPad(arr, length, padValue) {
-                const diff = Math.abs(length) - arr.length;
-                if (diff <= 0) return arr.slice(); // sudah cukup panjang
+        function getSummary() {
+            page = "kartu";
+            $('#div-table').html('');
+            $.ajax({
+                url: '{{ route("aset-tetap.get-summary") }}?year={{ getInput('year') }}&month={{ getInput('month') }}',
+                method: 'get',
+                success: function(res) {
+                    console.log(res);
+                    if (res.status == 1) {
+                        totalAset=0;
+                        totalNilaiBuku=0;
+                        Object.keys(res.msg).forEach(function eachData(type) {
+                            dataType = res.msg[type];
+                            varHeader = headerTabel;
+                            stringHeader = "";
+                            varHeader.forEach(function eachHeader(header, i) {
+                                sticky = i < 5 ? 'sticky-col-' + (i + 1) + ' bg-primary-dark' :
+                                    'bg-primary-light';
+                                stringHeader += '<th class="' + sticky + ' text-white">' +
+                                    header + '</th>';
+                            });
+                            stringData = "";
+                            Object.keys(dataType).forEach(function eachInv(invID, indexInv) {
+                                dataInv = dataType[invID];
+                                bukuAkhir= array_key_exists(invID,res.saldo_buku_akhir)?res.saldo_buku_akhir[invID].nilai_buku:0;
+                                stringData += `
+                                    <tr>
+                                    <td class="sticky-col-1">${indexInv + 1}</td>
+                                    <td class="sticky-col-2"><div class="wrapper-scroll-horizontal">
+                                        <button onclick="showDetailOnModal('{{ url("admin/daftar/aset-tetap/edit-data") }}/${invID}','xl')"><i class="fas fa-edit"></i></button>
+                                        ${dataInv.name} [id:${invID}] </div></td>
+                                
+                                    <td class="sticky-col-3">${dataInv.keterangan_qty_unit}</td>
+                                    <td class="sticky-col-4">${dataInv.date} <br> ${dataInv.periode} tahun</td>
+                                    <td class="sticky-col-5">${formatRupiah(dataInv.nilai_perolehan)}</td>
+                                    <td >${array_key_exists(invID,res.saldo_buku_awal)?formatRupiah(res.saldo_buku_awal[invID].nilai_buku):0}</td>
+                                    <td>${formatRupiah(dataInv.total_pembelian)}</td>
+                                    ${collect(monthSusut).map(month => `<td>${array_key_exists(month,dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[month]) : '-'}</td>`).join('')}
+                                    <td>${formatRupiah(dataInv.total_penyusutan)}</td>
+                                    <td>${formatRupiah(dataInv.nilai_perolehan-bukuAkhir)}</td>
+                                    <td>${formatRupiah(bukuAkhir)}
+                                            <button class="btn btn-sm btn-outline-primary" onclick="showDetailOnModal('{{ url("admin/daftar/aset-tetap/kartu-mutasi") }}/${invID}','xl')">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
 
-                const padding = new Array(diff).fill(padValue);
-
-                return length > 0 ?
-                    arr.concat(padding) // pad ke kanan
-                    :
-                    padding.concat(arr); // pad ke kiri
-            }
-
-            function normalizeTable(table) {
-                const count = table.headers.length;
-
-                // Normalisasi setiap row di 'data'
-                table.data = table.data.map(row => {
-                    return arrayPad(row, count, '-');
-                });
-
-                // Normalisasi subtotal
-                table.subtotal = arrayPad(table.subtotal, count, '-');
-            }
-            var year = '{{ $year }}';
-            var headerTabel = [
-                'No',
-                'NAMA aset',
-                'Qty',
-                'Periode',
-                'Nilai Perolehan',
-                'Mutasi Pembelian',
-                'Penyusutan ' + year + '-' + '01',
-                'Penyusutan ' + year + '-' + '02',
-                'Penyusutan ' + year + '-' + '03',
-                'Penyusutan ' + year + '-' + '04',
-                'Penyusutan ' + year + '-' + '05',
-                'Penyusutan ' + year + '-' + '06',
-                'Penyusutan ' + year + '-' + '07',
-                'Penyusutan ' + year + '-' + '08',
-                'Penyusutan ' + year + '-' + '09',
-                'Penyusutan ' + year + '-' + '10',
-                'Penyusutan ' + year + '-' + '11',
-                'Penyusutan ' + year + '-' + '12',
-                'Total Penyusutan',
-                'Akumulasi akhir Penyusutan',
-                'Nilai Buku'
-            ];
-
-            var dataMutasi = [];
-
-            function getSummary() {
-                page = "kartu";
-                $('#div-table').html('');
-                $.ajax({
-                    url: '{{ route("aset-tetap.get-summary") }}?year={{ getInput('year') }}',
-                    method: 'get',
-                    success: function(res) {
-                        console.log(res);
-                        if (res.status == 1) {
-                            Object.keys(res.msg).forEach(function eachData(type) {
-                                dataType = res.msg[type];
-                                varHeader = headerTabel;
-                                stringHeader = "";
-                                varHeader.forEach(function eachHeader(header, i) {
-                                    sticky = i < 5 ? 'sticky-col-' + (i + 1) + ' bg-primary-dark' :
-                                        'bg-primary-light';
-                                    stringHeader += '<th class="' + sticky + ' text-white">' +
-                                        header + '</th>';
-                                });
-                                stringData = "";
-                                Object.keys(dataType).forEach(function eachInv(invID, indexInv) {
-                                    dataInv = dataType[invID];
-                                    stringData += `
-                <tr>
-                  <td class="sticky-col-1">${indexInv + 1}</td>
-                  <td class="sticky-col-2"><div class="wrapper-scroll-horizontal">
-                    <button onclick="showDetailOnModal('{{ url("admin/daftar/aset-tetap/edit-data") }}/${invID}','xl')"><i class="fas fa-edit"></i></button>
-                    ${dataInv.name} [id:${invID}] </div></td>
-               
-                  <td class="sticky-col-3">${dataInv.keterangan_qty_unit}</td>
-                  <td class="sticky-col-4">${dataInv.date} <br> ${dataInv.periode} tahun</td>
-                  <td class="sticky-col-5">${formatRupiah(dataInv.nilai_perolehan)}</td>
-                  <td>${formatRupiah(dataInv.total_pembelian)}</td>
-                  <td>${array_key_exists(year+'-01',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-01']) : '-'}</td>
-                  <td>${array_key_exists(year+'-02',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-02']) : '-'}</td>
-                  <td>${array_key_exists(year+'-03',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-03']) : '-'}</td>
-                  <td>${array_key_exists(year+'-04',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-04']) : '-'}</td>
-                  <td>${array_key_exists(year+'-05',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-05']) : '-'}</td>
-                  <td>${array_key_exists(year+'-06',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-06']) : '-'}</td>
-                  <td>${array_key_exists(year+'-07',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-07']) : '-'}</td>
-                  <td>${array_key_exists(year+'-08',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-08']) : '-'}</td>
-                  <td>${array_key_exists(year+'-09',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-09']) : '-'}</td>
-                  <td>${array_key_exists(year+'-10',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-10']) : '-'}</td>
-                  <td>${array_key_exists(year+'-11',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-11']) : '-'}</td>
-                  <td>${array_key_exists(year+'-12',dataInv.penyusutan) ? formatRupiah(dataInv.penyusutan[year+'-12']) : '-'}</td>
-                  <td>${formatRupiah(collect(dataInv.penyusutan).sum())}</td>
-                  <td>${formatRupiah(dataInv.total_penyusutan)}</td>
-                  <td>${array_key_exists(invID,res.saldo_buku_akhir)?formatRupiah(res.saldo_buku_akhir[invID].nilai_buku):0}
-                        <button class="btn btn-sm btn-outline-primary" onclick="showDetailOnModal('{{ url("admin/daftar/aset-tetap/kartu-mutasi") }}/${invID}','xl')">
-                            <i class="fas fa-eye"></i>
-                        </button>
-
-                  </td>
-                </tr>`;
-
-
-                                });
-                                stringTable = `
-                      <h5 class="mb-1 mt-2 text-primary-dark"><strong>${type}</strong></h4>
+                                    </td>
+                                    </tr>`;
+                                    totalAset+=parseFloat(dataInv.nilai_perolehan);
+                                    totalNilaiBuku+=parseFloat(bukuAkhir);
+                            });
+                            stringTable = `
+                      <h5 class="mb-1 mt-2 text-primary-dark"><strong>${type}</strong></h5>
                       <div style="max-height: 400px; overflow-x: auto; overflow-y: auto;">
                                     <table class="table sticky-table table-bordered">
                                       <thead class="table-light">
@@ -392,33 +416,42 @@
                                       </tbody>
                                     </table>
                       </div>`;
-                                $('#div-table').append(stringTable);
-                            });
-                        } else {
-                            Swal.fire('ops', 'something error ' + res.msg, 'error');
-                        }
-                    },
-                    error: function(err) {
-                        console.log(err);
+                            $('#div-table').append(stringTable);
+                        });
+                        $('#div-table').append(`
+                            <div class="mt-2">
+                                <h5 class=" mt-3 text-primary-dark"><strong>Ringkasan</strong></h5>
+                                <p>Total Nilai Perolehan : ${formatRupiah(totalAset)}</p>
+                                <p>Akumulasi Penyusutan : ${formatRupiah(totalAset-totalNilaiBuku)}</p>
+                                <p>Nilai Buku : ${formatRupiah(totalNilaiBuku)}</p>
+                            </div>
+                        `);
+                    } else {
+                        Swal.fire('ops', 'something error ' + res.msg, 'error');
                     }
-                });
-            }
+                },
+                error: function(err) {
+                    console.log(err);
+                }
+            });
+        }
 
 
-            getSummary();
+        getSummary();
 
-            function getMutasiKeluar() {
-                page = "keluar";
-                $.ajax({
-                    url: '{{ route("aset-tetap.get-mutasi-keluar") }}?year={{ getInput('year') }}',
-                    method: 'get',
-                    success: function(res) {
-                        console.log(res);
-                        if (res.status == 1) {
-                            var stringData = "";
-                            res.msg.forEach(function eachData(data, i) {
-                                dataMutasi[data.id] = data;
-                                stringData += `<tr>
+        function getMutasiKeluar() {
+            page = "keluar";
+            $.ajax({
+                url: '{{ route("aset-tetap.get-mutasi-keluar") }}?year={{ getInput('
+                year ') }}',
+                method: 'get',
+                success: function(res) {
+                    console.log(res);
+                    if (res.status == 1) {
+                        var stringData = "";
+                        res.msg.forEach(function eachData(data, i) {
+                            dataMutasi[data.id] = data;
+                            stringData += `<tr>
                                   <td>${i+1}</td>
                                   <td>${data.date}</td>
                                   <td>${data.name}</td>
@@ -426,33 +459,34 @@
                                   <td>${formatRupiah(data.amount)}</td>
                                   <td>${(!data.journal_number?'<span> belum ada jurnal</span> <button onclick="openLinkJournal('+data.id+')"> <i class="fas fa-link"></i> jurnal</button>':data.journal_number)}</td>
                                 </tr>`;
-                            });
-                            $('#body-mutasi-keluar').html(stringData);
-                            $('#kartuKeluar').DataTable({
-                                displayLength: -1
-                            });
-                        } else {
-                            Swal.fire('ops', 'something error ' + res.msg, 'error');
-                        }
-                    },
-                    error: function(err) {
-                        console.log(err);
+                        });
+                        $('#body-mutasi-keluar').html(stringData);
+                        $('#kartuKeluar').DataTable({
+                            displayLength: -1
+                        });
+                    } else {
+                        Swal.fire('ops', 'something error ' + res.msg, 'error');
                     }
-                });
-            }
+                },
+                error: function(err) {
+                    console.log(err);
+                }
+            });
+        }
 
-            function getMutasiMasuk() {
-                page = "masuk";
-                $.ajax({
-                    url: '{{ route("aset-tetap.get-mutasi-masuk") }}?year={{ getInput('year') }}',
-                    method: 'get',
-                    success: function(res) {
-                        console.log(res);
-                        if (res.status == 1) {
-                            var stringData = "";
-                            res.msg.forEach(function eachData(data, i) {
-                                dataMutasi[data.id] = data;
-                                stringData += `<tr>
+        function getMutasiMasuk() {
+            page = "masuk";
+            $.ajax({
+                url: '{{ route("aset-tetap.get-mutasi-masuk") }}?year={{ getInput('
+                year ') }}',
+                method: 'get',
+                success: function(res) {
+                    console.log(res);
+                    if (res.status == 1) {
+                        var stringData = "";
+                        res.msg.forEach(function eachData(data, i) {
+                            dataMutasi[data.id] = data;
+                            stringData += `<tr>
                                 <td>${i+1}</td>
                                 <td>${data.date}</td>
                                 <td>${data.name}</td>
@@ -460,93 +494,93 @@
                                 <td>${formatRupiah(data.amount)}</td>
                                 <td>${(!data.journal_number?'<span> belum ada jurnal</span> <button onclick="openLinkJournal('+data.id+')"> <i class="fas fa-link"></i> jurnal</button>':data.journal_number)}</td>
                               </tr>`;
-                            });
-                            $('#body-mutasi-masuk').html(stringData);
-                            $('#kartuMasuk').DataTable({
-                                displayLength: -1
-                            });
-                        } else {
-                            Swal.fire('ops', 'something error ' + res.msg, 'error');
-                        }
-                    },
-                    error: function(err) {
-                        console.log(err);
+                        });
+                        $('#body-mutasi-masuk').html(stringData);
+                        $('#kartuMasuk').DataTable({
+                            displayLength: -1
+                        });
+                    } else {
+                        Swal.fire('ops', 'something error ' + res.msg, 'error');
                     }
-                });
-            }
-
-            $('#daterange').daterangepicker({
-                opens: 'right',
-                locale: {
-                    format: 'YYYY-MM-DD'
+                },
+                error: function(err) {
+                    console.log(err);
                 }
             });
-            console.log('init berhasil lur ');
-            initItemSelectManual('#select-code_group', '{{ route("chart-account.get-item-keuangan") }}?kind=kartu-inventory',
-                'pilih kode akun', '#modal-journal');
+        }
 
-            function openLinkJournal(id) {
-                $('#modal-journal').modal('show');
-                $('#keterangan-kartu').html(`
+        $('#daterange').daterangepicker({
+            opens: 'right',
+            locale: {
+                format: 'YYYY-MM-DD'
+            }
+        });
+        console.log('init berhasil lur ');
+        initItemSelectManual('#select-code_group', '{{ route("chart-account.get-item-keuangan") }}?kind=kartu-inventory',
+            'pilih kode akun', '#modal-journal');
+
+        function openLinkJournal(id) {
+            $('#modal-journal').modal('show');
+            $('#keterangan-kartu').html(`
                     <p>Link Kartu Inventory ID :  ${id}</p>
                     <p>${dataMutasi[id].name} - ${dataMutasi[id].type_aset} :${formatRupiah(dataMutasi[id].amount)}</p>
                 `);
-                $('#model_id').val(id);
+            $('#model_id').val(id);
+        }
+
+        function linkJournal() {
+            id = $('#journal_id').val();
+            if (id == "") {
+                Swal.fire("opss", "Pilih jurnal terlebih dahulu", "error");
+                return;
+            }
+            model_id = $('#model_id').val();
+            if (model_id == "") {
+                Swal.fire("opss", "Pilih kartu stock terlebih dahulu", "error");
+                return;
             }
 
-            function linkJournal() {
-                id = $('#journal_id').val();
-                if (id == "") {
-                    Swal.fire("opss", "Pilih jurnal terlebih dahulu", "error");
-                    return;
-                }
-                model_id = $('#model_id').val();
-                if (model_id == "") {
-                    Swal.fire("opss", "Pilih kartu stock terlebih dahulu", "error");
-                    return;
-                }
-
-                $.ajax({
-                    url: '{{ route("jurnal.link-journal") }}',
-                    method: 'POST',
-                    data: {
-                        "_token": "{{ csrf_token() }}",
-                        "model_id": model_id,
-                        "journal_id": id,
-                        "model": "App\\Models\\KartuInventory",
-                    },
-                    success: function(res) {
-                        console.log(res);
-                        if (res.status == 1) {
-                            $('#modal-journal').modal('hide');
-                            swalInfo("Berhasil", "Berhasil menghubungkan jurnal ke kartu inventory", "success");
-                            if (page == "masuk")
-                                getMutasiMasuk();
-                            else if (page == 'keluar') {
-                                getMutasiKeluar();
-                            }
-                        } else {
-                            Swal.fire("opss", res.msg, "error");
+            $.ajax({
+                url: '{{ route("jurnal.link-journal") }}',
+                method: 'POST',
+                data: {
+                    "_token": "{{ csrf_token() }}",
+                    "model_id": model_id,
+                    "journal_id": id,
+                    "model": "App\\Models\\KartuInventory",
+                },
+                success: function(res) {
+                    console.log(res);
+                    if (res.status == 1) {
+                        $('#modal-journal').modal('hide');
+                        swalInfo("Berhasil", "Berhasil menghubungkan jurnal ke kartu inventory", "success");
+                        if (page == "masuk")
+                            getMutasiMasuk();
+                        else if (page == 'keluar') {
+                            getMutasiKeluar();
                         }
-                    },
-                    error: function(err) {
-                        console.log(err);
+                    } else {
+                        Swal.fire("opss", res.msg, "error");
                     }
-                });
-            }
+                },
+                error: function(err) {
+                    console.log(err);
+                }
+            });
+        }
 
-            function searchJournal() {
+        function searchJournal() {
 
-                $.ajax({
-                    url: '{{ route("jurnal.search-error") }}?code_group=' + $('#select-code_group').val() +
-                        '&daterange=' + $('#daterange').val() + '&description=' + $('#description').val(),
-                    method: 'get',
-                    success: function(res) {
-                        console.log(res);
-                        if (res.status == 1) {
-                            html = "";
-                            res.msg.forEach(function eachData(data) {
-                                html += `
+            $.ajax({
+                url: '{{ route("jurnal.search-error") }}?code_group=' + $('#select-code_group').val() +
+                    '&daterange=' + $('#daterange').val() + '&description=' + $('#description').val(),
+                method: 'get',
+                success: function(res) {
+                    console.log(res);
+                    if (res.status == 1) {
+                        html = "";
+                        res.msg.forEach(function eachData(data) {
+                            html += `
                                     <a href="javascript:void(pilihJurnal(${data.id}))" >
                                         <div id="item-jurnal${data.id}" class="col-md-12 col-xs-12 item-jurnal colorblack " style="position:relative; border-bottom:1px solid black;">
                                             <span style="position:absolute; top:0px; left:-17px"> <i class="fas fa-circle"></i></span>
@@ -555,23 +589,24 @@
                                         </div>
                                     </a>
                                 `;
-                            });
-                            $('#container-journal').html(html);
-                        } else {
+                        });
+                        $('#container-journal').html(html);
+                    } else {
 
-                        }
-                    },
-                    error: function(res) {
-                        console.log(res);
                     }
-                });
-            }
-            function pilihJurnal(id) {
-                $('.item-jurnal').removeClass('bg-primary colorwhite');
-                $('#item-jurnal' + id).addClass('bg-primary colorwhite');
-                $('#journal_id').val(id);
-            }
-        </script>
+                },
+                error: function(res) {
+                    console.log(res);
+                }
+            });
+        }
+
+        function pilihJurnal(id) {
+            $('.item-jurnal').removeClass('bg-primary colorwhite');
+            $('#item-jurnal' + id).addClass('bg-primary colorwhite');
+            $('#journal_id').val(id);
+        }
+    </script>
     @endpush
 
 

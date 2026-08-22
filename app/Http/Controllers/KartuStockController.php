@@ -27,7 +27,7 @@ class KartuStockController extends Controller
         return $view;
     }
 
-    public static function getSummary($month = null, $year = null)
+    public static function getSummary($year = null, $month = null)
     {
         if (!$month)
             $month = getInput('month') ?? date('m');

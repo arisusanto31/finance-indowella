@@ -21,7 +21,7 @@ class MakeExportData extends Command
      *
      * @var string
      */
-    protected $signature = 'make:export-data {month?} {year?} {bookid?} {singkat=0} {force=0}';
+    protected $signature = 'make:export-data {bookid?} {month?} {year?} {singkat=0} {force=0}';
 
     /**
      * The console command description.
@@ -187,7 +187,7 @@ class MakeExportData extends Command
 
             $kartuInventory = $force? null: (unserialize(Redis::get('export_data_kartu_inventory_' . $bookid . '_' . $year)) ?? null);
             if (!$kartuInventory || $force) {
-                $kartuInventory = ExcelExportController::getKartuInventory($year);
+                $kartuInventory = ExcelExportController::getKartuInventory($month,$year);
             }
             Redis::setex('export_data_kartu_inventory_' . $bookid . '_' . $year, $timeout, serialize($kartuInventory));
             $bgprocess->success();
@@ -199,7 +199,7 @@ class MakeExportData extends Command
 
             $kartuBDD = $force? null: (unserialize(Redis::get('export_data_kartu_bdd_' . $bookid . '_' . $year)) ?? null);
             if (!$kartuBDD || $force) {
-                $kartuBDD = ExcelExportController::getKartuBDD($year);
+                $kartuBDD = ExcelExportController::getKartuBDD($month,$year);
             }
             Redis::setex('export_data_kartu_bdd_' . $bookid . '_' . $year, $timeout, serialize($kartuBDD));
             $bgprocess->success();

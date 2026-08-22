@@ -18,6 +18,7 @@ class BDDController extends Controller
     {
         $view = view('daftar.bdd');
         $view->year = getInput('year') ? getInput('year') : date('Y');
+        $view->month= getInput('month') ? toDigit(getInput('month'), 2) : date('m');
         return $view;
     }
 
@@ -122,8 +123,9 @@ class BDDController extends Controller
         ];
     }
 
-    public static function getSummary($year = null)
+    public static function getSummary($year = null,$month=null)
     {
+        return KartuPrepaidExpense::getSummary($year, $month, 'prepaid_expense_id');
         if (!$year)
             $year = getInput('year') ? getInput('year') : date('Y');
         $indexLastYear = createCarbon($year . '-01-01')->endOfYear()->format('ymdHis000');

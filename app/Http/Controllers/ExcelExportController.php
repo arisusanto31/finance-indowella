@@ -270,19 +270,19 @@ class ExcelExportController extends Controller
         ];
     }
 
-    public static function getKartuInventory($year)
+    public static function getKartuInventory($month,$year)
     {
-        return InventoryController::getSummary($year);
+        return InventoryController::getSummary($year, $month);
     }
 
-    public static function getKartuBDD($year)
+    public static function getKartuBDD($month, $year)
     {
-        return BDDController::getSummary($year);
+        return BDDController::getSummary($year, $month);
     }
 
     public static function getKartuStock($month, $year)
     {
-        return KartuStockController::getSummary($month, $year);
+        return KartuStockController::getSummary($year, $month);
     }
 
     public static function getKartuBDP($month, $year)
@@ -568,6 +568,26 @@ class ExcelExportController extends Controller
                 'data1' => $neracaPasiva,
                 'data2' => $nlPasiva,
                 'hasil' => abs($neracaPasiva - $nlPasiva) > 0.01 ? 'TIDAK SESUAI (' . ($neracaPasiva - $nlPasiva) . ')' : 'SESUAI'
+            ];
+
+            //total nilai neraca bdd = total buku kartu
+            $neracaBDD= collect($neraca['msg']['Aset'])->where('code_group', 160000)->first()['saldo'] ?? 0;
+            $bukuBDD= collect($kartuBDD['saldo_buku_akhir'])->sum('nilai_buku')??0;
+            $data[] = [
+                'keterangan' => 'Total Neraca BDD vs Total Buku BDD',
+                'data1' => $neracaBDD,
+                'data2' => $bukuBDD,
+                'hasil' => abs($neracaBDD - $bukuBDD) > 0.01 ? 'TIDAK SESUAI (' . ($neracaBDD - $bukuBDD) . ')' : 'SESUAI'
+            ];
+
+            //total nilai neraca inventory = total buku kartu
+            $neracaInventory= collect($neraca['msg']['Aset'])->where('code_group','>=',181000)->where('code_group','<',190000)->sum('saldo') ?? 0;
+            $bukuInventory= collect($kartuInventory['saldo_buku_akhir'])->sum('nilai_buku')??0;
+            $data[] = [
+                'keterangan' => 'Total Neraca Inventory vs Total Buku Inventory',
+                'data1' => $neracaInventory,
+                'data2' => $bukuInventory,
+                'hasil' => abs($neracaInventory - $bukuInventory) > 0.01 ? 'TIDAK SESUAI (' . ($neracaInventory - $bukuInventory) . ')' : 'SESUAI'
             ];
 
             //neraca kewajiban
