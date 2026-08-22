@@ -22,7 +22,7 @@
             <tbody>
                 @foreach ($data as $row => $item)
                     <tr id="tr-mutasi-piutang-{{ $item->id }}">
-                        <td>{{ $item->created_at }}</td>
+                        <td>{{ $item->created_at }} [{{ $item->id }}]</td>
                         <td>{{ $item->description }}</td>
                         <td id="kolom-journal{{ $item->id }}">
                             @if ($item->journal_number)
