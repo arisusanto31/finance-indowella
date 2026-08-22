@@ -673,6 +673,7 @@ class JournalController extends Controller
                     }else{
                         //brati ini duplikat. langsnung kita tambah aja
                         $allJournals[$row]['index_date']= $j['index_date']+1;
+                        $allJournals[$row]['journal_identifier']=$j['code_group'].$allJournals[$row]['index_date'];
                         $uniqueindex[$j['code_group']][]=$allJournals[$row]['index_date'];
                     }
                 }else{
