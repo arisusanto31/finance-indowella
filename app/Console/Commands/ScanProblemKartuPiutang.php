@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Journal;
 use App\Models\KartuPiutang;
 use App\Models\SalesOrder;
 use Illuminate\Console\Command;
@@ -35,7 +36,7 @@ class ScanProblemKartuPiutang extends Command
         $indexStart = createCarbon($monthyear . '-01')->startOfMonth()->format('ymdHis000');
         $indexEnd = createCarbon($monthyear . '-01')->endOfMonth()->format('ymdHis999');
         $kps = KartuPiutang::whereBetween('index_date', [$indexStart, $indexEnd])
-            ->select(DB::raw('sum(amount_debet-amount_kredit) as total_amount'), 'invoice_pack_number','id', 'sales_order_id')
+            ->select(DB::raw('sum(amount_debet-amount_kredit) as total_amount'), 'invoice_pack_number','id', 'journal_number','sales_order_id')
             ->groupBy('invoice_pack_number')
             ->havingRaw('total_amount <> 0')
             ->get();
@@ -47,6 +48,17 @@ class ScanProblemKartuPiutang extends Command
         foreach ($kps as $kp) {
             $this->info('Checking kpid:'.$kp->id.' invoice pack number: ' . $kp->invoice_pack_number . ' with ' . $kp->total_amount);
             $so = SalesOrder::find($kp->sales_order_id);
+            if(!$so){
+                $journal= Journal::where('journal_number', $kp->journal_number)->first();
+                if(!$journal){
+                    $this->error('kartu usang kpid:'.$kp->id.' invoice pack number: ' . $kp->invoice_pack_number . ' and journal number: '.$kp->journal_number);
+                    $kp->delete();
+                    continue;
+                }else{
+                    $this->error('jurnal ada tapi sales order tidak ditemukan kpid:'.$kp->id.' invoice pack number: ' . $kp->invoice_pack_number . ' and journal number: '.$kp->journal_number);
+                    continue;
+                }
+            }
             $problem = KartuPiutang::where('invoice_pack_number', $kp->invoice_pack_number)
                 ->where('amount_kredit', '<>', ($so->total_price + $so->total_ppn_k))
                 ->where('type','pelunasan')
