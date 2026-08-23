@@ -44,6 +44,7 @@ class ScanProblemKartuPiutang extends Command
             'invoice_pack_number' => 'center',
             'total_amount' => 'right'
         ], $this);
+        
 
         foreach ($kps as $kp) {
             $this->info('Checking kpid:'.$kp->id.' invoice pack number: ' . $kp->invoice_pack_number . ' with ' . $kp->total_amount);
@@ -56,6 +57,7 @@ class ScanProblemKartuPiutang extends Command
                     continue;
                 }else{
                     $this->error('jurnal ada tapi sales order tidak ditemukan kpid:'.$kp->id.' invoice pack number: ' . $kp->invoice_pack_number . ' and journal number: '.$kp->journal_number);
+                    $kp->delete();
                     continue;
                 }
             }
