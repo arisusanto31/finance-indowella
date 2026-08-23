@@ -36,7 +36,7 @@ class ScanProblemKartuPiutang extends Command
         $indexStart = createCarbon($monthyear . '-01')->startOfMonth()->format('ymdHis000');
         $indexEnd = createCarbon($monthyear . '-01')->endOfMonth()->format('ymdHis999');
         $kps = KartuPiutang::whereBetween('index_date', [$indexStart, $indexEnd])
-            ->select(DB::raw('sum(amount_debet-amount_kredit) as total_amount'), 'invoice_pack_number','id', 'journal_number','sales_order_id')
+            ->select(DB::raw('sum(amount_debet-amount_kredit) as total_amount'), 'invoice_pack_number', 'id', 'journal_number', 'sales_order_id')
             ->groupBy('invoice_pack_number')
             ->havingRaw('total_amount <> 0')
             ->get();
@@ -44,26 +44,31 @@ class ScanProblemKartuPiutang extends Command
             'invoice_pack_number' => 'center',
             'total_amount' => 'right'
         ], $this);
-        
+
 
         foreach ($kps as $kp) {
-            $this->info('Checking kpid:'.$kp->id.' invoice pack number: ' . $kp->invoice_pack_number . ' with ' . $kp->total_amount);
-            $so = SalesOrder::find($kp->sales_order_id);
-            if(!$so){
-                $journal= Journal::where('journal_number', $kp->journal_number)->first();
-                if(!$journal){
-                    $this->error('kartu usang kpid:'.$kp->id.' invoice pack number: ' . $kp->invoice_pack_number . ' and journal number: '.$kp->journal_number);
-                    $kp->delete();
-                    continue;
-                }else{
-                    $this->error('jurnal ada tapi sales order tidak ditemukan kpid:'.$kp->id.' invoice pack number: ' . $kp->invoice_pack_number . ' and journal number: '.$kp->journal_number);
-                    $kp->delete();
-                    continue;
+            //cek all kp di invoice itu yang ga jelas.
+            $allkps = KartuPiutang::where('invoice_pack_number', $kp->invoice_pack_number)->get();
+            $theso = SalesOrder::find($kp->sales_order_id);
+            foreach ($allkps as $k) {
+                $this->info('Checking kpid:' . $k->id . ' invoice pack number: ' . $k->invoice_pack_number . ' with ' . $k->total_amount);
+                $so = SalesOrder::find($k->sales_order_id);
+                if (!$so) {
+                    $journal = Journal::where('journal_number', $k->journal_number)->first();
+                    if (!$journal) {
+                        $this->error('kartu usang kpid:' . $k->id . ' invoice pack number: ' . $k->invoice_pack_number . ' and journal number: ' . $k->journal_number);
+                        $k->delete();
+                        continue;
+                    } else {
+                        $this->error('jurnal ada tapi sales order tidak ditemukan kpid:' . $k->id . ' invoice pack number: ' . $k->invoice_pack_number . ' and journal number: ' . $k->journal_number);
+                        $k->delete();
+                        continue;
+                    }
                 }
             }
             $problem = KartuPiutang::where('invoice_pack_number', $kp->invoice_pack_number)
-                ->where('amount_kredit', '<>', ($so->total_price + $so->total_ppn_k))
-                ->where('type','pelunasan')
+                ->where('amount_kredit', '<>', ($theso->total_price + $theso->total_ppn_k))
+                ->where('type', 'pelunasan')
                 ->get();
             tampilkanTableTerminal($problem, [
                 'id' => 'center',
@@ -71,7 +76,7 @@ class ScanProblemKartuPiutang extends Command
                 'description' => 'left',
                 'amount_kredit' => 'right'
             ], $this);
-            foreach($problem as $p){
+            foreach ($problem as $p) {
                 $p->delete();
                 $this->info('Deleted Kartu Piutang ID: ' . $p->id . ' with amount_kredit: ' . $p->amount_kredit);
             }
