@@ -66,6 +66,9 @@ class ScanProblemKartuPiutang extends Command
                     }
                 }
             }
+            if (!$theso) {
+                continue;
+            }
             $problem = KartuPiutang::where('invoice_pack_number', $kp->invoice_pack_number)
                 ->where('amount_kredit', '<>', ($theso->total_price + $theso->total_ppn_k))
                 ->where('type', 'pelunasan')
