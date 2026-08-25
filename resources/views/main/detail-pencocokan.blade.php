@@ -35,6 +35,12 @@
                             @endforeach
                         </ul>
                     </li>
+                    <li> List Kartu tidak match : </li>
+                    <ul>
+                        @foreach ($listKartuNotMatch as $kartuNotMatch)
+                        <li>{{$kartuNotMatch}}</li>
+                        @endforeach
+                    </ul>
                 </ul>
             </div>
             <div class="wrapper-scroll-vertical">
@@ -84,6 +90,12 @@
                         @if($journal->kartu_id == null)
                         <li>{{ $journal->index_date }} - {{ $journal->journal_number }} - {{$journal->id}} - {{ format_price($journal->amount) }}</li>
                         @endif
+                        @endforeach
+                    </ul>
+                    <li> List Journal tidak match : </li>
+                    <ul>
+                        @foreach ($listJournalNotMatch as $journalNotMatch)
+                        <li>{{$journalNotMatch}}</li>
                         @endforeach
                     </ul>
                 </ul>
@@ -139,6 +151,7 @@
 
 <script>
     initDateRangePicker('#daterange');
+    loading(0);
 
     function initDateRangePicker(t) {
         $(t).daterangepicker({
@@ -163,11 +176,12 @@
         });
     }
 
-    
+
 
     function changeDateRange(input) {
         console.log("woii BERUBAH");
         let dateRange = $(input).val();
+        loading(1);
         showDetailOnModal('{{url("admin/show-detail-pencocokan")}}?date_range=' + dateRange + '&model={{$model}}', 'xl');
 
     }

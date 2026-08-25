@@ -2205,6 +2205,15 @@ class JournalController extends Controller
                 DB::raw('case when j.code_group > 200000 then j.amount_kredit-j.amount_debet else j.amount_debet-j.amount_kredit end as amount')
             )->groupBy('j.id')->orderBy('j.index_date', 'asc')->get();
 
+        $listKartu= collect($kartu)->groupBy('journal_id')->map(function($val,$journalID){
+          
+            return $journalID.'-'.$val->amount;
+        })->values()->all();
+        $listJournal= collect($journals)->map(function($val,$key){
+            return $val->id.'-'.$val->amount;
+        })->values()->all();
+        $listKartuNotMatch=array_diff($listKartu,$listJournal);
+        $listJournalNotMatch=array_diff($listJournal,$listKartu);
         $view = view('main.detail-pencocokan');
         $view->kartus = $kartu;
         $view->journals = $journals;
@@ -2215,6 +2224,8 @@ class JournalController extends Controller
         $view->endDate = $endDate;
         $view->indexStart = $indexStart;
         $view->indexEnd = $indexEnd;
+        $view->listKartuNotMatch = $listKartuNotMatch;
+        $view->listJournalNotMatch = $listJournalNotMatch;
         return $view;
     }
 
