@@ -72,15 +72,19 @@ class Journal extends Model
         });
         static::addGlobalScope('journal', function ($query) {
             $from = $query->getQuery()->from ?? 'journals'; // untuk dukung alias `j` kalau pakai from('journals as j')
-            // if (Str::contains($from, ' as ')) {
-            //     [$table, $alias] = explode(' as ', $from);
-            //     $alias = trim($alias);
-            // } else {
-            //     $alias = $from;
-            // }
+
             if ($from instanceof Expression) {
-                // fromSub biasanya alias-nya ada di SQL: (...) as `journals`
-                $alias = $query->getModel()->getTable(); // default: journals
+                // fromSub:
+                // (...) as `j`
+                $fromSql = $query->getQuery()
+                    ->getGrammar()
+                    ->getValue($from);
+
+                if (preg_match('/\s+as\s+[`"]?([^`"\s]+)[`"]?\s*$/i', $fromSql, $matches)) {
+                    $alias = $matches[1];
+                } else {
+                    $alias = $query->getModel()->getTable();
+                }
             } elseif (is_string($from) && Str::contains(strtolower($from), ' as ')) {
                 [$table, $alias] = preg_split('/\s+as\s+/i', $from);
                 $alias = trim($alias, '` ');
@@ -269,7 +273,7 @@ class Journal extends Model
         ];
     }
 
-    public static function getNextIndexDate($date,$codegroup)
+    public static function getNextIndexDate($date, $codegroup)
     {
         $counter = 9999;
         $now = createCarbon($date);
