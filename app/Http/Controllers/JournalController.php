@@ -2089,8 +2089,8 @@ class JournalController extends Controller
 
             $startDate = createCarbon($date)->startOfDay()->format('Y-m-d 00:00:00');
             $endDate = createCarbon($date)->endOfDay()->format('Y-m-d 23:59:59');
-            $indexStart = createCarbon($date)->startOfDay()->format('ymdHis000');
-            $indexEnd = createCarbon($date)->endOfDay()->format('ymdHis999');
+            $indexStart = createCarbon($date)->startOfDay()->format('ymdHis00');
+            $indexEnd = createCarbon($date)->endOfDay()->format('ymdHis99');
         }
         $fixModel = 'App\\Models\\' . $model;
         // $journals = Journal::where('index_date', '>=', $indexDateJournal)
