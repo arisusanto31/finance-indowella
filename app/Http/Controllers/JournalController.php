@@ -2207,10 +2207,10 @@ class JournalController extends Controller
 
         $listKartu= collect($kartu)->groupBy('journal_id')->map(function($val,$journalID){
             $totalAmount= collect($val)->sum('amount');
-            return $journalID.'-'.$totalAmount;
+            return $journalID.'-'.round($totalAmount,2);
         })->values()->all();
         $listJournal= collect($journals)->map(function($val,$key){
-            return $val->id.'-'.$val->amount;
+            return $val->id.'-'.round($val->amount,2);
         })->values()->all();
         $listKartuNotMatch=array_diff($listKartu,$listJournal);
         $listJournalNotMatch=array_diff($listJournal,$listKartu);
