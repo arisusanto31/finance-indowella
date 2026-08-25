@@ -29,6 +29,16 @@ trait HasModelDetailKartuInvoice
 
         if (get_class($kartu) == Journal::class) {
             $kartu->journal_id = $kartu->id;
+            //ambil lawan jurnalnya trus ambil kartu lawannya. biasanya disitu kartu nya
+            $jLawan= Journal::where('journal_number', $kartu->journal_number)
+                ->where('id', '<>', $kartu->id)
+                ->where('code_group',$kartu->lawan_code_group)
+                ->whereRaw('amount_debet + amount_kredit = ?', [$kartu->amount_debet + $kartu->amount_kredit])
+                ->first();
+            $dkLawan = DetailKartuInvoice::where('journal_id',$jLawan->id)->first();
+            $salesOrderNumber = $dkLawan->sales_order_number ?? null;
+            $salesOrder= SalesOrder::where('sales_order_number', $salesOrderNumber)->first();
+            $SOID = $salesOrder ? $salesOrder->id : null;
         }
         // if (isset($kartu->purchase_order_number)) {
         //     $purchaseOrderNumber = $kartu->purchase_order_number;
