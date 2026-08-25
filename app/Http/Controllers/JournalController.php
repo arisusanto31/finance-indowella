@@ -500,16 +500,16 @@ class JournalController extends Controller
                     'journal_number',
                     DB::raw('CASE WHEN code_group < 200000 THEN amount_debet-amount_kredit ELSE amount_kredit-amount_debet END as amount_journal'),
                     'amount_saldo',
-                    )->union($theLastJournal);
-            
-            $journals= Journal::fromSub($journals,'journals')
-              ->select(
-                'journals.*',
-                DB::raw('COALESCE(LAG(amount_saldo) OVER (PARTITION BY code_group ORDER BY index_date),0) as last_saldo')
-              );
+                )->union($theLastJournal);
+
+            $journals = Journal::fromSub($journals, 'journals')
+                ->select(
+                    'journals.*',
+                    DB::raw('COALESCE(LAG(amount_saldo) OVER (PARTITION BY code_group ORDER BY index_date),0) as last_saldo')
+                );
             $datamin = Journal::fromSub($journals, 'journals')
                 ->whereRaw('last_saldo + amount_journal != amount_saldo')
-                ->where('tag','<>','opening 01/2026')
+                ->where('tag', '<>', 'opening 01/2026')
                 ->where('index_date', '>=', $indexAwal)
                 ->select('*', DB::raw('amount_journal + last_saldo - amount_saldo as selisih'))
                 ->get()->groupBy('code_group')->map(function ($group) {
@@ -665,21 +665,21 @@ class JournalController extends Controller
                 // $allLocks[] = ['lock' => $st['lock'], 'name' => $st['lock_name']];
                 $allJournals[] = safeModelToArrayAll($st);
             }
-            $uniqueindex=[];
-            foreach($allJournals as $row => $j){
-                if(array_key_exists($j['code_group'],$uniqueindex)){
-                    if(!in_array($j['index_date'],$uniqueindex[$j['code_group']])){
-                        $uniqueindex[$j['code_group']][]=$j['index_date'];
-                    }else{
+            $uniqueindex = [];
+            foreach ($allJournals as $row => $j) {
+                if (array_key_exists($j['code_group'], $uniqueindex)) {
+                    if (!in_array($j['index_date'], $uniqueindex[$j['code_group']])) {
+                        $uniqueindex[$j['code_group']][] = $j['index_date'];
+                    } else {
                         //brati ini duplikat. langsnung kita tambah aja
                         $maxIndex = max($uniqueindex[$j['code_group']]);
-                        $allJournals[$row]['index_date']= $maxIndex + 1;
-                        $allJournals[$row]['journal_identifier']=$j['code_group'].$allJournals[$row]['index_date'];
-                        $uniqueindex[$j['code_group']][]=$allJournals[$row]['index_date'];
+                        $allJournals[$row]['index_date'] = $maxIndex + 1;
+                        $allJournals[$row]['journal_identifier'] = $j['code_group'] . $allJournals[$row]['index_date'];
+                        $uniqueindex[$j['code_group']][] = $allJournals[$row]['index_date'];
                     }
-                }else{
-                    $uniqueindex[$j['code_group']]=[];
-                    $uniqueindex[$j['code_group']][]=$j['index_date'];
+                } else {
+                    $uniqueindex[$j['code_group']] = [];
+                    $uniqueindex[$j['code_group']][] = $j['index_date'];
                 }
             }
 
@@ -1586,7 +1586,7 @@ class JournalController extends Controller
                         'reference_type' => null,
                         'tag' => $tag
                     ];
-                } elseif (bccomp($saldo, '0', 2) < 0) {
+                } else if (bccomp($saldo, '0', 2) < 0) {
                     $kredits[] = [
                         'code_group' => $ca->code_group,
                         'lawan_code_group' => 302200,
@@ -1697,24 +1697,25 @@ class JournalController extends Controller
             ];
 
             //setelah terinput baru recalculate jadi 
-            $minIndex = Journal::where('tag', $tag)->min('index_date');
-            $sub = Journal::where('index_date', '<', $minIndex)
-                ->select('code_group', DB::raw('MAX(index_date) as max_index_date'))->groupBy('code_group');
-            $lastJournals = Journal::joinSub($sub, 'sub', function ($join) {
-                $join->on('journals.code_group', '=', 'sub.code_group')->on('journals.index_date', '=', 'sub.max_index_date');
-            })->select('journals.*')->get();
-            foreach ($lastJournals as $j) {
-                $j->calculateJournalNext(false);
-            }
+            // $minIndex = Journal::where('tag', $tag)->min('index_date');
+            // $sub = Journal::where('index_date', '<', $minIndex)
+            //     ->select('code_group', DB::raw('MAX(index_date) as max_index_date'))->groupBy('code_group');
+            // $lastJournals = Journal::joinSub($sub, 'sub', function ($join) {
+            //     $join->on('journals.code_group', '=', 'sub.code_group')->on('journals.index_date', '=', 'sub.max_index_date');
+            // })->select('journals.*')->get();
+            // foreach ($lastJournals as $j) {
+            //     $j->calculateJournalNext(false);
+            // }
             DB::commit();
             if ($lockManager) {
                 $lockManager->releaseAll();
             }
             return ['status' => 1, 'input' => $allInput, 'output' => $allOutput, 'monthyear' => $monthyear];
         } catch (\Throwable $e) {
+            DB::rollBack();
             $errMsg = $e->getMessage();
         }
-        DB::rollBack();
+
         if ($lockManager) {
             $lockManager->releaseAll();
         }
@@ -2130,13 +2131,11 @@ class JournalController extends Controller
             $tableName = "kartu_prepaid_expenses";
             $saldoKartu = KartuPrepaidExpense::getTotalSaldoRupiah($startDate, 'prepaid_expense_id');
             $saldoJournal = KartuPrepaidExpense::getTotalJournal($startDate);
-        } 
-        else if($model=='KartuPenjualan'){
-            $tableName="invoice_sale_details";
-            $saldoKartu= InvoiceSaleDetail::getTotalMutasiKartu($startDate);
+        } else if ($model == 'KartuPenjualan') {
+            $tableName = "invoice_sale_details";
+            $saldoKartu = InvoiceSaleDetail::getTotalMutasiKartu($startDate);
             $saldoJournal = InvoiceSaleDetail::getTotalMutasiJounal($startDate);
-        }
-        else {
+        } else {
             return [
                 'status' => 0,
                 'msg' => 'model belum diakomodasi'
@@ -2185,10 +2184,9 @@ class JournalController extends Controller
                     'kartu.nilai_buku',
                     DB::raw('coalesce(dk.journal_id, kartu.journal_id) as journal_id'),
                 )->groupBy('kartu.id')->get();
-        } 
-        else if($model=='KartuPenjualan'){
-            $fixModel=InvoiceSaleDetail::class;
-             $kartu= InvoiceSaleDetail::from('invoice_sale_details as kartu')
+        } else if ($model == 'KartuPenjualan') {
+            $fixModel = InvoiceSaleDetail::class;
+            $kartu = InvoiceSaleDetail::from('invoice_sale_details as kartu')
                 ->leftJoin('detail_kartu_invoices as dk', function ($join) {
                     $join->on('dk.kartu_id', '=', 'kartu.id')->where('dk.kartu_type', InvoiceSaleDetail::class);
                 })
@@ -2198,10 +2196,8 @@ class JournalController extends Controller
                     'kartu.index_date',
                     'kartu.total_price as amount',
                     DB::raw('coalesce(dk.journal_id, kartu.journal_id) as journal_id'),
-                )->groupBy('kartu.id')->get();   
-        }
-        
-        else {
+                )->groupBy('kartu.id')->get();
+        } else {
             return [
                 'status' => 0,
                 'msg' => 'model belum diakomodasi'
@@ -2227,15 +2223,15 @@ class JournalController extends Controller
                 DB::raw('case when j.code_group > 200000 then j.amount_kredit-j.amount_debet else j.amount_debet-j.amount_kredit end as amount')
             )->groupBy('j.id')->orderBy('j.index_date', 'asc')->get();
 
-        $listKartu= collect($kartu)->groupBy('journal_id')->map(function($val,$journalID){
-            $totalAmount= collect($val)->sum('amount');
-            return $journalID.'-'.round($totalAmount,2);
+        $listKartu = collect($kartu)->groupBy('journal_id')->map(function ($val, $journalID) {
+            $totalAmount = collect($val)->sum('amount');
+            return $journalID . '-' . round($totalAmount, 2);
         })->values()->all();
-        $listJournal= collect($journals)->map(function($val,$key){
-            return $val->id.'-'.round($val->amount,2);
+        $listJournal = collect($journals)->map(function ($val, $key) {
+            return $val->id . '-' . round($val->amount, 2);
         })->values()->all();
-        $listKartuNotMatch=array_diff($listKartu,$listJournal);
-        $listJournalNotMatch=array_diff($listJournal,$listKartu);
+        $listKartuNotMatch = array_diff($listKartu, $listJournal);
+        $listJournalNotMatch = array_diff($listJournal, $listKartu);
         $view = view('main.detail-pencocokan');
         $view->kartus = $kartu;
         $view->journals = $journals;
