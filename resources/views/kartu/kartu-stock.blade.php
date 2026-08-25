@@ -31,7 +31,7 @@
                             <li class="nav-item">
                                 <button type="button" class="nav-link active" role="tab" data-bs-toggle="tab"
                                     data-bs-target="#navs-pills-top-home" aria-controls="navs-pills-top-home"
-                                    aria-selected="true" onclick="getSummary()">
+                                    aria-selected="true">
                                     🗃 KARTU
                                 </button>
                             </li>
@@ -82,6 +82,9 @@
                                             </tr>
                                         </thead>
                                         <tbody id="body-summary">
+                                            <tr>
+                                                <td colspan="12"> <button onclick="getSummary()"><i class="fas fa-refresh"></i> load data </button></td>
+                                            </tr>
                                         </tbody>
                                     </table>
 
@@ -232,9 +235,7 @@
 
         <script>
             var page = "kartu";
-            setTimeout(function() {
-                getSummary();
-            }, 200);
+           
             $('#daterange').daterangepicker({
                 opens: 'right',
                 locale: {
