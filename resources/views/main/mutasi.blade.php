@@ -419,6 +419,8 @@
         }
 
         function submitClosingJournal() {
+            $('#btn-closing').prop('disabled', true).html('<i class="fas fa-circle-notch fa-spin"></i> memproses...');
+            
             swalConfirmAndSubmit({
                 url: '{{ url("admin/jurnal/tutup-jurnal") }}',
                 data: {
@@ -427,6 +429,7 @@
                     _token: '{{ csrf_token() }}'
                 },
                 onSuccess: (res) => {
+                    $('#btn-closing').prop('disabled', false).html('Submit Jurnal Penutup');
                     if (res.status == 1) {
 
                     } else {
