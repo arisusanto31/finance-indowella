@@ -12,6 +12,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
+use Illuminate\Contracts\Database\Query\Expression;
+
 use Illuminate\Support\Str;
 use Throwable;
 
@@ -27,14 +29,35 @@ class KartuStock extends Model
 
     protected static function booted()
     {
-        static::addGlobalScope('journal', function ($query) {
+        // static::addGlobalScope('journal', function ($query) {
+        //     $from = $query->getQuery()->from ?? 'kartu_stocks'; // untuk dukung alias `j` kalau pakai from('journals as j')
+        //     if (Str::contains($from, ' as ')) {
+        //         [$table, $alias] = explode(' as ', $from);
+        //         $alias = trim($alias);
+        //     } else {
+        //         $alias = $from;
+        //     }
+
+        //     $query->where(function ($q) use ($alias) {
+        //         $q->whereNull("{$alias}.book_journal_id")
+        //             ->orWhere("{$alias}.book_journal_id", bookID());
+        //     });
+        // });
+
+
+          static::addGlobalScope('journal', function ($query) {
             $from = $query->getQuery()->from ?? 'kartu_stocks'; // untuk dukung alias `j` kalau pakai from('journals as j')
-            if (Str::contains($from, ' as ')) {
-                [$table, $alias] = explode(' as ', $from);
-                $alias = trim($alias);
+          
+            if ($from instanceof Expression) {
+                // fromSub biasanya alias-nya ada di SQL: (...) as `journals`
+                $alias = $query->getModel()->getTable(); // default: journals
+            } elseif (is_string($from) && Str::contains(strtolower($from), ' as ')) {
+                [$table, $alias] = preg_split('/\s+as\s+/i', $from);
+                $alias = trim($alias, '` ');
             } else {
-                $alias = $from;
+                $alias = trim((string) $from, '` ');
             }
+
 
             $query->where(function ($q) use ($alias) {
                 $q->whereNull("{$alias}.book_journal_id")
