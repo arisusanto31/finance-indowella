@@ -2196,7 +2196,7 @@ class JournalController extends Controller
                 ->where('kartu.index_date', '<=', $indexEnd . '9')
                 ->select(
                     'kartu.index_date',
-                    'kartu.total_price',
+                    'kartu.total_price as amount',
                     DB::raw('coalesce(dk.journal_id, kartu.journal_id) as journal_id'),
                 )->groupBy('kartu.id')->get();   
         }
