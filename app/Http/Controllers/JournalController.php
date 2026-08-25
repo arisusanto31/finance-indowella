@@ -1541,7 +1541,7 @@ class JournalController extends Controller
             $subquery = DB::table('journals')
                 ->where('book_journal_id', book()->id)
                 ->where('index_date', '<', (float)$theLastDate)->whereRaw('CONVERT(code_group, UNSIGNED) > ?', [400000])
-                ->select(DB::raw('MAX(journal_identifier)'));
+                ->select(DB::raw('MAX(journal_identifier)'))->groupBy('code_group');
                 
 
             $chartAccounts = DB::table('journals as j')
