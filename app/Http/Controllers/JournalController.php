@@ -1546,7 +1546,10 @@ class JournalController extends Controller
 
             $chartAccounts = DB::table('journals as j')
                 ->whereIn('j.journal_identifier',$subquery)
-                ->leftJoin('chart_account_aliases as ca', 'ca.code_group', '=', 'j.code_group')
+                ->leftJoin('chart_account_aliases as ca', function($join){
+                    $join->on('j.code_group', '=', 'ca.code_group')
+                    ->where('ca.book_journal_id', book()->id);
+                })
                 ->where('ca.code_group', '>=', 400000)->where('ca.is_child', 1)
                 ->select(
                     'ca.name',
