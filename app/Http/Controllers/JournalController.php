@@ -2206,8 +2206,8 @@ class JournalController extends Controller
             )->groupBy('j.id')->orderBy('j.index_date', 'asc')->get();
 
         $listKartu= collect($kartu)->groupBy('journal_id')->map(function($val,$journalID){
-          
-            return $journalID.'-'.$val->amount;
+            $totalAmount= collect($val)->sum('amount');
+            return $journalID.'-'.$totalAmount;
         })->values()->all();
         $listJournal= collect($journals)->map(function($val,$key){
             return $val->id.'-'.$val->amount;
