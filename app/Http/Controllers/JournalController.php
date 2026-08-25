@@ -2084,10 +2084,10 @@ class JournalController extends Controller
             $indexEnd = Carbon::createFromFormat('d/m/Y', $splitDate[1])->format('ymd23595999');
         } else {
 
-            $startDate = createCarbon($date)->format('Y-m-d 00:00:00');
-            $endDate = Carbon::now()->format('Y-m-d 23:59:59');
-            $indexStart = createCarbon($date)->format('ymdHis00');
-            $indexEnd = Carbon::now()->format('ymd23595999');
+            $startDate = createCarbon($date)->startOfDay()->format('Y-m-d 00:00:00');
+            $endDate = createCarbon($date)->endOfDay()->format('Y-m-d 23:59:59');
+            $indexStart = createCarbon($date)->startOfDay()->format('ymdHis000');
+            $indexEnd = createCarbon($date)->endOfDay()->format('ymdHis999');
         }
         $fixModel = 'App\\Models\\' . $model;
         // $journals = Journal::where('index_date', '>=', $indexDateJournal)
