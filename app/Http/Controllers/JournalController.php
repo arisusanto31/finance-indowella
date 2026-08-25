@@ -1611,23 +1611,23 @@ class JournalController extends Controller
             $allInput = [];
             $allOutput = [];
             $tanggalJurnal = createCarbon($monthyear)->endOfMonth()->format('Y-m-d H:i:s');
-            if ($aksi == 1) {
-                if (count($debets) > 0 && count($kredits) > 0) {
-                    $st = JournalController::createBaseJournal(new Request([
-                        'debets' => $debets,
-                        'kredits' => $kredits,
-                        'type' => 'umum',
-                        'user_backdate_id' => user()->id,
-                        'is_backdate' => 1,
-                        'date' => $tanggalJurnal,
-                        'is_auto_generated' => 0,
-                        'title' => 'Jurnal tutup buku'
-                    ]), false, $lockManager, true);
+            // if ($aksi == 1) {
+            //     if (count($debets) > 0 && count($kredits) > 0) {
+            //         $st = JournalController::createBaseJournal(new Request([
+            //             'debets' => $debets,
+            //             'kredits' => $kredits,
+            //             'type' => 'umum',
+            //             'user_backdate_id' => user()->id,
+            //             'is_backdate' => 1,
+            //             'date' => $tanggalJurnal,
+            //             'is_auto_generated' => 0,
+            //             'title' => 'Jurnal tutup buku'
+            //         ]), false, $lockManager, true);
 
-                    if ($st['status'] == 0) return $st;
-                    $allOutput[] = $st;
-                }
-            }
+            //         if ($st['status'] == 0) return $st;
+            //         $allOutput[] = $st;
+            //     }
+            // }
 
             $allInput[] = [
                 'debet' => $debets,
