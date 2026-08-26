@@ -2114,7 +2114,6 @@ class JournalController extends Controller
             $saldoJournal = KartuBahanJadi::getTotalJournal($startDate);
         } else if ($model == 'KartuHutang') {
             $tableName = "kartu_hutangs";
-
             $saldoKartu = KartuHutang::getTotalsaldoRupiah($startDate, 'factur_supplier_number');
             $saldoJournal = KartuHutang::getTotalJournal($startDate);
         } else if ($model == 'KartuPiutang') {
@@ -2210,7 +2209,8 @@ class JournalController extends Controller
         $journals = Journal::from('journals as j')
             ->where('j.index_date', '>', $indexStart)
             ->where('j.index_date', '<=', $indexEnd)
-            ->whereIn('j.code_group', $codeGroups);
+            // ->whereIn('j.code_group', $codeGroups);
+            ->where('j.reference_model', $fixModel);
         $journals= Journal::fromSub($journals, 'j')
             ->leftJoin('detail_kartu_invoices as dk', function ($join) use ($fixModel) {
                 $join->on('dk.journal_id', '=', 'j.id')->where('dk.kartu_type', $fixModel);
