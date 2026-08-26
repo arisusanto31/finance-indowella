@@ -143,6 +143,16 @@ class Journal extends Model
             }
         }
     }
+    public function updateLawanID(){
+        $lawanJournal= Journal::where('journal_number',$this->journal_number)->where('code_group',$this->lawan_code_group)->get();
+        if(count($lawanJournal)==1){
+            $this->journal_lawan_id= $lawanJournal[0]->id;
+            $this->save();
+        }else{
+            $this->journal_lawan_id= collect($lawanJournal)->where('amount_debet',$this->amount_kredit)->where('amount_kredit',$this->amount_debet)->first()->id ?? null;
+            $this->save();
+        }
+    }
     // 'reference_id' => $transaction->id,
     // 'reference_type' => get_class($transaction),
     public static function generateJournal(Request $request, ?LockManager $lockManager = null)
@@ -314,6 +324,7 @@ class Journal extends Model
         }
 
         $journal->createKartuLink();
+        $journal->updateLawanID();
         $journal->verifyJournal();
         $journal->createDetailKartuInvoice();
     }
