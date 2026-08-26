@@ -148,6 +148,10 @@ class KartuStockController extends Controller
                 $journal->amount_kredit=0;
             }
             $journal->save();
+            $lawanJournal= Journal::where('journal_number',$journal->journal_number)->where('code_group',$journal->lawan_code_group)->where('id','<>',$journal->id)->first();
+            $lawanJournal->amount_debet=$journal->amount_kredit;
+            $lawanJournal->amount_kredit=$journal->amount_debet;
+            $lawanJournal->save();
             $lastKartu = $kartu;
         }
         return ['status' => 1, 'msg' => 'Re-evaluation of HPP successful'];
