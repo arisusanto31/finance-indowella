@@ -30,15 +30,17 @@ trait HasModelDetailKartuInvoice
         if (get_class($kartu) == Journal::class) {
             $kartu->journal_id = $kartu->id;
             //ambil lawan jurnalnya trus ambil kartu lawannya. biasanya disitu kartu nya
-            $jLawan= Journal::where('journal_number', $kartu->journal_number)
+            $jLawan = Journal::where('journal_number', $kartu->journal_number)
                 ->where('id', '<>', $kartu->id)
-                ->where('code_group',$kartu->lawan_code_group)
+                ->where('code_group', $kartu->lawan_code_group)
                 ->whereRaw('amount_debet + amount_kredit = ?', [$kartu->amount_debet + $kartu->amount_kredit])
                 ->first();
-            $dkLawan = DetailKartuInvoice::where('journal_id',$jLawan->id)->first();
-            $salesOrderNumber = $dkLawan->sales_order_number ?? null;
-            $salesOrder= SalesOrder::where('sales_order_number', $salesOrderNumber)->first();
-            $SOID = $salesOrder ? $salesOrder->id : null;
+            if ($jLawan) {
+                $dkLawan = DetailKartuInvoice::where('journal_id', $jLawan->id)->first();
+                $salesOrderNumber = $dkLawan->sales_order_number ?? null;
+                $salesOrder = SalesOrder::where('sales_order_number', $salesOrderNumber)->first();
+                $SOID = $salesOrder ? $salesOrder->id : null;
+            }
         }
         // if (isset($kartu->purchase_order_number)) {
         //     $purchaseOrderNumber = $kartu->purchase_order_number;
@@ -53,12 +55,14 @@ trait HasModelDetailKartuInvoice
             $invoiceNumber = $kartu->invoice_pack_number;
             $invoice = InvoicePack::where('invoice_number', $invoiceNumber)->first();
             $invID = $invoice ? $invoice->id : null;
-            if($invoice->reference_model == InvoiceSaleDetail::class){
-                if(!$saleOrderNumber){
-                    $salesOrder= SalesOrder::find($invoice->sales_order_id);
-                    if($salesOrder){
-                        $saleOrderNumber=$salesOrder->sales_order_number;
-                        $SOID=$salesOrder->id;
+            if ($invoice) {
+                if ($invoice->reference_model == InvoiceSaleDetail::class) {
+                    if (!$saleOrderNumber) {
+                        $salesOrder = SalesOrder::find($invoice->sales_order_id);
+                        if ($salesOrder) {
+                            $saleOrderNumber = $salesOrder->sales_order_number;
+                            $SOID = $salesOrder->id;
+                        }
                     }
                 }
             }
@@ -66,7 +70,7 @@ trait HasModelDetailKartuInvoice
         $dks = DetailKartuInvoice::storeData(new Request([
             'kartu_type' => get_class($kartu),
             'kartu_id' => $kartu->id,
-            'journal_number'=> $kartu->journal_number??null,
+            'journal_number' => $kartu->journal_number ?? null,
             'journal_id' => $kartu->journal_id,
             'sales_order_number' => $saleOrderNumber,
             'sales_order_id' => $SOID,
@@ -76,7 +80,7 @@ trait HasModelDetailKartuInvoice
             'invoice_pack_id' => $invID,
         ]));
         if ($dks['status'] == 0) {
-            return $dks;
+            throw new \Exception('create link error:' . $dks['msg']);
         }
 
         $thedk = $dks['msg'];

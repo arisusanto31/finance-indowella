@@ -126,12 +126,25 @@ class KartuStockController extends Controller
                 $kartu->mutasi_qty_backend = $mutasiQTYBackend;
                 $kartu->mutasi_rupiah_on_unit = $mutasiRupiahOnUnit;
                 $kartu->mutasi_rupiah_total = $mutasiRupiahTotal;
+                //ya iki pekoknya lur. harusnya jurnalnya ya disamakan juga tole..
+
             } else {
                 //ga perlu diganti ya kalo mutasi masuk
             }
             $kartu->saldo_qty_backend = $lastKartu ? $lastKartu->saldo_qty_backend + $kartu->mutasi_qty_backend : $kartu->mutasi_qty_backend;
             $kartu->saldo_rupiah_total = $lastKartu ? $lastKartu->saldo_rupiah_total + $kartu->mutasi_rupiah_total : $kartu->mutasi_rupiah_total;
             $kartu->save();
+
+            //update jurnal ini lur 
+            // $journal= Journal::find($kartu->journal_id);
+            // if($kartu->mutasi_rupiah_total <0){
+            //     $journal->amount_debet=0;
+            //     $journal->amount_kredit=abs($kartu->mutasi_rupiah_total);
+            // }else{
+            //     $journal->amount_debet=$kartu->mutasi_rupiah_total;
+            //     $journal->amount_kredit=0;
+            // }
+            // $journal->save();
             $lastKartu = $kartu;
         }
         return ['status' => 1, 'msg' => 'Re-evaluation of HPP successful'];

@@ -129,8 +129,9 @@ class DetailKartuInvoice extends Model
 
             //oke dari sini sudah ada jurnal dan invoice pack, dan bisa jadi ada kartu
             $dt = null;
-
-            $dt = DetailKartuInvoice::where('journal_id', $journal->id)->first();
+            if($journal) {
+                $dt = DetailKartuInvoice::where('journal_id', $journal->id)->where('kartu_type', $kartuType)->where('kartu_id', $kartuId)->first();
+            }
             if ($dt) {
                 $dt->updateData($dataUpdate);
             } else {
@@ -159,8 +160,8 @@ class DetailKartuInvoice extends Model
         } catch (\Exception $e) {
             return [
                 'status' => 0,
-                'msg' => $e->getMessage()
-            ];
+                'msg' => 'store data failed '.$e->getMessage()
+            ]; 
         }
     }
 
