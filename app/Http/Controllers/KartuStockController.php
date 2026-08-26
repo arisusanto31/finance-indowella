@@ -136,15 +136,18 @@ class KartuStockController extends Controller
             $kartu->save();
 
             //update jurnal ini lur 
-            // $journal= Journal::find($kartu->journal_id);
-            // if($kartu->mutasi_rupiah_total <0){
-            //     $journal->amount_debet=0;
-            //     $journal->amount_kredit=abs($kartu->mutasi_rupiah_total);
-            // }else{
-            //     $journal->amount_debet=$kartu->mutasi_rupiah_total;
-            //     $journal->amount_kredit=0;
-            // }
-            // $journal->save();
+            $allks= KartuStock::where('stock_id',$kartu->stock_id)->where('journal_id',$kartu->journal_id)->select(
+                DB::raw('sum(mutasi_rupiah_total) as sum_mutasi_rupiah_total')
+            )->groupBy('journal_id')->first();
+            $journal= Journal::find($kartu->journal_id);
+            if($allks->sum_mutasi_rupiah_total <0){
+                $journal->amount_debet=0;
+                $journal->amount_kredit=abs($allks->sum_mutasi_rupiah_total);
+            }else{
+                $journal->amount_debet=$allks->sum_mutasi_rupiah_total;
+                $journal->amount_kredit=0;
+            }
+            $journal->save();
             $lastKartu = $kartu;
         }
         return ['status' => 1, 'msg' => 'Re-evaluation of HPP successful'];
