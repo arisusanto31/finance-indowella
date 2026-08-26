@@ -13,7 +13,7 @@ return new class extends Migration
     {
         //
         Schema::table('journals',function($table){
-            $table->integer('journal_lawan_id')->nullable()->index();
+            $table->integer('journal_lawan_id')->nullable();
         });
     }
 
