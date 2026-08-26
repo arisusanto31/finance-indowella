@@ -267,69 +267,70 @@
                 </div>
                 <div class="card-body ">
                     <div class="">
-                        <h5 id="" class="pb-0 mt-3 mb-0 text-primary"> <i class="fas fa-circle"></i> Kartu
+                        <h5 id="" class="pb-0 mt-3 mb-0 text-primary"> <input type="checkbox" class="check-cocok" checked id="check-kartu-stock" /> Kartu
                             Stock <span style="font-size:14px"> vs jurnal</span>
-                         <button onclick="showDetailMutasi('KartuStock')"><i class="fas fa-eye"></i> </button> 
+                            <button onclick="showDetailMutasi('KartuStock')"><i class="fas fa-eye"></i> </button>
                         </h5>
                         <div id="cocok-kartu-stock" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
-                         <h5 id="" class="pb-0 mt-3 mb-0 text-primary"> <i class="fas fa-circle"></i> Kartu
+
+                        <h5 id="" class="pb-0 mt-3 mb-0 text-primary"> <input type="checkbox" class="check-cocok" checked id="check-kartu-in-transit" /> Kartu
                             In Transit <span style="font-size:14px"> vs jurnal</span>
                             <button onclick="showDetailMutasi('KartuInTransit')"><i class="fas fa-eye"></i> </button>
                         </h5>
                         <div id="cocok-kartu-in-transit" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
-                        <h5 id="" class="pb-0 mt-3 mb-0 text-primary"> <i class="fas fa-circle"></i> Kartu
+                        <h5 id="" class="pb-0 mt-3 mb-0 text-primary"> <input type="checkbox" class="check-cocok" checked id="check-kartu-bdp" /> Kartu
                             BDP <span style="font-size:14px"> vs jurnal</span>
                             <button onclick="showDetailMutasi('KartuBDP')"><i class="fas fa-eye"></i> </button>
                         </h5>
                         <div id="cocok-kartu-bdp" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
-                        <h5 id="" class="pb-0 mt-3 mb-0  text-primary"> <i class="fas fa-circle"></i> Kartu
+                        <h5 id="" class="pb-0 mt-3 mb-0  text-primary"> <input type="checkbox" class="check-cocok" checked id="check-kartu-bahan-jadi" /> Kartu
                             Bahan Jadi <span style="font-size:14px"> vs jurnal</span>
-                            <button onclick="showDetailMutasi('KartuBahanJadi')"><i class="fas fa-eye"></i> </button> 
-                        
+                            <button onclick="showDetailMutasi('KartuBahanJadi')"><i class="fas fa-eye"></i> </button>
+
                         </h5>
                         <div id="cocok-kartu-bahan-jadi" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
-                        <h5 class="pb-0 mt-3 mb-0 text-primary"> <i class="fas fa-circle"></i> Kartu Piutang <span
+                        <h5 class="pb-0 mt-3 mb-0 text-primary"> <input type="checkbox" class="check-cocok" checked id="check-kartu-piutang" /> Kartu Piutang <span
                                 style="font-size:14px"> vs jurnal</span>
-                               <button onclick="showDetailMutasi('KartuPiutang')"><i class="fas fa-eye"></i> </button> 
-                        
+                            <button onclick="showDetailMutasi('KartuPiutang')"><i class="fas fa-eye"></i> </button>
+
                         </h5>
                         <div id="cocok-kartu-piutang" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
-                        <h5 class="pb-0 mt-3 mb-0 text-primary"> <i class="fas fa-circle"></i> Kartu Hutang <span
+                        <h5 class="pb-0 mt-3 mb-0 text-primary"> <input type="checkbox" class="check-cocok" checked id="check-kartu-hutang" /> Kartu Hutang <span
                                 style="font-size:14px"> vs jurnal</span>
-                             <button onclick="showDetailMutasi('KartuHutang')"><i class="fas fa-eye"></i> </button> 
+                            <button onclick="showDetailMutasi('KartuHutang')"><i class="fas fa-eye"></i> </button>
                         </h5>
                         <div id="cocok-kartu-hutang" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
-                        <h5 class="pb-0 mt-3 mb-0 text-primary">
-                             <i class="fas fa-circle"></i> Kartu DP Sales <span
+                        <h5 class="pb-0 mt-3 mb-0 text-primary"> <input type="checkbox" class="check-cocok" checked id="check-kartu-dp" />
+                            Kartu DP Sales <span
                                 style="font-size:14px"> vs jurnal</span>
-                             <button onclick="showDetailMutasi('KartuDPSales')"><i class="fas fa-eye"></i> </button>    
+                            <button onclick="showDetailMutasi('KartuDPSales')"><i class="fas fa-eye"></i> </button>
                         </h5>
                         <div id="cocok-kartu-dp" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
-                        <h5 class="pb-0 mt-3 mb-0 text-primary">
-                             <i class="fas fa-circle"></i> Inventaris <span
+                        <h5 class="pb-0 mt-3 mb-0 text-primary"> <input type="checkbox" class="check-cocok" checked id="check-kartu-inventaris" />
+                            Inventaris <span
                                 style="font-size:14px"> vs jurnal</span>
-                             <button onclick="showDetailMutasi('KartuInventaris')"><i class="fas fa-eye"></i> </button> 
+                            <button onclick="showDetailMutasi('KartuInventaris')"><i class="fas fa-eye"></i> </button>
                         </h5>
                         <div id="cocok-kartu-inventaris" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
-                        <h5 class="pb-0 mt-3 mb-0 text-primary">
-                             <i class="fas fa-circle"></i> BDD<span
+                        <h5 class="pb-0 mt-3 mb-0 text-primary"> <input type="checkbox" class="check-cocok" checked id="check-kartu-bdd" />
+                            BDD<span
                                 style="font-size:14px"> vs jurnal</span>
-                                 <button onclick="showDetailMutasi('KartuBDD')"><i class="fas fa-eye"></i> </button> 
-                            </h5>
+                            <button onclick="showDetailMutasi('KartuBDD')"><i class="fas fa-eye"></i> </button>
+                        </h5>
                         <div id="cocok-kartu-bdd" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
 
-                         <h5 class="pb-0 mt-3 mb-0 text-primary">
-                             <i class="fas fa-circle"></i> Penjualan<span
+                        <h5 class="pb-0 mt-3 mb-0 text-primary"> <input type="checkbox" class="check-cocok" checked id="check-kartu-penjualan" />
+                            Penjualan<span
                                 style="font-size:14px"> vs jurnal</span>
-                                 <button onclick="showDetailMutasi('KartuPenjualan')"><i class="fas fa-eye"></i> </button> 
-                            </h5>
+                            <button onclick="showDetailMutasi('KartuPenjualan')"><i class="fas fa-eye"></i> </button>
+                        </h5>
                         <div id="cocok-kartu-penjualan" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
 
-                         <h5 class="pb-0 mt-3 mb-0 text-primary">
-                             <i class="fas fa-circle"></i> Pembelian<span
+                        <h5 class="pb-0 mt-3 mb-0 text-primary"> <input type="checkbox" class="check-cocok" checked id="check-kartu-pembelian" />
+                            Pembelian<span
                                 style="font-size:14px"> vs jurnal</span>
-                                 <button onclick="showDetailMutasi('KartuPembelian')"><i class="fas fa-eye"></i> </button> 
-                            </h5>
+                            <button onclick="showDetailMutasi('KartuPembelian')"><i class="fas fa-eye"></i> </button>
+                        </h5>
                         <div id="cocok-kartu-pembelian" class="ps-4">Rp 12.000.000 = Rp 12.000.000</div>
 
                     </div>
@@ -457,143 +458,143 @@
     </div>
 
     @push('styles')
-        <style>
-            .custom-dashboard-style {
-                color: red;
-            }
-        </style>
+    <style>
+        .custom-dashboard-style {
+            color: red;
+        }
+    </style>
     @endpush
     @push('scripts')
-        <script>
-            // Custom JavaScript code can be added here
-            console.log('Dashboard script loaded');
-            $(document).ready(function() {
-                // Initialize the donut chart
-                initItemSelectManual('#select-codegroup-custom', '{{ route("chart-account.get-item-all") }}?',
-                    '--Pilih Akun--');
-                loadDataError();
-                getDataSaldoHighlight();
-                $('#select-codegroup-custom').html('<option value="140000" selected >Persediaan </option>');
-                getSaldoCustom();
-                getSummaryBalance();
-            });
+    <script>
+        // Custom JavaScript code can be added here
+        console.log('Dashboard script loaded');
+        $(document).ready(function() {
+            // Initialize the donut chart
+            initItemSelectManual('#select-codegroup-custom', '{{ route("chart-account.get-item-all") }}?',
+                '--Pilih Akun--');
+            loadDataError();
+            getDataSaldoHighlight();
+            $('#select-codegroup-custom').html('<option value="140000" selected >Persediaan </option>');
+            getSaldoCustom();
+            getSummaryBalance();
+        });
 
-            var lastDate = null;
+        var lastDate = null;
 
-            function showDetailMutasi(typeKartu){
-                let date = $('#date-cocok').val();
-                let url = '{{url("admin/show-detail-pencocokan")}}?model='+typeKartu+'&date='+date;
-                
-                showDetailOnModal(url, 'xl');
-            }
+        function showDetailMutasi(typeKartu) {
+            let date = $('#date-cocok').val();
+            let url = '{{url("admin/show-detail-pencocokan")}}?model=' + typeKartu + '&date=' + date;
 
-            
-            function onFocusOutDate() {
-                dateCocok = $('#date-cocok').val();
-                if (dateCocok != lastDate) {
-                    lastDate = dateCocok;
-                    getSummaryBalance();
-                }
+            showDetailOnModal(url, 'xl');
+        }
 
-            }
 
-            function onFocusInDate() {
-                dateCocok = $('#date-cocok').val();
+        function onFocusOutDate() {
+            dateCocok = $('#date-cocok').val();
+            if (dateCocok != lastDate) {
                 lastDate = dateCocok;
-                console.log(lastDate);
+                getSummaryBalance();
             }
 
-            const donutChartConfig = {
-                chart: {
-                    height: 165,
-                    width: 130,
-                    type: 'donut'
-                },
-                labels: ['Jurnal', 'kartuStock', 'KartuHutang', 'KartuPiutang', 'kartu Inventory', 'kartu Prepaid'],
-                series: [0, 0, 0, 0, 0, 0],
-                colors: ['#696cff', '#8592a3', '#03c3ec', '#71dd37', '#ffab00', '#ff3e1d'],
-                stroke: {
-                    width: 5,
-                    colors: ['#fff']
-                },
-                dataLabels: {
-                    enabled: false
-                },
-                legend: {
-                    show: false
-                },
-                grid: {
-                    padding: {
-                        top: 0,
-                        bottom: 0,
-                        right: 15
-                    }
-                },
-                plotOptions: {
-                    pie: {
-                        donut: {
-                            size: '75%',
-                            labels: {
+        }
+
+        function onFocusInDate() {
+            dateCocok = $('#date-cocok').val();
+            lastDate = dateCocok;
+            console.log(lastDate);
+        }
+
+        const donutChartConfig = {
+            chart: {
+                height: 165,
+                width: 130,
+                type: 'donut'
+            },
+            labels: ['Jurnal', 'kartuStock', 'KartuHutang', 'KartuPiutang', 'kartu Inventory', 'kartu Prepaid'],
+            series: [0, 0, 0, 0, 0, 0],
+            colors: ['#696cff', '#8592a3', '#03c3ec', '#71dd37', '#ffab00', '#ff3e1d'],
+            stroke: {
+                width: 5,
+                colors: ['#fff']
+            },
+            dataLabels: {
+                enabled: false
+            },
+            legend: {
+                show: false
+            },
+            grid: {
+                padding: {
+                    top: 0,
+                    bottom: 0,
+                    right: 15
+                }
+            },
+            plotOptions: {
+                pie: {
+                    donut: {
+                        size: '75%',
+                        labels: {
+                            show: true,
+                            value: {
+                                fontSize: '1.5rem',
+                                fontFamily: 'Public Sans',
+                                color: '#566a7f',
+                                offsetY: -15
+                            },
+                            name: {
+                                offsetY: 20,
+                                fontFamily: 'Public Sans'
+                            },
+                            total: {
                                 show: true,
-                                value: {
-                                    fontSize: '1.5rem',
-                                    fontFamily: 'Public Sans',
-                                    color: '#566a7f',
-                                    offsetY: -15
-                                },
-                                name: {
-                                    offsetY: 20,
-                                    fontFamily: 'Public Sans'
-                                },
-                                total: {
-                                    show: true,
-                                    fontSize: '0.8125rem',
-                                    color: '#a1acb8',
-                                    label: 'Error'
-                                }
+                                fontSize: '0.8125rem',
+                                color: '#a1acb8',
+                                label: 'Error'
                             }
                         }
                     }
-                },
-                yaxis: [ /* ❌ ini akan dibuang otomatis */ ],
-                annotations: {
-                    yaxis: [],
-                    xaxis: [],
-                    points: []
-                },
-                xaxis: {
-                    convertedCatToNumeric: false
                 }
-            };
-            console.log(donutChartConfig)
-            // ✅ Function untuk bikin donut chart aman tanpa properti yang tidak perlu
-            function createSafeDonutChart(elId, config) {
-                const chartEl = document.querySelector(elId);
-                if (!chartEl) return console.error('Element chart tidak ditemukan:', elId);
-
-                const safeConfig = JSON.parse(JSON.stringify(config));
-
-                // Hapus properti yang bisa memicu error
-                delete safeConfig.yaxis;
-                delete safeConfig.xaxis;
-                delete safeConfig.annotations;
-
-                const chart = new ApexCharts(chartEl, safeConfig);
-                chart.render();
+            },
+            yaxis: [ /* ❌ ini akan dibuang otomatis */ ],
+            annotations: {
+                yaxis: [],
+                xaxis: [],
+                points: []
+            },
+            xaxis: {
+                convertedCatToNumeric: false
             }
+        };
+        console.log(donutChartConfig)
+        // ✅ Function untuk bikin donut chart aman tanpa properti yang tidak perlu
+        function createSafeDonutChart(elId, config) {
+            const chartEl = document.querySelector(elId);
+            if (!chartEl) return console.error('Element chart tidak ditemukan:', elId);
 
-            // 🔥 Panggil dengan ID chart kamu
-            function loadDataError() {
-                $.ajax({
-                    url: '{{ route("dashboard.inspect-jurnal") }}',
-                    method: 'get',
-                    success: function(res) {
-                        console.log(res);
+            const safeConfig = JSON.parse(JSON.stringify(config));
 
-                        if (res.status == 1) {
-                            $('#total-data-valid').html(res.total);
-                            // Handle success
-                            html = `
+            // Hapus properti yang bisa memicu error
+            delete safeConfig.yaxis;
+            delete safeConfig.xaxis;
+            delete safeConfig.annotations;
+
+            const chart = new ApexCharts(chartEl, safeConfig);
+            chart.render();
+        }
+
+        // 🔥 Panggil dengan ID chart kamu
+        function loadDataError() {
+            $.ajax({
+                url: '{{ route("dashboard.inspect-jurnal") }}',
+                method: 'get',
+                success: function(res) {
+                    console.log(res);
+
+                    if (res.status == 1) {
+                        $('#total-data-valid').html(res.total);
+                        // Handle success
+                        html = `
                         <li class="d-flex mb-3 pb-1">
                             <div class="avatar flex-shrink-0 me-3">
                                 <span class="avatar-initial rounded " style="background-color:#696cff"><i class="bx bx-book"></i></span>
@@ -679,149 +680,210 @@
                             </div>
                         </li> 
                         `;
-                            $('#list-data-valid').html(html);
+                        $('#list-data-valid').html(html);
 
-                            donutChartConfig.series = [res.problem_journal, res.problem_kartu_stock, res
-                                .problem_kartu_hutang, res.problem_kartu_piutang, res.problem_kartu_inventory,
-                                res.problem_kartu_prepaid
-                            ];
-                            createSafeDonutChart('#errorDataChart', donutChartConfig);
+                        donutChartConfig.series = [res.problem_journal, res.problem_kartu_stock, res
+                            .problem_kartu_hutang, res.problem_kartu_piutang, res.problem_kartu_inventory,
+                            res.problem_kartu_prepaid
+                        ];
+                        createSafeDonutChart('#errorDataChart', donutChartConfig);
 
-                        } else {
-                            // Handle error
-                            Swal.fire('Error', 'Failed to load data: ' + res.msg, 'error');
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('AJAX Error:', status, error);
-                        Swal.fire('Error', 'AJAX request failed: ' + error, 'error');
+                    } else {
+                        // Handle error
+                        Swal.fire('Error', 'Failed to load data: ' + res.msg, 'error');
                     }
-                });
-            }
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', status, error);
+                    Swal.fire('Error', 'AJAX request failed: ' + error, 'error');
+                }
+            });
+        }
 
-            function getDataSaldoHighlight() {
-                $.ajax({
-                    url: '{{ route("jurnal.get-saldo-highlight") }}?date={{ Date("Y-m-d H:i:s") }}',
-                    method: 'get',
-                    success: function(res) {
-                        console.log(res);
-                        if (res.status == 1) {
-                            $('#saldo-hutang').html("Rp." + formatRupiahSimple(res.msg.saldo_hutang.msg));
-                            $('#saldo-piutang').html("Rp." + formatRupiahSimple(res.msg.saldo_piutang.msg));
-                            $('#saldo-laba').html("Rp." + formatRupiahSimple(res.msg.saldo_laba));
-                            $('#saldo-penjualan').html("Rp." + formatRupiahSimple(res.msg.saldo_penjualan.msg));
-                            // $('#prosen-hutang').html(res.prosen_hutang);
-                            // $('#prosen-piutang').html(res.prosen_piutang);
-                            // $('#prosen-penjualan').html(res.prosen_penjualan);
-                        } else {
-                            // Handle error
-                            Swal.fire('Error', 'Failed to load data: ' + res.msg, 'error');
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('AJAX Error:', status, error);
-                        Swal.fire('Error', 'AJAX request failed: ' + error, 'error');
+        function getDataSaldoHighlight() {
+            $.ajax({
+                url: '{{ route("jurnal.get-saldo-highlight") }}?date={{ Date("Y-m-d H:i:s") }}',
+                method: 'get',
+                success: function(res) {
+                    console.log(res);
+                    if (res.status == 1) {
+                        $('#saldo-hutang').html("Rp." + formatRupiahSimple(res.msg.saldo_hutang.msg));
+                        $('#saldo-piutang').html("Rp." + formatRupiahSimple(res.msg.saldo_piutang.msg));
+                        $('#saldo-laba').html("Rp." + formatRupiahSimple(res.msg.saldo_laba));
+                        $('#saldo-penjualan').html("Rp." + formatRupiahSimple(res.msg.saldo_penjualan.msg));
+                        // $('#prosen-hutang').html(res.prosen_hutang);
+                        // $('#prosen-piutang').html(res.prosen_piutang);
+                        // $('#prosen-penjualan').html(res.prosen_penjualan);
+                    } else {
+                        // Handle error
+                        Swal.fire('Error', 'Failed to load data: ' + res.msg, 'error');
                     }
-                });
-            }
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', status, error);
+                    Swal.fire('Error', 'AJAX request failed: ' + error, 'error');
+                }
+            });
+        }
 
-            function getSaldoCustom() {
-                var code = $('#select-codegroup-custom option:selected').val();
-                $.ajax({
-                    url: '{{ url("admin/jurnal/get-saldo-custom") }}/' + code + "?date={{ Date('Y-m-d H:i:s') }}",
-                    method: 'get',
-                    success: function(res) {
-                        console.log(res);
-                        if (res.status == 1) {
+        function getSaldoCustom() {
+            var code = $('#select-codegroup-custom option:selected').val();
+            $.ajax({
+                url: '{{ url("admin/jurnal/get-saldo-custom") }}/' + code + "?date={{ Date('Y-m-d H:i:s') }}",
+                method: 'get',
+                success: function(res) {
+                    console.log(res);
+                    if (res.status == 1) {
 
-                            $('#saldo-custom').html("Rp " + formatRupiahSimple(res.msg.msg));
-                            // $('#prosen-hutang').html(res.prosen_hutang);
-                            // $('#prosen-piutang').html(res.prosen_piutang);
-                            // $('#prosen-penjualan').html(res.prosen_penjualan);
-                        } else {
-                            // Handle error
-                            Swal.fire('Error', 'Failed to load data: ' + res.msg, 'error');
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('AJAX Error:', status, error);
-                        Swal.fire('Error', 'AJAX request failed: ' + error, 'error');
+                        $('#saldo-custom').html("Rp " + formatRupiahSimple(res.msg.msg));
+                        // $('#prosen-hutang').html(res.prosen_hutang);
+                        // $('#prosen-piutang').html(res.prosen_piutang);
+                        // $('#prosen-penjualan').html(res.prosen_penjualan);
+                    } else {
+                        // Handle error
+                        Swal.fire('Error', 'Failed to load data: ' + res.msg, 'error');
                     }
-                });
-            }
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', status, error);
+                    Swal.fire('Error', 'AJAX request failed: ' + error, 'error');
+                }
+            });
+        }
 
-            function getSummaryBalance() {
-                dateCocok = $('#date-cocok').val();
-                url = '{{ url("admin/get-summary-balance") }}?date=' + dateCocok;
-                console.log('get summary balance :'+url);
-                loading(1);
-                $.ajax({
-                    url: url,
-                    method: 'get',
-                    success: function(res) {
-                        loading(0);
-                        console.log('summary balance',res);
-                        if (res.status == 1) {
-                            var isCocokStock = (Math.abs(res.kartu_stock.saldo - res.kartu_stock.journal)<0.01)?1:0;
-                            var isCocokBdp = (Math.abs(res.kartu_bdp.saldo - res.kartu_bdp.journal)<0.01)?1:0;
-                            var isCocokBahanJadi = (Math.abs(res.kartu_bahan_jadi.saldo - res.kartu_bahan_jadi.journal)<0.01)?1:0;
-                            var isCocokPiutang = (Math.abs(res.kartu_piutang.saldo - res.kartu_piutang.journal)<0.01)?1:0;
-                            var isCocokHutang = (Math.abs(res.kartu_hutang.saldo - res.kartu_hutang.journal)<0.01)?1:0;
-                            var isCocokDp = (Math.abs(res.kartu_dp.saldo - res.kartu_dp.journal)<0.01)?1:0;
-                            var isCocokInventaris = (Math.abs(res.kartu_inventaris.saldo - res.kartu_inventaris.journal)<0.01)?1:0;
-                            var isCocokBdd = (Math.abs(res.kartu_bdd.saldo - res.kartu_bdd.journal)<0.01)?1:0;
-                            var isCocokPenjualan = (Math.abs(res.penjualan.saldo - res.penjualan.journal)<0.01)?1:0;
-                            var isCocokPembelian = (Math.abs(res.pembelian.saldo - res.pembelian.journal)<0.01)?1:0;
-                            var isCocokInTransit = (Math.abs(res.kartu_in_transit.saldo - res.kartu_in_transit.journal)<0.01)?1:0;
+        function getSummaryBalance() {
+            var dateCocok = $('#date-cocok').val();
+            var checkedData = [];
+            $('.check-cocok').each(function(index, el) {
+                if ($(el).is(':checked')) {
+                    checkedData.push($(el).attr('id').replace('check-', ''));
+                }
+            });
+            var url = '{{ url("admin/get-summary-balance") }}?date=' + dateCocok + '&checked=' + checkedData.join(',');
+            console.log('get summary balance :' + url);
+            console.log('checked data :', checkedData);
+            loading(1);
+            $.ajax({
+                url: url,
+                method: 'get',
+                success: function(res) {
+                    loading(0);
+                    console.log('summary balance', res);
+                    if (res.status == 1) {
+                        if (checkedData.includes('kartu-stock'))
+                            var isCocokStock = (Math.abs(res.kartu_stock.saldo - res.kartu_stock.journal) < 0.01) ? 1 : 0;
+                        if (checkedData.includes('kartu-in-transit'))
+                            var isCocokInTransit = (Math.abs(res.kartu_in_transit.saldo - res.kartu_in_transit.journal) < 0.01) ? 1 : 0;
+                        if (checkedData.includes('kartu-bdp'))
+                            var isCocokBdp = (Math.abs(res.kartu_bdp.saldo - res.kartu_bdp.journal) < 0.01) ? 1 : 0;
+                        if (checkedData.includes('kartu-bahan-jadi'))
+                            var isCocokBahanJadi = (Math.abs(res.kartu_bahan_jadi.saldo - res.kartu_bahan_jadi.journal) < 0.01) ? 1 : 0;
+                        if (checkedData.includes('kartu-piutang'))
+                            var isCocokPiutang = (Math.abs(res.kartu_piutang.saldo - res.kartu_piutang.journal) < 0.01) ? 1 : 0;
+                        if (checkedData.includes('kartu-hutang'))
+                            var isCocokHutang = (Math.abs(res.kartu_hutang.saldo - res.kartu_hutang.journal) < 0.01) ? 1 : 0;
+                        if (checkedData.includes('kartu-dp'))
+                            var isCocokDp = (Math.abs(res.kartu_dp.saldo - res.kartu_dp.journal) < 0.01) ? 1 : 0;
+                        if (checkedData.includes('kartu-inventaris'))
+                            var isCocokInventaris = (Math.abs(res.kartu_inventaris.saldo - res.kartu_inventaris.journal) < 0.01) ? 1 : 0;
+                        if (checkedData.includes('kartu-bdd'))
+                            var isCocokBdd = (Math.abs(res.kartu_bdd.saldo - res.kartu_bdd.journal) < 0.01) ? 1 : 0;
+                        if (checkedData.includes('kartu-penjualan'))
+                            var isCocokPenjualan = (Math.abs(res.penjualan.saldo - res.penjualan.journal) < 0.01) ? 1 : 0;
+                        if (checkedData.includes('kartu-pembelian'))
+                            var isCocokPembelian = (Math.abs(res.pembelian.saldo - res.pembelian.journal) < 0.01) ? 1 : 0;
 
+                        if (checkedData.includes('kartu-stock')) {
                             $('#cocok-kartu-stock').html("Rp " + formatRupiah(res.kartu_stock.saldo) + ' vs ' +
-                                formatRupiah(res.kartu_stock.journal)+
-                                `${isCocokStock?'<span class="text-success"> <i class="fas fa-check"></i></span>':'<span class="text-danger"> <i class="fas fa-times"></i></span>'}`);
+                                formatRupiah(res.kartu_stock.journal) +
+                                `${isCocokStock?'<span class="text-success"> <i class="fas fa-check"></i></span>':'<span class="text-danger"> <i class="fas fa-times"></i></span>'}
+                                 ${isCocokStock?'':'<br><span class="text-danger"> (miss: Rp '+formatRupiah(Math.abs(res.kartu_stock.saldo - res.kartu_stock.journal))+'</span>)'}
+                                `);
+                        }
+                        if (checkedData.includes('kartu-in-transit')) {
                             $('#cocok-kartu-in-transit').html("Rp " + formatRupiah(res.kartu_in_transit.saldo) + ' vs ' +
-                                formatRupiah(res.kartu_in_transit.journal)+
-                                `${isCocokInTransit?'<span class="text-success"> <i class="fas fa-check"></i></span>':'<span class="text-danger"> <i class="fas fa-times"></i></span>'}`);
+                                formatRupiah(res.kartu_in_transit.journal) +
+                                `${isCocokInTransit?'<span class="text-success"> <i class="fas fa-check"></i></span>':'<span class="text-danger"> <i class="fas fa-times"></i></span>'}
+                                 ${isCocokInTransit?'':'<br><span class="text-danger"> (miss: Rp '+formatRupiah(Math.abs(res.kartu_in_transit.saldo - res.kartu_in_transit.journal))+'</span>)'}
+                                `);
+                        }
+                        if (checkedData.includes('kartu-bdp')) {
                             $('#cocok-kartu-bdp').html("Rp " + formatRupiah(res.kartu_bdp.saldo) + ' vs ' +
-                                formatRupiah(res.kartu_bdp.journal)+
-                                `${isCocokBdp?'<span class="text-success"> <i class="fas fa-check"></i></span>':'<span class="text-danger"> <i class="fas fa-times"></i></span>'}`);
+                                formatRupiah(res.kartu_bdp.journal) +
+                                `${isCocokBdp?'<span class="text-success"> <i class="fas fa-check"></i></span>':'<span class="text-danger"> <i class="fas fa-times"></i></span>'}
+                                 ${isCocokBdp?'':'<br><span class="text-danger"> (miss: Rp '+formatRupiah(Math.abs(res.kartu_bdp.saldo - res.kartu_bdp.journal))+'</span>)'}
+                                `);
+                        }
+                        if (checkedData.includes('kartu-bahan-jadi')) {
                             $('#cocok-kartu-bahan-jadi').html("Rp " + formatRupiah(res.kartu_bahan_jadi.saldo) +
                                 ' vs ' +
-                                formatRupiah(res.kartu_bahan_jadi.journal)+
-                                `${isCocokBahanJadi?'<span class="text-success"> <i class="fas fa-check"></i></span>':'<span class="text-danger"> <i class="fas fa-times"></i></span>'}`);
+                                formatRupiah(res.kartu_bahan_jadi.journal) +
+                                `${isCocokBahanJadi?'<span class="text-success"> <i class="fas fa-check"></i></span>':'<span class="text-danger"> <i class="fas fa-times"></i></span>'}
+                                 ${isCocokBahanJadi?'':'<br><span class="text-danger"> (miss: Rp '+formatRupiah(Math.abs(res.kartu_bahan_jadi.saldo - res.kartu_bahan_jadi.journal))+'</span>)'}
+                                `);
+                        }
+                        if (checkedData.includes('kartu-piutang')) {
                             $('#cocok-kartu-piutang').html("Rp " + formatRupiah(res.kartu_piutang.saldo) + ' vs ' +
-                                formatRupiah(res.kartu_piutang.journal)+
-                                `${isCocokPiutang?'<span class="text-success"> <i class="fas fa-check"></i></span>':'<span class="text-danger"> <i class="fas fa-times"></i></span>'}`);
+                                formatRupiah(res.kartu_piutang.journal) +
+                                `${isCocokPiutang?'<span class="text-success"> <i class="fas fa-check"></i></span>':'<span class="text-danger"> <i class="fas fa-times"></i></span>'}
+                                 ${isCocokPiutang?'':'<br><span class="text-danger"> (miss: Rp '+formatRupiah(Math.abs(res.kartu_piutang.saldo - res.kartu_piutang.journal))+'</span>)'}
+                                `);
+                        }
+                        if (checkedData.includes('kartu-hutang')) {
                             $('#cocok-kartu-hutang').html("Rp " + formatRupiah(res.kartu_hutang.saldo) + ' vs ' +
-                                formatRupiah(res.kartu_hutang.journal)+
-                                `${isCocokHutang?'<span class="text-success"> <i class="fas fa-check"></i></span>':'<span class="text-danger"> <i class="fas fa-times"></i></span>'}`);
+                                formatRupiah(res.kartu_hutang.journal) +
+                                `${isCocokHutang?'<span class="text-success"> <i class="fas fa-check"></i></span>':'<span class="text-danger"> <i class="fas fa-times"></i></span>'}
+                                 ${isCocokHutang?'':'<br><span class="text-danger"> (miss: Rp '+formatRupiah(Math.abs(res.kartu_hutang.saldo - res.kartu_hutang.journal))+'</span>)'}
+                                `);
+                        }
+                        if (checkedData.includes('kartu-dp')) {
                             $('#cocok-kartu-dp').html("Rp " + formatRupiah(res.kartu_dp.saldo) + ' vs ' +
-                                formatRupiah(res.kartu_dp.journal)+
-                                `${isCocokDp?'<span class="text-success"> <i class="fas fa-check"></i></span>':'<span class="text-danger"> <i class="fas fa-times"></i></span>'}`);
+                                formatRupiah(res.kartu_dp.journal) +
+                                `${isCocokDp?'<span class="text-success"> <i class="fas fa-check"></i></span>':'<span class="text-danger"> <i class="fas fa-times"></i></span>'}
+                                 ${isCocokDp?'':'<br><span class="text-danger"> (miss: Rp '+formatRupiah(Math.abs(res.kartu_dp.saldo - res.kartu_dp.journal))+'</span>)'}
+                                `);
+                        }
+                        if (checkedData.includes('kartu-inventaris')) {
                             $('#cocok-kartu-inventaris').html("Rp " + formatRupiah(res.kartu_inventaris.saldo) +
                                 ' vs ' +
-                                formatRupiah(res.kartu_inventaris.journal)+
-                                `${isCocokInventaris?'<span class="text-success"> <i class="fas fa-check"></i></span>':'<span class="text-danger"> <i class="fas fa-times"></i></span>'}`);
-                            $('#cocok-kartu-bdd').html("Rp " + formatRupiah(res.kartu_bdd.saldo) + ' vs ' +
-                                formatRupiah(res.kartu_bdd.journal)+
-                                `${isCocokBdd?'<span class="text-success"> <i class="fas fa-check"></i></span>':'<span class="text-danger"> <i class="fas fa-times"></i></span>'}`);
-                            $('#cocok-kartu-penjualan').html("Rp " + formatRupiah(res.penjualan.saldo) + ' vs ' +
-                                formatRupiah(res.penjualan.journal)+
-                                `${isCocokPenjualan?'<span class="text-success"> <i class="fas fa-check"></i></span>':'<span class="text-danger"> <i class="fas fa-times"></i></span>'}`);
-                            $('#cocok-kartu-pembelian').html("Rp " + formatRupiah(res.pembelian.saldo) + ' vs ' +
-                                formatRupiah(res.pembelian.journal)+
-                                `${isCocokPembelian?'<span class="text-success"> <i class="fas fa-check"></i></span>':'<span class="text-danger"> <i class="fas fa-times"></i></span>'}`);
-
-                        } else {
-                            swalInfo('opps', 'something error' + res.msg, 'error');
+                                formatRupiah(res.kartu_inventaris.journal) +
+                                `${isCocokInventaris?'<span class="text-success"> <i class="fas fa-check"></i></span>':'<span class="text-danger"> <i class="fas fa-times"></i></span>'}
+                                 ${isCocokInventaris?'':'<br><span class="text-danger"> (miss: Rp '+formatRupiah(Math.abs(res.kartu_inventaris.saldo - res.kartu_inventaris.journal))+'</span>)'}
+                                `);
                         }
-                    },
-                    error: function(res) {
-                        loading(0);
-                        swalInfo('opps', 'something error', 'error');
+                        if (checkedData.includes('kartu-bdd')) {
+                            $('#cocok-kartu-bdd').html("Rp " + formatRupiah(res.kartu_bdd.saldo) + ' vs ' +
+                                formatRupiah(res.kartu_bdd.journal) +
+                                `${isCocokBdd?'<span class="text-success"> <i class="fas fa-check"></i></span>':'<span class="text-danger"> <i class="fas fa-times"></i></span>'}
+                                 ${isCocokBdd?'':'<br><span class="text-danger"> (miss: Rp '+formatRupiah(Math.abs(res.kartu_bdd.saldo - res.kartu_bdd.journal))+'</span>)'}
+                                `);
+                        }
+                        if (checkedData.includes('kartu-penjualan')) {
+                            $('#cocok-kartu-penjualan').html("Rp " + formatRupiah(res.penjualan.saldo) + ' vs ' +
+                                formatRupiah(res.penjualan.journal) +
+                                `${isCocokPenjualan?'<span class="text-success"> <i class="fas fa-check"></i></span>':'<span class="text-danger"> <i class="fas fa-times"></i></span>'}
+                                 ${isCocokPenjualan?'':'<br><span class="text-danger"> (miss: Rp '+formatRupiah(Math.abs(res.penjualan.saldo - res.penjualan.journal))+'</span>)'}
+                                `);
+                        }
+                        if (checkedData.includes('kartu-pembelian')) {
+                            $('#cocok-kartu-pembelian').html("Rp " + formatRupiah(res.pembelian.saldo) + ' vs ' +
+                                formatRupiah(res.pembelian.journal) +
+                                `${isCocokPembelian?'<span class="text-success"> <i class="fas fa-check"></i></span>':'<span class="text-danger"> <i class="fas fa-times"></i></span>'}
+                                 ${isCocokPembelian?'':'<br><span class="text-danger"> (miss: Rp '+formatRupiah(Math.abs(res.pembelian.saldo - res.pembelian.journal))+'</span>)'}
+                                `);
+                        }
+
+                    } else {
+                        swalInfo('opps', 'something error' + res.msg, 'error');
                     }
+                },
+                error: function(res) {
+                    loading(0);
+                    swalInfo('opps', 'something error', 'error');
+                }
 
-                });
-            }
-
-        </script>
+            });
+        }
+    </script>
     @endpush
 </x-app-layout>

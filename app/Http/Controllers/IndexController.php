@@ -107,38 +107,102 @@ class IndexController extends Controller
 
     public function getSummaryBalance()
     {
-        $ks = KartuStock::getTotalSaldoRupiah(getInput('date'));
-        $jks = KartuStock::getTotalJournal(getInput('date'));
+        $checked = getInput('checked') ? explode(',', getInput('checked')) : [];
+        if (count($checked) == 0) {
+            return [
+                'status' => 0,
+                'msg' => 'Tidak ada data yang dicentang'
+            ];
+        }
+        if (in_array('kartu-stock', $checked)) {
+            $ks = KartuStock::getTotalSaldoRupiah(getInput('date'));
+            $jks = KartuStock::getTotalJournal(getInput('date'));
+        } else {
 
-        $kit = KartuInTransit::getTotalSaldoRupiah(getInput('date'));
-        $jkit = KartuInTransit::getTotalJournal(getInput('date'));
+            $ks = 0;
+            $jks = 0;
+        }
 
-        $kbdp = KartuBDP::getTotalSaldoRupiah(getInput('date'), true);
-        $jkbdp = KartuBDP::getTotalJournal(getInput('date'));
+        if (in_array('kartu-in-transit', $checked)) {
+            $kit = KartuInTransit::getTotalSaldoRupiah(getInput('date'));
+            $jkit = KartuInTransit::getTotalJournal(getInput('date'));
+        } else {
+            $kit = 0;
+            $jkit = 0;
+        }
 
-        $kbj = KartuBahanJadi::getTotalSaldoRupiah(getInput('date'), true);
-        $jbj = KartuBahanJadi::getTotalJournal(getInput('date'));
+        if (in_array('kartu-bdp', $checked)) {
+            $kbdp = KartuBDP::getTotalSaldoRupiah(getInput('date'), true);
+            $jkbdp = KartuBDP::getTotalJournal(getInput('date'));
+        } else {
+            $kbdp = 0;
+            $jkbdp = 0;
+        }
 
-        $kh = KartuHutang::getTotalsaldoRupiah(getInput('date'), 'factur_supplier_number');
-        $jkh = KartuHutang::getTotalJournal(getInput('date'));
+        if (in_array('kartu-bahan-jadi', $checked)) {
+            $kbj = KartuBahanJadi::getTotalSaldoRupiah(getInput('date'), true);
+            $jbj = KartuBahanJadi::getTotalJournal(getInput('date'));
+        } else {
+            $kbj = 0;
+            $jbj = 0;
+        }
 
-        $kp = KartuPiutang::getTotalSaldoRupiah(getInput('date'));
-        $jkp = KartuPiutang::getTotalJournal(getInput('date'));
 
-        $kdp = KartuDPSales::getTotalSaldoRupiah(getInput('date'), 'sales_order_number');
-        $jkdp = KartuDPSales::getTotalJournal(getInput('date'));
+        if (in_array('kartu-hutang', $checked)) {
+            $kh = KartuHutang::getTotalsaldoRupiah(getInput('date'), 'factur_supplier_number');
+            $jkh = KartuHutang::getTotalJournal(getInput('date'));
+        } else {
+            $kh = 0;
+            $jkh = 0;
+        }
 
-        $kinv = KartuInventory::getTotalSaldoRupiah(getInput('date'), 'inventory_id');
-        $jinv = KartuInventory::getTotalJournal(getInput('date'));
+        if (in_array('kartu-piutang', $checked)) {
+            $kp = KartuPiutang::getTotalSaldoRupiah(getInput('date'));
+            $jkp = KartuPiutang::getTotalJournal(getInput('date'));
+        } else {
+            $kp = 0;
+            $jkp = 0;
+        }
 
-        $kprepaid = KartuPrepaidExpense::getTotalSaldoRupiah(getInput('date'), 'prepaid_expense_id');
-        $jprepaid = KartuPrepaidExpense::getTotalJournal(getInput('date'));
+        if (in_array('kartu-dp', $checked)) {
+            $kdp = KartuDPSales::getTotalSaldoRupiah(getInput('date'), 'sales_order_number');
+            $jkdp = KartuDPSales::getTotalJournal(getInput('date'));
+        } else {
+            $kdp = 0;
+            $jkdp = 0;
+        }
 
-        $kpenjualan = InvoiceSaleDetail::getTotalMutasiKartu(getInput('date'));
-        $jpenjualan = InvoiceSaleDetail::getTotalMutasiJounal(getInput('date'));
+        if (in_array('kartu-inventaris', $checked)) {
+            $kinv = KartuInventory::getTotalSaldoRupiah(getInput('date'), 'inventory_id');
+            $jinv = KartuInventory::getTotalJournal(getInput('date'));
+        } else {
+            $kinv = 0;
+            $jinv = 0;
+        }
 
-        $kpembelian = InvoicePurchaseDetail::getTotalMutasiKartu(getInput('date'));
-        $jpembelian = InvoicePurchaseDetail::getTotalMutasiJournal(getInput('date'));
+        if (in_array('kartu-bdd', $checked)) {
+            $kprepaid = KartuPrepaidExpense::getTotalSaldoRupiah(getInput('date'), 'prepaid_expense_id');
+            $jprepaid = KartuPrepaidExpense::getTotalJournal(getInput('date'));
+        } else {
+            $kprepaid = 0;
+            $jprepaid = 0;
+        }
+
+        if (in_array('kartu-penjualan', $checked)) {
+            $kpenjualan = InvoiceSaleDetail::getTotalMutasiKartu(getInput('date'));
+            $jpenjualan = InvoiceSaleDetail::getTotalMutasiJounal(getInput('date'));
+        } else {
+            $kpenjualan = 0;
+            $jpenjualan = 0;
+        }
+
+        if (in_array('kartu-pembelian', $checked)) {
+            $kpembelian = InvoicePurchaseDetail::getTotalMutasiKartu(getInput('date'));
+            $jpembelian = InvoicePurchaseDetail::getTotalMutasiJournal(getInput('date'));
+        } else {
+            $kpembelian = 0;
+            $jpembelian = 0;
+        }
         return [
             'kartu_stock' => [
                 'saldo' => $ks,
@@ -373,6 +437,6 @@ class IndexController extends Controller
     public function fileArsip()
     {
         $files = FinalReport::where('book_journal_id', bookID())->orderBy('key_file', 'desc')->get();
-        return view('main.file-arsip',compact('files'));
+        return view('main.file-arsip', compact('files'));
     }
 }
