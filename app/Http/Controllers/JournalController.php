@@ -2136,7 +2136,13 @@ class JournalController extends Controller
             $tableName = "invoice_sale_details";
             $saldoKartu = InvoiceSaleDetail::getTotalMutasiKartu($startDate);
             $saldoJournal = InvoiceSaleDetail::getTotalMutasiJounal($startDate);
-        } else {
+        }
+        else if($model=='KartuPembelian'){
+            $tableName = "invoice_purchase_details";
+            $saldoKartu = InvoicePurchaseDetail::getTotalMutasiKartu($startDate);
+            $saldoJournal = InvoicePurchaseDetail::getTotalMutasiJounal($startDate);
+        }
+        else {
             return [
                 'status' => 0,
                 'msg' => 'model belum diakomodasi'
@@ -2198,7 +2204,22 @@ class JournalController extends Controller
                     'kartu.total_price as amount',
                     DB::raw('coalesce(dk.journal_id, kartu.journal_id) as journal_id'),
                 )->groupBy('kartu.id')->get();
-        } else {
+        }else if($model=='KartuPembelian'){
+            $fixModel = InvoicePurchaseDetail::class;
+            $kartu = InvoicePurchaseDetail::from('invoice_purchase_details as kartu')
+                ->leftJoin('detail_kartu_invoices as dk', function ($join) {
+                    $join->on('dk.kartu_id', '=', 'kartu.id')->where('dk.kartu_type', InvoicePurchaseDetail::class);
+                })
+                ->where('kartu.index_date', '>', $indexStart . '0')
+                ->where('kartu.index_date', '<=', $indexEnd . '9')
+                ->select(
+                    'kartu.index_date',
+                    'kartu.total_price as amount',
+                    DB::raw('coalesce(dk.journal_id, kartu.journal_id) as journal_id'),
+                )->groupBy('kartu.id')->get();
+        }
+        
+        else {
             return [
                 'status' => 0,
                 'msg' => 'model belum diakomodasi'
