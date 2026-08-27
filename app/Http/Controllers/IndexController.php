@@ -190,7 +190,7 @@ class IndexController extends Controller
 
         if (in_array('kartu-penjualan', $checked)) {
             $kpenjualan = InvoiceSaleDetail::getTotalMutasiKartu(getInput('date'));
-            $jpenjualan = InvoiceSaleDetail::getTotalMutasiJounal(getInput('date'));
+            $jpenjualan = InvoiceSaleDetail::getTotalMutasiJournal(getInput('date'));
         } else {
             $kpenjualan = 0;
             $jpenjualan = 0;

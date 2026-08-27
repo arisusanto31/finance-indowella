@@ -2135,12 +2135,12 @@ class JournalController extends Controller
         } else if ($model == 'KartuPenjualan') {
             $tableName = "invoice_sale_details";
             $saldoKartu = InvoiceSaleDetail::getTotalMutasiKartu($startDate);
-            $saldoJournal = InvoiceSaleDetail::getTotalMutasiJounal($startDate);
+            $saldoJournal = InvoiceSaleDetail::getTotalMutasiJournal($startDate);
         }
         else if($model=='KartuPembelian'){
             $tableName = "invoice_purchase_details";
             $saldoKartu = InvoicePurchaseDetail::getTotalMutasiKartu($startDate);
-            $saldoJournal = InvoicePurchaseDetail::getTotalMutasiJounal($startDate);
+            $saldoJournal = InvoicePurchaseDetail::getTotalMutasiJournal($startDate);
         }
         else {
             return [

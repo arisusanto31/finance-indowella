@@ -102,7 +102,7 @@ class InvoiceSaleDetail extends Model
         return $total ? $total : 0;
     }
 
-    public static function getTotalMutasiJounal($date)
+    public static function getTotalMutasiJournal($date)
     {
         $dateAwal = createCarbon($date)->startOfMonth()->format('ymdHis00');
         $dateAkhir = createCarbon($date)->format('ymdHis99');
