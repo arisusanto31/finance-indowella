@@ -305,7 +305,7 @@ class ChartAccountController extends Controller
 
     public function getItemChartAccountBDD()
     {
-        $chart = ChartAccountAlias::where('code_group', 160000)->first();
+        $chart = ChartAccountAlias::where('code_group','>', 160000)->where('code_group','<', 170000)->first();
         $charts = ChartAccountAlias::where('parent_id', $chart->id);
         if (getInput('search')) {
             foreach (explode(' ', getInput('search')) as $search) {
