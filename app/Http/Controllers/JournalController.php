@@ -2318,13 +2318,14 @@ class JournalController extends Controller
             $singkat = bookID() == 2 ? 1 : 0;
             $month = intval(getInput('month'));
             $year = intval(getInput('year'));
-            Artisan::call('make:export-data', [
-                'month' => $month,
-                'year' => $year,
-                'bookid' => bookID(),
-                'singkat' => $singkat,
-                'force' => 1
-            ]);
+            // Artisan::call('make:export-data', [
+            //     'month' => $month,
+            //     'year' => $year,
+            //     'bookid' => bookID(),
+            //     'singkat' => $singkat,
+            //     'force' => 1
+            // ]);
+            MakeExportDataJob::dispatch($month, $year, bookID(), $singkat, 1)->onQueue('export');
             return [
                 'status' => 1,
                 'msg' => 'artisan renew:success',
