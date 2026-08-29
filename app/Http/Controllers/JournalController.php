@@ -2314,6 +2314,7 @@ class JournalController extends Controller
     function renewDataExport()
     {
         try {
+            set_time_limit(0);
             $singkat = bookID() == 2 ? 1 : 0;
             $month = intval(getInput('month'));
             $year = intval(getInput('year'));
@@ -2324,7 +2325,6 @@ class JournalController extends Controller
                 'singkat' => $singkat,
                 'force' => 1
             ]);
-            // MakeExportDataJob::dispatch($month, $year, bookID(), $singkat, 1);
             return [
                 'status' => 1,
                 'msg' => 'artisan renew:success',
