@@ -13,7 +13,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Session;
-use Maatwebsite\Excel\Excel;
+use Maatwebsite\Excel\Facades\Excel;
+use Throwable;
 
 class MakeExportDataJob implements ShouldQueue
 {
@@ -299,7 +300,7 @@ class MakeExportDataJob implements ShouldQueue
             $bgprocess->status = 'finished';
             $bgprocess->save();
             $this->info('final report successfully created..');
-        } catch (\Exception $e) {
+        } catch (Throwable $e) {
             $this->info('error make export data: ' . $e->getMessage());
             if ($bgprocess) {
                 $bgprocess->stage_process = 'error make export data: ' . $e->getMessage();
