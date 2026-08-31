@@ -40,12 +40,41 @@ class InvoiceSaleDetail extends Model
 
     protected static function booted()
     {
-        static::addGlobalScope('journal', function ($query) {
-            $from = $query->getQuery()->from ?? 'journals'; // untuk dukung alias `j` kalau pakai from('journals as j')
+        // static::addGlobalScope('journal', function ($query) {
+        //     $from = $query->getQuery()->from ?? 'journals'; // untuk dukung alias `j` kalau pakai from('journals as j')
          
+        //     if ($from instanceof Expression) {
+        //         // fromSub biasanya alias-nya ada di SQL: (...) as `journals`
+        //         $alias = $query->getModel()->getTable(); // default: journals
+        //     } elseif (is_string($from) && Str::contains(strtolower($from), ' as ')) {
+        //         [$table, $alias] = preg_split('/\s+as\s+/i', $from);
+        //         $alias = trim($alias, '` ');
+        //     } else {
+        //         $alias = trim((string) $from, '` ');
+        //     }
+
+
+        //     $query->where(function ($q) use ($alias) {
+        //         $q->whereNull("{$alias}.book_journal_id")
+        //             ->orWhere("{$alias}.book_journal_id", bookID());
+        //     });
+        // });
+
+          static::addGlobalScope('journal', function ($query) {
+            $from = $query->getQuery()->from ?? 'invoice_sale_details'; // untuk dukung alias `j` kalau pakai from('journals as j')
+
             if ($from instanceof Expression) {
-                // fromSub biasanya alias-nya ada di SQL: (...) as `journals`
-                $alias = $query->getModel()->getTable(); // default: journals
+                // fromSub:
+                // (...) as `j`
+                $fromSql = $query->getQuery()
+                    ->getGrammar()
+                    ->getValue($from);
+
+                if (preg_match('/\s+as\s+[`"]?([^`"\s]+)[`"]?\s*$/i', $fromSql, $matches)) {
+                    $alias = $matches[1];
+                } else {
+                    $alias = $query->getModel()->getTable();
+                }
             } elseif (is_string($from) && Str::contains(strtolower($from), ' as ')) {
                 [$table, $alias] = preg_split('/\s+as\s+/i', $from);
                 $alias = trim($alias, '` ');
