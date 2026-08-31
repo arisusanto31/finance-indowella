@@ -222,8 +222,10 @@ class ExcelExportController extends Controller
 
         $inv = InvoiceSaleDetail::from('invoice_sale_details as d')
             ->where('index_date', '>', $indexStart)
-            ->where('index_date', '<', $indexEnd)
-            ->select('d.*')->get()->groupBy('invoice_pack_number');
+            ->where('index_date', '<', $indexEnd);
+        $inv= InvoiceSaleDetail::fromSub($inv,'inv')
+            ->join('stocks as s','s.id','=','inv.stock_id')
+            ->select('inv.*',DB::raw('coalesce(inv.custom_stock_name,s.name) as stock_name'))->get()->groupBy('invoice_pack_number');
         return [
             'month' => $month,
             'year' => $year,

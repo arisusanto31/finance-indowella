@@ -78,7 +78,7 @@ class _PenjualanExport implements FromCollection, WithHeadings, WithTitle, WithE
                         $d->invoice_pack_number,
                         "",
                         $d->stock_id,
-                        $d->custom_stock_name,
+                        $d->stock_name,
                         $d->quantity,
                         $d->unit,
                         ($d->price),
