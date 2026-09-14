@@ -125,21 +125,20 @@ class AnalyzeExportData extends Command
         $this->info('process data kartu dp sales finished.');
 
         $this->info('process data kartu inventory..');
-
-        $kartuInventory = unserialize(Redis::get('export_data_kartu_inventory_' . $bookid . '_' . $year)) ?? null;
+        $kartuInventory = unserialize(Redis::get('export_data_kartu_inventory_' . $bookid . '_' . $year.'_'.$month)) ?? null;
         if (!$kartuInventory || in_array('kartu_inventory', $allforces)) {
             $kartuInventory = ExcelExportController::getKartuInventory($month,$year);
         }
-        Redis::setex('export_data_kartu_inventory_' . $bookid . '_' . $year, $timeout, serialize($kartuInventory));
+        Redis::setex('export_data_kartu_inventory_' . $bookid . '_' . $year.'_'.$month, $timeout, serialize($kartuInventory));
         $this->info('process data kartu inventory finished.');
 
         $this->info('process data kartu bdd..');
 
-        $kartuBDD = unserialize(Redis::get('export_data_kartu_bdd_' . $bookid . '_' . $year)) ?? null;
+        $kartuBDD = unserialize(Redis::get('export_data_kartu_bdd_' . $bookid . '_' . $year.'_'.$month)) ?? null;
         if (!$kartuBDD || in_array('kartu_bdd', $allforces)) {
             $kartuBDD = ExcelExportController::getKartuBDD($month,$year);
         }
-        Redis::setex('export_data_kartu_bdd_' . $bookid . '_' . $year, $timeout, serialize($kartuBDD));
+        Redis::setex('export_data_kartu_bdd_' . $bookid . '_' . $year.'_'.$month, $timeout, serialize($kartuBDD));
         $this->info('process data kartu bdd finished.');
 
         $this->info('process data kartu stock..');

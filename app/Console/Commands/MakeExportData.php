@@ -185,11 +185,11 @@ class MakeExportData extends Command
             $bgprocess->stage_process = 'process data kartu inventory..';
             $bgprocess->save();
 
-            $kartuInventory = $force? null: (unserialize(Redis::get('export_data_kartu_inventory_' . $bookid . '_' . $year)) ?? null);
+            $kartuInventory = $force? null: (unserialize(Redis::get('export_data_kartu_inventory_' . $bookid . '_' . $year.'_'.$month)) ?? null);
             if (!$kartuInventory || $force) {
                 $kartuInventory = ExcelExportController::getKartuInventory($month,$year);
             }
-            Redis::setex('export_data_kartu_inventory_' . $bookid . '_' . $year, $timeout, serialize($kartuInventory));
+            Redis::setex('export_data_kartu_inventory_' . $bookid . '_' . $year.'_'.$month, $timeout, serialize($kartuInventory));
             $bgprocess->success();
             $this->info('process data kartu inventory finished.');
 
@@ -197,11 +197,11 @@ class MakeExportData extends Command
             $bgprocess->stage_process = 'process data kartu bdd..';
             $bgprocess->save();
 
-            $kartuBDD = $force? null: (unserialize(Redis::get('export_data_kartu_bdd_' . $bookid . '_' . $year)) ?? null);
+            $kartuBDD = $force? null: (unserialize(Redis::get('export_data_kartu_bdd_' . $bookid . '_' . $year.'_'.$month)) ?? null);
             if (!$kartuBDD || $force) {
                 $kartuBDD = ExcelExportController::getKartuBDD($month,$year);
             }
-            Redis::setex('export_data_kartu_bdd_' . $bookid . '_' . $year, $timeout, serialize($kartuBDD));
+            Redis::setex('export_data_kartu_bdd_' . $bookid . '_' . $year.'_'.$month, $timeout, serialize($kartuBDD));
             $bgprocess->success();
             $this->info('process data kartu bdd finished.');
 
