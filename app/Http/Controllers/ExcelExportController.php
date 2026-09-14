@@ -400,6 +400,7 @@ class ExcelExportController extends Controller
             $NLPersediaanBDP = collect($neracaLajur['msg'])->where('code_group', 140003)->first()['saldo_akhir'] ?? 0;
             $NLPersediaanBahanJadi = collect($neracaLajur['msg'])->where('code_group', 140004)->first()['saldo_akhir'] ?? 0;
             $codeKas = ChartAccountAlias::aktif()->where('is_child', 1)->where('code_group', '<', 120000)->pluck('code_group')->all();
+            $NLpotongpembelian= collect($neracaLajur['msg'])->where('code_group', 603000)->first()['saldo_akhir'] ?? 0;
 
             $NLtotalKas = collect($neracaLajur['msg'])->filter(function ($item) use ($codeKas) {
                 return in_array($item['code_group'], $codeKas);
@@ -617,10 +618,10 @@ class ExcelExportController extends Controller
                 'hasil' => abs($sumNeracaLaba-$saldoLabaAwalTahun  - $sumKartuLR) > 0.01 ? 'TIDAK SESUAI (' . ($sumNeracaLaba - $saldoLabaAwalTahun - $sumKartuLR) . ')' : 'SESUAI'
             ];
             $data[] = [
-                'keterangan' => "AwalStock +pembelian- akhir stock vs HPP",
-                'data1' => $totalPersediaanAwal + $totalPembelian - $totalPersediaan,
+                'keterangan' => "AwalStock +pembelian-pot.pembelian(jurnal) - akhir stock vs HPP",
+                'data1' => $totalPersediaanAwal + $totalPembelian - $NLpotongpembelian- $totalPersediaan,
                 'data2' => $NLSumHPP,
-                'hasil' => abs(($totalPersediaanAwal + $totalPembelian - $totalPersediaan) + $NLSumHPP) > 0.01 ? 'TIDAK SESUAI (' . (($totalPersediaanAwal + $totalPembelian - $totalPersediaan) + $NLSumHPP) . ')' : 'SESUAI'
+                'hasil' => abs(($totalPersediaanAwal + $totalPembelian - $NLpotongpembelian - $totalPersediaan) + $NLSumHPP) > 0.01 ? 'TIDAK SESUAI (' . (($totalPersediaanAwal + $totalPembelian - $NLpotongpembelian- $totalPersediaan) + $NLSumHPP) . ')' : 'SESUAI'
             ];
             return [
                 'status' => 1,
