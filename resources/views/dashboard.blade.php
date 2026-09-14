@@ -472,11 +472,11 @@
             // Initialize the donut chart
             initItemSelectManual('#select-codegroup-custom', '{{ route("chart-account.get-item-all") }}?',
                 '--Pilih Akun--');
-            loadDataError();
-            getDataSaldoHighlight();
+            // loadDataError();
+            // getDataSaldoHighlight();
             $('#select-codegroup-custom').html('<option value="140000" selected >Persediaan </option>');
-            getSaldoCustom();
-            getSummaryBalance();
+            // getSaldoCustom();
+            // getSummaryBalance();
         });
 
         var lastDate = null;
