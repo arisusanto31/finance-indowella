@@ -38,7 +38,9 @@
                                             <i class="fas fa-box colorblack ms-2" ></i>${process.total_task} 
                                             <i class="fas fa-box text-success ms-2" ></i>${process.success_task} 
                                             <i class="fas fa-box text-danger ms-2" ></i>${process.failed_task}
-                                            <i class="fas fa-spinner fa-spin text-primary" style="margin-left: 20px;"></i> ${process.progress}%
+                                            ${process.progress<100?`
+                                            <i class="fas fa-spinner fa-spin text-primary" style="margin-left: 20px;"></i> ${process.progress}%`:
+                                            `<i class="fas fa-check text-success" style="margin-left: 20px;"></i> ${process.progress}%`}
                                     </span>
                                     <br>
                                     <span id="span-stage-bg${process.id}" class="text-muted"> ${process.stage_process}</span>
