@@ -15,7 +15,6 @@ trait HasIndexDate
             $newdate = Carbon::createFromFormat('ymdHis', $model->index_date_group);
             $model->created_at = $newdate;
         });
-
         static::updating(function ($model) {
             $newdate = Carbon::createFromFormat('ymdHis', $model->index_date_group);
             $model->created_at = $newdate;

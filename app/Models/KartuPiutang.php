@@ -90,8 +90,6 @@ class KartuPiutang extends Model
                 // $lastSaldo =  $lastKartu ? $lastKartu->amount_saldo_factur : 0;
                 // $lastSaldoFactur = $lastSaldo;
                 // CustomLogger::log('invoicing','info','kp- cari last kartu piutang. time '.(microtime(true)-$time).' seconds');
-
-
                 $kartu = new KartuPiutang();
                 $kartu->type = $request->input('type');
                 $kartu->sales_order_number = $SONumber;

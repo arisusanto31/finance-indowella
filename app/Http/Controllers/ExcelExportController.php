@@ -609,7 +609,7 @@ class ExcelExportController extends Controller
                 'keterangan' => 'penambahan piutang vs total penjualan + ppn keluaran',
                 'data1' => $penambahanPiutang,
                 'data2' => $totalPenjualan + $totalPPNK,
-                'hasil' => abs($penambahanPiutang - ($totalPenjualan + $totalPPNK)) > 0.01 ? 'TIDAK SESUAI (' . ($penambahanPiutang - $totalPenjualan) . ')' : 'SESUAI'
+                'hasil' => abs($penambahanPiutang - ($totalPenjualan + $totalPPNK)) > 0.01 ? 'TIDAK SESUAI (' . ($penambahanPiutang - ($totalPenjualan + $totalPPNK)) . ')' : 'SESUAI'
             ];
             $data[] = [
                 'keterangan' => 'sum neraca laba vs sum kartu LR',
