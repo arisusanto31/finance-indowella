@@ -445,7 +445,6 @@ class ExcelExportController extends Controller
             $thecode = ChartAccountAlias::aktif()->whereIn('code_group', [302000, 302100])->where('is_child', 1)->pluck('code_group')->all();
             $saldoLabaAwalTahun = Journal::whereIn('code_group', $thecode)->where('index_date', '<=', $indAwalTahun)->orderBy('index_date', 'desc')->first()->amount_saldo ?? 0;
             $saldoLaba = collect($neraca['msg']['Ekuitas'])->where('code_group', 302000)->first()['saldo'] ?? 0;
-            $saldoLaba -= $saldoLabaAwalTahun;
             $sumNeracaLaba = $neracaLabaBulan + $saldoLaba;
             $sumKartuLR = collect($lr['msg'])->sum(function ($tahun) {
                 return collect($tahun)->sum('saldo_akhir');
@@ -612,10 +611,10 @@ class ExcelExportController extends Controller
                 'hasil' => abs($penambahanPiutang - ($totalPenjualan + $totalPPNK)) > 0.01 ? 'TIDAK SESUAI (' . ($penambahanPiutang - ($totalPenjualan + $totalPPNK)) . ')' : 'SESUAI'
             ];
             $data[] = [
-                'keterangan' => 'sum neraca laba vs sum kartu LR',
-                'data1' => $sumNeracaLaba,
+                'keterangan' => '(saldo laba akhir - saldo laba awal tahun) vs sum kartu LR',
+                'data1' => $sumNeracaLaba.'-'.$saldoLabaAwalTahun,
                 'data2' => $sumKartuLR,
-                'hasil' => abs($sumNeracaLaba - $sumKartuLR) > 0.01 ? 'TIDAK SESUAI (' . ($sumNeracaLaba - $sumKartuLR) . ')' : 'SESUAI'
+                'hasil' => abs($sumNeracaLaba-$saldoLabaAwalTahun  - $sumKartuLR) > 0.01 ? 'TIDAK SESUAI (' . ($sumNeracaLaba - $saldoLabaAwalTahun - $sumKartuLR) . ')' : 'SESUAI'
             ];
             $data[] = [
                 'keterangan' => "AwalStock +pembelian- akhir stock vs HPP",
