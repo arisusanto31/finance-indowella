@@ -119,9 +119,10 @@ class InvoicePurchaseController extends Controller
             $data = collect($data)->groupBy('no_invoice')->map(function ($item, $key) use ($refToko, $existingInvoice, $tokoName, &$idBuatan, $stockType, $defaultToko) {
                 $kodeToko = norm_string(collect($item)->first()['kode_toko'] ?? null);
                 $tanggal = collect($item)->first()['tanggal'];
+                $sts= $stockType::whereIn('id', collect($item)->select('kode_barang')->pluck('name','id'))->all();
                 return [
                     'package_number' => $key,
-                    'details' => collect($item)->map(function ($val) use ($defaultToko) {
+                    'details' => collect($item)->map(function ($val) use ($defaultToko,$sts) {
                         return [
                             'created_at' => excelSerialToCarbon($val['tanggal']),
                             'stock_id' => $val['kode_barang'],
@@ -134,6 +135,7 @@ class InvoicePurchaseController extends Controller
                             'reference_id' => null,
                             'reference_type' => null,
                             'kode_toko' => $val['kode_toko'] ?? $defaultToko->kode_toko,
+                            'ref_name'=>array_key_exists($val['kode_barang'], $sts) ? $sts[$val['kode_barang']] : 'Tidak Ada'
 
                         ];
                     }),

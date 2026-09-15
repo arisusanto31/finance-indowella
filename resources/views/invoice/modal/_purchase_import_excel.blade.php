@@ -161,8 +161,11 @@
                                     <td rowspan="${jumlah}">${item.package_number} (${item.supplier})</td>
                                     <td rowspan="${jumlah}">${item.toko_name}</td>
                                     `:''}
+                                  
                                     <td>${detail.stock_id}</td>
-                                    <td>${detail.stock_name}</td>
+                                    <td>${detail.stock_name}
+                                       <p style="font-size:10px"><i class="fas fa-link"></i> ${detail.ref_name}</p>
+                                    </td>
                                     <td>${detail['quantity']}</td>
                                     <td>${detail['unit']}</td>
                                     <td>${formatRupiah(detail['price'])}</td>
