@@ -119,7 +119,6 @@ class InvoicePurchaseController extends Controller
             $data = collect($data)->groupBy('no_invoice')->map(function ($item, $key) use ($refToko, $existingInvoice, $tokoName, &$idBuatan, $stockType, $defaultToko) {
                 $kodeToko = norm_string(collect($item)->first()['kode_toko'] ?? null);
                 $tanggal = collect($item)->first()['tanggal'];
-
                 return [
                     'package_number' => $key,
                     'details' => collect($item)->map(function ($val) use ($defaultToko) {
