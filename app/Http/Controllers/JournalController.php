@@ -511,8 +511,7 @@ class JournalController extends Controller
                 );
             $sqlString= getSqlString($journals);
                 info('fix journal '.$sqlString);
-            return 0;
-        
+          
             $datamin = Journal::fromSub($journals, 'journals')
                 ->whereRaw('last_saldo + amount_journal != amount_saldo')
                 ->where('tag', '<>', 'opening 01/2026')
