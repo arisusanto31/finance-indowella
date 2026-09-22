@@ -464,7 +464,7 @@ class JournalController extends Controller
         if ($indexAwal == null && $indexAkhir == null) {
             $date = getInput('date') ? getInput('date') : carbonDate()->format('Y-m-d');
             $indexAwal = createCarbon($date)->startOfDay()->format('ymdHis00');
-            $indexAkhir = createCarbon($date)->addMonths(12)->format('ymdHis00');
+            $indexAkhir = createCarbon($date)->addMonths(2)->format('ymdHis00');
         } else {
             if ($indexAwal == null || $indexAkhir == null) {
                 return [
