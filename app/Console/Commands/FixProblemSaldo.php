@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Http\Controllers\JournalController;
 use App\Models\Journal;
+use App\Models\JournalKey;
 use Illuminate\Console\Command;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
@@ -30,13 +31,16 @@ class FixProblemSaldo extends Command
     public function handle()
     {
         //
-        $bookid= $this->argument('bookid');
+        $bookid = $this->argument('bookid');
         Session::put('book_journal_id', $bookid);
-        $date= $this->argument('date') ?? carbonDate()->format('Y-m-d');
-        $indexDateJournal = createCarbon($date)->startOfYear()->format('ymdHis00');
-        $indexDateKartu = createCarbon($date)->startOfYear()->format('ymdHis000');
-        $indexDateJournalEnd = createCarbon($date)->addYears(2)->format('ymdHis99');
-        $indexDateKartuEnd = createCarbon($date)->endOfYear()->format('ymdHis999');
+        $date = $this->argument('date') ?? carbonDate()->format('Y-m-d');
+        $kunciTerakhir = JournalKey::orderBy('key_at', 'desc')->first();
+        $keyAt = $kunciTerakhir ? $kunciTerakhir->key_at : createCarbon($date)->startOfYear();
+
+        $indexDateJournal = createCarbon($keyAt)->format('ymdHis00');
+        $indexDateKartu = createCarbon($keyAt)->format('ymdHis000');
+        $indexDateJournalEnd = createCarbon($date)->addMonths(2)->format('ymdHis99');
+        $indexDateKartuEnd = createCarbon($date)->addMonths(2)->format('ymdHis999');
         // $count= Journal::whereBetween('index_date', [$indexDateJournal, $indexDateJournalEnd])->count();
         // $this->info('jumlah journal yang dicek ' . $count);
         $this->info('mencari index date journal antara ' . $indexDateJournal . ' dan ' . $indexDateJournalEnd);

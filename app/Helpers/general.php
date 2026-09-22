@@ -80,6 +80,20 @@ function alltheme()
     ];
 }
 
+function getSqlString($query)
+{
+    $sql = $query->toSql();
+
+    foreach ($query->getBindings() as $binding) {
+        $value = is_numeric($binding)
+            ? $binding
+            : "'" . addslashes($binding) . "'";
+
+        $sql = preg_replace('/\?/', $value, $sql, 1);
+    }
+    return $sql;
+}
+
 
 if (!function_exists('bookID')) {
     function bookID()

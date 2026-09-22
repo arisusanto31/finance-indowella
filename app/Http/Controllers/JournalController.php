@@ -476,7 +476,7 @@ class JournalController extends Controller
         try {
             $lastJournal = Journal::where('index_date', '<', $indexAwal)
                 ->select(DB::raw('max(index_date) as max_index_date'), 'code_group')
-                ->groupBy('code_group');
+                ->groupBy('book_journal_id','code_group');
             $theLastJournal = Journal::joinSub($lastJournal, 'last', function ($join) {
                 $join->on('last.code_group', '=', 'journals.code_group')
                     ->on('last.max_index_date', '=', 'journals.index_date');
@@ -490,6 +490,8 @@ class JournalController extends Controller
                 DB::raw('CASE WHEN journals.code_group < 200000 THEN journals.amount_debet-journals.amount_kredit ELSE journals.amount_kredit-journals.amount_debet END as amount_journal'),
                 'journals.amount_saldo'
             );
+            $sqlString= getSqlString($theLastJournal);
+         
             $journals = Journal::whereBetween('index_date', [$indexAwal, $indexAkhir])
                 ->select(
                     'id',
@@ -507,16 +509,24 @@ class JournalController extends Controller
                     'journals.*',
                     DB::raw('COALESCE(LAG(amount_saldo) OVER (PARTITION BY code_group ORDER BY index_date),0) as last_saldo')
                 );
+            $sqlString= getSqlString($journals);
+                info('fix journal '.$sqlString);
+            return 0;
+        
             $datamin = Journal::fromSub($journals, 'journals')
                 ->whereRaw('last_saldo + amount_journal != amount_saldo')
                 ->where('tag', '<>', 'opening 01/2026')
                 ->where('index_date', '>=', $indexAwal)
-                ->select('*', DB::raw('amount_journal + last_saldo - amount_saldo as selisih'))
-                ->get()->groupBy('code_group')->map(function ($group) {
+                ->select('*', DB::raw('amount_journal + last_saldo - amount_saldo as selisih'));
+
+            // $sqlString= getSqlString($datamin);
+            $datamin= $datamin->get()->groupBy('book_journal_id','code_group')->map(function ($group) {
                     return collect($group)->sortBy('index_date')->first()->id ?? null;
                 })->values()->all();
 
-            $journals = Journal::whereIn('id', $datamin)->get();
+            $journals = Journal::whereIn('id', $datamin);
+            $journals= $journals->get();
+        
             return [
                 'status' => 1,
                 'datamin' => $datamin,
