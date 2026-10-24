@@ -83,7 +83,6 @@ function detectFormat(input) {
     // 1. Format database: angka murni dengan titik desimal
     //console.log(input);
     const dbPattern = /^-?\d+(\.\d+)?$/;
-
     // 2. Format rupiah: bisa mengandung Rp, titik ribuan, koma desimal
     const rupiahPattern = /^\s?[\d\.]+(,\d{1,2})?$/;
 
@@ -96,8 +95,6 @@ function detectFormat(input) {
     }
 }
 function formatRupiah(number, language = "id") {
-
-
     //yang bingung disini adalah inputnya ,inputnya itu formatDB atau stringIndo atau stringEng
     //harusnya kalau kita pake language id , barti asumsinya cuma angka dengan format DB dan string Indo
     //buat mastikan angkanya itu beneran angka dulu
@@ -118,7 +115,6 @@ function formatRupiah(number, language = "id") {
             //asumsi rupiah format indo ya
             if (number.match(/\,$/)) isTyping = true;
             number = (number.replace(/[^0-9,]/g, '').replace(',', '.'));
-
         }
     }
     number = parseFloat(number).toString();
@@ -146,8 +142,6 @@ function formatRupiahSimple(number, language = "id") {
     //buat mastikan angkanya itu beneran angka dulu
     let isTyping = false;
     awal = number;
-
-
     if (detectFormat(number) != 'database') {
         //kalo inputnya ternyata format rupiah
         if (language == "eng") {
@@ -267,9 +261,6 @@ function notification(kind = 'info', message = '') {
         stopOnFocus: true,
         style: { background: styles[kind] ?? styles.info }
     }).showToast();
-
-
-
 
 }
 

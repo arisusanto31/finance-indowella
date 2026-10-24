@@ -77,7 +77,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
     });
     Route::get('show-detail-pencocokan', [JournalController::class, 'detailPencocokan'])->name('show-detail-pencocokan');
     Route::get('get-background-process', [IndexController::class, 'getBackgroundProcess'])->name('get-background-process');
-    Route::get('background-process',[IndexController::class, 'backgroundProcess']);
+    Route::get('background-process', [IndexController::class, 'backgroundProcess']);
     Route::get('file-arsip', [IndexController::class, 'fileArsip']);
     Route::post('set-confirm-background-process', [IndexController::class, 'setConfirmBackgroundProcess'])->name('set-confirm-background-process');
     Route::post('delete-background-process', [IndexController::class, 'deleteBackgroundProcess'])->name('delete-background-process');
@@ -246,6 +246,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::get('show-history-stock/{id}', [KartuBahanJadiController::class, 'showHistoryStock'])->name('show-history-stock');
             Route::post('recalculate', [KartuBahanJadiController::class, 'recalculate'])->name('recalculate');
             Route::post('delete-mutation', [KartuBahanJadiController::class, 'deleteMutation'])->name('delete-mutation');
+            Route::post('re-evaluate-hpp', [KartuBahanJadiController::class, 'reEvaluateHPP'])->name('re-evaluate-hpp');
         });
 
         Route::prefix('kartu-hutang')->name('kartu-hutang.')->group(function () {

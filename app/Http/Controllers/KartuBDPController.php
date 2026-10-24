@@ -45,8 +45,6 @@ class KartuBDPController extends Controller
 
     public function createMutations(Request $request)
     {
-
-
         $stockIDs = $request->input('stock_id');
         $quantitys = $request->input('quantity');
         $spkNumbers = $request->input('spk_number');
@@ -112,8 +110,6 @@ class KartuBDPController extends Controller
                         'mutasi_rupiah_total' => $mutasiRupiahTotal,
                         'date' => $date,
                         'description' => $desc,
-
-
                     ]), false);
                     if ($stStock['status'] == 0) {
                         throw new \Exception($stStock['msg']);
