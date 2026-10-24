@@ -310,8 +310,17 @@ class KartuBahanJadi extends Model
         ];
     }
 
+
     public function recalculateSaldo()
     {
+        $lastSaldo = KartuBahanJadi::where('stock_id', $this->stock_id)->where('index_date', '<', $this->index_date)->where('production_number', $this->production_number)->orderBy('index_date', 'desc')->first();
+        $lastSaldoQty = $lastSaldo ? $lastSaldo->saldo_qty_backend : 0;
+        $lastSaldoRupiah = $lastSaldo ? $lastSaldo->saldo_rupiah_total : 0;
+        $this->saldo_qty_backend = $lastSaldoQty+$this->mutasi_qty_backend;
+        $this->saldo_rupiah_total = $lastSaldoRupiah+$this->mutasi_rupiah_total;
+        $this->save();
+
+        //hitung nextnya
         $kartus = KartuBahanJadi::where('stock_id', $this->stock_id)->where('index_date', '>', $this->index_date)->where('production_number', $this->production_number)
             ->orderBy('index_date', 'asc')->get();
 
