@@ -199,6 +199,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::post('recalculate', [KartuStockController::class, 'recalculate'])->name('recalculate');
             Route::post('re-evaluate-hpp', [KartuStockController::class, 'reEvaluateHPP'])->name('re-evaluate-hpp');
             Route::get('process-task-import/{id}', [KartuStockController::class, 'processTaskImport'])->name('process-task-import');
+            Route::post('edit-date', [KartuStockController::class, 'editDate'])->name('edit-date');
         });
 
         Route::prefix('kartu-bdp')->name('kartu-bdp.')->group(function () {
@@ -215,6 +216,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::post('recalculate', [KartuBDPController::class, 'recalculate'])->name('recalculate');
             Route::post('delete-mutation', [KartuBDPController::class, 'deleteMutation'])->name('delete-mutation');
             Route::post('bebankan', [KartuBDPController::class, 'bebankan'])->name('bebankan');
+            Route::post('re-evaluate-hpp', [KartuBDPController::class, 'reEvaluateHPP'])->name('re-evaluate-hpp');
+            Route::post('edit-date', [KartuBDPController::class, 'editDate'])->name('edit-date');
         });
 
         Route::prefix('kartu-in-transit')->name('kartu-in-transit.')->group(function () {
@@ -231,6 +234,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::post('pindahkan', [KartuInTransitController::class, 'pindahkan'])->name('pindahkan');
             Route::post('recalculate', [KartuInTransitController::class, 'recalculate'])->name('recalculate');
             Route::post('delete-mutation', [KartuInTransitController::class, 'deleteMutation'])->name('delete-mutation');
+            Route::post('re-evaluate-hpp', [KartuInTransitController::class, 'reEvaluateHPP'])->name('re-evaluate-hpp');
+            Route::post('edit-date', [KartuInTransitController::class, 'editDate'])->name('edit-date');
         });
 
         Route::prefix('kartu-bahan-jadi')->name('kartu-bahan-jadi.')->group(function () {
@@ -247,6 +252,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,web', 'ensure.journal'])
             Route::post('recalculate', [KartuBahanJadiController::class, 'recalculate'])->name('recalculate');
             Route::post('delete-mutation', [KartuBahanJadiController::class, 'deleteMutation'])->name('delete-mutation');
             Route::post('re-evaluate-hpp', [KartuBahanJadiController::class, 'reEvaluateHPP'])->name('re-evaluate-hpp');
+            Route::post('edit-date', [KartuBahanJadiController::class, 'editDate'])->name('edit-date');
         });
 
         Route::prefix('kartu-hutang')->name('kartu-hutang.')->group(function () {

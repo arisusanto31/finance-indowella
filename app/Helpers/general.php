@@ -2,6 +2,7 @@
 
 use App\Models\BookJournal;
 use App\Models\BookTheme;
+use App\Models\JournalKey;
 use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
 use App\Services\ContextService;
 use Carbon\Carbon;
@@ -64,6 +65,14 @@ if (!function_exists('bookTheme')) {
     }
 }
 
+
+function isLockDate($date){
+    $j=JournalKey::orderBy('key_at','desc')->first();
+    if (!$j) {
+        return false;
+    }
+    return createCarbon($date) <= createCarbon($j->key_at);
+}
 
 function alltheme()
 {

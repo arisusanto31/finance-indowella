@@ -9,6 +9,7 @@ use App\Models\KartuBDP;
 use App\Models\KartuStock;
 use App\Models\SalesOrder;
 use App\Models\Stock;
+use App\Models\StockUnit;
 use App\Services\LockManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -183,6 +184,60 @@ class KartuBDPController extends Controller
             'status' => 1,
             'msg' => $allSt
         ];
+    }
+
+
+      public function reEvaluateHPP(Request $request)
+    {
+        $id = $request->input('id');
+        $kartu = KartuBDP::find($id);
+        $konversi = StockUnit::where('stock_id', $kartu->stock_id)->pluck('konversi', 'unit')->all();
+        $lastKartu = KartuBDP::where('stock_id', $kartu->stock_id)->where('production_number',$kartu->production_number)
+                ->where('index_date', '<', $kartu->index_date)->orderBy('index_date', 'desc')->first();
+        $hpp = $lastKartu ? ($lastKartu->saldo_rupiah_total / $lastKartu->saldo_qty_backend) : 0;
+        $kartus = KartuBDP::where('stock_id', $kartu->stock_id)->where('production_number',$kartu->production_number)
+            ->where('index_date', '>=', $kartu->index_date)->orderBy('index_date', 'asc')->get();
+        foreach ($kartus as $kartu) {
+            if ($kartu->mutasi_quantity < 0) {
+                $mutasiQTYBackend = $kartu->mutasi_quantity * $konversi[$kartu->unit];
+                $mutasiRupiahOnUnit = $hpp * -1;
+                $mutasiRupiahTotal = abs($mutasiQTYBackend * $mutasiRupiahOnUnit) * -1;
+                $kartu->mutasi_qty_backend = $mutasiQTYBackend;
+                $kartu->mutasi_rupiah_on_unit = $mutasiRupiahOnUnit;
+                $kartu->mutasi_rupiah_total = $mutasiRupiahTotal;
+                //ya iki pekoknya lur. harusnya jurnalnya ya disamakan juga tole..
+
+            } else {
+                //ga perlu diganti ya kalo mutasi masuk
+            }
+            $kartu->saldo_qty_backend = $lastKartu ? $lastKartu->saldo_qty_backend + $kartu->mutasi_qty_backend : $kartu->mutasi_qty_backend;
+            $kartu->saldo_rupiah_total = $lastKartu ? $lastKartu->saldo_rupiah_total + $kartu->mutasi_rupiah_total : $kartu->mutasi_rupiah_total;
+            $kartu->save();
+
+            //update jurnal ini lur 
+            $allks = KartuBDP::where('stock_id', $kartu->stock_id)->where('production_number',$kartu->production_number)
+             ->where('journal_id', $kartu->journal_id)->select(
+                DB::raw('sum(mutasi_rupiah_total) as sum_mutasi_rupiah_total')
+            )->groupBy('journal_id')->first();
+            $journal = Journal::find($kartu->journal_id);
+            if ($allks->sum_mutasi_rupiah_total < 0) {
+                $journal->amount_debet = 0;
+                $journal->amount_kredit = abs($allks->sum_mutasi_rupiah_total);
+            } else {
+                $journal->amount_debet = $allks->sum_mutasi_rupiah_total;
+                $journal->amount_kredit = 0;
+            }
+            $journal->save();
+            if ($journal->journal_lawan_id) {
+                $lawanJournal = Journal::find($journal->journal_lawan_id);
+            } else
+                $lawanJournal = Journal::where('journal_number', $journal->journal_number)->where('code_group', $journal->lawan_code_group)->where('id', '<>', $journal->id)->first();
+            $lawanJournal->amount_debet = $journal->amount_kredit;
+            $lawanJournal->amount_kredit = $journal->amount_debet;
+            $lawanJournal->save();
+            $lastKartu = $kartu;
+        }
+        return ['status' => 1, 'msg' => 'Re-evaluation of HPP successful'];
     }
 
     public function bebankan(Request $request){

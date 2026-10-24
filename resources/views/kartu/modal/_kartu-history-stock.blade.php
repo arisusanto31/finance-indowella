@@ -54,9 +54,11 @@
                             <i class="fas fa-coins"></i> re-evaluate HPP
                         </button>
 
-                        <button class="btn btn-danger btn-sm mt-2" onclick="pindahkan('{{ $data->id }}')">
-                            <i class="fas fa-money-bill-wave"></i> Pindahkan
-                        </button>
+                        <button class="btn btn-primary btn-sm mt-2" onclick="editDate('{{ $data->id }}')">
+
+                            <button class="btn btn-danger btn-sm mt-2" onclick="pindahkan('{{ $data->id }}')">
+                                <i class="fas fa-money-bill-wave"></i> Pindahkan
+                            </button>
 
                     </td>
                 </tr>
@@ -88,6 +90,42 @@
 
 
 <script>
+    function editDate(kartuId) {
+        swal({
+            title: 'Edit Tanggal',
+            text: 'Masukkan tanggal baru:',
+            content: {
+                element: 'input',
+                attributes: {
+                    type: 'datetime-local',
+                    id: 'swal-date'
+                }
+            },
+            buttons: true
+        }).then((value) => {
+            if (value) {
+                const date = document.getElementById('swal-date').value;
+                $.post('{{ url("admin/kartu/".$model."/edit-date") }}', {
+                    _token: '{{ csrf_token() }}',
+                    id: kartuId,
+                    date: date
+                }, function(response) {
+                    if (response.status == 1) {
+                        swal('Sukses', 'Tanggal berhasil diubah', 'success');
+                        reload();
+                    } else {
+                        swal('Gagal', response.msg, 'error');
+                    }
+                }).fail(function() {
+                    swal('Gagal', 'Terjadi kesalahan saat mengubah tanggal', 'error');
+                });
+            }
+        });
+    }
+
+    function reload(){
+         showDetailOnModal('{{ url("admin/kartu/kartu-bahan-jadi/show-history-stock") }}/{{ $id }}?production_number={{ $productionNumber }}','xl');
+    }
     function bebankan(productionNumber, stockId) {
         swalConfirmAndSubmit({
             url: '{{ url("admin/kartu/".$model."/bebankan") }}',
@@ -117,8 +155,8 @@
         const oldEnforceFocus = $.fn.modal.Constructor.prototype._enforceFocus;
 
         $.fn.modal.Constructor.prototype._enforceFocus = function() {};
-        console.log('version modal',$.fn.modal.Constructor.VERSION)
-        console.log('version swal',Swal.version)
+        console.log('version modal', $.fn.modal.Constructor.VERSION)
+        console.log('version swal', Swal.version)
         const modal = bootstrap.Modal.getInstance(document.getElementById('global-modal'));
 
         modal._focustrap.deactivate();
@@ -147,7 +185,7 @@
                 };
             }
         }).then((result) => {
-             modal._focustrap.activate();
+            modal._focustrap.activate();
             if (result.isConfirmed) {
                 $.ajax({
                     url: '{{ url("admin/kartu/".$model."/pindahkan") }}',

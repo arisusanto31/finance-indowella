@@ -293,10 +293,10 @@ class KartuBahanJadiController extends Controller
         $id = $request->input('id');
         $kartu = KartuBahanJadi::find($id);
         $konversi = StockUnit::where('stock_id', $kartu->stock_id)->pluck('konversi', 'unit')->all();
-        $lastKartu = KartuBahanJadi::where('stock_id', $kartu->stock_id)->where('production_number',$kartu->production_number)
-                ->where('index_date', '<', $kartu->index_date)->orderBy('index_date', 'desc')->first();
+        $lastKartu = KartuBahanJadi::where('stock_id', $kartu->stock_id)->where('production_number', $kartu->production_number)
+            ->where('index_date', '<', $kartu->index_date)->orderBy('index_date', 'desc')->first();
         $hpp = $lastKartu ? ($lastKartu->saldo_rupiah_total / $lastKartu->saldo_qty_backend) : 0;
-        $kartus = KartuBahanJadi::where('stock_id', $kartu->stock_id)->where('production_number',$kartu->production_number)
+        $kartus = KartuBahanJadi::where('stock_id', $kartu->stock_id)->where('production_number', $kartu->production_number)
             ->where('index_date', '>=', $kartu->index_date)->orderBy('index_date', 'asc')->get();
         foreach ($kartus as $kartu) {
             if ($kartu->mutasi_quantity < 0) {
@@ -316,29 +316,32 @@ class KartuBahanJadiController extends Controller
             $kartu->save();
 
             //update jurnal ini lur 
-            $allks = KartuBahanJadi::where('stock_id', $kartu->stock_id)->where('production_number',$kartu->production_number)
-             ->where('journal_id', $kartu->journal_id)->select(
-                DB::raw('sum(mutasi_rupiah_total) as sum_mutasi_rupiah_total')
-            )->groupBy('journal_id')->first();
-            $journal = Journal::find($kartu->journal_id);
-            if ($allks->sum_mutasi_rupiah_total < 0) {
-                $journal->amount_debet = 0;
-                $journal->amount_kredit = abs($allks->sum_mutasi_rupiah_total);
-            } else {
-                $journal->amount_debet = $allks->sum_mutasi_rupiah_total;
-                $journal->amount_kredit = 0;
-            }
-            $journal->save();
-            if ($journal->journal_lawan_id) {
-                $lawanJournal = Journal::find($journal->journal_lawan_id);
-            } else
-                $lawanJournal = Journal::where('journal_number', $journal->journal_number)->where('code_group', $journal->lawan_code_group)->where('id', '<>', $journal->id)->first();
-            $lawanJournal->amount_debet = $journal->amount_kredit;
-            $lawanJournal->amount_kredit = $journal->amount_debet;
-            $lawanJournal->save();
+            $kartu->updateAmountJournal();
             $lastKartu = $kartu;
         }
         return ['status' => 1, 'msg' => 'Re-evaluation of HPP successful'];
+    }
+
+    public function editDate(Request $request)
+    {
+        try {
+            DB::transaction(function () use ($request) {
+                $date = $request->input('date');
+                if (isLockDate($date)) {
+                    return ['status' => 0, 'msg' => 'Date is locked'];
+                }
+                $kartu = KartuBahanJadi::find($request->input('id'));
+                $kartu->index_date = KartuBahanJadi::getNextIndexDate($date);
+                $kartu->index_date_group = createCarbon($date)->format('ymdHis');
+                $kartu->save();
+                $kartu->updateAmountJournal();
+                $kartu->recalculateSaldo();
+
+                return ['status' => 1, 'msg' => $kartu];
+            });
+        } catch (\Exception $e) {
+            return ['status' => 0, 'msg' => 'gagal mengubah tanggal:' . $e->getMessage()];
+        }
     }
 
     public function getMutasiMasuk()
@@ -437,6 +440,8 @@ class KartuBahanJadiController extends Controller
         $view->title = $name . ' [' . $stock->id . ']';
         $view->datas = $dataHistory;
         $view->model = 'kartu-bahan-jadi';
+        $view->id = $id;
+        $view->productionNumber = $productionNumber;
         return $view;
     }
 

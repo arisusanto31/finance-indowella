@@ -120,7 +120,7 @@ class KartuBahanJadi extends Model
                 return [
                     'status' => 0,
                     'msg' => 'kartu barang jadi, invalid input, saldo minus jika diinput!',
-                    'detail'=>$kartu
+                    'detail' => $kartu
                 ];
             }
             $kartu->save();
@@ -140,7 +140,7 @@ class KartuBahanJadi extends Model
                 'msg' => $th->getMessage()
             ];
         } finally {
-           // $lock->release();
+            // $lock->release();
         }
         return [
             'status' => 1,
@@ -164,7 +164,7 @@ class KartuBahanJadi extends Model
             $customStockName = $request->input('custom_stock_name');
             $codeGroup = $request->input('code_group');
             $chart = ChartAccount::where('code_group', $codeGroup)->first();
-            $desc= $request->input('description');
+            $desc = $request->input('description');
 
             $SONumber = $request->input('sales_order_number');
             $invoiceNumber = $request->input('invoice_pack_number');
@@ -204,8 +204,8 @@ class KartuBahanJadi extends Model
             }
             $qtybackend = $qty * $dataunit->konversi;
             $unitbackend = $stock->unit_backend;
-            if($qtybackend==0){
-                throw new \Exception('qty backend kartu bahan jadi tidak boleh nol (qty= ' . $qty .',konversi= '.$dataunit->konversi.',stock id= '.$stockid.')');  
+            if ($qtybackend == 0) {
+                throw new \Exception('qty backend kartu bahan jadi tidak boleh nol (qty= ' . $qty . ',konversi= ' . $dataunit->konversi . ',stock id= ' . $stockid . ')');
             }
             $mutasiRupiahUnit = money($mutasiRupiahTotal / $qtybackend);
             $st = self::create(new Request([
@@ -236,7 +236,7 @@ class KartuBahanJadi extends Model
             $number = null;
             if ($isOtomatisJurnal) {
 
-                if(!$lawanCodeGroup){
+                if (!$lawanCodeGroup) {
                     throw new \Exception('lawan code group tidak boleh kosong jika otomatis buat jurnal');
                 }
                 $amount = abs($ks->mutasi_rupiah_total);
@@ -245,13 +245,13 @@ class KartuBahanJadi extends Model
                     //keluar
                     $codeDebet = $lawanCodeGroup;
                     $codeKredit = $codeGroup;
-                    if(!$desc)
-                    $desc =  'proses '.$spkNumber . ' dibebankan ' . $lawanCodeGroupName;
+                    if (!$desc)
+                        $desc =  'proses ' . $spkNumber . ' dibebankan ' . $lawanCodeGroupName;
                 } else {
                     $codeDebet = $codeGroup;
                     $codeKredit = $lawanCodeGroup;
-                    if(!$desc)
-                      $desc =  $spkNumber . 'proses selesai';
+                    if (!$desc)
+                        $desc =  $spkNumber . 'proses selesai';
                 }
                 $kredits = [
                     [
@@ -325,5 +325,30 @@ class KartuBahanJadi extends Model
             $kartu->saldo_rupiah_total = $saldoRupiah;
             $kartu->save();
         }
+    }
+
+    public function updateAmountJournal()
+    {
+        $kartu= $this;
+        $allks = KartuBahanJadi::where('stock_id', $kartu->stock_id)->where('production_number', $kartu->production_number)
+            ->where('journal_id', $kartu->journal_id)->select(
+                DB::raw('sum(mutasi_rupiah_total) as sum_mutasi_rupiah_total')
+            )->groupBy('journal_id')->first();
+        $journal = Journal::find($kartu->journal_id);
+        if ($allks->sum_mutasi_rupiah_total < 0) {
+            $journal->amount_debet = 0;
+            $journal->amount_kredit = abs($allks->sum_mutasi_rupiah_total);
+        } else {
+            $journal->amount_debet = $allks->sum_mutasi_rupiah_total;
+            $journal->amount_kredit = 0;
+        }
+        $journal->save();
+        if ($journal->journal_lawan_id) {
+            $lawanJournal = Journal::find($journal->journal_lawan_id);
+        } else
+            $lawanJournal = Journal::where('journal_number', $journal->journal_number)->where('code_group', $journal->lawan_code_group)->where('id', '<>', $journal->id)->first();
+        $lawanJournal->amount_debet = $journal->amount_kredit;
+        $lawanJournal->amount_kredit = $journal->amount_debet;
+        $lawanJournal->save();
     }
 }
