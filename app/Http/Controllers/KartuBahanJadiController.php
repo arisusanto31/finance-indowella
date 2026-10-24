@@ -325,7 +325,7 @@ class KartuBahanJadiController extends Controller
     public function editDate(Request $request)
     {
         try {
-            DB::transaction(function () use ($request) {
+           return DB::transaction(function () use ($request) {
                 $date = $request->input('date');
                 if (isLockDate($date)) {
                     return ['status' => 0, 'msg' => 'Date is locked'];
