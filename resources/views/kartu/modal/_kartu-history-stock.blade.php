@@ -55,10 +55,12 @@
                         </button>
 
                         <button class="btn btn-primary btn-sm mt-2" onclick="editDate('{{ $data->id }}')">
+                            <i class="fas fa-calendar-alt"></i> Edit Date
+                        </button>
 
-                            <button class="btn btn-danger btn-sm mt-2" onclick="pindahkan('{{ $data->id }}')">
-                                <i class="fas fa-money-bill-wave"></i> Pindahkan
-                            </button>
+                        <button class="btn btn-danger btn-sm mt-2" onclick="pindahkan('{{ $data->id }}')">
+                            <i class="fas fa-money-bill-wave"></i> Pindahkan
+                        </button>
 
                     </td>
                 </tr>
@@ -123,9 +125,10 @@
         });
     }
 
-    function reload(){
-         showDetailOnModal('{{ url("admin/kartu/kartu-bahan-jadi/show-history-stock") }}/{{ $id }}?production_number={{ $productionNumber }}','xl');
+    function reload() {
+        showDetailOnModal('{{ url("admin/kartu/kartu-bahan-jadi/show-history-stock") }}/{{ $id }}?production_number={{ $productionNumber }}', 'xl');
     }
+
     function bebankan(productionNumber, stockId) {
         swalConfirmAndSubmit({
             url: '{{ url("admin/kartu/".$model."/bebankan") }}',
