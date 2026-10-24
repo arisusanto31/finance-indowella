@@ -96,17 +96,25 @@
         Swal.fire({
             title: 'Edit Tanggal',
             text: 'Masukkan tanggal baru:',
-            content: {
-                element: 'input',
-                attributes: {
-                    type: 'datetime-local',
-                    id: 'swal-date'
-                }
+            input: 'datetime-local',
+            inputLabel: 'Tanggal Baru',
+            inputAttributes: {
+                step: '1' // Agar bisa memilih sampai detik
             },
-            buttons: true
-        }).then((value) => {
-            if (value) {
-                const date = document.getElementById('swal-date').value;
+            showCancelButton: true,
+            confirmButtonText: 'Simpan',
+            cancelButtonText: 'Batal',
+            preConfirm: (date) => {
+                if (!date) {
+                    Swal.showValidationMessage('Tanggal wajib diisi!');
+                    return false;
+                }
+                return date;
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const date = result.value;
+
                 $.post('{{ url("admin/kartu/".$model."/edit-date") }}', {
                     _token: '{{ csrf_token() }}',
                     id: kartuId,
@@ -124,6 +132,7 @@
             }
         });
     }
+
 
     function reload() {
         showDetailOnModal('{{ url("admin/kartu/kartu-bahan-jadi/show-history-stock") }}/{{ $id }}?production_number={{ $productionNumber }}', 'xl');
