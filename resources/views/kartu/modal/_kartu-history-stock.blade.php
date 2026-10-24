@@ -120,6 +120,7 @@
                     id: kartuId,
                     date: date
                 }, function(response) {
+                    console.log('edit date',response);
                     if (response.status == 1) {
                         Swal.fire('Sukses', 'Tanggal berhasil diubah', 'success');
                         reload();
