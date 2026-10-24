@@ -136,7 +136,7 @@
 
 
     function reload() {
-        showDetailOnModal('{{ url("admin/kartu/kartu-bahan-jadi/show-history-stock") }}/{{ $id }}?production_number={{ $productionNumber }}', 'xl');
+        showDetailOnModal('{{ url("admin/kartu/".$model."/show-history-stock") }}/{{ $id }}?production_number={{ $productionNumber }}', 'xl');
     }
 
     function bebankan(productionNumber, stockId) {
@@ -235,6 +235,7 @@
             onSuccess: function(response) {
                 // Handle success response
                 console.log("Recalculation successful:", response);
+                reload();
                 notification('success', 'Recalculation successful', 'success');
                 // Optionally, you can refresh the modal or update the UI
             },
