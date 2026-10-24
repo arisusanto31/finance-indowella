@@ -335,6 +335,7 @@ class KartuBahanJadiController extends Controller
                 $kartu->index_date_group = createCarbon($date)->format('ymdHis');
                 $kartu->save();
                 $kartu->updateAmountJournal();
+                $kartu->refresh();
                 $kartu->recalculateSaldo();
 
                 return ['status' => 1, 'msg' => $kartu];
