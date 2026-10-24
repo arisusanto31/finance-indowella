@@ -93,7 +93,7 @@
 
 <script>
     function editDate(kartuId) {
-        swal({
+        Swal.fire({
             title: 'Edit Tanggal',
             text: 'Masukkan tanggal baru:',
             content: {
@@ -113,13 +113,13 @@
                     date: date
                 }, function(response) {
                     if (response.status == 1) {
-                        swal('Sukses', 'Tanggal berhasil diubah', 'success');
+                        Swal.fire('Sukses', 'Tanggal berhasil diubah', 'success');
                         reload();
                     } else {
-                        swal('Gagal', response.msg, 'error');
+                        Swal.fire('Gagal', response.msg, 'error');
                     }
                 }).fail(function() {
-                    swal('Gagal', 'Terjadi kesalahan saat mengubah tanggal', 'error');
+                    Swal.fire('Gagal', 'Terjadi kesalahan saat mengubah tanggal', 'error');
                 });
             }
         });
