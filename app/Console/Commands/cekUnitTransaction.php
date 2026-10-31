@@ -37,6 +37,30 @@ class cekUnitTransaction extends Command
         Session::put('book_journal_id', $bookID);
         $startDate = createCarbon($monthyear)->startOfMonth();
         $endDate = createCarbon($monthyear)->endOfMonth();
+        $unitTrims= SalesOrderDetail::where('sales_order_details.created_at', '>=', $startDate)
+            ->where('sales_order_details.created_at', '<', $endDate)
+            ->leftJoin('stock_units',function($join){
+                $join->on('sales_order_details.stock_id', '=', 'stock_units.stock_id')
+                ->where('stock_units.unit','=','sales_order_details.unit');
+            })->whereNull('stock_units.id')
+            ->select('sales_order_details.*')
+            ->get();
+        tampilkanTableTerminal($unitTrims,
+        [
+            'id'=>'center',
+            'created_at'=>'center',
+            'stock_id'=>'center',
+            'unit'=>'center'
+        ],$this);
+        if(!$this->confirm('lanjut?')){
+            return;
+        }
+        foreach($unitTrims as $unitTrim){
+            $unitTrim->unit= trim($unitTrim->unit);
+            $unitTrim->save();
+            $this->info("Unit Trim ID: {$unitTrim->id}, Stock ID: {$unitTrim->stock_id}, Unit: {$unitTrim->unit}");
+        }
+
         $sales= SalesOrderDetail::where('created_at', '>=', $startDate)
             ->where('created_at', '<', $endDate)
             ->where('unit','like','-%')
