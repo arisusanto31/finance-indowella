@@ -41,13 +41,14 @@ class UpdateReadyStockSalesOrder extends Command
         if ($onlyNotReady==1) {
             $salesOrders = $salesOrders->where('is_ready_stock', 0);
         }
-        $salesOrders = $salesOrders->get();
+
+        $salesOrders = $salesOrders->orderBy('created_at','asc')->get();
 
         $this->info('kamu akan update sebanyak ' . count($salesOrders) . ' sales order');
         foreach ($salesOrders as $so) {
             $st = $so->updateReadyStock();
             $this->info(json_encode($st));
-            $this->info('ready stock sales order ' . $so->is_ready_stock);
+            $this->info($so->id.' : '.$so->created_at.' ready stock sales order ' . $so->is_ready_stock);
         }
     }
 }

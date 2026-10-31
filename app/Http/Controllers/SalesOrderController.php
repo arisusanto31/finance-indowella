@@ -558,7 +558,7 @@ class SalesOrderController extends Controller
                         'stock_id' => $val['kode_barang'],
                         'stock_name' => $val['nama_barang'],
                         'quantity' => $val['quantity'],
-                        'unit' => $val['satuan'],
+                        'unit' => trim($val['satuan']),
                         'price' => $val['harga_pcs'],
                         'total_price' => $val['sub_total'],
                         'akun_cash_kind_name' => $val['payment'],
