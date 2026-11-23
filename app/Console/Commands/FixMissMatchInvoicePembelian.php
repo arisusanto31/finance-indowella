@@ -13,7 +13,7 @@ class FixMissMatchInvoicePembelian extends Command
      *
      * @var string
      */
-    protected $signature = 'fix:miss-match-pembelian {bookid}';
+    protected $signature = 'fix:miss-match-pembelian {bookid} {monthyear}';
     /**
      * The console command description.
      *
@@ -27,16 +27,19 @@ class FixMissMatchInvoicePembelian extends Command
     public function handle()
     {
         //
-
+        $monthyear = $this->argument('monthyear');
+        $date = createCarbon($monthyear);
+        $dateStart = $date->copy()->startOfMonth();
+        $dateEnd = $date->copy()->endOfMonth();
         $bookID = $this->argument('bookid');
-        Session::put('book_journal_id',$bookID);
-        $query= DB::select('select sum(inv.mutasi_rupiah_total) as amount_inv,inv.id,(j.amount_debet-j.amount_kredit) as amount_journal,j.id as 
+        Session::put('book_journal_id', $bookID);
+        $query = DB::select('select sum(inv.mutasi_rupiah_total) as amount_inv,inv.id,(j.amount_debet-j.amount_kredit) as amount_journal,j.id as 
           jk_id, inv.journal_id from kartu_stocks as inv left join journals as j on j.id= inv.journal_id  WHERE inv.book_journal_id=? 
           AND inv.purchase_order_id is not null
-          AND inv.created_at BETWEEN "2026-01-01 00:00:00" AND "2026-01-31 23:59:59" 
-          group by inv.journal_id;', [$bookID]);
-          $totalSelisih=0;
-          $totalAmountt=0;
+          AND inv.created_at BETWEEN ? AND ? 
+          group by inv.journal_id;', [$bookID, $dateStart, $dateEnd]);
+        $totalSelisih = 0;
+        $totalAmountt = 0;
         foreach ($query as $row) {
             $this->info("Invoice ID: {$row->id}, jID: {$row->jk_id}, JournalID: {$row->journal_id}, Amount Invoice: {$row->amount_inv}, Amount Journal: {$row->amount_journal}, selisih " . ($row->amount_inv - $row->amount_journal));
             $totalSelisih += ($row->amount_inv - $row->amount_journal);
@@ -45,5 +48,11 @@ class FixMissMatchInvoicePembelian extends Command
 
         $this->info("Total selisih: " . format_price($totalSelisih));
         $this->info("Total amount invoice: " . format_price($totalAmountt));
+
+        $query2 = DB::select('select sum(amount_debet-amount_kredit),lawan_code_group,code_group from journals where book_journal_id=? and code_group in
+         (140001,140002) and index_date BETWEEN ? AND ?  and amount_debet > 0 group by lawan_code_group;', [$bookID, $dateStart, $dateEnd]);
+        foreach ($query2 as $row) {
+            $this->info("Lawan Code Group: {$row->lawan_code_group}, Code Group: {$row->code_group}, Amount: {$row->sum}");
+        }
     }
 }
