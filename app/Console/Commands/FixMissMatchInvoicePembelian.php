@@ -50,8 +50,12 @@ class FixMissMatchInvoicePembelian extends Command
         $this->info("Total amount invoice: " . format_price($totalAmountt));
         $indexStart = $dateStart->format('ymdHis00');
         $indexEnd = $dateEnd->format('ymdHis99');
+        $this->info('==========================================');
+        $this->info("\n\n");
 
-        $query = DB::select('select i.id,i.total_price,i.invoice_pack_number,ks.id as ks_id from invoice_purchase_details as i left join kartu_stocks as ks on ks.purchase_order_id=i.id  where i.index_date BETWEEN ? AND ? and i.book_journal_id=? and ks.id is null;', [$indexStart, $indexEnd, $bookID]);
+        $query = DB::select('select i.id,i.total_price,i.invoice_pack_number,ks.id as ks_id from invoice_purchase_details as i 
+          left join kartu_stocks as ks on ks.purchase_order_id=i.id  
+          where i.index_date BETWEEN ? AND ? and i.book_journal_id=? and ks.id is null;', [$indexStart, $indexEnd, $bookID]);
         foreach ($query as $row) {
             $this->info("Invoice Purchase Detail ID: {$row->id}, Total Price: {$row->total_price}, Invoice Pack Number: {$row->invoice_pack_number}, Kartu Stock ID: {$row->ks_id}");
         }
