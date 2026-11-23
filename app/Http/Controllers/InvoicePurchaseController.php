@@ -52,9 +52,9 @@ class InvoicePurchaseController extends Controller
             ->get()
             ->groupBy('invoice_pack_number');
      ;
-        $totalInvoice = collect($invoices)->sum('total_price');
-        $totalInvoiceFinal = collect($invoices)->where('is_final', 1)->sum('total_price');
-        $totalInvoiceMark = collect($invoices)->where('is_mark', 1)->sum('total_price');
+        $totalInvoice = collect($invoices)->flatten()->sum('total_price');
+        $totalInvoiceFinal = collect($invoices)->flatten()->where('is_final', 1)->sum('total_price');
+        $totalInvoiceMark = collect($invoices)->flatten()->where('is_mark', 1)->sum('total_price');
 
         return view('invoice.invoice-purchase', compact('invoices', 'month', 'year', 'totalInvoice', 'totalInvoiceFinal', 'totalInvoiceMark', 'parent'));
     }
