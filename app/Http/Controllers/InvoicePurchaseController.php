@@ -41,15 +41,20 @@ class InvoicePurchaseController extends Controller
         $year = getInput('year') ? getInput('year') : date('Y');
         $parent = [];
 
-        $invoices = InvoicePurchaseDetail::whereMonth('created_at', $month)->whereYear('created_at', $year)->with(['parent', 'stock', 'supplier'])
+        $startIndex =  createCarbon("$year-$month-01")->startOfMonth()->format('ymdHis000');
+        $endIndex = createCarbon("$year-$month-01")->endOfMonth()->format('ymdHis999');
+
+        $invoices = InvoicePurchaseDetail::
+            leftJoin('invoice_packs as invpack', 'invpack.id', '=', 'invoice_purchase_details.invoice_pack_id')
+            ->select('invoice_purchase_details.*','invpack.is_final', 'invpack.is_mark') 
+            ->whereBetween('index_date', [$startIndex, $endIndex])->with(['parent', 'stock', 'supplier'])
             ->orderBy('created_at', 'desc')
             ->get()
             ->groupBy('invoice_pack_number');
-        $invPack = InvoicePack::whereMonth('created_at', $month)->whereYear('created_at', $year)->where('reference_model', InvoicePurchaseDetail::class)
-            ->select('is_final', 'is_mark', 'total_price', 'total_ppn_m')->get();
-        $totalInvoice = collect($invPack)->sum('total_price');
-        $totalInvoiceFinal = collect($invPack)->where('is_final', 1)->sum('total_price');
-        $totalInvoiceMark = collect($invPack)->where('is_mark', 1)->sum('total_price');
+     ;
+        $totalInvoice = collect($invoices)->sum('total_price');
+        $totalInvoiceFinal = collect($invoices)->where('is_final', 1)->sum('total_price');
+        $totalInvoiceMark = collect($invoices)->where('is_mark', 1)->sum('total_price');
 
         return view('invoice.invoice-purchase', compact('invoices', 'month', 'year', 'totalInvoice', 'totalInvoiceFinal', 'totalInvoiceMark', 'parent'));
     }
@@ -63,7 +68,7 @@ class InvoicePurchaseController extends Controller
             $invoice = InvoicePack::find($id);
             $invoice->fp_number = $fpNumber;
             $invoice->save();
-            $details= InvoicePurchaseDetail::where('invoice_pack_id',$id)->update(['fp_number'=>$fpNumber]);
+            $details = InvoicePurchaseDetail::where('invoice_pack_id', $id)->update(['fp_number' => $fpNumber]);
             return [
                 'status' => 1,
                 'msg' => $invoice
@@ -119,10 +124,10 @@ class InvoicePurchaseController extends Controller
             $data = collect($data)->groupBy('no_invoice')->map(function ($item, $key) use ($refToko, $existingInvoice, $tokoName, &$idBuatan, $stockType, $defaultToko) {
                 $kodeToko = norm_string(collect($item)->first()['kode_toko'] ?? null);
                 $tanggal = collect($item)->first()['tanggal'];
-                $sts= $stockType::whereIn('id', collect($item)->pluck('kode_barang'))->select('id','name')->pluck('name','id')->all();
+                $sts = $stockType::whereIn('id', collect($item)->pluck('kode_barang'))->select('id', 'name')->pluck('name', 'id')->all();
                 return [
                     'package_number' => $key,
-                    'details' => collect($item)->map(function ($val) use ($defaultToko,$sts) {
+                    'details' => collect($item)->map(function ($val) use ($defaultToko, $sts) {
                         return [
                             'created_at' => excelSerialToCarbon($val['tanggal']),
                             'stock_id' => $val['kode_barang'],
@@ -135,7 +140,7 @@ class InvoicePurchaseController extends Controller
                             'reference_id' => null,
                             'reference_type' => null,
                             'kode_toko' => $val['kode_toko'] ?? $defaultToko->kode_toko,
-                            'ref_name'=>array_key_exists($val['kode_barang'], $sts) ? $sts[$val['kode_barang']] : 'Tidak Ada'
+                            'ref_name' => array_key_exists($val['kode_barang'], $sts) ? $sts[$val['kode_barang']] : 'Tidak Ada'
 
                         ];
                     }),
