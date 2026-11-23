@@ -48,16 +48,22 @@ class FixMissMatchInvoicePembelian extends Command
 
         $this->info("Total selisih: " . format_price($totalSelisih));
         $this->info("Total amount invoice: " . format_price($totalAmountt));
+        $indexStart = $dateStart->format('ymdHis00');
+        $indexEnd = $dateEnd->format('ymdHis99');
 
-        $indexStart= $dateStart->format('ymdHis00');
-        $indexEnd= $dateEnd->format('ymdHis99');
+        $query = DB::select('select i.id,i.total_price,i.invoice_pack_number,ks.id as ks_id from invoice_purchase_details as i left join kartu_stocks as ks on ks.purchase_order_id=i.id  where i.index_date BETWEEN ? AND ? and i.book_journal_id=? and ks.id is null;', [$indexStart, $indexEnd, $bookID]);
+        foreach ($query as $row) {
+            $this->info("Invoice Purchase Detail ID: {$row->id}, Total Price: {$row->total_price}, Invoice Pack Number: {$row->invoice_pack_number}, Kartu Stock ID: {$row->ks_id}");
+        }
+
+
         $query2 = DB::select('select sum(amount_debet-amount_kredit) as sum,lawan_code_group,code_group from journals where book_journal_id=? and code_group in
          (140001,140002) and index_date BETWEEN ? AND ?  and amount_debet > 0 group by lawan_code_group;', [$bookID, $indexStart, $indexEnd]);
-        $lawanPersediaan=0;
-        $lawanNonPersediaan=0;
+        $lawanPersediaan = 0;
+        $lawanNonPersediaan = 0;
         foreach ($query2 as $row) {
             $this->info("Lawan Code Group: {$row->lawan_code_group}, Code Group: {$row->code_group}, Amount: {$row->sum}");
-            if($row->lawan_code_group > 140000 && $row->lawan_code_group < 150000){
+            if ($row->lawan_code_group > 140000 && $row->lawan_code_group < 150000) {
                 $lawanPersediaan += $row->sum;
             } else {
                 $lawanNonPersediaan += $row->sum;
