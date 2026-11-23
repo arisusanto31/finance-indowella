@@ -51,7 +51,7 @@ class FixMissMatchInvoicePembelian extends Command
 
         $indexStart= $dateStart->format('ymdHis00');
         $indexEnd= $dateEnd->format('ymdHis99');
-        $query2 = DB::select('select sum(amount_debet-amount_kredit),lawan_code_group,code_group from journals where book_journal_id=? and code_group in
+        $query2 = DB::select('select sum(amount_debet-amount_kredit) as sum,lawan_code_group,code_group from journals where book_journal_id=? and code_group in
          (140001,140002) and index_date BETWEEN ? AND ?  and amount_debet > 0 group by lawan_code_group;', [$bookID, $indexStart, $indexEnd]);
         foreach ($query2 as $row) {
             $this->info("Lawan Code Group: {$row->lawan_code_group}, Code Group: {$row->code_group}, Amount: {$row->sum}");
