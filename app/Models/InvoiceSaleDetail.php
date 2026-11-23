@@ -81,14 +81,11 @@ class InvoiceSaleDetail extends Model
             } else {
                 $alias = trim((string) $from, '` ');
             }
-
-
             $query->where(function ($q) use ($alias) {
                 $q->whereNull("{$alias}.book_journal_id")
                     ->orWhere("{$alias}.book_journal_id", bookID());
             });
         });
-
         static::updating(function ($model) {});
     }
 

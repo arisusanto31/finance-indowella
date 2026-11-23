@@ -492,11 +492,13 @@ class InvoiceSaleController extends Controller
             $count = $lastInv ? intval(explode('-', $lastInv->invoice_number)[2]) : 0;
             $invoiceNumber = sprintf("INV-%04d-%03d", $sales->customer_id, $count + 1);
             $realDataSales = $sales->details->keyBy('id')->all();
+            $totalPriceArray=[];
             foreach ($salesDetailIDs as $i => $saleDetailID) {
                 $dataDetailSale = $realDataSales[$saleDetailID];
-                $prosen = $quantities[$i] / $dataDetailSale->quantity;
+                $prosen = $quantities[$i] / $dataDetailSale->qtyjadi;
                 $discount = $quantities[$i] * $dataDetailSale->discount / $dataDetailSale->quantity;
                 $totalPrice = $prosen * $dataDetailSale->total_price;
+                $totalPriceArray[$saleDetailID] = $totalPrice;
                 $grouped[] = [
                     'invoice_pack_number' => $invoiceNumber,
                     'stock_id' => $stockIDs[$i],
@@ -551,6 +553,9 @@ class InvoiceSaleController extends Controller
             foreach ($salesDetailIDs as $i => $saleDetailID) {
                 $dataDetailSale = $realDataSales[$saleDetailID];
                 $person = $invoicePack->person;
+                if($dataDetailSale->total_price != $totalPriceArray[$saleDetailID])
+                    throw new \Exception('Total price mismatch for sale detail ID ' . $saleDetailID);
+                
                 $kartu = KartuPiutang::createMutation(new Request([
                     'invoice_pack_number' => $invoicePack->invoice_number,
                     'amount_mutasi' => $dataDetailSale->total_price,
