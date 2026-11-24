@@ -381,6 +381,7 @@ class InvoicePackController extends Controller
                 $kartu->journal_id = $journalPersediaan->id;
                 $kartu->journal_number = $journalPersediaan->journal_number;
                 $kartu->save();
+                $kartu->createDetailKartuInvoice();
             }
 
             //mestinya sampek sini kartu stock dan hutang sudah jadi dan sudah integrate sama journal

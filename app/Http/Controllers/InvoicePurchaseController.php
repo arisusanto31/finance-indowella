@@ -41,13 +41,13 @@ class InvoicePurchaseController extends Controller
         $year = getInput('year') ? getInput('year') : date('Y');
         $parent = [];
 
-        $startIndex =  createCarbon("$year-$month-01")->startOfMonth()->format('ymdHis000');
-        $endIndex = createCarbon("$year-$month-01")->endOfMonth()->format('ymdHis999');
+        $startDate =  createCarbon("$year-$month-01")->startOfMonth()->format('ymdHis000');
+        $endDate = createCarbon("$year-$month-01")->endOfMonth()->format('ymdHis999');
 
         $invoices = InvoicePurchaseDetail::
             leftJoin('invoice_packs as invpack', 'invpack.id', '=', 'invoice_purchase_details.invoice_pack_id')
             ->select('invoice_purchase_details.*','invpack.is_final', 'invpack.is_mark') 
-            ->whereBetween('index_date', [$startIndex, $endIndex])->with(['parent', 'stock', 'supplier'])
+            ->whereBetween('invoice_purchase_details.created_at', [$startDate, $endDate])->with(['parent', 'stock', 'supplier'])
             ->orderBy('created_at', 'desc')
             ->get()
             ->groupBy('invoice_pack_number');
