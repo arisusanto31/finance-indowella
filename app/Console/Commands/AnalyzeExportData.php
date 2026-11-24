@@ -204,7 +204,9 @@ class AnalyzeExportData extends Command
         if ($st['status'] == 1) {
             foreach ($st['msg'] as $val) {
                 $this->info($val['keterangan'] . ' => ' . $val['hasil']);
+                $this->info($val['hitungan']);
                 $this->info($val['data1'] . ' vs ' . $val['data2']);
+
                 $this->info('-----------------------------------');
             }
         }else{

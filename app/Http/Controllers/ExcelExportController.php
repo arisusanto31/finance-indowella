@@ -463,6 +463,7 @@ class ExcelExportController extends Controller
                 'keterangan' => 'Total Pembelian vs K.StockIn + K.TransIn - K.TransOut',
                 'data1' => $totalPembelian,
                 'data2' => $mutasiMasukStock,
+                'hitungan'=> "{$totalPembelian} - {$mutasiMasukStock}",
                 'hasil' => abs($totalPembelian - $mutasiMasukStock) > 0.01 ? 'TIDAK SESUAI (' . ($totalPembelian - $mutasiMasukStock) . ')' : 'SESUAI'
             ];
 
@@ -471,6 +472,7 @@ class ExcelExportController extends Controller
                 'keterangan' => 'Total Penjualan vs NL Sum penjualan',
                 'data1' => $totalPenjualan,
                 'data2' => $sumNLPenjualan,
+                'hitungan'=> "{$totalPenjualan} - {$sumNLPenjualan}",
                 'hasil' => abs($totalPenjualan - $sumNLPenjualan) > 0.01 ? 'TIDAK SESUAI (' . ($totalPenjualan - $sumNLPenjualan) . ')' : 'SESUAI'
             ];
 
@@ -480,6 +482,7 @@ class ExcelExportController extends Controller
                 'keterangan' => 'Total Persediaan vs NL Sum persediaan',
                 'data1' => $totalPersediaan,
                 'data2' => $NLSumPersediaan,
+                'hitungan'=> "{$totalPersediaan} - {$NLSumPersediaan}",
                 'hasil' => abs($totalPersediaan - $NLSumPersediaan) > 0.01 ? 'TIDAK SESUAI (' . ($totalPersediaan - $NLSumPersediaan) . ')' : 'SESUAI'
             ];
 
@@ -489,6 +492,7 @@ class ExcelExportController extends Controller
                 'keterangan' => 'Total K.Stock vs NL Persediaan Stock',
                 'data1' => $saldoAkhirStock + $saldoAkhirInTransit,
                 'data2' => $NLPersediaanBahanDagang + $NLPersediaanBahanBaku,
+                'hitungan'=> "({$saldoAkhirStock} + {$saldoAkhirInTransit}) - ({$NLPersediaanBahanDagang} + {$NLPersediaanBahanBaku})",
                 'hasil' => abs(($saldoAkhirStock + $saldoAkhirInTransit) - ($NLPersediaanBahanDagang + $NLPersediaanBahanBaku)) > 0.01 ? 'TIDAK SESUAI (' . (($saldoAkhirStock + $saldoAkhirInTransit) - ($NLPersediaanBahanDagang + $NLPersediaanBahanBaku)) . ')' : 'SESUAI'
             ];
 
@@ -498,6 +502,7 @@ class ExcelExportController extends Controller
                 'keterangan' => 'Total BDP vs NL Persediaan BDP',
                 'data1' => $saldoAkhirBDP,
                 'data2' => $NLPersediaanBDP,
+                'hitungan'=> "{$saldoAkhirBDP} - {$NLPersediaanBDP}",
                 'hasil' => abs($saldoAkhirBDP - $NLPersediaanBDP) > 0.01 ? 'TIDAK SESUAI (' . ($saldoAkhirBDP - $NLPersediaanBDP) . ')' : 'SESUAI'
             ];
 
@@ -508,6 +513,7 @@ class ExcelExportController extends Controller
                 'keterangan' => 'Total Bahan Jadi vs NL Persediaan Bahan Jadi',
                 'data1' => $saldoAkhirBahanJadi,
                 'data2' => $NLPersediaanBahanJadi,
+                'hitungan'=> "{$saldoAkhirBahanJadi} - {$NLPersediaanBahanJadi}",
                 'hasil' => abs($saldoAkhirBahanJadi - $NLPersediaanBahanJadi) > 0.01 ? 'TIDAK SESUAI (' . ($saldoAkhirBahanJadi - $NLPersediaanBahanJadi) . ')' : 'SESUAI'
             ];
 
@@ -518,6 +524,7 @@ class ExcelExportController extends Controller
                 'keterangan' => 'Total Kas vs NL Total Kas',
                 'data1' => $totalKas,
                 'data2' => $NLtotalKas,
+                'hitungan'=> "{$totalKas} - {$NLtotalKas}",
                 'hasil' => abs($totalKas - $NLtotalKas) > 0.01 ? 'TIDAK SESUAI (' . ($totalKas - $NLtotalKas) . ')' : 'SESUAI'
             ];
 
@@ -527,6 +534,7 @@ class ExcelExportController extends Controller
                 'keterangan' => 'Saldo Akhir Piutang vs NL sum piutang',
                 'data1' => $saldoAkhirPiutang,
                 'data2' => $NLSumPiutang,
+                'hitungan'=> "{$saldoAkhirPiutang} - {$NLSumPiutang}",
                 'hasil' => abs($saldoAkhirPiutang - $NLSumPiutang) > 0.01 ? 'TIDAK SESUAI (' . ($saldoAkhirPiutang - $NLSumPiutang) . ')' : 'SESUAI'
             ];
 
@@ -536,6 +544,7 @@ class ExcelExportController extends Controller
                 'keterangan' => 'Saldo Akhir Utang vs NL Utang Usaha',
                 'data1' => $saldoAkhirUtang,
                 'data2' => $NLUtangUsaha,
+                'hitungan'=> "{$saldoAkhirUtang} - {$NLUtangUsaha}",
                 'hasil' => abs($saldoAkhirUtang - $NLUtangUsaha) > 0.01 ? 'TIDAK SESUAI (' . ($saldoAkhirUtang - $NLUtangUsaha) . ')' : 'SESUAI'
             ];
 
@@ -545,6 +554,7 @@ class ExcelExportController extends Controller
                 'keterangan' => 'Saldo DP vs NL Saldo DP',
                 'data1' => $saldoDP,
                 'data2' => $NLSaldoDP,
+                'hitungan'=> "{$saldoDP} - {$NLSaldoDP}",
                 'hasil' => abs($saldoDP - $NLSaldoDP) > 0.01 ? 'TIDAK SESUAI (' . ($saldoDP - $NLSaldoDP) . ')' : 'SESUAI'
             ];
 
@@ -557,6 +567,7 @@ class ExcelExportController extends Controller
                 'keterangan' => 'Total Aset Neraca vs Total NL Aset',
                 'data1' => $neracaAset,
                 'data2' => $nlAset,
+                'hitungan'=> "{$neracaAset} - {$nlAset}",
                 'hasil' => abs($neracaAset - $nlAset) > 0.01 ? 'TIDAK SESUAI (' . ($neracaAset - $nlAset) . ')' : 'SESUAI'
             ];
 
@@ -569,6 +580,7 @@ class ExcelExportController extends Controller
                 'keterangan' => 'Total Pasiva Neraca vs Total NL Pasiva',
                 'data1' => $neracaPasiva,
                 'data2' => $nlPasiva,
+                'hitungan'=> "{$neracaPasiva} - {$nlPasiva}",
                 'hasil' => abs($neracaPasiva - $nlPasiva) > 0.01 ? 'TIDAK SESUAI (' . ($neracaPasiva - $nlPasiva) . ')' : 'SESUAI'
             ];
 
@@ -579,6 +591,7 @@ class ExcelExportController extends Controller
                 'keterangan' => 'Total Neraca BDD vs Total Buku BDD',
                 'data1' => $neracaBDD,
                 'data2' => $bukuBDD,
+                'hitungan'=> "{$neracaBDD} - {$bukuBDD}",
                 'hasil' => abs($neracaBDD - $bukuBDD) > 0.01 ? 'TIDAK SESUAI (' . ($neracaBDD - $bukuBDD) . ')' : 'SESUAI'
             ];
 
@@ -589,6 +602,7 @@ class ExcelExportController extends Controller
                 'keterangan' => 'Total Neraca Inventory vs Total Buku Inventory',
                 'data1' => $neracaInventory,
                 'data2' => $bukuInventory,
+                'hitungan'=> "{$neracaInventory} - {$bukuInventory}",
                 'hasil' => abs($neracaInventory - $bukuInventory) > 0.01 ? 'TIDAK SESUAI (' . ($neracaInventory - $bukuInventory) . ')' : 'SESUAI'
             ];
 
@@ -597,30 +611,35 @@ class ExcelExportController extends Controller
                 'keterangan' => 'Kewajiban vs NL sum utang',
                 'data1' => $NLSumKewajiban,
                 'data2' => $neracaKewajiban,
+                'hitungan'=> "{$NLSumKewajiban} - {$neracaKewajiban}",
                 'hasil' => abs($NLSumKewajiban - $neracaKewajiban) > 0.01 ? 'TIDAK SESUAI (' . ($NLSumKewajiban - $neracaKewajiban) . ')' : 'SESUAI'
             ];
             $data[] = [
                 'keterangan' => 'Laba kartu LR vs Laba Neraca',
                 'data1' => $labaKartuLR,
                 'data2' => $neracaLabaBulan,
+                'hitungan'=> "{$labaKartuLR} - {$neracaLabaBulan}",
                 'hasil' => abs($neracaLabaBulan - ($labaKartuLR)) > 0.01 ? 'TIDAK SESUAI (' . ($neracaLabaBulan - ($labaKartuLR)) . ')' : 'SESUAI'
             ];
             $data[] = [
                 'keterangan' => 'penambahan piutang vs total penjualan + ppn keluaran',
                 'data1' => $penambahanPiutang,
                 'data2' => $totalPenjualan + $totalPPNK,
+                'hitungan'=> "{$penambahanPiutang} - ({$totalPenjualan} + {$totalPPNK})",
                 'hasil' => abs($penambahanPiutang - ($totalPenjualan + $totalPPNK)) > 0.01 ? 'TIDAK SESUAI (' . ($penambahanPiutang - ($totalPenjualan + $totalPPNK)) . ')' : 'SESUAI'
             ];
             $data[] = [
                 'keterangan' => '(saldo laba akhir - saldo laba awal tahun) vs sum kartu LR',
                 'data1' => $sumNeracaLaba.'-'.$saldoLabaAwalTahun,
                 'data2' => $sumKartuLR,
+                'hitungan'=> "({$sumNeracaLaba} - {$saldoLabaAwalTahun}) - {$sumKartuLR}",
                 'hasil' => abs($sumNeracaLaba-$saldoLabaAwalTahun  - $sumKartuLR) > 0.01 ? 'TIDAK SESUAI (' . ($sumNeracaLaba - $saldoLabaAwalTahun - $sumKartuLR) . ')' : 'SESUAI'
             ];
             $data[] = [
                 'keterangan' => "AwalStock +pembelian-pot.pembelian(jurnal) - akhir stock vs HPP",
                 'data1' => $totalPersediaanAwal + $totalPembelian - $NLpotongpembelian- $totalPersediaan,
                 'data2' => $NLSumHPP,
+                'hitungan'=> "({$totalPersediaanAwal} + {$totalPembelian} - {$NLpotongpembelian} - {$totalPersediaan}) + {$NLSumHPP}",
                 'hasil' => abs(($totalPersediaanAwal + $totalPembelian - $NLpotongpembelian - $totalPersediaan) + $NLSumHPP) > 0.01 ? 'TIDAK SESUAI (' . (($totalPersediaanAwal + $totalPembelian - $NLpotongpembelian- $totalPersediaan) + $NLSumHPP) . ')' : 'SESUAI'
             ];
             return [
