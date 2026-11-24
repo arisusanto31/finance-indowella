@@ -46,6 +46,7 @@ class CekNilaiTutupJurnal extends Command
                     ->where('ca.book_journal_id', book()->id);
             })
             ->where('ca.code_group', '>=', 400000)->where('ca.is_child', 1)
+            ->whereNull('j.tag')
             ->select(
                 'ca.name',
                 'ca.id',
@@ -56,7 +57,7 @@ class CekNilaiTutupJurnal extends Command
             ->orderBy('ca.code_group')->get();
 
         tampilkanTableTerminal($chartAccounts, [
-            'name' => 'center',
+            'name' => 'left',
             'id' => 'center',
             'code_group' => 'center',
             'saldo' => 'right',
