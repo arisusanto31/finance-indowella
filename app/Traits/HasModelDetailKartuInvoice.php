@@ -4,6 +4,7 @@ namespace App\Traits;
 
 use App\Models\DetailKartuInvoice;
 use App\Models\InvoicePack;
+use App\Models\InvoicePurchaseDetail;
 use App\Models\InvoiceSaleDetail;
 use App\Models\Journal;
 use App\Models\SalesOrder;
@@ -66,6 +67,14 @@ trait HasModelDetailKartuInvoice
                     }
                 }
             }
+        }
+        if(!$invoiceNumber && isset($kartu->purchase_order_id) && $kartu->purchase_order_id >0){
+            $invd= InvoicePurchaseDetail::find($kartu->purchase_order_id);
+            if ($invd) {
+                $invoiceNumber = $invd->invoice_pack_number;
+                $invID = $invd->invoice_pack_id;
+            }
+
         }
         $dks = DetailKartuInvoice::storeData(new Request([
             'kartu_type' => get_class($kartu),
