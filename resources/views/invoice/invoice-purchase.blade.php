@@ -121,6 +121,7 @@
                         <tr>
                             <th>No</th>
                             <th>tanggal</th>
+                            <th>Index </th>
                             <th>Invoice</th>
                             <th>No Pajak </th>
                             <th>Supplier</th>
@@ -157,6 +158,7 @@
                                     class="parent{{ $item->parent->id }} @if ($item->parent->is_mark == 1) bg-primary-lightest @endif">
                                     @if ($index === 0)
                                         <td rowspan="{{ $rowspan }}">{{ $no++ }}</td>
+                                        <td rowspan="{{ $rowspan }}">{{ $item->index_date??'belum ada' }}</td>
                                         <td rowspan="{{ $rowspan }}">
                                             {{ createCarbon($item->created_at)->format('Y-m-d') }}</td>
                                         <td rowspan="{{ $rowspan }}">{{ $invoiceNumber }} [{{$item->parent->id}}] <br> <i
