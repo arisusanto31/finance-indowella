@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\DetailKartuInvoice;
 use App\Models\Journal;
+use App\Models\KartuStock;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
@@ -47,13 +48,27 @@ class UpdateValueJournalKartu extends Command
 
         $this->info('\ncoba cari kartu dari jurnal ini');
         $dkfirst = collect($dk)->first();
-        $kartu = $dkfirst->kartu_type::where('journal_id', $journalid)->get();
-        $this->info('ditemukan kartu sebanyak ' . $kartu->count());
-        foreach ($kartu as $k) {
-            $this->info('kartu id: ' . $k->id . ' AMOUNT : ' . $k->mutasi_rupiah_total);
-            $thek = (new \ReflectionClass($k))->newInstanceWithoutConstructor();
-            $thek = $thek::find($k->id);
-            $thek->createDetailKartuInvoice();
+        if ($dkfirst->kartu_type) {
+            $kartu = $dkfirst->kartu_type::where('journal_id', $journalid)->get();
+            $this->info('ditemukan kartu sebanyak ' . $kartu->count());
+            foreach ($kartu as $k) {
+                $this->info('kartu id: ' . $k->id . ' AMOUNT : ' . $k->mutasi_rupiah_total);
+                $thek = (new \ReflectionClass($k))->newInstanceWithoutConstructor();
+                $thek = $thek::find($k->id);
+                $thek->createDetailKartuInvoice();
+            }
+        }else{
+            $this->error('kartu type nya kosong, kita ambil dari KartuStock');
+            $kartu= KartuStock::where('journal_id', $journalid)->get();
+            $this->info('ditemukan kartu sebanyak ' . $kartu->count());
+            foreach ($kartu as $k) {
+                $this->info('kartu id: ' . $k->id . ' AMOUNT : ' . $k->mutasi_rupiah_total);
+                $thek = (new \ReflectionClass($k))->newInstanceWithoutConstructor();
+                $thek = $thek::find($k->id);
+                $thek->createDetailKartuInvoice();
+            }
+
+            
         }
         $this->info('nilai amount kartu=' . $kartu->sum('mutasi_rupiah_total'));
         if ($kartu->count() == 1 && $kartu->first()->mutasi_rupiah_total != ($journal->amount_debet - $journal->amount_kredit)) {
