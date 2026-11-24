@@ -370,6 +370,8 @@ class JournalController extends Controller
             $lawanJournal->updateIndexDate();
             $journal->lawan_code_group = $lawanCodeGroup;
             $journal->save();
+            $lawanJournal->journal_identifier = $lawanJournal->code_group . $lawanJournal->index_date;
+            $lawanJournal->save();
             $lawanJournal->recalculateJournal();
             DB::commit();
             return [
@@ -476,7 +478,7 @@ class JournalController extends Controller
         try {
             $lastJournal = Journal::where('index_date', '<', $indexAwal)
                 ->select(DB::raw('max(index_date) as max_index_date'), 'code_group')
-                ->groupBy('book_journal_id','code_group');
+                ->groupBy('book_journal_id', 'code_group');
             $theLastJournal = Journal::joinSub($lastJournal, 'last', function ($join) {
                 $join->on('last.code_group', '=', 'journals.code_group')
                     ->on('last.max_index_date', '=', 'journals.index_date');
@@ -490,8 +492,8 @@ class JournalController extends Controller
                 DB::raw('CASE WHEN journals.code_group < 200000 THEN journals.amount_debet-journals.amount_kredit ELSE journals.amount_kredit-journals.amount_debet END as amount_journal'),
                 'journals.amount_saldo'
             );
-            $sqlString= getSqlString($theLastJournal);
-         
+            $sqlString = getSqlString($theLastJournal);
+
             $journals = Journal::whereBetween('index_date', [$indexAwal, $indexAkhir])
                 ->select(
                     'id',
@@ -509,9 +511,9 @@ class JournalController extends Controller
                     'journals.*',
                     DB::raw('COALESCE(LAG(amount_saldo) OVER (PARTITION BY code_group ORDER BY index_date),0) as last_saldo')
                 );
-            $sqlString= getSqlString($journals);
-                info('fix journal '.$sqlString);
-          
+            $sqlString = getSqlString($journals);
+            info('fix journal ' . $sqlString);
+
             $datamin = Journal::fromSub($journals, 'journals')
                 ->whereRaw('last_saldo + amount_journal != amount_saldo')
                 ->where('tag', '<>', 'opening 01/2026')
@@ -519,13 +521,13 @@ class JournalController extends Controller
                 ->select('*', DB::raw('amount_journal + last_saldo - amount_saldo as selisih'));
 
             // $sqlString= getSqlString($datamin);
-            $datamin= $datamin->get()->groupBy('book_journal_id','code_group')->map(function ($group) {
-                    return collect($group)->sortBy('index_date')->first()->id ?? null;
-                })->values()->all();
+            $datamin = $datamin->get()->groupBy('book_journal_id', 'code_group')->map(function ($group) {
+                return collect($group)->sortBy('index_date')->first()->id ?? null;
+            })->values()->all();
 
             $journals = Journal::whereIn('id', $datamin);
-            $journals= $journals->get();
-        
+            $journals = $journals->get();
+
             return [
                 'status' => 1,
                 'datamin' => $datamin,
@@ -1551,13 +1553,13 @@ class JournalController extends Controller
                 ->where('book_journal_id', book()->id)
                 ->where('index_date', '<', (float)$theLastDate)->whereRaw('CONVERT(code_group, UNSIGNED) > ?', [400000])
                 ->select(DB::raw('MAX(journal_identifier)'))->groupBy('code_group');
-                
+
 
             $chartAccounts = DB::table('journals as j')
-                ->whereIn('j.journal_identifier',$subquery)
-                ->leftJoin('chart_account_aliases as ca', function($join){
+                ->whereIn('j.journal_identifier', $subquery)
+                ->leftJoin('chart_account_aliases as ca', function ($join) {
                     $join->on('j.code_group', '=', 'ca.code_group')
-                    ->where('ca.book_journal_id', book()->id);
+                        ->where('ca.book_journal_id', book()->id);
                 })
                 ->where('ca.code_group', '>=', 400000)->where('ca.is_child', 1)
                 ->select(
@@ -1705,7 +1707,7 @@ class JournalController extends Controller
                 'kredit' => $kredits
             ];
 
-        
+
 
             //setelah terinput baru recalculate jadi 
             // $minIndex = Journal::where('tag', $tag)->min('index_date');
@@ -2145,13 +2147,11 @@ class JournalController extends Controller
             $tableName = "invoice_sale_details";
             $saldoKartu = InvoiceSaleDetail::getTotalMutasiKartu($startDate);
             $saldoJournal = InvoiceSaleDetail::getTotalMutasiJournal($startDate);
-        }
-        else if($model=='KartuPembelian'){
+        } else if ($model == 'KartuPembelian') {
             $tableName = "invoice_purchase_details";
             $saldoKartu = InvoicePurchaseDetail::getTotalMutasiKartu($startDate);
             $saldoJournal = InvoicePurchaseDetail::getTotalMutasiJournal($startDate);
-        }
-        else {
+        } else {
             return [
                 'status' => 0,
                 'msg' => 'model belum diakomodasi'
@@ -2213,7 +2213,7 @@ class JournalController extends Controller
                     'kartu.total_price as amount',
                     DB::raw('coalesce(dk.journal_id, kartu.journal_id) as journal_id'),
                 )->groupBy('kartu.id')->get();
-        }else if($model=='KartuPembelian'){
+        } else if ($model == 'KartuPembelian') {
             $fixModel = InvoicePurchaseDetail::class;
             $kartu = InvoicePurchaseDetail::from('invoice_purchase_details as kartu')
                 ->leftJoin('detail_kartu_invoices as dk', function ($join) {
@@ -2226,28 +2226,26 @@ class JournalController extends Controller
                     'kartu.total_price as amount',
                     DB::raw('coalesce(dk.journal_id, kartu.journal_id) as journal_id'),
                 )->groupBy('kartu.id')->get();
-        }
-        
-        else {
+        } else {
             return [
                 'status' => 0,
                 'msg' => 'model belum diakomodasi'
             ];
         }
-        
-        $codeGroups= ChartAccountAlias::where('reference_model', $fixModel)->pluck('code_group')->all();
+
+        $codeGroups = ChartAccountAlias::where('reference_model', $fixModel)->pluck('code_group')->all();
         $journals = Journal::from('journals as j')
             ->where('j.index_date', '>', $indexStart)
             ->where('j.index_date', '<=', $indexEnd)
             ->whereIn('j.code_group', $codeGroups);
-            // ->where('j.reference_model', $fixModel);
-        $journals= Journal::fromSub($journals, 'j')
+        // ->where('j.reference_model', $fixModel);
+        $journals = Journal::fromSub($journals, 'j')
             ->leftJoin('detail_kartu_invoices as dk', function ($join) use ($fixModel) {
                 $join->on('dk.journal_id', '=', 'j.id')->where('dk.kartu_type', $fixModel);
             })
-            ->leftJoin('chart_account_aliases as ca', function($join){
+            ->leftJoin('chart_account_aliases as ca', function ($join) {
                 $join->on('ca.code_group', '=', 'j.code_group')
-                ->where('ca.book_journal_id', bookID());
+                    ->where('ca.book_journal_id', bookID());
             })
             ->select(
                 'j.id',
