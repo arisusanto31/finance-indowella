@@ -13,5 +13,5 @@ Artisan::command('inspire', function () {
 Schedule::command('app:fix-problem-saldo 1')->cron('*/11 * * * *');
 Schedule::command('app:fix-problem-saldo 2')->cron('*/9 * * * *');
 Schedule::command('app:recalculate-kartu-stock-request')->cron('*/17 * * * *');
-Schedule::command('fill:index-date-invoice-sale')->dailyAt('21:00');
-Schedule::command('app:fill-link-kartu-stock 2')->cron('*/5 * * * *');
+// Schedule::command('fill:index-date-invoice-sale')->dailyAt('21:00');
+// Schedule::command('app:fill-link-kartu-stock 2')->cron('*/5 * * * *');
