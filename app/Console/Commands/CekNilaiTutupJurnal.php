@@ -36,6 +36,7 @@ class CekNilaiTutupJurnal extends Command
         $subquery = DB::table('journals')
             ->where('book_journal_id', book()->id)
             ->where('index_date', '<', (float)$theLastDate)->whereRaw('CONVERT(code_group, UNSIGNED) > ?', [400000])
+            ->whereNull('tag')
             ->select(DB::raw('MAX(journal_identifier)'))->groupBy('code_group');
 
 
@@ -46,7 +47,6 @@ class CekNilaiTutupJurnal extends Command
                     ->where('ca.book_journal_id', book()->id);
             })
             ->where('ca.code_group', '>=', 400000)->where('ca.is_child', 1)
-            ->whereNull('j.tag')
             ->select(
                 'ca.name',
                 'ca.id',
